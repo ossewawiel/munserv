@@ -379,11 +379,85 @@ part 'issue.g.dart';
 ## Build Commands (WSL2)
 ```bash
 flutter pub get                    # Install dependencies
-flutter pub run build_runner build # Generate freezed/riverpod code
+dart run build_runner build        # Generate freezed/riverpod code
 flutter analyze                    # Lint check
 flutter test                       # Run tests
 flutter run                        # Run on connected device/emulator
 ```
+
+## WSL2 + Windows Emulator Setup
+
+Running Flutter in WSL2 with an Android emulator on Windows requires special configuration.
+
+### One-Time Windows Setup (Run PowerShell as Administrator)
+```powershell
+# Add port proxy to forward ADB connections from WSL2 to Windows localhost
+netsh interface portproxy add v4tov4 listenport=5555 listenaddress=0.0.0.0 connectport=5555 connectaddress=127.0.0.1
+
+# Allow through Windows Firewall
+netsh advfirewall firewall add rule name="ADB 5555" dir=in action=allow protocol=TCP localport=5555
+```
+
+### Daily Development Workflow
+```bash
+# 1. Start emulator on Windows (Android Studio or command line)
+
+# 2. Connect from WSL2 (use the provided script)
+./scripts/start-dev.sh
+
+# Or manually:
+adb-win   # if you added the function to ~/.bashrc
+
+# 3. Run the app
+flutter run
+```
+
+### Quick Start Script
+Use the provided script: `./scripts/start-dev.sh`
+
+This script:
+1. Checks if Windows emulator is running
+2. Enables TCP/IP mode on the emulator
+3. Connects WSL2 ADB to Windows emulator
+4. Verifies Flutter can see the device
+
+### Troubleshooting
+
+**"Connection refused" error:**
+- Ensure emulator is running on Windows
+- Verify port proxy is set up: `netsh interface portproxy show v4tov4`
+- Check Windows Firewall allows port 5555
+
+**Flutter doesn't see device:**
+- Run `adb devices` to verify connection
+- Try `adb kill-server && adb start-server`
+- Re-run `./scripts/start-dev.sh`
+
+**Wrong IP address:**
+The correct Windows IP is the default gateway, not the DNS server:
+```bash
+# Correct (default gateway)
+ip route show | grep default | awk '{print $3}'
+
+# Wrong (DNS server)
+cat /etc/resolv.conf | grep nameserver
+```
+
+### Alternative: Run Emulator in WSL2 (Slower)
+If you prefer running the emulator directly in WSL2 (with nested virtualization):
+```bash
+# Enable KVM (requires .wslconfig with nestedVirtualization=true)
+sudo modprobe kvm && sudo modprobe kvm-intel
+
+# Add user to kvm group
+sudo usermod -aG kvm $USER
+sudo chown root:kvm /dev/kvm
+sudo chmod 660 /dev/kvm
+
+# Run emulator
+$ANDROID_HOME/emulator/emulator -avd Pixel_6_API_34 -gpu swiftshader_indirect -no-audio &
+```
+Note: This uses nested virtualization and will be slower than the Windows emulator.
 
 ## Code Generation
 After adding/modifying Freezed models or Riverpod providers:
