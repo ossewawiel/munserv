@@ -1,0 +1,211 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440100",
+    "type": "pothole",
+    "state": "reported",
+    "location": { "latitude": -26.1350, "longitude": 27.9800 },
+    "address": "Cnr Doreen & Doris Road, Northcliff",
+    "description": "Large pothole, about 30cm deep",
+    "heat": 75,
+    "photoUrls": ["https://picsum.photos/seed/pothole1/800/600"],
+    "sectorId": "550e8400-e29b-41d4-a716-446655440001",
+    "reporterId": "550e8400-e29b-41d4-a716-446655440010",
+    "reportCount": 3,
+    "createdAt": "2025-01-12T08:30:00Z",
+    "updatedAt": "2025-01-12T08:30:00Z",
+    "stateHistory": [
+      {
+        "state": "reported",
+        "changedAt": "2025-01-12T08:30:00Z",
+        "changedBy": null,
+        "note": null
+      }
+    ]
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440101",
+    "type": "street_light",
+    "state": "confirmed",
+    "location": { "latitude": -26.1380, "longitude": 27.9850 },
+    "address": "42 Doreen Road, Northcliff",
+    "description": "Light has been out for 2 weeks",
+    "heat": 45,
+    "photoUrls": ["https://picsum.photos/seed/light1/800/600"],
+    "sectorId": "550e8400-e29b-41d4-a716-446655440001",
+    "reporterId": "550e8400-e29b-41d4-a716-446655440011",
+    "reportCount": 1,
+    "createdAt": "2025-01-10T18:00:00Z",
+    "updatedAt": "2025-01-11T09:00:00Z",
+    "stateHistory": [
+      {
+        "state": "reported",
+        "changedAt": "2025-01-10T18:00:00Z",
+        "changedBy": null,
+        "note": null
+      },
+      {
+        "state": "confirmed",
+        "changedAt": "2025-01-11T09:00:00Z",
+        "changedBy": "550e8400-e29b-41d4-a716-446655440020",
+        "note": "Verified on site"
+      }
+    ]
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440102",
+    "type": "water_leak",
+    "state": "in_progress",
+    "location": { "latitude": -26.1320, "longitude": 27.9870 },
+    "address": "15 Doris Road, Northcliff",
+    "description": "Water gushing from pavement",
+    "heat": 90,
+    "photoUrls": [
+      "https://picsum.photos/seed/water1/800/600",
+      "https://picsum.photos/seed/water2/800/600"
+    ],
+    "sectorId": "550e8400-e29b-41d4-a716-446655440001",
+    "reporterId": "550e8400-e29b-41d4-a716-446655440010",
+    "reportCount": 8,
+    "createdAt": "2025-01-08T14:00:00Z",
+    "updatedAt": "2025-01-13T10:30:00Z",
+    "stateHistory": [
+      {
+        "state": "reported",
+        "changedAt": "2025-01-08T14:00:00Z",
+        "changedBy": null,
+        "note": null
+      },
+      {
+        "state": "confirmed",
+        "changedAt": "2025-01-09T08:00:00Z",
+        "changedBy": "550e8400-e29b-41d4-a716-446655440020",
+        "note": "Urgent - main burst"
+      },
+      {
+        "state": "in_progress",
+        "changedAt": "2025-01-13T10:30:00Z",
+        "changedBy": "550e8400-e29b-41d4-a716-446655440020",
+        "note": "JW team dispatched"
+      }
+    ]
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440103",
+    "type": "sewage_leak",
+    "state": "reported",
+    "location": { "latitude": -26.1400, "longitude": 27.9820 },
+    "address": "Cnr Doris & Main Road, Northcliff",
+    "description": "Sewage overflow, very bad smell",
+    "heat": 95,
+    "photoUrls": ["https://picsum.photos/seed/sewage1/800/600"],
+    "sectorId": "550e8400-e29b-41d4-a716-446655440001",
+    "reporterId": "550e8400-e29b-41d4-a716-446655440011",
+    "reportCount": 15,
+    "createdAt": "2025-01-07T06:00:00Z",
+    "updatedAt": "2025-01-07T06:00:00Z",
+    "stateHistory": [
+      {
+        "state": "reported",
+        "changedAt": "2025-01-07T06:00:00Z",
+        "changedBy": null,
+        "note": null
+      }
+    ]
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440104",
+    "type": "pothole",
+    "state": "fixed",
+    "location": { "latitude": -26.1360, "longitude": 27.9890 },
+    "address": "88 Main Road, Northcliff",
+    "description": null,
+    "heat": 0,
+    "photoUrls": ["https://picsum.photos/seed/pothole2/800/600"],
+    "sectorId": "550e8400-e29b-41d4-a716-446655440001",
+    "reporterId": "550e8400-e29b-41d4-a716-446655440010",
+    "reportCount": 2,
+    "createdAt": "2025-01-05T10:00:00Z",
+    "updatedAt": "2025-01-12T16:00:00Z",
+    "stateHistory": [
+      {
+        "state": "reported",
+        "changedAt": "2025-01-05T10:00:00Z",
+        "changedBy": null,
+        "note": null
+      },
+      {
+        "state": "confirmed",
+        "changedAt": "2025-01-06T09:00:00Z",
+        "changedBy": "550e8400-e29b-41d4-a716-446655440020",
+        "note": null
+      },
+      {
+        "state": "in_progress",
+        "changedAt": "2025-01-10T08:00:00Z",
+        "changedBy": "550e8400-e29b-41d4-a716-446655440020",
+        "note": "Scheduled for repair"
+      },
+      {
+        "state": "fixed",
+        "changedAt": "2025-01-12T16:00:00Z",
+        "changedBy": "550e8400-e29b-41d4-a716-446655440020",
+        "note": "Repaired by roads dept"
+      }
+    ]
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440105",
+    "type": "traffic_light",
+    "state": "confirmed",
+    "location": { "latitude": -26.1345, "longitude": 27.9815 },
+    "address": "Cnr Main & Beyers Naude, Northcliff",
+    "description": "Traffic light stuck on red",
+    "heat": 80,
+    "photoUrls": ["https://picsum.photos/seed/traffic1/800/600"],
+    "sectorId": "550e8400-e29b-41d4-a716-446655440001",
+    "reporterId": "550e8400-e29b-41d4-a716-446655440010",
+    "reportCount": 6,
+    "createdAt": "2025-01-11T07:30:00Z",
+    "updatedAt": "2025-01-11T10:00:00Z",
+    "stateHistory": [
+      {
+        "state": "reported",
+        "changedAt": "2025-01-11T07:30:00Z",
+        "changedBy": null,
+        "note": null
+      },
+      {
+        "state": "confirmed",
+        "changedAt": "2025-01-11T10:00:00Z",
+        "changedBy": "550e8400-e29b-41d4-a716-446655440020",
+        "note": "Confirmed - causing traffic backup"
+      }
+    ]
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440106",
+    "type": "illegal_dumping",
+    "state": "reported",
+    "location": { "latitude": -26.1390, "longitude": 27.9780 },
+    "address": "Open lot behind 55 Doreen Road",
+    "description": "Someone dumped construction rubble",
+    "heat": 35,
+    "photoUrls": [
+      "https://picsum.photos/seed/dump1/800/600",
+      "https://picsum.photos/seed/dump2/800/600"
+    ],
+    "sectorId": "550e8400-e29b-41d4-a716-446655440001",
+    "reporterId": "550e8400-e29b-41d4-a716-446655440011",
+    "reportCount": 1,
+    "createdAt": "2025-01-14T15:00:00Z",
+    "updatedAt": "2025-01-14T15:00:00Z",
+    "stateHistory": [
+      {
+        "state": "reported",
+        "changedAt": "2025-01-14T15:00:00Z",
+        "changedBy": null,
+        "note": null
+      }
+    ]
+  }
+]
