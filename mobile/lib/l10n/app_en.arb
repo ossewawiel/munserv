@@ -1,0 +1,195 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "MunServ",
+  "@appTitle": {
+    "description": "The application name"
+  },
+
+  "phoneEntryTitle": "Enter Phone Number",
+  "@phoneEntryTitle": {
+    "description": "Title for phone entry screen"
+  },
+
+  "phoneEntrySubtitle": "We'll send you a verification code",
+  "@phoneEntrySubtitle": {
+    "description": "Subtitle for phone entry screen"
+  },
+
+  "phoneLabel": "Phone Number",
+  "@phoneLabel": {
+    "description": "Label for phone input field"
+  },
+
+  "phoneHint": "Enter your phone number",
+  "@phoneHint": {
+    "description": "Hint text for phone input"
+  },
+
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Continue button text"
+  },
+
+  "otpTitle": "Verify Phone",
+  "@otpTitle": {
+    "description": "Title for OTP verification screen"
+  },
+
+  "otpSubtitle": "Enter the 6-digit code sent to {phoneNumber}",
+  "@otpSubtitle": {
+    "description": "Subtitle for OTP verification screen",
+    "placeholders": {
+      "phoneNumber": {
+        "type": "String",
+        "example": "+27 82 123 4567"
+      }
+    }
+  },
+
+  "resendOtp": "Resend Code",
+  "@resendOtp": {
+    "description": "Button to resend OTP"
+  },
+
+  "resendOtpIn": "Resend code in {seconds}s",
+  "@resendOtpIn": {
+    "description": "Countdown text for OTP resend",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+
+  "profileTitle": "Your Details",
+  "@profileTitle": {
+    "description": "Title for profile setup screen"
+  },
+
+  "profileSubtitle": "Tell us a bit about yourself",
+  "@profileSubtitle": {
+    "description": "Subtitle for profile setup screen"
+  },
+
+  "firstNameLabel": "First Name",
+  "@firstNameLabel": {
+    "description": "Label for first name field"
+  },
+
+  "surnameLabel": "Surname",
+  "@surnameLabel": {
+    "description": "Label for surname field"
+  },
+
+  "addressLabel": "Address",
+  "@addressLabel": {
+    "description": "Label for address field"
+  },
+
+  "addressHint": "Your residential address",
+  "@addressHint": {
+    "description": "Hint text for address input"
+  },
+
+  "detectLocation": "Detect My Location",
+  "@detectLocation": {
+    "description": "Button to detect current location"
+  },
+
+  "pinSetupTitle": "Create PIN",
+  "@pinSetupTitle": {
+    "description": "Title for PIN setup screen"
+  },
+
+  "pinSetupSubtitle": "You'll use this to log in",
+  "@pinSetupSubtitle": {
+    "description": "Subtitle for PIN setup screen"
+  },
+
+  "pinLabel": "Enter PIN",
+  "@pinLabel": {
+    "description": "Label for PIN input"
+  },
+
+  "pinConfirmLabel": "Confirm PIN",
+  "@pinConfirmLabel": {
+    "description": "Label for PIN confirmation input"
+  },
+
+  "pinMismatch": "PINs do not match",
+  "@pinMismatch": {
+    "description": "Error message when PINs don't match"
+  },
+
+  "loginTitle": "Welcome Back",
+  "@loginTitle": {
+    "description": "Title for login screen"
+  },
+
+  "loginSubtitle": "Enter your PIN to continue",
+  "@loginSubtitle": {
+    "description": "Subtitle for login screen"
+  },
+
+  "useBiometrics": "Use Fingerprint / Face ID",
+  "@useBiometrics": {
+    "description": "Button to use biometric login"
+  },
+
+  "forgotPin": "Forgot PIN?",
+  "@forgotPin": {
+    "description": "Link to reset PIN"
+  },
+
+  "errorGeneric": "Something went wrong. Please try again.",
+  "@errorGeneric": {
+    "description": "Generic error message"
+  },
+
+  "errorNetwork": "Network error. Please check your connection.",
+  "@errorNetwork": {
+    "description": "Network error message"
+  },
+
+  "errorInvalidPhone": "Please enter a valid phone number",
+  "@errorInvalidPhone": {
+    "description": "Invalid phone number error"
+  },
+
+  "errorInvalidOtp": "Invalid verification code",
+  "@errorInvalidOtp": {
+    "description": "Invalid OTP error"
+  },
+
+  "errorInvalidPin": "Invalid PIN",
+  "@errorInvalidPin": {
+    "description": "Invalid PIN error"
+  },
+
+  "successRegistration": "Registration successful!",
+  "@successRegistration": {
+    "description": "Registration success message"
+  },
+
+  "home": "Home",
+  "@home": {
+    "description": "Home navigation label"
+  },
+
+  "issues": "Issues",
+  "@issues": {
+    "description": "Issues navigation label"
+  },
+
+  "report": "Report",
+  "@report": {
+    "description": "Report navigation label"
+  },
+
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile navigation label"
+  }
+}

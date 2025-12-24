@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # State Management
   flutter_riverpod: ^3.0.3
@@ -23,6 +25,12 @@ dependencies:
 
   # Routing
   go_router: ^17.0.1
+
+  # i18n
+  intl: ^0.20.2
+
+  # Persistence
+  shared_preferences: ^2.2.2
 
   # UI
   cupertino_icons: ^1.0.8
@@ -43,3 +51,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true  # Enables automatic localization code generation

@@ -1,21 +1,42 @@
 import 'package:flutter/material.dart';
 
+import '../models/pod_config.dart';
+import 'colors.dart';
+import 'typography.dart';
+
+/// Theme builder that creates Material themes from pod configuration
 class AppTheme {
   AppTheme._();
 
-  static const Color _primaryColor = Color(0xFF1976D2);
-  static const Color _secondaryColor = Color(0xFF26A69A);
-  static const Color _errorColor = Color(0xFFD32F2F);
+  /// Build a complete theme from pod configuration
+  static ThemeData buildTheme({
+    required PodConfig config,
+    required Brightness brightness,
+  }) {
+    final brandColors = BrandColors.fromHex(
+      primary: config.primaryColor,
+      secondary: config.secondaryColor,
+      tertiary: config.tertiaryColor,
+    );
 
-  static ThemeData get lightTheme {
+    final typography = config.fontFamily != null
+        ? AppTypography(fontFamily: config.fontFamily!)
+        : AppTypography.defaultTypography;
+
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: brandColors.primary,
+      secondary: brandColors.secondary,
+      tertiary: brandColors.tertiary,
+      error: SemanticColors.error,
+      brightness: brightness,
+    );
+
+    final textTheme = typography.buildTextTheme(brightness: brightness);
+
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryColor,
-        secondary: _secondaryColor,
-        error: _errorColor,
-        brightness: Brightness.light,
-      ),
+      colorScheme: colorScheme,
+      textTheme: textTheme,
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         elevation: 0,
@@ -23,76 +44,73 @@ class AppTheme {
       cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: Radii.lgRadius,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: Radii.lgRadius,
         ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
+          horizontal: Spacing.md,
+          vertical: Spacing.sm + 4,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 12,
+            horizontal: Spacing.lg,
+            vertical: Spacing.sm + 4,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: Radii.lgRadius,
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.lg,
+            vertical: Spacing.sm + 4,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: Radii.lgRadius,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.lg,
+            vertical: Spacing.sm + 4,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: Radii.lgRadius,
           ),
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         elevation: 4,
       ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: Radii.mdRadius,
+        ),
+      ),
     );
   }
 
-  static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryColor,
-        secondary: _secondaryColor,
-        error: _errorColor,
+  /// Convenience getter for light theme with default config
+  static ThemeData get lightTheme => buildTheme(
+        config: PodConfig.defaultConfig,
+        brightness: Brightness.light,
+      );
+
+  /// Convenience getter for dark theme with default config
+  static ThemeData get darkTheme => buildTheme(
+        config: PodConfig.defaultConfig,
         brightness: Brightness.dark,
-      ),
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        elevation: 0,
-      ),
-      cardTheme: CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 12,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
-    );
-  }
+      );
 }
