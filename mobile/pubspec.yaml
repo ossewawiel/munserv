@@ -32,12 +32,19 @@ dependencies:
   # Persistence
   shared_preferences: ^2.2.2
 
+  # Security / Auth
+  flutter_secure_storage: ^9.0.0
+  local_auth: ^2.1.8
+
   # UI
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  # Testing
+  mocktail: ^1.0.4
 
   # Linting
   flutter_lints: ^6.0.0

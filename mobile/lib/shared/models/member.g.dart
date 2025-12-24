@@ -26,7 +26,7 @@ Map<String, dynamic> _$MemberToJson(_Member instance) => <String, dynamic>{
   'surname': instance.surname,
   'phoneNumber': instance.phoneNumber,
   'address': instance.address,
-  'registrationLocation': instance.registrationLocation,
+  'registrationLocation': instance.registrationLocation.toJson(),
   'sectorId': instance.sectorId,
   'status': _$MemberStatusEnumMap[instance.status]!,
   'createdAt': instance.createdAt.toIso8601String(),

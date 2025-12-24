@@ -15,5 +15,5 @@ _Sector _$SectorFromJson(Map<String, dynamic> json) => _Sector(
 Map<String, dynamic> _$SectorToJson(_Sector instance) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,
-  'center': instance.center,
+  'center': instance.center.toJson(),
 };

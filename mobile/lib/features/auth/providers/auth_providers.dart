@@ -1,0 +1,267 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../shared/models/geo_point.dart';
+import '../../../shared/providers/dio_provider.dart';
+import '../../../shared/utils/app_error.dart';
+import '../../../shared/utils/result.dart';
+import '../data/auth_api.dart';
+import '../data/auth_repository.dart';
+import '../data/secure_storage.dart';
+import '../domain/auth_state.dart';
+import '../domain/login_request.dart';
+import '../domain/otp_request.dart';
+import '../domain/otp_verify_result.dart';
+
+part 'auth_providers.g.dart';
+
+// =============================================================================
+// Infrastructure Providers
+// =============================================================================
+
+/// Provides FlutterSecureStorage instance
+@riverpod
+FlutterSecureStorage flutterSecureStorage(Ref ref) {
+  return const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
+}
+
+/// Provides SecureStorageService
+@riverpod
+SecureStorageService secureStorage(Ref ref) {
+  final storage = ref.watch(flutterSecureStorageProvider);
+  return SecureStorageService(storage);
+}
+
+/// Provides AuthApi
+@riverpod
+AuthApi authApi(Ref ref) {
+  final dio = ref.watch(dioProvider);
+  return AuthApi(dio);
+}
+
+/// Provides AuthRepository
+@riverpod
+AuthRepository authRepository(Ref ref) {
+  final api = ref.watch(authApiProvider);
+  return AuthRepository(api);
+}
+
+// =============================================================================
+// Auth State Notifier
+// =============================================================================
+
+/// Manages authentication state throughout the app
+@Riverpod(keepAlive: true)
+class AuthNotifier extends _$AuthNotifier {
+  @override
+  AuthState build() {
+    // Check for existing session on startup
+    _checkExistingSession();
+    return const AuthState.initial();
+  }
+
+  SecureStorageService get _storage => ref.read(secureStorageProvider);
+  AuthRepository get _repository => ref.read(authRepositoryProvider);
+
+  /// Check if user has a valid session stored
+  Future<void> _checkExistingSession() async {
+    final tokens = await _storage.getTokens();
+    final profile = await _storage.getProfile();
+
+    if (tokens != null && profile != null) {
+      // We have stored credentials - try to validate them
+      // For MVP, we trust the stored tokens without server validation
+      // In production, we'd call a /me endpoint to validate
+      state = AuthState.authenticated(
+        tokens: tokens,
+        profile: profile,
+        sector: const SectorInfo(
+          id: 'unknown',
+          name: 'Unknown',
+          center: GeoPoint(latitude: 0, longitude: 0),
+        ),
+      );
+    } else {
+      state = const AuthState.unauthenticated();
+    }
+  }
+
+  /// Request OTP for phone number
+  Future<Result<OtpRequestResponse>> requestOtp(String phoneNumber) async {
+    return _repository.requestOtp(phoneNumber);
+  }
+
+  /// Verify OTP code
+  Future<Result<OtpVerifyResult>> verifyOtp(
+    String phoneNumber,
+    String otp,
+  ) async {
+    final result = await _repository.verifyOtp(phoneNumber, otp);
+
+    // If existing user, they're now logged in
+    if (result.isSuccess) {
+      final verifyResult = result.dataOrNull!;
+      if (verifyResult.isExistingUser) {
+        final existing = verifyResult as OtpVerifyResultExistingUser;
+        await _handleSuccessfulAuth(
+          existing.tokens,
+          existing.profile.member,
+          existing.profile.sector,
+        );
+      }
+    }
+
+    return result;
+  }
+
+  /// Complete registration for new user
+  Future<Result<AuthResponse>> completeRegistration({
+    required String tempToken,
+    required String firstName,
+    required String surname,
+    required String pin,
+    required GeoPoint location,
+    required String address,
+  }) async {
+    state = const AuthState.loading();
+
+    final result = await _repository.completeRegistration(
+      tempToken: tempToken,
+      firstName: firstName,
+      surname: surname,
+      pin: pin,
+      location: location,
+      address: address,
+    );
+
+    if (result.isSuccess) {
+      final response = result.dataOrNull!;
+      await _handleSuccessfulAuth(
+        response.tokens,
+        response.member,
+        response.sector,
+      );
+    } else {
+      state = AuthState.error(result.errorOrNull?.displayMessage ?? 'Registration failed');
+    }
+
+    return result;
+  }
+
+  /// Login with phone and PIN
+  Future<Result<AuthResponse>> login(String phoneNumber, String pin) async {
+    state = const AuthState.loading();
+
+    final result = await _repository.login(phoneNumber, pin);
+
+    if (result.isSuccess) {
+      final response = result.dataOrNull!;
+      await _handleSuccessfulAuth(
+        response.tokens,
+        response.member,
+        response.sector,
+      );
+      // Save phone number for convenience
+      await _storage.savePhoneNumber(phoneNumber);
+    } else {
+      state = AuthState.error(result.errorOrNull?.displayMessage ?? 'Login failed');
+    }
+
+    return result;
+  }
+
+  /// Handle successful authentication
+  Future<void> _handleSuccessfulAuth(
+    AuthTokens tokens,
+    MemberProfile profile,
+    SectorInfo sector,
+  ) async {
+    // Save to secure storage
+    await _storage.saveTokens(tokens);
+    await _storage.saveProfile(profile);
+
+    // Update state
+    state = AuthState.authenticated(
+      tokens: tokens,
+      profile: profile,
+      sector: sector,
+    );
+  }
+
+  /// Refresh access token
+  Future<Result<AuthTokens>> refreshToken() async {
+    final currentTokens = await _storage.getTokens();
+    if (currentTokens == null) {
+      return Result.failure(
+        const AppError.unauthorized(message: 'No refresh token available'),
+      );
+    }
+
+    final result = await _repository.refreshToken(currentTokens.refreshToken);
+
+    if (result.isSuccess) {
+      final newTokens = result.dataOrNull!;
+      await _storage.saveTokens(newTokens);
+
+      // Update state with new tokens
+      final currentState = state;
+      if (currentState is AuthStateAuthenticated) {
+        state = AuthState.authenticated(
+          tokens: newTokens,
+          profile: currentState.profile,
+          sector: currentState.sector,
+        );
+      }
+    }
+
+    return result;
+  }
+
+  /// Logout and clear all stored data
+  Future<void> logout() async {
+    await _storage.clearAll();
+    state = const AuthState.unauthenticated();
+  }
+
+  /// Clear error state and return to unauthenticated
+  void clearError() {
+    if (state is AuthStateError) {
+      state = const AuthState.unauthenticated();
+    }
+  }
+}
+
+// =============================================================================
+// Convenience Providers
+// =============================================================================
+
+/// Provides the current authentication status
+@riverpod
+bool isAuthenticated(Ref ref) {
+  final authState = ref.watch(authProvider);
+  return authState.isAuthenticated;
+}
+
+/// Provides the current user profile if authenticated
+@riverpod
+MemberProfile? currentProfile(Ref ref) {
+  final authState = ref.watch(authProvider);
+  return authState.profileOrNull;
+}
+
+/// Provides the current access token if authenticated
+@riverpod
+String? accessToken(Ref ref) {
+  final authState = ref.watch(authProvider);
+  return authState.accessTokenOrNull;
+}
+
+/// Provides the stored phone number for login convenience
+@riverpod
+Future<String?> storedPhoneNumber(Ref ref) async {
+  final storage = ref.watch(secureStorageProvider);
+  return storage.getPhoneNumber();
+}

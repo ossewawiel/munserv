@@ -26,7 +26,10 @@ _MemberProfile _$MemberProfileFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$MemberProfileToJson(_MemberProfile instance) =>
-    <String, dynamic>{'member': instance.member, 'sector': instance.sector};
+    <String, dynamic>{
+      'member': instance.member.toJson(),
+      'sector': instance.sector.toJson(),
+    };
 
 _AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) =>
     _AuthResponse(
@@ -35,4 +38,7 @@ _AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$AuthResponseToJson(_AuthResponse instance) =>
-    <String, dynamic>{'tokens': instance.tokens, 'profile': instance.profile};
+    <String, dynamic>{
+      'tokens': instance.tokens.toJson(),
+      'profile': instance.profile.toJson(),
+    };

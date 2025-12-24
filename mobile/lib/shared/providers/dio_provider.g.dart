@@ -8,12 +8,16 @@ part of 'dio_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Provides the base Dio instance with auth interceptor
 
 @ProviderFor(dio)
 const dioProvider = DioProvider._();
 
+/// Provides the base Dio instance with auth interceptor
+
 final class DioProvider extends $FunctionalProvider<Dio, Dio, Dio>
     with $Provider<Dio> {
+  /// Provides the base Dio instance with auth interceptor
   const DioProvider._()
     : super(
         from: null,
@@ -47,4 +51,4 @@ final class DioProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$dioHash() => r'af0b69f5357e47df2e223cd19a56a9f56d728470';
+String _$dioHash() => r'a0ad69a90cc83dc410bffc077f75e2b59f6e9b8b';
