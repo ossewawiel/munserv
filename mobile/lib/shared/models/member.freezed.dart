@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Member {
 
- String get id; String get phoneNumber; String get displayName; String get sectorId; DateTime get createdAt;
+ String get id; String get firstName; String get surname; String get phoneNumber; String get address; GeoPoint get registrationLocation; String get sectorId; MemberStatus get status; DateTime get createdAt;
 /// Create a copy of Member
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $MemberCopyWith<Member> get copyWith => _$MemberCopyWithImpl<Member>(this as Mem
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Member&&(identical(other.id, id) || other.id == id)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Member&&(identical(other.id, id) || other.id == id)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.surname, surname) || other.surname == surname)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.address, address) || other.address == address)&&(identical(other.registrationLocation, registrationLocation) || other.registrationLocation == registrationLocation)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,phoneNumber,displayName,sectorId,createdAt);
+int get hashCode => Object.hash(runtimeType,id,firstName,surname,phoneNumber,address,registrationLocation,sectorId,status,createdAt);
 
 @override
 String toString() {
-  return 'Member(id: $id, phoneNumber: $phoneNumber, displayName: $displayName, sectorId: $sectorId, createdAt: $createdAt)';
+  return 'Member(id: $id, firstName: $firstName, surname: $surname, phoneNumber: $phoneNumber, address: $address, registrationLocation: $registrationLocation, sectorId: $sectorId, status: $status, createdAt: $createdAt)';
 }
 
 
@@ -48,11 +48,11 @@ abstract mixin class $MemberCopyWith<$Res>  {
   factory $MemberCopyWith(Member value, $Res Function(Member) _then) = _$MemberCopyWithImpl;
 @useResult
 $Res call({
- String id, String phoneNumber, String displayName, String sectorId, DateTime createdAt
+ String id, String firstName, String surname, String phoneNumber, String address, GeoPoint registrationLocation, String sectorId, MemberStatus status, DateTime createdAt
 });
 
 
-
+$GeoPointCopyWith<$Res> get registrationLocation;
 
 }
 /// @nodoc
@@ -65,17 +65,30 @@ class _$MemberCopyWithImpl<$Res>
 
 /// Create a copy of Member
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? phoneNumber = null,Object? displayName = null,Object? sectorId = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? firstName = null,Object? surname = null,Object? phoneNumber = null,Object? address = null,Object? registrationLocation = null,Object? sectorId = null,Object? status = null,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
+as String,surname: null == surname ? _self.surname : surname // ignore: cast_nullable_to_non_nullable
 as String,phoneNumber: null == phoneNumber ? _self.phoneNumber : phoneNumber // ignore: cast_nullable_to_non_nullable
-as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
-as String,sectorId: null == sectorId ? _self.sectorId : sectorId // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String,registrationLocation: null == registrationLocation ? _self.registrationLocation : registrationLocation // ignore: cast_nullable_to_non_nullable
+as GeoPoint,sectorId: null == sectorId ? _self.sectorId : sectorId // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as MemberStatus,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
-
+/// Create a copy of Member
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GeoPointCopyWith<$Res> get registrationLocation {
+  
+  return $GeoPointCopyWith<$Res>(_self.registrationLocation, (value) {
+    return _then(_self.copyWith(registrationLocation: value));
+  });
+}
 }
 
 
@@ -157,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String phoneNumber,  String displayName,  String sectorId,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String firstName,  String surname,  String phoneNumber,  String address,  GeoPoint registrationLocation,  String sectorId,  MemberStatus status,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Member() when $default != null:
-return $default(_that.id,_that.phoneNumber,_that.displayName,_that.sectorId,_that.createdAt);case _:
+return $default(_that.id,_that.firstName,_that.surname,_that.phoneNumber,_that.address,_that.registrationLocation,_that.sectorId,_that.status,_that.createdAt);case _:
   return orElse();
 
 }
@@ -178,10 +191,10 @@ return $default(_that.id,_that.phoneNumber,_that.displayName,_that.sectorId,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String phoneNumber,  String displayName,  String sectorId,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String firstName,  String surname,  String phoneNumber,  String address,  GeoPoint registrationLocation,  String sectorId,  MemberStatus status,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _Member():
-return $default(_that.id,_that.phoneNumber,_that.displayName,_that.sectorId,_that.createdAt);case _:
+return $default(_that.id,_that.firstName,_that.surname,_that.phoneNumber,_that.address,_that.registrationLocation,_that.sectorId,_that.status,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +211,10 @@ return $default(_that.id,_that.phoneNumber,_that.displayName,_that.sectorId,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String phoneNumber,  String displayName,  String sectorId,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String firstName,  String surname,  String phoneNumber,  String address,  GeoPoint registrationLocation,  String sectorId,  MemberStatus status,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Member() when $default != null:
-return $default(_that.id,_that.phoneNumber,_that.displayName,_that.sectorId,_that.createdAt);case _:
+return $default(_that.id,_that.firstName,_that.surname,_that.phoneNumber,_that.address,_that.registrationLocation,_that.sectorId,_that.status,_that.createdAt);case _:
   return null;
 
 }
@@ -212,14 +225,18 @@ return $default(_that.id,_that.phoneNumber,_that.displayName,_that.sectorId,_tha
 /// @nodoc
 @JsonSerializable()
 
-class _Member implements Member {
-  const _Member({required this.id, required this.phoneNumber, required this.displayName, required this.sectorId, required this.createdAt});
+class _Member extends Member {
+  const _Member({required this.id, required this.firstName, required this.surname, required this.phoneNumber, required this.address, required this.registrationLocation, required this.sectorId, required this.status, required this.createdAt}): super._();
   factory _Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
 
 @override final  String id;
+@override final  String firstName;
+@override final  String surname;
 @override final  String phoneNumber;
-@override final  String displayName;
+@override final  String address;
+@override final  GeoPoint registrationLocation;
 @override final  String sectorId;
+@override final  MemberStatus status;
 @override final  DateTime createdAt;
 
 /// Create a copy of Member
@@ -235,16 +252,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Member&&(identical(other.id, id) || other.id == id)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Member&&(identical(other.id, id) || other.id == id)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.surname, surname) || other.surname == surname)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.address, address) || other.address == address)&&(identical(other.registrationLocation, registrationLocation) || other.registrationLocation == registrationLocation)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,phoneNumber,displayName,sectorId,createdAt);
+int get hashCode => Object.hash(runtimeType,id,firstName,surname,phoneNumber,address,registrationLocation,sectorId,status,createdAt);
 
 @override
 String toString() {
-  return 'Member(id: $id, phoneNumber: $phoneNumber, displayName: $displayName, sectorId: $sectorId, createdAt: $createdAt)';
+  return 'Member(id: $id, firstName: $firstName, surname: $surname, phoneNumber: $phoneNumber, address: $address, registrationLocation: $registrationLocation, sectorId: $sectorId, status: $status, createdAt: $createdAt)';
 }
 
 
@@ -255,11 +272,11 @@ abstract mixin class _$MemberCopyWith<$Res> implements $MemberCopyWith<$Res> {
   factory _$MemberCopyWith(_Member value, $Res Function(_Member) _then) = __$MemberCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String phoneNumber, String displayName, String sectorId, DateTime createdAt
+ String id, String firstName, String surname, String phoneNumber, String address, GeoPoint registrationLocation, String sectorId, MemberStatus status, DateTime createdAt
 });
 
 
-
+@override $GeoPointCopyWith<$Res> get registrationLocation;
 
 }
 /// @nodoc
@@ -272,18 +289,31 @@ class __$MemberCopyWithImpl<$Res>
 
 /// Create a copy of Member
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? phoneNumber = null,Object? displayName = null,Object? sectorId = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? firstName = null,Object? surname = null,Object? phoneNumber = null,Object? address = null,Object? registrationLocation = null,Object? sectorId = null,Object? status = null,Object? createdAt = null,}) {
   return _then(_Member(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
+as String,surname: null == surname ? _self.surname : surname // ignore: cast_nullable_to_non_nullable
 as String,phoneNumber: null == phoneNumber ? _self.phoneNumber : phoneNumber // ignore: cast_nullable_to_non_nullable
-as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
-as String,sectorId: null == sectorId ? _self.sectorId : sectorId // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String,registrationLocation: null == registrationLocation ? _self.registrationLocation : registrationLocation // ignore: cast_nullable_to_non_nullable
+as GeoPoint,sectorId: null == sectorId ? _self.sectorId : sectorId // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as MemberStatus,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
 
-
+/// Create a copy of Member
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GeoPointCopyWith<$Res> get registrationLocation {
+  
+  return $GeoPointCopyWith<$Res>(_self.registrationLocation, (value) {
+    return _then(_self.copyWith(registrationLocation: value));
+  });
+}
 }
 
 // dart format on

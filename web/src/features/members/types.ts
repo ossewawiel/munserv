@@ -1,26 +1,23 @@
+import type { MemberStatus } from '@/features/auth/types';
+
 /**
- * Member summary for list views
+ * Member summary for admin list views
  */
 export interface MemberListItem {
   id: string;
-  displayName: string;
+  firstName: string;
+  surname: string;
   phoneNumber: string;
+  address: string;
+  status: MemberStatus;
   issueCount: number;
   joinedAt: string;
 }
 
 /**
- * Full member entity
+ * Full member entity (re-exported from auth for convenience)
  */
-export interface Member {
-  id: string;
-  phoneNumber: string;
-  displayName: string;
-  sectorId: string;
-  issueCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
+export type { Member } from '@/features/auth/types';
 
 /**
  * Member filter parameters
@@ -28,6 +25,7 @@ export interface Member {
 export interface MemberFilterParams {
   sectorId?: string;
   search?: string;
+  status?: MemberStatus;
   page?: number;
   limit?: number;
 }

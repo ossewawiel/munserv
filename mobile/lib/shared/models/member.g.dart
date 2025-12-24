@@ -8,16 +8,32 @@ part of 'member.dart';
 
 _Member _$MemberFromJson(Map<String, dynamic> json) => _Member(
   id: json['id'] as String,
+  firstName: json['firstName'] as String,
+  surname: json['surname'] as String,
   phoneNumber: json['phoneNumber'] as String,
-  displayName: json['displayName'] as String,
+  address: json['address'] as String,
+  registrationLocation: GeoPoint.fromJson(
+    json['registrationLocation'] as Map<String, dynamic>,
+  ),
   sectorId: json['sectorId'] as String,
+  status: $enumDecode(_$MemberStatusEnumMap, json['status']),
   createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
 Map<String, dynamic> _$MemberToJson(_Member instance) => <String, dynamic>{
   'id': instance.id,
+  'firstName': instance.firstName,
+  'surname': instance.surname,
   'phoneNumber': instance.phoneNumber,
-  'displayName': instance.displayName,
+  'address': instance.address,
+  'registrationLocation': instance.registrationLocation,
   'sectorId': instance.sectorId,
+  'status': _$MemberStatusEnumMap[instance.status]!,
   'createdAt': instance.createdAt.toIso8601String(),
+};
+
+const _$MemberStatusEnumMap = {
+  MemberStatus.active: 'active',
+  MemberStatus.pending: 'pending',
+  MemberStatus.suspended: 'suspended',
 };

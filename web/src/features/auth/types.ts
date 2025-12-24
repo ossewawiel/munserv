@@ -1,10 +1,26 @@
 import type { GeoPoint } from '@/shared/types/common';
 
+/**
+ * Member status for registration workflow
+ * MVP: always 'active'. Phase 2: 'pending' until admin approves
+ */
+export type MemberStatus = 'active' | 'pending' | 'suspended';
+
+export const MEMBER_STATUS_LABELS: Record<MemberStatus, string> = {
+  active: 'Active',
+  pending: 'Pending Approval',
+  suspended: 'Suspended',
+};
+
 export interface Member {
   id: string;
+  firstName: string;
+  surname: string;
   phoneNumber: string;
-  displayName: string;
+  address: string;
+  registrationLocation: GeoPoint;
   sectorId: string;
+  status: MemberStatus;
   createdAt: string;
 }
 

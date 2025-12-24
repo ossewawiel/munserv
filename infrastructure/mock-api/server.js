@@ -110,7 +110,17 @@ app.post('/api/v1/auth/verify-otp', (req, res) => {
         expiresAt: new Date(Date.now() + 86400000).toISOString()
       },
       profile: {
-        member: { id: member.id, phoneNumber: member.phoneNumber, displayName: member.displayName, sectorId: member.sectorId, createdAt: member.createdAt },
+        member: {
+          id: member.id,
+          firstName: member.firstName,
+          surname: member.surname,
+          phoneNumber: member.phoneNumber,
+          address: member.address,
+          registrationLocation: member.registrationLocation,
+          sectorId: member.sectorId,
+          status: member.status,
+          createdAt: member.createdAt
+        },
         sector
       }
     });
@@ -129,42 +139,54 @@ app.post('/api/v1/auth/complete-registration', (req, res) => {
   if (!auth || !auth.startsWith('Bearer ')) {
     return res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Missing temp token' } });
   }
-  
+
   const tempToken = auth.split(' ')[1];
   const stored = tempTokenStore.get(tempToken);
-  
+
   if (!stored) {
     return res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Invalid or expired temp token' } });
   }
-  
-  const { displayName, pin, sectorId } = req.body;
-  
-  if (!displayName || !pin || !sectorId) {
+
+  const { firstName, surname, pin, location, address } = req.body;
+
+  if (!firstName || !surname || !pin || !location || !address) {
     return res.status(400).json({
-      error: { code: 'VALIDATION_ERROR', message: 'Missing required fields' }
+      error: { code: 'VALIDATION_ERROR', message: 'Missing required fields: firstName, surname, pin, location, address' }
     });
   }
-  
-  const sector = sectors.find(s => s.id === sectorId);
-  if (!sector) {
+
+  if (!location.latitude || !location.longitude) {
     return res.status(400).json({
-      error: { code: 'VALIDATION_ERROR', message: 'Invalid sector' }
+      error: { code: 'VALIDATION_ERROR', message: 'Location must include latitude and longitude' }
     });
   }
-  
-  // Create new member
+
+  // Auto-assign sector based on location (for MVP: always assign to first sector)
+  // In production, this would do a PostGIS query to find the sector containing the location
+  const sector = sectors[0];
+
+  // Create new member with new structure
   const newMember = {
     id: uuidv4(),
+    firstName,
+    surname,
     phoneNumber: stored.phoneNumber,
-    displayName,
-    sectorId,
+    address,
+    registrationLocation: {
+      latitude: parseFloat(location.latitude),
+      longitude: parseFloat(location.longitude)
+    },
+    sectorId: sector.id,
+    status: 'active', // MVP: always active. Phase 2: 'pending' until admin approves
     pin,
     createdAt: new Date().toISOString()
   };
-  
+
   members.push(newMember);
   tempTokenStore.delete(tempToken);
-  
+
+  console.log(`[AUTH] New member registered: ${newMember.firstName} ${newMember.surname} (${newMember.phoneNumber})`);
+
   res.status(201).json({
     tokens: {
       accessToken: generateToken({ id: newMember.id, type: 'member' }),
@@ -172,7 +194,17 @@ app.post('/api/v1/auth/complete-registration', (req, res) => {
       expiresAt: new Date(Date.now() + 86400000).toISOString()
     },
     profile: {
-      member: { id: newMember.id, phoneNumber: newMember.phoneNumber, displayName: newMember.displayName, sectorId: newMember.sectorId, createdAt: newMember.createdAt },
+      member: {
+        id: newMember.id,
+        firstName: newMember.firstName,
+        surname: newMember.surname,
+        phoneNumber: newMember.phoneNumber,
+        address: newMember.address,
+        registrationLocation: newMember.registrationLocation,
+        sectorId: newMember.sectorId,
+        status: newMember.status,
+        createdAt: newMember.createdAt
+      },
       sector
     }
   });
@@ -181,17 +213,17 @@ app.post('/api/v1/auth/complete-registration', (req, res) => {
 // POST /api/v1/auth/login
 app.post('/api/v1/auth/login', (req, res) => {
   const { phoneNumber, pin } = req.body;
-  
+
   const member = members.find(m => m.phoneNumber === phoneNumber);
-  
+
   if (!member || member.pin !== pin) {
     return res.status(401).json({
       error: { code: 'UNAUTHORIZED', message: 'Invalid credentials' }
     });
   }
-  
+
   const sector = sectors.find(s => s.id === member.sectorId);
-  
+
   res.json({
     tokens: {
       accessToken: generateToken({ id: member.id, type: 'member' }),
@@ -199,7 +231,17 @@ app.post('/api/v1/auth/login', (req, res) => {
       expiresAt: new Date(Date.now() + 86400000).toISOString()
     },
     profile: {
-      member: { id: member.id, phoneNumber: member.phoneNumber, displayName: member.displayName, sectorId: member.sectorId, createdAt: member.createdAt },
+      member: {
+        id: member.id,
+        firstName: member.firstName,
+        surname: member.surname,
+        phoneNumber: member.phoneNumber,
+        address: member.address,
+        registrationLocation: member.registrationLocation,
+        sectorId: member.sectorId,
+        status: member.status,
+        createdAt: member.createdAt
+      },
       sector
     }
   });
@@ -530,22 +572,25 @@ app.get('/api/v1/admin/reports/heat', verifyToken, (req, res) => {
 // GET /api/v1/admin/members
 app.get('/api/v1/admin/members', verifyToken, (req, res) => {
   const { page = 1, limit = 20 } = req.query;
-  
+
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + parseInt(limit);
   const paginated = members.slice(startIndex, endIndex);
-  
+
   const items = paginated.map(m => {
     const issueCount = issues.filter(i => i.reporterId === m.id).length;
     return {
       id: m.id,
-      displayName: m.displayName,
+      firstName: m.firstName,
+      surname: m.surname,
       phoneNumber: m.phoneNumber,
+      address: m.address,
+      status: m.status,
       issueCount,
       joinedAt: m.createdAt
     };
   });
-  
+
   res.json({
     items,
     pagination: {

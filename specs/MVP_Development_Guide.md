@@ -42,7 +42,7 @@ MVP is complete when:
 
 | # | User Story | Acceptance Criteria |
 |---|------------|---------------------|
-| M1 | Register with phone number | Enter phone → receive OTP → verify → create PIN |
+| M1 | Register with phone number | Enter phone → receive OTP → verify → profile (name, address via GPS) → create PIN |
 | M2 | Login with PIN/biometric | Enter PIN or use fingerprint → access app |
 | M3 | View issues on map | See map centered on my sector with issue markers |
 | M4 | View issue list | See list of issues, filter by type/state |
@@ -66,6 +66,7 @@ MVP is complete when:
 
 | Feature | Why Deferred | Phase |
 |---------|--------------|-------|
+| Member approval workflow | Collect data now, approval later | 2 |
 | Member management (add/remove/warn) | Not core to proving concept | 2 |
 | Sector boundary editing | Complex, use fixed test boundary | 2 |
 | Push notifications | Requires backend infrastructure | 2 |
@@ -110,11 +111,17 @@ interface GeoPoint {
 
 // === MEMBER ===
 
+type MemberStatus = 'active' | 'pending' | 'suspended';
+
 interface Member {
   id: string;                    // UUID
+  firstName: string;             // "John"
+  surname: string;               // "Doe"
   phoneNumber: string;           // E.164 format: +27821234567
-  displayName: string;           // "John D."
-  sectorId: string;              // UUID
+  address: string;               // Reverse geocoded from GPS at registration
+  registrationLocation: GeoPoint; // GPS coordinates at time of registration
+  sectorId: string;              // UUID - auto-assigned from location
+  status: MemberStatus;          // MVP: always 'active'. Phase 2: pending until approved
   createdAt: string;             // ISO 8601
 }
 
@@ -314,7 +321,7 @@ POST /auth/verify-otp
 }
 ```
 
-#### Complete Registration (Set PIN)
+#### Complete Registration (Set PIN + Profile)
 
 ```
 POST /auth/complete-registration
@@ -325,11 +332,18 @@ POST /auth/complete-registration
 **Request:**
 ```json
 {
-  "displayName": "John D.",
+  "firstName": "John",
+  "surname": "Doe",
   "pin": "1234",
-  "sectorId": "sector-uuid-here"
+  "location": { "latitude": -26.1350, "longitude": 27.9800 },
+  "address": "42 Doreen Road, Northcliff"
 }
 ```
+
+**Notes:**
+- `location`: GPS coordinates at time of registration (for sector auto-assignment)
+- `address`: Reverse-geocoded address string from GPS, user can edit
+- `sectorId` is NOT sent - server determines sector from location
 
 **Response (201):**
 ```json
@@ -342,15 +356,19 @@ POST /auth/complete-registration
   "profile": {
     "member": {
       "id": "member-uuid",
+      "firstName": "John",
+      "surname": "Doe",
       "phoneNumber": "+27821234567",
-      "displayName": "John D.",
+      "address": "42 Doreen Road, Northcliff",
+      "registrationLocation": { "latitude": -26.1350, "longitude": 27.9800 },
       "sectorId": "sector-uuid",
+      "status": "active",
       "createdAt": "2025-01-15T10:00:00Z"
     },
     "sector": {
       "id": "sector-uuid",
       "name": "Ward 42 - Northcliff",
-      "center": { "latitude": -26.1234, "longitude": 28.0123 }
+      "center": { "latitude": -26.1367, "longitude": 27.9833 }
     }
   }
 }
@@ -708,16 +726,24 @@ All errors follow this format:
 [
   {
     "id": "550e8400-e29b-41d4-a716-446655440010",
+    "firstName": "John",
+    "surname": "Doe",
     "phoneNumber": "+27821234567",
-    "displayName": "John D.",
+    "address": "42 Doreen Road, Northcliff",
+    "registrationLocation": { "latitude": -26.1350, "longitude": 27.9800 },
     "sectorId": "550e8400-e29b-41d4-a716-446655440001",
+    "status": "active",
     "createdAt": "2025-01-10T08:00:00Z"
   },
   {
     "id": "550e8400-e29b-41d4-a716-446655440011",
+    "firstName": "Sarah",
+    "surname": "Miller",
     "phoneNumber": "+27829876543",
-    "displayName": "Sarah M.",
+    "address": "15 Doris Road, Northcliff",
+    "registrationLocation": { "latitude": -26.1320, "longitude": 27.9870 },
     "sectorId": "550e8400-e29b-41d4-a716-446655440001",
+    "status": "active",
     "createdAt": "2025-01-11T09:30:00Z"
   }
 ]
