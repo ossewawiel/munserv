@@ -41,11 +41,15 @@ class IssueTypeBadge extends StatelessWidget {
           ),
           if (showLabel) ...[
             const SizedBox(width: Spacing.xs),
-            Text(
-              type.displayName,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
+            Flexible(
+              child: Text(
+                type.displayName,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ],

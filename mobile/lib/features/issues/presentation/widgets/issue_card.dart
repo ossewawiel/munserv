@@ -62,9 +62,9 @@ class IssueCard extends StatelessWidget {
                     // Type and state row
                     Row(
                       children: [
-                        IssueTypeBadge(type: issue.type),
+                        Flexible(child: IssueTypeBadge(type: issue.type)),
                         const SizedBox(width: Spacing.sm),
-                        IssueStateBadge(state: issue.state, compact: true),
+                        Flexible(child: IssueStateBadge(state: issue.state, compact: true)),
                       ],
                     ),
                     const SizedBox(height: Spacing.sm),

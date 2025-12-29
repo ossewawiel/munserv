@@ -6,7 +6,10 @@ import '../../features/auth/data/secure_storage.dart';
 
 part 'dio_provider.g.dart';
 
-const String _baseUrl = 'http://localhost:3001/api/v1';
+// Use WSL2 IP for Android emulator running on Windows
+// localhost won't work - emulator can't reach WSL2's localhost
+// To find WSL2 IP: hostname -I | awk '{print $1}'
+const String _baseUrl = 'http://172.22.115.44:3001/api/v1';
 
 /// Provides the base Dio instance with auth interceptor
 @riverpod

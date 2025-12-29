@@ -43,7 +43,7 @@ class HomePage extends ConsumerWidget {
                   children: [
                     Text(
                       'Welcome back!',
-                      style: theme.textTheme.headlineMedium?.copyWith(
+                      style: theme.textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),

@@ -9,15 +9,15 @@ class BrandColors {
   const BrandColors({
     required this.primary,
     required this.secondary,
-    this.tertiary = const Color(0xFFE8E4DC),
+    this.tertiary = const Color(0xFFF3EDDA),
   });
 
   /// Default MunServ brand colors - Forest Green & Terracotta palette
   /// Based on Environmental Emissions App design reference
   static const defaultBrand = BrandColors(
-    primary: Color(0xFF2D4A47),   // Forest Green - primary text, outlines
-    secondary: Color(0xFFC75B39), // Terracotta - accents, CTAs
-    tertiary: Color(0xFFE8E4DC),  // Warm Beige - secondary backgrounds
+    primary: Color(0xFF233D36),   // Forest Green - primary text, outlines
+    secondary: Color(0xFFD9613F), // Terracotta - accents, CTAs
+    tertiary: Color(0xFFF3EDDA),  // Warm Beige - secondary backgrounds
   );
 
   /// Create brand colors from hex strings
@@ -29,7 +29,7 @@ class BrandColors {
     return BrandColors(
       primary: _hexToColor(primary),
       secondary: _hexToColor(secondary),
-      tertiary: tertiary != null ? _hexToColor(tertiary) : const Color(0xFFE8E4DC),
+      tertiary: tertiary != null ? _hexToColor(tertiary) : const Color(0xFFF3EDDA),
     );
   }
 
@@ -44,16 +44,16 @@ class BrandColors {
 /// Surface and background colors for the app
 class SurfaceColors {
   /// White/very light background for main scaffold
-  static const Color background = Color(0xFFFAFAFA);
+  static const Color background = Color(0xFFFFFFFF);
 
   /// Pure white for app bar and navigation
   static const Color white = Color(0xFFFFFFFF);
 
   /// Cream for card backgrounds (stands out from white)
-  static const Color cream = Color(0xFFF5F2ED);
+  static const Color cream = Color(0xFFF3EDDA);
 
   /// Warm beige for secondary surfaces
-  static const Color beige = Color(0xFFE8E4DC);
+  static const Color beige = Color(0xFFF3EDDA);
 
   /// Dark background for dark theme
   static const Color backgroundDark = Color(0xFF1A1A1A);

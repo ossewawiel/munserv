@@ -36,6 +36,8 @@ class IssueStateBadge extends StatelessWidget {
           color: Colors.white,
           fontWeight: FontWeight.w600,
         ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       ),
     );
   }

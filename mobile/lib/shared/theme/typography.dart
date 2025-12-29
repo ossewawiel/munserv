@@ -55,18 +55,18 @@ class AppTypography {
 
       // Title styles - Source Sans 3
       titleLarge: GoogleFonts.sourceSans3(
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: FontWeight.w500,
         color: baseColor,
       ),
       titleMedium: GoogleFonts.sourceSans3(
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.15,
         color: baseColor,
       ),
       titleSmall: GoogleFonts.sourceSans3(
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.1,
         color: baseColor,
@@ -74,19 +74,19 @@ class AppTypography {
 
       // Body styles - Source Sans 3
       bodyLarge: GoogleFonts.sourceSans3(
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: FontWeight.w400,
         letterSpacing: 0.5,
         color: baseColor,
       ),
       bodyMedium: GoogleFonts.sourceSans3(
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: FontWeight.w400,
         letterSpacing: 0.25,
         color: baseColor,
       ),
       bodySmall: GoogleFonts.sourceSans3(
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: FontWeight.w400,
         letterSpacing: 0.4,
         color: secondaryColor,
@@ -94,19 +94,19 @@ class AppTypography {
 
       // Label styles - Source Sans 3
       labelLarge: GoogleFonts.sourceSans3(
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.1,
         color: baseColor,
       ),
       labelMedium: GoogleFonts.sourceSans3(
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.5,
         color: baseColor,
       ),
       labelSmall: GoogleFonts.sourceSans3(
-        fontSize: 11,
+        fontSize: 13,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.5,
         color: secondaryColor,
