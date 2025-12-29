@@ -5,6 +5,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../features/auth/domain/auth_state.dart';
 import '../features/auth/presentation/pages/pages.dart';
 import '../features/auth/providers/auth_providers.dart';
+import '../features/home/presentation/pages/pages.dart';
+import '../features/issues/presentation/pages/pages.dart';
+import '../features/profile/presentation/pages/pages.dart';
+import '../shell/app_shell.dart';
 
 part 'app_router.g.dart';
 
@@ -51,14 +55,48 @@ GoRouter appRouter(Ref ref) {
       return null;
     },
     routes: [
-      // ===== Home/Main Routes =====
-      GoRoute(
-        path: '/',
-        name: 'home',
-        builder: (context, state) => const _PlaceholderPage(title: 'Home'),
+      // ===== App Shell with Bottom Navigation =====
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return AppShell(navigationShell: navigationShell);
+        },
+        branches: [
+          // Home branch
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/',
+                name: 'home',
+                builder: (context, state) => const HomePage(),
+              ),
+            ],
+          ),
+
+          // Issues branch
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/issues',
+                name: 'issues',
+                builder: (context, state) => const IssueListPage(),
+              ),
+            ],
+          ),
+
+          // Profile branch
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                name: 'profile',
+                builder: (context, state) => const ProfilePage(),
+              ),
+            ],
+          ),
+        ],
       ),
 
-      // ===== Auth Routes =====
+      // ===== Auth Routes (outside shell) =====
       GoRoute(
         path: '/auth/phone',
         name: 'phone',
@@ -105,39 +143,29 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const LoginPage(),
       ),
 
-      // ===== Issue Routes =====
-      GoRoute(
-        path: '/issues',
-        name: 'issues',
-        builder: (context, state) =>
-            const _PlaceholderPage(title: 'Issue List'),
-      ),
+      // ===== Issue Detail Routes (outside shell for full-screen) =====
       GoRoute(
         path: '/issues/:id',
         name: 'issueDetail',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return _PlaceholderPage(title: 'Issue $id');
+          return IssueDetailPage(issueId: id);
         },
       ),
       GoRoute(
         path: '/report',
         name: 'report',
-        builder: (context, state) =>
-            const _PlaceholderPage(title: 'Report Issue'),
+        builder: (context, state) => const ReportIssuePage(),
       ),
       GoRoute(
         path: '/my-issues',
         name: 'myIssues',
-        builder: (context, state) =>
-            const _PlaceholderPage(title: 'My Issues'),
+        builder: (context, state) => const MyReportsPage(),
       ),
-
-      // ===== Profile Routes =====
       GoRoute(
-        path: '/profile',
-        name: 'profile',
-        builder: (context, state) => const _PlaceholderPage(title: 'Profile'),
+        path: '/map',
+        name: 'map',
+        builder: (context, state) => const IssueMapPage(),
       ),
     ],
   );
@@ -149,25 +177,5 @@ class _GoRouterRefreshStream extends ChangeNotifier {
     ref.listen(provider, (prev, next) {
       notifyListeners();
     });
-  }
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-
-  const _PlaceholderPage({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Text(
-          '$title\n(Placeholder)',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-      ),
-    );
   }
 }

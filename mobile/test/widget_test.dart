@@ -12,7 +12,11 @@ void main() {
       ),
     );
 
+    // Pump a few frames to allow initial rendering
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
     // Verify the app renders without crashing
-    expect(find.text('Home'), findsOneWidget);
+    expect(find.byType(MunServApp), findsOneWidget);
   });
 }
