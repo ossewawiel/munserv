@@ -1,128 +1,129 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'colors.dart';
 
 /// Typography configuration for the app
-/// Can be customized per pod with different font families
+/// Uses Source Sans 3 throughout for a clean, modern look
 class AppTypography {
-  final String fontFamily;
-  final String? displayFontFamily;
+  AppTypography._();
 
-  const AppTypography({
-    this.fontFamily = 'Roboto',
-    this.displayFontFamily,
-  });
-
-  /// Default typography using system fonts
-  static const defaultTypography = AppTypography();
-
-  /// Build a complete TextTheme from this configuration
-  TextTheme buildTextTheme({Brightness brightness = Brightness.light}) {
+  /// Build a complete TextTheme using Source Sans 3
+  static TextTheme buildTextTheme({Brightness brightness = Brightness.light}) {
     final baseColor = brightness == Brightness.light
-        ? Colors.black87
+        ? TextColors.primary
         : Colors.white;
     final secondaryColor = brightness == Brightness.light
-        ? Colors.black54
+        ? TextColors.secondary
         : Colors.white70;
 
     return TextTheme(
-      displayLarge: TextStyle(
-        fontFamily: displayFontFamily ?? fontFamily,
+      // Display styles - Source Sans 3 (large headlines)
+      displayLarge: GoogleFonts.sourceSans3(
         fontSize: 57,
         fontWeight: FontWeight.w400,
         letterSpacing: -0.25,
         color: baseColor,
       ),
-      displayMedium: TextStyle(
-        fontFamily: displayFontFamily ?? fontFamily,
+      displayMedium: GoogleFonts.sourceSans3(
         fontSize: 45,
         fontWeight: FontWeight.w400,
         color: baseColor,
       ),
-      displaySmall: TextStyle(
-        fontFamily: displayFontFamily ?? fontFamily,
+      displaySmall: GoogleFonts.sourceSans3(
         fontSize: 36,
         fontWeight: FontWeight.w400,
         color: baseColor,
       ),
-      headlineLarge: TextStyle(
-        fontFamily: fontFamily,
+
+      // Headline styles - Source Sans 3 (section headers)
+      headlineLarge: GoogleFonts.sourceSans3(
         fontSize: 32,
         fontWeight: FontWeight.w600,
         color: baseColor,
       ),
-      headlineMedium: TextStyle(
-        fontFamily: fontFamily,
+      headlineMedium: GoogleFonts.sourceSans3(
         fontSize: 28,
         fontWeight: FontWeight.w600,
         color: baseColor,
       ),
-      headlineSmall: TextStyle(
-        fontFamily: fontFamily,
+      headlineSmall: GoogleFonts.sourceSans3(
         fontSize: 24,
         fontWeight: FontWeight.w600,
         color: baseColor,
       ),
-      titleLarge: TextStyle(
-        fontFamily: fontFamily,
+
+      // Title styles - Source Sans 3
+      titleLarge: GoogleFonts.sourceSans3(
         fontSize: 22,
         fontWeight: FontWeight.w500,
         color: baseColor,
       ),
-      titleMedium: TextStyle(
-        fontFamily: fontFamily,
+      titleMedium: GoogleFonts.sourceSans3(
         fontSize: 16,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.15,
         color: baseColor,
       ),
-      titleSmall: TextStyle(
-        fontFamily: fontFamily,
+      titleSmall: GoogleFonts.sourceSans3(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.1,
         color: baseColor,
       ),
-      bodyLarge: TextStyle(
-        fontFamily: fontFamily,
+
+      // Body styles - Source Sans 3
+      bodyLarge: GoogleFonts.sourceSans3(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         letterSpacing: 0.5,
         color: baseColor,
       ),
-      bodyMedium: TextStyle(
-        fontFamily: fontFamily,
+      bodyMedium: GoogleFonts.sourceSans3(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         letterSpacing: 0.25,
         color: baseColor,
       ),
-      bodySmall: TextStyle(
-        fontFamily: fontFamily,
+      bodySmall: GoogleFonts.sourceSans3(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         letterSpacing: 0.4,
         color: secondaryColor,
       ),
-      labelLarge: TextStyle(
-        fontFamily: fontFamily,
+
+      // Label styles - Source Sans 3
+      labelLarge: GoogleFonts.sourceSans3(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.1,
         color: baseColor,
       ),
-      labelMedium: TextStyle(
-        fontFamily: fontFamily,
+      labelMedium: GoogleFonts.sourceSans3(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.5,
         color: baseColor,
       ),
-      labelSmall: TextStyle(
-        fontFamily: fontFamily,
+      labelSmall: GoogleFonts.sourceSans3(
         fontSize: 11,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.5,
         color: secondaryColor,
       ),
+    );
+  }
+
+  /// Build text style for numbers/data displays
+  static TextStyle dataDisplay({
+    double fontSize = 32,
+    FontWeight fontWeight = FontWeight.w600,
+    Color? color,
+  }) {
+    return GoogleFonts.sourceSans3(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color ?? TextColors.primary,
     );
   }
 }

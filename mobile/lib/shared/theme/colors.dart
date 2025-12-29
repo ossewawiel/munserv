@@ -9,14 +9,15 @@ class BrandColors {
   const BrandColors({
     required this.primary,
     required this.secondary,
-    this.tertiary = const Color(0xFF6750A4),
+    this.tertiary = const Color(0xFFE8E4DC),
   });
 
-  /// Default MunServ brand colors
+  /// Default MunServ brand colors - Forest Green & Terracotta palette
+  /// Based on Environmental Emissions App design reference
   static const defaultBrand = BrandColors(
-    primary: Color(0xFF1976D2),
-    secondary: Color(0xFF26A69A),
-    tertiary: Color(0xFF6750A4),
+    primary: Color(0xFF2D4A47),   // Forest Green - primary text, outlines
+    secondary: Color(0xFFC75B39), // Terracotta - accents, CTAs
+    tertiary: Color(0xFFE8E4DC),  // Warm Beige - secondary backgrounds
   );
 
   /// Create brand colors from hex strings
@@ -28,7 +29,7 @@ class BrandColors {
     return BrandColors(
       primary: _hexToColor(primary),
       secondary: _hexToColor(secondary),
-      tertiary: tertiary != null ? _hexToColor(tertiary) : const Color(0xFF6750A4),
+      tertiary: tertiary != null ? _hexToColor(tertiary) : const Color(0xFFE8E4DC),
     );
   }
 
@@ -38,6 +39,45 @@ class BrandColors {
     buffer.write(hex.replaceFirst('#', ''));
     return Color(int.parse(buffer.toString(), radix: 16));
   }
+}
+
+/// Surface and background colors for the app
+class SurfaceColors {
+  /// White/very light background for main scaffold
+  static const Color background = Color(0xFFFAFAFA);
+
+  /// Pure white for app bar and navigation
+  static const Color white = Color(0xFFFFFFFF);
+
+  /// Cream for card backgrounds (stands out from white)
+  static const Color cream = Color(0xFFF5F2ED);
+
+  /// Warm beige for secondary surfaces
+  static const Color beige = Color(0xFFE8E4DC);
+
+  /// Dark background for dark theme
+  static const Color backgroundDark = Color(0xFF1A1A1A);
+
+  /// Dark surface for dark theme cards
+  static const Color surfaceDark = Color(0xFF2D2D2D);
+}
+
+/// Text colors
+class TextColors {
+  /// Primary text color - forest green for light theme
+  static const Color primary = Color(0xFF2D4A47);
+
+  /// Secondary text color - slightly lighter
+  static const Color secondary = Color(0xFF4A6360);
+
+  /// Muted text color
+  static const Color muted = Color(0xFF6B7B78);
+
+  /// White text for dark backgrounds
+  static const Color onDark = Color(0xFFFFFFFF);
+
+  /// Dark text for light colored backgrounds
+  static const Color onLight = Color(0xFF2D4A47);
 }
 
 /// Semantic colors for consistent UI across the app
