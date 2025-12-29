@@ -191,5 +191,30 @@
   "profile": "Profile",
   "@profile": {
     "description": "Profile navigation label"
+  },
+
+  "issuesTitle": "Issues",
+  "@issuesTitle": {
+    "description": "Title for issues list page"
+  },
+
+  "issueDetailTitle": "Issue Details",
+  "@issueDetailTitle": {
+    "description": "Title for issue detail page"
+  },
+
+  "myReportsTitle": "My Reports",
+  "@myReportsTitle": {
+    "description": "Title for my reports page"
+  },
+
+  "reportIssueTitle": "Report Issue",
+  "@reportIssueTitle": {
+    "description": "Title for report issue page"
+  },
+
+  "mapViewTitle": "Map View",
+  "@mapViewTitle": {
+    "description": "Title for map view page"
   }
 }

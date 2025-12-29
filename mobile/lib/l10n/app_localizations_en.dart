@@ -119,4 +119,19 @@ class SEn extends S {
 
   @override
   String get profile => 'Profile';
+
+  @override
+  String get issuesTitle => 'Issues';
+
+  @override
+  String get issueDetailTitle => 'Issue Details';
+
+  @override
+  String get myReportsTitle => 'My Reports';
+
+  @override
+  String get reportIssueTitle => 'Report Issue';
+
+  @override
+  String get mapViewTitle => 'Map View';
 }

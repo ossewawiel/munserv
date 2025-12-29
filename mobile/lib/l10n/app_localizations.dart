@@ -308,6 +308,36 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Profile'**
   String get profile;
+
+  /// Title for issues list page
+  ///
+  /// In en, this message translates to:
+  /// **'Issues'**
+  String get issuesTitle;
+
+  /// Title for issue detail page
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Details'**
+  String get issueDetailTitle;
+
+  /// Title for my reports page
+  ///
+  /// In en, this message translates to:
+  /// **'My Reports'**
+  String get myReportsTitle;
+
+  /// Title for report issue page
+  ///
+  /// In en, this message translates to:
+  /// **'Report Issue'**
+  String get reportIssueTitle;
+
+  /// Title for map view page
+  ///
+  /// In en, this message translates to:
+  /// **'Map View'**
+  String get mapViewTitle;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {
