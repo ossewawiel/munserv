@@ -44,4 +44,10 @@ extension AuthStateX on AuthState {
 
   /// Get the current access token if authenticated
   String? get accessTokenOrNull => authenticatedOrNull?.tokens.accessToken;
+
+  /// Get the current sector ID if authenticated
+  String? get sectorIdOrNull => authenticatedOrNull?.sector.id;
+
+  /// Get the current sector info if authenticated
+  SectorInfo? get sectorOrNull => authenticatedOrNull?.sector;
 }
