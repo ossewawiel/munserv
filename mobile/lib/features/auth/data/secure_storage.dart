@@ -10,6 +10,8 @@ abstract class SecureStorageKeys {
   static const String refreshToken = 'refresh_token';
   static const String userProfile = 'user_profile';
   static const String phoneNumber = 'phone_number';
+  static const String biometricPin = 'biometric_pin';
+  static const String biometricEnabled = 'biometric_enabled';
 }
 
 /// Service for secure storage of auth tokens and user data
@@ -114,5 +116,42 @@ class SecureStorageService {
   /// Clear all stored data (logout)
   Future<void> clearAll() async {
     await _storage.deleteAll();
+  }
+
+  // --- Biometric Authentication ---
+
+  /// Enable biometric login by storing the PIN
+  Future<void> enableBiometric(String pin) async {
+    await _storage.write(
+      key: SecureStorageKeys.biometricPin,
+      value: pin,
+    );
+    await _storage.write(
+      key: SecureStorageKeys.biometricEnabled,
+      value: 'true',
+    );
+  }
+
+  /// Disable biometric login
+  Future<void> disableBiometric() async {
+    await _storage.delete(key: SecureStorageKeys.biometricPin);
+    await _storage.write(
+      key: SecureStorageKeys.biometricEnabled,
+      value: 'false',
+    );
+  }
+
+  /// Check if biometric login is enabled
+  Future<bool> isBiometricEnabled() async {
+    final enabled = await _storage.read(key: SecureStorageKeys.biometricEnabled);
+    return enabled == 'true';
+  }
+
+  /// Get stored PIN for biometric login
+  /// Only returns if biometric is enabled
+  Future<String?> getBiometricPin() async {
+    final enabled = await isBiometricEnabled();
+    if (!enabled) return null;
+    return _storage.read(key: SecureStorageKeys.biometricPin);
   }
 }

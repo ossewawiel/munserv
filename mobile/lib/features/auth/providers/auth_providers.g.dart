@@ -439,3 +439,94 @@ final class StoredPhoneNumberProvider
 }
 
 String _$storedPhoneNumberHash() => r'eb265dcd0652314b3d9627883034892442c31cef';
+
+/// Check if biometric login is enabled for this user
+
+@ProviderFor(isBiometricLoginEnabled)
+const isBiometricLoginEnabledProvider = IsBiometricLoginEnabledProvider._();
+
+/// Check if biometric login is enabled for this user
+
+final class IsBiometricLoginEnabledProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  /// Check if biometric login is enabled for this user
+  const IsBiometricLoginEnabledProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isBiometricLoginEnabledProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isBiometricLoginEnabledHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    return isBiometricLoginEnabled(ref);
+  }
+}
+
+String _$isBiometricLoginEnabledHash() =>
+    r'7745400042f70b89557664870cc062ee4842e21a';
+
+/// Enable biometric login with the user's PIN
+
+@ProviderFor(BiometricLoginNotifier)
+const biometricLoginProvider = BiometricLoginNotifierProvider._();
+
+/// Enable biometric login with the user's PIN
+final class BiometricLoginNotifierProvider
+    extends $AsyncNotifierProvider<BiometricLoginNotifier, void> {
+  /// Enable biometric login with the user's PIN
+  const BiometricLoginNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'biometricLoginProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$biometricLoginNotifierHash();
+
+  @$internal
+  @override
+  BiometricLoginNotifier create() => BiometricLoginNotifier();
+}
+
+String _$biometricLoginNotifierHash() =>
+    r'1a004368dfea1a89e2f79fbe0bf225070200909a';
+
+/// Enable biometric login with the user's PIN
+
+abstract class _$BiometricLoginNotifier extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, void>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}

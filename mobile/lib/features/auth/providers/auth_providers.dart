@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../shared/models/geo_point.dart';
 import '../../../shared/providers/dio_provider.dart';
+import '../../../shared/services/biometric_service.dart';
 import '../../../shared/utils/app_error.dart';
 import '../../../shared/utils/result.dart';
 import '../data/auth_api.dart';
@@ -264,4 +265,118 @@ String? accessToken(Ref ref) {
 Future<String?> storedPhoneNumber(Ref ref) async {
   final storage = ref.watch(secureStorageProvider);
   return storage.getPhoneNumber();
+}
+
+// =============================================================================
+// Biometric Authentication Providers
+// =============================================================================
+
+/// Check if biometric login is enabled for this user
+@riverpod
+Future<bool> isBiometricLoginEnabled(Ref ref) async {
+  final storage = ref.watch(secureStorageProvider);
+  final biometricService = ref.watch(biometricServiceProvider);
+
+  // Must have biometric enabled in storage AND device must support it
+  final userEnabled = await storage.isBiometricEnabled();
+  if (!userEnabled) return false;
+
+  final deviceAvailable = await biometricService.isBiometricAvailable();
+  return deviceAvailable;
+}
+
+/// Enable biometric login with the user's PIN
+@riverpod
+class BiometricLoginNotifier extends _$BiometricLoginNotifier {
+  @override
+  FutureOr<void> build() {}
+
+  SecureStorageService get _storage => ref.read(secureStorageProvider);
+  BiometricService get _biometricService => ref.read(biometricServiceProvider);
+
+  /// Enable biometric login by storing the PIN
+  Future<Result<void>> enableBiometric(String pin) async {
+    state = const AsyncLoading();
+
+    // First verify biometrics are available
+    final isAvailable = await _biometricService.isBiometricAvailable();
+    if (!isAvailable) {
+      state = AsyncError(
+        const AppError.validation(message: 'Biometrics not available on this device'),
+        StackTrace.current,
+      );
+      return const Result.failure(
+        AppError.validation(message: 'Biometrics not available on this device'),
+      );
+    }
+
+    // Authenticate to confirm user identity
+    final authResult = await _biometricService.authenticate(
+      localizedReason: 'Authenticate to enable biometric login',
+    );
+
+    if (!authResult.isSuccess) {
+      final errorMsg = authResult.errorMessage ?? 'Biometric authentication failed';
+      state = AsyncError(AppError.unauthorized(message: errorMsg), StackTrace.current);
+      return Result.failure(AppError.unauthorized(message: errorMsg));
+    }
+
+    // Store the PIN for biometric login
+    await _storage.enableBiometric(pin);
+
+    // Invalidate the enabled state provider to refresh
+    ref.invalidate(isBiometricLoginEnabledProvider);
+
+    state = const AsyncData(null);
+    return const Result.success(null);
+  }
+
+  /// Disable biometric login
+  Future<void> disableBiometric() async {
+    await _storage.disableBiometric();
+    ref.invalidate(isBiometricLoginEnabledProvider);
+  }
+
+  /// Perform biometric login - returns the stored PIN on success
+  Future<Result<String>> authenticateAndGetPin() async {
+    state = const AsyncLoading();
+
+    // Check if biometric login is enabled
+    final isEnabled = await _storage.isBiometricEnabled();
+    if (!isEnabled) {
+      state = AsyncError(
+        const AppError.validation(message: 'Biometric login not enabled'),
+        StackTrace.current,
+      );
+      return const Result.failure(
+        AppError.validation(message: 'Biometric login not enabled'),
+      );
+    }
+
+    // Authenticate
+    final authResult = await _biometricService.authenticate(
+      localizedReason: 'Authenticate to login',
+    );
+
+    if (!authResult.isSuccess) {
+      final errorMsg = authResult.errorMessage ?? 'Biometric authentication failed';
+      state = AsyncError(AppError.unauthorized(message: errorMsg), StackTrace.current);
+      return Result.failure(AppError.unauthorized(message: errorMsg));
+    }
+
+    // Get the stored PIN
+    final pin = await _storage.getBiometricPin();
+    if (pin == null) {
+      state = AsyncError(
+        const AppError.validation(message: 'No PIN stored for biometric login'),
+        StackTrace.current,
+      );
+      return const Result.failure(
+        AppError.validation(message: 'No PIN stored for biometric login'),
+      );
+    }
+
+    state = const AsyncData(null);
+    return Result.success(pin);
+  }
 }
