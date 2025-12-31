@@ -147,7 +147,7 @@ class ProfilePage extends ConsumerWidget {
               Navigator.pop(context);
               await ref.read(authProvider.notifier).logout();
               if (context.mounted) {
-                context.go('/auth/phone');
+                context.go('/auth/login');
               }
             },
             child: const Text('Log Out'),

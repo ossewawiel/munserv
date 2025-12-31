@@ -15,6 +15,7 @@ part 'app_router.g.dart';
 @riverpod
 GoRouter appRouter(Ref ref) {
   final authState = ref.watch(authProvider);
+  final storedPhoneAsync = ref.watch(storedPhoneNumberProvider);
 
   return GoRouter(
     initialLocation: '/',
@@ -46,9 +47,14 @@ GoRouter appRouter(Ref ref) {
 
       // If not authenticated and not on auth route, redirect to auth
       if (!isAuthenticated && !isOnAuthRoute) {
-        // Check if user has stored credentials to show login vs phone entry
-        // For now, always go to phone entry
-        return '/auth/phone';
+        // Check if user has stored phone number to show login vs phone entry
+        // If still loading, don't redirect yet - wait for value
+        final redirectPath = storedPhoneAsync.when(
+          data: (phone) => phone != null ? '/auth/login' : '/auth/phone',
+          loading: () => null, // Don't redirect while loading
+          error: (_, __) => '/auth/phone',
+        );
+        return redirectPath;
       }
 
       // No redirect needed

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -112,6 +113,8 @@ class AuthNotifier extends _$AuthNotifier {
           existing.profile.member,
           existing.profile.sector,
         );
+        // Save phone number for quick re-login after logout
+        await _storage.savePhoneNumber(phoneNumber);
       }
     }
 
@@ -120,6 +123,7 @@ class AuthNotifier extends _$AuthNotifier {
 
   /// Complete registration for new user
   Future<Result<AuthResponse>> completeRegistration({
+    required String phoneNumber,
     required String tempToken,
     required String firstName,
     required String surname,
@@ -145,6 +149,8 @@ class AuthNotifier extends _$AuthNotifier {
         response.member,
         response.sector,
       );
+      // Save phone number for quick re-login after logout
+      await _storage.savePhoneNumber(phoneNumber);
     } else {
       state = AuthState.error(result.errorOrNull?.displayMessage ?? 'Registration failed');
     }
@@ -160,13 +166,16 @@ class AuthNotifier extends _$AuthNotifier {
 
     if (result.isSuccess) {
       final response = result.dataOrNull!;
+      // Store PIN FIRST before auth state change triggers navigation
+      ref.read(tempPinForBiometricSetupProvider.notifier).setPin(pin);
+      // Save phone number for convenience
+      await _storage.savePhoneNumber(phoneNumber);
+      // This updates auth state which triggers router redirect
       await _handleSuccessfulAuth(
         response.tokens,
         response.member,
         response.sector,
       );
-      // Save phone number for convenience
-      await _storage.savePhoneNumber(phoneNumber);
     } else {
       state = AuthState.error(result.errorOrNull?.displayMessage ?? 'Login failed');
     }
@@ -221,9 +230,9 @@ class AuthNotifier extends _$AuthNotifier {
     return result;
   }
 
-  /// Logout and clear all stored data
+  /// Logout - clear session but keep phone number for quick re-login
   Future<void> logout() async {
-    await _storage.clearAll();
+    await _storage.clearSession();
     state = const AuthState.unauthenticated();
   }
 
@@ -271,6 +280,22 @@ Future<String?> storedPhoneNumber(Ref ref) async {
 // Biometric Authentication Providers
 // =============================================================================
 
+/// Temporary PIN storage for biometric setup after login
+/// This is cleared after use or on app restart
+@Riverpod(keepAlive: true)
+class TempPinForBiometricSetup extends _$TempPinForBiometricSetup {
+  @override
+  String? build() => null;
+
+  void setPin(String? pin) {
+    state = pin;
+  }
+
+  void clear() {
+    state = null;
+  }
+}
+
 /// Check if biometric login is enabled for this user
 @riverpod
 Future<bool> isBiometricLoginEnabled(Ref ref) async {
@@ -286,97 +311,118 @@ Future<bool> isBiometricLoginEnabled(Ref ref) async {
 }
 
 /// Enable biometric login with the user's PIN
-@riverpod
+@Riverpod(keepAlive: true)
 class BiometricLoginNotifier extends _$BiometricLoginNotifier {
   @override
   FutureOr<void> build() {}
 
-  SecureStorageService get _storage => ref.read(secureStorageProvider);
-  BiometricService get _biometricService => ref.read(biometricServiceProvider);
-
   /// Enable biometric login by storing the PIN
   Future<Result<void>> enableBiometric(String pin) async {
+    // Cache dependencies before async operations to avoid ref access after disposal
+    final storage = ref.read(secureStorageProvider);
+    final biometricService = ref.read(biometricServiceProvider);
+
     state = const AsyncLoading();
 
     // First verify biometrics are available
-    final isAvailable = await _biometricService.isBiometricAvailable();
+    final isAvailable = await biometricService.isBiometricAvailable();
     if (!isAvailable) {
-      state = AsyncError(
-        const AppError.validation(message: 'Biometrics not available on this device'),
-        StackTrace.current,
-      );
+      if (ref.mounted) {
+        state = AsyncError(
+          const AppError.validation(message: 'Biometrics not available on this device'),
+          StackTrace.current,
+        );
+      }
       return const Result.failure(
         AppError.validation(message: 'Biometrics not available on this device'),
       );
     }
 
     // Authenticate to confirm user identity
-    final authResult = await _biometricService.authenticate(
+    final authResult = await biometricService.authenticate(
       localizedReason: 'Authenticate to enable biometric login',
     );
 
     if (!authResult.isSuccess) {
       final errorMsg = authResult.errorMessage ?? 'Biometric authentication failed';
-      state = AsyncError(AppError.unauthorized(message: errorMsg), StackTrace.current);
+      if (ref.mounted) {
+        state = AsyncError(AppError.unauthorized(message: errorMsg), StackTrace.current);
+      }
       return Result.failure(AppError.unauthorized(message: errorMsg));
     }
 
     // Store the PIN for biometric login
-    await _storage.enableBiometric(pin);
+    await storage.enableBiometric(pin);
 
     // Invalidate the enabled state provider to refresh
-    ref.invalidate(isBiometricLoginEnabledProvider);
-
-    state = const AsyncData(null);
+    if (ref.mounted) {
+      ref.invalidate(isBiometricLoginEnabledProvider);
+      state = const AsyncData(null);
+    }
     return const Result.success(null);
   }
 
   /// Disable biometric login
   Future<void> disableBiometric() async {
-    await _storage.disableBiometric();
-    ref.invalidate(isBiometricLoginEnabledProvider);
+    final storage = ref.read(secureStorageProvider);
+    await storage.disableBiometric();
+    if (ref.mounted) {
+      ref.invalidate(isBiometricLoginEnabledProvider);
+    }
   }
 
   /// Perform biometric login - returns the stored PIN on success
   Future<Result<String>> authenticateAndGetPin() async {
+    // Cache dependencies before async operations
+    final storage = ref.read(secureStorageProvider);
+    final biometricService = ref.read(biometricServiceProvider);
+
     state = const AsyncLoading();
 
     // Check if biometric login is enabled
-    final isEnabled = await _storage.isBiometricEnabled();
+    final isEnabled = await storage.isBiometricEnabled();
     if (!isEnabled) {
-      state = AsyncError(
-        const AppError.validation(message: 'Biometric login not enabled'),
-        StackTrace.current,
-      );
+      if (ref.mounted) {
+        state = AsyncError(
+          const AppError.validation(message: 'Biometric login not enabled'),
+          StackTrace.current,
+        );
+      }
       return const Result.failure(
         AppError.validation(message: 'Biometric login not enabled'),
       );
     }
 
     // Authenticate
-    final authResult = await _biometricService.authenticate(
+    final authResult = await biometricService.authenticate(
       localizedReason: 'Authenticate to login',
     );
 
     if (!authResult.isSuccess) {
       final errorMsg = authResult.errorMessage ?? 'Biometric authentication failed';
-      state = AsyncError(AppError.unauthorized(message: errorMsg), StackTrace.current);
+      if (ref.mounted) {
+        state = AsyncError(AppError.unauthorized(message: errorMsg), StackTrace.current);
+      }
       return Result.failure(AppError.unauthorized(message: errorMsg));
     }
 
     // Get the stored PIN
-    final pin = await _storage.getBiometricPin();
+    final pin = await storage.getBiometricPin();
     if (pin == null) {
-      state = AsyncError(
-        const AppError.validation(message: 'No PIN stored for biometric login'),
-        StackTrace.current,
-      );
+      if (ref.mounted) {
+        state = AsyncError(
+          const AppError.validation(message: 'No PIN stored for biometric login'),
+          StackTrace.current,
+        );
+      }
       return const Result.failure(
         AppError.validation(message: 'No PIN stored for biometric login'),
       );
     }
 
-    state = const AsyncData(null);
+    if (ref.mounted) {
+      state = const AsyncData(null);
+    }
     return Result.success(pin);
   }
 }

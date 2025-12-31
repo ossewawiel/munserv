@@ -3,16 +3,111 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/services/biometric_service.dart';
 import '../../../../shared/theme/typography.dart';
+import '../../../../shared/utils/result.dart';
+import '../../../auth/providers/auth_providers.dart';
 import '../../../issues/providers/issue_providers.dart';
 import '../../../issues/presentation/widgets/widgets.dart';
 
 /// Home page showing dashboard overview
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  bool _hasCheckedBiometric = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check biometric offer after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkBiometricOffer();
+    });
+  }
+
+  Future<void> _checkBiometricOffer() async {
+    if (_hasCheckedBiometric) return;
+    _hasCheckedBiometric = true;
+
+    if (!mounted) return;
+
+    // Cache ref reads before async gaps
+    final biometricService = ref.read(biometricServiceProvider);
+
+    final isBiometricEnabled =
+        await ref.read(isBiometricLoginEnabledProvider.future);
+
+    if (!mounted) return;
+
+    final biometricAvailable = await biometricService.isBiometricAvailable();
+
+    if (!isBiometricEnabled && biometricAvailable && mounted) {
+      await _offerBiometricSetup();
+    }
+  }
+
+  Future<void> _offerBiometricSetup() async {
+    if (!mounted) return;
+
+    // Get the temporary PIN stored during login
+    final tempPin = ref.read(tempPinForBiometricSetupProvider);
+    if (tempPin == null) {
+      return;
+    }
+
+    final l10n = S.of(context);
+    final shouldEnable = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.useBiometrics),
+        content: const Text(
+          'Would you like to enable fingerprint or face unlock for faster login next time?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Not now'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Enable'),
+          ),
+        ],
+      ),
+    );
+
+    // Clear the temp PIN regardless of choice
+    ref.read(tempPinForBiometricSetupProvider.notifier).clear();
+
+    if (shouldEnable == true && mounted) {
+      final biometricNotifier = ref.read(biometricLoginProvider.notifier);
+      final result = await biometricNotifier.enableBiometric(tempPin);
+
+      if (mounted) {
+        if (result.isSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Biometric login enabled!')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                result.errorOrNull?.displayMessage ?? 'Could not enable biometrics',
+              ),
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = S.of(context);
     final theme = Theme.of(context);
     final issuesAsync = ref.watch(issuesProvider);

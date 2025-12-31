@@ -113,9 +113,16 @@ class SecureStorageService {
     return token != null;
   }
 
-  /// Clear all stored data (logout)
+  /// Clear all stored data (full reset)
   Future<void> clearAll() async {
     await _storage.deleteAll();
+  }
+
+  /// Clear session data but keep phone number and biometric settings (logout)
+  Future<void> clearSession() async {
+    await _storage.delete(key: SecureStorageKeys.accessToken);
+    await _storage.delete(key: SecureStorageKeys.refreshToken);
+    // Keep: phoneNumber, biometricPin, biometricEnabled
   }
 
   // --- Biometric Authentication ---

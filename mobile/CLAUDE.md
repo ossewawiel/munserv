@@ -385,6 +385,50 @@ flutter test                       # Run tests
 flutter run                        # Run on connected device/emulator
 ```
 
+## Parameterized Builds (API Host)
+
+The app uses `--dart-define` to configure the API host for different environments:
+
+```bash
+# For Emulator (default - uses 10.0.2.2)
+flutter build apk --debug
+flutter run
+
+# For Real Device on same network as mock API
+flutter build apk --debug --dart-define=API_HOST=192.168.1.100
+flutter run --dart-define=API_HOST=192.168.1.100
+
+# For Release build
+flutter build apk --release --dart-define=API_HOST=your.api.host
+```
+
+### Real Device Testing Setup
+
+1. **On Windows (mock API host):**
+   ```powershell
+   # Open firewall for mock API
+   netsh advfirewall firewall add rule name="Mock API 3001" dir=in action=allow protocol=TCP localport=3001
+
+   # Find your IP
+   ipconfig  # Look for IPv4 Address (e.g., 192.168.1.100)
+
+   # Start mock API
+   cd D:\sourcecode\pocs\munserv\infrastructure\mock-api
+   npm start
+   ```
+
+2. **Enable USB Debugging on phone:**
+   - Settings → About Phone → Tap "Build Number" 7 times
+   - Settings → Developer Options → Enable "USB Debugging"
+   - Connect via USB, accept debugging prompt
+
+3. **Build and install:**
+   ```bash
+   flutter build apk --debug --dart-define=API_HOST=YOUR_WINDOWS_IP
+   flutter install
+   # Or manually copy build/app/outputs/flutter-apk/app-debug.apk to phone
+   ```
+
 ## WSL2 + Windows Emulator Setup
 
 Running Flutter in WSL2 with an Android emulator on Windows requires special configuration.

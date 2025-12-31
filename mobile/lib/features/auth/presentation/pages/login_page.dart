@@ -79,7 +79,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
 
     if (result.isSuccess) {
-      context.go('/');
+      // Check if we should offer biometric setup before navigating
+      final isBiometricEnabled =
+          await ref.read(isBiometricLoginEnabledProvider.future);
+      final biometricService = ref.read(biometricServiceProvider);
+      final biometricAvailable = await biometricService.isBiometricAvailable();
+
+      if (!isBiometricEnabled && biometricAvailable && mounted) {
+        await _offerBiometricSetup(pin);
+      }
+
+      if (mounted) {
+        context.go('/');
+      }
     } else {
       setState(() {
         _errorText =
@@ -91,18 +103,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> _onPinCompleted(String pin) async {
     await _loginWithPin(pin);
-
-    // After successful PIN login, offer to enable biometrics if not enabled
-    if (mounted) {
-      final isBiometricEnabled =
-          await ref.read(isBiometricLoginEnabledProvider.future);
-      final biometricService = ref.read(biometricServiceProvider);
-      final biometricAvailable = await biometricService.isBiometricAvailable();
-
-      if (!isBiometricEnabled && biometricAvailable && mounted) {
-        _offerBiometricSetup(pin);
-      }
-    }
   }
 
   Future<void> _offerBiometricSetup(String pin) async {
@@ -202,12 +202,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final showBiometricButton = biometricAvailableAsync.when(
       data: (value) => value,
       loading: () => false,
-      error: (error, stack) => false,
+      error: (_, __) => false,
     );
     final biometricEnabled = isBiometricEnabledAsync.when(
       data: (value) => value,
       loading: () => false,
-      error: (error, stack) => false,
+      error: (_, __) => false,
     );
 
     return AuthPageLayout(
@@ -234,14 +234,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               errorText: _errorText,
             ),
           const SizedBox(height: Spacing.xl),
-          // Biometric button - show if device supports biometrics
-          if (showBiometricButton && !_isLoading && !_isBiometricLoading)
+          // Biometric button - only show if biometrics are enabled (setup happens after PIN login)
+          if (showBiometricButton && biometricEnabled && !_isLoading && !_isBiometricLoading)
             OutlinedButton.icon(
               onPressed: _onUseBiometrics,
               icon: const Icon(Icons.fingerprint),
-              label: Text(
-                biometricEnabled ? l10n.useBiometrics : 'Set up biometrics',
-              ),
+              label: Text(l10n.useBiometrics),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 48),
               ),

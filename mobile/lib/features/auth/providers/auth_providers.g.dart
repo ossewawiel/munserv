@@ -241,7 +241,7 @@ final class AuthNotifierProvider
   }
 }
 
-String _$authNotifierHash() => r'b8fdb2a528a66ccb94dfab75c00ee6ceb841cac4';
+String _$authNotifierHash() => r'252c444b4ea3c94800523fc5b3915cdc52395168';
 
 /// Manages authentication state throughout the app
 
@@ -440,6 +440,70 @@ final class StoredPhoneNumberProvider
 
 String _$storedPhoneNumberHash() => r'eb265dcd0652314b3d9627883034892442c31cef';
 
+/// Temporary PIN storage for biometric setup after login
+/// This is cleared after use or on app restart
+
+@ProviderFor(TempPinForBiometricSetup)
+const tempPinForBiometricSetupProvider = TempPinForBiometricSetupProvider._();
+
+/// Temporary PIN storage for biometric setup after login
+/// This is cleared after use or on app restart
+final class TempPinForBiometricSetupProvider
+    extends $NotifierProvider<TempPinForBiometricSetup, String?> {
+  /// Temporary PIN storage for biometric setup after login
+  /// This is cleared after use or on app restart
+  const TempPinForBiometricSetupProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tempPinForBiometricSetupProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tempPinForBiometricSetupHash();
+
+  @$internal
+  @override
+  TempPinForBiometricSetup create() => TempPinForBiometricSetup();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$tempPinForBiometricSetupHash() =>
+    r'e3fe5ec31572ffe669a932427abbc38721e5c9bc';
+
+/// Temporary PIN storage for biometric setup after login
+/// This is cleared after use or on app restart
+
+abstract class _$TempPinForBiometricSetup extends $Notifier<String?> {
+  String? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<String?, String?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String?, String?>,
+              String?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
 /// Check if biometric login is enabled for this user
 
 @ProviderFor(isBiometricLoginEnabled)
@@ -494,7 +558,7 @@ final class BiometricLoginNotifierProvider
         argument: null,
         retry: null,
         name: r'biometricLoginProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -508,7 +572,7 @@ final class BiometricLoginNotifierProvider
 }
 
 String _$biometricLoginNotifierHash() =>
-    r'1a004368dfea1a89e2f79fbe0bf225070200909a';
+    r'bdd85f2f5ffbeda26be5fe77a16e8556b0e6e969';
 
 /// Enable biometric login with the user's PIN
 

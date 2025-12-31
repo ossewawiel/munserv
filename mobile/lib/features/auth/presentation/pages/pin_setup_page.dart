@@ -70,6 +70,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
 
     final authNotifier = ref.read(authProvider.notifier);
     final result = await authNotifier.completeRegistration(
+      phoneNumber: widget.phoneNumber,
       tempToken: widget.tempToken,
       firstName: widget.firstName,
       surname: widget.surname,
