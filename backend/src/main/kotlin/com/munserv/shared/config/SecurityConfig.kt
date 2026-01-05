@@ -1,5 +1,6 @@
 package com.munserv.shared.config
 
+import com.munserv.shared.security.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -8,10 +9,13 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig {
+class SecurityConfig(
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+) {
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
@@ -19,7 +23,7 @@ class SecurityConfig {
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
         http
             .csrf { it.disable() }
-            .cors { } // Use WebConfig CORS settings
+            .cors { }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth
@@ -28,8 +32,12 @@ class SecurityConfig {
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/api/v1/sectors").permitAll()
                     .requestMatchers("/uploads/**").permitAll()
-                    // All other endpoints require authentication (will be enforced in Phase 2)
-                    .anyRequest().permitAll() // TODO: Change to authenticated() in Phase 2
+                    // Protected endpoints require authentication
+                    .requestMatchers("/api/v1/issues/**").authenticated()
+                    .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                    // Default: allow all for now (remaining endpoints)
+                    .anyRequest().permitAll()
             }
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .build()
 }
