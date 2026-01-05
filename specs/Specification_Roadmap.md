@@ -56,25 +56,26 @@
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
 | 7 | [MVP Development Guide](MVP_Development_Guide.md) | ✅ Complete | Scope, API contract, mock data |
-| 8 | Mobile App Implementation | 🔄 In Progress | Build against mock API |
+| 8 | Mobile App Implementation | ✅ **Near Complete** | M2-M7 done, M1 partial |
 | 9 | Web Admin Implementation | ✅ **Complete** | All W1-W7 features implemented |
+| 10 | [Mobile Theming Guide](Mobile_Theming_Guide.md) | ✅ **Complete** | M3 color system, components |
 
 ### Phase 3: Backend & Integration (LATER)
 
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
-| 10 | Entity-Relationship Model (MVP) | ⏳ Not Started | Database schema for MVP features |
-| 11 | Backend Implementation | ⏳ Not Started | Spring Boot API |
-| 12 | Integration & Testing | ⏳ Not Started | Connect frontend to real backend |
+| 11 | Entity-Relationship Model (MVP) | ⏳ Not Started | Database schema for MVP features |
+| 12 | Backend Implementation | ⏳ Not Started | Spring Boot API |
+| 13 | Integration & Testing | ⏳ Not Started | Connect frontend to real backend |
 
 ### Phase 4: Expansion (FUTURE)
 
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
-| 13 | Entity-Relationship Model (Full) | ⏳ Not Started | Complete schema with all features |
-| 14 | API Specification (Full) | ⏳ Not Started | All endpoints, not just MVP |
-| 15 | AI Integration Spec | ⏳ Not Started | Photo analysis, duplicate detection |
-| 16 | Offline Mode Spec | ⏳ Not Started | Sync strategy, conflict resolution |
+| 14 | Entity-Relationship Model (Full) | ⏳ Not Started | Complete schema with all features |
+| 15 | API Specification (Full) | ⏳ Not Started | All endpoints, not just MVP |
+| 16 | AI Integration Spec | ⏳ Not Started | Photo analysis, duplicate detection |
+| 17 | Offline Mode Spec | ⏳ Not Started | Sync strategy, conflict resolution |
 
 **Status Key:** ✅ Complete | 🔄 In Progress / Ready | ⏳ Not Started
 
@@ -114,13 +115,15 @@
 
 ### MVP Features Summary
 
-**Mobile (Member):** 🔄 In Progress
-- Register with phone + OTP
-- Login with PIN/biometric
-- View issues on map
-- Report issue with photo
-- View issue details
-- View my reports
+**Mobile (Member):** ✅ **Near Complete** (January 2026)
+- ✅ Login with PIN/biometric
+- ✅ View issues on map (flutter_map + GPS)
+- ✅ View issue list with filters
+- ✅ Report issue with photo
+- ✅ View issue details
+- ✅ View my reports
+- ✅ Material Design 3 theming
+- 🔄 Register with phone + OTP (partial)
 
 **Web (Admin):** ✅ **COMPLETE** (January 2026)
 - ✅ Login with email/password
@@ -297,17 +300,24 @@ Include in prompt:
    - W6: Heat report ranked list
    - W7: Members list with pagination
    - Bonus: Logout, responsive mobile navigation
+7. ✅ **Complete mobile MVP** (M2-M7 features)
+   - M2: Login with PIN + biometric authentication
+   - M3: View issues on map (flutter_map + GPS location)
+   - M4: View issue list with type/state filters
+   - M5: Report new issue with camera + location
+   - M6: View issue details with photos + history
+   - M7: View my reports with status
+   - Material Design 3 theming with tonal palettes
+   - Theme showcase page (debug builds)
+   - Mobile theming documentation
 
 ### Current Focus (Mobile App)
 
-- 🔄 Complete mobile MVP screens (M1-M7)
-- ⬜ M1: Register with phone + OTP
-- ⬜ M2: Login with PIN/biometric (partial - biometric done)
-- ⬜ M3: View issues on map
-- ⬜ M4: View issue list
-- ⬜ M5: Report new issue
-- ⬜ M6: View issue details
-- ⬜ M7: View my reports
+- 🔄 Complete M1: Register with phone + OTP
+  - ⬜ Phone entry page with validation
+  - ⬜ OTP verification flow
+  - ⬜ Profile creation with GPS address
+  - ⬜ Sector auto-assignment from location
 
 ### Later (When UI Proven)
 

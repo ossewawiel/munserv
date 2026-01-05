@@ -29,26 +29,28 @@ Define MVP Scope → API Contract → Mock API → Build UI → Learn → Repeat
 ### Success Criteria
 
 MVP is complete when:
-- [ ] Member can register, report an issue with photo, and see it on a map
+- [x] Member can report an issue with photo and see it on a map ✅ (registration partial)
 - [x] Admin can view issues, change states, and see a basic heat list ✅ **COMPLETE**
-- [ ] Both apps work against the same mock API
-- [ ] Ready to swap mock for real backend
+- [x] Both apps work against the same mock API ✅
+- [ ] Ready to swap mock for real backend (pending M1 registration)
 
 ---
 
 ## 2. MVP Scope
 
-### 2.1 Mobile App (Member)
+### 2.1 Mobile App (Member) 🔄 **IN PROGRESS**
 
-| # | User Story | Acceptance Criteria |
-|---|------------|---------------------|
-| M1 | Register with phone number | Enter phone → receive OTP → verify → profile (name, address via GPS) → create PIN |
-| M2 | Login with PIN/biometric | Enter PIN or use fingerprint → access app |
-| M3 | View issues on map | See map centered on my sector with issue markers |
-| M4 | View issue list | See list of issues, filter by type/state |
-| M5 | Report new issue | Take photo → select type → confirm location → submit |
-| M6 | View issue details | See photo(s), type, state, location, timestamps |
-| M7 | View my reports | See list of issues I reported with current status |
+| # | User Story | Acceptance Criteria | Status |
+|---|------------|---------------------|--------|
+| M1 | Register with phone number | Enter phone → receive OTP → verify → profile (name, address via GPS) → create PIN | 🔄 Partial |
+| M2 | Login with PIN/biometric | Enter PIN or use fingerprint → access app | ✅ Done |
+| M3 | View issues on map | See map centered on my sector with issue markers | ✅ Done |
+| M4 | View issue list | See list of issues, filter by type/state | ✅ Done |
+| M5 | Report new issue | Take photo → select type → confirm location → submit | ✅ Done |
+| M6 | View issue details | See photo(s), type, state, location, timestamps | ✅ Done |
+| M7 | View my reports | See list of issues I reported with current status | ✅ Done |
+
+**Infrastructure Complete:** January 2026 | **Stack:** Flutter 3.x + Riverpod + Freezed + Material Design 3
 
 ### 2.2 Web Admin (Sector Administrator) ✅ **COMPLETE**
 
@@ -1095,14 +1097,17 @@ These are **comments for future reference**, not current requirements.
 
 ## 10. Checklist
 
-### Before Starting Mobile Dev
+### Before Starting Mobile Dev ✅ **COMPLETE**
 
-- [ ] Mock server running
-- [ ] Flutter project initialized with folder structure
-- [ ] Riverpod configured
-- [ ] Dio HTTP client configured with base URL
-- [ ] Freezed models generated from data shapes
-- [ ] Basic navigation set up
+- [x] Mock server running
+- [x] Flutter project initialized with folder structure
+- [x] Riverpod configured
+- [x] Dio HTTP client configured with base URL
+- [x] Freezed models generated from data shapes
+- [x] Basic navigation set up (GoRouter with StatefulShellRoute)
+- [x] Material Design 3 theming with M3 tonal palettes
+- [x] Biometric authentication (local_auth)
+- [x] Map integration (flutter_map + GPS location)
 
 ### Before Starting Web Dev ✅ **COMPLETE**
 
@@ -1115,13 +1120,15 @@ These are **comments for future reference**, not current requirements.
 
 ### MVP Complete Checklist
 
-- [ ] All M1-M7 user stories working (mobile)
+- [x] M2-M7 user stories working (mobile) - M1 registration partial
 - [x] All W1-W7 user stories working (web) ✅ **COMPLETE**
-- [x] Error states handled gracefully (web)
-- [x] Loading states shown appropriately (web)
+- [x] Error states handled gracefully (web + mobile)
+- [x] Loading states shown appropriately (web + mobile)
 - [x] Both apps use same mock API
-- [x] Basic styling/theming applied (CSS variables + Tailwind)
+- [x] Basic styling/theming applied (web: CSS + Tailwind, mobile: M3)
 - [x] Code follows project standards
+- [x] Mobile: M3 theming with tonal palettes ✅ **COMPLETE**
+- [ ] Mobile: M1 registration flow (OTP + profile creation)
 
 ---
 
