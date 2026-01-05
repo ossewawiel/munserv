@@ -3,17 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
+import { HeatReportPage } from '@/features/dashboard/HeatReportPage';
 import { IssuesPage } from '@/features/issues/IssuesPage';
 import { IssueDetailPage } from '@/features/issues/IssueDetailPage';
-
-function HeatReportPage() {
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Heat Report</h1>
-      <p className="text-text-muted">Heat Report Page (Placeholder)</p>
-    </div>
-  );
-}
 
 function MembersPage() {
   return (
