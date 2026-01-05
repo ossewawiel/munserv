@@ -30,7 +30,7 @@ Define MVP Scope → API Contract → Mock API → Build UI → Learn → Repeat
 
 MVP is complete when:
 - [ ] Member can register, report an issue with photo, and see it on a map
-- [ ] Admin can view issues, change states, and see a basic heat list
+- [x] Admin can view issues, change states, and see a basic heat list ✅ **COMPLETE**
 - [ ] Both apps work against the same mock API
 - [ ] Ready to swap mock for real backend
 
@@ -50,17 +50,19 @@ MVP is complete when:
 | M6 | View issue details | See photo(s), type, state, location, timestamps |
 | M7 | View my reports | See list of issues I reported with current status |
 
-### 2.2 Web Admin (Sector Administrator)
+### 2.2 Web Admin (Sector Administrator) ✅ **COMPLETE**
 
-| # | User Story | Acceptance Criteria |
-|---|------------|---------------------|
-| W1 | Login with email/password | Enter credentials → access dashboard |
-| W2 | View dashboard | See summary stats: open issues, by type, by state |
-| W3 | View issues list | See paginated list, filter by type/state, sort by heat |
-| W4 | View issue details | See all info, photo(s), reporter (admin only), history |
-| W5 | Change issue state | Select new state → add optional note → save |
-| W6 | View heat report | See issues ranked by heat score |
-| W7 | View members list | See sector members (Phase 2: manage them) |
+| # | User Story | Acceptance Criteria | Status |
+|---|------------|---------------------|--------|
+| W1 | Login with email/password | Enter credentials → access dashboard | ✅ Done |
+| W2 | View dashboard | See summary stats: open issues, by type, by state | ✅ Done |
+| W3 | View issues list | See paginated list, filter by type/state, sort by heat | ✅ Done |
+| W4 | View issue details | See all info, photo(s), reporter (admin only), history | ✅ Done |
+| W5 | Change issue state | Select new state → add optional note → save | ✅ Done |
+| W6 | View heat report | See issues ranked by heat score | ✅ Done |
+| W7 | View members list | See sector members (Phase 2: manage them) | ✅ Done |
+
+**Implemented:** January 2026 | **Stack:** React 19 + TypeScript 5.9 + Vite 7 + Tailwind CSS 4 + React Query
 
 ### 2.3 Explicitly Deferred
 
@@ -1102,24 +1104,24 @@ These are **comments for future reference**, not current requirements.
 - [ ] Freezed models generated from data shapes
 - [ ] Basic navigation set up
 
-### Before Starting Web Dev
+### Before Starting Web Dev ✅ **COMPLETE**
 
-- [ ] Mock server running (or MSW configured)
-- [ ] React project initialized with Vite
-- [ ] React Query configured
-- [ ] React Router configured
-- [ ] shadcn/ui components installed
-- [ ] TypeScript types created from data shapes
+- [x] Mock server running (or MSW configured)
+- [x] React project initialized with Vite
+- [x] React Query configured
+- [x] React Router configured
+- [x] Custom atomic components (Button, Input, Badge, Select, Modal)
+- [x] TypeScript types created from data shapes
 
 ### MVP Complete Checklist
 
 - [ ] All M1-M7 user stories working (mobile)
-- [ ] All W1-W7 user stories working (web)
-- [ ] Error states handled gracefully
-- [ ] Loading states shown appropriately
-- [ ] Both apps use same mock API
-- [ ] Basic styling/theming applied
-- [ ] Code follows project standards
+- [x] All W1-W7 user stories working (web) ✅ **COMPLETE**
+- [x] Error states handled gracefully (web)
+- [x] Loading states shown appropriately (web)
+- [x] Both apps use same mock API
+- [x] Basic styling/theming applied (CSS variables + Tailwind)
+- [x] Code follows project standards
 
 ---
 

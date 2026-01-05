@@ -56,8 +56,8 @@
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
 | 7 | [MVP Development Guide](MVP_Development_Guide.md) | ✅ Complete | Scope, API contract, mock data |
-| 8 | Mobile App Implementation | 🔄 Ready to Start | Build against mock API |
-| 9 | Web Admin Implementation | 🔄 Ready to Start | Build against mock API |
+| 8 | Mobile App Implementation | 🔄 In Progress | Build against mock API |
+| 9 | Web Admin Implementation | ✅ **Complete** | All W1-W7 features implemented |
 
 ### Phase 3: Backend & Integration (LATER)
 
@@ -114,21 +114,23 @@
 
 ### MVP Features Summary
 
-**Mobile (Member):**
+**Mobile (Member):** 🔄 In Progress
 - Register with phone + OTP
-- Login with PIN
+- Login with PIN/biometric
 - View issues on map
 - Report issue with photo
 - View issue details
 - View my reports
 
-**Web (Admin):**
-- Login with email/password
-- Dashboard with stats
-- Issues list with filters
-- Change issue state
-- Heat report
-- Members list (view only)
+**Web (Admin):** ✅ **COMPLETE** (January 2026)
+- ✅ Login with email/password
+- ✅ Dashboard with stats + charts
+- ✅ Issues list with filters + pagination
+- ✅ Issue detail with photos + state history
+- ✅ Change issue state with modal
+- ✅ Heat report (ranked by heat score)
+- ✅ Members list with pagination
+- ✅ Logout + responsive mobile navigation
 
 **See [MVP_Development_Guide.md](MVP_Development_Guide.md) for full details, API contracts, and mock data.**
 
@@ -279,26 +281,38 @@ Include in prompt:
 
 ## 9. Next Actions
 
-### Immediate (This Week)
+### Completed ✅
 
 1. ✅ Create MVP Development Guide
-2. ⬜ Set up mock API server with test data
-3. ⬜ Initialize mobile app with folder structure
-4. ⬜ Initialize web app with folder structure
-5. ⬜ Build first mobile screen (login flow)
-6. ⬜ Build first web screen (login + dashboard)
+2. ✅ Set up mock API server with test data (Express + JSON Server)
+3. ✅ Initialize mobile app with folder structure (Flutter + Riverpod)
+4. ✅ Initialize web app with folder structure (React 19 + Vite 7)
+5. ✅ Build first mobile screen (login flow with biometrics)
+6. ✅ **Complete web admin MVP** (All W1-W7 features)
+   - W1: Login with email/password
+   - W2: Dashboard with stats and charts
+   - W3: Issues list with filters and pagination
+   - W4: Issue detail with photos and history
+   - W5: Change issue state with modal
+   - W6: Heat report ranked list
+   - W7: Members list with pagination
+   - Bonus: Logout, responsive mobile navigation
 
-### Soon (Next 2 Weeks)
+### Current Focus (Mobile App)
 
-- ⬜ Complete mobile MVP screens
-- ⬜ Complete web admin MVP screens
-- ⬜ Refine mock API as needed
-- ⬜ Review and iterate on UX
+- 🔄 Complete mobile MVP screens (M1-M7)
+- ⬜ M1: Register with phone + OTP
+- ⬜ M2: Login with PIN/biometric (partial - biometric done)
+- ⬜ M3: View issues on map
+- ⬜ M4: View issue list
+- ⬜ M5: Report new issue
+- ⬜ M6: View issue details
+- ⬜ M7: View my reports
 
 ### Later (When UI Proven)
 
 - ⬜ Create ER Model (MVP scope)
-- ⬜ Implement backend
+- ⬜ Implement backend (Kotlin + Spring Boot)
 - ⬜ Integrate and test
 - ⬜ Deploy to staging
 
