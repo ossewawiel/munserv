@@ -60,22 +60,23 @@
 | 9 | Web Admin Implementation | ✅ **Complete** | All W1-W7 features implemented |
 | 10 | [Mobile Theming Guide](Mobile_Theming_Guide.md) | ✅ **Complete** | M3 color system, components |
 
-### Phase 3: Backend & Integration (LATER)
+### Phase 3: Backend & Integration (CURRENT 🔄)
 
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
-| 11 | Entity-Relationship Model (MVP) | ⏳ Not Started | Database schema for MVP features |
-| 12 | Backend Implementation | ⏳ Not Started | Spring Boot API |
-| 13 | Integration & Testing | ⏳ Not Started | Connect frontend to real backend |
+| 11 | [Backend Development Guide](Backend_Development_Guide.md) | ✅ Complete | Phased TDD implementation plan |
+| 12 | Database Migrations | 🔄 Ready | PostgreSQL + PostGIS schema (V001-V009) |
+| 13 | Backend Implementation | 🔄 Ready | Kotlin/Spring Boot API (8 phases) |
+| 14 | Integration & Testing | ⏳ Phase 6 | Connect frontend to real backend |
 
 ### Phase 4: Expansion (FUTURE)
 
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
-| 14 | Entity-Relationship Model (Full) | ⏳ Not Started | Complete schema with all features |
-| 15 | API Specification (Full) | ⏳ Not Started | All endpoints, not just MVP |
-| 16 | AI Integration Spec | ⏳ Not Started | Photo analysis, duplicate detection |
-| 17 | Offline Mode Spec | ⏳ Not Started | Sync strategy, conflict resolution |
+| 15 | Entity-Relationship Model (Full) | ⏳ Not Started | Complete schema with all features |
+| 16 | API Specification (Full) | ⏳ Not Started | All endpoints, not just MVP |
+| 17 | AI Integration Spec | ⏳ Not Started | Photo analysis, duplicate detection |
+| 18 | Offline Mode Spec | ⏳ Not Started | Sync strategy, conflict resolution |
 
 **Status Key:** ✅ Complete | 🔄 In Progress / Ready | ⏳ Not Started
 
@@ -163,14 +164,18 @@
 | Naming conventions | [Coding Standards](Coding_Standards.md) §4 |
 | Testing approach | [Testing Strategy](Testing_Strategy.md) §8 |
 
-### For Backend Development (When Ready)
+### For Backend Development (READY)
 
 | Need | Document |
 |------|----------|
-| API to implement | [MVP Development Guide](MVP_Development_Guide.md) §4 |
+| **START HERE** | [Backend Development Guide](Backend_Development_Guide.md) |
+| Implementation phases | [Backend Development Guide](Backend_Development_Guide.md) §7 |
+| Database migrations | [Backend Development Guide](Backend_Development_Guide.md) §4 |
+| API contract | [Backend Development Guide](Backend_Development_Guide.md) §5 |
+| Kotlin data shapes | [Backend Development Guide](Backend_Development_Guide.md) §6 |
+| Testing patterns | [Backend Development Guide](Backend_Development_Guide.md) §8 |
 | Code patterns | [Architecture & Design Patterns](Architecture_and_Design_Patterns.md) §2 |
 | Naming conventions | [Coding Standards](Coding_Standards.md) §2 |
-| Testing approach | [Testing Strategy](Testing_Strategy.md) §6 |
 | Domain concepts | [Domain & Data Modeling](Domain_and_Data_Modeling.md) |
 
 ---
@@ -311,20 +316,31 @@ Include in prompt:
    - Theme showcase page (debug builds)
    - Mobile theming documentation
 
-### Current Focus (Mobile App)
+### Current Focus (Parallel Tracks)
 
+**Track A: Mobile App (M1 Registration)**
 - 🔄 Complete M1: Register with phone + OTP
   - ⬜ Phone entry page with validation
   - ⬜ OTP verification flow
   - ⬜ Profile creation with GPS address
   - ⬜ Sector auto-assignment from location
 
-### Later (When UI Proven)
+**Track B: Backend Development (Phase 3)**
+- ✅ Create Backend Development Guide
+- 🔄 Phase 0: Project scaffold (build.gradle.kts, application.yml)
+- ⬜ Phase 1: Database foundation (migrations V001-V003, sectors API)
+- ⬜ Phase 2: Authentication (members, JWT, auth endpoints)
+- ⬜ Phase 3: Issues domain (CRUD, state machine)
+- ⬜ Phase 4: Admin endpoints (dashboard, reports)
+- ⬜ Phase 5: Photo upload
+- ⬜ Phase 6: Integration testing
+- ⬜ Phase 7: Hardening
 
-- ⬜ Create ER Model (MVP scope)
-- ⬜ Implement backend (Kotlin + Spring Boot)
-- ⬜ Integrate and test
+### Later
+
+- ⬜ Replace mock API with real backend
 - ⬜ Deploy to staging
+- ⬜ E2E testing with real apps
 
 ---
 

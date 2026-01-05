@@ -1,0 +1,8 @@
+# Local development overrides
+spring:
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    com.munserv: DEBUG
