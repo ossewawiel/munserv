@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -5,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../features/auth/domain/auth_state.dart';
 import '../features/auth/presentation/pages/pages.dart';
 import '../features/auth/providers/auth_providers.dart';
+import '../features/dev/presentation/pages/theme_showcase_page.dart';
 import '../features/home/presentation/pages/pages.dart';
 import '../features/issues/presentation/pages/pages.dart';
 import '../features/profile/presentation/pages/pages.dart';
@@ -173,6 +175,14 @@ GoRouter appRouter(Ref ref) {
         name: 'map',
         builder: (context, state) => const IssueMapPage(),
       ),
+
+      // ===== Dev Routes (debug only) =====
+      if (kDebugMode)
+        GoRoute(
+          path: '/dev/theme',
+          name: 'themeShowcase',
+          builder: (context, state) => const ThemeShowcasePage(),
+        ),
     ],
   );
 }

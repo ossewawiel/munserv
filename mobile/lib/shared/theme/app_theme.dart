@@ -4,60 +4,28 @@ import '../models/pod_config.dart';
 import 'colors.dart';
 import 'typography.dart';
 
-/// Theme builder that creates Material themes from pod configuration
-/// Design based on Environmental Emissions App reference
+/// Material Design 3 Theme builder
+/// Uses M3 tonal palettes from Material Theme Builder for proper accessibility
+/// and consistent visual hierarchy.
+///
+/// M3 Specifications followed:
+/// - Buttons: 40dp height, 48dp touch target, stadium shape
+/// - Cards: 12dp radius, 1dp elevation
+/// - Navigation Bar: 80dp height, pill indicator
+/// - Chips: 8dp radius, 32dp height
+/// - FAB: 56dp, 16dp radius
+/// - Inputs: 4dp radius, filled style
 class AppTheme {
   AppTheme._();
 
-  /// Build a complete theme from pod configuration
+  /// Build a complete M3 theme from pod configuration
   static ThemeData buildTheme({
     required PodConfig config,
     required Brightness brightness,
   }) {
-    final brandColors = BrandColors.fromHex(
-      primary: config.primaryColor,
-      secondary: config.secondaryColor,
-      tertiary: config.tertiaryColor,
-    );
-
-    final isLight = brightness == Brightness.light;
+    // Use M3 generated color scheme with proper tonal palettes
+    final colorScheme = M3ColorSchemes.getScheme(brightness);
     final textTheme = AppTypography.buildTextTheme(brightness: brightness);
-
-    // Color scheme based on design reference:
-    // - Forest green for primary text and outlines
-    // - Terracotta for accents and CTAs
-    // - White background with cream cards
-    final colorScheme = ColorScheme(
-      brightness: brightness,
-      // Primary - Forest Green
-      primary: brandColors.primary,
-      onPrimary: Colors.white,
-      primaryContainer: brandColors.primary,
-      onPrimaryContainer: Colors.white,
-      // Secondary - Terracotta
-      secondary: brandColors.secondary,
-      onSecondary: Colors.white,
-      secondaryContainer: brandColors.secondary,
-      onSecondaryContainer: Colors.white,
-      // Tertiary - Beige
-      tertiary: brandColors.tertiary,
-      onTertiary: brandColors.primary,
-      tertiaryContainer: SurfaceColors.cream,
-      onTertiaryContainer: brandColors.primary,
-      // Surfaces
-      surface: isLight ? SurfaceColors.cream : SurfaceColors.surfaceDark,
-      onSurface: isLight ? brandColors.primary : Colors.white,
-      onSurfaceVariant: isLight ? TextColors.secondary : Colors.white70,
-      surfaceContainerHighest: isLight ? SurfaceColors.beige : const Color(0xFF3D3D3D),
-      // Error
-      error: SemanticColors.error,
-      onError: Colors.white,
-      errorContainer: SemanticColors.errorLight,
-      onErrorContainer: SemanticColors.error,
-      // Outline - thin forest green
-      outline: isLight ? brandColors.primary : Colors.white54,
-      outlineVariant: isLight ? brandColors.primary.withValues(alpha: 0.3) : Colors.white24,
-    );
 
     return ThemeData(
       useMaterial3: true,
@@ -65,268 +33,363 @@ class AppTheme {
       colorScheme: colorScheme,
       textTheme: textTheme,
 
-      // Scaffold - white/very light background
-      scaffoldBackgroundColor: isLight
-          ? SurfaceColors.background
-          : SurfaceColors.backgroundDark,
+      // Scaffold - use M3 surface color
+      scaffoldBackgroundColor: colorScheme.surface,
 
-      // AppBar - white, no elevation, forest green text
+      // AppBar - M3 style with surface tint
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: isLight ? SurfaceColors.white : SurfaceColors.backgroundDark,
-        foregroundColor: isLight ? brandColors.primary : Colors.white,
-        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 2,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        surfaceTintColor: colorScheme.surfaceTint,
         titleTextStyle: textTheme.titleLarge?.copyWith(
-          color: isLight ? brandColors.primary : Colors.white,
+          color: colorScheme.onSurface,
           fontWeight: FontWeight.w600,
         ),
       ),
 
-      // Cards - cream background, no shadow, rounded corners
+      // Cards - M3: 12dp radius, 1dp elevation, surfaceContainerLow
       cardTheme: CardThemeData(
-        elevation: 0,
-        color: isLight ? SurfaceColors.cream : SurfaceColors.surfaceDark,
-        surfaceTintColor: Colors.transparent,
+        elevation: 1,
+        color: colorScheme.surfaceContainerLow,
+        surfaceTintColor: colorScheme.surfaceTint,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12), // M3 medium shape
         ),
         margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
       ),
 
-      // Input fields - outlined with forest green border
+      // Input fields - M3: 4dp radius, filled style
       inputDecorationTheme: InputDecorationTheme(
-        filled: false,
+        filled: true,
+        fillColor: colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: brandColors.primary.withValues(alpha: 0.3)),
+          borderRadius: BorderRadius.circular(4), // M3 extra small shape
+          borderSide: BorderSide(color: colorScheme.outline),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: brandColors.primary.withValues(alpha: 0.3)),
+          borderRadius: BorderRadius.circular(4),
+          borderSide: BorderSide(color: colorScheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: brandColors.primary, width: 1.5),
+          borderRadius: BorderRadius.circular(4),
+          borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: SemanticColors.error),
+          borderRadius: BorderRadius.circular(4),
+          borderSide: BorderSide(color: colorScheme.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: SemanticColors.error, width: 1.5),
+          borderRadius: BorderRadius.circular(4),
+          borderSide: BorderSide(color: colorScheme.error, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        hintStyle: TextStyle(color: brandColors.primary.withValues(alpha: 0.5)),
-        labelStyle: TextStyle(color: brandColors.primary),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        hintStyle: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+        labelStyle: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
       ),
 
-      // Elevated buttons - outlined style (forest green border)
+      // Elevated buttons - M3: 40dp height, 1dp elevation, stadium shape
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: brandColors.primary,
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          side: BorderSide(color: brandColors.primary, width: 1),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.5,
-          ),
+          minimumSize: const Size(64, 40), // M3 spec
+          elevation: 1,
+          backgroundColor: colorScheme.surfaceContainerLow,
+          foregroundColor: colorScheme.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          shape: const StadiumBorder(),
+          textStyle: textTheme.labelLarge,
+        ).copyWith(
+          // Ensure 48dp touch target
+          tapTargetSize: MaterialTapTargetSize.padded,
         ),
       ),
 
-      // Filled buttons - terracotta for CTAs
+      // Filled buttons - M3: 40dp height, primary container, stadium shape
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: brandColors.secondary,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.5,
-          ),
+          minimumSize: const Size(64, 40), // M3 spec
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          shape: const StadiumBorder(),
+          textStyle: textTheme.labelLarge,
+        ).copyWith(
+          tapTargetSize: MaterialTapTargetSize.padded,
         ),
       ),
 
-      // Outlined buttons - forest green thin outline
+      // Outlined buttons - M3: 40dp height, outline, stadium shape
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: brandColors.primary,
-          side: BorderSide(color: brandColors.primary, width: 1),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.5,
-          ),
+          minimumSize: const Size(64, 40), // M3 spec
+          foregroundColor: colorScheme.primary,
+          side: BorderSide(color: colorScheme.outline),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          shape: const StadiumBorder(),
+          textStyle: textTheme.labelLarge,
+        ).copyWith(
+          tapTargetSize: MaterialTapTargetSize.padded,
         ),
       ),
 
-      // Text buttons - terracotta accent
+      // Text buttons - M3: 40dp height, no background
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: brandColors.secondary,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          minimumSize: const Size(48, 40), // M3 spec
+          foregroundColor: colorScheme.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          textStyle: textTheme.labelLarge,
+        ).copyWith(
+          tapTargetSize: MaterialTapTargetSize.padded,
         ),
       ),
 
-      // Icon buttons - circular outline
+      // Icon buttons - M3: 48dp touch target
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
-          foregroundColor: brandColors.primary,
-          side: BorderSide(color: brandColors.primary, width: 1),
-          shape: const CircleBorder(),
+          foregroundColor: colorScheme.onSurfaceVariant,
+          minimumSize: const Size(48, 48), // M3 touch target
         ),
       ),
 
-      // Bottom navigation - white background, terracotta selected
+      // Navigation Bar - M3: 80dp height, pill indicator
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: isLight ? SurfaceColors.white : SurfaceColors.surfaceDark,
-        indicatorColor: Colors.transparent,
-        elevation: 0,
-        height: 64,
+        height: 80, // M3 spec
+        backgroundColor: colorScheme.surfaceContainer,
+        indicatorColor: colorScheme.secondaryContainer,
+        indicatorShape: const StadiumBorder(),
+        elevation: 2,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(color: brandColors.secondary, size: 24);
+            return IconThemeData(
+              color: colorScheme.onSecondaryContainer,
+              size: 24,
+            );
           }
-          return IconThemeData(color: brandColors.primary.withValues(alpha: 0.5), size: 24);
+          return IconThemeData(
+            color: colorScheme.onSurfaceVariant,
+            size: 24,
+          );
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return TextStyle(
-              color: brandColors.secondary,
-              fontSize: 12,
+            return textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurface,
               fontWeight: FontWeight.w600,
             );
           }
-          return TextStyle(
-            color: brandColors.primary.withValues(alpha: 0.5),
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
+          return textTheme.labelMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
           );
         }),
       ),
 
-      // FAB - terracotta
+      // FAB - M3: 56dp, 16dp radius, primaryContainer
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: brandColors.secondary,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        backgroundColor: colorScheme.primaryContainer,
+        foregroundColor: colorScheme.onPrimaryContainer,
+        elevation: 3,
+        highlightElevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16), // M3 spec
+        ),
+        sizeConstraints: const BoxConstraints.tightFor(
+          width: 56, // M3 standard FAB
+          height: 56,
         ),
       ),
 
-      // Chips - outlined style, pill shape
+      // Chips - M3: 8dp radius, 32dp height
       chipTheme: ChipThemeData(
         backgroundColor: Colors.transparent,
-        selectedColor: brandColors.primary.withValues(alpha: 0.1),
-        side: BorderSide(color: brandColors.primary.withValues(alpha: 0.3)),
-        shape: const StadiumBorder(),
-        labelStyle: TextStyle(color: brandColors.primary, fontSize: 13),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        selectedColor: colorScheme.secondaryContainer,
+        side: BorderSide(color: colorScheme.outline),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8), // M3 small shape
+        ),
+        labelStyle: textTheme.labelLarge,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 8),
       ),
 
-      // Snackbar - forest green
+      // Snackbar - M3: inverseSurface
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: brandColors.primary,
-        contentTextStyle: const TextStyle(color: Colors.white),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        backgroundColor: colorScheme.inverseSurface,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurface,
         ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4), // M3 extra small shape
+        ),
+        elevation: 6,
       ),
 
-      // Divider - very subtle
+      // Divider - M3: outlineVariant
       dividerTheme: DividerThemeData(
-        color: isLight ? brandColors.primary.withValues(alpha: 0.1) : Colors.white12,
+        color: colorScheme.outlineVariant,
         thickness: 1,
         space: 1,
       ),
 
-      // List tile
+      // List tile - M3 spec
       listTileTheme: ListTileThemeData(
-        iconColor: brandColors.primary,
-        textColor: brandColors.primary,
+        iconColor: colorScheme.onSurfaceVariant,
+        textColor: colorScheme.onSurface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        minVerticalPadding: 8,
       ),
 
       // Icon theme
       iconTheme: IconThemeData(
-        color: isLight ? brandColors.primary : Colors.white,
+        color: colorScheme.onSurface,
         size: 24,
       ),
 
-      // Progress indicator - terracotta
+      // Progress indicator - M3: primary
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: brandColors.secondary,
-        circularTrackColor: brandColors.primary.withValues(alpha: 0.1),
-        linearTrackColor: brandColors.primary.withValues(alpha: 0.1),
+        color: colorScheme.primary,
+        circularTrackColor: colorScheme.surfaceContainerHighest,
+        linearTrackColor: colorScheme.surfaceContainerHighest,
       ),
 
-      // Switch - terracotta when on
+      // Switch - M3 spec
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return brandColors.secondary;
-          return Colors.white;
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.onPrimary;
+          }
+          return colorScheme.outline;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return brandColors.secondary.withValues(alpha: 0.5);
+            return colorScheme.primary;
           }
-          return brandColors.primary.withValues(alpha: 0.2);
+          return colorScheme.surfaceContainerHighest;
+        }),
+        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.transparent;
+          }
+          return colorScheme.outline;
         }),
       ),
 
-      // Checkbox - forest green
+      // Checkbox - M3 spec
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return brandColors.primary;
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.primary;
+          }
           return Colors.transparent;
         }),
-        checkColor: WidgetStateProperty.all(Colors.white),
-        side: BorderSide(color: brandColors.primary, width: 1.5),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        checkColor: WidgetStateProperty.all(colorScheme.onPrimary),
+        side: BorderSide(color: colorScheme.onSurfaceVariant, width: 2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
       ),
 
-      // Radio - forest green
+      // Radio - M3 spec
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return brandColors.primary;
-          return brandColors.primary.withValues(alpha: 0.5);
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.primary;
+          }
+          return colorScheme.onSurfaceVariant;
         }),
+      ),
+
+      // Dialog - M3 spec
+      dialogTheme: DialogThemeData(
+        backgroundColor: colorScheme.surfaceContainerHigh,
+        surfaceTintColor: colorScheme.surfaceTint,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28), // M3 extra large shape
+        ),
+        elevation: 6,
+      ),
+
+      // Bottom Sheet - M3 spec
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colorScheme.surfaceContainerLow,
+        surfaceTintColor: colorScheme.surfaceTint,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(28), // M3 extra large shape
+          ),
+        ),
+        elevation: 1,
+        dragHandleColor: colorScheme.onSurfaceVariant,
+        dragHandleSize: const Size(32, 4),
+      ),
+
+      // Segmented Button - M3 spec
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return colorScheme.secondaryContainer;
+            }
+            return Colors.transparent;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return colorScheme.onSecondaryContainer;
+            }
+            return colorScheme.onSurface;
+          }),
+          side: WidgetStateProperty.all(BorderSide(color: colorScheme.outline)),
+        ),
+      ),
+
+      // Slider - M3 spec
+      sliderTheme: SliderThemeData(
+        activeTrackColor: colorScheme.primary,
+        inactiveTrackColor: colorScheme.surfaceContainerHighest,
+        thumbColor: colorScheme.primary,
+        overlayColor: colorScheme.primary.withValues(alpha: 0.12),
+      ),
+
+      // Tab Bar - M3 spec
+      tabBarTheme: TabBarThemeData(
+        labelColor: colorScheme.primary,
+        unselectedLabelColor: colorScheme.onSurfaceVariant,
+        indicatorColor: colorScheme.primary,
+        indicatorSize: TabBarIndicatorSize.label,
+        labelStyle: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: textTheme.titleSmall,
+      ),
+
+      // Tooltip - M3 spec
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: colorScheme.inverseSurface,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        textStyle: textTheme.bodySmall?.copyWith(
+          color: colorScheme.onSurface,
+        ),
+      ),
+
+      // Badge - M3 spec
+      badgeTheme: BadgeThemeData(
+        backgroundColor: colorScheme.error,
+        textColor: colorScheme.onError,
+        textStyle: textTheme.labelSmall,
       ),
     );
   }
 
-  /// Convenience getter for light theme with default config
+  /// Light theme using M3 generated colors
   static ThemeData get lightTheme => buildTheme(
         config: PodConfig.defaultConfig,
         brightness: Brightness.light,
       );
 
-  /// Convenience getter for dark theme with default config
+  /// Dark theme using M3 generated colors
   static ThemeData get darkTheme => buildTheme(
         config: PodConfig.defaultConfig,
         brightness: Brightness.dark,

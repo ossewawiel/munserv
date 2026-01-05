@@ -60,6 +60,77 @@ lib/
     └── app_router.dart
 ```
 
+## Material Design 3 Theming
+
+The app uses Material Design 3 with a generated tonal palette system.
+
+**Full spec:** [`/specs/Mobile_Theming_Guide.md`](/specs/Mobile_Theming_Guide.md)
+
+### Brand Colors
+
+| Role | Color | Hex |
+|------|-------|-----|
+| Primary | Forest Green | `#233D36` |
+| Secondary | Terracotta | `#D9613F` |
+| Tertiary | Warm Beige | `#F3EDDA` |
+
+### Using Theme Colors
+
+```dart
+// ✅ DO: Use ColorScheme from theme
+final colors = Theme.of(context).colorScheme;
+
+colors.primary              // Primary actions
+colors.primaryContainer     // FAB, prominent containers
+colors.secondary            // Secondary actions
+colors.secondaryContainer   // Selected nav items
+colors.surfaceContainerLow  // Cards, dialogs
+colors.surfaceContainerHigh // Menus, elevated surfaces
+colors.onSurface            // Primary text
+colors.onSurfaceVariant     // Secondary text
+
+// ❌ DON'T: Hardcode colors
+Container(color: Color(0xFF233D36))
+
+// ❌ DON'T: Use .withOpacity() on theme colors
+colors.primary.withOpacity(0.5) // Use semantic variant instead
+```
+
+### M3 Component Specifications
+
+| Component | Height | Radius | Notes |
+|-----------|--------|--------|-------|
+| Buttons | 40dp | Stadium | 48dp touch target |
+| Cards | - | 12dp | 1dp elevation |
+| Nav Bar | 80dp | - | Pill indicator |
+| FAB | 56dp | 16dp | primaryContainer |
+| Chips | 32dp | 8dp | - |
+| Inputs | - | 4dp | Filled style |
+| Dialogs | - | 28dp | surfaceContainerHigh |
+
+### Theme Files
+
+| File | Purpose |
+|------|---------|
+| `shared/theme/colors.dart` | M3ColorSchemes, brand colors |
+| `shared/theme/app_theme.dart` | ThemeData builder |
+| `shared/theme/typography.dart` | TextTheme, Spacing, Radii |
+| `shared/providers/theme_provider.dart` | Light/dark mode state |
+
+### Semantic Colors
+
+```dart
+// Issue states
+IssueStateColors.reported   // Orange
+IssueStateColors.confirmed  // Blue
+IssueStateColors.inProgress // Purple
+IssueStateColors.fixed      // Green
+IssueStateColors.rejected   // Gray
+
+// Heat priority
+HeatColors.fromHeat(75)     // Returns red for high heat
+```
+
 ## Freezed Model Pattern
 
 ```dart

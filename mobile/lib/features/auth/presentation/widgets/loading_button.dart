@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../shared/theme/typography.dart';
-
 /// A button with loading state
+/// Follows Material Design 3 specifications:
+/// - 40dp minimum height
+/// - 48dp touch target (via MaterialTapTargetSize.padded)
+/// - Stadium shape (pill)
 class LoadingButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -29,18 +31,15 @@ class LoadingButton extends StatelessWidget {
       onPressed: isLoading || !enabled ? null : onPressed,
       style: style ??
           FilledButton.styleFrom(
-            minimumSize: const Size(double.infinity, 52),
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.lg,
-              vertical: Spacing.md,
-            ),
+            minimumSize: const Size(64, 40), // M3 spec: 40dp height
+            padding: const EdgeInsets.symmetric(horizontal: 24),
           ),
       child: isLoading
           ? SizedBox(
-              height: 24,
-              width: 24,
+              height: 20,
+              width: 20,
               child: CircularProgressIndicator(
-                strokeWidth: 2.5,
+                strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(
                   theme.colorScheme.onPrimary,
                 ),
@@ -56,6 +55,10 @@ class LoadingButton extends StatelessWidget {
 }
 
 /// An outlined button with loading state
+/// Follows Material Design 3 specifications:
+/// - 40dp minimum height
+/// - 48dp touch target (via MaterialTapTargetSize.padded)
+/// - Stadium shape (pill)
 class LoadingOutlinedButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -82,18 +85,15 @@ class LoadingOutlinedButton extends StatelessWidget {
       onPressed: isLoading || !enabled ? null : onPressed,
       style: style ??
           OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 52),
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.lg,
-              vertical: Spacing.md,
-            ),
+            minimumSize: const Size(64, 40), // M3 spec: 40dp height
+            padding: const EdgeInsets.symmetric(horizontal: 24),
           ),
       child: isLoading
           ? SizedBox(
-              height: 24,
-              width: 24,
+              height: 20,
+              width: 20,
               child: CircularProgressIndicator(
-                strokeWidth: 2.5,
+                strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(
                   theme.colorScheme.primary,
                 ),

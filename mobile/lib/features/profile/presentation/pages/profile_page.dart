@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -112,6 +113,24 @@ class ProfilePage extends ConsumerWidget {
               );
             },
           ),
+
+          // Developer section (debug only)
+          if (kDebugMode) ...[
+            const SizedBox(height: Spacing.xl),
+            Text(
+              'Developer',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: Spacing.md),
+            _SettingsItem(
+              icon: Icons.palette_outlined,
+              title: 'Theme Showcase',
+              subtitle: 'View M3 theme components',
+              onTap: () => context.push('/dev/theme'),
+            ),
+          ],
 
           const SizedBox(height: Spacing.xl),
 
