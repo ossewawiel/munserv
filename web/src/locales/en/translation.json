@@ -60,6 +60,9 @@
     "stateHistory": "State History",
     "photos": "Photos",
     "noIssuesDescription": "No issues match your current filters. Try adjusting your filters or check back later.",
+    "selectState": "Select new state",
+    "note": "Note (optional)",
+    "notePlaceholder": "Add a note about this state change",
     "states": {
       "reported": "Reported",
       "confirmed": "Confirmed",

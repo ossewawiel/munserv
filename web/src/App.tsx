@@ -4,15 +4,7 @@ import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { IssuesPage } from '@/features/issues/IssuesPage';
-
-function IssueDetailPage() {
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Issue Details</h1>
-      <p className="text-text-muted">Issue Detail Page (Placeholder)</p>
-    </div>
-  );
-}
+import { IssueDetailPage } from '@/features/issues/IssueDetailPage';
 
 function HeatReportPage() {
   return (
