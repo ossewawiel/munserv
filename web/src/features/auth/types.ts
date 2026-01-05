@@ -54,10 +54,14 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface LoginResponse {
-  tokens: AuthTokens;
+export interface AdminProfile {
   admin: AdminUser;
   sector: Sector;
+}
+
+export interface LoginResponse {
+  tokens: AuthTokens;
+  profile: AdminProfile;
 }
 
 /**

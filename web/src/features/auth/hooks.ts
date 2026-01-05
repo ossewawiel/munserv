@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { authApi } from './api';
 import type { LoginRequest } from './types';
+
+const ACCESS_TOKEN_KEY = 'accessToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
+const ADMIN_KEY = 'admin';
 
 export function useLogin() {
   const queryClient = useQueryClient();
@@ -8,9 +13,12 @@ export function useLogin() {
   return useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),
     onSuccess: (response) => {
-      localStorage.setItem('accessToken', response.tokens.accessToken);
-      localStorage.setItem('refreshToken', response.tokens.refreshToken);
-      queryClient.setQueryData(['auth', 'admin'], response.admin);
+      // Store tokens and admin in localStorage
+      localStorage.setItem(ACCESS_TOKEN_KEY, response.tokens.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, response.tokens.refreshToken);
+      localStorage.setItem(ADMIN_KEY, JSON.stringify(response.profile.admin));
+      // Also update React Query cache
+      queryClient.setQueryData(['auth', 'admin'], response.profile.admin);
     },
   });
 }
@@ -21,8 +29,11 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => authApi.logout(),
     onSuccess: () => {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      // Clear localStorage
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      localStorage.removeItem(ADMIN_KEY);
+      // Clear React Query cache
       queryClient.clear();
     },
   });
