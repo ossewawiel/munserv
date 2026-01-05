@@ -2,16 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { LoginPage } from '@/features/auth/LoginPage';
-
-// Placeholder pages - to be implemented in later phases
-function DashboardPage() {
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <p className="text-text-muted">Dashboard Page (Placeholder)</p>
-    </div>
-  );
-}
+import { DashboardPage } from '@/features/dashboard/DashboardPage';
 
 function IssuesPage() {
   return (
