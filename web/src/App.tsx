@@ -3,15 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
-
-function IssuesPage() {
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Issues</h1>
-      <p className="text-text-muted">Issues List Page (Placeholder)</p>
-    </div>
-  );
-}
+import { IssuesPage } from '@/features/issues/IssuesPage';
 
 function IssueDetailPage() {
   return (

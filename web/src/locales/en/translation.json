@@ -59,6 +59,7 @@
     "changeState": "Change State",
     "stateHistory": "State History",
     "photos": "Photos",
+    "noIssuesDescription": "No issues match your current filters. Try adjusting your filters or check back later.",
     "states": {
       "reported": "Reported",
       "confirmed": "Confirmed",

@@ -41,8 +41,11 @@ export function DataTable<T>({
     right: 'text-right',
   };
 
-  if (data.length === 0 && emptyMessage) {
-    return <>{emptyMessage}</>;
+  if (!data || data.length === 0) {
+    if (emptyMessage) {
+      return <>{emptyMessage}</>;
+    }
+    return null;
   }
 
   return (
