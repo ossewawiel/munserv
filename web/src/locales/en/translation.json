@@ -1,0 +1,112 @@
+{
+  "common": {
+    "appName": "MunServ Admin",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "all": "All",
+    "noResults": "No results found",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Sign In",
+    "loginError": "Invalid email or password",
+    "loggingIn": "Signing in..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "issues": "Issues",
+    "heatReport": "Heat Report",
+    "members": "Members"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalOpen": "Total Open",
+    "reportedThisWeek": "Reported This Week",
+    "avgResolution": "Avg Resolution",
+    "days": "days",
+    "byState": "Issues by State",
+    "byType": "Issues by Type"
+  },
+  "issues": {
+    "title": "Issues",
+    "detail": "Issue Detail",
+    "type": "Type",
+    "state": "State",
+    "heat": "Heat",
+    "location": "Location",
+    "description": "Description",
+    "reportCount": "Report Count",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "changeState": "Change State",
+    "stateHistory": "State History",
+    "photos": "Photos",
+    "states": {
+      "reported": "Reported",
+      "confirmed": "Confirmed",
+      "in_progress": "In Progress",
+      "fixed": "Fixed",
+      "rejected": "Rejected"
+    },
+    "types": {
+      "pothole": "Pothole",
+      "water_leak": "Water Leak",
+      "sewage_leak": "Sewage Leak",
+      "traffic_light": "Traffic Light",
+      "street_light": "Street Light",
+      "illegal_dumping": "Illegal Dumping",
+      "other": "Other"
+    }
+  },
+  "members": {
+    "title": "Members",
+    "name": "Name",
+    "phone": "Phone",
+    "address": "Address",
+    "status": "Status",
+    "issuesReported": "Issues Reported",
+    "joinedAt": "Joined",
+    "statuses": {
+      "active": "Active",
+      "pending": "Pending",
+      "suspended": "Suspended"
+    }
+  },
+  "heatReport": {
+    "title": "Heat Report",
+    "rank": "Rank",
+    "daysOpen": "Days Open",
+    "generatedAt": "Generated at"
+  },
+  "pagination": {
+    "page": "Page",
+    "of": "of",
+    "showing": "Showing",
+    "to": "to",
+    "results": "results"
+  },
+  "errors": {
+    "notFound": "Not Found",
+    "unauthorized": "Unauthorized",
+    "serverError": "Server Error",
+    "networkError": "Network Error"
+  }
+}
