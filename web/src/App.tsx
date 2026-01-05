@@ -6,15 +6,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { HeatReportPage } from '@/features/dashboard/HeatReportPage';
 import { IssuesPage } from '@/features/issues/IssuesPage';
 import { IssueDetailPage } from '@/features/issues/IssueDetailPage';
-
-function MembersPage() {
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Members</h1>
-      <p className="text-text-muted">Members List Page (Placeholder)</p>
-    </div>
-  );
-}
+import { MembersPage } from '@/features/members/MembersPage';
 
 function App() {
   return (
