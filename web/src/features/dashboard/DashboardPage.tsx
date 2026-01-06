@@ -1,5 +1,8 @@
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Skeleton from '@mui/material/Skeleton';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { PageHeader } from '@/components/molecules/PageHeader';
@@ -18,14 +21,18 @@ export const DashboardPage: FC = () => {
     <DashboardLayout>
       <PageHeader title={t('dashboard.title')} />
 
-      <div className="mt-6 space-y-6">
+      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
         {isLoading && (
           <>
             <CardSkeleton count={4} />
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="h-80 animate-pulse rounded-lg bg-secondary-200" />
-              <div className="h-80 animate-pulse rounded-lg bg-secondary-200" />
-            </div>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, lg: 6 }}>
+                <Skeleton variant="rounded" height={320} />
+              </Grid>
+              <Grid size={{ xs: 12, lg: 6 }}>
+                <Skeleton variant="rounded" height={320} />
+              </Grid>
+            </Grid>
           </>
         )}
 
@@ -40,13 +47,17 @@ export const DashboardPage: FC = () => {
         {data && (
           <>
             <StatsGrid stats={data.stats} />
-            <div className="grid gap-6 lg:grid-cols-2">
-              <IssuesByStateChart byState={data.stats.byState} />
-              <IssuesByTypeChart byType={data.stats.byType} />
-            </div>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, lg: 6 }}>
+                <IssuesByStateChart byState={data.stats.byState} />
+              </Grid>
+              <Grid size={{ xs: 12, lg: 6 }}>
+                <IssuesByTypeChart byType={data.stats.byType} />
+              </Grid>
+            </Grid>
           </>
         )}
-      </div>
+      </Box>
     </DashboardLayout>
   );
 };

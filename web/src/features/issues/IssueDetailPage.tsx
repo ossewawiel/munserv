@@ -1,6 +1,9 @@
 import { type FC, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { PageHeader } from '@/components/molecules/PageHeader';
@@ -55,7 +58,7 @@ export const IssueDetailPage: FC = () => {
       <PageHeader
         title={t('issues.detail')}
         actions={
-          <div className="flex gap-2">
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <Button variant="secondary" onClick={handleBack}>
               {t('common.back')}
             </Button>
@@ -64,17 +67,17 @@ export const IssueDetailPage: FC = () => {
                 {t('issues.changeState')}
               </Button>
             )}
-          </div>
+          </Box>
         }
       />
 
-      <div className="mt-6 space-y-6">
+      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
         {isLoading && (
-          <div className="space-y-6">
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <LoadingSkeleton variant="rect" height={200} />
             <LoadingSkeleton variant="rect" height={300} />
             <LoadingSkeleton variant="rect" height={150} />
-          </div>
+          </Box>
         )}
 
         {error && (
@@ -87,19 +90,21 @@ export const IssueDetailPage: FC = () => {
 
         {issue && (
           <>
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div>
-                <h3 className="mb-4 text-lg font-semibold text-text">
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, lg: 6 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                   {t('issues.photos')}
-                </h3>
+                </Typography>
                 <PhotoGallery photos={issue.photoUrls} alt={t('issues.detail')} />
-              </div>
-              <IssueInfoCard issue={issue} />
-            </div>
+              </Grid>
+              <Grid size={{ xs: 12, lg: 6 }}>
+                <IssueInfoCard issue={issue} />
+              </Grid>
+            </Grid>
             <StateHistory history={issue.stateHistory || []} />
           </>
         )}
-      </div>
+      </Box>
 
       {issue && (
         <StateChangeModal

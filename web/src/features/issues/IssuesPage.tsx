@@ -1,6 +1,7 @@
 import { type FC, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { PageHeader } from '@/components/molecules/PageHeader';
@@ -85,7 +86,7 @@ export const IssuesPage: FC = () => {
     <DashboardLayout>
       <PageHeader title={t('issues.title')} />
 
-      <div className="mt-6 space-y-6">
+      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <IssueFilters
           state={state}
           type={type}
@@ -116,7 +117,7 @@ export const IssuesPage: FC = () => {
             />
           </>
         )}
-      </div>
+      </Box>
     </DashboardLayout>
   );
 };

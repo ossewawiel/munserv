@@ -1,6 +1,7 @@
 import { type FC, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { PageHeader } from '@/components/molecules/PageHeader';
@@ -37,11 +38,11 @@ export const MembersPage: FC = () => {
     <DashboardLayout>
       <PageHeader title={t('members.title')} />
 
-      <div className="mt-6 space-y-4">
+      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
         {isLoading && (
-          <div className="space-y-4">
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <LoadingSkeleton variant="rect" height={400} />
-          </div>
+          </Box>
         )}
 
         {error && (
@@ -71,7 +72,7 @@ export const MembersPage: FC = () => {
             />
           </>
         )}
-      </div>
+      </Box>
     </DashboardLayout>
   );
 };

@@ -1,6 +1,7 @@
 import { type FC, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { PageHeader } from '@/components/molecules/PageHeader';
@@ -39,11 +40,11 @@ export const HeatReportPage: FC = () => {
         }
       />
 
-      <div className="mt-6">
+      <Box sx={{ mt: 3 }}>
         {isLoading && (
-          <div className="space-y-4">
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <LoadingSkeleton variant="rect" height={400} />
-          </div>
+          </Box>
         )}
 
         {error && (
@@ -64,7 +65,7 @@ export const HeatReportPage: FC = () => {
         {report && report.items.length > 0 && (
           <HeatReportTable items={report.items} onRowClick={handleRowClick} />
         )}
-      </div>
+      </Box>
     </DashboardLayout>
   );
 };
