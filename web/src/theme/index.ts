@@ -11,3 +11,22 @@ export {
   getHeatLevel,
 } from './colors';
 export type { PodThemeConfig, ColorMode, IssueState, HeatLevel } from './types';
+
+// Berry-inspired constants
+export {
+  gridSpacing,
+  avatarSizes,
+  type AvatarSize,
+  drawerWidth,
+  drawerWidthMini,
+  headerHeight,
+  commonAvatar,
+  mediumAvatar,
+} from './constants';
+export {
+  cardHoverShadow,
+  cardHoverShadowDark,
+  colorShadows,
+  colorShadowsDark,
+  type ColorShadowKey,
+} from './shadows';

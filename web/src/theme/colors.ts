@@ -16,6 +16,10 @@ export const lightScheme = {
   onPrimary: '#FFFFFF',
   primaryContainer: '#233D36',
   onPrimaryContainer: '#8BA89E',
+  // Berry-style light tints for UI backgrounds (visible but light)
+  primaryLight: '#E8F0ED',     // Light forest green tint
+  secondaryLight: '#FFEAE4',   // Light terracotta/peach tint (Berry-style visible)
+  tertiaryLight: '#F7F5F0',    // Light cream tint for content background
   secondary: '#A2391A',
   onSecondary: '#FFFFFF',
   secondaryContainer: '#C35130',
@@ -56,6 +60,10 @@ export const darkScheme = {
   onPrimary: '#1B352E',
   primaryContainer: '#233D36',
   onPrimaryContainer: '#8BA89E',
+  // Berry-style dark mode tints for UI backgrounds
+  primaryLight: '#1D2B26',     // Subtle forest green tint for dark mode
+  secondaryLight: '#2F2320',   // Subtle terracotta tint for dark mode
+  tertiaryLight: '#1C1B18',    // Subtle warm tint for content background
   secondary: '#FFB5A0',
   onSecondary: '#601400',
   secondaryContainer: '#E76C49',

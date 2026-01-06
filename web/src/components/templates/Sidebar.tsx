@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import { type FC, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
@@ -8,12 +8,17 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import PeopleIcon from '@mui/icons-material/People';
 
-export const SIDEBAR_WIDTH = 260;
+import { drawerWidth, drawerWidthMini } from '@/theme';
+import { MiniDrawerStyled } from './MiniDrawerStyled';
 
 interface NavItem {
   labelKey: string;
@@ -37,6 +42,8 @@ interface SidebarProps {
 export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
   const { t } = useTranslation();
   const location = useLocation();
+  const theme = useTheme();
+  const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
 
   const isSelected = (href: string): boolean => {
     if (href === '/') {
@@ -45,14 +52,37 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
     return location.pathname.startsWith(href);
   };
 
+  const logo = useMemo(
+    () => (
+      <Box sx={{ display: 'flex', p: 2, alignItems: 'center' }}>
+        <Typography
+          component={Link}
+          to="/"
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            color: 'text.primary',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            '&:hover': { color: 'primary.main' },
+          }}
+        >
+          {open ? t('common.appName') : 'M'}
+        </Typography>
+      </Box>
+    ),
+    [open, t]
+  );
+
   const drawerContent = (
-    <Box sx={{ overflow: 'auto' }}>
-      <List>
+    <Box sx={{ overflow: 'auto', mt: open ? 0 : 2 }}>
+      <List sx={{ px: open ? 2 : 0.5 }}>
         {navItems.map((item) => {
           const Icon = item.icon;
           const selected = isSelected(item.href);
 
-          return (
+          const listItem = (
             <ListItemButton
               key={item.href}
               component={Link}
@@ -60,64 +90,115 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
               selected={selected}
               onClick={variant === 'temporary' ? onClose : undefined}
               sx={{
-                mx: 1,
-                my: 0.5,
+                minHeight: 44,
                 borderRadius: 2,
+                mb: 0.5,
+                px: open ? 2 : 1.5,
+                justifyContent: open ? 'initial' : 'center',
                 '&.Mui-selected': {
-                  bgcolor: 'secondaryContainer',
-                  color: 'onSecondaryContainer',
+                  bgcolor: theme.palette.mode === 'dark'
+                    ? 'rgba(217, 97, 63, 0.15)'
+                    : 'secondary.light',
+                  color: theme.palette.mode === 'dark'
+                    ? 'secondary.main'
+                    : 'secondary.dark',
                   '&:hover': {
-                    bgcolor: 'secondaryContainer',
+                    bgcolor: theme.palette.mode === 'dark'
+                      ? 'rgba(217, 97, 63, 0.15)'
+                      : 'secondary.light',
                   },
                   '& .MuiListItemIcon-root': {
-                    color: 'secondary.main',
+                    color: theme.palette.mode === 'dark'
+                      ? 'secondary.main'
+                      : 'secondary.dark',
                   },
                 },
                 '&:hover': {
-                  bgcolor: 'action.hover',
+                  bgcolor: theme.palette.mode === 'dark'
+                    ? 'rgba(217, 97, 63, 0.15)'
+                    : 'secondary.light',
+                  color: theme.palette.mode === 'dark'
+                    ? 'secondary.main'
+                    : 'secondary.dark',
+                  '& .MuiListItemIcon-root': {
+                    color: theme.palette.mode === 'dark'
+                      ? 'secondary.main'
+                      : 'secondary.dark',
+                  },
                 },
               }}
             >
               <ListItemIcon
                 sx={{
-                  minWidth: 40,
-                  color: selected ? 'secondary.main' : 'text.secondary',
+                  minWidth: open ? 36 : 'auto',
+                  mr: open ? 1.5 : 0,
+                  justifyContent: 'center',
+                  color: selected
+                    ? (theme.palette.mode === 'dark' ? 'secondary.main' : 'secondary.dark')
+                    : 'text.primary',
                 }}
               >
                 <Icon />
               </ListItemIcon>
-              <ListItemText
-                primary={t(item.labelKey)}
-                primaryTypographyProps={{
-                  fontWeight: selected ? 600 : 400,
-                }}
-              />
+              {open && (
+                <ListItemText
+                  primary={t(item.labelKey)}
+                  primaryTypographyProps={{
+                    fontWeight: selected ? 600 : 400,
+                    fontSize: '0.875rem',
+                  }}
+                />
+              )}
             </ListItemButton>
           );
+
+          // Wrap in tooltip when drawer is collapsed
+          if (!open && variant === 'permanent') {
+            return (
+              <Tooltip key={item.href} title={t(item.labelKey)} placement="right" arrow>
+                {listItem}
+              </Tooltip>
+            );
+          }
+
+          return listItem;
         })}
       </List>
     </Box>
   );
 
+  // Mobile: temporary drawer
+  if (matchDownMd) {
+    return (
+      <Drawer
+        variant="temporary"
+        anchor="left"
+        open={open}
+        onClose={onClose}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            background: theme.palette.background.default,
+            color: theme.palette.text.primary,
+            borderRight: 'none',
+          },
+        }}
+        ModalProps={{ keepMounted: true }}
+      >
+        {logo}
+        {drawerContent}
+      </Drawer>
+    );
+  }
+
+  // Desktop: mini drawer (collapsible)
   return (
-    <Drawer
-      variant={variant}
-      open={open}
-      onClose={onClose}
-      sx={{
-        width: SIDEBAR_WIDTH,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: SIDEBAR_WIDTH,
-          boxSizing: 'border-box',
-          bgcolor: 'background.paper',
-          borderRight: 1,
-          borderColor: 'divider',
-        },
-      }}
-    >
+    <MiniDrawerStyled variant="permanent" open={open}>
       <Toolbar />
       {drawerContent}
-    </Drawer>
+    </MiniDrawerStyled>
   );
 };
+
+// Re-export drawer width for backward compatibility
+export { drawerWidth as SIDEBAR_WIDTH } from '@/theme';

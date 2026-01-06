@@ -26,7 +26,7 @@ export function createPodTheme(config: PodThemeConfig) {
           secondary: {
             main: lightScheme.secondary,
             contrastText: lightScheme.onSecondary,
-            light: lightScheme.secondaryContainer,
+            light: lightScheme.secondaryLight,  // Berry-style light tint
             dark: lightScheme.secondary,
           },
           error: {
@@ -72,7 +72,7 @@ export function createPodTheme(config: PodThemeConfig) {
           secondary: {
             main: darkScheme.secondary,
             contrastText: darkScheme.onSecondary,
-            light: darkScheme.secondaryContainer,
+            light: darkScheme.secondaryLight,  // Berry-style light tint
             dark: darkScheme.secondary,
           },
           error: {
@@ -168,6 +168,27 @@ export function createPodTheme(config: PodThemeConfig) {
         styleOverrides: {
           root: {
             borderRadius: 12,
+            transition: 'box-shadow 0.25s ease-in-out',
+          },
+        },
+      },
+      MuiCardContent: {
+        styleOverrides: {
+          root: {
+            padding: 20,
+            '&:last-child': {
+              paddingBottom: 20,
+            },
+          },
+        },
+      },
+      MuiCardHeader: {
+        styleOverrides: {
+          root: {
+            padding: 20,
+          },
+          title: {
+            fontWeight: 600,
           },
         },
       },

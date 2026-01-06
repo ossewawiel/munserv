@@ -1,6 +1,10 @@
 import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import LinearProgress from '@mui/material/LinearProgress';
 
+import { MainCard } from '@/components/atoms/MainCard';
 import type { IssueType } from '@/features/issues/types';
 
 interface IssuesByTypeChartProps {
@@ -34,29 +38,39 @@ export const IssuesByTypeChart: FC<IssuesByTypeChartProps> = ({ byType }) => {
   }, [byType]);
 
   return (
-    <div className="rounded-lg border border-border bg-background p-6">
-      <h3 className="mb-4 text-lg font-semibold text-text">{t('dashboard.byType')}</h3>
-      <div className="space-y-4">
+    <MainCard title={t('dashboard.byType')} divider={false}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {items.map(({ type, count, percentage }) => (
-          <div key={type}>
-            <div className="mb-1 flex items-center justify-between text-sm">
-              <span className="text-text">{t(`issues.types.${type}`)}</span>
-              <span className="font-medium text-text">{count}</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-secondary-200">
-              <div
-                className="h-full rounded-full bg-primary-500 transition-all"
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-          </div>
+          <Box key={type}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography variant="body2" color="text.primary">
+                {t(`issues.types.${type}`)}
+              </Typography>
+              <Typography variant="body2" fontWeight={500} color="text.primary">
+                {count}
+              </Typography>
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={percentage}
+              sx={{
+                height: 8,
+                borderRadius: 4,
+                bgcolor: 'action.hover',
+                '& .MuiLinearProgress-bar': {
+                  borderRadius: 4,
+                  bgcolor: 'primary.main',
+                },
+              }}
+            />
+          </Box>
         ))}
-      </div>
+      </Box>
       {total === 0 && (
-        <p className="mt-4 text-center text-sm text-text-muted">
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
           {t('common.noResults')}
-        </p>
+        </Typography>
       )}
-    </div>
+    </MainCard>
   );
 };

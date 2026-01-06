@@ -1,20 +1,16 @@
 import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { clsx } from 'clsx';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import LinearProgress from '@mui/material/LinearProgress';
 
+import { MainCard } from '@/components/atoms/MainCard';
+import { issueStateColors } from '@/theme';
 import type { IssueState } from '@/features/issues/types';
 
 interface IssuesByStateChartProps {
   byState: Record<IssueState, number>;
 }
-
-const stateColors: Record<IssueState, string> = {
-  reported: 'bg-info-500',
-  confirmed: 'bg-warning-500',
-  in_progress: 'bg-accent-500',
-  fixed: 'bg-success-500',
-  rejected: 'bg-danger-500',
-};
 
 const STATES_ORDER: IssueState[] = ['reported', 'confirmed', 'in_progress', 'fixed', 'rejected'];
 
@@ -32,29 +28,39 @@ export const IssuesByStateChart: FC<IssuesByStateChartProps> = ({ byState }) => 
   }, [byState]);
 
   return (
-    <div className="rounded-lg border border-border bg-background p-6">
-      <h3 className="mb-4 text-lg font-semibold text-text">{t('dashboard.byState')}</h3>
-      <div className="space-y-4">
+    <MainCard title={t('dashboard.byState')} divider={false}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {items.map(({ state, count, percentage }) => (
-          <div key={state}>
-            <div className="mb-1 flex items-center justify-between text-sm">
-              <span className="text-text">{t(`issues.states.${state}`)}</span>
-              <span className="font-medium text-text">{count}</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-secondary-200">
-              <div
-                className={clsx('h-full rounded-full transition-all', stateColors[state])}
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-          </div>
+          <Box key={state}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography variant="body2" color="text.primary">
+                {t(`issues.states.${state}`)}
+              </Typography>
+              <Typography variant="body2" fontWeight={500} color="text.primary">
+                {count}
+              </Typography>
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={percentage}
+              sx={{
+                height: 8,
+                borderRadius: 4,
+                bgcolor: 'action.hover',
+                '& .MuiLinearProgress-bar': {
+                  borderRadius: 4,
+                  bgcolor: issueStateColors[state],
+                },
+              }}
+            />
+          </Box>
         ))}
-      </div>
+      </Box>
       {total === 0 && (
-        <p className="mt-4 text-center text-sm text-text-muted">
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
           {t('common.noResults')}
-        </p>
+        </Typography>
       )}
-    </div>
+    </MainCard>
   );
 };
