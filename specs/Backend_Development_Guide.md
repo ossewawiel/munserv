@@ -1998,39 +1998,39 @@ docker exec -it munserv-db psql -U munserv -d munserv_dev \
 ### 10.3 Phase 0 Complete Checklist
 
 ```
-[ ] build.gradle.kts compiles
-[ ] ./gradlew bootRun starts server on 8080
-[ ] /actuator/health returns 200
-[ ] TestContainers works with PostgreSQL + PostGIS
-[ ] GeoPoint tests pass
+[x] build.gradle.kts compiles
+[x] ./gradlew bootRun starts server on 8080
+[x] /actuator/health returns 200
+[x] TestContainers works with PostgreSQL + PostGIS
+[x] GeoPoint tests pass
 ```
 
 ### 10.4 Phase 2 Complete Checklist
 
 ```
-[ ] Can POST /auth/register (OTP logged to console)
-[ ] Can POST /auth/verify-otp (new_user or existing_user)
-[ ] Can POST /auth/complete-registration
-[ ] Can POST /auth/login (receive JWT)
-[ ] Can POST /auth/admin/login
-[ ] Can POST /auth/refresh
-[ ] Protected endpoints reject unauthenticated requests (401)
-[ ] All auth domain tests pass
-[ ] All auth service tests pass
+[x] Can POST /auth/register (OTP logged to console)
+[x] Can POST /auth/verify-otp (new_user or existing_user)
+[x] Can POST /auth/complete-registration
+[x] Can POST /auth/login (receive JWT)
+[x] Can POST /auth/admin/login
+[x] Can POST /auth/refresh
+[x] Protected endpoints reject unauthenticated requests (401)
+[x] All auth domain tests pass
+[x] All auth service tests pass
 ```
 
 ### 10.5 Phase 3 Complete Checklist
 
 ```
-[ ] All IssueState transition tests pass
-[ ] All IssueService tests pass
-[ ] Can GET /api/v1/issues (with filters, pagination)
-[ ] Can GET /api/v1/issues/{id}
-[ ] Can POST /api/v1/issues (creates issue)
-[ ] Can PATCH /api/v1/issues/{id}/state (admin only)
-[ ] Can GET /api/v1/issues/mine
-[ ] Invalid state transitions return 422
-[ ] State history is recorded
+[x] All IssueState transition tests pass
+[x] All IssueService tests pass
+[x] Can GET /api/v1/issues (with filters, pagination)
+[x] Can GET /api/v1/issues/{id}
+[x] Can POST /api/v1/issues (creates issue)
+[x] Can PATCH /api/v1/issues/{id}/state (admin only)
+[x] Can GET /api/v1/issues/mine
+[x] Invalid state transitions return 422
+[x] State history is recorded
 ```
 
 ### 10.6 Full MVP Complete Checklist

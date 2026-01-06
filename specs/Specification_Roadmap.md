@@ -1,8 +1,8 @@
 # MunServ Specification Roadmap
 
-**Project:** Municipal Service Issue Tracker (MunServ)  
-**Version:** 2.0  
-**Last Updated:** December 2025  
+**Project:** Municipal Service Issue Tracker (MunServ)
+**Version:** 2.1
+**Last Updated:** January 2026
 **Purpose:** Master index of all specification documents and development approach
 
 ---
@@ -65,8 +65,8 @@
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
 | 11 | [Backend Development Guide](Backend_Development_Guide.md) | ✅ Complete | Phased TDD implementation plan |
-| 12 | Database Migrations | 🔄 Ready | PostgreSQL + PostGIS schema (V001-V009) |
-| 13 | Backend Implementation | 🔄 Ready | Kotlin/Spring Boot API (8 phases) |
+| 12 | Database Migrations | ✅ Complete | PostgreSQL + PostGIS schema (V001-V010) |
+| 13 | Backend Implementation | 🔄 Phase 3 Done | Kotlin/Spring Boot API (Phases 0-3 complete) |
 | 14 | Integration & Testing | ⏳ Phase 6 | Connect frontend to real backend |
 
 ### Phase 4: Expansion (FUTURE)
@@ -284,6 +284,7 @@ Include in prompt:
 |---------|------|---------|
 | 1.0 | December 2025 | Initial roadmap with waterfall approach |
 | 2.0 | December 2025 | Revised for agile MVP-first approach |
+| 2.1 | January 2026 | Backend Phases 0-3 complete (scaffold, auth, issues domain) |
 
 ---
 
@@ -325,13 +326,13 @@ Include in prompt:
   - ⬜ Profile creation with GPS address
   - ⬜ Sector auto-assignment from location
 
-**Track B: Backend Development (Phase 3)**
+**Track B: Backend Development (Phase 4 Next)**
 - ✅ Create Backend Development Guide
-- 🔄 Phase 0: Project scaffold (build.gradle.kts, application.yml)
-- ⬜ Phase 1: Database foundation (migrations V001-V003, sectors API)
-- ⬜ Phase 2: Authentication (members, JWT, auth endpoints)
-- ⬜ Phase 3: Issues domain (CRUD, state machine)
-- ⬜ Phase 4: Admin endpoints (dashboard, reports)
+- ✅ Phase 0: Project scaffold (build.gradle.kts, application.yml)
+- ✅ Phase 1: Database foundation (migrations V001-V003, sectors API)
+- ✅ Phase 2: Authentication (members, JWT, auth endpoints)
+- ✅ Phase 3: Issues domain (CRUD, state machine, heat calculation)
+- 🔄 Phase 4: Admin endpoints (dashboard, reports)
 - ⬜ Phase 5: Photo upload
 - ⬜ Phase 6: Integration testing
 - ⬜ Phase 7: Hardening
