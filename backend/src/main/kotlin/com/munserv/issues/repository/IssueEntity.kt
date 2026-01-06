@@ -11,6 +11,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnTransformer
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
@@ -31,9 +32,11 @@ class IssueEntity(
     val sectorId: UUID,
     @Column(name = "reporter_id", nullable = false)
     val reporterId: UUID,
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, columnDefinition = "issue_type")
+    @ColumnTransformer(write = "?::issue_type")
     val type: String,
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, columnDefinition = "issue_state")
+    @ColumnTransformer(write = "?::issue_state")
     val state: String,
     @Column(columnDefinition = "geography(Point,4326)", nullable = false)
     val location: Point,
