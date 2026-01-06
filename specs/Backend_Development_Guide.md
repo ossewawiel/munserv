@@ -2124,4 +2124,192 @@ Rejected → (terminal)
 
 ---
 
+## 12. API Documentation (OpenAPI/Swagger)
+
+### 12.1 Overview
+
+The API is documented using **SpringDoc OpenAPI** (Swagger 3.0). Documentation is auto-generated from code annotations and available at runtime.
+
+**URLs:**
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- OpenAPI YAML: `http://localhost:8080/v3/api-docs.yaml`
+
+### 12.2 Dependencies
+
+```kotlin
+// backend/build.gradle.kts
+dependencies {
+    // OpenAPI / Swagger
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+}
+```
+
+### 12.3 Configuration
+
+**Application Configuration:**
+
+```yaml
+# backend/src/main/resources/application.yml
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    filter: true
+    display-request-duration: true
+  show-actuator: false
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+```
+
+**Security Configuration:**
+
+```kotlin
+// Allow Swagger UI without authentication
+.requestMatchers("/swagger-ui.html", "/swagger-ui/**").permitAll()
+.requestMatchers("/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
+.requestMatchers("/swagger-resources/**", "/webjars/**").permitAll()
+```
+
+**OpenAPI Bean Configuration:**
+
+```kotlin
+// backend/src/main/kotlin/com/munserv/shared/config/OpenApiConfig.kt
+@Configuration
+class OpenApiConfig {
+    @Bean
+    fun openAPI(): OpenAPI = OpenAPI()
+        .info(Info()
+            .title("MunServ API")
+            .description("Municipal Service Issue Tracker API")
+            .version("1.0.0"))
+        .components(Components()
+            .addSecuritySchemes("bearerAuth",
+                SecurityScheme()
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("JWT")))
+        .addSecurityItem(SecurityRequirement().addList("bearerAuth"))
+}
+```
+
+### 12.4 Controller Annotations Pattern
+
+**Class-Level Annotations:**
+
+```kotlin
+@RestController
+@RequestMapping("/api/v1/issues")
+@Tag(name = "Issues", description = "Issue management endpoints")
+@SecurityRequirement(name = "bearerAuth")  // Requires JWT for all endpoints
+class IssueController(...)
+```
+
+**Method-Level Annotations:**
+
+```kotlin
+@Operation(
+    summary = "List issues",
+    description = "Retrieve a paginated list of issues with optional filtering"
+)
+@ApiResponses(value = [
+    ApiResponse(
+        responseCode = "200",
+        description = "Successfully retrieved issues",
+        content = [Content(schema = Schema(implementation = PaginatedIssuesResponse::class))]
+    ),
+    ApiResponse(responseCode = "401", description = "Unauthorized"),
+    ApiResponse(responseCode = "403", description = "Forbidden")
+])
+@GetMapping
+fun listIssues(
+    @Parameter(description = "Filter by sector UUID")
+    @RequestParam(required = false) sectorId: String?,
+
+    @Parameter(description = "Page number", schema = Schema(defaultValue = "1"))
+    @RequestParam(defaultValue = "1") page: Int
+): ResponseEntity<PaginatedIssuesResponse>
+```
+
+**Request Body Annotations:**
+
+```kotlin
+@PostMapping
+fun createIssue(
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Issue creation request",
+        required = true,
+        content = [Content(schema = Schema(implementation = CreateIssueRequest::class))]
+    )
+    @RequestBody request: CreateIssueRequest
+): ResponseEntity<*>
+```
+
+### 12.5 DTO Annotations Pattern
+
+Add Schema annotations to DTOs for better documentation:
+
+```kotlin
+data class CreateIssueRequest(
+    @field:Schema(
+        description = "Type of issue",
+        example = "pothole",
+        allowableValues = ["pothole", "water_leak", "sewage_leak", "traffic_light",
+                          "street_light", "illegal_dumping", "graffiti", "other"]
+    )
+    val type: String,
+
+    @field:Schema(description = "GPS latitude", example = "-26.1350", minimum = "-90", maximum = "90")
+    val latitude: Double,
+
+    @field:Schema(description = "GPS longitude", example = "27.9800", minimum = "-180", maximum = "180")
+    val longitude: Double,
+
+    @field:Schema(description = "Optional description", example = "Large pothole near the intersection")
+    val description: String?
+)
+```
+
+### 12.6 Common Annotations Reference
+
+| Annotation | Purpose | Location |
+|------------|---------|----------|
+| `@Tag` | Group endpoints by domain | Controller class |
+| `@Operation` | Describe endpoint purpose | Controller method |
+| `@ApiResponses` | Document response codes | Controller method |
+| `@Parameter` | Describe path/query params | Method parameter |
+| `@RequestBody` (io.swagger) | Describe request body | Method parameter |
+| `@Schema` | Describe data types | DTO fields |
+| `@SecurityRequirement` | Specify auth requirements | Controller class/method |
+| `@Hidden` | Exclude from docs | Any |
+
+### 12.7 Swagger UI Features
+
+- **Try it out**: Test endpoints directly from the UI
+- **Authorize**: Enter JWT token for authenticated requests
+- **Filter**: Search for specific endpoints
+- **Models**: View all request/response schemas
+- **Download**: Export OpenAPI spec as JSON/YAML
+
+### 12.8 Disabling in Production
+
+For production deployments where Swagger should be disabled:
+
+```yaml
+# application-prod.yml
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+```
+
+---
+
 *This is a living document. Update as you progress through implementation.*

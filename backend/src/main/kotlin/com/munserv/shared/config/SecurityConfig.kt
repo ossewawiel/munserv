@@ -32,6 +32,10 @@ class SecurityConfig(
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/api/v1/sectors").permitAll()
                     .requestMatchers("/uploads/**").permitAll()
+                    // Swagger/OpenAPI documentation endpoints
+                    .requestMatchers("/swagger-ui.html", "/swagger-ui/**").permitAll()
+                    .requestMatchers("/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
+                    .requestMatchers("/swagger-resources/**", "/webjars/**").permitAll()
                     // Protected endpoints require authentication
                     .requestMatchers("/api/v1/issues/**").authenticated()
                     .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")

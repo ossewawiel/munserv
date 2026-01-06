@@ -2,6 +2,10 @@ package com.munserv.auth.api
 
 import com.munserv.auth.service.AuthResult
 import com.munserv.auth.service.AuthService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,9 +20,18 @@ import org.springframework.web.bind.annotation.RestController
  */
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Authentication", description = "User registration, login, and token management")
 class AuthController(
     private val authService: AuthService,
 ) {
+    @Operation(summary = "Request OTP", description = "Request a one-time password for phone number verification")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "OTP sent successfully"),
+            ApiResponse(responseCode = "400", description = "Invalid phone number format"),
+            ApiResponse(responseCode = "409", description = "Phone number already registered"),
+        ],
+    )
     @PostMapping("/register")
     fun register(
         @Valid @RequestBody request: RegisterRequest,
@@ -43,6 +56,14 @@ class AuthController(
                     .body(ErrorResponse("error", "Unexpected error"))
         }
 
+    @Operation(summary = "Verify OTP", description = "Verify the one-time password sent to phone")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "OTP verified successfully"),
+            ApiResponse(responseCode = "400", description = "Invalid phone number format"),
+            ApiResponse(responseCode = "401", description = "Invalid or expired OTP"),
+        ],
+    )
     @PostMapping("/verify-otp")
     fun verifyOtp(
         @Valid @RequestBody request: VerifyOtpRequest,
@@ -67,6 +88,13 @@ class AuthController(
                     .body(ErrorResponse("error", "Unexpected error"))
         }
 
+    @Operation(summary = "Complete registration", description = "Complete member registration with profile details and PIN")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "201", description = "Registration completed successfully"),
+            ApiResponse(responseCode = "400", description = "Invalid phone number or PIN format"),
+        ],
+    )
     @PostMapping("/complete-registration")
     fun completeRegistration(
         @Valid @RequestBody request: CompleteRegistrationRequest,
@@ -112,6 +140,14 @@ class AuthController(
                     .body(ErrorResponse("error", "Unexpected error"))
         }
 
+    @Operation(summary = "Member login", description = "Authenticate member with phone number and PIN")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Login successful"),
+            ApiResponse(responseCode = "401", description = "Invalid credentials"),
+            ApiResponse(responseCode = "403", description = "Account suspended"),
+        ],
+    )
     @PostMapping("/login")
     fun login(
         @Valid @RequestBody request: LoginRequest,
@@ -143,6 +179,13 @@ class AuthController(
                     .body(ErrorResponse("error", "Unexpected error"))
         }
 
+    @Operation(summary = "Admin login", description = "Authenticate administrator with email and password")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Admin login successful"),
+            ApiResponse(responseCode = "401", description = "Invalid credentials"),
+        ],
+    )
     @PostMapping("/admin/login")
     fun adminLogin(
         @Valid @RequestBody request: AdminLoginRequest,
@@ -172,6 +215,13 @@ class AuthController(
                     .body(ErrorResponse("error", "Unexpected error"))
         }
 
+    @Operation(summary = "Refresh token", description = "Exchange a valid refresh token for new access and refresh tokens")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Tokens refreshed successfully"),
+            ApiResponse(responseCode = "401", description = "Invalid or expired refresh token"),
+        ],
+    )
     @PostMapping("/refresh")
     fun refreshToken(
         @Valid @RequestBody request: RefreshTokenRequest,

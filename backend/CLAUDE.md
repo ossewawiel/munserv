@@ -322,6 +322,73 @@ class IssueService(
 // ❌ Never access another module's repository directly
 ```
 
+## OpenAPI/Swagger Documentation
+
+**URLs:**
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+**Configuration:**
+- `shared/config/OpenApiConfig.kt` - Global OpenAPI settings
+- `application.yml` - SpringDoc configuration
+
+### Controller-Level Annotations
+
+```kotlin
+@RestController
+@RequestMapping("/api/v1/issues")
+@Tag(name = "Issues", description = "Issue management endpoints")
+@SecurityRequirement(name = "bearerAuth")  // JWT required
+class IssueController(...)
+```
+
+### Method-Level Annotations
+
+```kotlin
+@Operation(
+    summary = "List issues",
+    description = "Retrieve paginated issues with filtering"
+)
+@ApiResponses(value = [
+    ApiResponse(responseCode = "200", description = "Success"),
+    ApiResponse(responseCode = "401", description = "Unauthorized"),
+    ApiResponse(responseCode = "404", description = "Not found")
+])
+@GetMapping
+fun listIssues(
+    @Parameter(description = "Filter by sector UUID")
+    @RequestParam(required = false) sectorId: String?
+): ResponseEntity<PaginatedIssuesResponse>
+```
+
+### DTO Schema Annotations
+
+```kotlin
+data class CreateIssueRequest(
+    @field:Schema(
+        description = "Type of issue",
+        example = "pothole",
+        allowableValues = ["pothole", "water_leak", "other"]
+    )
+    val type: String,
+
+    @field:Schema(description = "GPS latitude", example = "-26.1350")
+    val latitude: Double
+)
+```
+
+### Annotation Quick Reference
+
+| Annotation | Purpose | Location |
+|------------|---------|----------|
+| `@Tag` | Group endpoints | Controller class |
+| `@Operation` | Endpoint description | Method |
+| `@ApiResponses` | Response codes | Method |
+| `@Parameter` | Path/query param | Parameter |
+| `@Schema` | Data type docs | DTO field |
+| `@SecurityRequirement` | Auth required | Class/method |
+| `@Hidden` | Exclude from docs | Any |
+
 ## Forbidden
 - `!!` (force unwrap) without preceding null check
 - `var` for state (use `val` + `copy()`)

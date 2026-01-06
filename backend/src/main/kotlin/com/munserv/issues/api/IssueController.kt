@@ -10,6 +10,14 @@ import com.munserv.photos.service.IssuePhotoService
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -28,6 +36,8 @@ import java.util.UUID
  */
 @RestController
 @RequestMapping("/api/v1/issues")
+@Tag(name = "Issues", description = "Issue management endpoints for reporting and tracking municipal issues")
+@SecurityRequirement(name = "bearerAuth")
 class IssueController(
     private val issueService: IssueService,
     private val photoService: IssuePhotoService,
@@ -35,13 +45,33 @@ class IssueController(
     /**
      * GET /api/v1/issues - List issues with optional filtering.
      */
+    @Operation(
+        summary = "List issues",
+        description = "Retrieve a paginated list of issues with optional filtering by sector, state, and type",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Successfully retrieved issues",
+                content = [Content(schema = Schema(implementation = PaginatedIssuesResponse::class))],
+            ),
+            ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+        ],
+    )
     @GetMapping
     fun listIssues(
+        @Parameter(description = "Filter by sector UUID")
         @RequestParam(required = false) sectorId: String?,
+        @Parameter(description = "Filter by issue state")
         @RequestParam(required = false) state: String?,
+        @Parameter(description = "Filter by issue type")
         @RequestParam(required = false) type: String?,
+        @Parameter(description = "Page number (1-based)")
         @RequestParam(defaultValue = "1") page: Int,
+        @Parameter(description = "Items per page (max 100)")
         @RequestParam(defaultValue = "20") limit: Int,
+        @Parameter(description = "Sort field", schema = Schema(allowableValues = ["heat", "createdAt"]))
         @RequestParam(defaultValue = "heat") sortBy: String,
     ): ResponseEntity<PaginatedIssuesResponse> {
         var issues = issueService.findAll()
@@ -94,10 +124,27 @@ class IssueController(
     /**
      * GET /api/v1/issues/mine - List issues reported by the authenticated member.
      */
+    @Operation(
+        summary = "List my issues",
+        description = "Retrieve issues reported by the authenticated member",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Successfully retrieved member's issues",
+                content = [Content(schema = Schema(implementation = PaginatedIssuesResponse::class))],
+            ),
+            ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+        ],
+    )
     @GetMapping("/mine")
     fun listMyIssues(
+        @Parameter(hidden = true)
         @AuthenticationPrincipal memberId: MemberId?,
+        @Parameter(description = "Page number (1-based)")
         @RequestParam(defaultValue = "1") page: Int,
+        @Parameter(description = "Items per page")
         @RequestParam(defaultValue = "20") limit: Int,
     ): ResponseEntity<PaginatedIssuesResponse> {
         // Use first member ID if not authenticated (for testing)
@@ -132,8 +179,24 @@ class IssueController(
     /**
      * GET /api/v1/issues/{id} - Get issue by ID.
      */
+    @Operation(
+        summary = "Get issue details",
+        description = "Retrieve detailed information about a specific issue including photos and state history",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Successfully retrieved issue",
+                content = [Content(schema = Schema(implementation = IssueDetailResponse::class))],
+            ),
+            ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            ApiResponse(responseCode = "404", description = "Issue not found"),
+        ],
+    )
     @GetMapping("/{id}")
     fun getIssue(
+        @Parameter(description = "Issue UUID", required = true)
         @PathVariable id: String,
     ): ResponseEntity<*> {
         val issueId = IssueId(UUID.fromString(id))
@@ -155,9 +218,30 @@ class IssueController(
     /**
      * POST /api/v1/issues - Create a new issue.
      */
+    @Operation(
+        summary = "Report a new issue",
+        description = "Create a new municipal issue report with location and type",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "201",
+                description = "Issue created successfully",
+                content = [Content(schema = Schema(implementation = IssueDetailResponse::class))],
+            ),
+            ApiResponse(responseCode = "400", description = "Validation error"),
+            ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+        ],
+    )
     @PostMapping
     fun createIssue(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Issue creation request",
+            required = true,
+            content = [Content(schema = Schema(implementation = CreateIssueRequest::class))],
+        )
         @RequestBody request: CreateIssueRequest,
+        @Parameter(hidden = true)
         @AuthenticationPrincipal memberId: MemberId?,
     ): ResponseEntity<*> {
         // Use first member and sector if not authenticated (for testing)
@@ -192,9 +276,32 @@ class IssueController(
     /**
      * PATCH /api/v1/issues/{id}/state - Update issue state.
      */
+    @Operation(
+        summary = "Update issue state",
+        description = "Transition an issue to a new state. Requires admin role.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "State updated successfully",
+                content = [Content(schema = Schema(implementation = IssueDetailResponse::class))],
+            ),
+            ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            ApiResponse(responseCode = "403", description = "Forbidden - requires admin role"),
+            ApiResponse(responseCode = "404", description = "Issue not found"),
+            ApiResponse(responseCode = "422", description = "Invalid state transition"),
+        ],
+    )
     @PatchMapping("/{id}/state")
     fun updateIssueState(
+        @Parameter(description = "Issue UUID", required = true)
         @PathVariable id: String,
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "State change request",
+            required = true,
+            content = [Content(schema = Schema(implementation = UpdateIssueStateRequest::class))],
+        )
         @RequestBody request: UpdateIssueStateRequest,
     ): ResponseEntity<*> {
         val issueId = IssueId(UUID.fromString(id))
