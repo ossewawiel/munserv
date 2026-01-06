@@ -31,6 +31,15 @@ sealed interface AuthResult {
         val tokens: TokenPair,
     ) : AuthResult
 
+    // Admin login result
+    data class AdminLoginSuccess(
+        val adminId: String,
+        val email: String,
+        val displayName: String,
+        val sectorId: String,
+        val tokens: TokenPair,
+    ) : AuthResult
+
     data object InvalidCredentials : AuthResult
 
     data object AccountSuspended : AuthResult

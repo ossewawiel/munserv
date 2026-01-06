@@ -42,6 +42,20 @@ data class LoginResponse(
 )
 
 /**
+ * Response for admin login success.
+ */
+data class AdminLoginResponse(
+    val adminId: String,
+    val email: String,
+    val displayName: String,
+    val sectorId: String,
+    val accessToken: String,
+    val refreshToken: String,
+    val expiresIn: Long,
+    val tokenType: String = "Bearer",
+)
+
+/**
  * Error response format.
  */
 data class ErrorResponse(

@@ -23,6 +23,14 @@ class AuthService(
 ) {
     companion object {
         private const val MEMBER_ROLE = "member"
+        private const val ADMIN_ROLE = "admin"
+
+        // Test admin credentials (MVP only - replace with proper admin table later)
+        private const val TEST_ADMIN_EMAIL = "admin@ward42.example.com"
+        private const val TEST_ADMIN_PASSWORD = "admin123"
+        private const val TEST_ADMIN_ID = "550e8400-e29b-41d4-a716-446655440020"
+        private const val TEST_ADMIN_NAME = "Ward 42 Admin"
+        private const val TEST_ADMIN_SECTOR = "550e8400-e29b-41d4-a716-446655440001"
     }
 
     /**
@@ -152,6 +160,30 @@ class AuthService(
 
         return AuthResult.LoginSuccess(
             memberId = member.id,
+            tokens = tokens,
+        )
+    }
+
+    /**
+     * Admin login with email and password.
+     * MVP: Uses hardcoded test credentials. Replace with proper admin table later.
+     */
+    fun adminLogin(
+        email: String,
+        password: String,
+    ): AuthResult {
+        if (email != TEST_ADMIN_EMAIL || password != TEST_ADMIN_PASSWORD) {
+            return AuthResult.InvalidCredentials
+        }
+
+        val adminId = MemberId.fromString(TEST_ADMIN_ID)
+        val tokens = jwtService.generateTokenPair(adminId, ADMIN_ROLE)
+
+        return AuthResult.AdminLoginSuccess(
+            adminId = TEST_ADMIN_ID,
+            email = TEST_ADMIN_EMAIL,
+            displayName = TEST_ADMIN_NAME,
+            sectorId = TEST_ADMIN_SECTOR,
             tokens = tokens,
         )
     }

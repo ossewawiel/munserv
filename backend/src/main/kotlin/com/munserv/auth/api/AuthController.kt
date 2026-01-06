@@ -143,6 +143,35 @@ class AuthController(
                     .body(ErrorResponse("error", "Unexpected error"))
         }
 
+    @PostMapping("/admin/login")
+    fun adminLogin(
+        @Valid @RequestBody request: AdminLoginRequest,
+    ): ResponseEntity<*> =
+        when (val result = authService.adminLogin(request.email, request.password)) {
+            is AuthResult.AdminLoginSuccess ->
+                ResponseEntity.ok(
+                    AdminLoginResponse(
+                        adminId = result.adminId,
+                        email = result.email,
+                        displayName = result.displayName,
+                        sectorId = result.sectorId,
+                        accessToken = result.tokens.accessToken,
+                        refreshToken = result.tokens.refreshToken,
+                        expiresIn = result.tokens.expiresIn,
+                    ),
+                )
+
+            is AuthResult.InvalidCredentials ->
+                ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse("invalid_credentials", "Invalid email or password"))
+
+            else ->
+                ResponseEntity
+                    .internalServerError()
+                    .body(ErrorResponse("error", "Unexpected error"))
+        }
+
     @PostMapping("/refresh")
     fun refreshToken(
         @Valid @RequestBody request: RefreshTokenRequest,
