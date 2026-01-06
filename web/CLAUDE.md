@@ -1,8 +1,34 @@
-# Web Admin Context - React + TypeScript + React Query
+# Web Admin Context - React + TypeScript + MUI + React Query
 
 ## Related Specs
+- **Web Theming Guide** (`/specs/Web_Theming_Guide.md`): MUI v7 theming, colors, pod configuration
 - **DevOps Strategy** (`/specs/DevOps_Strategy.md`): Git workflow, commit format, CI/CD
 - **Testing Strategy** (`/specs/Testing_Strategy.md`): Test patterns, component tests
+
+## Styling (MUI v7)
+
+| Pattern | Usage |
+|---------|-------|
+| `sx` prop | Inline styles with theme access |
+| Theme colors | `bgcolor: 'primary.main'` |
+| CSS variables | `var(--munserv-palette-*)` |
+| Responsive | `{ xs: 2, sm: 3, md: 4 }` |
+
+### DO: Use MUI's sx prop
+```typescript
+<Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
+<Button variant="contained" color="primary">
+<Typography variant="body2" color="text.secondary">
+```
+
+### DON'T: Use inline styles or raw CSS classes
+```typescript
+// BAD - inline styles
+<div style={{ padding: '16px', backgroundColor: 'white' }}>
+
+// BAD - Tailwind/CSS classes
+<div className="p-4 bg-white rounded">
+```
 
 ## Layer Architecture
 
@@ -17,7 +43,7 @@ Pages → Organisms → Molecules → Atoms
 | Pages | Route entry, compose organisms | Yes (via hooks) |
 | Organisms | Complex UI sections | Sometimes |
 | Molecules | Combined atoms | No |
-| Atoms | Single UI elements | No |
+| Atoms | Single UI elements (MUI wrappers) | No |
 
 ## Folder Structure
 
@@ -25,19 +51,26 @@ Pages → Organisms → Molecules → Atoms
 src/
 ├── main.tsx
 ├── App.tsx
+├── theme/                  ← MUI theme configuration
+│   ├── index.ts
+│   ├── colors.ts
+│   ├── types.ts
+│   ├── createPodTheme.ts
+│   ├── defaultTheme.ts
+│   └── ThemeContext.tsx
 ├── components/
-│   ├── atoms/
+│   ├── atoms/             ← Thin wrappers around MUI
 │   │   ├── Button.tsx
 │   │   ├── Input.tsx
 │   │   ├── Badge.tsx
 │   │   └── Spinner.tsx
 │   ├── molecules/
-│   │   ├── SearchBar.tsx
-│   │   ├── FormField.tsx
+│   │   ├── LoginForm.tsx
+│   │   ├── HeatIndicator.tsx
 │   │   └── IssueCard.tsx
 │   ├── organisms/
+│   │   ├── DataTable.tsx
 │   │   ├── IssueList.tsx
-│   │   ├── IssueMap.tsx
 │   │   └── Navbar.tsx
 │   └── templates/
 │       ├── DashboardLayout.tsx
@@ -47,18 +80,15 @@ src/
 │   │   ├── api.ts
 │   │   ├── hooks.ts
 │   │   ├── types.ts
-│   │   └── IssuesPage.tsx
+│   │   └── components/
 │   ├── members/
 │   │   └── [same structure]
-│   └── sectors/
+│   └── dashboard/
 │       └── [same structure]
 ├── shared/
 │   ├── hooks/
-│   │   └── useAuth.ts
 │   ├── utils/
-│   │   └── formatters.ts
 │   └── types/
-│       └── common.ts
 └── lib/
     ├── api-client.ts
     └── query-client.ts
@@ -79,22 +109,22 @@ interface Issue {
 }
 
 // Union types for fixed values
-type IssueState = 
-  | 'reported' 
-  | 'confirmed' 
-  | 'in_progress' 
-  | 'fixed' 
-  | 'rejected' 
+type IssueState =
+  | 'reported'
+  | 'confirmed'
+  | 'in_progress'
+  | 'fixed'
+  | 'rejected'
   | 'reopened';
 
-type IssueType = 
-  | 'pothole' 
-  | 'water_leak' 
-  | 'sewerage_leak' 
-  | 'traffic_light' 
-  | 'street_light' 
-  | 'illegal_dumping' 
-  | 'graffiti' 
+type IssueType =
+  | 'pothole'
+  | 'water_leak'
+  | 'sewerage_leak'
+  | 'traffic_light'
+  | 'street_light'
+  | 'illegal_dumping'
+  | 'graffiti'
   | 'other';
 
 // Component props
@@ -141,7 +171,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export function useUpdateIssueState() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, state }: { id: string; state: IssueState }) =>
       issueApi.updateState(id, state),
@@ -180,42 +210,46 @@ function IssueDetailPage() {
 
 ## Component Patterns
 
-### Atom (Single Element)
+### Atom (MUI Wrapper)
 ```typescript
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+import { type FC } from 'react';
+import MuiButton, { type ButtonProps as MuiButtonProps } from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+
+interface ButtonProps extends Omit<MuiButtonProps, 'variant' | 'color'> {
+  variant?: ButtonVariant;
   isLoading?: boolean;
 }
 
 export const Button: FC<ButtonProps> = ({
   variant = 'primary',
-  size = 'md',
   isLoading = false,
   children,
   disabled,
-  className,
   ...props
 }) => {
+  const muiProps = variantMap[variant];
+
   return (
-    <button
-      className={clsx(
-        'rounded font-medium transition-colors',
-        variantStyles[variant],
-        sizeStyles[size],
-        className
-      )}
+    <MuiButton
+      {...muiProps}
       disabled={disabled || isLoading}
+      startIcon={isLoading ? <CircularProgress size={16} /> : undefined}
       {...props}
     >
-      {isLoading ? <Spinner size="sm" /> : children}
-    </button>
+      {isLoading ? 'Loading...' : children}
+    </MuiButton>
   );
 };
 ```
 
 ### Molecule (Combined Atoms)
 ```typescript
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+
 interface IssueCardProps {
   issue: Issue;
   onSelect?: (issue: Issue) => void;
@@ -223,23 +257,35 @@ interface IssueCardProps {
 
 export const IssueCard: FC<IssueCardProps> = ({ issue, onSelect }) => {
   return (
-    <div 
-      className="rounded-lg border p-4 hover:bg-gray-50 cursor-pointer"
+    <Box
+      sx={{
+        p: 2,
+        border: 1,
+        borderColor: 'divider',
+        borderRadius: 2,
+        cursor: 'pointer',
+        '&:hover': { bgcolor: 'action.hover' },
+      }}
       onClick={() => onSelect?.(issue)}
     >
-      <div className="flex items-center justify-between">
-        <IssueTypeIcon type={issue.type} />
-        <Badge variant={stateVariant[issue.state]}>{issue.state}</Badge>
-      </div>
-      <p className="mt-2 text-sm text-gray-600">{issue.type}</p>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <IssueTypeBadge type={issue.type} />
+        <IssueStateBadge state={issue.state} />
+      </Box>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        {issue.type}
+      </Typography>
       <HeatIndicator heat={issue.heat} />
-    </div>
+    </Box>
   );
 };
 ```
 
 ### Organism (Complex Section)
 ```typescript
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+
 interface IssueListProps {
   sectorId: string;
 }
@@ -247,7 +293,7 @@ interface IssueListProps {
 export const IssueList: FC<IssueListProps> = ({ sectorId }) => {
   const { data: issues, isLoading, error } = useIssues(sectorId);
   const [filter, setFilter] = useState<IssueState | 'all'>('all');
-  
+
   const filteredIssues = useMemo(() => {
     if (filter === 'all') return issues ?? [];
     return issues?.filter(i => i.state === filter) ?? [];
@@ -257,14 +303,16 @@ export const IssueList: FC<IssueListProps> = ({ sectorId }) => {
   if (error) return <ErrorDisplay error={error} />;
 
   return (
-    <div>
+    <Box>
       <IssueFilters value={filter} onChange={setFilter} />
-      <div className="grid gap-4 mt-4">
+      <Grid container spacing={2} sx={{ mt: 2 }}>
         {filteredIssues.map(issue => (
-          <IssueCard key={issue.id} issue={issue} />
+          <Grid item xs={12} sm={6} md={4} key={issue.id}>
+            <IssueCard issue={issue} />
+          </Grid>
         ))}
-      </div>
-    </div>
+      </Grid>
+    </Box>
   );
 };
 ```
@@ -273,7 +321,7 @@ export const IssueList: FC<IssueListProps> = ({ sectorId }) => {
 ```typescript
 export default function IssuesPage() {
   const { sectorId } = useParams<{ sectorId: string }>();
-  
+
   if (!sectorId) return <Navigate to="/sectors" />;
 
   return (
@@ -304,15 +352,15 @@ apiClient.interceptors.request.use((config) => {
 
 // features/issues/api.ts
 export const issueApi = {
-  getAll: () => 
+  getAll: () =>
     apiClient.get<Issue[]>('/v1/issues').then(r => r.data),
-    
+
   getBySector: (sectorId: string) =>
     apiClient.get<Issue[]>(`/v1/sectors/${sectorId}/issues`).then(r => r.data),
-    
+
   getById: (id: string) =>
     apiClient.get<Issue>(`/v1/issues/${id}`).then(r => r.data),
-    
+
   updateState: (id: string, state: IssueState) =>
     apiClient.patch<Issue>(`/v1/issues/${id}/state`, { state }).then(r => r.data),
 };
@@ -354,13 +402,17 @@ import { useState, useCallback, useMemo, type FC } from 'react';
 
 // 2. Third-party libraries
 import { useQuery } from '@tanstack/react-query';
-import { clsx } from 'clsx';
 
-// 3. Project absolute imports (@/ alias)
+// 3. MUI components
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+
+// 4. Project absolute imports (@/ alias)
 import { Button } from '@/components/atoms/Button';
 import { useAuth } from '@/shared/hooks/useAuth';
 
-// 4. Feature-relative imports
+// 5. Feature-relative imports
 import { useIssues } from './hooks';
 import type { Issue, IssueState } from './types';
 ```
@@ -394,6 +446,10 @@ const STATES = ['reported', 'confirmed', 'fixed'] as const;
 - Index as key in dynamic lists (use stable IDs)
 - Inline object/function creation in JSX within loops
 - Business logic in components (extract to hooks/utils)
+- **CSS class names or Tailwind** (use MUI `sx` prop)
+- **clsx or classnames** (removed from project)
+- **Direct color values** (use theme tokens: `'primary.main'`)
+- **Inline styles** (use `sx` prop instead)
 
 ## Build Commands (WSL2)
 ```bash

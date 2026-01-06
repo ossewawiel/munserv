@@ -1,5 +1,7 @@
 import { type FC, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 
 import { Modal } from '@/components/atoms/Modal';
 import { Select } from '@/components/atoms/Select';
@@ -30,7 +32,7 @@ export const StateChangeModal: FC<StateChangeModalProps> = ({
   const [note, setNote] = useState('');
 
   const handleStateChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setSelectedState(e.target.value as IssueState);
     },
     []
@@ -60,7 +62,7 @@ export const StateChangeModal: FC<StateChangeModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t('issues.changeState')}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Select
           label={t('issues.state')}
           options={stateOptions}
@@ -73,7 +75,7 @@ export const StateChangeModal: FC<StateChangeModalProps> = ({
           onChange={handleNoteChange}
           placeholder={t('issues.notePlaceholder')}
         />
-        <div className="flex justify-end gap-2 pt-4">
+        <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ pt: 2 }}>
           <Button
             type="button"
             variant="secondary"
@@ -89,8 +91,8 @@ export const StateChangeModal: FC<StateChangeModalProps> = ({
           >
             {t('common.confirm')}
           </Button>
-        </div>
-      </form>
+        </Stack>
+      </Box>
     </Modal>
   );
 };

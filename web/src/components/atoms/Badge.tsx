@@ -1,35 +1,28 @@
 import { type FC, type ReactNode } from 'react';
-import { clsx } from 'clsx';
+import Chip, { type ChipProps } from '@mui/material/Chip';
 
-const variantStyles = {
-  default: 'bg-secondary-100 text-secondary-800',
-  primary: 'bg-primary-100 text-primary-800',
-  success: 'bg-success-100 text-success-700',
-  warning: 'bg-warning-100 text-warning-700',
-  danger: 'bg-danger-100 text-danger-700',
-  info: 'bg-info-100 text-info-700',
+type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
+
+const colorMap: Record<BadgeVariant, ChipProps['color']> = {
+  default: 'default',
+  primary: 'primary',
+  success: 'success',
+  warning: 'warning',
+  danger: 'error',
+  info: 'info',
 };
 
 interface BadgeProps {
   children: ReactNode;
-  variant?: keyof typeof variantStyles;
-  className?: string;
+  variant?: BadgeVariant;
 }
 
-export const Badge: FC<BadgeProps> = ({
-  children,
-  variant = 'default',
-  className,
-}) => {
+export const Badge: FC<BadgeProps> = ({ children, variant = 'default' }) => {
   return (
-    <span
-      className={clsx(
-        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-        variantStyles[variant],
-        className
-      )}
-    >
-      {children}
-    </span>
+    <Chip
+      label={children}
+      color={colorMap[variant]}
+      size="small"
+    />
   );
 };

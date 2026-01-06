@@ -1,5 +1,10 @@
 import { type FC, type ReactNode } from 'react';
-import { clsx } from 'clsx';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 interface StatCardProps {
   title: string;
@@ -10,7 +15,6 @@ interface StatCardProps {
     value: number;
     isPositive: boolean;
   };
-  className?: string;
 }
 
 export const StatCard: FC<StatCardProps> = ({
@@ -19,68 +23,60 @@ export const StatCard: FC<StatCardProps> = ({
   subtitle,
   icon,
   trend,
-  className,
 }) => {
   return (
-    <div
-      className={clsx(
-        'rounded-lg border border-border bg-background p-6 shadow-sm',
-        className
-      )}
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-text-muted">{title}</p>
-          <p className="mt-2 text-3xl font-bold text-text">{value}</p>
-          {subtitle && (
-            <p className="mt-1 text-sm text-text-muted">{subtitle}</p>
-          )}
-          {trend && (
-            <p
-              className={clsx(
-                'mt-2 flex items-center text-sm font-medium',
-                trend.isPositive ? 'text-success-600' : 'text-danger-600'
-              )}
+    <Card variant="outlined">
+      <CardContent>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <Box>
+            <Typography variant="body2" color="text.secondary" fontWeight={500}>
+              {title}
+            </Typography>
+            <Typography variant="h4" component="p" fontWeight={700} sx={{ mt: 1 }}>
+              {value}
+            </Typography>
+            {subtitle && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                {subtitle}
+              </Typography>
+            )}
+            {trend && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  mt: 1,
+                  color: trend.isPositive ? 'success.main' : 'error.main',
+                }}
+              >
+                {trend.isPositive ? (
+                  <TrendingUpIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                ) : (
+                  <TrendingDownIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                )}
+                <Typography variant="body2" fontWeight={500}>
+                  {Math.abs(trend.value)}%
+                </Typography>
+              </Box>
+            )}
+          </Box>
+          {icon && (
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: 'primary.light',
+                color: 'primary.contrastText',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
-              {trend.isPositive ? (
-                <svg
-                  className="mr-1 h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 10l7-7m0 0l7 7m-7-7v18"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="mr-1 h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  />
-                </svg>
-              )}
-              {Math.abs(trend.value)}%
-            </p>
+              {icon}
+            </Box>
           )}
-        </div>
-        {icon && (
-          <div className="rounded-lg bg-primary-100 p-3 text-primary-600">
-            {icon}
-          </div>
-        )}
-      </div>
-    </div>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };

@@ -1,13 +1,14 @@
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { clsx } from 'clsx';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import SvgIcon from '@mui/material/SvgIcon';
 
 import type { IssueType } from '@/features/issues/types';
 
 interface IssueTypeBadgeProps {
   type: IssueType;
   showIcon?: boolean;
-  className?: string;
 }
 
 const typeIcons: Record<IssueType, string> = {
@@ -23,33 +24,35 @@ const typeIcons: Record<IssueType, string> = {
 export const IssueTypeBadge: FC<IssueTypeBadgeProps> = ({
   type,
   showIcon = true,
-  className,
 }) => {
   const { t } = useTranslation();
 
   return (
-    <span
-      className={clsx(
-        'inline-flex items-center gap-1.5 text-sm text-text',
-        className
-      )}
+    <Box
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 0.75,
+      }}
     >
       {showIcon && (
-        <svg
-          className="h-4 w-4 text-text-muted"
-          fill="none"
+        <SvgIcon
+          sx={{ fontSize: 16, color: 'text.secondary' }}
           viewBox="0 0 24 24"
-          stroke="currentColor"
         >
           <path
+            fill="none"
+            stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={1.5}
             d={typeIcons[type]}
           />
-        </svg>
+        </SvgIcon>
       )}
-      {t(`issues.types.${type}`)}
-    </span>
+      <Typography variant="body2" color="text.primary">
+        {t(`issues.types.${type}`)}
+      </Typography>
+    </Box>
   );
 };

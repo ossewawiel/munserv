@@ -1,69 +1,41 @@
-import { type FC, type ButtonHTMLAttributes } from 'react';
-import { clsx } from 'clsx';
+import { type FC } from 'react';
+import MuiButton, { type ButtonProps as MuiButtonProps } from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 
-const variantStyles = {
-  primary: 'bg-primary-600 text-text-inverse hover:bg-primary-700 focus:ring-primary-500',
-  secondary: 'bg-secondary-200 text-secondary-900 hover:bg-secondary-300 focus:ring-secondary-500',
-  danger: 'bg-danger-600 text-text-inverse hover:bg-danger-700 focus:ring-danger-500',
-  ghost: 'bg-transparent text-secondary-700 hover:bg-secondary-100 focus:ring-secondary-500',
-};
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
-const sizeStyles = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-base',
-  lg: 'px-6 py-3 text-lg',
-};
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: keyof typeof variantStyles;
-  size?: keyof typeof sizeStyles;
+interface ButtonProps extends Omit<MuiButtonProps, 'variant' | 'color'> {
+  variant?: ButtonVariant;
   isLoading?: boolean;
 }
 
+const variantMap: Record<ButtonVariant, { variant: MuiButtonProps['variant']; color: MuiButtonProps['color'] }> = {
+  primary: { variant: 'contained', color: 'primary' },
+  secondary: { variant: 'outlined', color: 'inherit' },
+  danger: { variant: 'contained', color: 'error' },
+  ghost: { variant: 'text', color: 'inherit' },
+};
+
 export const Button: FC<ButtonProps> = ({
   variant = 'primary',
-  size = 'md',
   isLoading = false,
   children,
   disabled,
-  className,
+  size = 'medium',
   ...props
 }) => {
+  const { variant: muiVariant, color } = variantMap[variant];
+
   return (
-    <button
-      className={clsx(
-        'rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
-        variantStyles[variant],
-        sizeStyles[size],
-        (disabled || isLoading) && 'opacity-50 cursor-not-allowed',
-        className
-      )}
+    <MuiButton
+      variant={muiVariant}
+      color={color}
+      size={size}
       disabled={disabled || isLoading}
+      startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
       {...props}
     >
-      {isLoading ? (
-        <span className="flex items-center justify-center">
-          <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-              fill="none"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          Loading...
-        </span>
-      ) : (
-        children
-      )}
-    </button>
+      {isLoading ? 'Loading...' : children}
+    </MuiButton>
   );
 };

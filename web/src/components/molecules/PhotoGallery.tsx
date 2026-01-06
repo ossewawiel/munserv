@@ -1,19 +1,21 @@
 import { type FC, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { clsx } from 'clsx';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
+import ButtonBase from '@mui/material/ButtonBase';
 
 import { Modal } from '@/components/atoms/Modal';
 
 interface PhotoGalleryProps {
   photos: string[];
   alt?: string;
-  className?: string;
 }
 
 export const PhotoGallery: FC<PhotoGalleryProps> = ({
   photos,
   alt = 'Photo',
-  className,
 }) => {
   const { t } = useTranslation();
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
@@ -22,52 +24,92 @@ export const PhotoGallery: FC<PhotoGalleryProps> = ({
     setSelectedPhoto(null);
   }, []);
 
+  const getCols = (count: number): number => {
+    if (count === 1) return 1;
+    if (count === 2) return 2;
+    return 3;
+  };
+
   if (photos.length === 0) {
     return (
-      <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border bg-surface">
-        <p className="text-sm text-text-muted">{t('common.noResults')}</p>
-      </div>
+      <Box
+        sx={{
+          display: 'flex',
+          height: 128,
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 2,
+          border: '1px dashed',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          {t('common.noResults')}
+        </Typography>
+      </Box>
     );
   }
 
   return (
     <>
-      <div
-        className={clsx(
-          'grid gap-2',
-          photos.length === 1
-            ? 'grid-cols-1'
-            : photos.length === 2
-              ? 'grid-cols-2'
-              : 'grid-cols-2 sm:grid-cols-3',
-          className
-        )}
-      >
+      <ImageList cols={getCols(photos.length)} gap={8}>
         {photos.map((photo, index) => (
-          <button
-            key={photo}
-            onClick={() => setSelectedPhoto(photo)}
-            className="group relative aspect-square overflow-hidden rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <img
-              src={photo}
-              alt={`${alt} ${index + 1}`}
-              className="h-full w-full object-cover transition-transform group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10" />
-          </button>
+          <ImageListItem key={photo}>
+            <ButtonBase
+              onClick={() => setSelectedPhoto(photo)}
+              sx={{
+                width: '100%',
+                aspectRatio: '1',
+                overflow: 'hidden',
+                borderRadius: 2,
+                border: 1,
+                borderColor: 'divider',
+                '&:focus-visible': {
+                  outline: 2,
+                  outlineOffset: 2,
+                  outlineColor: 'primary.main',
+                },
+                '& img': {
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  transition: 'transform 0.2s',
+                },
+                '&:hover img': {
+                  transform: 'scale(1.05)',
+                },
+                '&:hover::after': {
+                  content: '""',
+                  position: 'absolute',
+                  inset: 0,
+                  bgcolor: 'rgba(0,0,0,0.1)',
+                },
+              }}
+            >
+              <img
+                src={photo}
+                alt={`${alt} ${index + 1}`}
+                loading="lazy"
+              />
+            </ButtonBase>
+          </ImageListItem>
         ))}
-      </div>
+      </ImageList>
 
       <Modal isOpen={!!selectedPhoto} onClose={handleClose} size="lg">
         {selectedPhoto && (
-          <div className="relative">
-            <img
+          <Box sx={{ position: 'relative' }}>
+            <Box
+              component="img"
               src={selectedPhoto}
               alt={alt}
-              className="w-full rounded-lg"
+              sx={{
+                width: '100%',
+                borderRadius: 2,
+              }}
             />
-          </div>
+          </Box>
         )}
       </Modal>
     </>

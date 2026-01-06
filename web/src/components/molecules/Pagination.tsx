@@ -1,8 +1,8 @@
 import { type FC, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { clsx } from 'clsx';
-
-import { Button } from '@/components/atoms/Button';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import MuiPagination from '@mui/material/Pagination';
 
 interface PaginationProps {
   currentPage: number;
@@ -10,7 +10,6 @@ interface PaginationProps {
   totalItems: number;
   pageSize: number;
   onPageChange: (page: number) => void;
-  className?: string;
 }
 
 export const Pagination: FC<PaginationProps> = ({
@@ -19,61 +18,46 @@ export const Pagination: FC<PaginationProps> = ({
   totalItems,
   pageSize,
   onPageChange,
-  className,
 }) => {
   const { t } = useTranslation();
 
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
-  const handlePrevious = useCallback(() => {
-    if (currentPage > 1) {
-      onPageChange(currentPage - 1);
-    }
-  }, [currentPage, onPageChange]);
-
-  const handleNext = useCallback(() => {
-    if (currentPage < totalPages) {
-      onPageChange(currentPage + 1);
-    }
-  }, [currentPage, totalPages, onPageChange]);
+  const handleChange = useCallback(
+    (_event: React.ChangeEvent<unknown>, page: number) => {
+      onPageChange(page);
+    },
+    [onPageChange]
+  );
 
   if (totalPages <= 1) return null;
 
   return (
-    <div
-      className={clsx(
-        'flex flex-col items-center justify-between gap-4 sm:flex-row',
-        className
-      )}
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 2,
+      }}
     >
-      <p className="text-sm text-text-muted">
-        {t('pagination.showing')} <span className="font-medium">{startItem}</span>{' '}
-        {t('pagination.to')} <span className="font-medium">{endItem}</span>{' '}
-        {t('pagination.of')} <span className="font-medium">{totalItems}</span>{' '}
+      <Typography variant="body2" color="text.secondary">
+        {t('pagination.showing')} <strong>{startItem}</strong>{' '}
+        {t('pagination.to')} <strong>{endItem}</strong>{' '}
+        {t('pagination.of')} <strong>{totalItems}</strong>{' '}
         {t('pagination.results')}
-      </p>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handlePrevious}
-          disabled={currentPage === 1}
-        >
-          {t('common.previous')}
-        </Button>
-        <span className="px-3 text-sm text-text-muted">
-          {t('pagination.page')} {currentPage} {t('pagination.of')} {totalPages}
-        </span>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-        >
-          {t('common.next')}
-        </Button>
-      </div>
-    </div>
+      </Typography>
+      <MuiPagination
+        count={totalPages}
+        page={currentPage}
+        onChange={handleChange}
+        color="primary"
+        size="small"
+        showFirstButton
+        showLastButton
+      />
+    </Box>
   );
 };

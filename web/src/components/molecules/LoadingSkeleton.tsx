@@ -1,52 +1,53 @@
 import { type FC } from 'react';
-import { clsx } from 'clsx';
+import Skeleton from '@mui/material/Skeleton';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Grid from '@mui/material/Grid';
 
 interface LoadingSkeletonProps {
   variant?: 'text' | 'rect' | 'circle';
   width?: string | number;
   height?: string | number;
-  className?: string;
   count?: number;
 }
+
+const variantMap = {
+  text: 'text' as const,
+  rect: 'rectangular' as const,
+  circle: 'circular' as const,
+};
 
 export const LoadingSkeleton: FC<LoadingSkeletonProps> = ({
   variant = 'rect',
   width,
   height,
-  className,
   count = 1,
 }) => {
-  const baseClasses = 'animate-pulse bg-secondary-200';
-
-  const variantClasses = {
-    text: 'h-4 rounded',
-    rect: 'rounded-md',
-    circle: 'rounded-full',
-  };
-
-  const style: React.CSSProperties = {};
-  if (width) style.width = typeof width === 'number' ? `${width}px` : width;
-  if (height) style.height = typeof height === 'number' ? `${height}px` : height;
-
   if (count === 1) {
     return (
-      <div
-        className={clsx(baseClasses, variantClasses[variant], className)}
-        style={style}
+      <Skeleton
+        variant={variantMap[variant]}
+        width={width}
+        height={height}
+        animation="wave"
       />
     );
   }
 
   return (
-    <div className="space-y-3">
+    <Stack spacing={1.5}>
       {Array.from({ length: count }).map((_, index) => (
-        <div
+        <Skeleton
           key={index}
-          className={clsx(baseClasses, variantClasses[variant], className)}
-          style={style}
+          variant={variantMap[variant]}
+          width={width}
+          height={height}
+          animation="wave"
         />
       ))}
-    </div>
+    </Stack>
   );
 };
 
@@ -60,24 +61,25 @@ export const TableSkeleton: FC<TableSkeletonProps> = ({
   columns = 4,
 }) => {
   return (
-    <div className="w-full">
-      <div className="mb-4 flex gap-4">
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
         {Array.from({ length: columns }).map((_, i) => (
-          <LoadingSkeleton key={i} variant="text" className="h-4 flex-1" />
+          <Skeleton key={i} variant="text" sx={{ flex: 1, height: 24 }} animation="wave" />
         ))}
-      </div>
+      </Box>
       {Array.from({ length: rows }).map((_, rowIndex) => (
-        <div key={rowIndex} className="mb-3 flex gap-4">
+        <Box key={rowIndex} sx={{ display: 'flex', gap: 2, mb: 1.5 }}>
           {Array.from({ length: columns }).map((_, colIndex) => (
-            <LoadingSkeleton
+            <Skeleton
               key={colIndex}
-              variant="text"
-              className="h-8 flex-1"
+              variant="rectangular"
+              sx={{ flex: 1, height: 40, borderRadius: 1 }}
+              animation="wave"
             />
           ))}
-        </div>
+        </Box>
       ))}
-    </div>
+    </Box>
   );
 };
 
@@ -87,16 +89,17 @@ interface CardSkeletonProps {
 
 export const CardSkeleton: FC<CardSkeletonProps> = ({ count = 4 }) => {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <Grid container spacing={2}>
       {Array.from({ length: count }).map((_, index) => (
-        <div
-          key={index}
-          className="rounded-lg border border-border bg-background p-6"
-        >
-          <LoadingSkeleton variant="text" className="mb-2 h-4 w-24" />
-          <LoadingSkeleton variant="text" className="h-8 w-20" />
-        </div>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={index}>
+          <Card variant="outlined">
+            <CardContent>
+              <Skeleton variant="text" width={100} height={20} sx={{ mb: 1 }} animation="wave" />
+              <Skeleton variant="text" width={80} height={32} animation="wave" />
+            </CardContent>
+          </Card>
+        </Grid>
       ))}
-    </div>
+    </Grid>
   );
 };

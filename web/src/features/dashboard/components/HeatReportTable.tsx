@@ -1,5 +1,9 @@
 import { type FC, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
+import PeopleIcon from '@mui/icons-material/People';
 
 import { DataTable, type Column } from '@/components/organisms/DataTable';
 import { IssueStateBadge } from '@/components/molecules/IssueStateBadge';
@@ -10,13 +14,11 @@ import type { HeatReportItem } from '../types';
 interface HeatReportTableProps {
   items: HeatReportItem[];
   onRowClick?: (item: HeatReportItem) => void;
-  className?: string;
 }
 
 export const HeatReportTable: FC<HeatReportTableProps> = ({
   items,
   onRowClick,
-  className,
 }) => {
   const { t } = useTranslation();
 
@@ -28,9 +30,18 @@ export const HeatReportTable: FC<HeatReportTableProps> = ({
         width: '60px',
         align: 'center',
         render: (item) => (
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700">
+          <Avatar
+            sx={{
+              width: 28,
+              height: 28,
+              bgcolor: 'primary.light',
+              color: 'primary.contrastText',
+              fontSize: '0.875rem',
+              fontWeight: 700,
+            }}
+          >
             {item.rank}
-          </span>
+          </Avatar>
         ),
       },
       {
@@ -38,10 +49,16 @@ export const HeatReportTable: FC<HeatReportTableProps> = ({
         header: '',
         width: '64px',
         render: (item) => (
-          <img
+          <Box
+            component="img"
             src={item.thumbnailUrl}
             alt={t(`issues.types.${item.type}`)}
-            className="h-12 w-12 rounded-md object-cover"
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 1,
+              objectFit: 'cover',
+            }}
           />
         ),
       },
@@ -68,7 +85,9 @@ export const HeatReportTable: FC<HeatReportTableProps> = ({
         width: '100px',
         align: 'center',
         render: (item) => (
-          <span className="text-text-muted">{item.daysOpen}</span>
+          <Typography variant="body2" color="text.secondary">
+            {item.daysOpen}
+          </Typography>
         ),
       },
       {
@@ -77,22 +96,10 @@ export const HeatReportTable: FC<HeatReportTableProps> = ({
         width: '120px',
         align: 'center',
         render: (item) => (
-          <span className="inline-flex items-center gap-1 text-text-muted">
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
-            {item.reportCount}
-          </span>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+            <PeopleIcon sx={{ fontSize: 16 }} />
+            <Typography variant="body2">{item.reportCount}</Typography>
+          </Box>
         ),
       },
     ],
@@ -119,7 +126,6 @@ export const HeatReportTable: FC<HeatReportTableProps> = ({
       data={rankedItems}
       keyExtractor={(item) => item.id}
       onRowClick={handleRowClick}
-      className={className}
     />
   );
 };

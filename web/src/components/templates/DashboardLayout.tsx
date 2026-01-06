@@ -1,7 +1,19 @@
 import { type FC, type ReactNode, useState, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { clsx } from 'clsx';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import MuiButton from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { useLogout } from '@/features/auth/hooks';
 import { Button } from '@/components/atoms/Button';
@@ -53,101 +65,103 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-surface">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* Header */}
-      <header className="bg-background shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 justify-between">
-            <div className="flex">
-              <div className="flex flex-shrink-0 items-center">
-                <h1 className="text-xl font-bold text-text">{t('common.appName')}</h1>
-              </div>
+      <AppBar position="static" color="default" elevation={1}>
+        <Container maxWidth="xl">
+          <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="h6" component="h1" fontWeight={700}>
+                {t('common.appName')}
+              </Typography>
               {/* Desktop navigation */}
-              <nav className="hidden sm:ml-8 sm:flex sm:space-x-4">
+              <Box
+                component="nav"
+                sx={{
+                  display: { xs: 'none', sm: 'flex' },
+                  ml: 4,
+                  gap: 0.5,
+                }}
+              >
                 {navItems.map((item) => (
-                  <Link
+                  <MuiButton
                     key={item.href}
+                    component={Link}
                     to={item.href}
-                    className={clsx(
-                      'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium',
-                      location.pathname === item.href
-                        ? 'bg-primary-100 text-primary-700'
-                        : 'text-text-muted hover:bg-surface-hover hover:text-text'
-                    )}
+                    variant={location.pathname === item.href ? 'contained' : 'text'}
+                    color={location.pathname === item.href ? 'primary' : 'inherit'}
+                    size="small"
                   >
                     {t(item.labelKey)}
-                  </Link>
+                  </MuiButton>
                 ))}
-              </nav>
-            </div>
-            <div className="flex items-center gap-2">
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {/* Mobile menu button */}
-              <button
-                type="button"
+              <IconButton
                 onClick={toggleMobileMenu}
-                className="inline-flex items-center justify-center rounded-md p-2 text-text-muted hover:bg-surface-hover hover:text-text sm:hidden"
-                aria-expanded={mobileMenuOpen}
+                sx={{ display: { sm: 'none' } }}
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
               >
-                <span className="sr-only">Open main menu</span>
-                {mobileMenuOpen ? (
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                ) : (
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                )}
-              </button>
+                {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+              </IconButton>
               {/* Logout button */}
               <Button
                 variant="secondary"
-                size="sm"
+                size="small"
                 onClick={handleLogout}
                 isLoading={logout.isPending}
-                className="hidden sm:inline-flex"
+                sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
               >
                 {t('auth.logout')}
               </Button>
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
 
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="sm:hidden">
-            <div className="space-y-1 px-4 pb-3 pt-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  onClick={closeMobileMenu}
-                  className={clsx(
-                    'block rounded-md px-3 py-2 text-base font-medium',
-                    location.pathname === item.href
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-text-muted hover:bg-surface-hover hover:text-text'
-                  )}
-                >
-                  {t(item.labelKey)}
-                </Link>
-              ))}
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="mt-2 block w-full rounded-md px-3 py-2 text-left text-base font-medium text-danger-600 hover:bg-danger-50"
-              >
-                {t('auth.logout')}
-              </button>
-            </div>
-          </div>
-        )}
-      </header>
+      {/* Mobile menu */}
+      <Drawer
+        anchor="top"
+        open={mobileMenuOpen}
+        onClose={closeMobileMenu}
+        sx={{
+          display: { sm: 'none' },
+          '& .MuiDrawer-paper': {
+            top: 64,
+            bgcolor: 'background.paper',
+          },
+        }}
+      >
+        <List>
+          {navItems.map((item) => (
+            <ListItemButton
+              key={item.href}
+              component={Link}
+              to={item.href}
+              selected={location.pathname === item.href}
+              onClick={closeMobileMenu}
+            >
+              <ListItemText primary={t(item.labelKey)} />
+            </ListItemButton>
+          ))}
+          <ListItemButton
+            onClick={() => {
+              closeMobileMenu();
+              handleLogout();
+            }}
+            sx={{ color: 'error.main' }}
+          >
+            <ListItemText primary={t('auth.logout')} />
+          </ListItemButton>
+        </List>
+      </Drawer>
 
       {/* Main content */}
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <Container component="main" maxWidth="xl" sx={{ py: 3 }}>
         {children}
-      </main>
-    </div>
+      </Container>
+    </Box>
   );
 };

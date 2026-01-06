@@ -1,5 +1,9 @@
 import { type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -9,20 +13,36 @@ export const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h1 className="text-center text-3xl font-bold text-text">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'background.default',
+        py: 6,
+        px: 2,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography variant="h4" component="h1" fontWeight={700}>
             {t('common.appName')}
-          </h1>
-          <p className="mt-2 text-center text-sm text-text-muted">
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             Municipal Service Admin Portal
-          </p>
-        </div>
-        <div className="bg-background py-8 px-4 shadow-lg rounded-lg sm:px-10 border border-border">
+          </Typography>
+        </Box>
+        <Paper
+          elevation={3}
+          sx={{
+            p: { xs: 3, sm: 5 },
+            borderRadius: 2,
+          }}
+        >
           {children}
-        </div>
-      </div>
-    </div>
+        </Paper>
+      </Container>
+    </Box>
   );
 };

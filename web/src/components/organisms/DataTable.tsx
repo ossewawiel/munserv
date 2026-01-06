@@ -1,11 +1,17 @@
 import { type ReactNode, useCallback } from 'react';
-import { clsx } from 'clsx';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 
 export interface Column<T> {
   key: string;
   header: string;
   render: (item: T) => ReactNode;
-  width?: string;
+  width?: string | number;
   align?: 'left' | 'center' | 'right';
 }
 
@@ -15,7 +21,6 @@ interface DataTableProps<T> {
   keyExtractor: (item: T) => string;
   onRowClick?: (item: T) => void;
   emptyMessage?: ReactNode;
-  className?: string;
 }
 
 export function DataTable<T>({
@@ -24,7 +29,6 @@ export function DataTable<T>({
   keyExtractor,
   onRowClick,
   emptyMessage,
-  className,
 }: DataTableProps<T>) {
   const handleRowClick = useCallback(
     (item: T) => {
@@ -35,12 +39,6 @@ export function DataTable<T>({
     [onRowClick]
   );
 
-  const alignClasses = {
-    left: 'text-left',
-    center: 'text-center',
-    right: 'text-right',
-  };
-
   if (!data || data.length === 0) {
     if (emptyMessage) {
       return <>{emptyMessage}</>;
@@ -49,57 +47,48 @@ export function DataTable<T>({
   }
 
   return (
-    <div
-      className={clsx(
-        'w-full overflow-hidden rounded-lg border border-border',
-        className
-      )}
-    >
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-full divide-y divide-border">
-          <thead className="bg-surface">
-            <tr>
-              {columns.map((column) => (
-                <th
-                  key={column.key}
-                  scope="col"
-                  className={clsx(
-                    'px-4 py-3 text-sm font-semibold text-text',
-                    alignClasses[column.align ?? 'left']
-                  )}
-                  style={{ width: column.width }}
-                >
-                  {column.header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border bg-background">
-            {data.map((item) => (
-              <tr
-                key={keyExtractor(item)}
-                onClick={() => handleRowClick(item)}
-                className={clsx(
-                  'transition-colors',
-                  onRowClick && 'cursor-pointer hover:bg-surface'
-                )}
+    <TableContainer component={Paper} variant="outlined">
+      <Table>
+        <TableHead>
+          <TableRow>
+            {columns.map((column) => (
+              <TableCell
+                key={column.key}
+                align={column.align ?? 'left'}
+                sx={{
+                  width: column.width,
+                  fontWeight: 600,
+                  bgcolor: 'background.default',
+                }}
               >
-                {columns.map((column) => (
-                  <td
-                    key={column.key}
-                    className={clsx(
-                      'whitespace-nowrap px-4 py-3 text-sm text-text',
-                      alignClasses[column.align ?? 'left']
-                    )}
-                  >
-                    {column.render(item)}
-                  </td>
-                ))}
-              </tr>
+                {column.header}
+              </TableCell>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((item) => (
+            <TableRow
+              key={keyExtractor(item)}
+              onClick={() => handleRowClick(item)}
+              hover={!!onRowClick}
+              sx={{
+                cursor: onRowClick ? 'pointer' : 'default',
+                '&:last-child td': { borderBottom: 0 },
+              }}
+            >
+              {columns.map((column) => (
+                <TableCell
+                  key={column.key}
+                  align={column.align ?? 'left'}
+                >
+                  {column.render(item)}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

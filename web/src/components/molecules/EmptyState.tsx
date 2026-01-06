@@ -1,13 +1,14 @@
 import { type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { clsx } from 'clsx';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import InboxIcon from '@mui/icons-material/Inbox';
 
 interface EmptyStateProps {
   title?: string;
   description?: string;
   icon?: ReactNode;
   action?: ReactNode;
-  className?: string;
 }
 
 export const EmptyState: FC<EmptyStateProps> = ({
@@ -15,41 +16,32 @@ export const EmptyState: FC<EmptyStateProps> = ({
   description,
   icon,
   action,
-  className,
 }) => {
   const { t } = useTranslation();
 
   return (
-    <div
-      className={clsx(
-        'flex flex-col items-center justify-center py-12 text-center',
-        className
-      )}
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 6,
+        textAlign: 'center',
+      }}
     >
-      {icon ? (
-        <div className="mb-4 text-text-muted">{icon}</div>
-      ) : (
-        <svg
-          className="mb-4 h-12 w-12 text-text-muted"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-          />
-        </svg>
-      )}
-      <h3 className="text-lg font-medium text-text">
+      <Box sx={{ mb: 2, color: 'text.secondary' }}>
+        {icon || <InboxIcon sx={{ fontSize: 48 }} />}
+      </Box>
+      <Typography variant="h6" fontWeight={500}>
         {title || t('common.noResults')}
-      </h3>
+      </Typography>
       {description && (
-        <p className="mt-2 max-w-sm text-sm text-text-muted">{description}</p>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 400 }}>
+          {description}
+        </Typography>
       )}
-      {action && <div className="mt-6">{action}</div>}
-    </div>
+      {action && <Box sx={{ mt: 3 }}>{action}</Box>}
+    </Box>
   );
 };

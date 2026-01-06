@@ -1,33 +1,44 @@
 import { type FC, type ReactNode } from 'react';
-import { clsx } from 'clsx';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
   actions?: ReactNode;
-  className?: string;
 }
 
 export const PageHeader: FC<PageHeaderProps> = ({
   title,
   subtitle,
   actions,
-  className,
 }) => {
   return (
-    <div
-      className={clsx(
-        'flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between',
-        className
-      )}
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { sm: 'center' },
+        justifyContent: 'space-between',
+        gap: 2,
+      }}
     >
-      <div>
-        <h1 className="text-2xl font-bold text-text">{title}</h1>
+      <Box>
+        <Typography variant="h5" component="h1" fontWeight={600}>
+          {title}
+        </Typography>
         {subtitle && (
-          <p className="mt-1 text-sm text-text-muted">{subtitle}</p>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {subtitle}
+          </Typography>
         )}
-      </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
-    </div>
+      </Box>
+      {actions && (
+        <Stack direction="row" spacing={1} alignItems="center">
+          {actions}
+        </Stack>
+      )}
+    </Box>
   );
 };

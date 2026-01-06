@@ -59,24 +59,25 @@
 | 8 | Mobile App Implementation | ✅ **Near Complete** | M2-M7 done, M1 partial |
 | 9 | Web Admin Implementation | ✅ **Complete** | All W1-W7 features implemented |
 | 10 | [Mobile Theming Guide](Mobile_Theming_Guide.md) | ✅ **Complete** | M3 color system, components |
+| 11 | [Web Theming Guide](Web_Theming_Guide.md) | ✅ **Complete** | MUI v7 theming, pod configuration |
 
 ### Phase 3: Backend & Integration (CURRENT 🔄)
 
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
-| 11 | [Backend Development Guide](Backend_Development_Guide.md) | ✅ Complete | Phased TDD implementation plan |
-| 12 | Database Migrations | ✅ Complete | PostgreSQL + PostGIS schema (V001-V010) |
-| 13 | Backend Implementation | 🔄 Phase 4 Done | Kotlin/Spring Boot API (Phases 0-4 complete) |
-| 14 | Integration & Testing | ⏳ Phase 6 | Connect frontend to real backend |
+| 12 | [Backend Development Guide](Backend_Development_Guide.md) | ✅ Complete | Phased TDD implementation plan |
+| 13 | Database Migrations | ✅ Complete | PostgreSQL + PostGIS schema (V001-V010) |
+| 14 | Backend Implementation | 🔄 Phase 4 Done | Kotlin/Spring Boot API (Phases 0-4 complete) |
+| 15 | Integration & Testing | ⏳ Phase 6 | Connect frontend to real backend |
 
 ### Phase 4: Expansion (FUTURE)
 
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
-| 15 | Entity-Relationship Model (Full) | ⏳ Not Started | Complete schema with all features |
-| 16 | API Specification (Full) | ⏳ Not Started | All endpoints, not just MVP |
-| 17 | AI Integration Spec | ⏳ Not Started | Photo analysis, duplicate detection |
-| 18 | Offline Mode Spec | ⏳ Not Started | Sync strategy, conflict resolution |
+| 16 | Entity-Relationship Model (Full) | ⏳ Not Started | Complete schema with all features |
+| 17 | API Specification (Full) | ⏳ Not Started | All endpoints, not just MVP |
+| 18 | AI Integration Spec | ⏳ Not Started | Photo analysis, duplicate detection |
+| 19 | Offline Mode Spec | ⏳ Not Started | Sync strategy, conflict resolution |
 
 **Status Key:** ✅ Complete | 🔄 In Progress / Ready | ⏳ Not Started
 
@@ -161,6 +162,8 @@
 | API endpoints to call | [MVP Development Guide](MVP_Development_Guide.md) §4 |
 | Data models (TypeScript) | [MVP Development Guide](MVP_Development_Guide.md) §3.1 |
 | Code patterns | [Architecture & Design Patterns](Architecture_and_Design_Patterns.md) §4 |
+| MUI theming patterns | [Architecture & Design Patterns](Architecture_and_Design_Patterns.md) §4.4 |
+| Theming & colors | [Web Theming Guide](Web_Theming_Guide.md) |
 | Naming conventions | [Coding Standards](Coding_Standards.md) §4 |
 | Testing approach | [Testing Strategy](Testing_Strategy.md) §8 |
 
@@ -231,8 +234,9 @@ Include in prompt:
 ```
 Include in prompt:
 1. MVP_Development_Guide.md (relevant sections)
-2. Architecture_and_Design_Patterns.md §4 (React patterns)
-3. Coding_Standards.md §4 (TypeScript standards)
+2. Architecture_and_Design_Patterns.md §4 (React + MUI patterns)
+3. Web_Theming_Guide.md (colors, styling)
+4. Coding_Standards.md §4 (TypeScript standards)
 ```
 
 ### For Backend Feature

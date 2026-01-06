@@ -1,5 +1,7 @@
 import { type FC, type FormEvent, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
 
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
@@ -51,11 +53,11 @@ export const LoginForm: FC<LoginFormProps> = ({
   );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {error && (
-        <div className="p-3 rounded-md bg-danger-50 border border-danger-200">
-          <p className="text-sm text-danger-700">{error}</p>
-        </div>
+        <Alert severity="error" variant="outlined">
+          {error}
+        </Alert>
       )}
 
       <Input
@@ -82,12 +84,12 @@ export const LoginForm: FC<LoginFormProps> = ({
 
       <Button
         type="submit"
-        className="w-full"
+        fullWidth
         isLoading={isLoading}
         disabled={isLoading}
       >
         {isLoading ? t('auth.loggingIn') : t('auth.loginButton')}
       </Button>
-    </form>
+    </Box>
   );
 };

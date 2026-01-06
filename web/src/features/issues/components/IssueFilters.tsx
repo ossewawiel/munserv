@@ -1,5 +1,6 @@
 import { type FC, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
 
 import { Select } from '@/components/atoms/Select';
 import { Button } from '@/components/atoms/Button';
@@ -34,7 +35,7 @@ export const IssueFilters: FC<IssueFiltersProps> = ({
   const { t } = useTranslation();
 
   const handleStateChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       onStateChange(value ? (value as IssueState) : undefined);
     },
@@ -42,7 +43,7 @@ export const IssueFilters: FC<IssueFiltersProps> = ({
   );
 
   const handleTypeChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       onTypeChange(value ? (value as IssueType) : undefined);
     },
@@ -62,8 +63,8 @@ export const IssueFilters: FC<IssueFiltersProps> = ({
   const hasFilters = !!state || !!type;
 
   return (
-    <div className="flex flex-wrap items-end gap-4">
-      <div className="w-48">
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: 2 }}>
+      <Box sx={{ width: 192 }}>
         <Select
           label={t('issues.state')}
           options={stateOptions}
@@ -71,8 +72,8 @@ export const IssueFilters: FC<IssueFiltersProps> = ({
           onChange={handleStateChange}
           placeholder={t('common.all')}
         />
-      </div>
-      <div className="w-48">
+      </Box>
+      <Box sx={{ width: 192 }}>
         <Select
           label={t('issues.type')}
           options={typeOptions}
@@ -80,12 +81,12 @@ export const IssueFilters: FC<IssueFiltersProps> = ({
           onChange={handleTypeChange}
           placeholder={t('common.all')}
         />
-      </div>
+      </Box>
       {hasFilters && (
-        <Button variant="ghost" size="sm" onClick={onClear}>
+        <Button variant="ghost" size="small" onClick={onClear}>
           {t('common.clear')}
         </Button>
       )}
-    </div>
+    </Box>
   );
 };

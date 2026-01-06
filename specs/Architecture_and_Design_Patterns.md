@@ -333,6 +333,79 @@ function IssuesPage() {
 }
 ```
 
+### 4.4 MUI Theming Patterns
+
+The web admin uses MUI v7 with CSS variables for theming. See [Web_Theming_Guide.md](Web_Theming_Guide.md) for complete theming documentation.
+
+**Using the `sx` prop for styling:**
+
+```typescript
+// Theme color tokens
+<Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }} />
+
+// Responsive values
+<Box sx={{ p: { xs: 2, sm: 3, md: 4 } }} />
+
+// Nested selectors
+<TableRow
+  sx={{
+    cursor: 'pointer',
+    '&:hover': { bgcolor: 'action.hover' },
+  }}
+/>
+```
+
+**Using CSS variables directly:**
+
+```typescript
+// When you need raw color values
+<Box sx={{ bgcolor: 'var(--munserv-palette-primary-main)' }} />
+```
+
+**Component patterns:**
+
+```typescript
+// Atoms use MUI components directly
+import MuiButton from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+
+export const Button: FC<ButtonProps> = ({ variant, isLoading, ...props }) => (
+  <MuiButton
+    variant={variant === 'primary' ? 'contained' : 'outlined'}
+    startIcon={isLoading ? <CircularProgress size={16} /> : undefined}
+    {...props}
+  />
+);
+
+// Molecules compose atoms
+import Box from '@mui/material/Box';
+import { Button } from '@/components/atoms/Button';
+
+export const LoginForm: FC<LoginFormProps> = ({ onSubmit }) => (
+  <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Input label="Email" />
+    <Button type="submit">Login</Button>
+  </Box>
+);
+```
+
+**Pod theming (per-customer colors):**
+
+```typescript
+// Theme context loads pod-specific colors at runtime
+const { setPodTheme } = useTheme();
+
+// Load from API or environment
+const podConfig = await fetchPodConfig();
+setPodTheme({
+  podId: 'pod-123',
+  colors: {
+    primary: '#233D36',    // Forest Green
+    secondary: '#D9613F',  // Terracotta
+  },
+});
+```
+
 ---
 
 ## 5. Quick Reference
@@ -345,7 +418,8 @@ function IssuesPage() {
 | Kotlin  | Domain logic in entities, orchestration in services   |
 | Kotlin  | Extension functions for conversions                   |
 | Flutter | Riverpod for state, freezed for models                |
-| React   | React Query for server state, Zustand for UI state    |
+| React   | React Query for server state, MUI `sx` prop for styles |
+| React   | MUI components (Box, Typography, Button, etc.)        |
 | All     | Feature-based folders, co-located tests               |
 
 ### Don't Do This ❌
@@ -357,6 +431,8 @@ function IssuesPage() {
 | Kotlin  | Services calling other module's repositories     |
 | Flutter | setState for complex state                       |
 | React   | Prop drilling beyond 2 levels                    |
+| React   | Inline styles (use `sx` prop instead)            |
+| React   | Direct color values (use theme tokens)           |
 | All     | Business logic in controllers/widgets/components |
 
 ---
