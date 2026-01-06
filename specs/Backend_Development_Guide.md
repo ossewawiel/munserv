@@ -2047,7 +2047,24 @@ docker exec -it munserv-db psql -U munserv -d munserv_dev \
 [x] Live integration tests pass against running server
 ```
 
-### 10.7 Full MVP Complete Checklist
+### 10.7 Phase 5 Complete Checklist
+
+```
+[x] PhotoValidationService tests pass (file type, size validation)
+[x] LocalPhotoStorageService tests pass (upload, URL generation)
+[x] Can POST /api/v1/issues/{id}/photos (upload photo)
+[x] Can GET /api/v1/issues/{id}/photos (list photos)
+[x] Can DELETE /api/v1/photos/{id} (delete photo)
+[x] Photos upload to local storage (./uploads directory)
+[x] Issue list includes thumbnailUrl
+[x] Issue detail includes photoUrls array
+[x] Invalid content types rejected (400 with VALIDATION_ERROR)
+[x] File size limits enforced (5MB, proper error message)
+[x] Spring multipart configured for 5MB max file size
+[x] MaxUploadSizeExceededException handled gracefully
+```
+
+### 10.8 Full MVP Complete Checklist
 
 ```
 [ ] All Phase 0-7 checklists complete

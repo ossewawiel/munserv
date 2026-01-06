@@ -67,7 +67,7 @@
 |---|----------|--------|---------|
 | 12 | [Backend Development Guide](Backend_Development_Guide.md) | ✅ Complete | Phased TDD implementation plan |
 | 13 | Database Migrations | ✅ Complete | PostgreSQL + PostGIS schema (V001-V010) |
-| 14 | Backend Implementation | 🔄 Phase 4 Done | Kotlin/Spring Boot API (Phases 0-4 complete) |
+| 14 | Backend Implementation | 🔄 Phase 5 Done | Kotlin/Spring Boot API (Phases 0-5 complete) |
 | 15 | Integration & Testing | ⏳ Phase 6 | Connect frontend to real backend |
 
 ### Phase 4: Expansion (FUTURE)
@@ -290,6 +290,7 @@ Include in prompt:
 | 2.0 | December 2025 | Revised for agile MVP-first approach |
 | 2.1 | January 2026 | Backend Phases 0-3 complete (scaffold, auth, issues domain) |
 | 2.2 | January 2026 | Backend Phase 4 complete (admin endpoints: dashboard, heat report, members) |
+| 2.3 | January 2026 | Backend Phase 5 complete (photo upload: local storage, validation, REST endpoints) |
 
 ---
 
@@ -331,15 +332,15 @@ Include in prompt:
   - ⬜ Profile creation with GPS address
   - ⬜ Sector auto-assignment from location
 
-**Track B: Backend Development (Phase 5 Next)**
+**Track B: Backend Development (Phase 6 Next)**
 - ✅ Create Backend Development Guide
 - ✅ Phase 0: Project scaffold (build.gradle.kts, application.yml)
 - ✅ Phase 1: Database foundation (migrations V001-V003, sectors API)
 - ✅ Phase 2: Authentication (members, JWT, auth endpoints)
 - ✅ Phase 3: Issues domain (CRUD, state machine, heat calculation)
 - ✅ Phase 4: Admin endpoints (dashboard, heat report, members list)
-- 🔄 Phase 5: Photo upload
-- ⬜ Phase 6: Integration testing
+- ✅ Phase 5: Photo upload (local storage, validation, REST endpoints)
+- 🔄 Phase 6: Integration testing
 - ⬜ Phase 7: Hardening
 
 ### Later
