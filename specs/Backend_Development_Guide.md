@@ -2033,7 +2033,21 @@ docker exec -it munserv-db psql -U munserv -d munserv_dev \
 [x] State history is recorded
 ```
 
-### 10.6 Full MVP Complete Checklist
+### 10.6 Phase 4 Complete Checklist
+
+```
+[x] DashboardService tests pass (stats aggregation)
+[x] HeatReportService tests pass (heat sorting)
+[x] Can GET /api/v1/admin/dashboard (returns sector stats)
+[x] Can GET /api/v1/admin/reports/heat (sorted by heat descending)
+[x] Can GET /api/v1/admin/members (paginated with issue counts)
+[x] All admin endpoints require ROLE_ADMIN
+[x] Admin login endpoint works (POST /auth/admin/login)
+[x] API responses match mock API contract format
+[x] Live integration tests pass against running server
+```
+
+### 10.7 Full MVP Complete Checklist
 
 ```
 [ ] All Phase 0-7 checklists complete
