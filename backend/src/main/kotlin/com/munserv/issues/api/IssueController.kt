@@ -6,6 +6,7 @@ import com.munserv.issues.domain.IssueType
 import com.munserv.issues.service.CreateIssueCommand
 import com.munserv.issues.service.IssueResult
 import com.munserv.issues.service.IssueService
+import com.munserv.photos.service.IssuePhotoService
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
@@ -29,6 +30,7 @@ import java.util.UUID
 @RequestMapping("/api/v1/issues")
 class IssueController(
     private val issueService: IssueService,
+    private val photoService: IssuePhotoService,
 ) {
     /**
      * GET /api/v1/issues - List issues with optional filtering.
@@ -72,8 +74,12 @@ class IssueController(
         val endIndex = minOf(startIndex + limit, totalItems)
         val paginated = if (startIndex < totalItems) issues.subList(startIndex, endIndex) else emptyList()
 
-        // Convert to response
-        val items = paginated.map { it.toSummaryResponse() }
+        // Convert to response with thumbnail URLs
+        val items =
+            paginated.map { issue ->
+                val thumbnailUrl = photoService.getThumbnailUrl(issue.id)
+                issue.toSummaryResponse(thumbnailUrl)
+            }
         val pagination =
             PaginationInfo(
                 page = page,
@@ -107,7 +113,11 @@ class IssueController(
         val endIndex = minOf(startIndex + limit, totalItems)
         val paginated = if (startIndex < totalItems) issues.subList(startIndex, endIndex) else emptyList()
 
-        val items = paginated.map { it.toSummaryResponse() }
+        val items =
+            paginated.map { issue ->
+                val thumbnailUrl = photoService.getThumbnailUrl(issue.id)
+                issue.toSummaryResponse(thumbnailUrl)
+            }
         val pagination =
             PaginationInfo(
                 page = page,
@@ -129,7 +139,10 @@ class IssueController(
         val issueId = IssueId(UUID.fromString(id))
 
         return when (val result = issueService.findById(issueId)) {
-            is IssueResult.Success -> ResponseEntity.ok(result.issue.toDetailResponse())
+            is IssueResult.Success -> {
+                val photoUrls = photoService.getPhotoUrls(issueId)
+                ResponseEntity.ok(result.issue.toDetailResponse(photoUrls))
+            }
             is IssueResult.NotFound ->
                 ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse(ErrorDetail("NOT_FOUND", "Issue not found")))
@@ -162,9 +175,11 @@ class IssueController(
             )
 
         return when (val result = issueService.create(command)) {
-            is IssueResult.Success ->
+            is IssueResult.Success -> {
+                // New issues have no photos yet
                 ResponseEntity.status(HttpStatus.CREATED)
-                    .body(result.issue.toDetailResponse())
+                    .body(result.issue.toDetailResponse(emptyList()))
+            }
             is IssueResult.ValidationError ->
                 ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ErrorResponse(ErrorDetail("VALIDATION_ERROR", result.errors.joinToString(", "))))
@@ -186,7 +201,10 @@ class IssueController(
         val newState = IssueState.fromString(request.state)
 
         return when (val result = issueService.updateState(issueId, newState)) {
-            is IssueResult.Success -> ResponseEntity.ok(result.issue.toDetailResponse())
+            is IssueResult.Success -> {
+                val photoUrls = photoService.getPhotoUrls(issueId)
+                ResponseEntity.ok(result.issue.toDetailResponse(photoUrls))
+            }
             is IssueResult.NotFound ->
                 ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse(ErrorDetail("NOT_FOUND", "Issue not found")))

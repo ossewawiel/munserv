@@ -5,6 +5,7 @@ import com.munserv.issues.domain.IssueId
 import com.munserv.issues.domain.IssueState
 import com.munserv.issues.domain.IssueType
 import com.munserv.issues.repository.IssueRepository
+import com.munserv.photos.service.IssuePhotoService
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
@@ -23,6 +24,7 @@ import java.time.temporal.ChronoUnit
 
 class HeatReportServiceTest {
     private lateinit var issueRepository: IssueRepository
+    private lateinit var photoService: IssuePhotoService
     private lateinit var clock: Clock
     private lateinit var service: HeatReportService
 
@@ -34,8 +36,12 @@ class HeatReportServiceTest {
     @BeforeEach
     fun setUp() {
         issueRepository = mockk()
+        photoService = mockk()
         clock = Clock.fixed(fixedInstant, ZoneId.of("UTC"))
-        service = HeatReportService(issueRepository, clock)
+        service = HeatReportService(issueRepository, photoService, clock)
+
+        // Default: return no thumbnail for any issue
+        every { photoService.getThumbnailUrl(any()) } returns null
     }
 
     private fun createTestIssue(

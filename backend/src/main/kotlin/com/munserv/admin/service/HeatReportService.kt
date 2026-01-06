@@ -3,6 +3,7 @@ package com.munserv.admin.service
 import com.munserv.admin.domain.HeatReportItem
 import com.munserv.issues.domain.Issue
 import com.munserv.issues.repository.IssueRepository
+import com.munserv.photos.service.IssuePhotoService
 import com.munserv.shared.types.SectorId
 import org.springframework.stereotype.Service
 import java.time.Clock
@@ -14,6 +15,7 @@ import java.time.temporal.ChronoUnit
 @Service
 class HeatReportService(
     private val issueRepository: IssueRepository,
+    private val photoService: IssuePhotoService,
     private val clock: Clock,
 ) {
     /**
@@ -38,8 +40,8 @@ class HeatReportService(
 
     private fun Issue.toHeatReportItem(now: java.time.Instant): HeatReportItem {
         val daysOpen = ChronoUnit.DAYS.between(createdAt, now)
+        val thumbnailUrl = photoService.getThumbnailUrl(id)
 
-        // TODO: Add thumbnailUrl photo support in Phase 5
         return HeatReportItem(
             id = id,
             type = type,
@@ -48,7 +50,7 @@ class HeatReportService(
             daysOpen = daysOpen,
             reportCount = reportCount,
             location = location,
-            thumbnailUrl = null,
+            thumbnailUrl = thumbnailUrl,
         )
     }
 }
