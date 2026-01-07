@@ -73,3 +73,4 @@ temp/
 
 # Docker
 docker-compose.override.yml
+.mcp.json
