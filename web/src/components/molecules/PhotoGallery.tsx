@@ -83,7 +83,7 @@ export const PhotoGallery: FC<PhotoGalleryProps> = ({
                   content: '""',
                   position: 'absolute',
                   inset: 0,
-                  bgcolor: 'rgba(0,0,0,0.1)',
+                  bgcolor: 'action.hover',
                 },
               }}
             >

@@ -59,6 +59,7 @@ export function createPodTheme(config: PodThemeConfig) {
             hover: lightScheme.surfaceContainerHigh,
             selected: lightScheme.surfaceContainerHighest,
           },
+          tertiaryLight: lightScheme.tertiaryLight,
         },
       },
       dark: {
@@ -105,6 +106,7 @@ export function createPodTheme(config: PodThemeConfig) {
             hover: darkScheme.surfaceContainerHigh,
             selected: darkScheme.surfaceContainerHighest,
           },
+          tertiaryLight: darkScheme.tertiaryLight,
         },
       },
     },

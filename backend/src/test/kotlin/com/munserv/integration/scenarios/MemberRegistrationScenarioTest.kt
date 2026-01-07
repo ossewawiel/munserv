@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.auth.api.LoginRequest
 import com.munserv.auth.api.RefreshTokenRequest
 import com.munserv.auth.api.RegisterRequest
-import com.munserv.auth.api.VerifyOtpRequest
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.MethodOrderer

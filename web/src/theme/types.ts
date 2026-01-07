@@ -36,3 +36,16 @@ export type IssueState =
  * Heat level for priority indicators
  */
 export type HeatLevel = 'low' | 'medium' | 'high' | 'critical';
+
+/**
+ * MUI Palette Augmentation
+ * Adds custom color tokens accessible via theme.palette.*
+ */
+declare module '@mui/material/styles' {
+  interface Palette {
+    tertiaryLight: string;
+  }
+  interface PaletteOptions {
+    tertiaryLight?: string;
+  }
+}

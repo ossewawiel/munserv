@@ -11,7 +11,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
@@ -96,16 +96,12 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
                 px: open ? 2 : 1.5,
                 justifyContent: open ? 'initial' : 'center',
                 '&.Mui-selected': {
-                  bgcolor: theme.palette.mode === 'dark'
-                    ? 'rgba(217, 97, 63, 0.15)'
-                    : 'secondary.light',
+                  bgcolor: alpha(theme.palette.secondary.main, 0.15),
                   color: theme.palette.mode === 'dark'
                     ? 'secondary.main'
                     : 'secondary.dark',
                   '&:hover': {
-                    bgcolor: theme.palette.mode === 'dark'
-                      ? 'rgba(217, 97, 63, 0.15)'
-                      : 'secondary.light',
+                    bgcolor: alpha(theme.palette.secondary.main, 0.2),
                   },
                   '& .MuiListItemIcon-root': {
                     color: theme.palette.mode === 'dark'
@@ -114,9 +110,7 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
                   },
                 },
                 '&:hover': {
-                  bgcolor: theme.palette.mode === 'dark'
-                    ? 'rgba(217, 97, 63, 0.15)'
-                    : 'secondary.light',
+                  bgcolor: alpha(theme.palette.secondary.main, 0.1),
                   color: theme.palette.mode === 'dark'
                     ? 'secondary.main'
                     : 'secondary.dark',

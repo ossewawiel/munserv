@@ -459,3 +459,138 @@ components: {
   },
 }
 ```
+
+## 12. Berry-Inspired Dashboard Patterns
+
+The dashboard adopts styling patterns from the Berry React template while maintaining MunServ brand colors.
+
+### 12.1 Layout Constants
+
+```typescript
+// theme/constants.ts
+export const gridSpacing = 3; // 24px - Berry standard grid spacing
+
+export const avatarSizes = {
+  small: { width: 22, height: 22, fontSize: '1rem' },
+  medium: { width: 34, height: 34, fontSize: '1.25rem' },
+  large: { width: 44, height: 44, fontSize: '1.5rem' },
+};
+```
+
+### 12.2 Card Shadows
+
+```typescript
+// theme/shadows.ts
+export const cardHoverShadow = '0 2px 14px 0 rgb(32 40 45 / 8%)';
+
+export const colorShadows = {
+  primary: '0 4px 20px 0 rgba(35, 61, 54, 0.14)',   // Forest Green
+  secondary: '0 4px 20px 0 rgba(217, 97, 63, 0.14)', // Terracotta
+  // ... other semantic colors
+};
+```
+
+### 12.3 StatCard Component
+
+Dashboard stat cards with colored backgrounds using brand colors.
+
+| Property | Value |
+|----------|-------|
+| Padding | 20px (2.5 spacing units) |
+| Border Radius | 12px |
+| Hover Shadow | cardHoverShadow |
+| Icon Avatar | 44x44px, semi-transparent white |
+
+```typescript
+// Usage - colored stat cards alternate between primary and secondary
+<StatCard
+  title="Total Open"
+  value={6}
+  variant="primary"  // or "secondary"
+  colored            // enables colored background
+  icon={<AssignmentOutlinedIcon />}
+/>
+```
+
+**Variant Colors for Colored Cards:**
+
+| Variant | Background | Usage |
+|---------|------------|-------|
+| primary | primary.dark (Forest Green) | Primary metrics |
+| secondary | secondary.main (Terracotta) | Secondary metrics |
+
+### 12.4 MainCard Component
+
+Berry-style card wrapper for dashboard sections.
+
+```typescript
+<MainCard title="Issues by State" divider={false}>
+  {/* Card content */}
+</MainCard>
+```
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| title | - | Card header text or ReactNode |
+| divider | true | Show divider below header |
+| hoverEffect | true | Enable hover shadow |
+| contentSx | - | Custom content styles |
+
+### 12.5 IconAvatar Component
+
+Consistent icon containers for stat cards.
+
+```typescript
+<IconAvatar size="large" variant="primary">
+  <AssignmentOutlinedIcon />
+</IconAvatar>
+```
+
+| Size | Dimensions | Font Size |
+|------|------------|-----------|
+| small | 22x22px | 1rem |
+| medium | 34x34px | 1.25rem |
+| large | 44x44px | 1.5rem |
+
+### 12.6 Dashboard Grid Layout
+
+```typescript
+import Grid from '@mui/material/Grid';
+import { gridSpacing } from '@/theme';
+
+<Grid container spacing={gridSpacing}>
+  <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+    <StatCard ... />
+  </Grid>
+</Grid>
+```
+
+### 12.7 Progress Bars (Charts)
+
+Issue state and type charts use LinearProgress with rounded corners.
+
+```typescript
+<LinearProgress
+  variant="determinate"
+  value={percentage}
+  sx={{
+    height: 8,
+    borderRadius: 4,
+    bgcolor: 'action.hover',
+    '& .MuiLinearProgress-bar': {
+      borderRadius: 4,
+      bgcolor: issueStateColors[state], // or 'primary.main'
+    },
+  }}
+/>
+```
+
+### 12.8 Files Reference (Berry Patterns)
+
+| File | Purpose |
+|------|---------|
+| `web/src/theme/constants.ts` | gridSpacing, avatarSizes |
+| `web/src/theme/shadows.ts` | cardHoverShadow, colorShadows |
+| `web/src/components/atoms/MainCard.tsx` | Berry-style card wrapper |
+| `web/src/components/atoms/IconAvatar.tsx` | Icon avatar component |
+| `web/src/components/molecules/StatCard.tsx` | Dashboard stat cards |

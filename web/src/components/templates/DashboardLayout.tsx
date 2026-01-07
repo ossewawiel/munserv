@@ -19,8 +19,6 @@ import {
   drawerWidthMini,
   commonAvatar,
   mediumAvatar,
-  lightScheme,
-  darkScheme,
 } from '@/theme';
 
 interface DashboardLayoutProps {
@@ -39,14 +37,12 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
     ...theme.typography.body1,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    // Content background: cream with optional vintage map overlay
-    backgroundColor: theme.palette.mode === 'dark'
-      ? darkScheme.tertiaryLight
-      : lightScheme.tertiaryLight,
-    // Vintage map background image (very subtle)
+    // Content background: cream with optional vintage map overlay (uses CSS variable for theme awareness)
+    backgroundColor: 'var(--munserv-palette-tertiaryLight)',
+    // Vintage map background image (very subtle) - only in light mode
     backgroundImage: theme.palette.mode === 'dark'
       ? 'none'
-      : `linear-gradient(${lightScheme.tertiaryLight}D9, ${lightScheme.tertiaryLight}D9), url('/assets/vintage-map.jpg')`,
+      : 'linear-gradient(color-mix(in srgb, var(--munserv-palette-tertiaryLight) 85%, transparent), color-mix(in srgb, var(--munserv-palette-tertiaryLight) 85%, transparent)), url(\'/assets/vintage-map.jpg\')',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundAttachment: 'fixed',

@@ -2,7 +2,7 @@
 # Uses docker-compose containers (must be running: cd infrastructure/docker && docker compose up -d)
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/munserv_dev
+    url: jdbc:postgresql://localhost:5433/munserv_dev
     username: munserv
     password: munserv_dev
     driver-class-name: org.postgresql.Driver

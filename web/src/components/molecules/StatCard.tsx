@@ -4,6 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
+import { useTheme, alpha } from '@mui/material/styles';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import { cardHoverShadow, avatarSizes } from '@/theme';
@@ -43,9 +44,12 @@ export const StatCard: FC<StatCardProps> = ({
   colored = false,
   trend,
 }) => {
+  const theme = useTheme();
   const isColored = colored;
   const textColor = isColored ? 'common.white' : 'text.primary';
-  const secondaryTextColor = isColored ? 'rgba(255,255,255,0.7)' : 'text.secondary';
+  const secondaryTextColor = isColored
+    ? alpha(theme.palette.common.white, 0.7)
+    : 'text.secondary';
 
   return (
     <Card
