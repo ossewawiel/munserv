@@ -89,8 +89,21 @@ void main() {
 
         expect(result, isA<OtpVerifyResultExistingUser>());
         final existing = result as OtpVerifyResultExistingUser;
-        expect(existing.tokens.accessToken, 'access_abc');
-        expect(existing.profile.member.id, 'user_123');
+        expect(existing.tokens?.accessToken, 'access_abc');
+        expect(existing.profile?.member.id, 'user_123');
+      });
+
+      test('can be created with null tokens and profile (backend flow)', () {
+        const result = OtpVerifyResult.existingUser(
+          tokens: null,
+          profile: null,
+        );
+
+        expect(result, isA<OtpVerifyResultExistingUser>());
+        final existing = result as OtpVerifyResultExistingUser;
+        expect(existing.tokens, isNull);
+        expect(existing.profile, isNull);
+        expect(result.hasTokens, false);
       });
 
       test('isExistingUser returns true', () {
@@ -133,9 +146,9 @@ void main() {
 
         expect(result, isA<OtpVerifyResultExistingUser>());
         final existing = result as OtpVerifyResultExistingUser;
-        expect(existing.tokens.accessToken, 'access_abc');
-        expect(existing.profile.member.firstName, 'John');
-        expect(existing.profile.sector.name, 'Test Sector');
+        expect(existing.tokens?.accessToken, 'access_abc');
+        expect(existing.profile?.member.firstName, 'John');
+        expect(existing.profile?.sector.name, 'Test Sector');
       });
     });
 
@@ -170,7 +183,7 @@ void main() {
         final output = switch (result) {
           OtpVerifyResultNewUser(:final tempToken) => 'New: $tempToken',
           OtpVerifyResultExistingUser(:final profile) =>
-            'Existing: ${profile.member.id}',
+            'Existing: ${profile?.member.id ?? "unknown"}',
         };
 
         expect(output, 'New: temp_abc');
@@ -185,7 +198,7 @@ void main() {
         final output = switch (result) {
           OtpVerifyResultNewUser(:final tempToken) => 'New: $tempToken',
           OtpVerifyResultExistingUser(:final profile) =>
-            'Existing: ${profile.member.id}',
+            'Existing: ${profile?.member.id ?? "unknown"}',
         };
 
         expect(output, 'Existing: user_123');

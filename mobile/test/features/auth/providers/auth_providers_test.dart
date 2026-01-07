@@ -137,6 +137,7 @@ void main() {
       );
       when(() => mockStorage.saveTokens(testTokens)).thenAnswer((_) async {});
       when(() => mockStorage.saveProfile(testProfile)).thenAnswer((_) async {});
+      when(() => mockStorage.savePhoneNumber(any())).thenAnswer((_) async {});
       when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
 
@@ -237,7 +238,7 @@ void main() {
     });
 
     test('logout clears storage and updates state', () async {
-      when(() => mockStorage.clearAll()).thenAnswer((_) async {});
+      when(() => mockStorage.clearSession()).thenAnswer((_) async {});
       when(() => mockStorage.getTokens()).thenAnswer((_) async => testTokens);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => testProfile);
 
@@ -256,7 +257,7 @@ void main() {
       final state = container.read(authProvider);
       expect(state, isA<AuthStateUnauthenticated>());
 
-      verify(() => mockStorage.clearAll()).called(1);
+      verify(() => mockStorage.clearSession()).called(1);
     });
 
     test('clearError returns to unauthenticated from error state', () async {
