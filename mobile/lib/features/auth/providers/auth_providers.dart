@@ -48,7 +48,8 @@ AuthApi authApi(Ref ref) {
 @riverpod
 AuthRepository authRepository(Ref ref) {
   final api = ref.watch(authApiProvider);
-  return AuthRepository(api);
+  final storage = ref.watch(secureStorageProvider);
+  return AuthRepository(api, storage);
 }
 
 // =============================================================================
@@ -97,23 +98,31 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   /// Verify OTP code
+  /// For backend flow: existing users need to login with PIN separately
+  /// For mock API flow: existing users get tokens immediately
   Future<Result<OtpVerifyResult>> verifyOtp(
     String phoneNumber,
     String otp,
   ) async {
     final result = await _repository.verifyOtp(phoneNumber, otp);
 
-    // If existing user, they're now logged in
+    // For mock API flow: If existing user has tokens, they're logged in
+    // For backend flow: tokens/profile are null, user must login with PIN
     if (result.isSuccess) {
       final verifyResult = result.dataOrNull!;
-      if (verifyResult.isExistingUser) {
+      if (verifyResult.isExistingUser && verifyResult.hasTokens) {
         final existing = verifyResult as OtpVerifyResultExistingUser;
+        // Mock API returns tokens immediately
         await _handleSuccessfulAuth(
-          existing.tokens,
-          existing.profile.member,
-          existing.profile.sector,
+          existing.tokens!,
+          existing.profile!.member,
+          existing.profile!.sector,
         );
         // Save phone number for quick re-login after logout
+        await _storage.savePhoneNumber(phoneNumber);
+      }
+      // For backend flow: just save phone number, user will login with PIN
+      if (verifyResult.isExistingUser && !verifyResult.hasTokens) {
         await _storage.savePhoneNumber(phoneNumber);
       }
     }
@@ -122,32 +131,36 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   /// Complete registration for new user
+  /// For backend: phoneNumber and sectorId are required
+  /// tempToken is kept for mock API compatibility but not used by backend
   Future<Result<AuthResponse>> completeRegistration({
     required String phoneNumber,
-    required String tempToken,
     required String firstName,
     required String surname,
     required String pin,
     required GeoPoint location,
     required String address,
+    required String sectorId,
+    String? tempToken, // Optional: used by mock API, ignored by backend
   }) async {
     state = const AuthState.loading();
 
     final result = await _repository.completeRegistration(
-      tempToken: tempToken,
+      phoneNumber: phoneNumber,
       firstName: firstName,
       surname: surname,
       pin: pin,
       location: location,
       address: address,
+      sectorId: sectorId,
     );
 
     if (result.isSuccess) {
       final response = result.dataOrNull!;
       await _handleSuccessfulAuth(
         response.tokens,
-        response.member,
-        response.sector,
+        response.profile.member,
+        response.profile.sector,
       );
       // Save phone number for quick re-login after logout
       await _storage.savePhoneNumber(phoneNumber);
@@ -173,8 +186,8 @@ class AuthNotifier extends _$AuthNotifier {
       // This updates auth state which triggers router redirect
       await _handleSuccessfulAuth(
         response.tokens,
-        response.member,
-        response.sector,
+        response.profile.member,
+        response.profile.sector,
       );
     } else {
       state = AuthState.error(result.errorOrNull?.displayMessage ?? 'Login failed');

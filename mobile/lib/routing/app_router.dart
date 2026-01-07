@@ -142,6 +142,8 @@ GoRouter appRouter(Ref ref) {
             address: params['address'] ?? '',
             latitude: double.tryParse(params['latitude'] ?? '') ?? 0,
             longitude: double.tryParse(params['longitude'] ?? '') ?? 0,
+            // Default sector for MVP - should be selected by user or auto-detected
+            sectorId: params['sectorId'] ?? '550e8400-e29b-41d4-a716-446655440001',
           );
         },
       ),

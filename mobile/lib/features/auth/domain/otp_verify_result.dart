@@ -23,14 +23,18 @@ sealed class OtpVerifyResult with _$OtpVerifyResult {
   const OtpVerifyResult._();
 
   /// New user - needs to complete registration
+  /// tempToken is optional (mock API uses it, backend doesn't)
   const factory OtpVerifyResult.newUser({
-    required String tempToken,
+    @Default('') String tempToken,
   }) = OtpVerifyResultNewUser;
 
-  /// Existing user - returns full auth response (already logged in)
+  /// Existing user - needs to login with PIN
+  /// tokens/profile are optional for backend flow (login happens separately)
+  /// For mock API: returns tokens/profile immediately
+  /// For backend: returns null tokens/profile, user must login with PIN
   const factory OtpVerifyResult.existingUser({
-    required AuthTokens tokens,
-    required AuthProfile profile,
+    AuthTokens? tokens,
+    AuthProfile? profile,
   }) = OtpVerifyResultExistingUser;
 
   factory OtpVerifyResult.fromJson(Map<String, dynamic> json) =>
@@ -39,6 +43,11 @@ sealed class OtpVerifyResult with _$OtpVerifyResult {
   /// Whether this is a new user needing registration
   bool get isNewUser => this is OtpVerifyResultNewUser;
 
-  /// Whether this is an existing user
+  /// Whether this is an existing user (needs to login with PIN)
   bool get isExistingUser => this is OtpVerifyResultExistingUser;
+
+  /// Whether existing user has tokens (mock API flow)
+  bool get hasTokens =>
+      this is OtpVerifyResultExistingUser &&
+      (this as OtpVerifyResultExistingUser).tokens != null;
 }

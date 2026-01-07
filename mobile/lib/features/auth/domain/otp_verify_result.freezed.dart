@@ -411,7 +411,7 @@ return existingUser(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String tempToken)?  newUser,TResult Function( AuthTokens tokens,  AuthProfile profile)?  existingUser,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String tempToken)?  newUser,TResult Function( AuthTokens? tokens,  AuthProfile? profile)?  existingUser,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case OtpVerifyResultNewUser() when newUser != null:
 return newUser(_that.tempToken);case OtpVerifyResultExistingUser() when existingUser != null:
@@ -433,7 +433,7 @@ return existingUser(_that.tokens,_that.profile);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String tempToken)  newUser,required TResult Function( AuthTokens tokens,  AuthProfile profile)  existingUser,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String tempToken)  newUser,required TResult Function( AuthTokens? tokens,  AuthProfile? profile)  existingUser,}) {final _that = this;
 switch (_that) {
 case OtpVerifyResultNewUser():
 return newUser(_that.tempToken);case OtpVerifyResultExistingUser():
@@ -451,7 +451,7 @@ return existingUser(_that.tokens,_that.profile);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String tempToken)?  newUser,TResult? Function( AuthTokens tokens,  AuthProfile profile)?  existingUser,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String tempToken)?  newUser,TResult? Function( AuthTokens? tokens,  AuthProfile? profile)?  existingUser,}) {final _that = this;
 switch (_that) {
 case OtpVerifyResultNewUser() when newUser != null:
 return newUser(_that.tempToken);case OtpVerifyResultExistingUser() when existingUser != null:
@@ -467,10 +467,10 @@ return existingUser(_that.tokens,_that.profile);case _:
 @JsonSerializable()
 
 class OtpVerifyResultNewUser extends OtpVerifyResult {
-  const OtpVerifyResultNewUser({required this.tempToken, final  String? $type}): $type = $type ?? 'new_user',super._();
+  const OtpVerifyResultNewUser({this.tempToken = '', final  String? $type}): $type = $type ?? 'new_user',super._();
   factory OtpVerifyResultNewUser.fromJson(Map<String, dynamic> json) => _$OtpVerifyResultNewUserFromJson(json);
 
- final  String tempToken;
+@JsonKey() final  String tempToken;
 
 @JsonKey(name: 'status')
 final String $type;
@@ -540,11 +540,11 @@ as String,
 @JsonSerializable()
 
 class OtpVerifyResultExistingUser extends OtpVerifyResult {
-  const OtpVerifyResultExistingUser({required this.tokens, required this.profile, final  String? $type}): $type = $type ?? 'existing_user',super._();
+  const OtpVerifyResultExistingUser({this.tokens, this.profile, final  String? $type}): $type = $type ?? 'existing_user',super._();
   factory OtpVerifyResultExistingUser.fromJson(Map<String, dynamic> json) => _$OtpVerifyResultExistingUserFromJson(json);
 
- final  AuthTokens tokens;
- final  AuthProfile profile;
+ final  AuthTokens? tokens;
+ final  AuthProfile? profile;
 
 @JsonKey(name: 'status')
 final String $type;
@@ -583,11 +583,11 @@ abstract mixin class $OtpVerifyResultExistingUserCopyWith<$Res> implements $OtpV
   factory $OtpVerifyResultExistingUserCopyWith(OtpVerifyResultExistingUser value, $Res Function(OtpVerifyResultExistingUser) _then) = _$OtpVerifyResultExistingUserCopyWithImpl;
 @useResult
 $Res call({
- AuthTokens tokens, AuthProfile profile
+ AuthTokens? tokens, AuthProfile? profile
 });
 
 
-$AuthTokensCopyWith<$Res> get tokens;$AuthProfileCopyWith<$Res> get profile;
+$AuthTokensCopyWith<$Res>? get tokens;$AuthProfileCopyWith<$Res>? get profile;
 
 }
 /// @nodoc
@@ -600,11 +600,11 @@ class _$OtpVerifyResultExistingUserCopyWithImpl<$Res>
 
 /// Create a copy of OtpVerifyResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? tokens = null,Object? profile = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? tokens = freezed,Object? profile = freezed,}) {
   return _then(OtpVerifyResultExistingUser(
-tokens: null == tokens ? _self.tokens : tokens // ignore: cast_nullable_to_non_nullable
-as AuthTokens,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as AuthProfile,
+tokens: freezed == tokens ? _self.tokens : tokens // ignore: cast_nullable_to_non_nullable
+as AuthTokens?,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
+as AuthProfile?,
   ));
 }
 
@@ -612,18 +612,24 @@ as AuthProfile,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$AuthTokensCopyWith<$Res> get tokens {
-  
-  return $AuthTokensCopyWith<$Res>(_self.tokens, (value) {
+$AuthTokensCopyWith<$Res>? get tokens {
+    if (_self.tokens == null) {
+    return null;
+  }
+
+  return $AuthTokensCopyWith<$Res>(_self.tokens!, (value) {
     return _then(_self.copyWith(tokens: value));
   });
 }/// Create a copy of OtpVerifyResult
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$AuthProfileCopyWith<$Res> get profile {
-  
-  return $AuthProfileCopyWith<$Res>(_self.profile, (value) {
+$AuthProfileCopyWith<$Res>? get profile {
+    if (_self.profile == null) {
+    return null;
+  }
+
+  return $AuthProfileCopyWith<$Res>(_self.profile!, (value) {
     return _then(_self.copyWith(profile: value));
   });
 }

@@ -30,7 +30,7 @@ class SecurityConfig(
                     // Public endpoints
                     .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                     .requestMatchers("/api/v1/auth/**").permitAll()
-                    .requestMatchers("/api/v1/sectors").permitAll()
+                    .requestMatchers("/api/v1/sectors", "/api/v1/sectors/**").permitAll()
                     .requestMatchers("/uploads/**").permitAll()
                     // Swagger/OpenAPI documentation endpoints
                     .requestMatchers("/swagger-ui.html", "/swagger-ui/**").permitAll()
@@ -38,6 +38,7 @@ class SecurityConfig(
                     .requestMatchers("/swagger-resources/**", "/webjars/**").permitAll()
                     // Protected endpoints require authentication
                     .requestMatchers("/api/v1/issues/**").authenticated()
+                    .requestMatchers("/api/v1/members/**").authenticated()
                     .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                     // Default: allow all for now (remaining endpoints)
                     .anyRequest().permitAll()

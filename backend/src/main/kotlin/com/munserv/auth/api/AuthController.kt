@@ -9,9 +9,11 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 /**
@@ -251,6 +253,32 @@ class AuthController(
                 ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("invalid_token", "Invalid or expired refresh token"))
+
+            else ->
+                ResponseEntity
+                    .internalServerError()
+                    .body(ErrorResponse("error", "Unexpected error"))
+        }
+
+    @Operation(summary = "Check phone registration", description = "Check if a phone number is already registered")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Phone check successful"),
+            ApiResponse(responseCode = "400", description = "Invalid phone number format"),
+        ],
+    )
+    @GetMapping("/check-phone")
+    fun checkPhone(
+        @RequestParam phone: String,
+    ): ResponseEntity<*> =
+        when (val result = authService.checkPhone(phone)) {
+            is AuthResult.PhoneCheckResult ->
+                ResponseEntity.ok(CheckPhoneResponse(isRegistered = result.isRegistered))
+
+            is AuthResult.InvalidPhoneNumber ->
+                ResponseEntity
+                    .badRequest()
+                    .body(ErrorResponse("invalid_phone", "Invalid phone number format"))
 
             else ->
                 ResponseEntity

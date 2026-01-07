@@ -9,9 +9,11 @@ part 'dio_provider.g.dart';
 // API URL configuration via --dart-define
 // Emulator: flutter run --dart-define=API_HOST=10.0.2.2
 // Real device: flutter run --dart-define=API_HOST=192.168.1.100
-// Default: 10.0.2.2 (emulator)
+// Backend (default): port 8080
+// Mock API: flutter run --dart-define=API_PORT=3001
 const String _apiHost = String.fromEnvironment('API_HOST', defaultValue: '10.0.2.2');
-const String _baseUrl = 'http://$_apiHost:3001/api/v1';
+const String _apiPort = String.fromEnvironment('API_PORT', defaultValue: '8080');
+const String _baseUrl = 'http://$_apiHost:$_apiPort/api/v1';
 
 /// Provides the base Dio instance with auth interceptor
 @riverpod

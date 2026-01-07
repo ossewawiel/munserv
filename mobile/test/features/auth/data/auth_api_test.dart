@@ -2,37 +2,20 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:munserv_mobile/features/auth/data/auth_api.dart';
+import 'package:munserv_mobile/features/auth/domain/backend_registration_request.dart';
 import 'package:munserv_mobile/features/auth/domain/login_request.dart';
 import 'package:munserv_mobile/features/auth/domain/otp_request.dart';
 import 'package:munserv_mobile/features/auth/domain/otp_verify_result.dart';
-import 'package:munserv_mobile/features/auth/domain/registration_request.dart';
-import 'package:munserv_mobile/shared/models/geo_point.dart';
 
 class MockDio extends Mock implements Dio {}
-
-/// Test data for auth responses
-final testProfileData = {
-  'member': {
-    'id': 'user_123',
-    'firstName': 'John',
-    'surname': 'Doe',
-    'phoneNumber': '+27821234567',
-    'address': '42 Doreen Road, Northcliff',
-    'registrationLocation': {'latitude': -26.135, 'longitude': 27.98},
-    'sectorId': 'sector_1',
-    'status': 'active',
-    'createdAt': '2024-01-01T00:00:00Z',
-  },
-  'sector': {
-    'id': 'sector_1',
-    'name': 'Northcliff',
-    'center': {'latitude': -26.135, 'longitude': 27.98},
-  },
-};
 
 void main() {
   late MockDio mockDio;
   late AuthApi authApi;
+
+  setUpAll(() {
+    registerFallbackValue(RequestOptions());
+  });
 
   setUp(() {
     mockDio = MockDio();
@@ -59,117 +42,102 @@ void main() {
         expect(result.expiresInSeconds, 300);
         verify(() => mockDio.post(
               '/auth/register',
-              data: {'phoneNumber': '+27821234567'},
+              data: {'phone': '+27821234567'},
             )).called(1);
       });
     });
 
     group('verifyOtp', () {
-      test('calls POST /auth/verify-otp and returns NewUser', () async {
+      test('calls POST /auth/verify-otp with phone and code', () async {
         when(() => mockDio.post(
               '/auth/verify-otp',
               data: any(named: 'data'),
             )).thenAnswer((_) async => Response(
-              data: {'status': 'new_user', 'tempToken': 'temp_abc123'},
+              data: {'message': 'OTP verified successfully'},
               statusCode: 200,
               requestOptions: RequestOptions(),
             ));
 
-        final result = await authApi.verifyOtp(
+        // verifyOtp now returns void
+        await authApi.verifyOtp(
           const OtpVerifyRequest(phoneNumber: '+27821234567', otp: '123456'),
         );
 
-        expect(result, isA<OtpVerifyResultNewUser>());
-        expect((result as OtpVerifyResultNewUser).tempToken, 'temp_abc123');
         verify(() => mockDio.post(
               '/auth/verify-otp',
-              data: {'phoneNumber': '+27821234567', 'otp': '123456'},
+              data: {'phone': '+27821234567', 'code': '123456'},
             )).called(1);
       });
+    });
 
-      test('calls POST /auth/verify-otp and returns ExistingUser', () async {
-        when(() => mockDio.post(
-              '/auth/verify-otp',
-              data: any(named: 'data'),
+    group('checkPhone', () {
+      test('calls GET /auth/check-phone with phone number', () async {
+        when(() => mockDio.get(
+              '/auth/check-phone',
+              queryParameters: any(named: 'queryParameters'),
             )).thenAnswer((_) async => Response(
-              data: {
-                'status': 'existing_user',
-                'tokens': {
-                  'accessToken': 'access_abc',
-                  'refreshToken': 'refresh_xyz',
-                },
-                'profile': testProfileData,
-              },
+              data: {'isRegistered': true},
               statusCode: 200,
               requestOptions: RequestOptions(),
             ));
 
-        final result = await authApi.verifyOtp(
-          const OtpVerifyRequest(phoneNumber: '+27821234567', otp: '123456'),
-        );
+        final result = await authApi.checkPhone('+27821234567');
 
-        expect(result, isA<OtpVerifyResultExistingUser>());
-        final existing = result as OtpVerifyResultExistingUser;
-        expect(existing.tokens.accessToken, 'access_abc');
-        expect(existing.profile.member.id, 'user_123');
+        expect(result.isRegistered, true);
+        verify(() => mockDio.get(
+              '/auth/check-phone',
+              queryParameters: {'phone': '+27821234567'},
+            )).called(1);
       });
     });
 
     group('completeRegistration', () {
-      test('calls POST /auth/complete-registration with auth header', () async {
+      test('calls POST /auth/complete-registration with backend format', () async {
         when(() => mockDio.post(
               '/auth/complete-registration',
               data: any(named: 'data'),
-              options: any(named: 'options'),
             )).thenAnswer((_) async => Response(
               data: {
-                'tokens': {
-                  'accessToken': 'access_abc',
-                  'refreshToken': 'refresh_xyz',
-                },
-                'profile': testProfileData,
+                'memberId': 'user_123',
+                'accessToken': 'access_abc',
+                'refreshToken': 'refresh_xyz',
+                'expiresIn': 3600,
               },
               statusCode: 201,
               requestOptions: RequestOptions(),
             ));
 
         final result = await authApi.completeRegistration(
-          tempToken: 'temp_abc123',
-          request: const RegistrationRequest(
+          const BackendRegistrationRequest(
+            phone: '+27821234567',
             firstName: 'John',
             surname: 'Doe',
             pin: '1234',
-            location: GeoPoint(latitude: -26.1350, longitude: 27.9800),
             address: '42 Doreen Road, Northcliff',
+            sectorId: 'sector_1',
+            latitude: -26.135,
+            longitude: 27.98,
           ),
         );
 
-        expect(result.tokens.accessToken, 'access_abc');
-        expect(result.profile.member.firstName, 'John');
-
-        final captured = verify(() => mockDio.post(
-          '/auth/complete-registration',
-          data: any(named: 'data'),
-          options: captureAny(named: 'options'),
-        )).captured;
-
-        final options = captured.first as Options;
-        expect(options.headers?['Authorization'], 'Bearer temp_abc123');
+        expect(result.memberId, 'user_123');
+        expect(result.accessToken, 'access_abc');
+        expect(result.refreshToken, 'refresh_xyz');
+        expect(result.expiresIn, 3600);
       });
     });
 
     group('login', () {
-      test('calls POST /auth/login with credentials', () async {
+      test('calls POST /auth/login with credentials (backend format)', () async {
         when(() => mockDio.post(
               '/auth/login',
               data: any(named: 'data'),
             )).thenAnswer((_) async => Response(
               data: {
-                'tokens': {
-                  'accessToken': 'access_abc',
-                  'refreshToken': 'refresh_xyz',
-                },
-                'profile': testProfileData,
+                'memberId': 'user_123',
+                'accessToken': 'access_abc',
+                'refreshToken': 'refresh_xyz',
+                'expiresIn': 3600,
               },
               statusCode: 200,
               requestOptions: RequestOptions(),
@@ -179,13 +147,59 @@ void main() {
           const LoginRequest(phoneNumber: '+27821234567', pin: '1234'),
         );
 
-        expect(result.tokens.accessToken, 'access_abc');
-        expect(result.tokens.refreshToken, 'refresh_xyz');
-        expect(result.profile.member.id, 'user_123');
+        expect(result.memberId, 'user_123');
+        expect(result.accessToken, 'access_abc');
+        expect(result.refreshToken, 'refresh_xyz');
         verify(() => mockDio.post(
               '/auth/login',
-              data: {'phoneNumber': '+27821234567', 'pin': '1234'},
+              data: {'phone': '+27821234567', 'pin': '1234'},
             )).called(1);
+      });
+    });
+
+    group('getMe', () {
+      test('calls GET /members/me and returns profile', () async {
+        when(() => mockDio.get('/members/me')).thenAnswer((_) async => Response(
+              data: {
+                'id': 'user_123',
+                'firstName': 'John',
+                'surname': 'Doe',
+                'phoneNumber': '+27821234567',
+                'address': '42 Doreen Road, Northcliff',
+                'registrationLocation': {'latitude': -26.135, 'longitude': 27.98},
+                'sectorId': 'sector_1',
+                'status': 'ACTIVE',
+                'createdAt': '2024-01-01T00:00:00Z',
+              },
+              statusCode: 200,
+              requestOptions: RequestOptions(),
+            ));
+
+        final result = await authApi.getMe();
+
+        expect(result.id, 'user_123');
+        expect(result.firstName, 'John');
+        expect(result.sectorId, 'sector_1');
+      });
+    });
+
+    group('getSector', () {
+      test('calls GET /sectors/{id} and returns sector info', () async {
+        when(() => mockDio.get('/sectors/sector_1')).thenAnswer((_) async => Response(
+              data: {
+                'id': 'sector_1',
+                'name': 'Northcliff',
+                'center': {'latitude': -26.135, 'longitude': 27.98},
+              },
+              statusCode: 200,
+              requestOptions: RequestOptions(),
+            ));
+
+        final result = await authApi.getSector('sector_1');
+
+        expect(result.id, 'sector_1');
+        expect(result.name, 'Northcliff');
+        expect(result.center.latitude, -26.135);
       });
     });
 
@@ -196,11 +210,10 @@ void main() {
               data: any(named: 'data'),
             )).thenAnswer((_) async => Response(
               data: {
-                'tokens': {
-                  'accessToken': 'new_access_token',
-                  'refreshToken': 'new_refresh_token',
-                  'expiresAt': '2024-12-31T23:59:59Z',
-                },
+                'memberId': 'user_123',
+                'accessToken': 'new_access_token',
+                'refreshToken': 'new_refresh_token',
+                'expiresIn': 3600,
               },
               statusCode: 200,
               requestOptions: RequestOptions(),

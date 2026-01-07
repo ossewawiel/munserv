@@ -1,11 +1,14 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart';
 
 import '../../../shared/models/issue.dart';
+import '../../../shared/models/issue_type.dart';
 import '../domain/domain.dart';
 
 /// API client for issue endpoints.
 /// All endpoints require Authorization header (handled by Dio interceptor).
+/// Updated to work with Spring Boot backend (two-step photo upload).
 class IssueApi {
   final Dio _dio;
 
@@ -48,47 +51,66 @@ class IssueApi {
     );
   }
 
-  /// Report a new issue with photos.
-  /// POST /issues (multipart/form-data)
+  /// Report a new issue with photos (two-step process for backend).
+  /// Step 1: POST /issues (JSON) - Create issue
+  /// Step 2: POST /issues/{id}/photos (multipart) - Upload each photo
   Future<ReportIssueResponse> reportIssue({
     required ReportIssueRequest request,
     required List<String> photoPaths,
   }) async {
-    final formData = FormData.fromMap({
-      'type': request.type.name,
-      'latitude': request.location.latitude.toString(),
-      'longitude': request.location.longitude.toString(),
-      if (request.description != null) 'description': request.description,
-    });
+    // Step 1: Create issue without photos (JSON request)
+    final createResponse = await _dio.post(
+      '/issues',
+      data: {
+        'type': _issueTypeToApiString(request.type),
+        'latitude': request.location.latitude,
+        'longitude': request.location.longitude,
+        if (request.description != null) 'description': request.description,
+      },
+    );
 
-    // Add photo files
-    for (int i = 0; i < photoPaths.length; i++) {
-      final path = photoPaths[i];
-      final fileName = path.split('/').last;
-      final extension = fileName.split('.').last.toLowerCase();
-      final mimeType = _getMimeType(extension);
+    final issueData = createResponse.data as Map<String, dynamic>;
+    final issueId = issueData['id'] as String;
+    final List<String> uploadedPhotoUrls = [];
 
-      formData.files.add(
-        MapEntry(
-          'photos',
-          await MultipartFile.fromFile(
+    // Step 2: Upload each photo separately
+    for (final path in photoPaths) {
+      try {
+        final fileName = path.split('/').last;
+        final extension = fileName.split('.').last.toLowerCase();
+        final mimeType = _getMimeType(extension);
+
+        final formData = FormData.fromMap({
+          'file': await MultipartFile.fromFile(
             path,
             filename: fileName,
             contentType: mimeType,
           ),
-        ),
-      );
+        });
+
+        final photoResponse = await _dio.post(
+          '/issues/$issueId/photos',
+          data: formData,
+          options: Options(contentType: 'multipart/form-data'),
+        );
+
+        final photoData = photoResponse.data as Map<String, dynamic>;
+        uploadedPhotoUrls.add(photoData['url'] as String);
+      } catch (e) {
+        // Log error but continue with other photos
+        debugPrint('Failed to upload photo $path: $e');
+      }
     }
 
-    final response = await _dio.post(
-      '/issues',
-      data: formData,
-      options: Options(
-        contentType: 'multipart/form-data',
-      ),
-    );
-    return ReportIssueResponse.fromJson(
-      response.data as Map<String, dynamic>,
+    // Build response combining issue data and uploaded photos
+    return ReportIssueResponse(
+      id: issueId,
+      type: _issueTypeFromApiString(issueData['type'] as String),
+      state: issueData['state'] as String,
+      location: request.location,
+      heat: issueData['heat'] as int,
+      photoUrls: uploadedPhotoUrls,
+      createdAt: DateTime.parse(issueData['createdAt'] as String),
     );
   }
 
@@ -97,6 +119,33 @@ class IssueApi {
   Future<Issue> getIssueFull(String issueId) async {
     final response = await _dio.get('/issues/$issueId');
     return Issue.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Convert IssueType enum to backend API string (snake_case)
+  String _issueTypeToApiString(IssueType type) {
+    return switch (type) {
+      IssueType.pothole => 'pothole',
+      IssueType.waterLeak => 'water_leak',
+      IssueType.sewageLeak => 'sewage_leak',
+      IssueType.trafficLight => 'traffic_light',
+      IssueType.streetLight => 'street_light',
+      IssueType.illegalDumping => 'illegal_dumping',
+      IssueType.other => 'other',
+    };
+  }
+
+  /// Convert backend API string to IssueType enum
+  IssueType _issueTypeFromApiString(String apiString) {
+    return switch (apiString.toLowerCase()) {
+      'pothole' => IssueType.pothole,
+      'water_leak' => IssueType.waterLeak,
+      'sewage_leak' => IssueType.sewageLeak,
+      'traffic_light' => IssueType.trafficLight,
+      'street_light' => IssueType.streetLight,
+      'illegal_dumping' => IssueType.illegalDumping,
+      'other' => IssueType.other,
+      _ => IssueType.other,
+    };
   }
 
   MediaType _getMimeType(String extension) {

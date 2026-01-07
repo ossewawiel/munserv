@@ -203,7 +203,7 @@ final class AuthRepositoryProvider
   }
 }
 
-String _$authRepositoryHash() => r'd6de7e5efa41eeb51d360f337179ed4d5e76e889';
+String _$authRepositoryHash() => r'2775d29e1d12d27bc8a6b1ba462dc9f8d37f4203';
 
 /// Manages authentication state throughout the app
 
@@ -241,7 +241,7 @@ final class AuthNotifierProvider
   }
 }
 
-String _$authNotifierHash() => r'252c444b4ea3c94800523fc5b3915cdc52395168';
+String _$authNotifierHash() => r'c81ea2fca4915b5866fc7fb57afb3422db2de69d';
 
 /// Manages authentication state throughout the app
 
@@ -572,7 +572,7 @@ final class BiometricLoginNotifierProvider
 }
 
 String _$biometricLoginNotifierHash() =>
-    r'bdd85f2f5ffbeda26be5fe77a16e8556b0e6e969';
+    r'c116c15e42e5f3b696ca1c4e36e89f0779928ff4';
 
 /// Enable biometric login with the user's PIN
 

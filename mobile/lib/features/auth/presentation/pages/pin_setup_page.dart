@@ -18,6 +18,7 @@ class PinSetupPage extends ConsumerStatefulWidget {
   final String address;
   final double latitude;
   final double longitude;
+  final String sectorId;
 
   const PinSetupPage({
     super.key,
@@ -28,6 +29,7 @@ class PinSetupPage extends ConsumerStatefulWidget {
     required this.address,
     required this.latitude,
     required this.longitude,
+    required this.sectorId,
   });
 
   @override
@@ -80,6 +82,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
         longitude: widget.longitude,
       ),
       address: widget.address,
+      sectorId: widget.sectorId,
     );
 
     if (!mounted) return;

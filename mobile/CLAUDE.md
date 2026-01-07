@@ -456,22 +456,32 @@ flutter test                       # Run tests
 flutter run                        # Run on connected device/emulator
 ```
 
-## Parameterized Builds (API Host)
+## Parameterized Builds (API Host & Port)
 
-The app uses `--dart-define` to configure the API host for different environments:
+The app uses `--dart-define` to configure the API for different environments:
 
 ```bash
-# For Emulator (default - uses 10.0.2.2)
+# For Backend (default after migration) - port 8080
 flutter build apk --debug
 flutter run
 
-# For Real Device on same network as mock API
+# For Mock API (testing/development) - port 3001
+flutter run --dart-define=API_PORT=3001
+
+# For Real Device on same network
 flutter build apk --debug --dart-define=API_HOST=192.168.1.100
 flutter run --dart-define=API_HOST=192.168.1.100
+
+# Full customization (host + port)
+flutter run --dart-define=API_HOST=192.168.1.100 --dart-define=API_PORT=8080
 
 # For Release build
 flutter build apk --release --dart-define=API_HOST=your.api.host
 ```
+
+**Default Values:**
+- `API_HOST`: `10.0.2.2` (Android emulator's localhost)
+- `API_PORT`: `8080` (Spring Boot backend)
 
 ### Real Device Testing Setup
 

@@ -156,9 +156,10 @@ void main() {
           const LoginRequest(phoneNumber: '+27821234567', pin: '1234'),
         );
 
-        expect(response.tokens.accessToken, isNotEmpty);
-        expect(response.tokens.refreshToken, isNotEmpty);
-        expect(response.profile.member.phoneNumber, '+27821234567');
+        // Backend returns flat response (not nested tokens/profile)
+        expect(response.accessToken, isNotEmpty);
+        expect(response.refreshToken, isNotEmpty);
+        expect(response.memberId, isNotEmpty);
       });
 
       test('fails with invalid PIN', () async {
@@ -187,9 +188,9 @@ void main() {
           const LoginRequest(phoneNumber: '+27821234567', pin: '1234'),
         );
 
-        // Refresh it
+        // Refresh it (backend returns flat response)
         final newTokens = await authApi.refreshToken(
-          loginResponse.tokens.refreshToken,
+          loginResponse.refreshToken,
         );
 
         expect(newTokens.accessToken, isNotEmpty);

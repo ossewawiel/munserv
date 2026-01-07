@@ -12,18 +12,22 @@ Community-based infrastructure issue reporting. Members report issues (potholes,
 │  CURRENT FOCUS                                               │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│   Mobile App (Flutter)  ←──── Mock API (JSON Server)        │
+│   Mobile App (Flutter)  ←──── Backend (Spring Boot) ✓       │
 │                                                              │
 │   Web Admin (React)     ←──── Backend (Spring Boot) ✓       │
 │                                                              │
-│   Web migrated to real backend. Mobile still uses mock API. │
+│   Both mobile and web now connected to real backend.        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 **Development workflow:**
 1. Start backend: `cd backend && ./gradlew bootRun` (port 8080)
 2. Start web: `cd web && pnpm dev` (port 3000)
-3. Mobile still uses mock API: `cd infrastructure/mock-api && npm start` (port 3001)
+3. Start mobile: `cd mobile && flutter run` (connects to backend on 8080)
+
+**For mobile mock API testing:**
+- Start mock: `cd infrastructure/mock-api && npm start` (port 3001)
+- Run mobile with: `flutter run --dart-define=API_PORT=3001`
 
 ## Platform-Specific Context (IMPORTANT)
 
@@ -47,11 +51,11 @@ Read mobile/CLAUDE.md, then create a ConsumerWidget for displaying issue details
 | Layer | Technology | Status |
 |-------|------------|--------|
 | Backend | Kotlin + Spring Boot | ✅ Ready |
-| Mobile | Flutter + Riverpod + Freezed | 🔄 Ready |
+| Mobile | Flutter + Riverpod + Freezed | ✅ Ready |
 | Web | React + TypeScript + React Query | ✅ Ready |
 | Database | PostgreSQL + PostGIS | ✅ Ready |
 | Storage | Local uploads (photos) | 🔄 MVP |
-| Mock API | JSON Server / Express | 🔄 Mobile only |
+| Mock API | JSON Server / Express | 📦 Optional (for testing) |
 
 ## Repository Structure
 ```

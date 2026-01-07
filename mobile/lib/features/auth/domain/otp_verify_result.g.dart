@@ -18,7 +18,7 @@ Map<String, dynamic> _$OtpVerifyRequestToJson(_OtpVerifyRequest instance) =>
 OtpVerifyResultNewUser _$OtpVerifyResultNewUserFromJson(
   Map<String, dynamic> json,
 ) => OtpVerifyResultNewUser(
-  tempToken: json['tempToken'] as String,
+  tempToken: json['tempToken'] as String? ?? '',
   $type: json['status'] as String?,
 );
 
@@ -32,15 +32,19 @@ Map<String, dynamic> _$OtpVerifyResultNewUserToJson(
 OtpVerifyResultExistingUser _$OtpVerifyResultExistingUserFromJson(
   Map<String, dynamic> json,
 ) => OtpVerifyResultExistingUser(
-  tokens: AuthTokens.fromJson(json['tokens'] as Map<String, dynamic>),
-  profile: AuthProfile.fromJson(json['profile'] as Map<String, dynamic>),
+  tokens: json['tokens'] == null
+      ? null
+      : AuthTokens.fromJson(json['tokens'] as Map<String, dynamic>),
+  profile: json['profile'] == null
+      ? null
+      : AuthProfile.fromJson(json['profile'] as Map<String, dynamic>),
   $type: json['status'] as String?,
 );
 
 Map<String, dynamic> _$OtpVerifyResultExistingUserToJson(
   OtpVerifyResultExistingUser instance,
 ) => <String, dynamic>{
-  'tokens': instance.tokens.toJson(),
-  'profile': instance.profile.toJson(),
+  'tokens': instance.tokens?.toJson(),
+  'profile': instance.profile?.toJson(),
   'status': instance.$type,
 };

@@ -81,6 +81,13 @@ data class GeoPointResponse(
 )
 
 /**
+ * Response for phone registration check.
+ */
+data class CheckPhoneResponse(
+    val isRegistered: Boolean,
+)
+
+/**
  * Error response format.
  */
 data class ErrorResponse(

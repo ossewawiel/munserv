@@ -25,6 +25,11 @@ sealed interface AuthResult {
 
     data object InvalidPin : AuthResult
 
+    // Phone check result
+    data class PhoneCheckResult(
+        val isRegistered: Boolean,
+    ) : AuthResult
+
     // Login results
     data class LoginSuccess(
         val memberId: MemberId,

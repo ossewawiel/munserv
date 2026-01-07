@@ -197,6 +197,21 @@ class AuthService(
     }
 
     /**
+     * Check if a phone number is registered.
+     */
+    fun checkPhone(phoneString: String): AuthResult {
+        val phone =
+            try {
+                PhoneNumber.fromString(phoneString)
+            } catch (e: IllegalArgumentException) {
+                return AuthResult.InvalidPhoneNumber
+            }
+
+        val isRegistered = memberRepository.existsByPhoneHash(phone.hash())
+        return AuthResult.PhoneCheckResult(isRegistered = isRegistered)
+    }
+
+    /**
      * Refresh tokens using a valid refresh token.
      */
     fun refreshToken(refreshToken: String): AuthResult {
