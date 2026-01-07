@@ -12,31 +12,46 @@ Community-based infrastructure issue reporting. Members report issues (potholes,
 │  CURRENT FOCUS                                               │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│   Mobile App (Flutter)  ←──┐                                 │
-│                            │                                 │
-│   Web Admin (React)    ←───┼──── Mock API (JSON Server)     │
-│                            │                                 │
-│   Backend (Later)      ────┘                                 │
+│   Mobile App (Flutter)  ←──── Mock API (JSON Server)        │
 │                                                              │
-│   Build UI first, prove the concept, then implement backend  │
+│   Web Admin (React)     ←──── Backend (Spring Boot) ✓       │
+│                                                              │
+│   Web migrated to real backend. Mobile still uses mock API. │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 **Development workflow:**
-1. Start mock API: `cd infrastructure/mock-api && npm start`
-2. Build features from MVP Development Guide
-3. Both mobile and web use the same mock API contract
-4. Backend implementation comes after UI is proven
+1. Start backend: `cd backend && ./gradlew bootRun` (port 8080)
+2. Start web: `cd web && pnpm dev` (port 3000)
+3. Mobile still uses mock API: `cd infrastructure/mock-api && npm start` (port 3001)
+
+## Platform-Specific Context (IMPORTANT)
+
+**When working on code in a subdirectory, ALWAYS read that directory's CLAUDE.md first:**
+
+| Working On | Read First | Contains |
+|------------|------------|----------|
+| `mobile/lib/**` | [`mobile/CLAUDE.md`](mobile/CLAUDE.md) | Riverpod, Freezed, Result patterns, widget rules |
+| `web/src/**` | [`web/CLAUDE.md`](web/CLAUDE.md) | React Query, atomic design, hooks patterns |
+| `backend/src/**` | [`backend/CLAUDE.md`](backend/CLAUDE.md) | Sealed results, value objects, layer rules |
+| `database/migrations/**` | [`database/CLAUDE.md`](database/CLAUDE.md) | PostGIS, naming conventions, Flyway |
+| `infrastructure/**` | [`infrastructure/CLAUDE.md`](infrastructure/CLAUDE.md) | Docker, CI/CD, environments |
+| `shared/**` | [`shared/CLAUDE.md`](shared/CLAUDE.md) | API contracts, shared types |
+
+**Example:** Before creating a Flutter widget, run:
+```
+Read mobile/CLAUDE.md, then create a ConsumerWidget for displaying issue details.
+```
 
 ## Tech Stack
 | Layer | Technology | Status |
 |-------|------------|--------|
-| Backend | Kotlin + Spring Boot | Later |
+| Backend | Kotlin + Spring Boot | ✅ Ready |
 | Mobile | Flutter + Riverpod + Freezed | 🔄 Ready |
-| Web | React + TypeScript + React Query | 🔄 Ready |
-| Database | PostgreSQL + PostGIS | Later |
-| Storage | Cloudflare R2 (photos) | Later |
-| Mock API | JSON Server / Express | 🔄 Ready |
+| Web | React + TypeScript + React Query | ✅ Ready |
+| Database | PostgreSQL + PostGIS | ✅ Ready |
+| Storage | Local uploads (photos) | 🔄 MVP |
+| Mock API | JSON Server / Express | 🔄 Mobile only |
 
 ## Repository Structure
 ```
@@ -52,20 +67,22 @@ Community-based infrastructure issue reporting. Members report issues (potholes,
 ## Quick Start
 
 ```bash
-# 1. Set up mock API
-cd infrastructure/mock-api
-npm install
-npm start                    # Runs on http://localhost:3001
+# 1. Start backend (required for web)
+cd backend
+./gradlew bootRun            # Runs on http://localhost:8080
 
-# 2. Start mobile development (new terminal)
-cd mobile
-flutter pub get
-flutter run
-
-# 3. Start web development (new terminal)
+# 2. Start web development (new terminal)
 cd web
 pnpm install
 pnpm dev                     # Runs on http://localhost:3000
+# Login: admin@ward42.example.com / admin123
+
+# 3. Start mobile development (new terminal)
+cd infrastructure/mock-api
+npm install && npm start     # Mock API on http://localhost:3001
+cd ../mobile
+flutter pub get
+flutter run
 ```
 
 ## Key Documents
@@ -94,30 +111,37 @@ pnpm dev                     # Runs on http://localhost:3000
 
 ### For Mobile (Flutter)
 ```
-Include in context:
-1. specs/MVP_Development_Guide.md §2.1, §3.2, §4 (scope, Dart models, API)
-2. specs/Architecture_and_Design_Patterns.md §3 (Flutter patterns)
-3. specs/Coding_Standards.md §3 (Dart standards)
-4. mobile/CLAUDE.md (if exists)
+1. READ mobile/CLAUDE.md FIRST (required patterns)
+2. Then if needed:
+   - specs/MVP_Development_Guide.md §2.1, §3.2, §4 (scope, Dart models, API)
+   - specs/Architecture_and_Design_Patterns.md §3 (Flutter patterns)
+   - specs/Coding_Standards.md §3 (Dart standards)
 ```
 
 ### For Web (React)
 ```
-Include in context:
-1. specs/MVP_Development_Guide.md §2.2, §3.1, §4 (scope, TS types, API)
-2. specs/Architecture_and_Design_Patterns.md §4 (React patterns)
-3. specs/Coding_Standards.md §4 (TypeScript standards)
-4. web/CLAUDE.md (if exists)
+1. READ web/CLAUDE.md FIRST (required patterns)
+2. Then if needed:
+   - specs/MVP_Development_Guide.md §2.2, §3.1, §4 (scope, TS types, API)
+   - specs/Architecture_and_Design_Patterns.md §4 (React patterns)
+   - specs/Coding_Standards.md §4 (TypeScript standards)
 ```
 
-### For Backend (Later)
+### For Backend (Kotlin)
 ```
-Include in context:
-1. specs/MVP_Development_Guide.md §4 (API to implement)
-2. specs/Architecture_and_Design_Patterns.md §2 (Kotlin patterns)
-3. specs/Coding_Standards.md §2 (Kotlin standards)
-4. specs/Domain_and_Data_Modeling.md
-5. backend/CLAUDE.md (if exists)
+1. READ backend/CLAUDE.md FIRST (required patterns)
+2. Then if needed:
+   - specs/MVP_Development_Guide.md §4 (API to implement)
+   - specs/Architecture_and_Design_Patterns.md §2 (Kotlin patterns)
+   - specs/Coding_Standards.md §2 (Kotlin standards)
+   - specs/Domain_and_Data_Modeling.md
+```
+
+### For Database
+```
+1. READ database/CLAUDE.md FIRST (naming, PostGIS patterns)
+2. Query postgres MCP for current schema before writing migrations
+3. specs/Domain_and_Data_Modeling.md for entity definitions
 ```
 
 ## Critical Rules (All Platforms)

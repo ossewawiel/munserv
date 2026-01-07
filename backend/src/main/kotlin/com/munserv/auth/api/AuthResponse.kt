@@ -43,16 +43,41 @@ data class LoginResponse(
 
 /**
  * Response for admin login success.
+ * Matches frontend expected contract with nested tokens and profile.
  */
 data class AdminLoginResponse(
-    val adminId: String,
+    val tokens: AdminTokens,
+    val profile: AdminProfile,
+)
+
+data class AdminTokens(
+    val accessToken: String,
+    val refreshToken: String,
+    val expiresAt: String,
+)
+
+data class AdminProfile(
+    val admin: AdminUser,
+    val sector: AdminSector,
+)
+
+data class AdminUser(
+    val id: String,
     val email: String,
     val displayName: String,
     val sectorId: String,
-    val accessToken: String,
-    val refreshToken: String,
-    val expiresIn: Long,
-    val tokenType: String = "Bearer",
+    val role: String,
+)
+
+data class AdminSector(
+    val id: String,
+    val name: String,
+    val center: GeoPointResponse,
+)
+
+data class GeoPointResponse(
+    val lat: Double,
+    val lng: Double,
 )
 
 /**

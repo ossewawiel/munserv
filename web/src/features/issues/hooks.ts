@@ -1,11 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { issueApi } from './api';
 import type { IssueFilterParams, IssueState } from './types';
 
-export function useIssues(params?: IssueFilterParams) {
+export function useIssues(params?: Omit<IssueFilterParams, 'sectorId'>) {
+  const { admin } = useAuth();
+  const fullParams: IssueFilterParams = {
+    ...params,
+    sectorId: admin?.sectorId,
+  };
+
   return useQuery({
-    queryKey: ['issues', params],
-    queryFn: () => issueApi.getAll(params),
+    queryKey: ['issues', fullParams],
+    queryFn: () => issueApi.getAll(fullParams),
+    enabled: !!admin?.sectorId,
   });
 }
 

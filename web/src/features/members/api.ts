@@ -3,8 +3,10 @@ import type { PaginatedResponse } from '@/shared/types/common';
 import type { MemberListItem } from './types';
 
 export const membersApi = {
-  getAll: (params?: { page?: number; limit?: number }) =>
+  getAll: (sectorId: string, params?: { page?: number; limit?: number }) =>
     apiClient
-      .get<PaginatedResponse<MemberListItem>>('/admin/members', { params })
+      .get<PaginatedResponse<MemberListItem>>('/admin/members', {
+        params: { sectorId, ...params },
+      })
       .then((r) => r.data),
 };

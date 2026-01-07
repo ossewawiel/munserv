@@ -31,6 +31,10 @@ class AuthService(
         private const val TEST_ADMIN_ID = "550e8400-e29b-41d4-a716-446655440020"
         private const val TEST_ADMIN_NAME = "Ward 42 Admin"
         private const val TEST_ADMIN_SECTOR = "550e8400-e29b-41d4-a716-446655440001"
+        private const val TEST_ADMIN_ROLE = "SECTOR_ADMIN"
+        private const val TEST_SECTOR_NAME = "Ward 42"
+        private const val TEST_SECTOR_CENTER_LAT = -26.2041
+        private const val TEST_SECTOR_CENTER_LNG = 28.0473
     }
 
     /**
@@ -184,6 +188,10 @@ class AuthService(
             email = TEST_ADMIN_EMAIL,
             displayName = TEST_ADMIN_NAME,
             sectorId = TEST_ADMIN_SECTOR,
+            role = TEST_ADMIN_ROLE,
+            sectorName = TEST_SECTOR_NAME,
+            sectorCenterLat = TEST_SECTOR_CENTER_LAT,
+            sectorCenterLng = TEST_SECTOR_CENTER_LNG,
             tokens = tokens,
         )
     }

@@ -37,6 +37,10 @@ sealed interface AuthResult {
         val email: String,
         val displayName: String,
         val sectorId: String,
+        val role: String,
+        val sectorName: String,
+        val sectorCenterLat: Double,
+        val sectorCenterLng: Double,
         val tokens: TokenPair,
     ) : AuthResult
 

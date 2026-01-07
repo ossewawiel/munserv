@@ -194,13 +194,30 @@ class AuthController(
             is AuthResult.AdminLoginSuccess ->
                 ResponseEntity.ok(
                     AdminLoginResponse(
-                        adminId = result.adminId,
-                        email = result.email,
-                        displayName = result.displayName,
-                        sectorId = result.sectorId,
-                        accessToken = result.tokens.accessToken,
-                        refreshToken = result.tokens.refreshToken,
-                        expiresIn = result.tokens.expiresIn,
+                        tokens = AdminTokens(
+                            accessToken = result.tokens.accessToken,
+                            refreshToken = result.tokens.refreshToken,
+                            expiresAt = java.time.Instant.now()
+                                .plusSeconds(result.tokens.expiresIn)
+                                .toString(),
+                        ),
+                        profile = AdminProfile(
+                            admin = AdminUser(
+                                id = result.adminId,
+                                email = result.email,
+                                displayName = result.displayName,
+                                sectorId = result.sectorId,
+                                role = result.role,
+                            ),
+                            sector = AdminSector(
+                                id = result.sectorId,
+                                name = result.sectorName,
+                                center = GeoPointResponse(
+                                    lat = result.sectorCenterLat,
+                                    lng = result.sectorCenterLng,
+                                ),
+                            ),
+                        ),
                     ),
                 )
 
