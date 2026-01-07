@@ -116,6 +116,24 @@ export const ThemeProvider: FC<ThemeProviderProps> = ({ children }) => {
     ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
     : colorMode;
 
+  // Set the data-color-scheme attribute on the HTML element for CSS variable switching
+  useEffect(() => {
+    document.documentElement.setAttribute('data-color-scheme', resolvedMode);
+  }, [resolvedMode]);
+
+  // Listen for system color scheme changes when in 'system' mode
+  useEffect(() => {
+    if (colorMode !== 'system') return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      document.documentElement.setAttribute('data-color-scheme', e.matches ? 'dark' : 'light');
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [colorMode]);
+
   return (
     <ThemeContext.Provider value={{ podConfig, colorMode, setColorMode, isLoading }}>
       <MuiThemeProvider theme={theme} defaultMode={resolvedMode}>

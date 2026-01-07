@@ -55,15 +55,18 @@ export const lightScheme = {
 } as const;
 
 // Dark scheme colors
+// Berry-inspired palette with forest green tint (matching brand #233D36)
+// Pattern: Deep tinted background → progressively lighter tinted surfaces
 export const darkScheme = {
   primary: '#B0CDC3',
   onPrimary: '#1B352E',
   primaryContainer: '#233D36',
   onPrimaryContainer: '#8BA89E',
   // Berry-style dark mode tints for UI backgrounds
-  primaryLight: '#1D2B26',     // Subtle forest green tint for dark mode
-  secondaryLight: '#2F2320',   // Subtle terracotta tint for dark mode
-  tertiaryLight: '#1C1B18',    // Subtle warm tint for content background
+  // These provide the visible distinction between header/sidebar/cards and content
+  primaryLight: '#1E3830',     // Forest green tint for dark mode accents
+  secondaryLight: '#3D2E2A',   // Terracotta tint for dark mode accents
+  tertiaryLight: '#1A1F1D',    // Subtle warm tint for content background
   secondary: '#FFB5A0',
   onSecondary: '#601400',
   secondaryContainer: '#E76C49',
@@ -76,26 +79,31 @@ export const darkScheme = {
   onError: '#690005',
   errorContainer: '#93000A',
   onErrorContainer: '#FFDAD6',
-  background: '#121413',
-  onBackground: '#E3E2E1',
-  surface: '#121413',
-  onSurface: '#E3E2E1',
-  surfaceVariant: '#424846',
-  onSurfaceVariant: '#C1C8C4',
-  outline: '#8B928F',
-  outlineVariant: '#424846',
+  // Main backgrounds - Berry-style deep tinted palette
+  // darkPaper equivalent (deepest) - forest green tint
+  background: '#0E1816',
+  onBackground: '#D5E0DC',
+  surface: '#0E1816',
+  onSurface: '#D5E0DC',
+  surfaceVariant: '#3A4742',
+  onSurfaceVariant: '#BDC9C4',
+  outline: '#87938E',
+  outlineVariant: '#3A4742',
   shadow: '#000000',
   scrim: '#000000',
-  inverseSurface: '#E3E2E1',
-  inverseOnSurface: '#2F3130',
+  inverseSurface: '#D5E0DC',
+  inverseOnSurface: '#2A3532',
   inversePrimary: '#49645C',
-  surfaceDim: '#121413',
-  surfaceBright: '#383938',
-  surfaceContainerLowest: '#0D0E0E',
-  surfaceContainerLow: '#1A1C1B',
-  surfaceContainer: '#1E201F',
-  surfaceContainerHigh: '#292A29',
-  surfaceContainerHighest: '#343534',
+  // Surface container hierarchy - progressively lighter with forest green tint
+  // These create visible layers for cards, menus, headers (Berry pattern)
+  // Berry reference: darkPaper #111936, darkLevel2 #212946 (difference ~16%)
+  surfaceDim: '#0E1816',
+  surfaceBright: '#3A4743',
+  surfaceContainerLowest: '#091210',       // Darkest container
+  surfaceContainerLow: '#141D1A',          // Slightly lighter
+  surfaceContainer: '#1F2926',             // Cards, menus (darkLevel2 equivalent)
+  surfaceContainerHigh: '#2A3633',         // Elevated cards, app bar
+  surfaceContainerHighest: '#354240',      // Highest elevation surfaces
 } as const;
 
 // Issue state colors (consistent across light/dark)

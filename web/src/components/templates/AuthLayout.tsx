@@ -19,7 +19,7 @@ export const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        bgcolor: 'background.default',
+        bgcolor: 'var(--munserv-palette-background-default)',
         py: 6,
         px: 2,
       }}

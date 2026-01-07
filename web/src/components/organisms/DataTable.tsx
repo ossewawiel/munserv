@@ -58,7 +58,7 @@ export function DataTable<T>({
                 sx={{
                   width: column.width,
                   fontWeight: 600,
-                  bgcolor: 'background.default',
+                  bgcolor: 'var(--munserv-palette-background-default)',
                 }}
               >
                 {column.header}

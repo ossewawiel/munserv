@@ -41,7 +41,7 @@ export const PhotoGallery: FC<PhotoGalleryProps> = ({
           borderRadius: 2,
           border: '1px dashed',
           borderColor: 'divider',
-          bgcolor: 'background.paper',
+          bgcolor: 'var(--munserv-palette-background-paper)',
         }}
       >
         <Typography variant="body2" color="text.secondary">

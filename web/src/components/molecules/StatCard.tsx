@@ -7,7 +7,7 @@ import Avatar from '@mui/material/Avatar';
 import { useTheme, alpha } from '@mui/material/styles';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import { cardHoverShadow, avatarSizes } from '@/theme';
+import { cardHoverShadow, avatarSizes, lightScheme } from '@/theme';
 
 type StatCardVariant = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
 
@@ -25,14 +25,25 @@ interface StatCardProps {
   };
 }
 
-// Background colors for colored cards (darker shades for good contrast)
+// Fixed background colors for colored cards - same in light and dark mode
+// Uses light scheme values to ensure consistency across themes
 const variantBgColors: Record<StatCardVariant, string> = {
-  primary: 'primary.dark',
-  secondary: 'secondary.main',
-  success: 'success.main',
-  warning: 'warning.dark',
-  error: 'error.main',
-  info: 'info.main',
+  primary: lightScheme.primary,           // #0C2721 - Forest green
+  secondary: lightScheme.secondary,       // #A2391A - Terracotta
+  success: '#4CAF50',                     // Green
+  warning: '#E65100',                     // Dark orange
+  error: '#D32F2F',                       // Red
+  info: '#1976D2',                        // Blue
+};
+
+// Light background colors for icon avatars (when card is not colored)
+const variantLightBgColors: Record<StatCardVariant, string> = {
+  primary: lightScheme.primaryLight,      // #E8F0ED - Light forest green
+  secondary: lightScheme.secondaryLight,  // #FFEAE4 - Light terracotta
+  success: '#E8F5E9',                     // Light green
+  warning: '#FFF3E0',                     // Light orange
+  error: '#FFEBEE',                       // Light red
+  info: '#E3F2FD',                        // Light blue
 };
 
 export const StatCard: FC<StatCardProps> = ({
@@ -57,7 +68,8 @@ export const StatCard: FC<StatCardProps> = ({
       sx={{
         border: isColored ? 'none' : '1px solid',
         borderColor: isColored ? 'transparent' : 'divider',
-        bgcolor: isColored ? variantBgColors[variant] : 'background.paper',
+        // Use CSS variable for dynamic color scheme switching
+        bgcolor: isColored ? variantBgColors[variant] : 'var(--munserv-palette-background-paper)',
         ':hover': {
           boxShadow: cardHoverShadow,
         },
@@ -106,8 +118,9 @@ export const StatCard: FC<StatCardProps> = ({
               sx={{
                 width: avatarSizes.large.width,
                 height: avatarSizes.large.height,
-                bgcolor: isColored ? 'rgba(255,255,255,0.2)' : `${variant}.light`,
-                color: isColored ? 'common.white' : `${variant}.dark`,
+                // Use fixed colors for consistency across light/dark modes
+                bgcolor: isColored ? 'rgba(255,255,255,0.2)' : variantLightBgColors[variant],
+                color: isColored ? 'common.white' : variantBgColors[variant],
                 '& .MuiSvgIcon-root': {
                   fontSize: avatarSizes.large.fontSize,
                 },

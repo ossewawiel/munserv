@@ -5,7 +5,6 @@ import { styled, useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -13,6 +12,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 import { useLogout } from '@/features/auth/hooks';
 import { Button } from '@/components/atoms/Button';
+import { ThemeToggle } from '@/components/atoms/ThemeToggle';
 import { Sidebar } from './Sidebar';
 import {
   drawerWidth,
@@ -156,17 +156,15 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
               ...mediumAvatar,
               overflow: 'hidden',
               transition: 'all .2s ease-in-out',
-              background: theme.palette.mode === 'dark'
-                ? theme.palette.grey[800]
-                : theme.palette.secondary.light,
-              color: theme.palette.mode === 'dark'
-                ? theme.palette.secondary.main
-                : theme.palette.secondary.dark,
+              cursor: 'pointer',
+              // Use CSS variables for dynamic color scheme switching
+              // Light mode: secondary.light bg, secondary.dark icon
+              // Dark mode: surfaceContainerHigh bg, secondary.main icon
+              bgcolor: 'var(--munserv-palette-secondary-light)',
+              color: 'var(--munserv-palette-secondary-dark)',
               '&:hover': {
-                background: theme.palette.mode === 'dark'
-                  ? theme.palette.secondary.main
-                  : theme.palette.secondary.dark,
-                color: theme.palette.secondary.light,
+                bgcolor: 'var(--munserv-palette-secondary-main)',
+                color: 'var(--munserv-palette-secondary-contrastText)',
               },
             }}
             onClick={handleDrawerToggle}
@@ -180,6 +178,7 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
 
         {/* Right side actions */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ThemeToggle size="small" />
           <Button
             variant="secondary"
             size="small"
@@ -203,7 +202,8 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
         color="inherit"
         elevation={0}
         sx={{
-          bgcolor: theme.palette.background.default,
+          // Use CSS variable for dynamic color scheme switching
+          bgcolor: 'var(--munserv-palette-background-default)',
           transition: theme.transitions.create('width'),
         }}
       >

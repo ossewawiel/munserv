@@ -17,7 +17,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import PeopleIcon from '@mui/icons-material/People';
 
-import { drawerWidth, drawerWidthMini } from '@/theme';
+import { drawerWidth } from '@/theme';
 import { MiniDrawerStyled } from './MiniDrawerStyled';
 
 interface NavItem {
@@ -172,8 +172,9 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
         sx={{
           '& .MuiDrawer-paper': {
             width: drawerWidth,
-            background: theme.palette.background.default,
-            color: theme.palette.text.primary,
+            // Use CSS variable for dynamic color scheme switching
+            background: 'var(--munserv-palette-background-default)',
+            color: 'var(--munserv-palette-text-primary)',
             borderRight: 'none',
           },
         }}

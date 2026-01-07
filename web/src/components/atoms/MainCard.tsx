@@ -40,6 +40,8 @@ export const MainCard: FC<MainCardProps> = forwardRef<HTMLDivElement, MainCardPr
         ref={ref}
         variant="outlined"
         sx={{
+          // Use CSS variable for dynamic color scheme switching
+          bgcolor: 'var(--munserv-palette-background-paper)',
           border: '1px solid',
           borderColor: 'divider',
           ...(hoverEffect && {

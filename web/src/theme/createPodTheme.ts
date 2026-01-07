@@ -225,12 +225,23 @@ export function createPodTheme(config: PodThemeConfig) {
       },
       MuiAppBar: {
         defaultProps: {
-          elevation: 1,
+          elevation: 0,
           color: 'inherit',
         },
         styleOverrides: {
           root: {
             backgroundImage: 'none',
+            // Use surfaceContainerHigh for elevated header in dark mode
+            backgroundColor: 'var(--munserv-palette-background-default)',
+          },
+        },
+      },
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            backgroundImage: 'none',
+            // Use background.default for sidebar - will be tinted in dark mode
+            backgroundColor: 'var(--munserv-palette-background-default)',
           },
         },
       },

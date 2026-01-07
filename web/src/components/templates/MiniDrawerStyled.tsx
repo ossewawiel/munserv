@@ -1,24 +1,26 @@
-import { styled } from '@mui/material/styles';
+import { styled, type Theme } from '@mui/material/styles';
 import Drawer from '@mui/material/Drawer';
 import { drawerWidth, drawerWidthMini } from '@/theme';
 
-const openedMixin = (theme: typeof import('@mui/material/styles').useTheme extends () => infer T ? T : never) => ({
+const openedMixin = (theme: Theme) => ({
   width: drawerWidth,
   borderRight: 'none',
   zIndex: 1099,
-  background: theme.palette.background.default,
+  // Use CSS variable for dynamic color scheme switching
+  background: 'var(--munserv-palette-background-default)',
   overflowX: 'hidden' as const,
-  boxShadow: theme.palette.mode === 'dark' ? theme.shadows[1] : 'none',
+  boxShadow: theme.shadows[1],
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen + 200,
   }),
 });
 
-const closedMixin = (theme: typeof import('@mui/material/styles').useTheme extends () => infer T ? T : never) => ({
+const closedMixin = (theme: Theme) => ({
   borderRight: 'none',
   zIndex: 1099,
-  background: theme.palette.background.default,
+  // Use CSS variable for dynamic color scheme switching
+  background: 'var(--munserv-palette-background-default)',
   overflowX: 'hidden' as const,
   width: drawerWidthMini,
   transition: theme.transitions.create('width', {
