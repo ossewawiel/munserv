@@ -19,7 +19,8 @@ const String _baseUrl = 'http://$_apiHost:$_apiPort/api/v1';
 const bool _debugApi = true;
 
 /// Provides the base Dio instance with auth interceptor
-@riverpod
+/// keepAlive: true because Dio should persist for the app lifetime
+@Riverpod(keepAlive: true)
 Dio dio(Ref ref) {
   if (_debugApi) {
     print('🔧 API Base URL: $_baseUrl');

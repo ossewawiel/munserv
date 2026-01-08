@@ -338,7 +338,8 @@ $GeoPointCopyWith<$Res> get location {
 /// @nodoc
 mixin _$IssueSummary {
 
- String get id; IssueType get type; IssueState get state; GeoPoint get location; int get heat; String get thumbnailUrl; DateTime get createdAt;
+ String get id; IssueType get type; IssueState get state; GeoPoint get location; int get heat; String? get thumbnailUrl;// Nullable - not all issues have thumbnails
+ DateTime get createdAt;
 /// Create a copy of IssueSummary
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -371,7 +372,7 @@ abstract mixin class $IssueSummaryCopyWith<$Res>  {
   factory $IssueSummaryCopyWith(IssueSummary value, $Res Function(IssueSummary) _then) = _$IssueSummaryCopyWithImpl;
 @useResult
 $Res call({
- String id, IssueType type, IssueState state, GeoPoint location, int heat, String thumbnailUrl, DateTime createdAt
+ String id, IssueType type, IssueState state, GeoPoint location, int heat, String? thumbnailUrl, DateTime createdAt
 });
 
 
@@ -388,15 +389,15 @@ class _$IssueSummaryCopyWithImpl<$Res>
 
 /// Create a copy of IssueSummary
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? state = null,Object? location = null,Object? heat = null,Object? thumbnailUrl = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? state = null,Object? location = null,Object? heat = null,Object? thumbnailUrl = freezed,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as IssueType,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as IssueState,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as GeoPoint,heat: null == heat ? _self.heat : heat // ignore: cast_nullable_to_non_nullable
-as int,thumbnailUrl: null == thumbnailUrl ? _self.thumbnailUrl : thumbnailUrl // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as int,thumbnailUrl: freezed == thumbnailUrl ? _self.thumbnailUrl : thumbnailUrl // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
@@ -491,7 +492,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  IssueType type,  IssueState state,  GeoPoint location,  int heat,  String thumbnailUrl,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  IssueType type,  IssueState state,  GeoPoint location,  int heat,  String? thumbnailUrl,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _IssueSummary() when $default != null:
 return $default(_that.id,_that.type,_that.state,_that.location,_that.heat,_that.thumbnailUrl,_that.createdAt);case _:
@@ -512,7 +513,7 @@ return $default(_that.id,_that.type,_that.state,_that.location,_that.heat,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  IssueType type,  IssueState state,  GeoPoint location,  int heat,  String thumbnailUrl,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  IssueType type,  IssueState state,  GeoPoint location,  int heat,  String? thumbnailUrl,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _IssueSummary():
 return $default(_that.id,_that.type,_that.state,_that.location,_that.heat,_that.thumbnailUrl,_that.createdAt);case _:
@@ -532,7 +533,7 @@ return $default(_that.id,_that.type,_that.state,_that.location,_that.heat,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  IssueType type,  IssueState state,  GeoPoint location,  int heat,  String thumbnailUrl,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  IssueType type,  IssueState state,  GeoPoint location,  int heat,  String? thumbnailUrl,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _IssueSummary() when $default != null:
 return $default(_that.id,_that.type,_that.state,_that.location,_that.heat,_that.thumbnailUrl,_that.createdAt);case _:
@@ -547,7 +548,7 @@ return $default(_that.id,_that.type,_that.state,_that.location,_that.heat,_that.
 @JsonSerializable()
 
 class _IssueSummary implements IssueSummary {
-  const _IssueSummary({required this.id, required this.type, required this.state, required this.location, required this.heat, required this.thumbnailUrl, required this.createdAt});
+  const _IssueSummary({required this.id, required this.type, required this.state, required this.location, required this.heat, this.thumbnailUrl, required this.createdAt});
   factory _IssueSummary.fromJson(Map<String, dynamic> json) => _$IssueSummaryFromJson(json);
 
 @override final  String id;
@@ -555,7 +556,8 @@ class _IssueSummary implements IssueSummary {
 @override final  IssueState state;
 @override final  GeoPoint location;
 @override final  int heat;
-@override final  String thumbnailUrl;
+@override final  String? thumbnailUrl;
+// Nullable - not all issues have thumbnails
 @override final  DateTime createdAt;
 
 /// Create a copy of IssueSummary
@@ -591,7 +593,7 @@ abstract mixin class _$IssueSummaryCopyWith<$Res> implements $IssueSummaryCopyWi
   factory _$IssueSummaryCopyWith(_IssueSummary value, $Res Function(_IssueSummary) _then) = __$IssueSummaryCopyWithImpl;
 @override @useResult
 $Res call({
- String id, IssueType type, IssueState state, GeoPoint location, int heat, String thumbnailUrl, DateTime createdAt
+ String id, IssueType type, IssueState state, GeoPoint location, int heat, String? thumbnailUrl, DateTime createdAt
 });
 
 
@@ -608,15 +610,15 @@ class __$IssueSummaryCopyWithImpl<$Res>
 
 /// Create a copy of IssueSummary
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? state = null,Object? location = null,Object? heat = null,Object? thumbnailUrl = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? state = null,Object? location = null,Object? heat = null,Object? thumbnailUrl = freezed,Object? createdAt = null,}) {
   return _then(_IssueSummary(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as IssueType,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as IssueState,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as GeoPoint,heat: null == heat ? _self.heat : heat // ignore: cast_nullable_to_non_nullable
-as int,thumbnailUrl: null == thumbnailUrl ? _self.thumbnailUrl : thumbnailUrl // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as int,thumbnailUrl: freezed == thumbnailUrl ? _self.thumbnailUrl : thumbnailUrl // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }

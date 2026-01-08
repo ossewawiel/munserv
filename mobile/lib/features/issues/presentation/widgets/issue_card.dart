@@ -37,21 +37,31 @@ class IssueCard extends StatelessWidget {
               // Thumbnail
               ClipRRect(
                 borderRadius: BorderRadius.circular(Radii.sm),
-                child: Image.network(
-                  issue.thumbnailUrl,
-                  width: 72,
-                  height: 72,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 72,
-                    height: 72,
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: Icon(
-                      Icons.image_not_supported,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
+                child: issue.thumbnailUrl != null
+                    ? Image.network(
+                        issue.thumbnailUrl!,
+                        width: 72,
+                        height: 72,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          width: 72,
+                          height: 72,
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.image_not_supported,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      )
+                    : Container(
+                        width: 72,
+                        height: 72,
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: Icon(
+                          Icons.report_problem_outlined,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
               ),
               const SizedBox(width: Spacing.md),
               // Content

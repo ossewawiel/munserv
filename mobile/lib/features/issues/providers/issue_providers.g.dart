@@ -9,23 +9,26 @@ part of 'issue_providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Provides IssueApi
+/// keepAlive: true to prevent disposal/recreation cycles
 
 @ProviderFor(issueApi)
 const issueApiProvider = IssueApiProvider._();
 
 /// Provides IssueApi
+/// keepAlive: true to prevent disposal/recreation cycles
 
 final class IssueApiProvider
     extends $FunctionalProvider<IssueApi, IssueApi, IssueApi>
     with $Provider<IssueApi> {
   /// Provides IssueApi
+  /// keepAlive: true to prevent disposal/recreation cycles
   const IssueApiProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'issueApiProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -52,27 +55,30 @@ final class IssueApiProvider
   }
 }
 
-String _$issueApiHash() => r'30bd7f9c2514ace0dc8f23171ab6b2b4cee5fd55';
+String _$issueApiHash() => r'5a369a3e67089e2efc45633aafcde6db6cda5f3b';
 
 /// Provides IssueRepository
+/// keepAlive: true to prevent disposal/recreation cycles
 
 @ProviderFor(issueRepository)
 const issueRepositoryProvider = IssueRepositoryProvider._();
 
 /// Provides IssueRepository
+/// keepAlive: true to prevent disposal/recreation cycles
 
 final class IssueRepositoryProvider
     extends
         $FunctionalProvider<IssueRepository, IssueRepository, IssueRepository>
     with $Provider<IssueRepository> {
   /// Provides IssueRepository
+  /// keepAlive: true to prevent disposal/recreation cycles
   const IssueRepositoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'issueRepositoryProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -99,24 +105,27 @@ final class IssueRepositoryProvider
   }
 }
 
-String _$issueRepositoryHash() => r'3a554a1afe136ec96ed9cef8131d24273a93d1c7';
+String _$issueRepositoryHash() => r'3f9c733584e68535569139a978dd7462de47e842';
 
 /// Current issue filter state - can be modified by UI
+/// keepAlive prevents disposal/recreation cycles that cause infinite fetch loops
 
 @ProviderFor(IssueFilterState)
 const issueFilterStateProvider = IssueFilterStateProvider._();
 
 /// Current issue filter state - can be modified by UI
+/// keepAlive prevents disposal/recreation cycles that cause infinite fetch loops
 final class IssueFilterStateProvider
     extends $NotifierProvider<IssueFilterState, IssueFilter> {
   /// Current issue filter state - can be modified by UI
+  /// keepAlive prevents disposal/recreation cycles that cause infinite fetch loops
   const IssueFilterStateProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'issueFilterStateProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -137,9 +146,10 @@ final class IssueFilterStateProvider
   }
 }
 
-String _$issueFilterStateHash() => r'7b9bbb5dcb75544192954c7200f5c9d20fbf6e73';
+String _$issueFilterStateHash() => r'1466682560677b283956adb0342410f99bf5e305';
 
 /// Current issue filter state - can be modified by UI
+/// keepAlive prevents disposal/recreation cycles that cause infinite fetch loops
 
 abstract class _$IssueFilterState extends $Notifier<IssueFilter> {
   IssueFilter build();
@@ -160,51 +170,69 @@ abstract class _$IssueFilterState extends $Notifier<IssueFilter> {
   }
 }
 
-/// Fetches paginated issues based on current filter
+/// Manages issue list data with explicit state control
+/// Uses AsyncNotifier pattern for better control over state transitions
 
-@ProviderFor(issues)
-const issuesProvider = IssuesProvider._();
+@ProviderFor(IssuesNotifier)
+const issuesProvider = IssuesNotifierProvider._();
 
-/// Fetches paginated issues based on current filter
-
-final class IssuesProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<PaginatedIssueSummaries>,
-          PaginatedIssueSummaries,
-          FutureOr<PaginatedIssueSummaries>
-        >
-    with
-        $FutureModifier<PaginatedIssueSummaries>,
-        $FutureProvider<PaginatedIssueSummaries> {
-  /// Fetches paginated issues based on current filter
-  const IssuesProvider._()
+/// Manages issue list data with explicit state control
+/// Uses AsyncNotifier pattern for better control over state transitions
+final class IssuesNotifierProvider
+    extends $AsyncNotifierProvider<IssuesNotifier, PaginatedIssueSummaries> {
+  /// Manages issue list data with explicit state control
+  /// Uses AsyncNotifier pattern for better control over state transitions
+  const IssuesNotifierProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'issuesProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$issuesHash();
+  String debugGetCreateSourceHash() => _$issuesNotifierHash();
 
   @$internal
   @override
-  $FutureProviderElement<PaginatedIssueSummaries> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<PaginatedIssueSummaries> create(Ref ref) {
-    return issues(ref);
-  }
+  IssuesNotifier create() => IssuesNotifier();
 }
 
-String _$issuesHash() => r'90e82bc3a36fbcf09bb59ee31c91c5748455d66d';
+String _$issuesNotifierHash() => r'0c92f9857d6b78b2ba5374bc13b0b328f87e84e6';
+
+/// Manages issue list data with explicit state control
+/// Uses AsyncNotifier pattern for better control over state transitions
+
+abstract class _$IssuesNotifier
+    extends $AsyncNotifier<PaginatedIssueSummaries> {
+  FutureOr<PaginatedIssueSummaries> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref =
+        this.ref
+            as $Ref<
+              AsyncValue<PaginatedIssueSummaries>,
+              PaginatedIssueSummaries
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                AsyncValue<PaginatedIssueSummaries>,
+                PaginatedIssueSummaries
+              >,
+              AsyncValue<PaginatedIssueSummaries>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
 /// Fetches a single issue detail by ID
 

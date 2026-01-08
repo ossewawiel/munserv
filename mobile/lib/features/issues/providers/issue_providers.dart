@@ -18,14 +18,16 @@ part 'issue_providers.g.dart';
 // =============================================================================
 
 /// Provides IssueApi
-@riverpod
+/// keepAlive: true to prevent disposal/recreation cycles
+@Riverpod(keepAlive: true)
 IssueApi issueApi(Ref ref) {
   final dio = ref.watch(dioProvider);
   return IssueApi(dio);
 }
 
 /// Provides IssueRepository
-@riverpod
+/// keepAlive: true to prevent disposal/recreation cycles
+@Riverpod(keepAlive: true)
 IssueRepository issueRepository(Ref ref) {
   final api = ref.watch(issueApiProvider);
   return IssueRepository(api);
@@ -36,14 +38,29 @@ IssueRepository issueRepository(Ref ref) {
 // =============================================================================
 
 /// Current issue filter state - can be modified by UI
-@riverpod
+/// keepAlive prevents disposal/recreation cycles that cause infinite fetch loops
+@Riverpod(keepAlive: true)
 class IssueFilterState extends _$IssueFilterState {
   @override
   IssueFilter build() {
-    // Get sector from auth state
-    final authState = ref.watch(authProvider);
-    final sectorId = authState.sectorIdOrNull ?? 'default-sector';
-    return IssueFilter(sectorId: sectorId);
+    // Get initial sector from auth state (read, not watch)
+    final authState = ref.read(authProvider);
+    final initialSectorId = authState.sectorIdOrNull ?? '';
+
+    // Listen for auth changes and update sector only when it actually changes
+    ref.listen(authProvider, (previous, next) {
+      final previousSectorId = previous?.sectorIdOrNull;
+      final nextSectorId = next.sectorIdOrNull;
+
+      // Only update if sector changed and we have a valid new sector
+      if (nextSectorId != null &&
+          nextSectorId.isNotEmpty &&
+          nextSectorId != previousSectorId) {
+        state = state.copyWith(sectorId: nextSectorId);
+      }
+    });
+
+    return IssueFilter(sectorId: initialSectorId);
   }
 
   /// Update the filter
@@ -89,18 +106,68 @@ class IssueFilterState extends _$IssueFilterState {
   }
 }
 
-/// Fetches paginated issues based on current filter
-@riverpod
-Future<PaginatedIssueSummaries> issues(Ref ref) async {
-  final repository = ref.watch(issueRepositoryProvider);
-  final filter = ref.watch(issueFilterStateProvider);
+/// Manages issue list data with explicit state control
+/// Uses AsyncNotifier pattern for better control over state transitions
+@Riverpod(keepAlive: true)
+class IssuesNotifier extends _$IssuesNotifier {
+  @override
+  Future<PaginatedIssueSummaries> build() async {
+    // Listen to filter changes and refetch
+    ref.listen(issueFilterStateProvider, (previous, next) {
+      // Only refetch if filter actually changed (not just object identity)
+      if (previous?.sectorId != next.sectorId ||
+          previous?.state != next.state ||
+          previous?.type != next.type ||
+          previous?.page != next.page ||
+          previous?.sortBy != next.sortBy) {
+        _fetch();
+      }
+    });
 
-  final result = await repository.getIssues(filter);
+    return _fetchInternal();
+  }
 
-  return switch (result) {
-    Success(:final data) => data,
-    Failure(:final error) => throw error,
-  };
+  /// Refetch issues (called when filter changes or for refresh)
+  Future<void> _fetch() async {
+    state = const AsyncLoading();
+    try {
+      final data = await _fetchInternal();
+      state = AsyncData(data);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
+  /// Internal fetch logic
+  Future<PaginatedIssueSummaries> _fetchInternal() async {
+    final repository = ref.read(issueRepositoryProvider);
+    final filter = ref.read(issueFilterStateProvider);
+
+    // Don't fetch if no valid sector (user not authenticated yet)
+    if (filter.sectorId.isEmpty) {
+      return const PaginatedIssueSummaries(
+        items: [],
+        pagination: Pagination(
+          page: 1,
+          limit: 20,
+          totalItems: 0,
+          totalPages: 0,
+        ),
+      );
+    }
+
+    final result = await repository.getIssues(filter);
+
+    return switch (result) {
+      Success(:final data) => data,
+      Failure(:final error) => throw error,
+    };
+  }
+
+  /// Public method to trigger a refresh
+  Future<void> refresh() async {
+    await _fetch();
+  }
 }
 
 /// Fetches a single issue detail by ID

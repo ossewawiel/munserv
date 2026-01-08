@@ -65,7 +65,7 @@ _IssueSummary _$IssueSummaryFromJson(Map<String, dynamic> json) =>
       state: $enumDecode(_$IssueStateEnumMap, json['state']),
       location: GeoPoint.fromJson(json['location'] as Map<String, dynamic>),
       heat: (json['heat'] as num).toInt(),
-      thumbnailUrl: json['thumbnailUrl'] as String,
+      thumbnailUrl: json['thumbnailUrl'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
 

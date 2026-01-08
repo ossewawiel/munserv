@@ -9,22 +9,25 @@ part of 'dio_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Provides the base Dio instance with auth interceptor
+/// keepAlive: true because Dio should persist for the app lifetime
 
 @ProviderFor(dio)
 const dioProvider = DioProvider._();
 
 /// Provides the base Dio instance with auth interceptor
+/// keepAlive: true because Dio should persist for the app lifetime
 
 final class DioProvider extends $FunctionalProvider<Dio, Dio, Dio>
     with $Provider<Dio> {
   /// Provides the base Dio instance with auth interceptor
+  /// keepAlive: true because Dio should persist for the app lifetime
   const DioProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'dioProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -51,4 +54,4 @@ final class DioProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$dioHash() => r'8d88fc0095e8cf480af03b765c6909ca1f823765';
+String _$dioHash() => r'e6600b3305e335af2d2ecb2ac09e532edf069ec0';
