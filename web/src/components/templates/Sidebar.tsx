@@ -20,6 +20,10 @@ import PeopleIcon from '@mui/icons-material/People';
 import { drawerWidth } from '@/theme';
 import { MiniDrawerStyled } from './MiniDrawerStyled';
 
+/** Get the color for selected/hovered items based on theme mode */
+const getItemColor = (isDarkMode: boolean): string =>
+  isDarkMode ? 'secondary.main' : 'secondary.dark';
+
 interface NavItem {
   labelKey: string;
   href: string;
@@ -97,27 +101,19 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
                 justifyContent: open ? 'initial' : 'center',
                 '&.Mui-selected': {
                   bgcolor: alpha(theme.palette.secondary.main, 0.15),
-                  color: theme.palette.mode === 'dark'
-                    ? 'secondary.main'
-                    : 'secondary.dark',
+                  color: getItemColor(theme.palette.mode === 'dark'),
                   '&:hover': {
                     bgcolor: alpha(theme.palette.secondary.main, 0.2),
                   },
                   '& .MuiListItemIcon-root': {
-                    color: theme.palette.mode === 'dark'
-                      ? 'secondary.main'
-                      : 'secondary.dark',
+                    color: getItemColor(theme.palette.mode === 'dark'),
                   },
                 },
                 '&:hover': {
                   bgcolor: alpha(theme.palette.secondary.main, 0.1),
-                  color: theme.palette.mode === 'dark'
-                    ? 'secondary.main'
-                    : 'secondary.dark',
+                  color: getItemColor(theme.palette.mode === 'dark'),
                   '& .MuiListItemIcon-root': {
-                    color: theme.palette.mode === 'dark'
-                      ? 'secondary.main'
-                      : 'secondary.dark',
+                    color: getItemColor(theme.palette.mode === 'dark'),
                   },
                 },
               }}
@@ -128,7 +124,7 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
                   mr: open ? 1.5 : 0,
                   justifyContent: 'center',
                   color: selected
-                    ? (theme.palette.mode === 'dark' ? 'secondary.main' : 'secondary.dark')
+                    ? getItemColor(theme.palette.mode === 'dark')
                     : 'text.primary',
                 }}
               >
@@ -137,9 +133,11 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
               {open && (
                 <ListItemText
                   primary={t(item.labelKey)}
-                  primaryTypographyProps={{
-                    fontWeight: selected ? 600 : 400,
-                    fontSize: '0.875rem',
+                  slotProps={{
+                    primary: {
+                      fontWeight: selected ? 600 : 400,
+                      fontSize: '0.875rem',
+                    },
                   }}
                 />
               )}

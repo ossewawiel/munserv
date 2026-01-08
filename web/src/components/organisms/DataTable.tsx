@@ -16,11 +16,11 @@ export interface Column<T> {
 }
 
 interface DataTableProps<T> {
-  columns: Column<T>[];
-  data: T[];
-  keyExtractor: (item: T) => string;
-  onRowClick?: (item: T) => void;
-  emptyMessage?: ReactNode;
+  readonly columns: readonly Column<T>[];
+  readonly data: readonly T[];
+  readonly keyExtractor: (item: T) => string;
+  readonly onRowClick?: (item: T) => void;
+  readonly emptyMessage?: ReactNode;
 }
 
 export function DataTable<T>({

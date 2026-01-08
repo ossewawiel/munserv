@@ -40,7 +40,7 @@ export const LoadingSkeleton: FC<LoadingSkeletonProps> = ({
     <Stack spacing={1.5}>
       {Array.from({ length: count }).map((_, index) => (
         <Skeleton
-          key={index}
+          key={`skeleton-${index}`}
           variant={variantMap[variant]}
           width={width}
           height={height}
@@ -64,14 +64,14 @@ export const TableSkeleton: FC<TableSkeletonProps> = ({
     <Box sx={{ width: '100%' }}>
       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
         {Array.from({ length: columns }).map((_, i) => (
-          <Skeleton key={i} variant="text" sx={{ flex: 1, height: 24 }} animation="wave" />
+          <Skeleton key={`header-${i}`} variant="text" sx={{ flex: 1, height: 24 }} animation="wave" />
         ))}
       </Box>
       {Array.from({ length: rows }).map((_, rowIndex) => (
-        <Box key={rowIndex} sx={{ display: 'flex', gap: 2, mb: 1.5 }}>
+        <Box key={`row-${rowIndex}`} sx={{ display: 'flex', gap: 2, mb: 1.5 }}>
           {Array.from({ length: columns }).map((_, colIndex) => (
             <Skeleton
-              key={colIndex}
+              key={`cell-${rowIndex}-${colIndex}`}
               variant="rectangular"
               sx={{ flex: 1, height: 40, borderRadius: 1 }}
               animation="wave"
@@ -91,7 +91,7 @@ export const CardSkeleton: FC<CardSkeletonProps> = ({ count = 4 }) => {
   return (
     <Grid container spacing={2}>
       {Array.from({ length: count }).map((_, index) => (
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={index}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={`card-${index}`}>
           <Card variant="outlined">
             <CardContent>
               <Skeleton variant="text" width={100} height={20} sx={{ mb: 1 }} animation="wave" />

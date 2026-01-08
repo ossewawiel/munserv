@@ -22,7 +22,7 @@ export const IssuesPage: FC = () => {
 
   const state = (searchParams.get('state') as IssueState) || undefined;
   const type = (searchParams.get('type') as IssueType) || undefined;
-  const page = parseInt(searchParams.get('page') || '1', 10);
+  const page = Number.parseInt(searchParams.get('page') || '1', 10);
 
   const { data, isLoading, error, refetch } = useIssues({
     state,

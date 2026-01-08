@@ -53,7 +53,7 @@ export const MembersPage: FC = () => {
           />
         )}
 
-        {data && data.items.length === 0 && (
+        {data?.items.length === 0 && (
           <EmptyState
             title={t('common.noResults')}
             description={t('common.noResults')}

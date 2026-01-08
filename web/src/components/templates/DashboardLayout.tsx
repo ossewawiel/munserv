@@ -213,7 +213,7 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
       {/* Sidebar */}
       <Sidebar
         variant={matchDownMd ? 'temporary' : 'permanent'}
-        open={matchDownMd ? drawerOpen : drawerOpen}
+        open={drawerOpen}
         onClose={handleDrawerClose}
       />
 

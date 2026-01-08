@@ -49,7 +49,7 @@ export const StateChangeModal: FC<StateChangeModalProps> = ({
     (e: React.FormEvent) => {
       e.preventDefault();
       if (selectedState) {
-        onSubmit(selectedState as IssueState, note || undefined);
+        onSubmit(selectedState, note || undefined);
       }
     },
     [selectedState, note, onSubmit]

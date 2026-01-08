@@ -95,11 +95,10 @@ export const StatCard: FC<StatCardProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   mt: 1,
-                  color: isColored
-                    ? 'common.white'
-                    : trend.isPositive
-                      ? 'success.main'
-                      : 'error.main',
+                  color: (() => {
+                    if (isColored) return 'common.white';
+                    return trend.isPositive ? 'success.main' : 'error.main';
+                  })(),
                 }}
               >
                 {trend.isPositive ? (

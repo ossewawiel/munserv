@@ -55,7 +55,7 @@ export const HeatReportPage: FC = () => {
           />
         )}
 
-        {report && report.items.length === 0 && (
+        {report?.items.length === 0 && (
           <EmptyState
             title={t('common.noResults')}
             description={t('issues.noIssuesDescription')}

@@ -3,6 +3,7 @@ import {
   useContext,
   useState,
   useEffect,
+  useMemo,
   type FC,
   type ReactNode,
 } from 'react';
@@ -72,7 +73,7 @@ export const ThemeProvider: FC<ThemeProviderProps> = ({ children }) => {
         }
 
         // Try to load from API based on subdomain
-        const hostname = window.location.hostname;
+        const hostname = globalThis.location.hostname;
         // Skip API call for localhost
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
           setIsLoading(false);
@@ -87,9 +88,8 @@ export const ThemeProvider: FC<ThemeProviderProps> = ({ children }) => {
           setPodConfig(config);
           setTheme(createPodTheme(config));
         }
-      } catch (error) {
-        // Fall back to default theme silently
-        console.warn('Failed to load pod theme, using default');
+      } catch {
+        // Fall back to default theme silently - error intentionally not logged to avoid noise
       } finally {
         setIsLoading(false);
       }
@@ -112,30 +112,37 @@ export const ThemeProvider: FC<ThemeProviderProps> = ({ children }) => {
   }, [colorMode]);
 
   // Determine the actual mode to use (resolve 'system' to light/dark)
-  const resolvedMode = colorMode === 'system'
-    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    : colorMode;
+  const getSystemColorScheme = (): 'light' | 'dark' =>
+    globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+  const resolvedMode = colorMode === 'system' ? getSystemColorScheme() : colorMode;
 
   // Set the data-color-scheme attribute on the HTML element for CSS variable switching
   useEffect(() => {
-    document.documentElement.setAttribute('data-color-scheme', resolvedMode);
+    document.documentElement.dataset.colorScheme = resolvedMode;
   }, [resolvedMode]);
 
   // Listen for system color scheme changes when in 'system' mode
   useEffect(() => {
     if (colorMode !== 'system') return;
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const mediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      document.documentElement.setAttribute('data-color-scheme', e.matches ? 'dark' : 'light');
+      document.documentElement.dataset.colorScheme = e.matches ? 'dark' : 'light';
     };
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [colorMode]);
 
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({ podConfig, colorMode, setColorMode, isLoading }),
+    [podConfig, colorMode, isLoading]
+  );
+
   return (
-    <ThemeContext.Provider value={{ podConfig, colorMode, setColorMode, isLoading }}>
+    <ThemeContext.Provider value={contextValue}>
       <MuiThemeProvider theme={theme} defaultMode={resolvedMode}>
         <CssBaseline />
         {children}
