@@ -1,5 +1,6 @@
 import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
 
 import { DataTable, type Column } from '@/components/organisms/DataTable';
 import { IssueStateBadge } from '@/components/molecules/IssueStateBadge';
@@ -21,12 +22,18 @@ export const IssuesTable: FC<IssuesTableProps> = ({ issues, onRowClick }) => {
       {
         key: 'thumbnail',
         header: '',
-        width: '60px',
+        width: '64px',
         render: (issue) => (
-          <img
+          <Box
+            component="img"
             src={issue.thumbnailUrl}
-            alt=""
-            className="h-10 w-10 rounded object-cover"
+            alt={t(`issues.types.${issue.type}`)}
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 1,
+              objectFit: 'cover',
+            }}
           />
         ),
       },
