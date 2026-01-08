@@ -53,6 +53,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # App Icon Generation
+  flutter_launcher_icons: ^0.14.3
+
   # Testing
   mocktail: ^1.0.4
 
@@ -70,3 +73,22 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true  # Enables automatic localization code generation
+
+  assets:
+    - assets/
+    - assets/icon/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#D9613F"  # Terracotta
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  remove_alpha_ios: true
+  web:
+    generate: false
+  windows:
+    generate: false
+  macos:
+    generate: false

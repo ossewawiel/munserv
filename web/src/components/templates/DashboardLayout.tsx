@@ -6,7 +6,6 @@ import AppBar from '@mui/material/AppBar';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import MenuIcon from '@mui/icons-material/Menu';
 
@@ -133,19 +132,18 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
             component="span"
             sx={{ display: { xs: 'none', md: 'block' }, flexGrow: 1 }}
           >
-            <Typography
-              variant="h6"
+            <Box
               component={Link}
               to="/"
-              sx={{
-                fontWeight: 700,
-                color: 'text.primary',
-                textDecoration: 'none',
-                '&:hover': { color: 'primary.main' },
-              }}
+              sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
             >
-              {t('common.appName')}
-            </Typography>
+              <Box
+                component="img"
+                src="/assets/app-logo.png"
+                alt={t('common.appName')}
+                sx={{ height: 32 }}
+              />
+            </Box>
           </Box>
 
           {/* Hamburger Toggle - Berry style with Avatar wrapper */}

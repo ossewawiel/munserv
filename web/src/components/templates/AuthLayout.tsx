@@ -26,9 +26,12 @@ export const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
     >
       <Container maxWidth="sm">
         <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography variant="h4" component="h1" fontWeight={700}>
-            {t('common.appName')}
-          </Typography>
+          <Box
+            component="img"
+            src="/assets/app-logo.png"
+            alt={t('common.appName')}
+            sx={{ height: 48, mb: 1 }}
+          />
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             Municipal Service Admin Portal
           </Typography>
