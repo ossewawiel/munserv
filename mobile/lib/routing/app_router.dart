@@ -18,8 +18,12 @@ GoRouter appRouter(Ref ref) {
   final authState = ref.watch(authProvider);
   final storedPhoneAsync = ref.watch(storedPhoneNumberProvider);
 
+  // Determine initial location based on auth state
+  // Start at login to prevent briefly showing home while checking auth
+  final initialLocation = authState.isAuthenticated ? '/' : '/auth/login';
+
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: initialLocation,
     debugLogDiagnostics: true,
     refreshListenable: _GoRouterRefreshStream(ref, authProvider),
     redirect: (context, state) {
@@ -27,7 +31,7 @@ GoRouter appRouter(Ref ref) {
       final isLoading = authState.isLoading;
       final path = state.matchedLocation;
 
-      // While checking auth status, don't redirect
+      // While checking auth status, stay on current route (don't redirect)
       if (isLoading) return null;
 
       // Define auth routes

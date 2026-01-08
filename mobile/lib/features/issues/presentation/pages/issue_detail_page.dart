@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/models/issue_state.dart';
 import '../../../../shared/models/issue_type.dart';
 import '../../../../shared/theme/colors.dart';
@@ -25,7 +24,6 @@ class IssueDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final issueAsync = ref.watch(issueDetailProvider(issueId));
-    final l10n = S.of(context);
 
     return Scaffold(
       appBar: MunServAppBar(

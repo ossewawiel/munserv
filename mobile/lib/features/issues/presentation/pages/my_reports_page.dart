@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/loading_spinner.dart';
@@ -17,7 +16,6 @@ class MyReportsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myIssuesAsync = ref.watch(myIssuesProvider());
-    final l10n = S.of(context);
 
     return Scaffold(
       appBar: const MunServAppBar(),

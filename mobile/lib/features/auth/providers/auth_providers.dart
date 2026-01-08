@@ -74,18 +74,27 @@ class AuthNotifier extends _$AuthNotifier {
     final profile = await _storage.getProfile();
 
     if (tokens != null && profile != null) {
-      // We have stored credentials - try to validate them
-      // For MVP, we trust the stored tokens without server validation
-      // In production, we'd call a /me endpoint to validate
-      state = AuthState.authenticated(
-        tokens: tokens,
-        profile: profile,
-        sector: const SectorInfo(
-          id: 'unknown',
-          name: 'Unknown',
-          center: GeoPoint(latitude: 0, longitude: 0),
-        ),
-      );
+      // Validate stored tokens by calling /members/me
+      // This ensures we don't auto-login with expired/invalid tokens
+      try {
+        final api = ref.read(authApiProvider);
+        final meResponse = await api.getMe();
+
+        // Tokens are valid - use fresh profile from server
+        state = AuthState.authenticated(
+          tokens: tokens,
+          profile: meResponse.toMemberProfile(),
+          sector: SectorInfo(
+            id: meResponse.sectorId,
+            name: 'Unknown', // Sector name not returned by /me endpoint
+            center: const GeoPoint(latitude: 0, longitude: 0),
+          ),
+        );
+      } catch (e) {
+        // Token validation failed - clear session and require re-login
+        await _storage.clearSession();
+        state = const AuthState.unauthenticated();
+      }
     } else {
       state = const AuthState.unauthenticated();
     }

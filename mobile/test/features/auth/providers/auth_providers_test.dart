@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:munserv_mobile/features/auth/data/auth_api.dart';
 import 'package:munserv_mobile/features/auth/data/auth_repository.dart';
 import 'package:munserv_mobile/features/auth/data/secure_storage.dart';
 import 'package:munserv_mobile/features/auth/domain/auth_state.dart';
 import 'package:munserv_mobile/features/auth/domain/login_request.dart';
+import 'package:munserv_mobile/features/auth/domain/member_profile_response.dart';
 import 'package:munserv_mobile/features/auth/domain/otp_request.dart';
 import 'package:munserv_mobile/features/auth/domain/otp_verify_result.dart';
 import 'package:munserv_mobile/features/auth/providers/auth_providers.dart';
@@ -15,6 +17,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 class MockSecureStorageService extends Mock implements SecureStorageService {}
+
+class MockAuthApi extends Mock implements AuthApi {}
 
 /// Test data
 const testTokens = AuthTokens(
@@ -50,13 +54,28 @@ const testAuthResponse = AuthResponse(
   profile: testAuthProfile,
 );
 
+/// MemberProfileResponse for getMe() API validation
+const testMemberProfileResponse = MemberProfileResponse(
+  id: 'user_123',
+  firstName: 'John',
+  surname: 'Doe',
+  phoneNumber: '+27821234567',
+  address: '42 Doreen Road, Northcliff',
+  registrationLocation: GeoPoint(latitude: -26.135, longitude: 27.98),
+  sectorId: 'sector_1',
+  status: 'active',
+  createdAt: '2024-01-01T00:00:00Z',
+);
+
 void main() {
   late MockAuthRepository mockRepository;
   late MockSecureStorageService mockStorage;
+  late MockAuthApi mockAuthApi;
 
   setUp(() {
     mockRepository = MockAuthRepository();
     mockStorage = MockSecureStorageService();
+    mockAuthApi = MockAuthApi();
   });
 
   group('AuthState', () {
@@ -107,6 +126,7 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(mockRepository),
           secureStorageProvider.overrideWithValue(mockStorage),
+          authApiProvider.overrideWithValue(mockAuthApi),
         ],
       );
     }
@@ -241,11 +261,12 @@ void main() {
       when(() => mockStorage.clearSession()).thenAnswer((_) async {});
       when(() => mockStorage.getTokens()).thenAnswer((_) async => testTokens);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => testProfile);
+      when(() => mockAuthApi.getMe()).thenAnswer((_) async => testMemberProfileResponse);
 
       final container = createContainer();
       final notifier = container.read(authProvider.notifier);
 
-      // Wait for initial check (will be authenticated)
+      // Wait for initial check (will be authenticated after getMe validation)
       await Future.delayed(const Duration(milliseconds: 50));
 
       // Verify we're authenticated
@@ -300,11 +321,13 @@ void main() {
     test('isAuthenticatedProvider returns true when authenticated', () async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => testTokens);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => testProfile);
+      when(() => mockAuthApi.getMe()).thenAnswer((_) async => testMemberProfileResponse);
 
       final container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(mockRepository),
           secureStorageProvider.overrideWithValue(mockStorage),
+          authApiProvider.overrideWithValue(mockAuthApi),
         ],
       );
 
@@ -317,11 +340,13 @@ void main() {
     test('currentProfileProvider returns profile when authenticated', () async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => testTokens);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => testProfile);
+      when(() => mockAuthApi.getMe()).thenAnswer((_) async => testMemberProfileResponse);
 
       final container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(mockRepository),
           secureStorageProvider.overrideWithValue(mockStorage),
+          authApiProvider.overrideWithValue(mockAuthApi),
         ],
       );
 
@@ -335,11 +360,13 @@ void main() {
     test('accessTokenProvider returns token when authenticated', () async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => testTokens);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => testProfile);
+      when(() => mockAuthApi.getMe()).thenAnswer((_) async => testMemberProfileResponse);
 
       final container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(mockRepository),
           secureStorageProvider.overrideWithValue(mockStorage),
+          authApiProvider.overrideWithValue(mockAuthApi),
         ],
       );
 
@@ -347,6 +374,27 @@ void main() {
 
       final token = container.read(accessTokenProvider);
       expect(token, 'access_abc');
+    });
+
+    test('clears session when token validation fails', () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => testTokens);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => testProfile);
+      when(() => mockStorage.clearSession()).thenAnswer((_) async {});
+      when(() => mockAuthApi.getMe()).thenThrow(Exception('Token invalid'));
+
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(mockRepository),
+          secureStorageProvider.overrideWithValue(mockStorage),
+          authApiProvider.overrideWithValue(mockAuthApi),
+        ],
+      );
+
+      await waitForAuth(container);
+
+      final isAuth = container.read(isAuthenticatedProvider);
+      expect(isAuth, false);
+      verify(() => mockStorage.clearSession()).called(1);
     });
   });
 }
