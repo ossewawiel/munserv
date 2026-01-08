@@ -2,9 +2,10 @@ import { type FC, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
-import { PageHeader } from '@/components/molecules/PageHeader';
+import { Breadcrumbs } from '@/components/molecules/Breadcrumbs';
 import { ErrorState } from '@/components/molecules/ErrorState';
 import { LoadingSkeleton } from '@/components/molecules/LoadingSkeleton';
 import { EmptyState } from '@/components/molecules/EmptyState';
@@ -31,16 +32,22 @@ export const HeatReportPage: FC = () => {
 
   return (
     <DashboardLayout>
-      <PageHeader
+      <Breadcrumbs
         title={t('heatReport.title')}
-        subtitle={
-          report
-            ? `${t('heatReport.generatedAt')}: ${formatGeneratedAt(report.generatedAt)}`
-            : undefined
-        }
+        items={[
+          { label: t('dashboard.title'), path: '/', icon: 'home' },
+          { label: t('reports.title'), path: '/reports' },
+          { label: t('heatReport.title') },
+        ]}
       />
 
       <Box sx={{ mt: 3 }}>
+        {/* Generated timestamp moved to content */}
+        {report && (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {t('heatReport.generatedAt')}: {formatGeneratedAt(report.generatedAt)}
+          </Typography>
+        )}
         {isLoading && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <LoadingSkeleton variant="rect" height={400} />

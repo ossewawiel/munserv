@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
-import { PageHeader } from '@/components/molecules/PageHeader';
+import { Breadcrumbs } from '@/components/molecules/Breadcrumbs';
 import { ErrorState } from '@/components/molecules/ErrorState';
 import { LoadingSkeleton } from '@/components/molecules/LoadingSkeleton';
 import { EmptyState } from '@/components/molecules/EmptyState';
@@ -36,7 +36,13 @@ export const MembersPage: FC = () => {
 
   return (
     <DashboardLayout>
-      <PageHeader title={t('members.title')} />
+      <Breadcrumbs
+        title={t('members.title')}
+        items={[
+          { label: t('dashboard.title'), path: '/', icon: 'home' },
+          { label: t('members.title') },
+        ]}
+      />
 
       <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
         {isLoading && (

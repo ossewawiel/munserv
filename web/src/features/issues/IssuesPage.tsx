@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
-import { PageHeader } from '@/components/molecules/PageHeader';
+import { Breadcrumbs } from '@/components/molecules/Breadcrumbs';
 import { ErrorState } from '@/components/molecules/ErrorState';
 import { TableSkeleton } from '@/components/molecules/LoadingSkeleton';
 import { Pagination } from '@/components/molecules/Pagination';
@@ -84,7 +84,13 @@ export const IssuesPage: FC = () => {
 
   return (
     <DashboardLayout>
-      <PageHeader title={t('issues.title')} />
+      <Breadcrumbs
+        title={t('issues.title')}
+        items={[
+          { label: t('dashboard.title'), path: '/', icon: 'home' },
+          { label: t('issues.title') },
+        ]}
+      />
 
       <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <IssueFilters

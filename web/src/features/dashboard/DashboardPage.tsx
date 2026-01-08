@@ -5,7 +5,6 @@ import Grid from '@mui/material/Grid';
 import Skeleton from '@mui/material/Skeleton';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
-import { PageHeader } from '@/components/molecules/PageHeader';
 import { ErrorState } from '@/components/molecules/ErrorState';
 import { CardSkeleton } from '@/components/molecules/LoadingSkeleton';
 import { useDashboardStats } from './hooks';
@@ -19,9 +18,7 @@ export const DashboardPage: FC = () => {
 
   return (
     <DashboardLayout>
-      <PageHeader title={t('dashboard.title')} />
-
-      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {isLoading && (
           <>
             <CardSkeleton count={4} />

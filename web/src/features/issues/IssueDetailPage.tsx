@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
-import { PageHeader } from '@/components/molecules/PageHeader';
+import { Breadcrumbs } from '@/components/molecules/Breadcrumbs';
 import { ErrorState } from '@/components/molecules/ErrorState';
 import { LoadingSkeleton } from '@/components/molecules/LoadingSkeleton';
 import { PhotoGallery } from '@/components/molecules/PhotoGallery';
@@ -55,23 +56,27 @@ export const IssueDetailPage: FC = () => {
 
   return (
     <DashboardLayout>
-      <PageHeader
+      <Breadcrumbs
         title={t('issues.detail')}
-        actions={
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="secondary" onClick={handleBack}>
-              {t('common.back')}
-            </Button>
-            {issue && (
-              <Button onClick={handleOpenModal}>
-                {t('issues.changeState')}
-              </Button>
-            )}
-          </Box>
-        }
+        items={[
+          { label: t('dashboard.title'), path: '/', icon: 'home' },
+          { label: t('issues.title'), path: '/issues' },
+          { label: t('issues.detail') },
+        ]}
       />
 
       <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* Actions moved below breadcrumb */}
+        <Stack direction="row" spacing={1} justifyContent="flex-end">
+          <Button variant="secondary" onClick={handleBack}>
+            {t('common.back')}
+          </Button>
+          {issue && (
+            <Button onClick={handleOpenModal}>
+              {t('issues.changeState')}
+            </Button>
+          )}
+        </Stack>
         {isLoading && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <LoadingSkeleton variant="rect" height={200} />

@@ -94,6 +94,9 @@
       "suspended": "Suspended"
     }
   },
+  "reports": {
+    "title": "Reports"
+  },
   "heatReport": {
     "title": "Heat Report",
     "rank": "Rank",
