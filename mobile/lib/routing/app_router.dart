@@ -156,7 +156,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/auth/login',
         name: 'login',
-        builder: (context, state) => const LoginPage(),
+        builder: (context, state) {
+          final phone = state.uri.queryParameters['phone'];
+          return LoginPage(phoneNumber: phone);
+        },
       ),
 
       // ===== Issue Detail Routes (outside shell for full-screen) =====

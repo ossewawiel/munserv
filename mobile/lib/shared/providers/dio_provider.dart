@@ -15,9 +15,16 @@ const String _apiHost = String.fromEnvironment('API_HOST', defaultValue: '10.0.2
 const String _apiPort = String.fromEnvironment('API_PORT', defaultValue: '8080');
 const String _baseUrl = 'http://$_apiHost:$_apiPort/api/v1';
 
+// Debug flag - set to true to see API calls in console
+const bool _debugApi = true;
+
 /// Provides the base Dio instance with auth interceptor
 @riverpod
 Dio dio(Ref ref) {
+  if (_debugApi) {
+    print('🔧 API Base URL: $_baseUrl');
+  }
+
   // Create secure storage directly to avoid circular dependency
   // (authNotifier -> authRepository -> authApi -> dio -> authNotifier)
   const storage = FlutterSecureStorage(
@@ -50,9 +57,27 @@ Dio dio(Ref ref) {
             options.headers['Authorization'] = 'Bearer $token';
           }
         }
+
+        if (_debugApi) {
+          print('🌐 API REQUEST: ${options.method} ${options.baseUrl}${options.path}');
+          print('📦 Data: ${options.data}');
+        }
+
         handler.next(options);
       },
+      onResponse: (response, handler) {
+        if (_debugApi) {
+          print('✅ API RESPONSE: ${response.statusCode} ${response.requestOptions.path}');
+          print('📦 Data: ${response.data}');
+        }
+        handler.next(response);
+      },
       onError: (error, handler) async {
+        if (_debugApi) {
+          print('❌ API ERROR: ${error.response?.statusCode} ${error.requestOptions.path}');
+          print('📦 Error: ${error.response?.data ?? error.message}');
+        }
+
         // Handle 401 errors - token expired
         if (error.response?.statusCode == 401) {
           // For MVP: just pass through the error

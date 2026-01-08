@@ -11,7 +11,11 @@ import '../widgets/widgets.dart';
 
 /// Page for existing user login with PIN
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+  /// Optional phone number passed from phone entry page (on 409 phone_registered)
+  /// When provided, this phone is used instead of the stored phone number
+  final String? phoneNumber;
+
+  const LoginPage({super.key, this.phoneNumber});
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
@@ -36,6 +40,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _loadStoredPhone() async {
+    // Use passed phone number if available, otherwise load from storage
+    if (widget.phoneNumber != null && widget.phoneNumber!.isNotEmpty) {
+      if (mounted) {
+        setState(() {
+          _storedPhone = widget.phoneNumber;
+        });
+      }
+      return;
+    }
+
     final phoneAsync = await ref.read(storedPhoneNumberProvider.future);
     if (mounted) {
       setState(() {
@@ -45,8 +59,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _tryAutoBiometricLogin() async {
-    final isBiometricEnabled =
-        await ref.read(isBiometricLoginEnabledProvider.future);
+    final isBiometricEnabled = await ref.read(
+      isBiometricLoginEnabledProvider.future,
+    );
     if (isBiometricEnabled && mounted) {
       // Small delay for better UX
       await Future.delayed(const Duration(milliseconds: 300));
@@ -80,8 +95,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     if (result.isSuccess) {
       // Check if we should offer biometric setup before navigating
-      final isBiometricEnabled =
-          await ref.read(isBiometricLoginEnabledProvider.future);
+      final isBiometricEnabled = await ref.read(
+        isBiometricLoginEnabledProvider.future,
+      );
       final biometricService = ref.read(biometricServiceProvider);
       final biometricAvailable = await biometricService.isBiometricAvailable();
 
@@ -176,7 +192,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       setState(() {
         _isBiometricLoading = false;
         // Don't show error for user cancelled
-        if (result.errorOrNull?.displayMessage != 'Biometric authentication failed') {
+        if (result.errorOrNull?.displayMessage !=
+            'Biometric authentication failed') {
           _errorText = result.errorOrNull?.displayMessage;
         }
       });
@@ -230,12 +247,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             PinInputField(
               key: _pinKey,
               onCompleted: _onPinCompleted,
-              autoFocus: !biometricEnabled, // Don't auto-focus if biometric will be tried
+              autoFocus:
+                  !biometricEnabled, // Don't auto-focus if biometric will be tried
               errorText: _errorText,
             ),
           const SizedBox(height: Spacing.xl),
           // Biometric button - only show if biometrics are enabled (setup happens after PIN login)
-          if (showBiometricButton && biometricEnabled && !_isLoading && !_isBiometricLoading)
+          if (showBiometricButton &&
+              biometricEnabled &&
+              !_isLoading &&
+              !_isBiometricLoading)
             OutlinedButton.icon(
               onPressed: _onUseBiometrics,
               icon: const Icon(Icons.fingerprint),
@@ -246,10 +267,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
           const SizedBox(height: Spacing.lg),
           // Forgot PIN link
-          TextButton(
-            onPressed: _onForgotPin,
-            child: Text(l10n.forgotPin),
-          ),
+          TextButton(onPressed: _onForgotPin, child: Text(l10n.forgotPin)),
           const SizedBox(height: Spacing.sm),
           // Use different account link
           TextButton(

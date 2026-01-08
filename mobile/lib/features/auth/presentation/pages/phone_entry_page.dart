@@ -59,14 +59,18 @@ class _PhoneEntryPageState extends ConsumerState<PhoneEntryPage> {
 
     if (result.isSuccess) {
       // Navigate to OTP verification page
-      context.pushNamed(
-        'otp',
-        queryParameters: {'phone': _phoneNumber},
-      );
+      context.pushNamed('otp', queryParameters: {'phone': _phoneNumber});
     } else {
+      final error = result.errorOrNull;
+
+      // Handle 409 phone_registered: redirect to login with this phone
+      if (error != null && error.isPhoneRegistered) {
+        context.goNamed('login', queryParameters: {'phone': _phoneNumber});
+        return;
+      }
+
       setState(() {
-        _errorText = result.errorOrNull?.displayMessage ??
-            S.of(context).errorGeneric;
+        _errorText = error?.displayMessage ?? S.of(context).errorGeneric;
       });
     }
   }

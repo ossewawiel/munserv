@@ -86,7 +86,7 @@ extension AppErrorPatterns on AppError {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( NetworkError value)?  network,TResult Function( ValidationError value)?  validation,TResult Function( UnauthorizedError value)?  unauthorized,TResult Function( NotFoundError value)?  notFound,TResult Function( ServerError value)?  server,TResult Function( UnknownError value)?  unknown,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( NetworkError value)?  network,TResult Function( ValidationError value)?  validation,TResult Function( UnauthorizedError value)?  unauthorized,TResult Function( NotFoundError value)?  notFound,TResult Function( ServerError value)?  server,TResult Function( ConflictError value)?  conflict,TResult Function( UnknownError value)?  unknown,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case NetworkError() when network != null:
@@ -94,7 +94,8 @@ return network(_that);case ValidationError() when validation != null:
 return validation(_that);case UnauthorizedError() when unauthorized != null:
 return unauthorized(_that);case NotFoundError() when notFound != null:
 return notFound(_that);case ServerError() when server != null:
-return server(_that);case UnknownError() when unknown != null:
+return server(_that);case ConflictError() when conflict != null:
+return conflict(_that);case UnknownError() when unknown != null:
 return unknown(_that);case _:
   return orElse();
 
@@ -113,7 +114,7 @@ return unknown(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( NetworkError value)  network,required TResult Function( ValidationError value)  validation,required TResult Function( UnauthorizedError value)  unauthorized,required TResult Function( NotFoundError value)  notFound,required TResult Function( ServerError value)  server,required TResult Function( UnknownError value)  unknown,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( NetworkError value)  network,required TResult Function( ValidationError value)  validation,required TResult Function( UnauthorizedError value)  unauthorized,required TResult Function( NotFoundError value)  notFound,required TResult Function( ServerError value)  server,required TResult Function( ConflictError value)  conflict,required TResult Function( UnknownError value)  unknown,}){
 final _that = this;
 switch (_that) {
 case NetworkError():
@@ -121,7 +122,8 @@ return network(_that);case ValidationError():
 return validation(_that);case UnauthorizedError():
 return unauthorized(_that);case NotFoundError():
 return notFound(_that);case ServerError():
-return server(_that);case UnknownError():
+return server(_that);case ConflictError():
+return conflict(_that);case UnknownError():
 return unknown(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -136,7 +138,7 @@ return unknown(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( NetworkError value)?  network,TResult? Function( ValidationError value)?  validation,TResult? Function( UnauthorizedError value)?  unauthorized,TResult? Function( NotFoundError value)?  notFound,TResult? Function( ServerError value)?  server,TResult? Function( UnknownError value)?  unknown,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( NetworkError value)?  network,TResult? Function( ValidationError value)?  validation,TResult? Function( UnauthorizedError value)?  unauthorized,TResult? Function( NotFoundError value)?  notFound,TResult? Function( ServerError value)?  server,TResult? Function( ConflictError value)?  conflict,TResult? Function( UnknownError value)?  unknown,}){
 final _that = this;
 switch (_that) {
 case NetworkError() when network != null:
@@ -144,7 +146,8 @@ return network(_that);case ValidationError() when validation != null:
 return validation(_that);case UnauthorizedError() when unauthorized != null:
 return unauthorized(_that);case NotFoundError() when notFound != null:
 return notFound(_that);case ServerError() when server != null:
-return server(_that);case UnknownError() when unknown != null:
+return server(_that);case ConflictError() when conflict != null:
+return conflict(_that);case UnknownError() when unknown != null:
 return unknown(_that);case _:
   return null;
 
@@ -162,14 +165,15 @@ return unknown(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String message,  int? statusCode)?  network,TResult Function( String message,  String? field)?  validation,TResult Function( String? message)?  unauthorized,TResult Function( String? message)?  notFound,TResult Function( String message)?  server,TResult Function( String message)?  unknown,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String message,  int? statusCode)?  network,TResult Function( String message,  String? field)?  validation,TResult Function( String? message)?  unauthorized,TResult Function( String? message)?  notFound,TResult Function( String message)?  server,TResult Function( String message,  String? errorCode)?  conflict,TResult Function( String message)?  unknown,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case NetworkError() when network != null:
 return network(_that.message,_that.statusCode);case ValidationError() when validation != null:
 return validation(_that.message,_that.field);case UnauthorizedError() when unauthorized != null:
 return unauthorized(_that.message);case NotFoundError() when notFound != null:
 return notFound(_that.message);case ServerError() when server != null:
-return server(_that.message);case UnknownError() when unknown != null:
+return server(_that.message);case ConflictError() when conflict != null:
+return conflict(_that.message,_that.errorCode);case UnknownError() when unknown != null:
 return unknown(_that.message);case _:
   return orElse();
 
@@ -188,14 +192,15 @@ return unknown(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String message,  int? statusCode)  network,required TResult Function( String message,  String? field)  validation,required TResult Function( String? message)  unauthorized,required TResult Function( String? message)  notFound,required TResult Function( String message)  server,required TResult Function( String message)  unknown,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String message,  int? statusCode)  network,required TResult Function( String message,  String? field)  validation,required TResult Function( String? message)  unauthorized,required TResult Function( String? message)  notFound,required TResult Function( String message)  server,required TResult Function( String message,  String? errorCode)  conflict,required TResult Function( String message)  unknown,}) {final _that = this;
 switch (_that) {
 case NetworkError():
 return network(_that.message,_that.statusCode);case ValidationError():
 return validation(_that.message,_that.field);case UnauthorizedError():
 return unauthorized(_that.message);case NotFoundError():
 return notFound(_that.message);case ServerError():
-return server(_that.message);case UnknownError():
+return server(_that.message);case ConflictError():
+return conflict(_that.message,_that.errorCode);case UnknownError():
 return unknown(_that.message);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -210,14 +215,15 @@ return unknown(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String message,  int? statusCode)?  network,TResult? Function( String message,  String? field)?  validation,TResult? Function( String? message)?  unauthorized,TResult? Function( String? message)?  notFound,TResult? Function( String message)?  server,TResult? Function( String message)?  unknown,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String message,  int? statusCode)?  network,TResult? Function( String message,  String? field)?  validation,TResult? Function( String? message)?  unauthorized,TResult? Function( String? message)?  notFound,TResult? Function( String message)?  server,TResult? Function( String message,  String? errorCode)?  conflict,TResult? Function( String message)?  unknown,}) {final _that = this;
 switch (_that) {
 case NetworkError() when network != null:
 return network(_that.message,_that.statusCode);case ValidationError() when validation != null:
 return validation(_that.message,_that.field);case UnauthorizedError() when unauthorized != null:
 return unauthorized(_that.message);case NotFoundError() when notFound != null:
 return notFound(_that.message);case ServerError() when server != null:
-return server(_that.message);case UnknownError() when unknown != null:
+return server(_that.message);case ConflictError() when conflict != null:
+return conflict(_that.message,_that.errorCode);case UnknownError() when unknown != null:
 return unknown(_that.message);case _:
   return null;
 
@@ -554,6 +560,74 @@ class _$ServerErrorCopyWithImpl<$Res>
   return _then(ServerError(
 message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class ConflictError extends AppError {
+  const ConflictError({required this.message, this.errorCode}): super._();
+  
+
+@override final  String message;
+ final  String? errorCode;
+
+/// Create a copy of AppError
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ConflictErrorCopyWith<ConflictError> get copyWith => _$ConflictErrorCopyWithImpl<ConflictError>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConflictError&&(identical(other.message, message) || other.message == message)&&(identical(other.errorCode, errorCode) || other.errorCode == errorCode));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message,errorCode);
+
+@override
+String toString() {
+  return 'AppError.conflict(message: $message, errorCode: $errorCode)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ConflictErrorCopyWith<$Res> implements $AppErrorCopyWith<$Res> {
+  factory $ConflictErrorCopyWith(ConflictError value, $Res Function(ConflictError) _then) = _$ConflictErrorCopyWithImpl;
+@override @useResult
+$Res call({
+ String message, String? errorCode
+});
+
+
+
+
+}
+/// @nodoc
+class _$ConflictErrorCopyWithImpl<$Res>
+    implements $ConflictErrorCopyWith<$Res> {
+  _$ConflictErrorCopyWithImpl(this._self, this._then);
+
+  final ConflictError _self;
+  final $Res Function(ConflictError) _then;
+
+/// Create a copy of AppError
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? errorCode = freezed,}) {
+  return _then(ConflictError(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,errorCode: freezed == errorCode ? _self.errorCode : errorCode // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
