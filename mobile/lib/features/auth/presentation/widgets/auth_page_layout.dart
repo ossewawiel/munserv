@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../shared/theme/typography.dart';
+import '../../../../shared/widgets/app_logo.dart';
 
 /// Common layout for authentication pages
 class AuthPageLayout extends StatelessWidget {
@@ -44,6 +45,9 @@ class AuthPageLayout extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (!showBackButton) const SizedBox(height: Spacing.xl),
+              const SizedBox(height: Spacing.lg),
+              // Logo
+              const Center(child: AppLogo.large()),
               const SizedBox(height: Spacing.lg),
               // Header
               Text(

@@ -4,10 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/models/issue_state.dart';
 import '../../../../shared/models/issue_type.dart';
-import '../../../../shared/widgets/error_display.dart';
-import '../../../../shared/widgets/loading_spinner.dart';
 import '../../../../shared/theme/colors.dart';
 import '../../../../shared/theme/typography.dart';
+import '../../../../shared/widgets/error_display.dart';
+import '../../../../shared/widgets/loading_spinner.dart';
+import '../../../../shared/widgets/munserv_app_bar.dart';
 import '../../domain/domain.dart';
 import '../../providers/issue_providers.dart';
 import '../widgets/widgets.dart';
@@ -27,8 +28,7 @@ class IssueDetailPage extends ConsumerWidget {
     final l10n = S.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.issueDetailTitle),
+      appBar: MunServAppBar(
         actions: [
           IconButton(
             icon: const Icon(Icons.share),

@@ -6,6 +6,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/services/biometric_service.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/utils/result.dart';
+import '../../../../shared/widgets/munserv_app_bar.dart';
 import '../../../auth/providers/auth_providers.dart';
 import '../../../issues/providers/issue_providers.dart';
 import '../../../issues/presentation/widgets/widgets.dart';
@@ -113,8 +114,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final issuesAsync = ref.watch(issuesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.appTitle),
+      appBar: MunServAppBar(
         actions: [
           IconButton(
             icon: const Icon(Icons.map),

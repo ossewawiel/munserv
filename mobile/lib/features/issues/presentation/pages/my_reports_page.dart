@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/theme/typography.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/loading_spinner.dart';
-import '../../../../shared/theme/typography.dart';
+import '../../../../shared/widgets/munserv_app_bar.dart';
 import '../../providers/issue_providers.dart';
 import '../widgets/widgets.dart';
 
@@ -19,9 +20,7 @@ class MyReportsPage extends ConsumerWidget {
     final l10n = S.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.myReportsTitle),
-      ),
+      appBar: const MunServAppBar(),
       body: myIssuesAsync.when(
         data: (paginated) {
           if (paginated.items.isEmpty) {

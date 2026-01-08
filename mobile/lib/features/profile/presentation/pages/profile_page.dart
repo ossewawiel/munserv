@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/theme/typography.dart';
+import '../../../../shared/widgets/munserv_app_bar.dart';
 import '../../../auth/domain/auth_state.dart';
 import '../../../auth/providers/auth_providers.dart';
 
@@ -19,9 +20,7 @@ class ProfilePage extends ConsumerWidget {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.profile),
-      ),
+      appBar: const MunServAppBar(),
       body: ListView(
         padding: const EdgeInsets.all(Spacing.lg),
         children: [
