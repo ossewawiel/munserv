@@ -201,13 +201,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                   padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      (context, index) => Padding(
-                        padding: const EdgeInsets.only(bottom: Spacing.md),
-                        child: IssueCard(
-                          issue: issues[index],
-                          onTap: () => context.push('/issues/${issues[index].id}'),
-                        ),
-                      ),
+                      (context, index) {
+                        final issue = issues[index];
+                        return Padding(
+                          key: ValueKey(issue.id),
+                          padding: const EdgeInsets.only(bottom: Spacing.md),
+                          child: IssueCard(
+                            issue: issue,
+                            onTap: () => context.push('/issues/${issue.id}'),
+                          ),
+                        );
+                      },
                       childCount: issues.length,
                     ),
                   ),

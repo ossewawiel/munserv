@@ -4,3 +4,4 @@ export 'issue_card.dart';
 export 'issue_filter_bar.dart';
 export 'issue_state_badge.dart';
 export 'issue_type_badge.dart';
+export 'location_step.dart';

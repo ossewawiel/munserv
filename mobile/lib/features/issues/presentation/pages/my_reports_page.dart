@@ -40,6 +40,7 @@ class MyReportsPage extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final issue = paginated.items[index];
                 return IssueCard(
+                  key: ValueKey(issue.id),
                   issue: issue,
                   onTap: () => context.push('/issues/${issue.id}'),
                 );
@@ -80,7 +81,7 @@ class _EmptyState extends StatelessWidget {
             Icon(
               Icons.assignment_outlined,
               size: 80,
-              color: theme.colorScheme.primary.withOpacity(0.5),
+              color: theme.colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: Spacing.lg),
             Text(

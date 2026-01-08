@@ -202,12 +202,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final showBiometricButton = biometricAvailableAsync.when(
       data: (value) => value,
       loading: () => false,
-      error: (_, __) => false,
+      error: (_, _) => false,
     );
     final biometricEnabled = isBiometricEnabledAsync.when(
       data: (value) => value,
       loading: () => false,
-      error: (_, __) => false,
+      error: (_, _) => false,
     );
 
     return AuthPageLayout(

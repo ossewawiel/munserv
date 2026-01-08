@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -54,7 +53,7 @@ GoRouter appRouter(Ref ref) {
         final redirectPath = storedPhoneAsync.when(
           data: (phone) => phone != null ? '/auth/login' : '/auth/phone',
           loading: () => null, // Don't redirect while loading
-          error: (_, __) => '/auth/phone',
+          error: (_, _) => '/auth/phone',
         );
         return redirectPath;
       }
@@ -134,6 +133,14 @@ GoRouter appRouter(Ref ref) {
         name: 'pinSetup',
         builder: (context, state) {
           final params = state.uri.queryParameters;
+          // TODO(MVP): Sector should be selected by user during registration
+          // or auto-detected based on location. For MVP, use default sector.
+          // See: specs/MVP_Development_Guide.md for sector selection requirements
+          final sectorId = params['sectorId'];
+          assert(
+            sectorId != null || kDebugMode,
+            'sectorId is required for registration',
+          );
           return PinSetupPage(
             phoneNumber: params['phone'] ?? '',
             tempToken: params['tempToken'] ?? '',
@@ -142,8 +149,7 @@ GoRouter appRouter(Ref ref) {
             address: params['address'] ?? '',
             latitude: double.tryParse(params['latitude'] ?? '') ?? 0,
             longitude: double.tryParse(params['longitude'] ?? '') ?? 0,
-            // Default sector for MVP - should be selected by user or auto-detected
-            sectorId: params['sectorId'] ?? '550e8400-e29b-41d4-a716-446655440001',
+            sectorId: sectorId ?? 'default-sector-mvp',
           );
         },
       ),
@@ -158,8 +164,10 @@ GoRouter appRouter(Ref ref) {
         path: '/issues/:id',
         name: 'issueDetail',
         builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return IssueDetailPage(issueId: id);
+          final id = state.pathParameters['id'];
+          // GoRouter guarantees 'id' exists for this route pattern
+          assert(id != null, 'Issue ID is required');
+          return IssueDetailPage(issueId: id ?? '');
         },
       ),
       GoRoute(

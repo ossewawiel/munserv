@@ -27,7 +27,7 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
   int _currentStep = 0;
 
   // Form data
-  final List<String> _photoPaths = [];
+  List<String> _photoPaths = [];
   IssueType? _selectedType;
   GeoPoint? _location;
   String? _description;
@@ -135,15 +135,14 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
                 _PhotoStep(
                   photoPaths: _photoPaths,
                   onPhotosChanged: (paths) => setState(() {
-                    _photoPaths.clear();
-                    _photoPaths.addAll(paths);
+                    _photoPaths = List.from(paths);
                   }),
                 ),
                 _TypeStep(
                   selectedType: _selectedType,
                   onTypeSelected: (type) => setState(() => _selectedType = type),
                 ),
-                _LocationStep(
+                LocationStep(
                   location: _location,
                   onLocationChanged: (loc) => setState(() => _location = loc),
                 ),
@@ -603,146 +602,6 @@ class _TypeOption extends StatelessWidget {
   }
 }
 
-class _LocationStep extends StatefulWidget {
-  final GeoPoint? location;
-  final void Function(GeoPoint) onLocationChanged;
-
-  const _LocationStep({
-    required this.location,
-    required this.onLocationChanged,
-  });
-
-  @override
-  State<_LocationStep> createState() => _LocationStepState();
-}
-
-class _LocationStepState extends State<_LocationStep> {
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.location == null) {
-      _getCurrentLocation();
-    }
-  }
-
-  Future<void> _getCurrentLocation() async {
-    setState(() => _isLoading = true);
-
-    // TODO: Implement actual location fetching with geolocator package
-    // For now, simulate with a mock location
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      widget.onLocationChanged(
-        const GeoPoint(latitude: -26.1052, longitude: 28.0564),
-      );
-      setState(() => _isLoading = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(Spacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Confirm Location',
-            style: theme.textTheme.titleLarge,
-          ),
-          const SizedBox(height: Spacing.sm),
-          Text(
-            'We\'ll use your current location. You can adjust if needed.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: Spacing.lg),
-
-          // Map placeholder
-          Container(
-            height: 250,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(Radii.md),
-            ),
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : widget.location != null
-                    ? Stack(
-                        children: [
-                          Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.map,
-                                  size: 64,
-                                  color: theme.colorScheme.onSurfaceVariant
-                                      .withOpacity(0.5),
-                                ),
-                                const SizedBox(height: Spacing.sm),
-                                Text(
-                                  'Map preview',
-                                  style: theme.textTheme.bodySmall,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            bottom: Spacing.md,
-                            left: Spacing.md,
-                            right: Spacing.md,
-                            child: Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(Spacing.md),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.location_on,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                    const SizedBox(width: Spacing.sm),
-                                    Expanded(
-                                      child: Text(
-                                        '${widget.location!.latitude.toStringAsFixed(6)}, ${widget.location!.longitude.toStringAsFixed(6)}',
-                                        style: theme.textTheme.bodyMedium,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Center(
-                        child: Text(
-                          'Location unavailable',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ),
-          ),
-
-          const SizedBox(height: Spacing.md),
-
-          // Refresh location button
-          OutlinedButton.icon(
-            onPressed: _getCurrentLocation,
-            icon: const Icon(Icons.my_location),
-            label: const Text('Refresh Location'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _ReviewStep extends StatelessWidget {
   final List<String> photoPaths;
   final IssueType? type;
@@ -789,7 +648,7 @@ class _ReviewStep extends StatelessWidget {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: photoPaths.length,
-                separatorBuilder: (_, __) => const SizedBox(width: Spacing.sm),
+                separatorBuilder: (_, _) => const SizedBox(width: Spacing.sm),
                 itemBuilder: (context, index) => ClipRRect(
                   borderRadius: BorderRadius.circular(Radii.sm),
                   child: Image.file(

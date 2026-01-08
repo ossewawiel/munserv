@@ -68,7 +68,9 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   }
 
   Future<void> _onContinue() async {
-    if (!_formKey.currentState!.validate() || _location == null) {
+    final formState = _formKey.currentState;
+    final location = _location;
+    if (formState == null || !formState.validate() || location == null) {
       return;
     }
 
@@ -81,8 +83,8 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
         'firstName': _firstNameController.text,
         'surname': _surnameController.text,
         'address': _addressController.text,
-        'latitude': _location!.latitude.toString(),
-        'longitude': _location!.longitude.toString(),
+        'latitude': location.latitude.toString(),
+        'longitude': location.longitude.toString(),
       },
     );
   }
@@ -96,6 +98,12 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
       title: l10n.profileTitle,
       subtitle: l10n.profileSubtitle,
       showBackButton: true,
+      bottomAction: LoadingButton(
+        label: l10n.continueButton,
+        onPressed: _onContinue,
+        isLoading: _isLoading,
+        enabled: _isFormValid,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
@@ -164,7 +172,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               },
               onChanged: (_) => setState(() {}),
             ),
-            if (_location != null) ...[
+            if (_location case final loc?) ...[
               const SizedBox(height: Spacing.sm),
               Row(
                 children: [
@@ -176,7 +184,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                   const SizedBox(width: Spacing.xs),
                   Expanded(
                     child: Text(
-                      'Location detected: ${_location!.latitude.toStringAsFixed(4)}, ${_location!.longitude.toStringAsFixed(4)}',
+                      'Location detected: ${loc.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.primary,
                       ),
@@ -185,10 +193,10 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 ],
               ),
             ],
-            if (_errorText != null) ...[
+            if (_errorText case final error?) ...[
               const SizedBox(height: Spacing.md),
               Text(
-                _errorText!,
+                error,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.error,
                 ),
@@ -197,12 +205,6 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
             ],
           ],
         ),
-      ),
-      bottomAction: LoadingButton(
-        label: l10n.continueButton,
-        onPressed: _onContinue,
-        isLoading: _isLoading,
-        enabled: _isFormValid,
       ),
     );
   }

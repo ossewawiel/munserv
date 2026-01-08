@@ -8,6 +8,25 @@ enum IssueState {
   fixed,
   rejected;
 
+  /// Parse from API string (snake_case format)
+  static IssueState fromString(String value) => switch (value) {
+        'reported' => reported,
+        'confirmed' => confirmed,
+        'in_progress' => inProgress,
+        'fixed' => fixed,
+        'rejected' => rejected,
+        _ => reported, // Default to reported for unknown states
+      };
+
+  /// Convert to API string (snake_case format)
+  String toApiString() => switch (this) {
+        reported => 'reported',
+        confirmed => 'confirmed',
+        inProgress => 'in_progress',
+        fixed => 'fixed',
+        rejected => 'rejected',
+      };
+
   String get displayName => switch (this) {
         reported => 'Reported',
         confirmed => 'Confirmed',

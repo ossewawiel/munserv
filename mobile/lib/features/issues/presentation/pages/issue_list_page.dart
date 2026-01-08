@@ -60,6 +60,7 @@ class IssueListPage extends ConsumerWidget {
 
                       final issue = paginated.items[index];
                       return IssueCard(
+                        key: ValueKey(issue.id),
                         issue: issue,
                         onTap: () => context.push('/issues/${issue.id}'),
                       );
@@ -103,7 +104,7 @@ class _EmptyState extends StatelessWidget {
             Icon(
               Icons.check_circle_outline,
               size: 80,
-              color: theme.colorScheme.primary.withOpacity(0.5),
+              color: theme.colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: Spacing.lg),
             Text(

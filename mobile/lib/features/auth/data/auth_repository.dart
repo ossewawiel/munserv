@@ -170,27 +170,7 @@ class AuthRepository {
   /// Get sectors list (for registration)
   Future<Result<List<SectorInfo>>> getSectors() async {
     try {
-      // This uses the sectors list endpoint
-      // We'll need to add this to AuthApi or use a separate SectorApi
-      // For now, we use the existing sectors endpoint through Dio
-      // This is a workaround - ideally should be a separate SectorRepository
-      final response = await _api._dio.get('/sectors');
-      final data = response.data as Map<String, dynamic>;
-      final items = data['items'] as List<dynamic>;
-
-      final sectors = items.map((item) {
-        final sectorData = item as Map<String, dynamic>;
-        final center = sectorData['center'] as Map<String, dynamic>;
-        return SectorInfo(
-          id: sectorData['id'] as String,
-          name: sectorData['name'] as String,
-          center: GeoPoint(
-            latitude: (center['latitude'] as num).toDouble(),
-            longitude: (center['longitude'] as num).toDouble(),
-          ),
-        );
-      }).toList();
-
+      final sectors = await _api.getSectors();
       return Result.success(sectors);
     } on DioException catch (e) {
       return Result.failure(AppError.fromDio(e));
@@ -198,9 +178,4 @@ class AuthRepository {
       return Result.failure(AppError.unknown(message: e.toString()));
     }
   }
-}
-
-// Re-export extension to access _dio (temporary workaround)
-extension AuthApiDioAccess on AuthApi {
-  Dio get _dio => (this as dynamic)._dio as Dio;
 }

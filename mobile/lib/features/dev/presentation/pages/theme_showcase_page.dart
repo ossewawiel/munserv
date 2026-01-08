@@ -526,22 +526,18 @@ class _SelectionControlsSectionState extends State<_SelectionControlsSection> {
         const SizedBox(height: 16),
         Text('Radio', style: Theme.of(context).textTheme.labelMedium),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            Radio<int>(
-              value: 0,
-              groupValue: _radioValue,
-              onChanged: (v) => setState(() => _radioValue = v!),
-            ),
-            const Text('Option 1'),
-            const SizedBox(width: 16),
-            Radio<int>(
-              value: 1,
-              groupValue: _radioValue,
-              onChanged: (v) => setState(() => _radioValue = v!),
-            ),
-            const Text('Option 2'),
-          ],
+        RadioGroup<int>(
+          groupValue: _radioValue,
+          onChanged: (v) => setState(() => _radioValue = v!),
+          child: Row(
+            children: [
+              Radio<int>(value: 0),
+              const Text('Option 1'),
+              const SizedBox(width: 16),
+              Radio<int>(value: 1),
+              const Text('Option 2'),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
         Text('Slider', style: Theme.of(context).textTheme.labelMedium),

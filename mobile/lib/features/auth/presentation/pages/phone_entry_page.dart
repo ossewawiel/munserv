@@ -78,6 +78,12 @@ class _PhoneEntryPageState extends ConsumerState<PhoneEntryPage> {
     return AuthPageLayout(
       title: l10n.phoneEntryTitle,
       subtitle: l10n.phoneEntrySubtitle,
+      bottomAction: LoadingButton(
+        label: l10n.continueButton,
+        onPressed: _onContinue,
+        isLoading: _isLoading,
+        enabled: _isPhoneValid,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -96,12 +102,6 @@ class _PhoneEntryPageState extends ConsumerState<PhoneEntryPage> {
             onSubmitted: _onContinue,
           ),
         ],
-      ),
-      bottomAction: LoadingButton(
-        label: l10n.continueButton,
-        onPressed: _onContinue,
-        isLoading: _isLoading,
-        enabled: _isPhoneValid,
       ),
     );
   }

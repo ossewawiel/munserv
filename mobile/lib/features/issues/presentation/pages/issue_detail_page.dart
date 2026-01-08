@@ -75,9 +75,9 @@ class _IssueDetailContent extends StatelessWidget {
                 // Type and State
                 Row(
                   children: [
-                    IssueTypeBadge(type: _parseIssueType(issue.type)),
+                    IssueTypeBadge(type: IssueType.fromString(issue.type)),
                     const SizedBox(width: Spacing.sm),
-                    IssueStateBadge(state: _parseIssueState(issue.state)),
+                    IssueStateBadge(state: IssueState.fromString(issue.state)),
                     const Spacer(),
                     HeatIndicator(heat: issue.heat),
                   ],
@@ -152,29 +152,6 @@ class _IssueDetailContent extends StatelessWidget {
       ),
     );
   }
-
-  IssueType _parseIssueType(String type) {
-    return switch (type) {
-      'pothole' => IssueType.pothole,
-      'water_leak' => IssueType.waterLeak,
-      'sewage_leak' => IssueType.sewageLeak,
-      'traffic_light' => IssueType.trafficLight,
-      'street_light' => IssueType.streetLight,
-      'illegal_dumping' => IssueType.illegalDumping,
-      _ => IssueType.other,
-    };
-  }
-
-  IssueState _parseIssueState(String state) {
-    return switch (state) {
-      'reported' => IssueState.reported,
-      'confirmed' => IssueState.confirmed,
-      'in_progress' => IssueState.inProgress,
-      'fixed' => IssueState.fixed,
-      'rejected' => IssueState.rejected,
-      _ => IssueState.reported,
-    };
-  }
 }
 
 class _PhotoCarousel extends StatefulWidget {
@@ -230,7 +207,7 @@ class _PhotoCarouselState extends State<_PhotoCarousel> {
                       shape: BoxShape.circle,
                       color: index == _currentIndex
                           ? Colors.white
-                          : Colors.white.withOpacity(0.5),
+                          : Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
                 ),

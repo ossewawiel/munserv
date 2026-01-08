@@ -33,7 +33,7 @@ class HeatIndicator extends StatelessWidget {
             children: [
               CircularProgressIndicator(
                 value: normalizedHeat,
-                backgroundColor: color.withOpacity(0.2),
+                backgroundColor: color.withValues(alpha: 0.2),
                 valueColor: AlwaysStoppedAnimation(color),
                 strokeWidth: 4,
               ),
@@ -81,9 +81,9 @@ class HeatBadge extends StatelessWidget {
         vertical: Spacing.xs,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(Radii.sm),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

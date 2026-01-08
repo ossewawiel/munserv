@@ -112,4 +112,26 @@ class AuthApi {
     );
     return BackendLoginResponse.fromJson(response.data as Map<String, dynamic>);
   }
+
+  /// Get all sectors
+  /// GET /sectors
+  /// Returns paginated list of sectors
+  Future<List<SectorInfo>> getSectors() async {
+    final response = await _dio.get('/sectors');
+    final data = response.data as Map<String, dynamic>;
+    final items = data['items'] as List<dynamic>;
+
+    return items.map((item) {
+      final sectorData = item as Map<String, dynamic>;
+      final center = sectorData['center'] as Map<String, dynamic>;
+      return SectorInfo(
+        id: sectorData['id'] as String,
+        name: sectorData['name'] as String,
+        center: GeoPoint(
+          latitude: (center['latitude'] as num).toDouble(),
+          longitude: (center['longitude'] as num).toDouble(),
+        ),
+      );
+    }).toList();
+  }
 }
