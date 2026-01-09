@@ -110,7 +110,8 @@
     "of": "of",
     "showing": "Showing",
     "to": "to",
-    "results": "results"
+    "results": "results",
+    "rowsPerPage": "Rows per page"
   },
   "errors": {
     "notFound": "Not Found",

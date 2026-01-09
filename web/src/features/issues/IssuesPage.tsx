@@ -1,4 +1,4 @@
-import { type FC, useCallback } from 'react';
+import { type FC, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
@@ -6,14 +6,18 @@ import Box from '@mui/material/Box';
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { Breadcrumbs } from '@/components/molecules/Breadcrumbs';
 import { ErrorState } from '@/components/molecules/ErrorState';
-import { TableSkeleton } from '@/components/molecules/LoadingSkeleton';
-import { Pagination } from '@/components/molecules/Pagination';
+import { EmptyState } from '@/components/molecules/EmptyState';
+import { DataTableCard } from '@/components/organisms/DataTableCard';
+import { IssueStateBadge } from '@/components/molecules/IssueStateBadge';
+import { IssueTypeBadge } from '@/components/molecules/IssueTypeBadge';
+import { HeatBadge } from '@/components/molecules/HeatIndicator';
 import { useIssues } from './hooks';
 import { IssueFilters } from './components/IssueFilters';
-import { IssuesTable } from './components/IssuesTable';
+import type { Column } from '@/components/organisms/DataTable';
 import type { IssueState, IssueType, IssueSummary } from './types';
 
-const PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [5, 10, 20] as const;
 
 export const IssuesPage: FC = () => {
   const { t } = useTranslation();
@@ -23,12 +27,16 @@ export const IssuesPage: FC = () => {
   const state = (searchParams.get('state') as IssueState) || undefined;
   const type = (searchParams.get('type') as IssueType) || undefined;
   const page = Number.parseInt(searchParams.get('page') || '1', 10);
+  const pageSize = Number.parseInt(
+    searchParams.get('pageSize') || String(DEFAULT_PAGE_SIZE),
+    10
+  );
 
   const { data, isLoading, error, refetch } = useIssues({
     state,
     type,
     page,
-    limit: PAGE_SIZE,
+    limit: pageSize,
   });
 
   const handleStateChange = useCallback(
@@ -62,13 +70,29 @@ export const IssuesPage: FC = () => {
   );
 
   const handleClearFilters = useCallback(() => {
-    setSearchParams({});
+    setSearchParams((prev) => {
+      prev.delete('state');
+      prev.delete('type');
+      prev.set('page', '1');
+      return prev;
+    });
   }, [setSearchParams]);
 
   const handlePageChange = useCallback(
     (newPage: number) => {
       setSearchParams((prev) => {
         prev.set('page', String(newPage));
+        return prev;
+      });
+    },
+    [setSearchParams]
+  );
+
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => {
+      setSearchParams((prev) => {
+        prev.set('pageSize', String(newPageSize));
+        prev.set('page', '1'); // Reset to first page when changing page size
         return prev;
       });
     },
@@ -82,6 +106,56 @@ export const IssuesPage: FC = () => {
     [navigate]
   );
 
+  const columns = useMemo<Column<IssueSummary>[]>(
+    () => [
+      {
+        key: 'thumbnail',
+        header: '',
+        width: '64px',
+        render: (issue) => (
+          <Box
+            component="img"
+            src={issue.thumbnailUrl}
+            alt={t(`issues.types.${issue.type}`)}
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 1,
+              objectFit: 'cover',
+            }}
+          />
+        ),
+      },
+      {
+        key: 'type',
+        header: t('issues.type'),
+        render: (issue) => <IssueTypeBadge type={issue.type} />,
+      },
+      {
+        key: 'state',
+        header: t('issues.state'),
+        render: (issue) => <IssueStateBadge state={issue.state} />,
+      },
+      {
+        key: 'heat',
+        header: t('issues.heat'),
+        align: 'center' as const,
+        render: (issue) => <HeatBadge heat={issue.heat} />,
+      },
+      {
+        key: 'createdAt',
+        header: t('issues.createdAt'),
+        render: (issue) =>
+          new Date(issue.createdAt).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          }),
+      },
+    ],
+    [t]
+  );
+
   return (
     <DashboardLayout>
       <Breadcrumbs
@@ -92,17 +166,7 @@ export const IssuesPage: FC = () => {
         ]}
       />
 
-      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <IssueFilters
-          state={state}
-          type={type}
-          onStateChange={handleStateChange}
-          onTypeChange={handleTypeChange}
-          onClear={handleClearFilters}
-        />
-
-        {isLoading && <TableSkeleton rows={5} columns={5} />}
-
+      <Box sx={{ mt: 3 }}>
         {error && (
           <ErrorState
             title={t('common.error')}
@@ -111,17 +175,35 @@ export const IssuesPage: FC = () => {
           />
         )}
 
-        {data && (
-          <>
-            <IssuesTable issues={data.items} onRowClick={handleRowClick} />
-            <Pagination
-              currentPage={data.pagination.page}
-              totalPages={data.pagination.totalPages}
-              totalItems={data.pagination.totalItems}
-              pageSize={data.pagination.limit}
-              onPageChange={handlePageChange}
-            />
-          </>
+        {!error && (
+          <DataTableCard
+            columns={columns}
+            data={data?.items ?? []}
+            keyExtractor={(issue) => issue.id}
+            totalItems={data?.pagination.totalItems ?? 0}
+            currentPage={data?.pagination.page ?? page}
+            pageSize={data?.pagination.limit ?? pageSize}
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            onRowClick={handleRowClick}
+            isLoading={isLoading}
+            filterSlot={
+              <IssueFilters
+                state={state}
+                type={type}
+                onStateChange={handleStateChange}
+                onTypeChange={handleTypeChange}
+                onClear={handleClearFilters}
+              />
+            }
+            emptyMessage={
+              <EmptyState
+                title={t('common.noResults')}
+                description={t('issues.noIssuesDescription')}
+              />
+            }
+          />
         )}
       </Box>
     </DashboardLayout>

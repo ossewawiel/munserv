@@ -585,12 +585,120 @@ Issue state and type charts use LinearProgress with rounded corners.
 />
 ```
 
-### 12.8 Files Reference (Berry Patterns)
+### 12.8 ActionButton Component
+
+Berry-style button with soft background colors, matching the hamburger button in the app header.
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| color | 'primary' \| 'secondary' | 'primary' | Color scheme |
+| variant | 'filled' \| 'outlined' | 'filled' | Button style |
+| icon | ReactNode | - | Icon before text |
+| children | ReactNode | - | Button text |
+
+**Color Schemes:**
+
+| Color | Filled Default | Filled Hover |
+|-------|----------------|--------------|
+| primary | Light green bg (#D0E0DA), dark green text | Green bg, white text |
+| secondary | Light peach bg (#FFDDD4), dark terracotta text | Terracotta bg, white text |
+
+```typescript
+import { ActionButton } from '@/components/atoms/ActionButton';
+import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
+import AddIcon from '@mui/icons-material/Add';
+
+// Primary filled (default)
+<ActionButton icon={<FilterAltOffIcon />}>Clear</ActionButton>
+
+// Secondary filled
+<ActionButton color="secondary" icon={<AddIcon />}>Add New</ActionButton>
+
+// Primary outlined
+<ActionButton variant="outlined" icon={<PrintIcon />}>Print</ActionButton>
+
+// Secondary outlined
+<ActionButton color="secondary" variant="outlined">Export</ActionButton>
+```
+
+### 12.9 DataTableCard Component
+
+Berry-inspired reusable data table wrapped in a card with integrated toolbar and pagination.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ ┌─────────────────────────┐    ┌─────────────────────────┐  │
+│ │  [State ▼] [Type ▼]     │    │  [🗑] [📤] [🖨] [➕]    │  │
+│ │  (Filter slots - left)  │    │  (Action slots - right) │  │
+│ └─────────────────────────┘    └─────────────────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│  | Col 1 | Col 2 | Col 3 | Col 4 | Col 5 |                  │
+│  |-------|-------|-------|-------|-------|                  │
+│  | ...   | ...   | ...   | ...   | ...   |                  │
+├─────────────────────────────────────────────────────────────┤
+│  Showing 1 to 10 of 45     Rows per page: [10▼]   < 1 2 3 > │
+└─────────────────────────────────────────────────────────────┘
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| columns | Column<T>[] | Table column definitions |
+| data | T[] | Data array to display |
+| keyExtractor | (item: T) => string | Extract unique key from item |
+| totalItems | number | Total item count for pagination |
+| currentPage | number | Current page (1-indexed) |
+| pageSize | number | Items per page |
+| pageSizeOptions | number[] | Available page sizes (default: [5, 10, 20]) |
+| onPageChange | (page: number) => void | Page change callback |
+| onPageSizeChange | (size: number) => void | Page size change callback |
+| filterSlot | ReactNode | Left toolbar content (filters/search) |
+| actionSlot | ReactNode | Right toolbar content (action buttons) |
+| isLoading | boolean | Show loading skeleton |
+| emptyMessage | ReactNode | Empty state content |
+
+```typescript
+// Usage example
+import { DataTableCard } from '@/components/organisms/DataTableCard';
+
+<DataTableCard
+  columns={columns}
+  data={issues}
+  keyExtractor={(item) => item.id}
+  totalItems={pagination.totalItems}
+  currentPage={pagination.page}
+  pageSize={pagination.limit}
+  pageSizeOptions={[5, 10, 20]}
+  onPageChange={handlePageChange}
+  onPageSizeChange={handlePageSizeChange}
+  onRowClick={handleRowClick}
+  isLoading={isLoading}
+  filterSlot={
+    <IssueFilters
+      state={state}
+      type={type}
+      onStateChange={handleStateChange}
+      onTypeChange={handleTypeChange}
+      onClear={handleClearFilters}
+    />
+  }
+  actionSlot={
+    <>
+      <IconButton><PrintIcon /></IconButton>
+      <IconButton><ExportIcon /></IconButton>
+    </>
+  }
+  emptyMessage={<EmptyState title="No results" />}
+/>
+```
+
+### 12.10 Files Reference (Berry Patterns)
 
 | File | Purpose |
 |------|---------|
 | `web/src/theme/constants.ts` | gridSpacing, avatarSizes |
 | `web/src/theme/shadows.ts` | cardHoverShadow, colorShadows |
+| `web/src/components/atoms/ActionButton.tsx` | Berry-style soft background button |
 | `web/src/components/atoms/MainCard.tsx` | Berry-style card wrapper |
 | `web/src/components/atoms/IconAvatar.tsx` | Icon avatar component |
 | `web/src/components/molecules/StatCard.tsx` | Dashboard stat cards |
+| `web/src/components/organisms/DataTableCard.tsx` | Reusable table card with toolbar and pagination |

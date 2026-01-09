@@ -63,6 +63,7 @@ src/
 │   └── ThemeContext.tsx
 ├── components/
 │   ├── atoms/             ← Thin wrappers around MUI
+│   │   ├── ActionButton.tsx  ← Berry-style soft bg button
 │   │   ├── Button.tsx
 │   │   ├── Input.tsx
 │   │   ├── Badge.tsx
@@ -73,7 +74,8 @@ src/
 │   │   ├── HeatIndicator.tsx
 │   │   └── IssueCard.tsx
 │   ├── organisms/
-│   │   ├── DataTable.tsx
+│   │   ├── DataTable.tsx       ← Base table component
+│   │   ├── DataTableCard.tsx   ← Reusable table card with toolbar + pagination
 │   │   ├── IssueList.tsx
 │   │   └── Navbar.tsx
 │   └── templates/

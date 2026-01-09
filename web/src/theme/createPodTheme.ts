@@ -20,7 +20,7 @@ export function createPodTheme(config: PodThemeConfig) {
           primary: {
             main: lightScheme.primary,
             contrastText: lightScheme.onPrimary,
-            light: lightScheme.primaryContainer,
+            light: lightScheme.primaryLight,  // Berry-style light tint
             dark: lightScheme.primary,
           },
           secondary: {
@@ -67,7 +67,7 @@ export function createPodTheme(config: PodThemeConfig) {
           primary: {
             main: darkScheme.primary,
             contrastText: darkScheme.onPrimary,
-            light: darkScheme.primaryContainer,
+            light: darkScheme.primaryLight,  // Berry-style light tint
             dark: darkScheme.primary,
           },
           secondary: {

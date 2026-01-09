@@ -1,4 +1,5 @@
 import { type ReactNode, useCallback } from 'react';
+import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -21,6 +22,8 @@ interface DataTableProps<T> {
   readonly keyExtractor: (item: T) => string;
   readonly onRowClick?: (item: T) => void;
   readonly emptyMessage?: ReactNode;
+  /** Use 'embedded' when inside a card (no border/rounded corners) */
+  readonly variant?: 'standalone' | 'embedded';
 }
 
 export function DataTable<T>({
@@ -29,6 +32,7 @@ export function DataTable<T>({
   keyExtractor,
   onRowClick,
   emptyMessage,
+  variant = 'standalone',
 }: DataTableProps<T>) {
   const handleRowClick = useCallback(
     (item: T) => {
@@ -46,49 +50,63 @@ export function DataTable<T>({
     return null;
   }
 
-  return (
-    <TableContainer component={Paper} variant="outlined">
-      <Table>
-        <TableHead>
-          <TableRow>
+  const isEmbedded = variant === 'embedded';
+
+  const tableContent = (
+    <Table>
+      <TableHead>
+        <TableRow>
+          {columns.map((column) => (
+            <TableCell
+              key={column.key}
+              align={column.align ?? 'left'}
+              sx={{
+                width: column.width,
+                fontWeight: 600,
+                bgcolor: 'var(--munserv-palette-background-default)',
+              }}
+            >
+              {column.header}
+            </TableCell>
+          ))}
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {data.map((item) => (
+          <TableRow
+            key={keyExtractor(item)}
+            onClick={() => handleRowClick(item)}
+            hover={!!onRowClick}
+            sx={{
+              cursor: onRowClick ? 'pointer' : 'default',
+              '&:last-child td': { borderBottom: 0 },
+            }}
+          >
             {columns.map((column) => (
               <TableCell
                 key={column.key}
                 align={column.align ?? 'left'}
-                sx={{
-                  width: column.width,
-                  fontWeight: 600,
-                  bgcolor: 'var(--munserv-palette-background-default)',
-                }}
               >
-                {column.header}
+                {column.render(item)}
               </TableCell>
             ))}
           </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.map((item) => (
-            <TableRow
-              key={keyExtractor(item)}
-              onClick={() => handleRowClick(item)}
-              hover={!!onRowClick}
-              sx={{
-                cursor: onRowClick ? 'pointer' : 'default',
-                '&:last-child td': { borderBottom: 0 },
-              }}
-            >
-              {columns.map((column) => (
-                <TableCell
-                  key={column.key}
-                  align={column.align ?? 'left'}
-                >
-                  {column.render(item)}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+        ))}
+      </TableBody>
+    </Table>
+  );
+
+  if (isEmbedded) {
+    return (
+      <TableContainer component={Box}>
+        {tableContent}
+      </TableContainer>
+    );
+  }
+
+  return (
+    <TableContainer component={Paper} variant="outlined">
+      {tableContent}
     </TableContainer>
   );
 }

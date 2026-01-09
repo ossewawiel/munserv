@@ -1,9 +1,10 @@
 import { type FC, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
+import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 
 import { Select } from '@/components/atoms/Select';
-import { Button } from '@/components/atoms/Button';
+import { ActionButton } from '@/components/atoms/ActionButton';
 import type { IssueState, IssueType } from '../types';
 
 interface IssueFiltersProps {
@@ -83,9 +84,14 @@ export const IssueFilters: FC<IssueFiltersProps> = ({
         />
       </Box>
       {hasFilters && (
-        <Button variant="ghost" size="small" onClick={onClear}>
+        <ActionButton
+          size="small"
+          color="primary"
+          icon={<FilterAltOffIcon fontSize="small" />}
+          onClick={onClear}
+        >
           {t('common.clear')}
-        </Button>
+        </ActionButton>
       )}
     </Box>
   );

@@ -17,8 +17,8 @@ export const lightScheme = {
   primaryContainer: '#233D36',
   onPrimaryContainer: '#8BA89E',
   // Berry-style light tints for UI backgrounds (visible but light)
-  primaryLight: '#E8F0ED',     // Light forest green tint
-  secondaryLight: '#FFEAE4',   // Light terracotta/peach tint (Berry-style visible)
+  primaryLight: '#D0E0DA',     // Light forest green tint (slightly darker for contrast)
+  secondaryLight: '#FFDDD4',   // Light terracotta/peach tint (slightly darker for contrast)
   tertiaryLight: '#F7F5F0',    // Light cream tint for content background
   secondary: '#A2391A',
   onSecondary: '#FFFFFF',
