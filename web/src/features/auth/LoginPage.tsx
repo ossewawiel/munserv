@@ -1,6 +1,10 @@
 import { type FC, useCallback, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 
 import { AuthLayout } from '@/components/templates/AuthLayout';
 import { LoginForm } from '@/components/molecules/LoginForm';
@@ -52,6 +56,26 @@ export const LoginPage: FC = () => {
         isLoading={loginMutation.isPending}
         error={errorMessage}
       />
+
+      <Divider sx={{ my: 3 }}>
+        <Typography variant="body2" color="text.secondary">
+          {t('auth.or')}
+        </Typography>
+      </Divider>
+
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          {t('auth.newMember')}
+        </Typography>
+        <Button
+          component={Link}
+          to="/register"
+          variant="outlined"
+          fullWidth
+        >
+          {t('auth.registerAsNewMember')}
+        </Button>
+      </Box>
     </AuthLayout>
   );
 };

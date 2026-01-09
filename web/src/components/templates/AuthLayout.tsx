@@ -12,6 +12,10 @@ import { useThemeContext } from '@/theme';
 
 interface AuthLayoutProps {
   children: ReactNode;
+  /** Optional custom header text (defaults to 'Hi, Welcome Back') */
+  header?: string;
+  /** Optional custom subtitle text (defaults to 'Enter your credentials to continue') */
+  subtitle?: string;
 }
 
 // Styled wrapper with vintage map background (Berry AuthWrapper1 pattern)
@@ -36,12 +40,16 @@ const AuthWrapper = styled('div')(({ theme }) => ({
   },
 }));
 
-export const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
+export const AuthLayout: FC<AuthLayoutProps> = ({ children, header, subtitle }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const { colorMode } = useThemeContext();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+
+  // Use custom header/subtitle or defaults
+  const headerText = header ?? t('auth.welcomeBack');
+  const subtitleText = subtitle ?? t('auth.enterCredentials');
 
   // Resolve color mode: if 'system', use system preference; otherwise use explicit mode
   const isDarkMode = colorMode === 'system' ? prefersDarkMode : colorMode === 'dark';
@@ -78,14 +86,14 @@ export const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
               variant={matchDownSM ? 'h6' : 'h5'}
               sx={{ fontWeight: 600 }}
             >
-              {t('auth.welcomeBack')}
+              {headerText}
             </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
               textAlign="center"
             >
-              {t('auth.enterCredentials')}
+              {subtitleText}
             </Typography>
           </Stack>
 

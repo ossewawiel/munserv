@@ -1473,7 +1473,7 @@ Use this checklist with `/dev-cycle` for implementation:
 ### Pages & Components
 - [x] Create `RegisterPage.tsx` ✅ (2026-01-09)
 - [x] Create `RegisterForm.tsx` ✅ (2026-01-09)
-- [ ] Update `LoginPage.tsx` - add register link
+- [x] Update `LoginPage.tsx` - add register link ✅ (2026-01-09)
 - [ ] Update `MembersPage.tsx` - add filters and actions
 - [ ] Create `MemberApprovalDialog.tsx`
 - [ ] Update `MembersTable.tsx` - add email and actions column
@@ -1496,6 +1496,7 @@ Use this checklist with `/dev-cycle` for implementation:
 ### Testing
 - [x] Write tests for RegisterPage ✅ (2026-01-09 - 12 tests)
 - [x] Write tests for RegisterForm ✅ (2026-01-09 - 16 tests)
+- [x] Write tests for LoginPage (register link) ✅ (2026-01-09 - 7 tests)
 - [ ] Write tests for MembersPage (updated)
 - [ ] Write tests for MemberApprovalDialog
 - [ ] E2E test for registration flow

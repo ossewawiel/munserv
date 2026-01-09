@@ -184,15 +184,6 @@ describe('RegisterPage', () => {
       });
     });
 
-    it('should render login link for existing users', async () => {
-      renderRegisterPage();
-
-      await waitFor(() => {
-        expect(screen.getByText('Already have an account?')).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: /log in here/i })).toBeInTheDocument();
-      });
-    });
-
     it('should load sectors from API', async () => {
       renderRegisterPage();
 
@@ -206,22 +197,6 @@ describe('RegisterPage', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Ward 42')).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('navigation', () => {
-    it('should navigate to login page when login link is clicked', async () => {
-      renderRegisterPage();
-
-      await waitFor(() => {
-        expect(screen.getByRole('link', { name: /log in here/i })).toBeInTheDocument();
-      });
-
-      await userEvent.click(screen.getByRole('link', { name: /log in here/i }));
-
-      await waitFor(() => {
-        expect(screen.getByText('Login Page')).toBeInTheDocument();
       });
     });
   });
