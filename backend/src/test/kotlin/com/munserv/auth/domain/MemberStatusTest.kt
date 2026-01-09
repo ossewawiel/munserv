@@ -34,6 +34,13 @@ class MemberStatusTest {
     }
 
     @Test
+    fun `should create status from valid string - pending_approval`() {
+        val status = MemberStatus.fromString("pending_approval")
+
+        status shouldBe MemberStatus.PendingApproval
+    }
+
+    @Test
     fun `should throw for unknown status`() {
         shouldThrow<IllegalArgumentException> {
             MemberStatus.fromString("unknown")
@@ -77,5 +84,33 @@ class MemberStatusTest {
         MemberStatus.Active.toString() shouldBe "active"
         MemberStatus.Suspended.toString() shouldBe "suspended"
         MemberStatus.Deleted.toString() shouldBe "deleted"
+        MemberStatus.PendingApproval.toString() shouldBe "pending_approval"
+    }
+
+    // PendingApproval transition tests
+    @Test
+    fun `PendingApproval status should allow transition to Active`() {
+        MemberStatus.PendingApproval.canTransitionTo(MemberStatus.Active) shouldBe true
+    }
+
+    @Test
+    fun `PendingApproval status should allow transition to Deleted`() {
+        MemberStatus.PendingApproval.canTransitionTo(MemberStatus.Deleted) shouldBe true
+    }
+
+    @Test
+    fun `PendingApproval status should not allow transition to Suspended`() {
+        MemberStatus.PendingApproval.canTransitionTo(MemberStatus.Suspended) shouldBe false
+    }
+
+    @Test
+    fun `PendingApproval status should not allow transition to PendingApproval`() {
+        MemberStatus.PendingApproval.canTransitionTo(MemberStatus.PendingApproval) shouldBe false
+    }
+
+    @Test
+    fun `should parse PENDING_APPROVAL case insensitively`() {
+        MemberStatus.fromString("PENDING_APPROVAL") shouldBe MemberStatus.PendingApproval
+        MemberStatus.fromString("Pending_Approval") shouldBe MemberStatus.PendingApproval
     }
 }

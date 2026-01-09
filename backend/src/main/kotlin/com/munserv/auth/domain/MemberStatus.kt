@@ -9,6 +9,12 @@ sealed class MemberStatus {
 
     fun canTransitionTo(newStatus: MemberStatus): Boolean = allowedTransitions.contains(newStatus)
 
+    object PendingApproval : MemberStatus() {
+        override val allowedTransitions: Set<MemberStatus> = setOf(Active, Deleted)
+
+        override fun toString(): String = "pending_approval"
+    }
+
     object Active : MemberStatus() {
         override val allowedTransitions: Set<MemberStatus> = setOf(Suspended, Deleted)
 
@@ -30,6 +36,7 @@ sealed class MemberStatus {
     companion object {
         fun fromString(value: String): MemberStatus =
             when (value.lowercase()) {
+                "pending_approval" -> PendingApproval
                 "active" -> Active
                 "suspended" -> Suspended
                 "deleted" -> Deleted
