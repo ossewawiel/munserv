@@ -1566,9 +1566,10 @@ Use this checklist with `/dev-cycle` for implementation:
 
 ### Repository Layer
 - [x] Update `MemberEntity.kt` - add JPA columns ✓
-- [ ] Update `MemberRepository.kt` - add new methods
-- [ ] Update `JpaMemberRepository.kt` - implement new methods
+- [x] Update `MemberRepository.kt` - add new methods ✓
+- [x] Update `JpaMemberRepository.kt` - implement new methods ✓
 - [x] Create migration `V011__add_member_email_authentication.sql` ✓
+- [x] Write integration tests for MemberRepository ✓
 
 ### Service Layer
 - [ ] Create `RegistrationService.kt`

@@ -9,6 +9,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnTransformer
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
@@ -58,7 +59,8 @@ class MemberEntity(
     @Column(name = "registration_location", nullable = false, columnDefinition = "geography(Point,4326)")
     val registrationLocation: Point,
     // Status
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, columnDefinition = "member_status")
+    @ColumnTransformer(write = "?::member_status")
     val status: String,
     @Column(name = "created_at", nullable = false)
     val createdAt: Instant,
