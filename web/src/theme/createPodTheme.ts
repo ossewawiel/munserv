@@ -157,6 +157,28 @@ export function createPodTheme(config: PodThemeConfig) {
           size: 'small',
         },
       },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          input: {
+            // Light mode autofill styling - use cream background
+            '[data-color-scheme="light"] &:-webkit-autofill, [data-color-scheme="light"] &:-webkit-autofill:hover, [data-color-scheme="light"] &:-webkit-autofill:focus':
+              {
+                WebkitBoxShadow: `0 0 0 1000px ${lightScheme.tertiaryLight} inset`,
+                WebkitTextFillColor: lightScheme.onSurface,
+                caretColor: lightScheme.onSurface,
+                borderRadius: 'inherit',
+              },
+            // Dark mode autofill styling - use forest green tinted background
+            '[data-color-scheme="dark"] &:-webkit-autofill, [data-color-scheme="dark"] &:-webkit-autofill:hover, [data-color-scheme="dark"] &:-webkit-autofill:focus':
+              {
+                WebkitBoxShadow: `0 0 0 1000px ${darkScheme.surfaceContainerLow} inset`,
+                WebkitTextFillColor: darkScheme.onSurface,
+                caretColor: darkScheme.onSurface,
+                borderRadius: 'inherit',
+              },
+          },
+        },
+      },
       MuiSelect: {
         defaultProps: {
           variant: 'outlined',

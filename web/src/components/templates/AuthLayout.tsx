@@ -1,12 +1,14 @@
 import { type FC, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { styled, useTheme, useColorScheme } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
+
+import { useThemeContext } from '@/theme';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -37,11 +39,12 @@ const AuthWrapper = styled('div')(({ theme }) => ({
 export const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { mode } = useColorScheme();
+  const { colorMode } = useThemeContext();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
-  // Determine if we're in dark mode (handle 'system' mode too)
-  const isDarkMode = mode === 'dark';
+  // Resolve color mode: if 'system', use system preference; otherwise use explicit mode
+  const isDarkMode = colorMode === 'system' ? prefersDarkMode : colorMode === 'dark';
 
   return (
     <AuthWrapper>

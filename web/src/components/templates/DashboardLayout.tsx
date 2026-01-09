@@ -1,7 +1,7 @@
 import { type FC, type ReactNode, useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { styled, useTheme, useColorScheme } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -18,6 +18,7 @@ import {
   drawerWidthMini,
   commonAvatar,
   mediumAvatar,
+  useThemeContext,
 } from '@/theme';
 
 interface DashboardLayoutProps {
@@ -86,11 +87,12 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const logout = useLogout();
   const theme = useTheme();
-  const { mode } = useColorScheme();
+  const { colorMode } = useThemeContext();
   const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
-  // Determine if we're in dark mode
-  const isDarkMode = mode === 'dark';
+  // Resolve color mode: if 'system', use system preference; otherwise use explicit mode
+  const isDarkMode = colorMode === 'system' ? prefersDarkMode : colorMode === 'dark';
 
   // Drawer state: open on desktop by default, closed on mobile
   const [drawerOpen, setDrawerOpen] = useState(true);

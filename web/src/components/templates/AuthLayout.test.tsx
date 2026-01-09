@@ -6,13 +6,13 @@ import i18n from 'i18next';
 
 import { AuthLayout } from './AuthLayout';
 
-// Mock useColorScheme
-const mockUseColorScheme = vi.fn();
-vi.mock('@mui/material/styles', async () => {
-  const actual = await vi.importActual('@mui/material/styles');
+// Mock useThemeContext
+const mockUseThemeContext = vi.fn();
+vi.mock('@/theme', async () => {
+  const actual = await vi.importActual('@/theme');
   return {
     ...actual,
-    useColorScheme: () => mockUseColorScheme(),
+    useThemeContext: () => mockUseThemeContext(),
   };
 });
 
@@ -37,14 +37,38 @@ const darkTheme = createTheme({ palette: { mode: 'dark' } });
 
 interface RenderOptions {
   theme?: ReturnType<typeof createTheme>;
-  colorMode?: 'light' | 'dark';
+  colorMode?: 'light' | 'dark' | 'system';
+  prefersDarkMode?: boolean;
+}
+
+// Mock matchMedia for prefers-color-scheme
+function mockMatchMedia(prefersDark: boolean) {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: query === '(prefers-color-scheme: dark)' ? prefersDark : false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
 }
 
 function renderWithProviders(
   ui: React.ReactElement,
-  { theme = lightTheme, colorMode = 'light' }: RenderOptions = {}
+  { theme = lightTheme, colorMode = 'light', prefersDarkMode = false }: RenderOptions = {}
 ) {
-  mockUseColorScheme.mockReturnValue({ mode: colorMode, setMode: vi.fn() });
+  mockUseThemeContext.mockReturnValue({
+    colorMode,
+    setColorMode: vi.fn(),
+    podConfig: { podId: 'test', fonts: { primary: 'Roboto' }, colors: {} },
+    isLoading: false,
+  });
+  mockMatchMedia(prefersDarkMode);
   return render(
     <ThemeProvider theme={theme}>
       <I18nextProvider i18n={i18n}>{ui}</I18nextProvider>
@@ -53,7 +77,7 @@ function renderWithProviders(
 }
 
 beforeEach(() => {
-  mockUseColorScheme.mockReset();
+  mockUseThemeContext.mockReset();
 });
 
 describe('AuthLayout', () => {
