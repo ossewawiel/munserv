@@ -8,16 +8,29 @@ import java.time.Instant
 /**
  * Domain entity representing a community member.
  * Pure Kotlin data class with business logic, no framework dependencies.
+ *
+ * Supports two authentication flows:
+ * 1. Legacy phone+PIN (mobile app registration with OTP)
+ * 2. Email+password (web registration with admin approval)
  */
 data class Member(
     val id: MemberId,
     val sectorId: SectorId,
-    val phoneHash: String,
-    val pinHash: String,
+    // Email authentication fields (web registration)
+    val email: String,
+    val emailHash: String,
+    val passwordHash: String?,
+    val mustChangePassword: Boolean = true,
+    // Phone authentication fields (legacy mobile registration, now nullable)
+    val phoneHash: String?,
+    val pinHash: String?,
+    // Contact information
+    val phone: String,
     val firstName: String,
     val surname: String,
     val address: String,
     val registrationLocation: GeoPoint,
+    // Status
     val status: MemberStatus = MemberStatus.Active,
     val createdAt: Instant = Instant.now(),
     val updatedAt: Instant = Instant.now(),
@@ -28,9 +41,19 @@ data class Member(
     val isActive: Boolean
         get() = status == MemberStatus.Active
 
+    val canLogin: Boolean
+        get() = status == MemberStatus.Active && passwordHash != null
+
     fun canTransitionTo(newStatus: MemberStatus): Boolean = status.canTransitionTo(newStatus)
 
     fun withStatus(newStatus: MemberStatus): Member = copy(status = newStatus, updatedAt = Instant.now())
 
+    fun withPassword(
+        hash: String,
+        mustChange: Boolean = true,
+    ): Member = copy(passwordHash = hash, mustChangePassword = mustChange, updatedAt = Instant.now())
+
     fun withPinHash(newPinHash: String): Member = copy(pinHash = newPinHash, updatedAt = Instant.now())
+
+    fun clearMustChangePassword(): Member = copy(mustChangePassword = false, updatedAt = Instant.now())
 }

@@ -1556,18 +1556,19 @@ Use this checklist with `/dev-cycle` for implementation:
 
 ### Domain Layer
 - [x] Update `MemberStatus.kt` - add PendingApproval ✓
-- [ ] Update `Member.kt` - add email/password fields
+- [x] Update `Member.kt` - add email/password fields ✓
 - [ ] Create `Email.kt` - email value object
 - [ ] Create `Password.kt` - password utilities
 - [ ] Write unit tests for Email
 - [ ] Write unit tests for Password
 - [x] Write unit tests for MemberStatus transitions ✓
+- [x] Write unit tests for Member entity (canLogin, withPassword, clearMustChangePassword) ✓
 
 ### Repository Layer
-- [ ] Update `MemberEntity.kt` - add JPA columns
+- [x] Update `MemberEntity.kt` - add JPA columns ✓
 - [ ] Update `MemberRepository.kt` - add new methods
 - [ ] Update `JpaMemberRepository.kt` - implement new methods
-- [ ] Create migration `V011__add_member_email_authentication.sql`
+- [x] Create migration `V011__add_member_email_authentication.sql` ✓
 
 ### Service Layer
 - [ ] Create `RegistrationService.kt`

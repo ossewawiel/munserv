@@ -1,11 +1,11 @@
 package com.munserv.auth.service
 
+import com.munserv.auth.config.AdminConfig
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
 import com.munserv.auth.domain.PhoneNumber
 import com.munserv.auth.domain.Pin
 import com.munserv.auth.repository.MemberRepository
-import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
 import org.springframework.stereotype.Service
@@ -20,21 +20,11 @@ class AuthService(
     private val memberRepository: MemberRepository,
     private val otpService: OtpService,
     private val jwtService: JwtService,
+    private val adminConfig: AdminConfig,
 ) {
     companion object {
         private const val MEMBER_ROLE = "member"
         private const val ADMIN_ROLE = "admin"
-
-        // Test admin credentials (MVP only - replace with proper admin table later)
-        private const val TEST_ADMIN_EMAIL = "admin@ward42.example.com"
-        private const val TEST_ADMIN_PASSWORD = "admin123"
-        private const val TEST_ADMIN_ID = "550e8400-e29b-41d4-a716-446655440020"
-        private const val TEST_ADMIN_NAME = "Ward 42 Admin"
-        private const val TEST_ADMIN_SECTOR = "550e8400-e29b-41d4-a716-446655440001"
-        private const val TEST_ADMIN_ROLE = "SECTOR_ADMIN"
-        private const val TEST_SECTOR_NAME = "Ward 42"
-        private const val TEST_SECTOR_CENTER_LAT = -26.2041
-        private const val TEST_SECTOR_CENTER_LNG = 28.0473
     }
 
     /**
@@ -80,47 +70,51 @@ class AuthService(
     /**
      * Complete registration by creating member account.
      */
-    fun completeRegistration(
-        phone: String,
-        pin: String,
-        firstName: String,
-        surname: String,
-        address: String,
-        sectorId: String,
-        latitude: Double,
-        longitude: Double,
-    ): AuthResult {
+    fun completeRegistration(command: CompleteRegistrationCommand): AuthResult {
         val phoneNumber =
             try {
-                PhoneNumber.fromString(phone)
+                PhoneNumber.fromString(command.phone)
             } catch (e: IllegalArgumentException) {
                 return AuthResult.InvalidPhoneNumber
             }
 
         val pinValue =
             try {
-                Pin.fromString(pin)
+                Pin.fromString(command.pin)
             } catch (e: IllegalArgumentException) {
                 return AuthResult.InvalidPin
             }
 
         val sectorIdValue =
             try {
-                SectorId(UUID.fromString(sectorId))
+                SectorId(UUID.fromString(command.sectorId))
             } catch (e: IllegalArgumentException) {
-                return AuthResult.InvalidPin // Could add specific error
+                return AuthResult.InvalidSectorId
             }
+
+        // Generate unique email placeholder for legacy phone registration
+        val memberId = MemberId.generate()
+        val placeholderEmail = "legacy-${memberId.value}@pending-migration.local"
+        val emailHash =
+            java.security.MessageDigest.getInstance("SHA-256")
+                .digest(placeholderEmail.lowercase().toByteArray())
+                .joinToString("") { "%02x".format(it) }
 
         val member =
             Member(
-                id = MemberId.generate(),
+                id = memberId,
                 sectorId = sectorIdValue,
+                email = placeholderEmail,
+                emailHash = emailHash,
+                passwordHash = null,
+                mustChangePassword = false,
                 phoneHash = phoneNumber.hash(),
                 pinHash = pinValue.hash(),
-                firstName = firstName,
-                surname = surname,
-                address = address,
-                registrationLocation = GeoPoint(latitude, longitude),
+                phone = command.phone,
+                firstName = command.firstName,
+                surname = command.surname,
+                address = command.address,
+                registrationLocation = command.location,
             )
 
         val savedMember = memberRepository.save(member)
@@ -155,8 +149,9 @@ class AuthService(
             return AuthResult.AccountSuspended
         }
 
-        // Verify PIN
-        if (!Pin.verify(pinString, member.pinHash)) {
+        // Verify PIN (pinHash may be null for web-registered members)
+        val pinHash = member.pinHash ?: return AuthResult.InvalidCredentials
+        if (!Pin.verify(pinString, pinHash)) {
             return AuthResult.InvalidCredentials
         }
 
@@ -170,28 +165,30 @@ class AuthService(
 
     /**
      * Admin login with email and password.
-     * MVP: Uses hardcoded test credentials. Replace with proper admin table later.
+     *
+     * WARNING: MVP implementation using configuration-based credentials.
+     * TODO: Replace with proper admin table and secure authentication in production.
      */
     fun adminLogin(
         email: String,
         password: String,
     ): AuthResult {
-        if (email != TEST_ADMIN_EMAIL || password != TEST_ADMIN_PASSWORD) {
+        if (email != adminConfig.email || password != adminConfig.password) {
             return AuthResult.InvalidCredentials
         }
 
-        val adminId = MemberId.fromString(TEST_ADMIN_ID)
+        val adminId = MemberId.fromString(adminConfig.id)
         val tokens = jwtService.generateTokenPair(adminId, ADMIN_ROLE)
 
         return AuthResult.AdminLoginSuccess(
-            adminId = TEST_ADMIN_ID,
-            email = TEST_ADMIN_EMAIL,
-            displayName = TEST_ADMIN_NAME,
-            sectorId = TEST_ADMIN_SECTOR,
-            role = TEST_ADMIN_ROLE,
-            sectorName = TEST_SECTOR_NAME,
-            sectorCenterLat = TEST_SECTOR_CENTER_LAT,
-            sectorCenterLng = TEST_SECTOR_CENTER_LNG,
+            adminId = adminConfig.id,
+            email = adminConfig.email,
+            displayName = adminConfig.displayName,
+            sectorId = adminConfig.sectorId,
+            role = adminConfig.role,
+            sectorName = adminConfig.sectorName,
+            sectorCenterLat = adminConfig.sectorCenterLat,
+            sectorCenterLng = adminConfig.sectorCenterLng,
             tokens = tokens,
         )
     }

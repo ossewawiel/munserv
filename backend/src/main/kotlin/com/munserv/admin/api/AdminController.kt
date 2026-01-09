@@ -7,7 +7,18 @@ import com.munserv.auth.domain.Member
 import com.munserv.auth.repository.MemberRepository
 import com.munserv.issues.repository.IssueRepository
 import com.munserv.shared.types.SectorId
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -21,6 +32,9 @@ import kotlin.math.ceil
  */
 @RestController
 @RequestMapping("/api/v1/admin")
+@Tag(name = "Admin", description = "Admin dashboard and reporting endpoints. Requires admin role.")
+@SecurityRequirement(name = "bearerAuth")
+@Validated
 class AdminController(
     private val dashboardService: DashboardService,
     private val heatReportService: HeatReportService,
@@ -32,8 +46,25 @@ class AdminController(
      * GET /api/v1/admin/dashboard
      * Returns dashboard statistics for the given sector.
      */
+    @Operation(
+        summary = "Get dashboard statistics",
+        description = "Retrieve dashboard statistics for a sector including issue counts by state and type",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Dashboard statistics retrieved successfully",
+                content = [Content(schema = Schema(implementation = DashboardResponse::class))],
+            ),
+            ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            ApiResponse(responseCode = "403", description = "Forbidden - requires admin role"),
+            ApiResponse(responseCode = "404", description = "Sector not found"),
+        ],
+    )
     @GetMapping("/dashboard")
     fun getDashboard(
+        @Parameter(description = "Sector UUID", required = true, example = "550e8400-e29b-41d4-a716-446655440001")
         @RequestParam sectorId: String,
     ): ResponseEntity<DashboardResponse> {
         val id = SectorId.fromString(sectorId)
@@ -48,10 +79,30 @@ class AdminController(
      * GET /api/v1/admin/reports/heat
      * Returns issues ranked by heat score descending.
      */
+    @Operation(
+        summary = "Get heat report",
+        description = "Retrieve a list of issues ranked by heat score in descending order",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Heat report generated successfully",
+                content = [Content(schema = Schema(implementation = HeatReportResponse::class))],
+            ),
+            ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            ApiResponse(responseCode = "403", description = "Forbidden - requires admin role"),
+        ],
+    )
     @GetMapping("/reports/heat")
     fun getHeatReport(
+        @Parameter(description = "Sector UUID", required = true, example = "550e8400-e29b-41d4-a716-446655440001")
         @RequestParam sectorId: String,
-        @RequestParam(defaultValue = "20") limit: Int,
+        @Parameter(description = "Maximum number of issues to return", example = "20")
+        @RequestParam(defaultValue = "20")
+        @Min(1, message = "Limit must be at least 1")
+        @Max(100, message = "Limit cannot exceed 100")
+        limit: Int,
     ): ResponseEntity<HeatReportResponse> {
         val id = SectorId.fromString(sectorId)
         val items = heatReportService.getHeatReport(id, limit)
@@ -64,11 +115,34 @@ class AdminController(
      * GET /api/v1/admin/members
      * Returns paginated list of members for the sector with issue counts.
      */
+    @Operation(
+        summary = "List sector members",
+        description = "Retrieve a paginated list of members in a sector with their issue counts",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Members list retrieved successfully",
+                content = [Content(schema = Schema(implementation = MembersListResponse::class))],
+            ),
+            ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            ApiResponse(responseCode = "403", description = "Forbidden - requires admin role"),
+        ],
+    )
     @GetMapping("/members")
     fun getMembers(
+        @Parameter(description = "Sector UUID", required = true, example = "550e8400-e29b-41d4-a716-446655440001")
         @RequestParam sectorId: String,
-        @RequestParam(defaultValue = "1") page: Int,
-        @RequestParam(defaultValue = "20") limit: Int,
+        @Parameter(description = "Page number (1-based)", example = "1")
+        @RequestParam(defaultValue = "1")
+        @Min(1, message = "Page must be at least 1")
+        page: Int,
+        @Parameter(description = "Items per page", example = "20")
+        @RequestParam(defaultValue = "20")
+        @Min(1, message = "Limit must be at least 1")
+        @Max(100, message = "Limit cannot exceed 100")
+        limit: Int,
     ): ResponseEntity<MembersListResponse> {
         val id = SectorId.fromString(sectorId)
         val allMembers = memberRepository.findBySectorId(id)
@@ -106,17 +180,10 @@ class AdminController(
             id = id,
             firstName = firstName,
             surname = surname,
-            phoneNumber = maskPhoneNumber(phoneHash),
+            phoneNumber = phone.ifEmpty { "***-***-****" },
             address = address,
             status = status,
             issueCount = issueCount,
             joinedAt = createdAt,
         )
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun maskPhoneNumber(phoneHash: String): String {
-        // For security, we don't store the actual phone number
-        // Return a masked placeholder
-        return "***-***-****"
-    }
 }

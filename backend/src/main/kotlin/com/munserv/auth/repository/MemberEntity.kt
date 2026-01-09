@@ -19,6 +19,10 @@ import java.util.UUID
 /**
  * JPA entity for members table.
  * Handles PostGIS geography type for registration_location.
+ *
+ * Supports both authentication flows:
+ * 1. Legacy phone+PIN (mobile app registration with OTP)
+ * 2. Email+password (web registration with admin approval)
  */
 @Entity
 @Table(name = "members")
@@ -27,10 +31,24 @@ class MemberEntity(
     val id: UUID,
     @Column(name = "sector_id", nullable = false)
     val sectorId: UUID,
-    @Column(name = "phone_hash", nullable = false, length = 64)
-    val phoneHash: String,
-    @Column(name = "pin_hash", nullable = false, length = 64)
-    val pinHash: String,
+    // Email authentication fields (web registration)
+    @Column(nullable = false, length = 255)
+    val email: String,
+    @Column(name = "email_hash", nullable = false, length = 64)
+    val emailHash: String,
+    @Column(name = "password_hash", length = 60)
+    val passwordHash: String?,
+    @Column(name = "must_change_password", nullable = false)
+    val mustChangePassword: Boolean = true,
+    // Phone authentication fields (legacy, now nullable)
+    @Column(name = "phone_hash", length = 64)
+    val phoneHash: String?,
+    @Column(name = "pin_hash", length = 64)
+    val pinHash: String?,
+    // Contact info
+    @Column(length = 20)
+    val phone: String?,
+    // Profile
     @Column(name = "first_name", nullable = false, length = 50)
     val firstName: String,
     @Column(nullable = false, length = 50)
@@ -39,6 +57,7 @@ class MemberEntity(
     val address: String,
     @Column(name = "registration_location", nullable = false, columnDefinition = "geography(Point,4326)")
     val registrationLocation: Point,
+    // Status
     @Column(nullable = false, length = 20)
     val status: String,
     @Column(name = "created_at", nullable = false)
@@ -52,8 +71,13 @@ class MemberEntity(
         Member(
             id = MemberId(id),
             sectorId = SectorId(sectorId),
+            email = email,
+            emailHash = emailHash,
+            passwordHash = passwordHash,
+            mustChangePassword = mustChangePassword,
             phoneHash = phoneHash,
             pinHash = pinHash,
+            phone = phone ?: "",
             firstName = firstName,
             surname = surname,
             address = address,
@@ -70,8 +94,13 @@ class MemberEntity(
             MemberEntity(
                 id = member.id.value,
                 sectorId = member.sectorId.value,
+                email = member.email,
+                emailHash = member.emailHash,
+                passwordHash = member.passwordHash,
+                mustChangePassword = member.mustChangePassword,
                 phoneHash = member.phoneHash,
                 pinHash = member.pinHash,
+                phone = member.phone,
                 firstName = member.firstName,
                 surname = member.surname,
                 address = member.address,

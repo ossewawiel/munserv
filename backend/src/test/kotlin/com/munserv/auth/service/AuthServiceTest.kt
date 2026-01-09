@@ -1,5 +1,6 @@
 package com.munserv.auth.service
 
+import com.munserv.auth.config.AdminConfig
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
 import com.munserv.auth.domain.PhoneNumber
@@ -26,6 +27,7 @@ class AuthServiceTest {
     private lateinit var memberRepository: MemberRepository
     private lateinit var otpService: OtpService
     private lateinit var jwtService: JwtService
+    private lateinit var adminConfig: AdminConfig
     private lateinit var clock: Clock
 
     private val testPhone = "+27821234567"
@@ -45,7 +47,19 @@ class AuthServiceTest {
                 refreshTokenTtl = Duration.ofDays(7),
                 clock = clock,
             )
-        authService = AuthService(memberRepository, otpService, jwtService)
+        adminConfig =
+            AdminConfig(
+                email = "admin@test.example.com",
+                password = "testpass123",
+                id = "550e8400-e29b-41d4-a716-446655440020",
+                displayName = "Test Admin",
+                sectorId = "550e8400-e29b-41d4-a716-446655440001",
+                role = "SECTOR_ADMIN",
+                sectorName = "Test Sector",
+                sectorCenterLat = -26.2041,
+                sectorCenterLng = 28.0473,
+            )
+        authService = AuthService(memberRepository, otpService, jwtService, adminConfig)
     }
 
     // Registration flow tests
@@ -116,14 +130,15 @@ class AuthServiceTest {
 
         val result =
             authService.completeRegistration(
-                phone = testPhone,
-                pin = testPin,
-                firstName = "John",
-                surname = "Doe",
-                address = "123 Main Street",
-                sectorId = testSectorId.value.toString(),
-                latitude = location.latitude,
-                longitude = location.longitude,
+                CompleteRegistrationCommand(
+                    phone = testPhone,
+                    pin = testPin,
+                    firstName = "John",
+                    surname = "Doe",
+                    address = "123 Main Street",
+                    sectorId = testSectorId.value.toString(),
+                    location = location,
+                ),
             )
 
         result.shouldBeInstanceOf<AuthResult.RegistrationComplete>()
@@ -142,15 +157,16 @@ class AuthServiceTest {
     fun `completeRegistration should fail for invalid PIN`() {
         val result =
             authService.completeRegistration(
-                phone = testPhone,
-                // Too short (3 digits instead of 4)
-                pin = "123",
-                firstName = "John",
-                surname = "Doe",
-                address = "123 Main Street",
-                sectorId = testSectorId.value.toString(),
-                latitude = 27.9833,
-                longitude = -26.1367,
+                CompleteRegistrationCommand(
+                    phone = testPhone,
+                    // Too short (3 digits instead of 4)
+                    pin = "123",
+                    firstName = "John",
+                    surname = "Doe",
+                    address = "123 Main Street",
+                    sectorId = testSectorId.value.toString(),
+                    location = GeoPoint(27.9833, -26.1367),
+                ),
             )
 
         result.shouldBeInstanceOf<AuthResult.InvalidPin>()
@@ -264,8 +280,13 @@ class AuthServiceTest {
         Member(
             id = testMemberId,
             sectorId = testSectorId,
+            email = "test@example.com",
+            emailHash = "abc123def456",
+            passwordHash = null,
+            mustChangePassword = false,
             phoneHash = phoneHash,
             pinHash = pinHash,
+            phone = "+27821234567",
             firstName = "John",
             surname = "Doe",
             address = "123 Main Street",
