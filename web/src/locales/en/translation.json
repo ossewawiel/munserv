@@ -28,7 +28,9 @@
     "password": "Password",
     "loginButton": "Sign In",
     "loginError": "Invalid email or password",
-    "loggingIn": "Signing in..."
+    "loggingIn": "Signing in...",
+    "welcomeBack": "Hi, Welcome Back",
+    "enterCredentials": "Enter your credentials to continue"
   },
   "nav": {
     "dashboard": "Dashboard",

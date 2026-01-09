@@ -1,7 +1,7 @@
 import { type FC, type ReactNode, useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { styled, useTheme } from '@mui/material/styles';
+import { styled, useTheme, useColorScheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -86,7 +86,11 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const logout = useLogout();
   const theme = useTheme();
+  const { mode } = useColorScheme();
   const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Determine if we're in dark mode
+  const isDarkMode = mode === 'dark';
 
   // Drawer state: open on desktop by default, closed on mobile
   const [drawerOpen, setDrawerOpen] = useState(true);
@@ -139,7 +143,7 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
             >
               <Box
                 component="img"
-                src="/assets/app-logo.png"
+                src={isDarkMode ? '/assets/app-logo-dark.png' : '/assets/app-logo.png'}
                 alt={t('common.appName')}
                 sx={{ height: 32 }}
               />

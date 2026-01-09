@@ -47,9 +47,6 @@ export const LoginPage: FC = () => {
 
   return (
     <AuthLayout>
-      <h2 className="text-xl font-semibold text-text mb-6">
-        {t('auth.login')}
-      </h2>
       <LoginForm
         onSubmit={handleSubmit}
         isLoading={loginMutation.isPending}
