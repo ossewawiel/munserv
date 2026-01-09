@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/loading_spinner.dart';
-import '../../../../shared/widgets/munserv_app_bar.dart';
 import '../../providers/issue_providers.dart';
 import '../widgets/widgets.dart';
 
@@ -18,7 +17,9 @@ class IssueListPage extends ConsumerWidget {
     final issuesAsync = ref.watch(issuesProvider);
 
     return Scaffold(
-      appBar: MunServAppBar(
+      appBar: AppBar(
+        title: const Text('Issues'),
+        centerTitle: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.map),
@@ -105,10 +106,7 @@ class _EmptyState extends StatelessWidget {
               color: theme.colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: Spacing.lg),
-            Text(
-              'No issues found',
-              style: theme.textTheme.titleLarge,
-            ),
+            Text('No issues found', style: theme.textTheme.titleLarge),
             const SizedBox(height: Spacing.sm),
             Text(
               'There are no issues matching your filters.\nBe the first to report one!',
@@ -147,9 +145,7 @@ class _PaginationFooter extends ConsumerWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.chevron_left),
-            onPressed: pagination.page > 1
-                ? filterNotifier.previousPage
-                : null,
+            onPressed: pagination.page > 1 ? filterNotifier.previousPage : null,
           ),
           const SizedBox(width: Spacing.sm),
           Text(

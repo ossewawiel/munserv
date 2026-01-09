@@ -6,7 +6,6 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/services/biometric_service.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/utils/result.dart';
-import '../../../../shared/widgets/munserv_app_bar.dart';
 import '../../../auth/providers/auth_providers.dart';
 import '../../../issues/providers/issue_providers.dart';
 import '../../../issues/presentation/widgets/widgets.dart';
@@ -40,8 +39,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     // Cache ref reads before async gaps
     final biometricService = ref.read(biometricServiceProvider);
 
-    final isBiometricEnabled =
-        await ref.read(isBiometricLoginEnabledProvider.future);
+    final isBiometricEnabled = await ref.read(
+      isBiometricLoginEnabledProvider.future,
+    );
 
     if (!mounted) return;
 
@@ -98,7 +98,8 @@ class _HomePageState extends ConsumerState<HomePage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                result.errorOrNull?.displayMessage ?? 'Could not enable biometrics',
+                result.errorOrNull?.displayMessage ??
+                    'Could not enable biometrics',
               ),
             ),
           );
@@ -114,7 +115,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     final issuesAsync = ref.watch(issuesProvider);
 
     return Scaffold(
-      appBar: MunServAppBar(
+      appBar: AppBar(
+        title: const Text('Home'),
+        centerTitle: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.map),
@@ -132,24 +135,17 @@ class _HomePageState extends ConsumerState<HomePage> {
             // Welcome section
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(Spacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Welcome back!',
-                      style: theme.textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.xs),
-                    Text(
-                      'Here\'s what\'s happening in your area',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                padding: const EdgeInsets.fromLTRB(
+                  Spacing.lg,
+                  Spacing.sm,
+                  Spacing.lg,
+                  Spacing.lg,
+                ),
+                child: Text(
+                  'Here\'s what\'s happening in your area',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
@@ -162,9 +158,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ),
 
-            const SliverToBoxAdapter(
-              child: SizedBox(height: Spacing.lg),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: Spacing.lg)),
 
             // Recent issues header
             SliverToBoxAdapter(
@@ -193,27 +187,22 @@ class _HomePageState extends ConsumerState<HomePage> {
               data: (paginatedIssues) {
                 final issues = paginatedIssues.items.take(5).toList();
                 if (issues.isEmpty) {
-                  return const SliverToBoxAdapter(
-                    child: _EmptyState(),
-                  );
+                  return const SliverToBoxAdapter(child: _EmptyState());
                 }
                 return SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final issue = issues[index];
-                        return Padding(
-                          key: ValueKey(issue.id),
-                          padding: const EdgeInsets.only(bottom: Spacing.md),
-                          child: IssueCard(
-                            issue: issue,
-                            onTap: () => context.push('/issues/${issue.id}'),
-                          ),
-                        );
-                      },
-                      childCount: issues.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final issue = issues[index];
+                      return Padding(
+                        key: ValueKey(issue.id),
+                        padding: const EdgeInsets.only(bottom: Spacing.md),
+                        child: IssueCard(
+                          issue: issue,
+                          onTap: () => context.push('/issues/${issue.id}'),
+                        ),
+                      );
+                    }, childCount: issues.length),
                   ),
                 );
               },
@@ -247,9 +236,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
 
             // Bottom padding
-            const SliverToBoxAdapter(
-              child: SizedBox(height: Spacing.xl),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: Spacing.xl)),
           ],
         ),
       ),
@@ -352,10 +339,7 @@ class _EmptyState extends StatelessWidget {
             color: theme.colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: Spacing.md),
-          Text(
-            'No issues reported yet',
-            style: theme.textTheme.titleMedium,
-          ),
+          Text('No issues reported yet', style: theme.textTheme.titleMedium),
           const SizedBox(height: Spacing.xs),
           Text(
             'Be the first to report an issue in your area',

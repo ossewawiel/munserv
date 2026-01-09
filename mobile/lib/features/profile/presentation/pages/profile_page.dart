@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/theme/typography.dart';
-import '../../../../shared/widgets/munserv_app_bar.dart';
 import '../../../auth/domain/auth_state.dart';
 import '../../../auth/providers/auth_providers.dart';
 
@@ -20,7 +19,7 @@ class ProfilePage extends ConsumerWidget {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      appBar: const MunServAppBar(),
+      appBar: AppBar(title: const Text('Profile'), centerTitle: false),
       body: ListView(
         padding: const EdgeInsets.all(Spacing.lg),
         children: [
@@ -42,9 +41,9 @@ class ProfilePage extends ConsumerWidget {
             title: 'Notifications',
             subtitle: 'Manage notification preferences',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Coming soon')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Coming soon')));
             },
           ),
           _SettingsItem(
@@ -52,9 +51,9 @@ class ProfilePage extends ConsumerWidget {
             title: 'Change PIN',
             subtitle: 'Update your login PIN',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Coming soon')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Coming soon')));
             },
           ),
           _SettingsItem(
@@ -62,9 +61,9 @@ class ProfilePage extends ConsumerWidget {
             title: 'Biometrics',
             subtitle: 'Enable fingerprint/face login',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Coming soon')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Coming soon')));
             },
           ),
 
@@ -84,9 +83,9 @@ class ProfilePage extends ConsumerWidget {
             title: 'Help & FAQ',
             subtitle: 'Get answers to common questions',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Coming soon')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Coming soon')));
             },
           ),
           _SettingsItem(
@@ -94,9 +93,9 @@ class ProfilePage extends ConsumerWidget {
             title: 'Send Feedback',
             subtitle: 'Help us improve the app',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Coming soon')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Coming soon')));
             },
           ),
           _SettingsItem(
