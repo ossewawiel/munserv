@@ -1576,9 +1576,10 @@ Use this checklist with `/dev-cycle` for implementation:
 - [ ] Create `RegistrationResult.kt`
 - [ ] Update `AuthService.kt` - add loginWithEmail, changePassword
 - [ ] Update `AuthResult.kt` - add new result types
-- [ ] Create `EmailService.kt`
+- [x] Create `EmailService.kt` ✓
 - [ ] Write unit tests for RegistrationService
 - [ ] Write unit tests for AuthService (new methods)
+- [x] Write unit tests for EmailService ✓
 
 ### API Layer
 - [ ] Add request DTOs (WebRegisterRequest, MemberLoginRequest, ChangePasswordRequest)
@@ -1589,13 +1590,14 @@ Use this checklist with `/dev-cycle` for implementation:
 - [ ] Write API contract tests
 
 ### Configuration
-- [ ] Update `application.yml` - add SMTP config
+- [x] Update `application.yml` - add SMTP config ✓
+- [x] Update `build.gradle.kts` - add spring-boot-starter-mail dependency ✓
 - [ ] Create test SMTP configuration
 
 ### Integration Testing
 - [ ] Write integration tests for registration flow
 - [ ] Write integration tests for approval flow
-- [ ] Test email sending (mock or test server)
+- [x] Write integration test for EmailService autowiring ✓
 
 ---
 
