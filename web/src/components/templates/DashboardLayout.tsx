@@ -29,14 +29,20 @@ interface DashboardLayoutProps {
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   open?: boolean;
 }>(({ theme, open }) => {
-  // Get toolbar height from theme mixins (responsive)
-  const toolbarMinHeight = theme.mixins.toolbar.minHeight as number;
+  // Toolbar has padding p: { xs: 1.5, md: 2 } = 12px/16px
+  // Actual AppBar height = toolbar minHeight + padding
+  // Desktop (md+): 64 + 16*2 padding = ~80px (but content fits, so ~72px)
+  // Tablet: 64 + 12*2 = ~88px
+  // Mobile: 56 + 12*2 = ~80px
+  const appBarHeight = {
+    xs: 68, // Mobile: accounts for toolbar + padding
+    sm: 80, // Tablet: accounts for toolbar + padding
+    md: 72, // Desktop: accounts for toolbar + padding
+  };
 
   return {
     // Base styles
     ...theme.typography.body1,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
     // Content background: cream with optional vintage map overlay (uses CSS variable for theme awareness)
     backgroundColor: 'var(--munserv-palette-tertiaryLight)',
     // Vintage map background image (very subtle) - only in light mode
@@ -49,18 +55,30 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
     minHeight: '100vh',
     padding: theme.spacing(3),
     marginRight: theme.spacing(0),
-    // Dynamic marginTop based on toolbar height
-    marginTop: toolbarMinHeight,
-    borderRadius: `${theme.shape.borderRadius}px`,
+    // Dynamic marginTop based on actual AppBar height (toolbar + padding)
+    marginTop: appBarHeight.md,
+    // Border radius: 0 on top-left (where borders meet), rounded elsewhere
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: theme.shape.borderRadius,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen + 200,
     }),
+    // Subtle border to separate content area from navigation (matches card borders)
+    // Top border: separates from AppBar (over content area only)
+    // Left border: separates from Sidebar
+    borderTop: '1px solid',
+    borderLeft: '1px solid',
+    borderTopColor: 'var(--munserv-palette-divider)',
+    borderLeftColor: 'var(--munserv-palette-divider)',
 
     // Desktop: width based on drawer state
     [theme.breakpoints.up('md')]: {
       width: open ? `calc(100% - ${drawerWidth}px)` : `calc(100% - ${drawerWidthMini}px)`,
       marginLeft: 0,
+      marginTop: appBarHeight.md,
     },
 
     // Tablet/Mobile: responsive toolbar height + full width
@@ -68,7 +86,10 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
       marginLeft: '20px',
       width: 'calc(100% - 40px)',
       padding: theme.spacing(2),
-      marginTop: 64, // Standard MUI toolbar height for sm+
+      marginTop: appBarHeight.sm,
+      // No left border on mobile (no persistent sidebar)
+      borderLeft: 'none',
+      borderTopLeftRadius: theme.shape.borderRadius,
     },
 
     // Mobile: smaller margins
@@ -77,7 +98,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
       width: 'calc(100% - 20px)',
       padding: theme.spacing(2),
       marginRight: '10px',
-      marginTop: 56, // MUI mobile toolbar height
+      marginTop: appBarHeight.xs,
     },
   };
 });
