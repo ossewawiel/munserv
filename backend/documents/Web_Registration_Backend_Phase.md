@@ -1557,9 +1557,9 @@ Use this checklist with `/dev-cycle` for implementation:
 ### Domain Layer
 - [x] Update `MemberStatus.kt` - add PendingApproval ✓
 - [x] Update `Member.kt` - add email/password fields ✓
-- [ ] Create `Email.kt` - email value object
+- [x] Create `Email.kt` - email value object ✓
 - [ ] Create `Password.kt` - password utilities
-- [ ] Write unit tests for Email
+- [x] Write unit tests for Email ✓
 - [ ] Write unit tests for Password
 - [x] Write unit tests for MemberStatus transitions ✓
 - [x] Write unit tests for Member entity (canLogin, withPassword, clearMustChangePassword) ✓
