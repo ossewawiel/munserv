@@ -8,9 +8,12 @@ interface MemberStatusBadgeProps {
   status: MemberStatus;
 }
 
-const statusVariants: Record<MemberStatus, 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
+const statusVariants: Record<
+  MemberStatus,
+  'default' | 'success' | 'warning' | 'danger' | 'info'
+> = {
   active: 'success',
-  pending: 'warning',
+  pending_approval: 'warning',
   suspended: 'danger',
 };
 

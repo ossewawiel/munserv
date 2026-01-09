@@ -7,6 +7,7 @@ export interface MemberListItem {
   id: string;
   firstName: string;
   surname: string;
+  email: string;
   phoneNumber: string;
   address: string;
   status: MemberStatus;
@@ -28,4 +29,13 @@ export interface MemberFilterParams {
   status?: MemberStatus;
   page?: number;
   limit?: number;
+}
+
+/**
+ * Response from member approval
+ */
+export interface MemberApproveResponse {
+  memberId: string;
+  email: string;
+  message: string;
 }

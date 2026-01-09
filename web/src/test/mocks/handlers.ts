@@ -16,9 +16,36 @@ const mockIssues = [
 const mockMembers = [
   {
     id: 'member-1',
-    displayName: 'Test Member',
-    phone: '+27123456789',
+    firstName: 'John',
+    surname: 'Active',
+    email: 'john@example.com',
+    phoneNumber: '+27123456789',
+    address: '123 Main Street',
     status: 'active',
+    issueCount: 5,
+    joinedAt: '2024-01-15T10:00:00Z',
+  },
+  {
+    id: 'member-2',
+    firstName: 'Jane',
+    surname: 'Pending',
+    email: 'jane@example.com',
+    phoneNumber: '+27987654321',
+    address: '456 Oak Avenue',
+    status: 'pending_approval',
+    issueCount: 0,
+    joinedAt: '2024-03-01T14:30:00Z',
+  },
+  {
+    id: 'member-3',
+    firstName: 'Bob',
+    surname: 'Suspended',
+    email: 'bob@example.com',
+    phoneNumber: '+27111222333',
+    address: '789 Pine Lane',
+    status: 'suspended',
+    issueCount: 2,
+    joinedAt: '2023-06-20T09:15:00Z',
   },
 ];
 
@@ -107,13 +134,58 @@ export const handlers = [
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
     const limit = Number(url.searchParams.get('limit') || 20);
+    const status = url.searchParams.get('status');
+
+    let filteredMembers = mockMembers;
+    if (status) {
+      filteredMembers = mockMembers.filter((m) => m.status === status);
+    }
 
     return HttpResponse.json({
-      items: mockMembers,
-      total: mockMembers.length,
-      page,
-      limit,
+      items: filteredMembers,
+      pagination: {
+        page,
+        limit,
+        totalItems: filteredMembers.length,
+        totalPages: Math.ceil(filteredMembers.length / limit),
+      },
     });
+  }),
+
+  // Member pending count
+  http.get('*/admin/members/pending-count', () => {
+    const pendingCount = mockMembers.filter(
+      (m) => m.status === 'pending_approval'
+    ).length;
+    return HttpResponse.json({ count: pendingCount });
+  }),
+
+  // Approve member
+  http.post('*/admin/members/:id/approve', ({ params }) => {
+    const member = mockMembers.find((m) => m.id === params.id);
+    if (!member) {
+      return HttpResponse.json({ message: 'Member not found' }, { status: 404 });
+    }
+    if (member.status !== 'pending_approval') {
+      return HttpResponse.json(
+        { message: 'Member is not pending approval' },
+        { status: 400 }
+      );
+    }
+    return HttpResponse.json({
+      memberId: member.id,
+      email: member.email,
+      message: 'Member approved successfully',
+    });
+  }),
+
+  // Reject member
+  http.delete('*/admin/members/:id', ({ params }) => {
+    const member = mockMembers.find((m) => m.id === params.id);
+    if (!member) {
+      return HttpResponse.json({ message: 'Member not found' }, { status: 404 });
+    }
+    return new HttpResponse(null, { status: 204 });
   }),
 
   // Dashboard

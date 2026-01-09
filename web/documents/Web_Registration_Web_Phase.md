@@ -1474,31 +1474,32 @@ Use this checklist with `/dev-cycle` for implementation:
 - [x] Create `RegisterPage.tsx` ✅ (2026-01-09)
 - [x] Create `RegisterForm.tsx` ✅ (2026-01-09)
 - [x] Update `LoginPage.tsx` - add register link ✅ (2026-01-09)
-- [ ] Update `MembersPage.tsx` - add filters and actions
-- [ ] Create `MemberApprovalDialog.tsx`
-- [ ] Update `MembersTable.tsx` - add email and actions column
-- [ ] Update `MemberStatusBadge.tsx` - add pending_approval
+- [x] Update `MembersPage.tsx` - add filters and actions ✅ (2026-01-09)
+- [x] Create `MemberApprovalDialog.tsx` ✅ (2026-01-09)
+- [x] Update `MembersTable.tsx` - add email and actions column ✅ (2026-01-09)
+- [x] Update `MemberStatusBadge.tsx` - add pending_approval ✅ (2026-01-09)
 
 ### API & Hooks
 - [x] Update `auth/api.ts` - add registerMember ✅ (2026-01-09)
-- [ ] Update `members/api.ts` - add approve, reject, getPendingCount
+- [x] Update `members/api.ts` - add approve, reject, getPendingCount ✅ (2026-01-09)
 - [x] Update `auth/hooks.ts` - add useRegisterMember, useSectors ✅ (2026-01-09)
-- [ ] Update `members/hooks.ts` - add useApproveMember, useRejectMember, usePendingMemberCount
+- [x] Update `members/hooks.ts` - add useApproveMember, useRejectMember, usePendingMemberCount ✅ (2026-01-09)
 
 ### Types
 - [x] Update `auth/types.ts` - add RegisterRequest, RegisterResponse ✅ (2026-01-09)
-- [ ] Update `members/types.ts` - add pending_approval status, email field
+- [x] Update `members/types.ts` - add pending_approval status, email field ✅ (2026-01-09)
 
 ### Routing & Config
 - [x] Update `App.tsx` - add /register route ✅ (2026-01-09)
 - [x] Add translations to `en/translation.json` ✅ (2026-01-09)
 
 ### Testing
-- [x] Write tests for RegisterPage ✅ (2026-01-09 - 12 tests)
+- [x] Write tests for RegisterPage ✅ (2026-01-09 - 10 tests)
 - [x] Write tests for RegisterForm ✅ (2026-01-09 - 16 tests)
 - [x] Write tests for LoginPage (register link) ✅ (2026-01-09 - 7 tests)
-- [ ] Write tests for MembersPage (updated)
-- [ ] Write tests for MemberApprovalDialog
+- [x] Write tests for MembersPage (updated) ✅ (2026-01-09 - 12 tests)
+- [x] Write tests for MemberApprovalDialog ✅ (2026-01-09 - 16 tests)
+- [x] Write tests for MembersTable ✅ (2026-01-09 - 14 tests)
 - [ ] E2E test for registration flow
 
 ---

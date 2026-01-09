@@ -2,13 +2,13 @@ import type { GeoPoint } from '@/shared/types/common';
 
 /**
  * Member status for registration workflow
- * MVP: always 'active'. Phase 2: 'pending' until admin approves
+ * MVP: always 'active'. Phase 2: 'pending_approval' until admin approves
  */
-export type MemberStatus = 'active' | 'pending' | 'suspended';
+export type MemberStatus = 'active' | 'pending_approval' | 'suspended';
 
 export const MEMBER_STATUS_LABELS: Record<MemberStatus, string> = {
   active: 'Active',
-  pending: 'Pending Approval',
+  pending_approval: 'Pending Approval',
   suspended: 'Suspended',
 };
 

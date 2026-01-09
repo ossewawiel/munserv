@@ -118,11 +118,28 @@
     "status": "Status",
     "issuesReported": "Issues Reported",
     "joinedAt": "Joined",
+    "actions": "Actions",
     "statuses": {
       "active": "Active",
-      "pending": "Pending",
+      "pending_approval": "Pending Approval",
       "suspended": "Suspended"
-    }
+    },
+    "filterByStatus": "Filter by status",
+    "filterAll": "All Members",
+    "filterPending": "Pending Approval",
+    "filterActive": "Active",
+    "filterSuspended": "Suspended",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveTitle": "Approve Member Registration",
+    "rejectTitle": "Reject Member Registration",
+    "approveConfirmation": "Are you sure you want to approve this member's registration?",
+    "rejectConfirmation": "Are you sure you want to reject this member's registration?",
+    "approveEmailNote": "A welcome email with login credentials will be sent to the member.",
+    "rejectWarning": "This will permanently delete the registration. The member will need to register again if they wish to join.",
+    "noMembers": "No Members",
+    "noMembersDescription": "No members match your current filters.",
+    "noPendingMembers": "No pending registrations to review"
   },
   "reports": {
     "title": "Reports"
