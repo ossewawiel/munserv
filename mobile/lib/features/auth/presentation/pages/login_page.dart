@@ -33,10 +33,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void initState() {
     super.initState();
     _loadStoredPhone();
-    // Try biometric login automatically if enabled
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _tryAutoBiometricLogin();
-    });
+    // Biometric login is only triggered when user taps the button
+    // to avoid interrupting PIN entry with an unexpected popup
   }
 
   Future<void> _loadStoredPhone() async {
@@ -55,19 +53,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       setState(() {
         _storedPhone = phoneAsync;
       });
-    }
-  }
-
-  Future<void> _tryAutoBiometricLogin() async {
-    final isBiometricEnabled = await ref.read(
-      isBiometricLoginEnabledProvider.future,
-    );
-    if (isBiometricEnabled && mounted) {
-      // Small delay for better UX
-      await Future.delayed(const Duration(milliseconds: 300));
-      if (mounted) {
-        _onUseBiometrics();
-      }
     }
   }
 
@@ -247,8 +232,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             PinInputField(
               key: _pinKey,
               onCompleted: _onPinCompleted,
-              autoFocus:
-                  !biometricEnabled, // Don't auto-focus if biometric will be tried
+              autoFocus: true, // Always focus PIN input, biometric is manual
               errorText: _errorText,
             ),
           const SizedBox(height: Spacing.xl),
