@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/widgets/branding_header.dart';
+import '../../../../shared/widgets/map_background.dart';
 
-/// Common layout for authentication pages
+/// Common layout for authentication pages with vintage map background
 class AuthPageLayout extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -32,59 +33,68 @@ class AuthPageLayout extends StatelessWidget {
         children: [
           // Branding header at the top
           const BrandingHeader(),
-          // Optional back button row
-          if (showBackButton)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: onBack ?? () => Navigator.of(context).pop(),
-              ),
-            ),
-          // Main content
+          // Main content with map background
           Expanded(
-            child: SafeArea(
-              top: false, // BrandingHeader handles top safe area
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: Spacing.lg),
-                    // Header
-                    Text(
-                      title,
-                      style: theme.textTheme.headlineMedium,
-                      textAlign: TextAlign.center,
+            child: MapBackground(
+              child: Column(
+                children: [
+                  // Optional back button row
+                  if (showBackButton)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: onBack ?? () => Navigator.of(context).pop(),
+                      ),
                     ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: Spacing.sm),
-                      Text(
-                        subtitle!,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                  // Main content
+                  Expanded(
+                    child: SafeArea(
+                      top: false, // BrandingHeader handles top safe area
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Spacing.lg,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                    const SizedBox(height: Spacing.xl),
-                    // Main content
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: child,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: Spacing.lg),
+                            // Header
+                            Text(
+                              title,
+                              style: theme.textTheme.headlineMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                            if (subtitle != null) ...[
+                              const SizedBox(height: Spacing.sm),
+                              Text(
+                                subtitle!,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                            const SizedBox(height: Spacing.xl),
+                            // Main content
+                            Expanded(
+                              child: SingleChildScrollView(child: child),
+                            ),
+                            // Bottom action
+                            if (bottomAction != null) ...[
+                              bottomAction!,
+                              SizedBox(
+                                height: mediaQuery.padding.bottom > 0
+                                    ? Spacing.md
+                                    : Spacing.lg,
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
-                    // Bottom action
-                    if (bottomAction != null) ...[
-                      bottomAction!,
-                      SizedBox(
-                        height: mediaQuery.padding.bottom > 0
-                            ? Spacing.md
-                            : Spacing.lg,
-                      ),
-                    ],
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

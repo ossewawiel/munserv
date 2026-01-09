@@ -96,6 +96,7 @@ class _IssueMapPageState extends ConsumerState<IssueMapPage> {
     final theme = Theme.of(context);
 
     return BrandedScaffold(
+      showMapBackground: false, // Disable since this page shows an actual map
       appBar: AppBar(
         title: Text(l10n.mapViewTitle),
         actions: [

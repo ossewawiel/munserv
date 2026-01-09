@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../l10n/app_localizations.dart';
 import '../shared/widgets/branding_header.dart';
+import '../shared/widgets/map_background.dart';
 
 /// Navigation destinations for the bottom navigation bar
 enum NavDestination {
@@ -14,14 +15,11 @@ enum NavDestination {
   final String path;
 }
 
-/// App shell with bottom navigation bar
+/// App shell with bottom navigation bar and vintage map background
 class AppShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const AppShell({
-    super.key,
-    required this.navigationShell,
-  });
+  const AppShell({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +30,12 @@ class AppShell extends StatelessWidget {
         children: [
           const BrandingHeader(),
           Expanded(
-            child: MediaQuery.removePadding(
-              context: context,
-              removeTop: true,
-              child: navigationShell,
+            child: MapBackground(
+              child: MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: navigationShell,
+              ),
             ),
           ),
         ],

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'branding_header.dart';
+import 'map_background.dart';
 
-/// A Scaffold wrapper that includes the MunServ branding header at the top.
+/// A Scaffold wrapper that includes the MunServ branding header at the top
+/// and an optional vintage map background for the body content.
 ///
-/// Use this instead of [Scaffold] to automatically include the branding header
-/// above the AppBar on all screens.
+/// Use this instead of [Scaffold] to automatically include:
+/// - Branding header above the AppBar
+/// - Vintage map background on the body content (optional, enabled by default)
 ///
 /// Example:
 /// ```dart
@@ -51,6 +54,10 @@ class BrandedScaffold extends StatelessWidget {
   /// Whether to extend the body to the bottom of the scaffold.
   final bool extendBody;
 
+  /// Whether to show the vintage map background behind the body content.
+  /// Defaults to true. Set to false for screens like maps that don't need it.
+  final bool showMapBackground;
+
   const BrandedScaffold({
     super.key,
     this.body,
@@ -65,10 +72,13 @@ class BrandedScaffold extends StatelessWidget {
     this.endDrawer,
     this.extendBodyBehindAppBar = false,
     this.extendBody = false,
+    this.showMapBackground = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bodyContent = body ?? const SizedBox.shrink();
+
     return Scaffold(
       backgroundColor: backgroundColor,
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
@@ -90,7 +100,9 @@ class BrandedScaffold extends StatelessWidget {
               child: appBar!,
             ),
           Expanded(
-            child: body ?? const SizedBox.shrink(),
+            child: showMapBackground
+                ? MapBackground(child: bodyContent)
+                : bodyContent,
           ),
         ],
       ),

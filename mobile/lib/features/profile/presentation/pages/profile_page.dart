@@ -19,6 +19,7 @@ class ProfilePage extends ConsumerWidget {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent, // Let map background show through
       appBar: AppBar(title: const Text('Profile'), centerTitle: false),
       body: ListView(
         padding: const EdgeInsets.all(Spacing.lg),

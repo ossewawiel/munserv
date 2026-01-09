@@ -115,6 +115,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final issuesAsync = ref.watch(issuesProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent, // Let map background show through
       appBar: AppBar(
         title: const Text('Home'),
         centerTitle: false,

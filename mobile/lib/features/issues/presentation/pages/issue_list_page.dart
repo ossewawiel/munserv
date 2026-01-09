@@ -17,6 +17,7 @@ class IssueListPage extends ConsumerWidget {
     final issuesAsync = ref.watch(issuesProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent, // Let map background show through
       appBar: AppBar(
         title: const Text('Issues'),
         centerTitle: false,
