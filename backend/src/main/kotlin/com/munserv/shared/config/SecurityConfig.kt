@@ -29,7 +29,18 @@ class SecurityConfig(
                 auth
                     // Public endpoints
                     .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    // Public auth endpoints
+                    .requestMatchers("/api/v1/auth/register").permitAll()
+                    .requestMatchers("/api/v1/auth/register/web").permitAll()
+                    .requestMatchers("/api/v1/auth/verify-otp").permitAll()
+                    .requestMatchers("/api/v1/auth/complete-registration").permitAll()
+                    .requestMatchers("/api/v1/auth/login").permitAll()
+                    .requestMatchers("/api/v1/auth/member/login").permitAll()
+                    .requestMatchers("/api/v1/auth/admin/login").permitAll()
+                    .requestMatchers("/api/v1/auth/refresh").permitAll()
+                    .requestMatchers("/api/v1/auth/check-phone").permitAll()
+                    // Protected auth endpoints (require authentication)
+                    .requestMatchers("/api/v1/auth/change-password").authenticated()
                     .requestMatchers("/api/v1/sectors", "/api/v1/sectors/**").permitAll()
                     .requestMatchers("/uploads/**").permitAll()
                     // Swagger/OpenAPI documentation endpoints

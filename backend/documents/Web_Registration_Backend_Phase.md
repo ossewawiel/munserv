@@ -1572,31 +1572,31 @@ Use this checklist with `/dev-cycle` for implementation:
 - [x] Write integration tests for MemberRepository ✓
 
 ### Service Layer
-- [ ] Create `RegistrationService.kt`
-- [ ] Create `RegistrationResult.kt`
-- [ ] Update `AuthService.kt` - add loginWithEmail, changePassword
-- [ ] Update `AuthResult.kt` - add new result types
+- [x] Create `RegistrationService.kt` ✓
+- [x] Create `RegistrationResult.kt` ✓
+- [x] Update `AuthService.kt` - add loginWithEmail, changePassword ✓
+- [x] Update `AuthResult.kt` - add new result types ✓
 - [x] Create `EmailService.kt` ✓
-- [ ] Write unit tests for RegistrationService
-- [ ] Write unit tests for AuthService (new methods)
+- [x] Write unit tests for RegistrationService ✓
+- [x] Write unit tests for AuthService (new methods) ✓
 - [x] Write unit tests for EmailService ✓
 
 ### API Layer
-- [ ] Add request DTOs (WebRegisterRequest, MemberLoginRequest, ChangePasswordRequest)
-- [ ] Add response DTOs (WebRegisterResponse, MemberLoginResponse, MemberApprovedResponse)
-- [ ] Update `AuthController.kt` - add new endpoints
-- [ ] Update `AdminController.kt` - add approve/reject endpoints
-- [ ] Update `SecurityConfig.kt` - add public endpoints
-- [ ] Write API contract tests
+- [x] Add request DTOs (WebRegisterRequest, MemberLoginRequest, ChangePasswordRequest) ✓
+- [x] Add response DTOs (WebRegisterResponse, MemberLoginResponse, MemberApprovedResponse) ✓
+- [x] Update `AuthController.kt` - add new endpoints ✓
+- [x] Update `AdminController.kt` - add approve/reject endpoints ✓
+- [x] Update `SecurityConfig.kt` - add public endpoints ✓
+- [x] Write API contract tests ✓
 
 ### Configuration
 - [x] Update `application.yml` - add SMTP config ✓
 - [x] Update `build.gradle.kts` - add spring-boot-starter-mail dependency ✓
-- [ ] Create test SMTP configuration
+- [x] Create test SMTP configuration ✓
 
 ### Integration Testing
-- [ ] Write integration tests for registration flow
-- [ ] Write integration tests for approval flow
+- [x] Write integration tests for registration flow ✓
+- [x] Write integration tests for approval flow ✓
 - [x] Write integration test for EmailService autowiring ✓
 
 ---

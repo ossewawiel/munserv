@@ -25,6 +25,8 @@ sealed interface AuthResult {
 
     data object InvalidPin : AuthResult
 
+    data object InvalidSectorId : AuthResult
+
     // Phone check result
     data class PhoneCheckResult(
         val isRegistered: Boolean,
@@ -59,4 +61,27 @@ sealed interface AuthResult {
     ) : AuthResult
 
     data object InvalidToken : AuthResult
+
+    // Email+password login results
+    data class MemberLoginSuccess(
+        val memberId: MemberId,
+        val tokens: TokenPair,
+        val mustChangePassword: Boolean,
+    ) : AuthResult
+
+    // Password change results
+    data class PasswordChanged(
+        val memberId: MemberId,
+    ) : AuthResult
+
+    // Member not found
+    data object MemberNotFound : AuthResult
+
+    // Registration pending admin approval
+    data object PendingApproval : AuthResult
+
+    // Validation errors
+    data class ValidationError(
+        val errors: List<String>,
+    ) : AuthResult
 }

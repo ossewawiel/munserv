@@ -3,9 +3,14 @@ package com.munserv.admin.api
 import com.munserv.admin.domain.MemberWithStats
 import com.munserv.admin.service.DashboardService
 import com.munserv.admin.service.HeatReportService
+import com.munserv.auth.api.ErrorResponse
+import com.munserv.auth.api.MemberApprovedResponse
 import com.munserv.auth.domain.Member
 import com.munserv.auth.repository.MemberRepository
+import com.munserv.auth.service.RegistrationResult
+import com.munserv.auth.service.RegistrationService
 import com.munserv.issues.repository.IssueRepository
+import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -17,13 +22,18 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.Clock
+import java.util.UUID
 import kotlin.math.ceil
 
 /**
@@ -40,6 +50,7 @@ class AdminController(
     private val heatReportService: HeatReportService,
     private val memberRepository: MemberRepository,
     private val issueRepository: IssueRepository,
+    private val registrationService: RegistrationService,
     private val clock: Clock,
 ) {
     /**
@@ -186,4 +197,114 @@ class AdminController(
             issueCount = issueCount,
             joinedAt = createdAt,
         )
+
+    /**
+     * POST /api/v1/admin/members/{id}/approve
+     * Approves a pending member registration.
+     * Generates temporary password and sends welcome email.
+     */
+    @Operation(
+        summary = "Approve pending member registration",
+        description = "Approve a pending member registration. Generates temporary password and sends welcome email.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Member approved",
+                content = [Content(schema = Schema(implementation = MemberApprovedResponse::class))],
+            ),
+            ApiResponse(responseCode = "400", description = "Invalid status"),
+            ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            ApiResponse(responseCode = "403", description = "Forbidden - requires admin role"),
+            ApiResponse(responseCode = "404", description = "Member not found"),
+        ],
+    )
+    @PostMapping("/members/{id}/approve")
+    fun approveMember(
+        @Parameter(description = "Member UUID to approve")
+        @PathVariable id: String,
+    ): ResponseEntity<*> =
+        when (val result = registrationService.approveMember(MemberId(UUID.fromString(id)))) {
+            is RegistrationResult.Approved ->
+                ResponseEntity.ok(
+                    MemberApprovedResponse(
+                        memberId = result.member.id.value.toString(),
+                        email = result.member.email,
+                        message = "Member approved. Temporary password: ${result.temporaryPassword}",
+                    ),
+                )
+
+            is RegistrationResult.MemberNotFound ->
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ErrorResponse("not_found", "Member not found"))
+
+            is RegistrationResult.InvalidStatus ->
+                ResponseEntity
+                    .badRequest()
+                    .body(
+                        ErrorResponse(
+                            "invalid_status",
+                            "Member status is ${result.current}, expected ${result.expected}",
+                        ),
+                    )
+
+            is RegistrationResult.Success,
+            is RegistrationResult.Rejected,
+            is RegistrationResult.EmailAlreadyRegistered,
+            is RegistrationResult.InvalidSector,
+            is RegistrationResult.ValidationError,
+            -> ResponseEntity.internalServerError().build<Unit>()
+        }
+
+    /**
+     * DELETE /api/v1/admin/members/{id}
+     * Rejects a pending member registration.
+     * Deletes the member record.
+     */
+    @Operation(
+        summary = "Reject pending member registration",
+        description = "Reject a pending member registration. Deletes the member record.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "204", description = "Member rejected"),
+            ApiResponse(responseCode = "400", description = "Invalid status"),
+            ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            ApiResponse(responseCode = "403", description = "Forbidden - requires admin role"),
+            ApiResponse(responseCode = "404", description = "Member not found"),
+        ],
+    )
+    @DeleteMapping("/members/{id}")
+    fun rejectMember(
+        @Parameter(description = "Member UUID to reject")
+        @PathVariable id: String,
+    ): ResponseEntity<*> =
+        when (val result = registrationService.rejectMember(MemberId(UUID.fromString(id)))) {
+            is RegistrationResult.Rejected ->
+                ResponseEntity.noContent().build<Unit>()
+
+            is RegistrationResult.MemberNotFound ->
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ErrorResponse("not_found", "Member not found"))
+
+            is RegistrationResult.InvalidStatus ->
+                ResponseEntity
+                    .badRequest()
+                    .body(
+                        ErrorResponse(
+                            "invalid_status",
+                            "Member status is ${result.current}, expected ${result.expected}",
+                        ),
+                    )
+
+            is RegistrationResult.Success,
+            is RegistrationResult.Approved,
+            is RegistrationResult.EmailAlreadyRegistered,
+            is RegistrationResult.InvalidSector,
+            is RegistrationResult.ValidationError,
+            -> ResponseEntity.internalServerError().build<Unit>()
+        }
 }

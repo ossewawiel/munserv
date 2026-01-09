@@ -104,3 +104,39 @@ fun TokenPair.toResponse(): TokenResponse =
         refreshToken = refreshToken,
         expiresIn = expiresIn,
     )
+
+/**
+ * Response for web registration submission.
+ */
+data class WebRegisterResponse(
+    val message: String,
+    val memberId: String,
+)
+
+/**
+ * Response for member email+password login.
+ */
+data class MemberLoginResponse(
+    val memberId: String,
+    val accessToken: String,
+    val refreshToken: String,
+    val expiresIn: Long,
+    val mustChangePassword: Boolean,
+    val tokenType: String = "Bearer",
+)
+
+/**
+ * Response for member approval by admin.
+ */
+data class MemberApprovedResponse(
+    val memberId: String,
+    val email: String,
+    val message: String,
+)
+
+/**
+ * Simple message response.
+ */
+data class MessageResponse(
+    val message: String,
+)
