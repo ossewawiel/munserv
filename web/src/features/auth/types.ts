@@ -84,3 +84,25 @@ export const ADMIN_ROLE_LABELS: Record<AdminUser['role'], string> = {
   SECTOR_ADMIN: 'Sector Admin',
   COMMUNITY_ADMIN: 'Community Admin',
 };
+
+/**
+ * Web registration request payload
+ */
+export interface RegisterRequest {
+  email: string;
+  firstName: string;
+  surname: string;
+  phone: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  sectorId: string;
+}
+
+/**
+ * Web registration response
+ */
+export interface RegisterResponse {
+  message: string;
+  memberId: string;
+}

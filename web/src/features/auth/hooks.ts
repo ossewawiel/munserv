@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { authApi } from './api';
-import type { LoginRequest } from './types';
+import type { LoginRequest, RegisterRequest } from './types';
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -43,5 +43,15 @@ export function useSectors() {
   return useQuery({
     queryKey: ['sectors'],
     queryFn: () => authApi.getSectors(),
+    staleTime: 1000 * 60 * 60, // 1 hour - sectors rarely change
+  });
+}
+
+/**
+ * Hook for registering a new member via web form
+ */
+export function useRegisterMember() {
+  return useMutation({
+    mutationFn: (data: RegisterRequest) => authApi.registerMember(data),
   });
 }

@@ -30,7 +30,34 @@
     "loginError": "Invalid email or password",
     "loggingIn": "Signing in...",
     "welcomeBack": "Hi, Welcome Back",
-    "enterCredentials": "Enter your credentials to continue"
+    "enterCredentials": "Enter your credentials to continue",
+    "registerTitle": "Register as a Community Member",
+    "registerSubtitle": "Join your community to report and track municipal service issues",
+    "personalInfo": "Personal Information",
+    "contactInfo": "Contact Information",
+    "locationInfo": "Location Information",
+    "firstName": "First Name",
+    "surname": "Surname",
+    "emailHelp": "You'll use this email to log in to the mobile app",
+    "phone": "Phone Number",
+    "phoneHelp": "For contact purposes",
+    "address": "Street Address",
+    "sector": "Community/Ward",
+    "sectorHelp": "Select the community you belong to",
+    "getLocation": "Get My Location",
+    "gettingLocation": "Getting location...",
+    "locationCaptured": "Location captured",
+    "locationError": "Could not get location. Please try again.",
+    "locationRequired": "Please capture your location using the button above",
+    "submitRegistration": "Submit Registration",
+    "registrationSuccess": "Registration Submitted Successfully!",
+    "registrationPendingInfo": "Your registration has been submitted. You will receive an email with login instructions once an administrator approves your registration.",
+    "backToLogin": "Back to Login",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginLink": "Log in here",
+    "or": "or",
+    "newMember": "New to the community?",
+    "registerAsNewMember": "Register as a New Member"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -118,5 +145,11 @@
     "unauthorized": "Unauthorized",
     "serverError": "Server Error",
     "networkError": "Network Error"
+  },
+  "validation": {
+    "required": "This field is required",
+    "maxLength": "Maximum {{max}} characters allowed",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number (e.g., +27821234567)"
   }
 }

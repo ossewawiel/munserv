@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { LoginPage } from '@/features/auth/LoginPage';
+import { RegisterPage } from '@/features/auth/RegisterPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { HeatReportPage } from '@/features/dashboard/HeatReportPage';
 import { IssuesPage } from '@/features/issues/IssuesPage';
@@ -13,6 +14,7 @@ function App() {
     <Routes>
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
 
       {/* Protected routes */}
       <Route
