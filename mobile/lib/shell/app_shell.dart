@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../l10n/app_localizations.dart';
+import '../shared/widgets/branding_header.dart';
 
 /// Navigation destinations for the bottom navigation bar
 enum NavDestination {
@@ -27,7 +28,18 @@ class AppShell extends StatelessWidget {
     final l10n = S.of(context);
 
     return Scaffold(
-      body: navigationShell,
+      body: Column(
+        children: [
+          const BrandingHeader(),
+          Expanded(
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: navigationShell,
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) {

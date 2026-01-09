@@ -338,6 +338,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Map View'**
   String get mapViewTitle;
+
+  /// App tagline shown below logo in branding header
+  ///
+  /// In en, this message translates to:
+  /// **'Municipal Service Watchdog'**
+  String get appTagline;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

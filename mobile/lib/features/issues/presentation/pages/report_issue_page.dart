@@ -10,6 +10,7 @@ import '../../../../shared/models/geo_point.dart';
 import '../../../../shared/models/issue_type.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/utils/result.dart';
+import '../../../../shared/widgets/branded_scaffold.dart';
 import '../../domain/domain.dart';
 import '../../providers/issue_providers.dart';
 import '../widgets/widgets.dart';
@@ -114,7 +115,7 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
 
-    return Scaffold(
+    return BrandedScaffold(
       appBar: AppBar(
         title: Text(l10n.reportIssueTitle),
         leading: IconButton(

@@ -216,5 +216,10 @@
   "mapViewTitle": "Map View",
   "@mapViewTitle": {
     "description": "Title for map view page"
+  },
+
+  "appTagline": "Municipal Service Watchdog",
+  "@appTagline": {
+    "description": "App tagline shown below logo in branding header"
   }
 }

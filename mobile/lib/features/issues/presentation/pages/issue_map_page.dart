@@ -8,10 +8,11 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/models/geo_point.dart';
 import '../../../../shared/models/issue.dart';
 import '../../../../shared/services/location_service.dart';
-import '../../../../shared/widgets/error_display.dart';
-import '../../../../shared/widgets/loading_spinner.dart';
 import '../../../../shared/theme/colors.dart';
 import '../../../../shared/theme/typography.dart';
+import '../../../../shared/widgets/branded_scaffold.dart';
+import '../../../../shared/widgets/error_display.dart';
+import '../../../../shared/widgets/loading_spinner.dart';
 import '../../providers/issue_providers.dart';
 import '../widgets/widgets.dart';
 
@@ -94,7 +95,7 @@ class _IssueMapPageState extends ConsumerState<IssueMapPage> {
     final l10n = S.of(context);
     final theme = Theme.of(context);
 
-    return Scaffold(
+    return BrandedScaffold(
       appBar: AppBar(
         title: Text(l10n.mapViewTitle),
         actions: [

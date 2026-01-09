@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/theme/typography.dart';
+import '../../../../shared/widgets/branded_scaffold.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/loading_spinner.dart';
-import '../../../../shared/widgets/munserv_app_bar.dart';
 import '../../providers/issue_providers.dart';
 import '../widgets/widgets.dart';
 
@@ -17,8 +17,8 @@ class MyReportsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final myIssuesAsync = ref.watch(myIssuesProvider());
 
-    return Scaffold(
-      appBar: const MunServAppBar(),
+    return BrandedScaffold(
+      appBar: AppBar(title: const Text('My Reports')),
       body: myIssuesAsync.when(
         data: (paginated) {
           if (paginated.items.isEmpty) {

@@ -134,4 +134,7 @@ class SEn extends S {
 
   @override
   String get mapViewTitle => 'Map View';
+
+  @override
+  String get appTagline => 'Municipal Service Watchdog';
 }
