@@ -10,9 +10,8 @@ import '../data/auth_api.dart';
 import '../data/auth_repository.dart';
 import '../data/secure_storage.dart';
 import '../domain/auth_state.dart';
-import '../domain/login_request.dart';
-import '../domain/otp_request.dart';
-import '../domain/otp_verify_result.dart';
+import '../domain/auth_types.dart';
+import '../domain/member_login_response.dart';
 
 part 'auth_providers.g.dart';
 
@@ -56,6 +55,7 @@ AuthRepository authRepository(Ref ref) {
 // =============================================================================
 
 /// Manages authentication state throughout the app
+/// Updated for email + password authentication (Web Registration Flow)
 @Riverpod(keepAlive: true)
 class AuthNotifier extends _$AuthNotifier {
   @override
@@ -98,110 +98,6 @@ class AuthNotifier extends _$AuthNotifier {
     } else {
       state = const AuthState.unauthenticated();
     }
-  }
-
-  /// Request OTP for phone number
-  Future<Result<OtpRequestResponse>> requestOtp(String phoneNumber) async {
-    return _repository.requestOtp(phoneNumber);
-  }
-
-  /// Verify OTP code
-  /// For backend flow: existing users need to login with PIN separately
-  /// For mock API flow: existing users get tokens immediately
-  Future<Result<OtpVerifyResult>> verifyOtp(
-    String phoneNumber,
-    String otp,
-  ) async {
-    final result = await _repository.verifyOtp(phoneNumber, otp);
-
-    // For mock API flow: If existing user has tokens, they're logged in
-    // For backend flow: tokens/profile are null, user must login with PIN
-    if (result.isSuccess) {
-      final verifyResult = result.dataOrNull!;
-      if (verifyResult.isExistingUser && verifyResult.hasTokens) {
-        final existing = verifyResult as OtpVerifyResultExistingUser;
-        // Mock API returns tokens immediately
-        await _handleSuccessfulAuth(
-          existing.tokens!,
-          existing.profile!.member,
-          existing.profile!.sector,
-        );
-        // Save phone number for quick re-login after logout
-        await _storage.savePhoneNumber(phoneNumber);
-      }
-      // For backend flow: just save phone number, user will login with PIN
-      if (verifyResult.isExistingUser && !verifyResult.hasTokens) {
-        await _storage.savePhoneNumber(phoneNumber);
-      }
-    }
-
-    return result;
-  }
-
-  /// Complete registration for new user
-  /// For backend: phoneNumber and sectorId are required
-  /// tempToken is kept for mock API compatibility but not used by backend
-  Future<Result<AuthResponse>> completeRegistration({
-    required String phoneNumber,
-    required String firstName,
-    required String surname,
-    required String pin,
-    required GeoPoint location,
-    required String address,
-    required String sectorId,
-    String? tempToken, // Optional: used by mock API, ignored by backend
-  }) async {
-    state = const AuthState.loading();
-
-    final result = await _repository.completeRegistration(
-      phoneNumber: phoneNumber,
-      firstName: firstName,
-      surname: surname,
-      pin: pin,
-      location: location,
-      address: address,
-      sectorId: sectorId,
-    );
-
-    if (result.isSuccess) {
-      final response = result.dataOrNull!;
-      await _handleSuccessfulAuth(
-        response.tokens,
-        response.profile.member,
-        response.profile.sector,
-      );
-      // Save phone number for quick re-login after logout
-      await _storage.savePhoneNumber(phoneNumber);
-    } else {
-      state = AuthState.error(result.errorOrNull?.displayMessage ?? 'Registration failed');
-    }
-
-    return result;
-  }
-
-  /// Login with phone and PIN
-  Future<Result<AuthResponse>> login(String phoneNumber, String pin) async {
-    state = const AuthState.loading();
-
-    final result = await _repository.login(phoneNumber, pin);
-
-    if (result.isSuccess) {
-      final response = result.dataOrNull!;
-      // Store PIN FIRST before auth state change triggers navigation
-      ref.read(tempPinForBiometricSetupProvider.notifier).setPin(pin);
-      // Save phone number for convenience
-      await _storage.savePhoneNumber(phoneNumber);
-      // This updates auth state which triggers router redirect
-      await _handleSuccessfulAuth(
-        response.tokens,
-        response.profile.member,
-        response.profile.sector,
-      );
-    } else {
-      state = AuthState.error(result.errorOrNull?.displayMessage ?? 'Login failed');
-    }
-
-    return result;
   }
 
   /// Handle successful authentication
@@ -251,7 +147,7 @@ class AuthNotifier extends _$AuthNotifier {
     return result;
   }
 
-  /// Logout - clear session but keep phone number for quick re-login
+  /// Logout - clear session
   Future<void> logout() async {
     await _storage.clearSession();
     state = const AuthState.unauthenticated();
@@ -262,6 +158,165 @@ class AuthNotifier extends _$AuthNotifier {
     if (state is AuthStateError) {
       state = const AuthState.unauthenticated();
     }
+  }
+
+  // ===============================
+  // Email + Password Login (Web Registration Flow)
+  // ===============================
+
+  /// Login with email and password
+  /// Used for members who registered via web portal
+  Future<Result<MemberLoginResponse>> loginWithEmail(
+    String email,
+    String password,
+  ) async {
+    // Don't change auth state to loading - the UI handles loading state locally
+    // This prevents router from rebuilding the page and losing local state
+
+    final result = await _repository.loginWithEmail(
+      email: email,
+      password: password,
+    );
+
+    result.when(
+      success: (response) async {
+        // Save email for future login convenience
+        await _storage.saveEmail(email);
+
+        // Create tokens from response
+        final tokens = AuthTokens.fromMemberLoginResponse(
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+          expiresIn: response.expiresIn,
+        );
+
+        // Save tokens
+        await _storage.saveTokens(tokens);
+
+        if (response.mustChangePassword) {
+          // User must change password before proceeding
+          state = AuthState.mustChangePassword(
+            tokens: tokens,
+            memberId: response.memberId,
+          );
+        } else {
+          // Check if PIN is already set up
+          final hasPin = await _storage.getPin() != null;
+
+          if (hasPin) {
+            // Fully authenticated, fetch profile
+            await _fetchAndSetProfile(tokens);
+          } else {
+            // Need PIN setup
+            state = AuthState.pendingPinSetup(
+              tokens: tokens,
+              memberId: response.memberId,
+            );
+          }
+        }
+      },
+      failure: (error) {
+        // Don't set auth state to error - the page displays the error via Result
+        // Setting AuthState.error would trigger router refresh and rebuild the page,
+        // losing the error message stored in local widget state
+      },
+    );
+
+    return result;
+  }
+
+  /// Change password (for first-time login after web registration)
+  Future<Result<void>> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    final currentState = state;
+    if (currentState is! AuthStateMustChangePassword) {
+      return Result.failure(
+        const AppError.validation(
+          message: 'Must be in password change state',
+        ),
+      );
+    }
+
+    final result = await _repository.changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
+
+    result.when(
+      success: (_) {
+        // Password changed, now need PIN setup
+        state = AuthState.pendingPinSetup(
+          tokens: currentState.tokens,
+          memberId: currentState.memberId,
+        );
+      },
+      failure: (error) {
+        // Stay in mustChangePassword state, show error temporarily
+        state = AuthState.error(error.displayMessage);
+        // Restore previous state after showing error
+        Future.delayed(const Duration(seconds: 2), () {
+          state = currentState;
+        });
+      },
+    );
+
+    return result;
+  }
+
+  /// Complete PIN setup and fully authenticate
+  Future<void> completePinSetup(String pin) async {
+    final currentState = state;
+
+    if (currentState is! AuthStatePendingPinSetup) {
+      return;
+    }
+
+    // Save PIN
+    await _storage.savePin(pin);
+
+    // Fetch profile and complete authentication
+    await _fetchAndSetProfile(currentState.tokens);
+  }
+
+  /// Fetch profile and set authenticated state
+  Future<void> _fetchAndSetProfile(AuthTokens tokens) async {
+    final result = await _repository.getMe();
+
+    result.when(
+      success: (response) async {
+        final profile = response.toMemberProfile();
+
+        // Save profile to storage
+        await _storage.saveProfile(profile);
+
+        // Fetch sector info
+        final api = ref.read(authApiProvider);
+        try {
+          final sector = await api.getSector(response.sectorId);
+          state = AuthState.authenticated(
+            tokens: tokens,
+            profile: profile,
+            sector: sector,
+          );
+        } catch (e) {
+          // If sector fetch fails, use placeholder
+          state = AuthState.authenticated(
+            tokens: tokens,
+            profile: profile,
+            sector: SectorInfo(
+              id: response.sectorId,
+              name: 'Unknown',
+              center: const GeoPoint(latitude: 0, longitude: 0),
+            ),
+          );
+        }
+      },
+      failure: (error) {
+        state = AuthState.error(error.displayMessage);
+      },
+    );
   }
 }
 
@@ -290,11 +345,11 @@ String? accessToken(Ref ref) {
   return authState.accessTokenOrNull;
 }
 
-/// Provides the stored phone number for login convenience
+/// Provides the stored email for login convenience (web registration flow)
 @riverpod
-Future<String?> storedPhoneNumber(Ref ref) async {
+Future<String?> storedEmail(Ref ref) async {
   final storage = ref.watch(secureStorageProvider);
-  return storage.getPhoneNumber();
+  return storage.getEmail();
 }
 
 // =============================================================================

@@ -4,10 +4,9 @@ import 'package:munserv_mobile/features/auth/data/auth_api.dart';
 import 'package:munserv_mobile/features/auth/data/auth_repository.dart';
 import 'package:munserv_mobile/features/auth/data/secure_storage.dart';
 import 'package:munserv_mobile/features/auth/domain/auth_state.dart';
-import 'package:munserv_mobile/features/auth/domain/login_request.dart';
+import 'package:munserv_mobile/features/auth/domain/auth_types.dart';
+import 'package:munserv_mobile/features/auth/domain/member_login_response.dart';
 import 'package:munserv_mobile/features/auth/domain/member_profile_response.dart';
-import 'package:munserv_mobile/features/auth/domain/otp_request.dart';
-import 'package:munserv_mobile/features/auth/domain/otp_verify_result.dart';
 import 'package:munserv_mobile/features/auth/providers/auth_providers.dart';
 import 'package:munserv_mobile/shared/models/geo_point.dart';
 import 'package:munserv_mobile/shared/utils/app_error.dart';
@@ -67,10 +66,33 @@ const testMemberProfileResponse = MemberProfileResponse(
   createdAt: '2024-01-01T00:00:00Z',
 );
 
+/// Test data for email-based authentication (web registration flow)
+const testMemberLoginResponse = MemberLoginResponse(
+  memberId: 'member_456',
+  accessToken: 'email_access_token',
+  refreshToken: 'email_refresh_token',
+  expiresIn: 900,
+  mustChangePassword: false,
+);
+
+const testMemberLoginResponseMustChange = MemberLoginResponse(
+  memberId: 'member_456',
+  accessToken: 'email_access_token',
+  refreshToken: 'email_refresh_token',
+  expiresIn: 900,
+  mustChangePassword: true,
+);
+
 void main() {
   late MockAuthRepository mockRepository;
   late MockSecureStorageService mockStorage;
   late MockAuthApi mockAuthApi;
+
+  setUpAll(() {
+    // Register fallback values for Mocktail
+    registerFallbackValue(testTokens);
+    registerFallbackValue(testProfile);
+  });
 
   setUp(() {
     mockRepository = MockAuthRepository();
@@ -131,132 +153,6 @@ void main() {
       );
     }
 
-    test('requestOtp returns success from repository', () async {
-      when(() => mockRepository.requestOtp('+27821234567')).thenAnswer(
-        (_) async => const Result.success(
-          OtpRequestResponse(message: 'OTP sent', expiresInSeconds: 300),
-        ),
-      );
-
-      // Use the repository directly since we're testing the pass-through
-      final result = await mockRepository.requestOtp('+27821234567');
-
-      expect(result.isSuccess, true);
-      expect(result.dataOrNull?.message, 'OTP sent');
-    });
-
-    test('verifyOtp with existing user updates state to authenticated',
-        () async {
-      when(() => mockRepository.verifyOtp('+27821234567', '123456')).thenAnswer(
-        (_) async => const Result.success(
-          OtpVerifyResult.existingUser(
-            tokens: testTokens,
-            profile: testAuthProfile,
-          ),
-        ),
-      );
-      when(() => mockStorage.saveTokens(testTokens)).thenAnswer((_) async {});
-      when(() => mockStorage.saveProfile(testProfile)).thenAnswer((_) async {});
-      when(() => mockStorage.savePhoneNumber(any())).thenAnswer((_) async {});
-      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
-      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-
-      final container = createContainer();
-      final notifier = container.read(authProvider.notifier);
-
-      // Wait for initial check
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      final result = await notifier.verifyOtp('+27821234567', '123456');
-
-      expect(result.isSuccess, true);
-      expect(result.dataOrNull, isA<OtpVerifyResultExistingUser>());
-
-      final state = container.read(authProvider);
-      expect(state.isAuthenticated, true);
-      expect(state.profileOrNull?.firstName, 'John');
-    });
-
-    test('verifyOtp with new user does not change auth state', () async {
-      when(() => mockRepository.verifyOtp('+27829999999', '123456')).thenAnswer(
-        (_) async => const Result.success(
-          OtpVerifyResult.newUser(tempToken: 'temp_abc'),
-        ),
-      );
-      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
-      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-
-      final container = createContainer();
-      final notifier = container.read(authProvider.notifier);
-
-      // Wait for initial check
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      final result = await notifier.verifyOtp('+27829999999', '123456');
-
-      expect(result.isSuccess, true);
-      expect(result.dataOrNull, isA<OtpVerifyResultNewUser>());
-      expect((result.dataOrNull as OtpVerifyResultNewUser).tempToken, 'temp_abc');
-
-      // State should still be unauthenticated
-      final state = container.read(authProvider);
-      expect(state.isAuthenticated, false);
-    });
-
-    test('login success updates state to authenticated', () async {
-      when(() => mockRepository.login('+27821234567', '1234')).thenAnswer(
-        (_) async => const Result.success(testAuthResponse),
-      );
-      when(() => mockStorage.saveTokens(testTokens)).thenAnswer((_) async {});
-      when(() => mockStorage.saveProfile(testProfile)).thenAnswer((_) async {});
-      when(() => mockStorage.savePhoneNumber('+27821234567'))
-          .thenAnswer((_) async {});
-      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
-      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-
-      final container = createContainer();
-      final notifier = container.read(authProvider.notifier);
-
-      // Wait for initial check
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      final result = await notifier.login('+27821234567', '1234');
-
-      expect(result.isSuccess, true);
-
-      final state = container.read(authProvider);
-      expect(state, isA<AuthStateAuthenticated>());
-      expect(state.profileOrNull?.phoneNumber, '+27821234567');
-
-      verify(() => mockStorage.saveTokens(testTokens)).called(1);
-      verify(() => mockStorage.saveProfile(testProfile)).called(1);
-      verify(() => mockStorage.savePhoneNumber('+27821234567')).called(1);
-    });
-
-    test('login failure updates state to error', () async {
-      when(() => mockRepository.login('+27821234567', '0000')).thenAnswer(
-        (_) async => const Result.failure(
-          AppError.unauthorized(message: 'Invalid PIN'),
-        ),
-      );
-      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
-      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-
-      final container = createContainer();
-      final notifier = container.read(authProvider.notifier);
-
-      // Wait for initial check
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      final result = await notifier.login('+27821234567', '0000');
-
-      expect(result.isFailure, true);
-
-      final state = container.read(authProvider);
-      expect(state, isA<AuthStateError>());
-      expect((state as AuthStateError).message, 'Invalid PIN');
-    });
-
     test('logout clears storage and updates state', () async {
       when(() => mockStorage.clearSession()).thenAnswer((_) async {});
       when(() => mockStorage.getTokens()).thenAnswer((_) async => testTokens);
@@ -281,12 +177,7 @@ void main() {
       verify(() => mockStorage.clearSession()).called(1);
     });
 
-    test('clearError returns to unauthenticated from error state', () async {
-      when(() => mockRepository.login('+27821234567', '0000')).thenAnswer(
-        (_) async => const Result.failure(
-          AppError.unauthorized(message: 'Invalid PIN'),
-        ),
-      );
+    test('clearError does nothing when not in error state', () async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
 
@@ -296,11 +187,10 @@ void main() {
       // Wait for initial check
       await Future.delayed(const Duration(milliseconds: 50));
 
-      // Trigger error state
-      await notifier.login('+27821234567', '0000');
-      expect(container.read(authProvider), isA<AuthStateError>());
+      // Should be unauthenticated
+      expect(container.read(authProvider), isA<AuthStateUnauthenticated>());
 
-      // Clear error
+      // Clear error (should do nothing since not in error state)
       notifier.clearError();
 
       final state = container.read(authProvider);
@@ -395,6 +285,308 @@ void main() {
       final isAuth = container.read(isAuthenticatedProvider);
       expect(isAuth, false);
       verify(() => mockStorage.clearSession()).called(1);
+    });
+  });
+
+  group('Email Authentication (Web Registration Flow)', () {
+    ProviderContainer createContainer() {
+      return ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(mockRepository),
+          secureStorageProvider.overrideWithValue(mockStorage),
+          authApiProvider.overrideWithValue(mockAuthApi),
+        ],
+      );
+    }
+
+    Future<void> waitForAuth(ProviderContainer container) async {
+      for (var i = 0; i < 20; i++) {
+        final state = container.read(authProvider);
+        if (!state.isLoading) return;
+        await Future.delayed(const Duration(milliseconds: 10));
+      }
+    }
+
+    test('loginWithEmail sets mustChangePassword state when required', () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+      when(
+        () => mockRepository.loginWithEmail(
+          email: 'test@example.com',
+          password: 'temppass123',
+        ),
+      ).thenAnswer((_) async => const Result.success(testMemberLoginResponseMustChange));
+      when(() => mockStorage.saveEmail('test@example.com')).thenAnswer((_) async {});
+      when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
+
+      final container = createContainer();
+      final notifier = container.read(authProvider.notifier);
+
+      await waitForAuth(container);
+
+      final result = await notifier.loginWithEmail('test@example.com', 'temppass123');
+
+      // Wait for async state updates to complete
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      expect(result.isSuccess, true);
+
+      final state = container.read(authProvider);
+      expect(state, isA<AuthStateMustChangePassword>());
+      expect(state.needsPasswordChange, true);
+      expect(state.memberId, 'member_456');
+
+      verify(() => mockStorage.saveEmail('test@example.com')).called(1);
+      verify(() => mockStorage.saveTokens(any())).called(1);
+    });
+
+    test('loginWithEmail sets pendingPinSetup when no PIN and no password change needed',
+        () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+      when(
+        () => mockRepository.loginWithEmail(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ).thenAnswer((_) async => const Result.success(testMemberLoginResponse));
+      when(() => mockStorage.saveEmail('test@example.com')).thenAnswer((_) async {});
+      when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
+      when(() => mockStorage.getPin()).thenAnswer((_) async => null);
+
+      final container = createContainer();
+      final notifier = container.read(authProvider.notifier);
+
+      await waitForAuth(container);
+
+      final result = await notifier.loginWithEmail('test@example.com', 'password123');
+
+      // Wait for async state updates to complete
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      expect(result.isSuccess, true);
+
+      final state = container.read(authProvider);
+      expect(state, isA<AuthStatePendingPinSetup>());
+      expect(state.needsPinSetup, true);
+      expect(state.memberId, 'member_456');
+    });
+
+    test('loginWithEmail completes to authenticated when PIN exists', () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+      when(
+        () => mockRepository.loginWithEmail(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ).thenAnswer((_) async => const Result.success(testMemberLoginResponse));
+      when(() => mockStorage.saveEmail('test@example.com')).thenAnswer((_) async {});
+      when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
+      when(() => mockStorage.getPin()).thenAnswer((_) async => '1234');
+      when(() => mockRepository.getMe())
+          .thenAnswer((_) async => const Result.success(testMemberProfileResponse));
+      when(() => mockStorage.saveProfile(any())).thenAnswer((_) async {});
+      when(() => mockAuthApi.getSector('sector_1')).thenAnswer((_) async => testSector);
+
+      final container = createContainer();
+      final notifier = container.read(authProvider.notifier);
+
+      await waitForAuth(container);
+
+      await notifier.loginWithEmail('test@example.com', 'password123');
+
+      // Wait for async profile fetch
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      final state = container.read(authProvider);
+      expect(state.isAuthenticated, true);
+      expect(state.profileOrNull?.firstName, 'John');
+    });
+
+    test('loginWithEmail returns failure result without changing auth state', () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+      when(
+        () => mockRepository.loginWithEmail(
+          email: 'test@example.com',
+          password: 'wrongpass',
+        ),
+      ).thenAnswer(
+        (_) async => const Result.failure(
+          AppError.unauthorized(message: 'Invalid credentials'),
+        ),
+      );
+
+      final container = createContainer();
+      final notifier = container.read(authProvider.notifier);
+
+      await waitForAuth(container);
+
+      // Verify initial state is unauthenticated
+      expect(container.read(authProvider), isA<AuthStateUnauthenticated>());
+
+      final result = await notifier.loginWithEmail('test@example.com', 'wrongpass');
+
+      // Result should be failure with error message
+      expect(result.isFailure, true);
+      expect(result.errorOrNull?.displayMessage, 'Invalid credentials');
+
+      // Auth state should remain unauthenticated (not change to error state)
+      // This allows the page to handle error display without router interference
+      final state = container.read(authProvider);
+      expect(state, isA<AuthStateUnauthenticated>());
+    });
+
+    test('changePassword transitions from mustChangePassword to pendingPinSetup',
+        () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+      when(
+        () => mockRepository.loginWithEmail(
+          email: 'test@example.com',
+          password: 'temppass123',
+        ),
+      ).thenAnswer((_) async => const Result.success(testMemberLoginResponseMustChange));
+      when(() => mockStorage.saveEmail('test@example.com')).thenAnswer((_) async {});
+      when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
+      when(
+        () => mockRepository.changePassword(
+          currentPassword: 'temppass123',
+          newPassword: 'NewPassword123!',
+        ),
+      ).thenAnswer((_) async => const Result.success(null));
+
+      final container = createContainer();
+      final notifier = container.read(authProvider.notifier);
+
+      await waitForAuth(container);
+
+      // First login with must change password
+      await notifier.loginWithEmail('test@example.com', 'temppass123');
+      // Wait for async state updates to complete
+      await Future.delayed(const Duration(milliseconds: 50));
+      expect(container.read(authProvider), isA<AuthStateMustChangePassword>());
+
+      // Change password
+      final result = await notifier.changePassword('temppass123', 'NewPassword123!');
+
+      expect(result.isSuccess, true);
+
+      final state = container.read(authProvider);
+      expect(state, isA<AuthStatePendingPinSetup>());
+      expect(state.needsPinSetup, true);
+    });
+
+    test('changePassword fails when not in mustChangePassword state', () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+
+      final container = createContainer();
+      final notifier = container.read(authProvider.notifier);
+
+      await waitForAuth(container);
+
+      // Should be unauthenticated
+      expect(container.read(authProvider), isA<AuthStateUnauthenticated>());
+
+      // Try to change password - should fail
+      final result = await notifier.changePassword('oldpass', 'newpass');
+
+      expect(result.isFailure, true);
+      expect(
+        result.errorOrNull?.displayMessage,
+        'Must be in password change state',
+      );
+    });
+
+    test('completePinSetup transitions to authenticated', () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+      when(
+        () => mockRepository.loginWithEmail(
+          email: 'test@example.com',
+          password: 'password123',
+        ),
+      ).thenAnswer((_) async => const Result.success(testMemberLoginResponse));
+      when(() => mockStorage.saveEmail('test@example.com')).thenAnswer((_) async {});
+      when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
+      when(() => mockStorage.getPin()).thenAnswer((_) async => null);
+      when(() => mockStorage.savePin('1234')).thenAnswer((_) async {});
+      when(() => mockRepository.getMe())
+          .thenAnswer((_) async => const Result.success(testMemberProfileResponse));
+      when(() => mockStorage.saveProfile(any())).thenAnswer((_) async {});
+      when(() => mockAuthApi.getSector('sector_1')).thenAnswer((_) async => testSector);
+
+      final container = createContainer();
+      final notifier = container.read(authProvider.notifier);
+
+      await waitForAuth(container);
+
+      // Login without PIN
+      await notifier.loginWithEmail('test@example.com', 'password123');
+      // Wait for async state updates to complete
+      await Future.delayed(const Duration(milliseconds: 50));
+      expect(container.read(authProvider), isA<AuthStatePendingPinSetup>());
+
+      // Complete PIN setup
+      await notifier.completePinSetup('1234');
+
+      // Wait for async profile fetch
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      final state = container.read(authProvider);
+      expect(state.isAuthenticated, true);
+      expect(state.profileOrNull?.firstName, 'John');
+
+      verify(() => mockStorage.savePin('1234')).called(1);
+    });
+
+    test('completePinSetup does nothing when not in pendingPinSetup state', () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+
+      final container = createContainer();
+      final notifier = container.read(authProvider.notifier);
+
+      await waitForAuth(container);
+
+      // Should be unauthenticated
+      expect(container.read(authProvider), isA<AuthStateUnauthenticated>());
+
+      // Try to complete PIN setup - should do nothing
+      await notifier.completePinSetup('1234');
+
+      // State should still be unauthenticated
+      expect(container.read(authProvider), isA<AuthStateUnauthenticated>());
+
+      verifyNever(() => mockStorage.savePin(any()));
+    });
+
+    test('storedEmailProvider returns stored email', () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+      when(() => mockStorage.getEmail()).thenAnswer((_) async => 'saved@example.com');
+
+      final container = createContainer();
+
+      await waitForAuth(container);
+
+      final email = await container.read(storedEmailProvider.future);
+      expect(email, 'saved@example.com');
+    });
+
+    test('storedEmailProvider returns null when no email stored', () async {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+      when(() => mockStorage.getEmail()).thenAnswer((_) async => null);
+
+      final container = createContainer();
+
+      await waitForAuth(container);
+
+      final email = await container.read(storedEmailProvider.future);
+      expect(email, isNull);
     });
   });
 }
