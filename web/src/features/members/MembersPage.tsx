@@ -1,17 +1,20 @@
-import { type FC, useCallback, useState } from 'react';
+import { type FC, useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Badge from '@mui/material/Badge';
+import Typography from '@mui/material/Typography';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { Breadcrumbs } from '@/components/molecules/Breadcrumbs';
 import { ErrorState } from '@/components/molecules/ErrorState';
-import { LoadingSkeleton } from '@/components/molecules/LoadingSkeleton';
 import { EmptyState } from '@/components/molecules/EmptyState';
-import { Pagination } from '@/components/molecules/Pagination';
+import { MemberStatusBadge } from '@/components/molecules/MemberStatusBadge';
+import {
+  DataTableCard,
+  type DataTableTab,
+} from '@/components/organisms/DataTableCard';
+import type { Column } from '@/components/organisms/DataTable';
 import type { MemberStatus } from '@/features/auth/types';
 import {
   useMembers,
@@ -19,11 +22,13 @@ import {
   useRejectMember,
   usePendingMemberCount,
 } from './hooks';
-import { MembersTable } from './components/MembersTable';
 import { MemberApprovalDialog } from './components/MemberApprovalDialog';
+import { MemberNameCell } from './components/MemberNameCell';
+import { MemberActionButtons } from './components/MemberActionButtons';
 import type { MemberListItem } from './types';
 
-const PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [5, 10, 20] as const;
 
 type StatusFilter = 'all' | MemberStatus;
 
@@ -31,23 +36,23 @@ export const MembersPage: FC = () => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // State
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
-    (searchParams.get('status') as StatusFilter) || 'all'
-  );
+  // URL state
+  const statusFilter = (searchParams.get('status') as StatusFilter) || 'all';
+  const currentPage = Number(searchParams.get('page')) || 1;
+  const pageSize =
+    Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE;
+
+  // Dialog state
   const [approvalDialog, setApprovalDialog] = useState<{
     open: boolean;
     action: 'approve' | 'reject';
     member: MemberListItem | null;
   }>({ open: false, action: 'approve', member: null });
 
-  // Pagination
-  const currentPage = Number(searchParams.get('page')) || 1;
-
   // Data fetching
   const { data, isLoading, error, refetch } = useMembers({
     page: currentPage,
-    limit: PAGE_SIZE,
+    limit: pageSize,
     status: statusFilter === 'all' ? undefined : statusFilter,
   });
 
@@ -58,31 +63,45 @@ export const MembersPage: FC = () => {
   const approveMutation = useApproveMember();
   const rejectMutation = useRejectMember();
 
-  // Handlers
+  // Tab change handler
+  const handleTabChange = useCallback(
+    (newValue: StatusFilter) => {
+      setSearchParams((prev) => {
+        prev.set('page', '1');
+        if (newValue === 'all') {
+          prev.delete('status');
+        } else {
+          prev.set('status', newValue);
+        }
+        return prev;
+      });
+    },
+    [setSearchParams]
+  );
+
+  // Pagination handlers
   const handlePageChange = useCallback(
     (page: number) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', String(page));
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        prev.set('page', String(page));
+        return prev;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
-  const handleStatusFilterChange = useCallback(
-    (_: React.SyntheticEvent, newValue: StatusFilter) => {
-      setStatusFilter(newValue);
-      const params = new URLSearchParams(searchParams);
-      params.set('page', '1');
-      if (newValue === 'all') {
-        params.delete('status');
-      } else {
-        params.set('status', newValue);
-      }
-      setSearchParams(params);
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => {
+      setSearchParams((prev) => {
+        prev.set('pageSize', String(newPageSize));
+        prev.set('page', '1');
+        return prev;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
+  // Approval handlers
   const handleApproveClick = useCallback((member: MemberListItem) => {
     setApprovalDialog({ open: true, action: 'approve', member });
   }, []);
@@ -109,6 +128,157 @@ export const MembersPage: FC = () => {
     setApprovalDialog({ open: false, action: 'approve', member: null });
   }, []);
 
+  // Date formatter
+  const formatDate = useCallback((dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }, []);
+
+  // Tab configuration
+  const tabs = useMemo<DataTableTab<StatusFilter>[]>(
+    () => [
+      {
+        value: 'all',
+        label: t('members.filterAll'),
+      },
+      {
+        value: 'pending_approval',
+        label: t('members.filterPending'),
+        badge: pendingCount,
+        badgeColor: 'warning',
+      },
+      {
+        value: 'active',
+        label: t('members.filterActive'),
+      },
+      {
+        value: 'suspended',
+        label: t('members.filterSuspended'),
+      },
+    ],
+    [t, pendingCount]
+  );
+
+  // Column configuration
+  const columns = useMemo<Column<MemberListItem>[]>(
+    () => [
+      {
+        key: 'name',
+        header: t('members.name'),
+        render: (member) => <MemberNameCell member={member} />,
+      },
+      {
+        key: 'phone',
+        header: t('members.phone'),
+        width: '140px',
+        render: (member) => (
+          <Typography variant="body2" color="text.secondary">
+            {member.phoneNumber}
+          </Typography>
+        ),
+      },
+      {
+        key: 'address',
+        header: t('members.address'),
+        render: (member) => (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              maxWidth: 200,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            title={member.address}
+          >
+            {member.address}
+          </Typography>
+        ),
+      },
+      {
+        key: 'status',
+        header: t('members.status'),
+        width: '140px',
+        render: (member) => <MemberStatusBadge status={member.status} />,
+      },
+      {
+        key: 'issuesReported',
+        header: t('members.issuesReported'),
+        width: '100px',
+        align: 'center',
+        render: (member) => (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 0.5,
+              color: 'text.secondary',
+            }}
+          >
+            <AssignmentIcon sx={{ fontSize: 16 }} />
+            <Typography variant="body2">{member.issueCount}</Typography>
+          </Box>
+        ),
+      },
+      {
+        key: 'joinedAt',
+        header: t('members.joinedAt'),
+        width: '130px',
+        render: (member) => (
+          <Typography variant="body2" color="text.secondary">
+            {formatDate(member.joinedAt)}
+          </Typography>
+        ),
+      },
+      // Actions column - only show when filtering shows pending members
+      ...(statusFilter === 'pending_approval' || statusFilter === 'all'
+        ? [
+            {
+              key: 'actions',
+              header: t('members.actions'),
+              width: '120px',
+              align: 'center' as const,
+              render: (member: MemberListItem) =>
+                member.status === 'pending_approval' ? (
+                  <MemberActionButtons
+                    onApprove={() => handleApproveClick(member)}
+                    onReject={() => handleRejectClick(member)}
+                  />
+                ) : null,
+            },
+          ]
+        : []),
+    ],
+    [t, formatDate, statusFilter, handleApproveClick, handleRejectClick]
+  );
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <Breadcrumbs
+          title={t('members.title')}
+          items={[
+            { label: t('dashboard.title'), path: '/', icon: 'home' },
+            { label: t('members.title') },
+          ]}
+        />
+        <Box sx={{ mt: 3 }}>
+          <ErrorState
+            title={t('common.error')}
+            description={t('errors.serverError')}
+            onRetry={() => refetch()}
+          />
+        </Box>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <Breadcrumbs
@@ -119,76 +289,36 @@ export const MembersPage: FC = () => {
         ]}
       />
 
-      {/* Status Filter Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
-        <Tabs
-          value={statusFilter}
-          onChange={handleStatusFilterChange}
-          aria-label={t('members.filterByStatus')}
-        >
-          <Tab value="all" label={t('members.filterAll')} />
-          <Tab
-            value="pending_approval"
-            label={
-              <Badge
-                badgeContent={pendingCount}
-                color="warning"
-                sx={{ '& .MuiBadge-badge': { right: -10, top: 0 } }}
-              >
-                {t('members.filterPending')}
-              </Badge>
-            }
-          />
-          <Tab value="active" label={t('members.filterActive')} />
-          <Tab value="suspended" label={t('members.filterSuspended')} />
-        </Tabs>
-      </Box>
-
-      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {isLoading && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <LoadingSkeleton variant="rect" height={400} />
-          </Box>
-        )}
-
-        {error && (
-          <ErrorState
-            title={t('common.error')}
-            description={t('errors.serverError')}
-            onRetry={() => refetch()}
-          />
-        )}
-
-        {data?.items.length === 0 && (
-          <EmptyState
-            title={t('members.noMembers')}
-            description={
-              statusFilter === 'pending_approval'
-                ? t('members.noPendingMembers')
-                : t('members.noMembersDescription')
-            }
-          />
-        )}
-
-        {data && data.items.length > 0 && (
-          <>
-            <MembersTable
-              members={data.items}
-              showApprovalActions={
-                statusFilter === 'pending_approval' || statusFilter === 'all'
+      <Box sx={{ mt: 3 }}>
+        <DataTableCard
+          columns={columns}
+          data={data?.items ?? []}
+          keyExtractor={(member) => member.id}
+          totalItems={data?.pagination.totalItems ?? 0}
+          currentPage={data?.pagination.page ?? currentPage}
+          pageSize={data?.pagination.limit ?? pageSize}
+          pageSizeOptions={PAGE_SIZE_OPTIONS}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          isLoading={isLoading}
+          hideToolbarWhenEmpty
+          tabs={{
+            tabs,
+            value: statusFilter,
+            onChange: handleTabChange,
+            ariaLabel: t('members.filterByStatus'),
+          }}
+          emptyMessage={
+            <EmptyState
+              title={t('members.noMembers')}
+              description={
+                statusFilter === 'pending_approval'
+                  ? t('members.noPendingMembers')
+                  : t('members.noMembersDescription')
               }
-              onApprove={handleApproveClick}
-              onReject={handleRejectClick}
             />
-            <Pagination
-              currentPage={data.pagination.page}
-              totalPages={data.pagination.totalPages}
-              totalItems={data.pagination.totalItems}
-              pageSize={data.pagination.limit}
-              onPageChange={handlePageChange}
-            />
-          </>
-        )}
+          }
+        />
       </Box>
 
       {/* Approval Confirmation Dialog */}

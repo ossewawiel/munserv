@@ -94,6 +94,7 @@ i18n.init({
           showing: 'Showing',
           to: 'to',
           results: 'results',
+          rowsPerPage: 'Rows per page',
         },
       },
     },

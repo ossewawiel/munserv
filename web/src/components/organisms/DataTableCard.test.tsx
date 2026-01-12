@@ -354,4 +354,451 @@ describe('DataTableCard', () => {
       expect(toolbar).toBeInTheDocument();
     });
   });
+
+  describe('tabs functionality', () => {
+    describe('tab rendering', () => {
+      it('should render tabs when tabs config is provided', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                { value: 'active', label: 'Active' },
+                { value: 'pending', label: 'Pending' },
+              ],
+            }}
+          />
+        );
+
+        expect(screen.getByRole('tablist')).toBeInTheDocument();
+        expect(screen.getByRole('tab', { name: 'All' })).toBeInTheDocument();
+        expect(screen.getByRole('tab', { name: 'Active' })).toBeInTheDocument();
+        expect(screen.getByRole('tab', { name: 'Pending' })).toBeInTheDocument();
+      });
+
+      it('should render tab badges when provided', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                { value: 'pending', label: 'Pending', badge: 5, badgeColor: 'warning' },
+              ],
+            }}
+          />
+        );
+
+        // Badge should be rendered with content "5"
+        expect(screen.getByText('5')).toBeInTheDocument();
+      });
+
+      it('should not render tabs section when tabs prop is undefined', () => {
+        const { container } = renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+          />
+        );
+
+        expect(container.querySelector('[data-testid="datatable-tabs"]')).not.toBeInTheDocument();
+        expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+      });
+
+      it('should render disabled tabs correctly', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                { value: 'archived', label: 'Archived', disabled: true },
+              ],
+            }}
+          />
+        );
+
+        const archivedTab = screen.getByRole('tab', { name: 'Archived' });
+        expect(archivedTab).toBeDisabled();
+      });
+    });
+
+    describe('tab state management', () => {
+      it('should support controlled mode with value prop', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                { value: 'active', label: 'Active' },
+              ],
+              value: 'active',
+            }}
+          />
+        );
+
+        // Active tab should be selected
+        const activeTab = screen.getByRole('tab', { name: 'Active' });
+        expect(activeTab).toHaveAttribute('aria-selected', 'true');
+      });
+
+      it('should support uncontrolled mode with defaultValue', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                { value: 'active', label: 'Active' },
+              ],
+              defaultValue: 'active',
+            }}
+          />
+        );
+
+        const activeTab = screen.getByRole('tab', { name: 'Active' });
+        expect(activeTab).toHaveAttribute('aria-selected', 'true');
+      });
+
+      it('should select first tab by default when no value or defaultValue', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                { value: 'active', label: 'Active' },
+              ],
+            }}
+          />
+        );
+
+        const allTab = screen.getByRole('tab', { name: 'All' });
+        expect(allTab).toHaveAttribute('aria-selected', 'true');
+      });
+
+      it('should call onChange when tab is clicked', () => {
+        const onChange = vi.fn();
+
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                { value: 'active', label: 'Active' },
+              ],
+              value: 'all',
+              onChange,
+            }}
+          />
+        );
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Active' }));
+        expect(onChange).toHaveBeenCalledWith('active');
+      });
+
+      it('should update internal state in uncontrolled mode when tab clicked', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                { value: 'active', label: 'Active' },
+              ],
+            }}
+          />
+        );
+
+        // Initial state - first tab selected
+        expect(screen.getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'true');
+
+        // Click second tab
+        fireEvent.click(screen.getByRole('tab', { name: 'Active' }));
+
+        // Should now be selected
+        expect(screen.getByRole('tab', { name: 'Active' })).toHaveAttribute('aria-selected', 'true');
+      });
+    });
+
+    describe('slot resolution', () => {
+      it('should show tab-specific filterSlot when active tab has one', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            filterSlot={<div data-testid="default-filter">Default Filter</div>}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                {
+                  value: 'active',
+                  label: 'Active',
+                  filterSlot: <div data-testid="active-filter">Active Filter</div>,
+                },
+              ],
+              value: 'active',
+            }}
+          />
+        );
+
+        // Should show tab-specific filter, not default
+        expect(screen.getByTestId('active-filter')).toBeInTheDocument();
+        expect(screen.queryByTestId('default-filter')).not.toBeInTheDocument();
+      });
+
+      it('should fall back to default filterSlot when tab has none', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            filterSlot={<div data-testid="default-filter">Default Filter</div>}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                { value: 'active', label: 'Active' },
+              ],
+              value: 'all',
+            }}
+          />
+        );
+
+        // Should show default filter since "all" tab has no filterSlot
+        expect(screen.getByTestId('default-filter')).toBeInTheDocument();
+      });
+
+      it('should show tab-specific actionSlot when active tab has one', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            actionSlot={<button data-testid="default-action">Default Action</button>}
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                {
+                  value: 'pending',
+                  label: 'Pending',
+                  actionSlot: <button data-testid="pending-action">Approve All</button>,
+                },
+              ],
+              value: 'pending',
+            }}
+          />
+        );
+
+        // Should show tab-specific action, not default
+        expect(screen.getByTestId('pending-action')).toBeInTheDocument();
+        expect(screen.queryByTestId('default-action')).not.toBeInTheDocument();
+      });
+
+      it('should switch filterSlot content when tab changes in uncontrolled mode', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            tabs={{
+              tabs: [
+                {
+                  value: 'all',
+                  label: 'All',
+                  filterSlot: <div data-testid="all-filter">All Filter</div>,
+                },
+                {
+                  value: 'active',
+                  label: 'Active',
+                  filterSlot: <div data-testid="active-filter">Active Filter</div>,
+                },
+              ],
+            }}
+          />
+        );
+
+        // Initially shows "all" tab filter
+        expect(screen.getByTestId('all-filter')).toBeInTheDocument();
+        expect(screen.queryByTestId('active-filter')).not.toBeInTheDocument();
+
+        // Click "active" tab
+        fireEvent.click(screen.getByRole('tab', { name: 'Active' }));
+
+        // Now shows "active" tab filter
+        expect(screen.getByTestId('active-filter')).toBeInTheDocument();
+        expect(screen.queryByTestId('all-filter')).not.toBeInTheDocument();
+      });
+
+      it('should hide toolbar when hideToolbarWhenEmpty and no slots for active tab', () => {
+        const { container } = renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            hideToolbarWhenEmpty
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                {
+                  value: 'active',
+                  label: 'Active',
+                  filterSlot: <div>Active Filter</div>,
+                },
+              ],
+              value: 'all', // "all" tab has no slots
+            }}
+          />
+        );
+
+        // Toolbar should not be present for "all" tab
+        const toolbar = container.querySelector('[data-testid="datatable-toolbar"]');
+        expect(toolbar).not.toBeInTheDocument();
+      });
+
+      it('should show toolbar when active tab has filterSlot even with hideToolbarWhenEmpty', () => {
+        const { container } = renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            hideToolbarWhenEmpty
+            tabs={{
+              tabs: [
+                { value: 'all', label: 'All' },
+                {
+                  value: 'active',
+                  label: 'Active',
+                  filterSlot: <div>Active Filter</div>,
+                },
+              ],
+              value: 'active', // "active" tab has filterSlot
+            }}
+          />
+        );
+
+        // Toolbar should be present for "active" tab
+        const toolbar = container.querySelector('[data-testid="datatable-toolbar"]');
+        expect(toolbar).toBeInTheDocument();
+      });
+    });
+
+    describe('backward compatibility', () => {
+      it('should work with filterSlot and actionSlot when no tabs provided', () => {
+        renderWithProviders(
+          <DataTableCard
+            columns={mockColumns}
+            data={mockData}
+            keyExtractor={(item) => item.id}
+            totalItems={3}
+            currentPage={1}
+            pageSize={10}
+            onPageChange={vi.fn()}
+            onPageSizeChange={vi.fn()}
+            filterSlot={<div data-testid="legacy-filter">Filter</div>}
+            actionSlot={<button data-testid="legacy-action">Export</button>}
+          />
+        );
+
+        expect(screen.getByTestId('legacy-filter')).toBeInTheDocument();
+        expect(screen.getByTestId('legacy-action')).toBeInTheDocument();
+        expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+      });
+    });
+  });
 });

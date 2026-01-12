@@ -1,11 +1,14 @@
-import { type ReactNode, useCallback } from 'react';
+import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import MuiPagination from '@mui/material/Pagination';
 import Select, { type SelectChangeEvent } from '@mui/material/Select';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
 import { MainCard } from '@/components/atoms/MainCard';
@@ -14,7 +17,50 @@ import { DataTable, type Column } from './DataTable';
 
 const DEFAULT_PAGE_SIZE_OPTIONS = [5, 10, 20] as const;
 
-export interface DataTableCardProps<T> {
+/**
+ * Configuration for a single tab in DataTableCard
+ */
+export interface DataTableTab<TValue extends string = string> {
+  /** Unique identifier for the tab (used as value) */
+  readonly value: TValue;
+  /** Display label for the tab */
+  readonly label: ReactNode;
+  /** Optional badge content (e.g., count) */
+  readonly badge?: number | string;
+  /** Badge color variant */
+  readonly badgeColor?:
+    | 'default'
+    | 'primary'
+    | 'secondary'
+    | 'error'
+    | 'info'
+    | 'success'
+    | 'warning';
+  /** Content for left side of toolbar (filters, search) when this tab is active */
+  readonly filterSlot?: ReactNode;
+  /** Content for right side of toolbar (action buttons) when this tab is active */
+  readonly actionSlot?: ReactNode;
+  /** Whether the tab is disabled */
+  readonly disabled?: boolean;
+}
+
+/**
+ * Configuration for the tabs section of DataTableCard
+ */
+export interface DataTableTabsConfig<TValue extends string = string> {
+  /** Array of tab configurations */
+  readonly tabs: readonly DataTableTab<TValue>[];
+  /** Currently active tab value (controlled mode) */
+  readonly value?: TValue;
+  /** Default active tab value (uncontrolled mode) */
+  readonly defaultValue?: TValue;
+  /** Callback when tab changes */
+  readonly onChange?: (value: TValue) => void;
+  /** Accessibility label for the tabs container */
+  readonly ariaLabel?: string;
+}
+
+export interface DataTableCardProps<T, TTabValue extends string = string> {
   /** Table columns configuration */
   readonly columns: readonly Column<T>[];
   /** Data to display */
@@ -35,9 +81,17 @@ export interface DataTableCardProps<T> {
   readonly onPageSizeChange: (pageSize: number) => void;
   /** Optional callback when row is clicked */
   readonly onRowClick?: (item: T) => void;
-  /** Content for left side of toolbar (filters, search) */
+  /**
+   * Content for left side of toolbar (filters, search).
+   * When tabs are present, this serves as the DEFAULT filter slot
+   * shown when no tab-specific filterSlot is defined.
+   */
   readonly filterSlot?: ReactNode;
-  /** Content for right side of toolbar (action buttons) */
+  /**
+   * Content for right side of toolbar (action buttons).
+   * When tabs are present, this serves as the DEFAULT action slot
+   * shown when no tab-specific actionSlot is defined.
+   */
   readonly actionSlot?: ReactNode;
   /** Message to display when data is empty */
   readonly emptyMessage?: ReactNode;
@@ -47,6 +101,8 @@ export interface DataTableCardProps<T> {
   readonly hideToolbarWhenEmpty?: boolean;
   /** Card title (optional) */
   readonly title?: ReactNode;
+  /** Tab configuration - when provided, tabs appear above the toolbar */
+  readonly tabs?: DataTableTabsConfig<TTabValue>;
 }
 
 interface PaginationFooterProps {
@@ -144,7 +200,7 @@ function PaginationFooter({
   );
 }
 
-export function DataTableCard<T>({
+export function DataTableCard<T, TTabValue extends string = string>({
   columns,
   data,
   keyExtractor,
@@ -155,14 +211,45 @@ export function DataTableCard<T>({
   onPageChange,
   onPageSizeChange,
   onRowClick,
-  filterSlot,
-  actionSlot,
+  filterSlot: defaultFilterSlot,
+  actionSlot: defaultActionSlot,
   emptyMessage,
   isLoading = false,
   hideToolbarWhenEmpty = false,
   title,
-}: DataTableCardProps<T>) {
-  const showToolbar = !hideToolbarWhenEmpty || filterSlot || actionSlot;
+  tabs,
+}: DataTableCardProps<T, TTabValue>) {
+  // Tab state management (uncontrolled mode)
+  const [internalTabValue, setInternalTabValue] = useState<TTabValue | undefined>(
+    tabs?.defaultValue ?? tabs?.tabs[0]?.value
+  );
+
+  // Determine if controlled or uncontrolled
+  const isControlled = tabs?.value !== undefined;
+  const activeTabValue = isControlled ? tabs.value : internalTabValue;
+
+  // Find active tab configuration
+  const activeTab = useMemo(
+    () => tabs?.tabs.find((tab) => tab.value === activeTabValue),
+    [tabs?.tabs, activeTabValue]
+  );
+
+  // Handle tab change
+  const handleTabChange = useCallback(
+    (_event: React.SyntheticEvent, newValue: TTabValue) => {
+      if (!isControlled) {
+        setInternalTabValue(newValue);
+      }
+      tabs?.onChange?.(newValue);
+    },
+    [isControlled, tabs]
+  );
+
+  // Resolve which filter/action slots to show (tab-specific overrides default)
+  const resolvedFilterSlot = activeTab?.filterSlot ?? defaultFilterSlot;
+  const resolvedActionSlot = activeTab?.actionSlot ?? defaultActionSlot;
+
+  const showToolbar = !hideToolbarWhenEmpty || resolvedFilterSlot || resolvedActionSlot;
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
@@ -171,6 +258,39 @@ export function DataTableCard<T>({
       divider={!!title}
       contentSx={{ p: 0, '&:last-child': { pb: 0 } }}
     >
+      {/* Tabs Section */}
+      {tabs && (
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs
+            value={activeTabValue}
+            onChange={handleTabChange}
+            aria-label={tabs.ariaLabel}
+            data-testid="datatable-tabs"
+          >
+            {tabs.tabs.map((tab) => (
+              <Tab
+                key={tab.value}
+                value={tab.value}
+                disabled={tab.disabled}
+                label={
+                  tab.badge !== undefined ? (
+                    <Badge
+                      badgeContent={tab.badge}
+                      color={tab.badgeColor ?? 'primary'}
+                      sx={{ '& .MuiBadge-badge': { right: -12, top: 0 } }}
+                    >
+                      {tab.label}
+                    </Badge>
+                  ) : (
+                    tab.label
+                  )
+                }
+              />
+            ))}
+          </Tabs>
+        </Box>
+      )}
+
       {/* Toolbar */}
       {showToolbar && (
         <>
@@ -187,13 +307,13 @@ export function DataTableCard<T>({
           >
             {/* Filter slot - left side */}
             <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
-              {filterSlot}
+              {resolvedFilterSlot}
             </Box>
 
             {/* Action slot - right side */}
-            {actionSlot && (
+            {resolvedActionSlot && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {actionSlot}
+                {resolvedActionSlot}
               </Box>
             )}
           </Box>
