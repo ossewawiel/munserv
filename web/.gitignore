@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test reports and coverage
+playwright-report/
+screenshots/
+coverage/
+
+# SonarQube
+.scannerwork/
+
+# Windows Zone.Identifier files
+*.Zone.Identifier
