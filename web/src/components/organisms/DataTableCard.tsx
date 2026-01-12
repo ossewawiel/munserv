@@ -272,12 +272,25 @@ export function DataTableCard<T, TTabValue extends string = string>({
                 key={tab.value}
                 value={tab.value}
                 disabled={tab.disabled}
+                sx={
+                  tab.badge !== undefined
+                    ? { pr: 4, minWidth: 'auto' } // Extra padding for badge
+                    : undefined
+                }
                 label={
                   tab.badge !== undefined ? (
                     <Badge
                       badgeContent={tab.badge}
                       color={tab.badgeColor ?? 'primary'}
-                      sx={{ '& .MuiBadge-badge': { right: -12, top: 0 } }}
+                      sx={{
+                        '& .MuiBadge-badge': {
+                          right: -16,
+                          top: 2,
+                          minWidth: 20,
+                          height: 20,
+                          fontSize: '0.75rem',
+                        },
+                      }}
                     >
                       {tab.label}
                     </Badge>
