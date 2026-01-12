@@ -227,7 +227,7 @@ export function createPodTheme(config: PodThemeConfig) {
       MuiDialog: {
         styleOverrides: {
           paper: {
-            borderRadius: 28,
+            borderRadius: 8, // Consistent with buttons, inputs, and cards
           },
         },
       },
