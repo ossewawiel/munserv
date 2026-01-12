@@ -48,11 +48,13 @@ Dio dio(Ref ref) {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
-        // Skip auth header for auth endpoints
+        // Skip auth header for public auth endpoints only
         final path = options.path;
-        final isAuthEndpoint = path.contains('/auth/');
+        final isPublicAuthEndpoint = path.contains('/auth/member/login') ||
+            path.contains('/auth/refresh') ||
+            path.contains('/auth/admin/login');
 
-        if (!isAuthEndpoint) {
+        if (!isPublicAuthEndpoint) {
           final token = await storage.read(key: SecureStorageKeys.accessToken);
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
