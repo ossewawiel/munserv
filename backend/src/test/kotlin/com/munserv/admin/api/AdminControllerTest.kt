@@ -217,6 +217,189 @@ class AdminControllerTest {
                     content.contains("\"pagination\"") shouldBe true
                 }
         }
+
+        @Test
+        fun `GET api-v1-admin-members should filter by status when provided`() {
+            mockMvc
+                .get("/api/v1/admin/members") {
+                    header("Authorization", "Bearer $adminToken")
+                    param("sectorId", testSectorId)
+                    param("status", "active")
+                    accept = MediaType.APPLICATION_JSON
+                }
+                .andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.items") { isArray() }
+                    jsonPath("$.pagination.totalItems") { isNumber() }
+                }
+                .andReturn()
+                .let { result ->
+                    val content = result.response.contentAsString
+                    // All returned members should have active status
+                    if (content.contains("\"status\":")) {
+                        content.contains("\"status\":\"active\"") shouldBe true
+                        content.contains("\"status\":\"pending_approval\"") shouldBe false
+                    }
+                }
+        }
+
+        @Test
+        fun `GET api-v1-admin-members should filter by pending_approval status`() {
+            mockMvc
+                .get("/api/v1/admin/members") {
+                    header("Authorization", "Bearer $adminToken")
+                    param("sectorId", testSectorId)
+                    param("status", "pending_approval")
+                    accept = MediaType.APPLICATION_JSON
+                }
+                .andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.items") { isArray() }
+                }
+        }
+
+        @Test
+        fun `GET api-v1-admin-members should return 400 for invalid status`() {
+            mockMvc
+                .get("/api/v1/admin/members") {
+                    header("Authorization", "Bearer $adminToken")
+                    param("sectorId", testSectorId)
+                    param("status", "invalid_status")
+                    accept = MediaType.APPLICATION_JSON
+                }
+                .andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.error") { value("invalid_status") }
+                    jsonPath("$.message") { isNotEmpty() }
+                }
+        }
+
+        @Test
+        fun `GET api-v1-admin-members should return all members when status not provided`() {
+            // First get total without filter
+            val resultWithoutFilter =
+                mockMvc
+                    .get("/api/v1/admin/members") {
+                        header("Authorization", "Bearer $adminToken")
+                        param("sectorId", testSectorId)
+                        accept = MediaType.APPLICATION_JSON
+                    }
+                    .andExpect {
+                        status { isOk() }
+                    }
+                    .andReturn()
+
+            val contentWithoutFilter = resultWithoutFilter.response.contentAsString
+            contentWithoutFilter.contains("\"totalItems\"") shouldBe true
+        }
+
+        @Test
+        fun `GET api-v1-admin-members should apply pagination with status filter`() {
+            mockMvc
+                .get("/api/v1/admin/members") {
+                    header("Authorization", "Bearer $adminToken")
+                    param("sectorId", testSectorId)
+                    param("status", "active")
+                    param("page", "1")
+                    param("limit", "5")
+                    accept = MediaType.APPLICATION_JSON
+                }
+                .andExpect {
+                    status { isOk() }
+                    jsonPath("$.pagination.page") { value(1) }
+                    jsonPath("$.pagination.limit") { value(5) }
+                }
+        }
+
+        @Test
+        fun `GET api-v1-admin-members filtered counts should sum to total unfiltered count`() {
+            val objectMapper = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
+
+            // Get total count without filter
+            val totalResult =
+                mockMvc
+                    .get("/api/v1/admin/members") {
+                        header("Authorization", "Bearer $adminToken")
+                        param("sectorId", testSectorId)
+                        param("limit", "1")
+                        accept = MediaType.APPLICATION_JSON
+                    }
+                    .andExpect { status { isOk() } }
+                    .andReturn()
+            val totalJson = objectMapper.readTree(totalResult.response.contentAsString)
+            val totalCount = totalJson.get("pagination").get("totalItems").asInt()
+
+            // Get count for each status
+            val statuses = listOf("active", "pending_approval", "suspended", "deleted")
+            var sumOfFilteredCounts = 0
+
+            for (status in statuses) {
+                val result =
+                    mockMvc
+                        .get("/api/v1/admin/members") {
+                            header("Authorization", "Bearer $adminToken")
+                            param("sectorId", testSectorId)
+                            param("status", status)
+                            param("limit", "1")
+                            accept = MediaType.APPLICATION_JSON
+                        }
+                        .andExpect { status { isOk() } }
+                        .andReturn()
+                val json = objectMapper.readTree(result.response.contentAsString)
+                sumOfFilteredCounts += json.get("pagination").get("totalItems").asInt()
+            }
+
+            // Sum of all filtered counts should equal total
+            sumOfFilteredCounts shouldBe totalCount
+        }
+
+        @Test
+        fun `GET api-v1-admin-members filtered by status should return only members with that status`() {
+            val objectMapper = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
+
+            // Test that all items returned for active filter have active status
+            val result =
+                mockMvc
+                    .get("/api/v1/admin/members") {
+                        header("Authorization", "Bearer $adminToken")
+                        param("sectorId", testSectorId)
+                        param("status", "active")
+                        param("limit", "100")
+                        accept = MediaType.APPLICATION_JSON
+                    }
+                    .andExpect { status { isOk() } }
+                    .andReturn()
+
+            val json = objectMapper.readTree(result.response.contentAsString)
+            val items = json.get("items")
+
+            // Verify all items have the expected status
+            for (item in items) {
+                item.get("status").asText() shouldBe "active"
+            }
+
+            // Test pending_approval filter
+            val pendingResult =
+                mockMvc
+                    .get("/api/v1/admin/members") {
+                        header("Authorization", "Bearer $adminToken")
+                        param("sectorId", testSectorId)
+                        param("status", "pending_approval")
+                        param("limit", "100")
+                        accept = MediaType.APPLICATION_JSON
+                    }
+                    .andExpect { status { isOk() } }
+                    .andReturn()
+
+            val pendingJson = objectMapper.readTree(pendingResult.response.contentAsString)
+            val pendingItems = pendingJson.get("items")
+
+            for (item in pendingItems) {
+                item.get("status").asText() shouldBe "pending_approval"
+            }
+        }
     }
 
     @Nested
