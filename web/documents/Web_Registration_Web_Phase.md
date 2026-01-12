@@ -2,7 +2,7 @@
 
 **Feature:** Member Registration via Web with Admin Approval
 **Phase:** Web Admin (2 of 3)
-**Status:** Ready for Implementation
+**Status:** ✅ Complete (2026-01-12)
 **Dependencies:** Backend Phase must be completed first
 
 ---
@@ -1500,7 +1500,11 @@ Use this checklist with `/dev-cycle` for implementation:
 - [x] Write tests for MembersPage (updated) ✅ (2026-01-09 - 12 tests)
 - [x] Write tests for MemberApprovalDialog ✅ (2026-01-09 - 16 tests)
 - [x] Write tests for MembersTable ✅ (2026-01-09 - 14 tests)
-- [ ] E2E test for registration flow
+- [x] Write tests for auth/api.ts ✅ (2026-01-09 - 9 tests)
+- [x] Write tests for members/api.ts ✅ (2026-01-09 - 15 tests)
+- [x] Write tests for auth/hooks.ts ✅ (2026-01-09 - 10 tests)
+- [x] Write tests for members/hooks.ts ✅ (2026-01-09 - 19 tests)
+- [x] E2E test for registration flow ✅ (2026-01-12 - 13 tests)
 
 ---
 
