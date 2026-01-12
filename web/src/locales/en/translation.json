@@ -150,6 +150,19 @@
     "noMembersDescription": "No members match your current filters.",
     "noPendingMembers": "No pending registrations to review"
   },
+  "profile": {
+    "menuTrigger": "Profile menu",
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "mood": "Mood",
+    "moodLight": "Light",
+    "moodDark": "Dark",
+    "moodSystem": "System",
+    "language": "Language"
+  },
   "reports": {
     "title": "Reports"
   },

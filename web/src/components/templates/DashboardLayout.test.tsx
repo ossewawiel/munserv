@@ -34,14 +34,33 @@ vi.mock('@/features/auth/hooks', () => ({
   }),
 }));
 
+// Mock i18n constants
+vi.mock('@/lib/i18n', () => ({
+  SUPPORTED_LANGUAGES: ['en'] as const,
+  LANGUAGE_NAMES: { en: 'English' },
+}));
+
 // Initialize i18next for tests
 i18n.init({
   lng: 'en',
   resources: {
     en: {
       translation: {
-        common: { appName: 'MunServ Admin' },
+        common: { appName: 'MunServ Admin', loading: 'Loading...' },
         auth: { logout: 'Logout' },
+        profile: {
+          menuTrigger: 'Profile menu',
+          greeting: {
+            morning: 'Good morning',
+            afternoon: 'Good afternoon',
+            evening: 'Good evening',
+          },
+          mood: 'Mood',
+          moodLight: 'Light',
+          moodDark: 'Dark',
+          moodSystem: 'System',
+          language: 'Language',
+        },
         nav: {
           dashboard: 'Dashboard',
           issues: 'Issues',
@@ -125,15 +144,15 @@ beforeEach(() => {
 
 describe('DashboardLayout', () => {
   describe('layout structure', () => {
-    it('should render AppBar', () => {
+    it('should render AppBar with ProfileMenu', () => {
       renderWithProviders(
         <DashboardLayout>
           <div>Content</div>
         </DashboardLayout>
       );
 
-      // AppBar contains the hamburger menu and logout button
-      expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
+      // AppBar contains the hamburger menu and profile menu button
+      expect(screen.getByRole('button', { name: /profile/i })).toBeInTheDocument();
     });
 
     it('should render children content', () => {

@@ -1,5 +1,5 @@
 import { type FC, type ReactNode, useState, useCallback, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { styled, useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
@@ -9,9 +9,7 @@ import Toolbar from '@mui/material/Toolbar';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import MenuIcon from '@mui/icons-material/Menu';
 
-import { useLogout } from '@/features/auth/hooks';
-import { Button } from '@/components/atoms/Button';
-import { ThemeToggle } from '@/components/atoms/ThemeToggle';
+import { ProfileMenu } from '@/components/organisms/ProfileMenu';
 import { Sidebar } from './Sidebar';
 import {
   drawerWidth,
@@ -105,8 +103,6 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
 
 export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const logout = useLogout();
   const theme = useTheme();
   const { colorMode } = useThemeContext();
   const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
@@ -117,20 +113,6 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
 
   // Drawer state: open on desktop by default, closed on mobile
   const [drawerOpen, setDrawerOpen] = useState(true);
-
-  const handleLogout = useCallback(() => {
-    logout.mutate(undefined, {
-      onSuccess: () => {
-        navigate('/login');
-      },
-      onError: () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('admin');
-        navigate('/login');
-      },
-    });
-  }, [logout, navigate]);
 
   const handleDrawerToggle = useCallback(() => {
     setDrawerOpen((prev) => !prev);
@@ -201,21 +183,11 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
         {/* Spacer */}
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* Right side actions */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <ThemeToggle size="small" />
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={handleLogout}
-            isLoading={logout.isPending}
-          >
-            {t('auth.logout')}
-          </Button>
-        </Box>
+        {/* Right side actions - Profile Menu */}
+        <ProfileMenu />
       </Toolbar>
     ),
-    [theme, t, handleDrawerToggle, handleLogout, logout.isPending]
+    [theme, t, isDarkMode, handleDrawerToggle]
   );
 
   return (
