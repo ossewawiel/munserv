@@ -19,27 +19,28 @@ vi.mock('@/theme', async () => {
   };
 });
 
-// Mock geolocation
-function mockGeolocation(options: { success?: boolean; coords?: { latitude: number; longitude: number } } = {}) {
-  const { success = true, coords = { latitude: -26.2041, longitude: 28.0473 } } = options;
-
-  const mockGeolocationAPI = {
-    getCurrentPosition: vi.fn((successCallback, errorCallback) => {
-      if (success) {
-        successCallback({ coords });
-      } else {
-        errorCallback({ code: 1, message: 'User denied geolocation' });
-      }
-    }),
-  };
-
-  Object.defineProperty(navigator, 'geolocation', {
-    value: mockGeolocationAPI,
-    writable: true,
-  });
-
-  return mockGeolocationAPI;
-}
+// Mock the LocationPickerDialog component
+vi.mock('@/components/molecules/LocationPickerDialog', () => ({
+  LocationPickerDialog: vi.fn(({ open, onClose, onConfirm }) => {
+    if (!open) return null;
+    return (
+      <div data-testid="location-picker-dialog" role="dialog">
+        <button onClick={onClose}>Cancel</button>
+        <button
+          onClick={() =>
+            onConfirm({
+              latitude: -26.2041,
+              longitude: 28.0473,
+              address: '123 Test Street, Johannesburg',
+            })
+          }
+        >
+          Confirm Location
+        </button>
+      </div>
+    );
+  }),
+}));
 
 // Mock matchMedia for prefers-color-scheme
 function mockMatchMedia(prefersDark: boolean = false) {
@@ -82,11 +83,12 @@ i18n.init({
           address: 'Street Address',
           sector: 'Community/Ward',
           sectorHelp: 'Select the community you belong to',
-          getLocation: 'Get My Location',
+          getLocation: 'Get Location from Map',
           gettingLocation: 'Getting location...',
           locationCaptured: 'Location captured',
-          locationError: 'Could not get location. Please try again.',
-          locationRequired: 'Please capture your location using the button above',
+          locationError: 'Could not get your location',
+          locationOptional: 'Location is optional but helps us serve you better',
+          addressHelp: 'Enter your street address or use the map to select',
           submitRegistration: 'Submit Registration',
           registrationSuccess: 'Registration Submitted Successfully!',
           registrationPendingInfo: 'Your registration has been submitted. You will receive an email with login instructions once an administrator approves your registration.',
@@ -154,7 +156,6 @@ function renderRegisterPage({ initialRoute = '/register' }: RenderOptions = {}) 
 describe('RegisterPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGeolocation({ success: true });
   });
 
   describe('rendering', () => {
@@ -242,14 +243,22 @@ describe('RegisterPage', () => {
       expect(emailInput).toBeEnabled();
     });
 
-    it('should allow capturing location', async () => {
+    it('should allow capturing location via map picker', async () => {
       renderRegisterPage();
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /get my location/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /get location from map/i })).toBeInTheDocument();
       });
 
-      await userEvent.click(screen.getByRole('button', { name: /get my location/i }));
+      // Open location picker dialog
+      await userEvent.click(screen.getByRole('button', { name: /get location from map/i }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('location-picker-dialog')).toBeInTheDocument();
+      });
+
+      // Confirm location
+      await userEvent.click(screen.getByText('Confirm Location'));
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /location captured/i })).toBeInTheDocument();
@@ -303,12 +312,7 @@ describe('RegisterPage', () => {
       await userEvent.click(screen.getByLabelText(/community\/ward/i));
       await userEvent.click(screen.getByText('Ward 42'));
 
-      await userEvent.click(screen.getByRole('button', { name: /get my location/i }));
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /location captured/i })).toBeInTheDocument();
-      });
-
-      // The submit button should be clickable before submission
+      // The submit button should be clickable before submission (location is now optional)
       expect(screen.getByRole('button', { name: /submit registration/i })).not.toBeDisabled();
     });
   });

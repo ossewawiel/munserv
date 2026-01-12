@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { I18nextProvider } from 'react-i18next';
@@ -7,6 +7,29 @@ import i18n from 'i18next';
 
 import { RegisterForm } from './RegisterForm';
 import type { Sector } from '@/features/auth/types';
+
+// Mock the LocationPickerDialog component
+vi.mock('./LocationPickerDialog', () => ({
+  LocationPickerDialog: vi.fn(({ open, onClose, onConfirm }) => {
+    if (!open) return null;
+    return (
+      <div data-testid="location-picker-dialog" role="dialog">
+        <button onClick={onClose}>Cancel</button>
+        <button
+          onClick={() =>
+            onConfirm({
+              latitude: -26.2041,
+              longitude: 28.0473,
+              address: '123 Test Street, Johannesburg',
+            })
+          }
+        >
+          Confirm Location
+        </button>
+      </div>
+    );
+  }),
+}));
 
 // Initialize i18next for tests
 i18n.init({
@@ -25,13 +48,12 @@ i18n.init({
           phone: 'Phone Number',
           phoneHelp: 'For contact purposes',
           address: 'Street Address',
+          addressHelp: 'Enter your street address or use the map',
           sector: 'Community/Ward',
           sectorHelp: 'Select the community you belong to',
-          getLocation: 'Get My Location',
-          gettingLocation: 'Getting location...',
+          getLocation: 'Get Location from Map',
           locationCaptured: 'Location captured',
-          locationError: 'Could not get location. Please try again.',
-          locationRequired: 'Please capture your location using the button above',
+          locationOptional: 'Location is optional but helps us serve you better',
           submitRegistration: 'Submit Registration',
         },
         validation: {
@@ -69,27 +91,6 @@ function renderRegisterForm(props: Partial<React.ComponentProps<typeof RegisterF
   );
 }
 
-// Mock geolocation
-function mockGeolocation(options: { success?: boolean; coords?: { latitude: number; longitude: number } } = {}) {
-  const { success = true, coords = { latitude: -26.2041, longitude: 28.0473 } } = options;
-
-  const mockGeolocationAPI = {
-    getCurrentPosition: vi.fn((successCallback, errorCallback) => {
-      if (success) {
-        successCallback({ coords });
-      } else {
-        errorCallback({ code: 1, message: 'User denied geolocation' });
-      }
-    }),
-  };
-
-  Object.defineProperty(navigator, 'geolocation', {
-    value: mockGeolocationAPI,
-    writable: true,
-  });
-
-  return mockGeolocationAPI;
-}
 
 describe('RegisterForm', () => {
   beforeEach(() => {
@@ -118,7 +119,7 @@ describe('RegisterForm', () => {
 
       expect(screen.getByText('Location Information')).toBeInTheDocument();
       expect(screen.getByLabelText(/street address/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /get my location/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /get location from map/i })).toBeInTheDocument();
     });
 
     it('should render sector dropdown with options', async () => {
@@ -198,11 +199,11 @@ describe('RegisterForm', () => {
       });
     });
 
-    it('should show location required alert when coordinates not captured', async () => {
-      mockGeolocation({ success: true });
-      renderRegisterForm();
+    it('should submit form with address only (no coordinates) - location is optional', async () => {
+      const onSubmit = vi.fn();
+      renderRegisterForm({ onSubmit });
 
-      // Fill in all other required fields
+      // Fill in all required fields
       await userEvent.type(screen.getByLabelText(/first name/i), 'John');
       await userEvent.type(screen.getByLabelText(/surname/i), 'Doe');
       await userEvent.type(screen.getByLabelText(/email address/i), 'john@example.com');
@@ -213,66 +214,110 @@ describe('RegisterForm', () => {
       await userEvent.click(screen.getByLabelText(/community\/ward/i));
       await userEvent.click(screen.getByText('Ward 42'));
 
-      // Submit without capturing location
+      // Submit without capturing location - should succeed
       await userEvent.click(screen.getByRole('button', { name: /submit registration/i }));
 
-      // The location required alert should appear
       await waitFor(() => {
-        expect(screen.getByRole('alert')).toBeInTheDocument();
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            firstName: 'John',
+            address: '123 Main St',
+            latitude: 0,
+            longitude: 0,
+          })
+        );
       });
     });
   });
 
-  describe('geolocation', () => {
-    it('should capture location when get location button is clicked', async () => {
-      const mockGeo = mockGeolocation({ success: true, coords: { latitude: -26.2041, longitude: 28.0473 } });
+  describe('location picker', () => {
+    it('should open location picker dialog when get location button is clicked', async () => {
       renderRegisterForm();
 
-      await userEvent.click(screen.getByRole('button', { name: /get my location/i }));
+      await userEvent.click(screen.getByRole('button', { name: /get location from map/i }));
 
       await waitFor(() => {
-        expect(mockGeo.getCurrentPosition).toHaveBeenCalled();
-      });
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /location captured/i })).toBeInTheDocument();
+        expect(screen.getByTestId('location-picker-dialog')).toBeInTheDocument();
       });
     });
 
-    it('should show error when geolocation fails', async () => {
-      mockGeolocation({ success: false });
+    it('should close dialog when cancel is clicked', async () => {
       renderRegisterForm();
 
-      await userEvent.click(screen.getByRole('button', { name: /get my location/i }));
+      // Open dialog
+      await userEvent.click(screen.getByRole('button', { name: /get location from map/i }));
+      expect(screen.getByTestId('location-picker-dialog')).toBeInTheDocument();
+
+      // Cancel dialog
+      await userEvent.click(screen.getByText('Cancel'));
 
       await waitFor(() => {
-        expect(screen.getByText(/could not get location/i)).toBeInTheDocument();
+        expect(screen.queryByTestId('location-picker-dialog')).not.toBeInTheDocument();
       });
     });
 
-    it('should show loading state while getting location', async () => {
-      // Mock geolocation with delayed response
-      const mockGeolocationAPI = {
-        getCurrentPosition: vi.fn(),
-      };
-      Object.defineProperty(navigator, 'geolocation', {
-        value: mockGeolocationAPI,
-        writable: true,
+    it('should fill address and capture coordinates when location is confirmed', async () => {
+      const onSubmit = vi.fn();
+      renderRegisterForm({ onSubmit });
+
+      // Fill other required fields
+      await userEvent.type(screen.getByLabelText(/first name/i), 'John');
+      await userEvent.type(screen.getByLabelText(/surname/i), 'Doe');
+      await userEvent.type(screen.getByLabelText(/email address/i), 'john@example.com');
+      await userEvent.type(screen.getByLabelText(/phone number/i), '+27821234567');
+
+      // Select sector
+      await userEvent.click(screen.getByLabelText(/community\/ward/i));
+      await userEvent.click(screen.getByText('Ward 42'));
+
+      // Open location picker and confirm
+      await userEvent.click(screen.getByRole('button', { name: /get location from map/i }));
+      await userEvent.click(screen.getByText('Confirm Location'));
+
+      // Dialog should close and address should be filled
+      await waitFor(() => {
+        expect(screen.queryByTestId('location-picker-dialog')).not.toBeInTheDocument();
       });
 
-      renderRegisterForm();
+      // Address field should now contain the address from the dialog
+      const addressField = screen.getByLabelText(/street address/i);
+      expect(addressField).toHaveValue('123 Test Street, Johannesburg');
 
-      fireEvent.click(screen.getByRole('button', { name: /get my location/i }));
+      // Button should show location captured
+      expect(screen.getByRole('button', { name: /location captured/i })).toBeInTheDocument();
+
+      // Submit and verify coordinates are included
+      await userEvent.click(screen.getByRole('button', { name: /submit registration/i }));
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /getting location/i })).toBeInTheDocument();
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            address: '123 Test Street, Johannesburg',
+            latitude: -26.2041,
+            longitude: 28.0473,
+          })
+        );
       });
+    });
+
+    it('should allow editing address after location is captured', async () => {
+      renderRegisterForm();
+
+      // Open location picker and confirm
+      await userEvent.click(screen.getByRole('button', { name: /get location from map/i }));
+      await userEvent.click(screen.getByText('Confirm Location'));
+
+      // Address field should be editable
+      const addressField = screen.getByLabelText(/street address/i);
+      await userEvent.clear(addressField);
+      await userEvent.type(addressField, '456 Different Street');
+
+      expect(addressField).toHaveValue('456 Different Street');
     });
   });
 
   describe('form submission', () => {
-    it('should call onSubmit with form data when valid', async () => {
-      mockGeolocation({ success: true, coords: { latitude: -26.2041, longitude: 28.0473 } });
+    it('should call onSubmit with form data when valid (with location from map)', async () => {
       const onSubmit = vi.fn();
       renderRegisterForm({ onSubmit });
 
@@ -281,14 +326,15 @@ describe('RegisterForm', () => {
       await userEvent.type(screen.getByLabelText(/surname/i), 'Doe');
       await userEvent.type(screen.getByLabelText(/email address/i), 'john@example.com');
       await userEvent.type(screen.getByLabelText(/phone number/i), '+27821234567');
-      await userEvent.type(screen.getByLabelText(/street address/i), '123 Main St');
 
       // Select sector
       await userEvent.click(screen.getByLabelText(/community\/ward/i));
       await userEvent.click(screen.getByText('Ward 42'));
 
-      // Get location
-      await userEvent.click(screen.getByRole('button', { name: /get my location/i }));
+      // Get location from map
+      await userEvent.click(screen.getByRole('button', { name: /get location from map/i }));
+      await userEvent.click(screen.getByText('Confirm Location'));
+
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /location captured/i })).toBeInTheDocument();
       });
@@ -303,10 +349,44 @@ describe('RegisterForm', () => {
             surname: 'Doe',
             email: 'john@example.com',
             phone: '+27821234567',
-            address: '123 Main St',
+            address: '123 Test Street, Johannesburg',
             latitude: -26.2041,
             longitude: 28.0473,
             sectorId: 'sector-1',
+          })
+        );
+      });
+    });
+
+    it('should call onSubmit with form data when valid (address only, no map location)', async () => {
+      const onSubmit = vi.fn();
+      renderRegisterForm({ onSubmit });
+
+      // Fill in form
+      await userEvent.type(screen.getByLabelText(/first name/i), 'Jane');
+      await userEvent.type(screen.getByLabelText(/surname/i), 'Smith');
+      await userEvent.type(screen.getByLabelText(/email address/i), 'jane@example.com');
+      await userEvent.type(screen.getByLabelText(/phone number/i), '+27829876543');
+      await userEvent.type(screen.getByLabelText(/street address/i), '456 Oak Avenue');
+
+      // Select sector
+      await userEvent.click(screen.getByLabelText(/community\/ward/i));
+      await userEvent.click(screen.getByText('Ward 43'));
+
+      // Submit form without using map picker
+      await userEvent.click(screen.getByRole('button', { name: /submit registration/i }));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            firstName: 'Jane',
+            surname: 'Smith',
+            email: 'jane@example.com',
+            phone: '+27829876543',
+            address: '456 Oak Avenue',
+            latitude: 0,
+            longitude: 0,
+            sectorId: 'sector-2',
           })
         );
       });
