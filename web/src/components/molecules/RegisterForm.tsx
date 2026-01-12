@@ -230,14 +230,20 @@ export const RegisterForm: FC<RegisterFormProps> = ({
           )}
         />
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <Button
             type="button"
-            variant="secondary"
+            variant="primary"
             onClick={handleOpenLocationPicker}
             disabled={isLoading}
             startIcon={hasLocationFromMap ? <CheckCircleIcon /> : <MapIcon />}
-            sx={{ whiteSpace: 'nowrap' }}
+            sx={{
+              bgcolor: 'secondary.main',
+              color: 'secondary.contrastText',
+              '&:hover': {
+                bgcolor: 'secondary.dark',
+              },
+            }}
           >
             {getLocationButtonText()}
           </Button>
