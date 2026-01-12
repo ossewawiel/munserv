@@ -26,3 +26,29 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Development-only request/response logging for debugging
+if (import.meta.env.DEV) {
+  apiClient.interceptors.request.use((config) => {
+    console.log(
+      `[API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`
+    );
+    return config;
+  });
+
+  apiClient.interceptors.response.use(
+    (response) => {
+      console.log(`[API Response] ${response.status} ${response.config.url}`);
+      return response;
+    },
+    (error) => {
+      console.error(`[API Error] ${error.message}`, {
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      return Promise.reject(error);
+    }
+  );
+}
