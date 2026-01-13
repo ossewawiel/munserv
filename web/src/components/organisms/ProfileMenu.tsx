@@ -13,6 +13,8 @@ import ButtonBase from '@mui/material/ButtonBase';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Divider from '@mui/material/Divider';
 import Fade from '@mui/material/Fade';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -23,7 +25,9 @@ import Popper from '@mui/material/Popper';
 import Stack from '@mui/material/Stack';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -34,7 +38,12 @@ import PersonIcon from '@mui/icons-material/Person';
 
 import { useLogout } from '@/features/auth/hooks';
 import { useThemeContext } from '@/theme';
-import { SUPPORTED_LANGUAGES, LANGUAGE_NAMES } from '@/lib/i18n';
+import {
+  SUPPORTED_LANGUAGES,
+  LANGUAGE_NAMES,
+  LANGUAGE_NATIVE_NAMES,
+  type SupportedLanguage,
+} from '@/lib/i18n';
 import type { ColorMode } from '@/theme/types';
 
 interface AdminProfile {
@@ -75,6 +84,7 @@ export const ProfileMenu: FC = () => {
   const { colorMode, setColorMode } = useThemeContext();
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [languageOpen, setLanguageOpen] = useState(false);
   const open = Boolean(anchorEl);
 
   const admin = useMemo(() => getAdminProfile(), []);
@@ -90,21 +100,34 @@ export const ProfileMenu: FC = () => {
 
   const handleClose = useCallback(() => {
     setAnchorEl(null);
+    setLanguageOpen(false);
+  }, []);
+
+  const handleLanguageClose = useCallback(() => {
+    setLanguageOpen(false);
+  }, []);
+
+  const handleLanguageToggle = useCallback(() => {
+    setLanguageOpen((prev) => !prev);
   }, []);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape') {
-      setAnchorEl(null);
+      if (languageOpen) {
+        setLanguageOpen(false);
+      } else {
+        setAnchorEl(null);
+      }
     }
-  }, []);
+  }, [languageOpen]);
 
   // Handle Escape key
   useEffect(() => {
-    if (open) {
+    if (open || languageOpen) {
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [open, handleKeyDown]);
+  }, [open, languageOpen, handleKeyDown]);
 
   const handleMoodChange = useCallback(
     (_event: React.MouseEvent<HTMLElement>, newMode: ColorMode | null) => {
@@ -116,9 +139,9 @@ export const ProfileMenu: FC = () => {
   );
 
   const handleLanguageSelect = useCallback(
-    (lng: string) => {
+    (lng: SupportedLanguage) => {
       i18n.changeLanguage(lng);
-      setAnchorEl(null);
+      setLanguageOpen(false);
     },
     [i18n]
   );
@@ -137,6 +160,10 @@ export const ProfileMenu: FC = () => {
       },
     });
   }, [logout, navigate]);
+
+  // Get current language name
+  const currentLanguage = i18n.language as SupportedLanguage;
+  const currentLanguageName = LANGUAGE_NATIVE_NAMES[currentLanguage] || currentLanguage;
 
   return (
     <>
@@ -327,7 +354,7 @@ export const ProfileMenu: FC = () => {
                           </ToggleButtonGroup>
                         </ListItem>
 
-                        {/* Language - Current selection with toggle */}
+                        {/* Language - Current selection with arrow button */}
                         <ListItem>
                           <ListItemIcon sx={{ minWidth: 36 }}>
                             <LanguageIcon sx={{ fontSize: '1.25rem' }} />
@@ -339,26 +366,48 @@ export const ProfileMenu: FC = () => {
                               </Typography>
                             }
                           />
-                          <ToggleButtonGroup
-                            value={i18n.language}
-                            exclusive
-                            onChange={(_e, lng: string | null) => {
-                              if (lng) handleLanguageSelect(lng);
-                            }}
-                            aria-label={t('profile.language', 'Language')}
-                            size="small"
+                          <Typography
+                            variant="body2"
+                            color="primary"
+                            sx={{ mr: 1 }}
                           >
-                            {SUPPORTED_LANGUAGES.map((lng) => (
-                              <ToggleButton
-                                key={lng}
-                                value={lng}
-                                aria-label={LANGUAGE_NAMES[lng]}
-                                sx={{ px: 1.5, py: 0.25, textTransform: 'uppercase' }}
-                              >
-                                {lng}
-                              </ToggleButton>
-                            ))}
-                          </ToggleButtonGroup>
+                            {currentLanguageName}
+                          </Typography>
+                          <Tooltip title={t('profile.selectLanguage', 'Select preferred language')}>
+                            <IconButton
+                              size="small"
+                              onClick={handleLanguageToggle}
+                              aria-label={t('profile.selectLanguage', 'Select preferred language')}
+                              aria-haspopup="true"
+                              aria-expanded={languageOpen}
+                              sx={{
+                                '& svg': {
+                                  transition: '0.2s',
+                                  transform: 'translateX(0) rotate(0)',
+                                },
+                                '&:hover, &:focus': {
+                                  bgcolor: 'action.hover',
+                                  '& svg:first-of-type': {
+                                    transform: 'translateX(-4px) rotate(-20deg)',
+                                  },
+                                  '& svg:last-of-type': {
+                                    right: 0,
+                                    opacity: 1,
+                                  },
+                                },
+                              }}
+                            >
+                              <LanguageIcon sx={{ fontSize: '1.25rem' }} />
+                              <ArrowRightIcon
+                                sx={{
+                                  position: 'absolute',
+                                  right: 4,
+                                  opacity: 0,
+                                  fontSize: '1rem',
+                                }}
+                              />
+                            </IconButton>
+                          </Tooltip>
                         </ListItem>
 
                         <Divider sx={{ my: 1 }} />
@@ -386,6 +435,71 @@ export const ProfileMenu: FC = () => {
                       </List>
                     </Box>
                   </>
+                )}
+              </Paper>
+            </Fade>
+          </ClickAwayListener>
+        )}
+      </Popper>
+
+      {/* Language Selection Popper */}
+      <Popper
+        placement="bottom-end"
+        open={languageOpen}
+        anchorEl={anchorEl}
+        role={undefined}
+        transition
+        disablePortal
+        modifiers={[
+          {
+            name: 'offset',
+            options: {
+              offset: [0, 20],
+            },
+          },
+        ]}
+        sx={{ zIndex: 1301 }}
+      >
+        {({ TransitionProps }) => (
+          <ClickAwayListener onClickAway={handleLanguageClose}>
+            <Fade {...TransitionProps} timeout={250}>
+              <Paper
+                elevation={16}
+                sx={{
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  minWidth: 200,
+                  maxWidth: 280,
+                }}
+              >
+                {languageOpen && (
+                  <List component="nav" sx={{ py: 0.5 }}>
+                    {SUPPORTED_LANGUAGES.map((lng) => (
+                      <ListItemButton
+                        key={lng}
+                        selected={currentLanguage === lng}
+                        onClick={() => handleLanguageSelect(lng)}
+                        sx={{ borderRadius: 1, mx: 0.5 }}
+                      >
+                        <ListItemText
+                          primary={
+                            <Grid container alignItems="center">
+                              <Typography color="textPrimary">
+                                {LANGUAGE_NATIVE_NAMES[lng]}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="textSecondary"
+                                sx={{ ml: 1 }}
+                              >
+                                ({LANGUAGE_NAMES[lng]})
+                              </Typography>
+                            </Grid>
+                          }
+                        />
+                      </ListItemButton>
+                    ))}
+                  </List>
                 )}
               </Paper>
             </Fade>

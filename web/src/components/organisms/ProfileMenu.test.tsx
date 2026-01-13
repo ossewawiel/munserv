@@ -50,13 +50,15 @@ vi.mock('@/features/auth/hooks', () => ({
 
 // Mock i18n
 vi.mock('@/lib/i18n', () => ({
-  SUPPORTED_LANGUAGES: ['en'] as const,
-  LANGUAGE_NAMES: { en: 'English' },
+  SUPPORTED_LANGUAGES: ['en', 'af', 'zu'] as const,
+  LANGUAGE_NAMES: { en: 'English', af: 'Afrikaans', zu: 'isiZulu' },
+  LANGUAGE_NATIVE_NAMES: { en: 'English', af: 'Afrikaans', zu: 'isiZulu' },
 }));
 
 // Initialize i18next for tests
 i18n.init({
   lng: 'en',
+  fallbackLng: 'en',
   resources: {
     en: {
       translation: {
@@ -72,12 +74,61 @@ i18n.init({
           moodDark: 'Dark',
           moodSystem: 'System',
           language: 'Language',
+          selectLanguage: 'Select preferred language',
         },
         auth: {
           logout: 'Logout',
         },
         common: {
           loading: 'Loading...',
+        },
+      },
+    },
+    af: {
+      translation: {
+        profile: {
+          menuTrigger: 'Profielmenu',
+          greeting: {
+            morning: 'Goeie môre',
+            afternoon: 'Goeie middag',
+            evening: 'Goeie aand',
+          },
+          mood: 'Modus',
+          moodLight: 'Lig',
+          moodDark: 'Donker',
+          moodSystem: 'Stelsel',
+          language: 'Taal',
+          selectLanguage: 'Kies voorkeur taal',
+        },
+        auth: {
+          logout: 'Teken uit',
+        },
+        common: {
+          loading: 'Laai...',
+        },
+      },
+    },
+    zu: {
+      translation: {
+        profile: {
+          menuTrigger: 'Imenyu yephrofayili',
+          greeting: {
+            morning: 'Sawubona ekuseni',
+            afternoon: 'Sawubona emini',
+            evening: 'Sawubona ebusuku',
+          },
+          mood: 'Imodi',
+          moodLight: 'Ukukhanya',
+          moodDark: 'Ubumnyama',
+          moodSystem: 'Isistimu',
+          language: 'Ulimi',
+          selectLanguage: 'Khetha ulimi oluncamelayo',
+        },
+        auth: {
+          logout: 'Phuma',
+        },
+        common: {
+          loading: 'Iyalayisha...',
         },
       },
     },
@@ -136,6 +187,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   // Set up localStorage with admin data
   localStorage.setItem('admin', JSON.stringify(mockAdmin));
+  // Reset language to English for each test
+  i18n.changeLanguage('en');
 });
 
 afterEach(() => {
@@ -211,7 +264,7 @@ describe('ProfileMenu', () => {
   });
 
   describe('language selection', () => {
-    it('should display language section', async () => {
+    it('should display language section with current language name', async () => {
       const user = userEvent.setup();
       renderWithProviders(<ProfileMenu />);
 
@@ -220,20 +273,72 @@ describe('ProfileMenu', () => {
 
       await waitFor(() => {
         expect(screen.getByText(/language/i)).toBeInTheDocument();
+        // Current language name should be displayed
+        expect(screen.getByText('English')).toBeInTheDocument();
       });
     });
 
-    it('should show English as current language', async () => {
+    it('should open language dropdown when language button is clicked', async () => {
       const user = userEvent.setup();
       renderWithProviders(<ProfileMenu />);
 
       const trigger = screen.getByRole('button', { name: /profile/i });
       await user.click(trigger);
 
-      // Language is now shown as toggle button with language code
+      // Click the language selector button
+      const languageButton = await screen.findByRole('button', { name: /select preferred language/i });
+      await user.click(languageButton);
+
+      // Language options should appear
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /english/i })).toBeInTheDocument();
+        expect(screen.getByText(/\(English\)/)).toBeInTheDocument();
+        expect(screen.getByText(/\(Afrikaans\)/)).toBeInTheDocument();
+        expect(screen.getByText(/\(isiZulu\)/)).toBeInTheDocument();
       });
+    });
+
+    it('should change language when Afrikaans is selected from dropdown', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<ProfileMenu />);
+
+      const trigger = screen.getByRole('button', { name: /profile/i });
+      await user.click(trigger);
+
+      // Click the language selector button
+      const languageButton = await screen.findByRole('button', { name: /select preferred language/i });
+      await user.click(languageButton);
+
+      // Click Afrikaans option
+      await waitFor(() => {
+        expect(screen.getByText(/\(Afrikaans\)/)).toBeInTheDocument();
+      });
+      const afOption = screen.getByText(/\(Afrikaans\)/).closest('div[role="button"]');
+      await user.click(afOption!);
+
+      // After clicking, language should change to Afrikaans
+      expect(i18n.language).toBe('af');
+    });
+
+    it('should change language when Zulu is selected from dropdown', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<ProfileMenu />);
+
+      const trigger = screen.getByRole('button', { name: /profile/i });
+      await user.click(trigger);
+
+      // Click the language selector button
+      const languageButton = await screen.findByRole('button', { name: /select preferred language/i });
+      await user.click(languageButton);
+
+      // Click Zulu option
+      await waitFor(() => {
+        expect(screen.getByText(/\(isiZulu\)/)).toBeInTheDocument();
+      });
+      const zuOption = screen.getByText(/\(isiZulu\)/).closest('div[role="button"]');
+      await user.click(zuOption!);
+
+      // After clicking, language should change to Zulu
+      expect(i18n.language).toBe('zu');
     });
   });
 

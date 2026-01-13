@@ -161,7 +161,8 @@
     "moodLight": "Light",
     "moodDark": "Dark",
     "moodSystem": "System",
-    "language": "Language"
+    "language": "Language",
+    "selectLanguage": "Select preferred language"
   },
   "reports": {
     "title": "Reports"
