@@ -2,6 +2,11 @@
 spring:
   jpa:
     show-sql: true
+  mail:
+    host: smtp.gmail.com          # Change to your SMTP provider
+    port: 587
+    username: marsel.pretorius@gmail.com  # Your email
+    password: uunm xebm cskx aceq     # Your app password (NOT your regular password)
 
 logging:
   level:

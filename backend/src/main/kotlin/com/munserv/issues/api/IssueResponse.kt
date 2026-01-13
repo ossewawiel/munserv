@@ -60,21 +60,6 @@ data class PaginationInfo(
     val totalPages: Int,
 )
 
-/**
- * Error response.
- */
-data class ErrorResponse(
-    val error: ErrorDetail,
-)
-
-/**
- * Error detail.
- */
-data class ErrorDetail(
-    val code: String,
-    val message: String,
-)
-
 // Extension functions to convert domain to response
 
 fun Issue.toSummaryResponse(thumbnailUrl: String? = null) =

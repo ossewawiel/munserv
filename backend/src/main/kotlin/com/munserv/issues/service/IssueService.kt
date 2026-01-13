@@ -28,6 +28,7 @@ class IssueService(
     /**
      * Find an issue by its ID.
      */
+    @Transactional(readOnly = true)
     fun findById(id: IssueId): IssueResult =
         repository.findById(id)
             ?.let { IssueResult.Success(it) }
@@ -36,16 +37,19 @@ class IssueService(
     /**
      * Find all issues.
      */
+    @Transactional(readOnly = true)
     fun findAll(): List<Issue> = repository.findAll()
 
     /**
      * Find issues reported by a specific member.
      */
+    @Transactional(readOnly = true)
     fun findByReporter(reporterId: MemberId): List<Issue> = repository.findByReporterId(reporterId)
 
     /**
      * Find all open issues (not fixed or rejected), sorted by heat.
      */
+    @Transactional(readOnly = true)
     fun findOpenIssues(): List<Issue> = repository.findOpenIssues()
 
     /**
@@ -111,7 +115,7 @@ class IssueService(
                 ?: return IssueResult.NotFound(id)
 
         val newReportCount = issue.reportCount + 1
-        val newHeat = calculateHeat(issue, newReportCount)
+        val newHeat = calculateHeat(newReportCount)
 
         val updatedIssue =
             issue
@@ -150,10 +154,7 @@ class IssueService(
      * The first report gets base heat, each additional report adds HEAT_PER_REPORT.
      * Capped at MAX_HEAT.
      */
-    private fun calculateHeat(
-        issue: Issue,
-        reportCount: Int,
-    ): Int {
+    private fun calculateHeat(reportCount: Int): Int {
         val baseHeat = DEFAULT_HEAT
         val additionalReports = (reportCount - 1).coerceAtLeast(0)
         val calculatedHeat = baseHeat + (additionalReports * HEAT_PER_REPORT)

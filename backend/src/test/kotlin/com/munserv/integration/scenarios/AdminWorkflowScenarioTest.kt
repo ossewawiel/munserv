@@ -122,6 +122,56 @@ class AdminWorkflowScenarioTest {
     }
 
     @Test
+    @Order(31)
+    fun `step 3-1 - admin can filter members by status`() {
+        // Filter by active status
+        mockMvc
+            .get("/api/v1/admin/members") {
+                header("Authorization", "Bearer $adminToken")
+                param("sectorId", testSectorId)
+                param("status", "active")
+                accept = MediaType.APPLICATION_JSON
+            }
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.items") { isArray() }
+                jsonPath("$.pagination.totalItems") { isNumber() }
+            }
+    }
+
+    @Test
+    @Order(32)
+    fun `step 3-2 - admin can filter members by pending_approval status`() {
+        mockMvc
+            .get("/api/v1/admin/members") {
+                header("Authorization", "Bearer $adminToken")
+                param("sectorId", testSectorId)
+                param("status", "pending_approval")
+                accept = MediaType.APPLICATION_JSON
+            }
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.items") { isArray() }
+            }
+    }
+
+    @Test
+    @Order(33)
+    fun `step 3-3 - invalid status returns 400`() {
+        mockMvc
+            .get("/api/v1/admin/members") {
+                header("Authorization", "Bearer $adminToken")
+                param("sectorId", testSectorId)
+                param("status", "invalid")
+                accept = MediaType.APPLICATION_JSON
+            }
+            .andExpect {
+                status { isBadRequest() }
+                jsonPath("$.error") { value("invalid_status") }
+            }
+    }
+
+    @Test
     @Order(4)
     fun `step 4 - admin can view issues`() {
         mockMvc
@@ -144,6 +194,7 @@ class AdminWorkflowScenarioTest {
         val createRequest =
             CreateIssueRequest(
                 type = "pothole",
+                sectorId = "550e8400-e29b-41d4-a716-446655440001",
                 latitude = -26.1350,
                 longitude = 27.9800,
                 description = "Admin workflow test issue",

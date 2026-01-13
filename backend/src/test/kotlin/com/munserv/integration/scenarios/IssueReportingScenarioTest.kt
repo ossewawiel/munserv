@@ -126,6 +126,7 @@ class IssueReportingScenarioTest {
         val request =
             CreateIssueRequest(
                 type = "pothole",
+                sectorId = "550e8400-e29b-41d4-a716-446655440001",
                 latitude = -26.1350,
                 longitude = 27.9800,
                 description = "Large pothole on Main Road",
@@ -200,6 +201,7 @@ class IssueReportingScenarioTest {
             val request =
                 CreateIssueRequest(
                     type = type,
+                    sectorId = "550e8400-e29b-41d4-a716-446655440001",
                     latitude = -26.1350 + (Math.random() * 0.01),
                     longitude = 27.9800 + (Math.random() * 0.01),
                     description = "Test $type issue",

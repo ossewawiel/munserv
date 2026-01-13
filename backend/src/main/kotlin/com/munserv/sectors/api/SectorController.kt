@@ -54,8 +54,9 @@ class SectorController(
         @Parameter(description = "Sector UUID")
         @PathVariable id: UUID,
     ): ResponseEntity<SectorResponse> {
-        val sector = sectorService.findById(SectorId(id))
-            ?: return ResponseEntity.notFound().build()
+        val sector =
+            sectorService.findById(SectorId(id))
+                ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(sector.toResponse())
     }

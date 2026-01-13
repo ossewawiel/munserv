@@ -399,11 +399,166 @@ data class CreateIssueRequest(
 - Business logic in controllers
 - Direct repository access across modules
 
+## Testing (JUnit 5 + MockK + Kotest)
+
+### Test Framework Stack
+- **JUnit 5** - Test framework
+- **MockK** - Mocking library for Kotlin
+- **Kotest** - Assertion library
+- **TestContainers** - PostgreSQL + PostGIS for integration tests
+- **SpringMockK** - MockK integration with Spring
+
+### Unit Test Pattern
+```kotlin
+class IssueServiceTest {
+    private val repository: IssueRepository = mockk()
+    private val clock: Clock = Clock.fixed(fixedInstant, ZoneId.UTC)
+    private lateinit var service: IssueService
+
+    @BeforeEach
+    fun setUp() {
+        clearAllMocks()
+        service = IssueService(repository, clock)
+    }
+
+    @Test
+    fun `should return Success when issue exists`() {
+        // Arrange
+        val issue = createTestIssue()
+        every { repository.findById(testId) } returns issue
+
+        // Act
+        val result = service.findById(testId)
+
+        // Assert
+        result.shouldBeInstanceOf<IssueResult.Success>()
+        verify { repository.findById(testId) }
+    }
+}
+```
+
+### Integration Test Pattern (TestContainers)
+```kotlin
+@DataJpaTest
+@Testcontainers
+@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class IssueRepositoryTest {
+    companion object {
+        @Container
+        val postgres = PostgreSQLContainer(
+            DockerImageName.parse("postgis/postgis:15-3.3-alpine")
+        )
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun configureProperties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.datasource.url") { postgres.jdbcUrl }
+        }
+    }
+}
+```
+
+### API Contract Test Pattern
+```kotlin
+@WebMvcTest(IssueController::class)
+@ActiveProfiles("test")
+class IssueApiContractTest {
+    @Autowired private lateinit var mockMvc: MockMvc
+    @MockkBean private lateinit var service: IssueService
+
+    @Test
+    @WithMockUser
+    fun `GET /api/v1/issues/{id} should return 200 when found`() {
+        every { service.findById(any()) } returns IssueResult.Success(issue)
+
+        mockMvc.get("/api/v1/issues/{id}", testId)
+            .andExpect { status { isOk() } }
+    }
+}
+```
+
+### Test Commands
+```bash
+./gradlew test                    # Run all tests
+./gradlew test --tests "*.IssueServiceTest"  # Run specific test
+./gradlew test --info             # Verbose output
+./gradlew jacocoTestReport        # Generate coverage
+```
+
+### Kotest Assertions
+```kotlin
+result shouldBe expected
+result shouldNotBe other
+result.shouldBeInstanceOf<Type>()
+result.shouldNotBeNull()
+list.shouldContain(element)
+list.shouldHaveSize(3)
+shouldThrow<Exception> { code() }
+```
+
+### MockK Patterns
+```kotlin
+every { mock.method(any()) } returns value
+every { mock.method(any()) } returns null
+verify { mock.method(any()) }
+verify(exactly = 1) { mock.method(testId) }
+val slot = slot<Issue>()
+every { repo.save(capture(slot)) } answers { slot.captured }
+```
+
+## Available Skills
+
+Skills are located in `.claude/commands/`. Use `/skill-name` to invoke.
+
+### Code Generation
+| Skill | Purpose |
+|-------|---------|
+| `/entity` | Generate domain entity, value object, or state machine |
+| `/feature` | Scaffold complete feature module |
+| `/service` | Create service with sealed Result pattern |
+| `/controller` | Generate REST controller with DTOs |
+| `/repository` | Create JPA repository with entity mapping |
+| `/migration` | Generate Flyway SQL migration |
+
+### Quality & Testing
+| Skill | Purpose |
+|-------|---------|
+| `/test` | Generate unit test (MockK + Kotest) |
+| `/integration-test` | Generate integration test (TestContainers) |
+| `/contract-test` | Generate API contract test (MockMvc) |
+| `/review` | Code review for Kotlin/Spring patterns |
+| `/sonar` | SonarQube analysis via MCP |
+| `/ci-fix` | Debug CI/CD failures |
+
+### Workflow
+| Skill | Purpose |
+|-------|---------|
+| `/dev-cycle` | Full TDD workflow: Specify → Test → Code → Refactor → Quality Gate |
+
+## TDD Development Cycle
+
+When adding functionality, follow this workflow:
+
+```
+1. SPECIFY    → Define acceptance criteria
+2. TEST       → Write failing tests FIRST (Red) - STRICT for domain/service
+3. CODE       → Implement to pass tests (Green)
+4. REFACTOR   → Clean up, fix review issues
+5. QUALITY    → Run ktlint, tests, sonar
+6. INTEGRATION→ Add contract + integration tests
+7. PRE-COMMIT → Full build verification
+```
+
+Use `/dev-cycle "your task description"` to orchestrate this workflow.
+
 ## Build Commands (WSL2)
 ```bash
 ./gradlew build          # Full build
 ./gradlew test           # Run tests
-./gradlew bootRun        # Start dev server
+./gradlew bootRun        # Start dev server (port 8080)
 ./gradlew ktlintCheck    # Lint check
 ./gradlew ktlintFormat   # Auto-format
+./gradlew sonar          # SonarQube analysis
+./gradlew jacocoTestReport  # Coverage report
 ```

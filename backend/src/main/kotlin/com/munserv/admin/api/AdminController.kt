@@ -6,6 +6,7 @@ import com.munserv.admin.service.HeatReportService
 import com.munserv.auth.api.ErrorResponse
 import com.munserv.auth.api.MemberApprovedResponse
 import com.munserv.auth.domain.Member
+import com.munserv.auth.domain.MemberStatus
 import com.munserv.auth.repository.MemberRepository
 import com.munserv.auth.service.RegistrationResult
 import com.munserv.auth.service.RegistrationService
@@ -125,10 +126,13 @@ class AdminController(
     /**
      * GET /api/v1/admin/members
      * Returns paginated list of members for the sector with issue counts.
+     * Optionally filter by member status.
      */
     @Operation(
         summary = "List sector members",
-        description = "Retrieve a paginated list of members in a sector with their issue counts",
+        description =
+            "Retrieve a paginated list of members in a sector with their issue counts. " +
+                "Optionally filter by member status.",
     )
     @ApiResponses(
         value = [
@@ -137,6 +141,7 @@ class AdminController(
                 description = "Members list retrieved successfully",
                 content = [Content(schema = Schema(implementation = MembersListResponse::class))],
             ),
+            ApiResponse(responseCode = "400", description = "Invalid status value"),
             ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
             ApiResponse(responseCode = "403", description = "Forbidden - requires admin role"),
         ],
@@ -145,6 +150,13 @@ class AdminController(
     fun getMembers(
         @Parameter(description = "Sector UUID", required = true, example = "550e8400-e29b-41d4-a716-446655440001")
         @RequestParam sectorId: String,
+        @Parameter(
+            description = "Filter by member status",
+            required = false,
+            example = "active",
+            schema = Schema(allowableValues = ["pending_approval", "active", "suspended", "deleted"]),
+        )
+        @RequestParam(required = false) status: String?,
         @Parameter(description = "Page number (1-based)", example = "1")
         @RequestParam(defaultValue = "1")
         @Min(1, message = "Page must be at least 1")
@@ -154,9 +166,31 @@ class AdminController(
         @Min(1, message = "Limit must be at least 1")
         @Max(100, message = "Limit cannot exceed 100")
         limit: Int,
-    ): ResponseEntity<MembersListResponse> {
+    ): ResponseEntity<*> {
         val id = SectorId.fromString(sectorId)
-        val allMembers = memberRepository.findBySectorId(id)
+
+        // Parse and validate status if provided
+        val memberStatus =
+            status?.let {
+                try {
+                    MemberStatus.fromString(it)
+                } catch (e: IllegalArgumentException) {
+                    return ResponseEntity.badRequest().body(
+                        ErrorResponse(
+                            "invalid_status",
+                            "Invalid status value: $it. Valid values are: pending_approval, active, suspended, deleted",
+                        ),
+                    )
+                }
+            }
+
+        // Fetch members - filter by status if provided
+        val allMembers =
+            if (memberStatus != null) {
+                memberRepository.findBySectorIdAndStatus(id, memberStatus)
+            } else {
+                memberRepository.findBySectorId(id)
+            }
 
         val totalItems = allMembers.size
         val totalPages = if (totalItems == 0) 1 else ceil(totalItems.toDouble() / limit).toInt()
@@ -197,6 +231,35 @@ class AdminController(
             issueCount = issueCount,
             joinedAt = createdAt,
         )
+
+    /**
+     * GET /api/v1/admin/members/pending-count
+     * Returns count of members with pending_approval status for the sector.
+     */
+    @Operation(
+        summary = "Get pending member count",
+        description = "Returns the number of members awaiting approval in a sector",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Pending count retrieved successfully",
+                content = [Content(schema = Schema(implementation = PendingCountResponse::class))],
+            ),
+            ApiResponse(responseCode = "401", description = "Unauthorized"),
+            ApiResponse(responseCode = "403", description = "Forbidden - requires admin role"),
+        ],
+    )
+    @GetMapping("/members/pending-count")
+    fun getPendingMemberCount(
+        @Parameter(description = "Sector UUID", required = true)
+        @RequestParam sectorId: String,
+    ): ResponseEntity<PendingCountResponse> {
+        val id = SectorId.fromString(sectorId)
+        val count = memberRepository.findBySectorIdAndStatus(id, MemberStatus.PendingApproval).size
+        return ResponseEntity.ok(PendingCountResponse(count))
+    }
 
     /**
      * POST /api/v1/admin/members/{id}/approve

@@ -49,7 +49,7 @@ fun Member.toResponse(): MemberProfileResponse =
         id = id.value.toString(),
         firstName = firstName,
         surname = surname,
-        phoneNumber = maskPhone(phoneHash), // Phone hash can't be reversed, show masked placeholder
+        phoneNumber = maskedPhonePlaceholder(),
         address = address,
         registrationLocation =
             GeoPointResponse(
@@ -62,7 +62,7 @@ fun Member.toResponse(): MemberProfileResponse =
     )
 
 /**
- * Mask phone number for privacy (shows only last 4 digits).
- * Since we store hash, we show a generic mask.
+ * Return masked phone placeholder for privacy.
+ * Since we store hash, we cannot recover the original number.
  */
-private fun maskPhone(phoneHash: String): String = "***-***-****"
+private fun maskedPhonePlaceholder(): String = "***-***-****"

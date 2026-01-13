@@ -109,6 +109,10 @@ data class PaginationResponse(
     val totalPages: Int,
 )
 
+data class PendingCountResponse(
+    val count: Int,
+)
+
 fun MemberWithStats.toResponse() =
     MemberResponse(
         id = id.value.toString(),

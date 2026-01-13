@@ -7,6 +7,11 @@ import com.munserv.issues.service.CreateIssueCommand
 import com.munserv.issues.service.IssueResult
 import com.munserv.issues.service.IssueService
 import com.munserv.photos.service.IssuePhotoService
+import com.munserv.shared.api.ErrorBody
+import com.munserv.shared.api.ErrorCodes
+import com.munserv.shared.api.ErrorResponse
+import com.munserv.shared.api.paginate
+import com.munserv.shared.api.toPaginationInfo
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
@@ -18,9 +23,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -38,10 +47,15 @@ import java.util.UUID
 @RequestMapping("/api/v1/issues")
 @Tag(name = "Issues", description = "Issue management endpoints for reporting and tracking municipal issues")
 @SecurityRequirement(name = "bearerAuth")
+@Validated
 class IssueController(
     private val issueService: IssueService,
     private val photoService: IssuePhotoService,
 ) {
+    companion object {
+        private const val ERROR_UNEXPECTED = "Unexpected error"
+    }
+
     /**
      * GET /api/v1/issues - List issues with optional filtering.
      */
@@ -68,57 +82,47 @@ class IssueController(
         @Parameter(description = "Filter by issue type")
         @RequestParam(required = false) type: String?,
         @Parameter(description = "Page number (1-based)")
-        @RequestParam(defaultValue = "1") page: Int,
+        @RequestParam(defaultValue = "1")
+        @Min(1, message = "Page must be at least 1")
+        page: Int,
         @Parameter(description = "Items per page (max 100)")
-        @RequestParam(defaultValue = "20") limit: Int,
+        @RequestParam(defaultValue = "20")
+        @Min(1, message = "Limit must be at least 1")
+        @Max(100, message = "Limit cannot exceed 100")
+        limit: Int,
         @Parameter(description = "Sort field", schema = Schema(allowableValues = ["heat", "createdAt"]))
         @RequestParam(defaultValue = "heat") sortBy: String,
     ): ResponseEntity<PaginatedIssuesResponse> {
-        var issues = issueService.findAll()
+        // Parse filter parameters
+        val sectorFilter = sectorId?.let { SectorId(UUID.fromString(it)) }
+        val stateFilter = state?.let { IssueState.fromString(it) }
+        val typeFilter = type?.let { IssueType.fromString(it) }
 
-        // Filter
-        if (sectorId != null) {
-            val sectorUuid = SectorId(UUID.fromString(sectorId))
-            issues = issues.filter { it.sectorId == sectorUuid }
-        }
-        if (state != null) {
-            val issueState = IssueState.fromString(state)
-            issues = issues.filter { it.state == issueState }
-        }
-        if (type != null) {
-            val issueType = IssueType.fromString(type)
-            issues = issues.filter { it.type == issueType }
-        }
+        // Filter, sort, and paginate using immutable chain
+        val filteredAndSortedIssues =
+            issueService.findAll()
+                .let { issues -> sectorFilter?.let { filter -> issues.filter { it.sectorId == filter } } ?: issues }
+                .let { issues -> stateFilter?.let { filter -> issues.filter { it.state == filter } } ?: issues }
+                .let { issues -> typeFilter?.let { filter -> issues.filter { it.type == filter } } ?: issues }
+                .let { issues ->
+                    when (sortBy) {
+                        "heat" -> issues.sortedByDescending { it.heat }
+                        "createdAt" -> issues.sortedByDescending { it.createdAt }
+                        else -> issues.sortedByDescending { it.heat }
+                    }
+                }
 
-        // Sort
-        issues =
-            when (sortBy) {
-                "heat" -> issues.sortedByDescending { it.heat }
-                "createdAt" -> issues.sortedByDescending { it.createdAt }
-                else -> issues.sortedByDescending { it.heat }
-            }
-
-        // Paginate
-        val totalItems = issues.size
-        val startIndex = (page - 1) * limit
-        val endIndex = minOf(startIndex + limit, totalItems)
-        val paginated = if (startIndex < totalItems) issues.subList(startIndex, endIndex) else emptyList()
+        // Paginate using shared utility
+        val paginatedResult = filteredAndSortedIssues.paginate(page, limit)
 
         // Convert to response with thumbnail URLs
         val items =
-            paginated.map { issue ->
+            paginatedResult.items.map { issue ->
                 val thumbnailUrl = photoService.getThumbnailUrl(issue.id)
                 issue.toSummaryResponse(thumbnailUrl)
             }
-        val pagination =
-            PaginationInfo(
-                page = page,
-                limit = limit,
-                totalItems = totalItems,
-                totalPages = if (totalItems > 0) (totalItems + limit - 1) / limit else 0,
-            )
 
-        return ResponseEntity.ok(PaginatedIssuesResponse(items, pagination))
+        return ResponseEntity.ok(PaginatedIssuesResponse(items, paginatedResult.pagination.toPaginationInfo()))
     }
 
     /**
@@ -141,39 +145,44 @@ class IssueController(
     @GetMapping("/mine")
     fun listMyIssues(
         @Parameter(hidden = true)
-        @AuthenticationPrincipal memberId: MemberId?,
+        @AuthenticationPrincipal memberIdStr: String?,
         @Parameter(description = "Page number (1-based)")
-        @RequestParam(defaultValue = "1") page: Int,
+        @RequestParam(defaultValue = "1")
+        @Min(1, message = "Page must be at least 1")
+        page: Int,
         @Parameter(description = "Items per page")
-        @RequestParam(defaultValue = "20") limit: Int,
-    ): ResponseEntity<PaginatedIssuesResponse> {
-        // Use first member ID if not authenticated (for testing)
-        val reporterId = memberId ?: MemberId(UUID.fromString("550e8400-e29b-41d4-a716-446655440010"))
+        @RequestParam(defaultValue = "20")
+        @Min(1, message = "Limit must be at least 1")
+        @Max(100, message = "Limit cannot exceed 100")
+        limit: Int,
+    ): ResponseEntity<*> {
+        if (memberIdStr == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Authentication required")))
+        }
+
+        val reporterId =
+            try {
+                MemberId(UUID.fromString(memberIdStr))
+            } catch (e: IllegalArgumentException) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Invalid authentication")))
+            }
 
         val issues =
             issueService.findByReporter(reporterId)
                 .sortedByDescending { it.createdAt }
 
-        // Paginate
-        val totalItems = issues.size
-        val startIndex = (page - 1) * limit
-        val endIndex = minOf(startIndex + limit, totalItems)
-        val paginated = if (startIndex < totalItems) issues.subList(startIndex, endIndex) else emptyList()
+        // Paginate using shared utility
+        val paginatedResult = issues.paginate(page, limit)
 
         val items =
-            paginated.map { issue ->
+            paginatedResult.items.map { issue ->
                 val thumbnailUrl = photoService.getThumbnailUrl(issue.id)
                 issue.toSummaryResponse(thumbnailUrl)
             }
-        val pagination =
-            PaginationInfo(
-                page = page,
-                limit = limit,
-                totalItems = totalItems,
-                totalPages = if (totalItems > 0) (totalItems + limit - 1) / limit else 0,
-            )
 
-        return ResponseEntity.ok(PaginatedIssuesResponse(items, pagination))
+        return ResponseEntity.ok(PaginatedIssuesResponse(items, paginatedResult.pagination.toPaginationInfo()))
     }
 
     /**
@@ -208,10 +217,12 @@ class IssueController(
             }
             is IssueResult.NotFound ->
                 ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse(ErrorDetail("NOT_FOUND", "Issue not found")))
-            else ->
-                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponse(ErrorDetail("INTERNAL_ERROR", "Unexpected error")))
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Issue not found")))
+            // Exhaustive handling - these should never occur for findById()
+            is IssueResult.InvalidTransition,
+            is IssueResult.ValidationError,
+            is IssueResult.Unauthorized,
+            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
         }
     }
 
@@ -240,13 +251,31 @@ class IssueController(
             required = true,
             content = [Content(schema = Schema(implementation = CreateIssueRequest::class))],
         )
+        @Valid
         @RequestBody request: CreateIssueRequest,
         @Parameter(hidden = true)
-        @AuthenticationPrincipal memberId: MemberId?,
+        @AuthenticationPrincipal memberIdStr: String?,
     ): ResponseEntity<*> {
-        // Use first member and sector if not authenticated (for testing)
-        val reporterId = memberId ?: MemberId(UUID.fromString("550e8400-e29b-41d4-a716-446655440010"))
-        val sectorId = SectorId(UUID.fromString("550e8400-e29b-41d4-a716-446655440001"))
+        if (memberIdStr == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Authentication required")))
+        }
+
+        val reporterId =
+            try {
+                MemberId(UUID.fromString(memberIdStr))
+            } catch (e: IllegalArgumentException) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Invalid authentication")))
+            }
+
+        val sectorId =
+            try {
+                SectorId(UUID.fromString(request.sectorId))
+            } catch (e: IllegalArgumentException) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.VALIDATION_ERROR, "Invalid sector ID format")))
+            }
 
         val command =
             CreateIssueCommand(
@@ -266,10 +295,12 @@ class IssueController(
             }
             is IssueResult.ValidationError ->
                 ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponse(ErrorDetail("VALIDATION_ERROR", result.errors.joinToString(", "))))
-            else ->
-                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponse(ErrorDetail("INTERNAL_ERROR", "Unexpected error")))
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.VALIDATION_ERROR, result.errors.joinToString(", "))))
+            // Exhaustive handling - these should never occur for create()
+            is IssueResult.NotFound,
+            is IssueResult.InvalidTransition,
+            is IssueResult.Unauthorized,
+            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
         }
     }
 
@@ -302,6 +333,7 @@ class IssueController(
             required = true,
             content = [Content(schema = Schema(implementation = UpdateIssueStateRequest::class))],
         )
+        @Valid
         @RequestBody request: UpdateIssueStateRequest,
     ): ResponseEntity<*> {
         val issueId = IssueId(UUID.fromString(id))
@@ -314,20 +346,21 @@ class IssueController(
             }
             is IssueResult.NotFound ->
                 ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse(ErrorDetail("NOT_FOUND", "Issue not found")))
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Issue not found")))
             is IssueResult.InvalidTransition ->
                 ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(
                         ErrorResponse(
-                            ErrorDetail(
-                                "INVALID_STATE_TRANSITION",
+                            ErrorBody(
+                                ErrorCodes.INVALID_STATE_TRANSITION,
                                 "Cannot transition from ${result.from.toApiString()} to ${result.to.toApiString()}",
                             ),
                         ),
                     )
-            else ->
-                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponse(ErrorDetail("INTERNAL_ERROR", "Unexpected error")))
+            // Exhaustive handling - these should never occur for updateState()
+            is IssueResult.ValidationError,
+            is IssueResult.Unauthorized,
+            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
         }
     }
 }

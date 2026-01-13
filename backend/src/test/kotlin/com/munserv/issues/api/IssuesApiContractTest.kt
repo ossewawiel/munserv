@@ -296,6 +296,7 @@ class IssuesApiContractTest {
             val request =
                 CreateIssueRequest(
                     type = "pothole",
+                    sectorId = "550e8400-e29b-41d4-a716-446655440001",
                     latitude = -26.1350,
                     longitude = 27.9800,
                     description = "Test pothole",
@@ -321,6 +322,7 @@ class IssuesApiContractTest {
             val request =
                 mapOf(
                     "type" to "invalid_type",
+                    "sectorId" to "550e8400-e29b-41d4-a716-446655440001",
                     "latitude" to -26.1350,
                     "longitude" to 27.9800,
                 )
@@ -341,6 +343,7 @@ class IssuesApiContractTest {
             val request =
                 CreateIssueRequest(
                     type = "water_leak",
+                    sectorId = "550e8400-e29b-41d4-a716-446655440001",
                     latitude = -26.1320,
                     longitude = 27.9870,
                     description = null,
@@ -374,6 +377,7 @@ class IssuesApiContractTest {
             val createRequest =
                 CreateIssueRequest(
                     type = "pothole",
+                    sectorId = "550e8400-e29b-41d4-a716-446655440001",
                     latitude = -26.1350,
                     longitude = 27.9800,
                     description = "Test issue for state transition",

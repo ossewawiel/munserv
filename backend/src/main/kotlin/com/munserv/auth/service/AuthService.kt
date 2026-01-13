@@ -33,6 +33,7 @@ class AuthService(
     /**
      * Start registration flow by sending OTP.
      */
+    @Transactional(readOnly = true)
     fun register(phoneString: String): AuthResult {
         val phone =
             try {
@@ -73,6 +74,7 @@ class AuthService(
     /**
      * Complete registration by creating member account.
      */
+    @Transactional
     fun completeRegistration(command: CompleteRegistrationCommand): AuthResult {
         val phoneNumber =
             try {
@@ -132,6 +134,7 @@ class AuthService(
     /**
      * Login with phone and PIN.
      */
+    @Transactional(readOnly = true)
     fun login(
         phoneString: String,
         pinString: String,
@@ -199,6 +202,7 @@ class AuthService(
     /**
      * Check if a phone number is registered.
      */
+    @Transactional(readOnly = true)
     fun checkPhone(phoneString: String): AuthResult {
         val phone =
             try {
@@ -214,6 +218,7 @@ class AuthService(
     /**
      * Refresh tokens using a valid refresh token.
      */
+    @Transactional(readOnly = true)
     fun refreshToken(refreshToken: String): AuthResult {
         val validation = jwtService.validateToken(refreshToken)
 
@@ -238,6 +243,7 @@ class AuthService(
      * Authenticates a member using email and password.
      * Used by mobile app after admin approval.
      */
+    @Transactional(readOnly = true)
     fun loginWithEmail(
         emailString: String,
         password: String,
