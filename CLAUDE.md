@@ -59,13 +59,24 @@ Read mobile/CLAUDE.md, then create a ConsumerWidget for displaying issue details
 
 ## Repository Structure
 ```
-/backend        → Kotlin/Spring Boot API (Phase 3)
-/mobile         → Flutter app ← START HERE
-/web            → React admin portal ← START HERE
-/database       → Migrations, seeds (Phase 3)
+/backend        → Kotlin/Spring Boot API
+/mobile         → Flutter app
+/web            → React admin portal
+/database       → Migrations, seeds
 /shared         → API contracts, shared types
 /infrastructure → Docker, mock-api, IaC
-/specs          → Specification documents
+/specs          → Documentation (see below)
+/.claude        → Project-level skills
+```
+
+### Specs Structure (Concise)
+```
+/specs
+├── requirements/      → User stories (mobile.md, web.md, backlog.md)
+├── contracts/         → API contract (api.md, types.md)
+├── architecture/      → Overview, patterns, decisions/
+├── features/          → Feature specs per feature
+└── operations/        → DevOps, environments
 ```
 
 ## Quick Start
@@ -89,27 +100,61 @@ flutter pub get
 flutter run
 ```
 
-## Key Documents
+## Project-Level Skills
 
-### For MVP Development (Read First)
+Use these skills for cross-platform development and documentation management.
+
+### Requirements & Features
+| Skill | Purpose |
+|-------|---------|
+| `/add-story` | Add user story to `specs/requirements/{platform}.md` |
+| `/add-feature` | Create feature spec in `specs/features/{name}/` |
+| `/plan-feature` | Generate cross-platform implementation plan |
+
+### Architecture & Contracts
+| Skill | Purpose |
+|-------|---------|
+| `/add-adr` | Create Architecture Decision Record |
+| `/add-pattern` | Add code pattern to `specs/architecture/patterns.md` |
+| `/add-endpoint` | Add API endpoint to `specs/contracts/api.md` |
+| `/add-type` | Add shared type to `specs/contracts/types.md` |
+
+### Documentation
+| Skill | Purpose |
+|-------|---------|
+| `/update-readme` | Update README with agentic workflow |
+| `/sync-docs` | Validate documentation consistency |
+| `/migrate-docs` | Migrate verbose docs to concise structure |
+
+### Workflow Example
+```
+1. /add-story platform=mobile story="As a member, I can reset my PIN"
+2. /add-endpoint method=POST path="/auth/reset-pin" response="{ otpSent }"
+3. /plan-feature feature="reset-pin"
+4. Hand off to platform /dev-cycle skills
+```
+
+## Documentation (Concise Structure)
+
+### Quick Reference (SHORT and SWEET)
 | Document | Purpose |
 |----------|---------|
-| [`MVP_Development_Guide.md`](specs/MVP_Development_Guide.md) | **START HERE** - Features, API contract, mock data |
-| [`Specification_Roadmap.md`](specs/Specification_Roadmap.md) | Overall plan and progress tracking |
+| [`specs/requirements/`](specs/requirements/) | User stories by platform |
+| [`specs/contracts/api.md`](specs/contracts/api.md) | API endpoints (source of truth) |
+| [`specs/contracts/types.md`](specs/contracts/types.md) | Shared data types |
+| [`specs/architecture/overview.md`](specs/architecture/overview.md) | System architecture |
+| [`specs/architecture/patterns.md`](specs/architecture/patterns.md) | Code patterns |
+| [`specs/architecture/decisions/`](specs/architecture/decisions/) | ADRs (why we chose X) |
+| [`specs/operations/`](specs/operations/) | DevOps, environments |
 
-### For Code Generation
+### Legacy Documents (Detailed Reference)
 | Document | Use When |
 |----------|----------|
-| [`Architecture_and_Design_Patterns.md`](specs/Architecture_and_Design_Patterns.md) | Layer structure, patterns, code examples |
-| [`Coding_Standards.md`](specs/Coding_Standards.md) | Naming conventions, formatting rules |
-| [`Testing_Strategy.md`](specs/Testing_Strategy.md) | Test patterns, coverage targets |
-
-### For Context
-| Document | Contains |
-|----------|----------|
-| [`Domain_and_Data_Modeling.md`](specs/Domain_and_Data_Modeling.md) | Entities, roles, workflows, state machines |
-| [`Tech_Stack_Selection.md`](specs/Tech_Stack_Selection.md) | Technology choices with rationale |
-| [`DevOps_Strategy.md`](specs/DevOps_Strategy.md) | Git workflow, CI/CD, environments |
+| [`MVP_Development_Guide.md`](specs/MVP_Development_Guide.md) | Full context, mock data |
+| [`Architecture_and_Design_Patterns.md`](specs/Architecture_and_Design_Patterns.md) | Detailed patterns |
+| [`Domain_and_Data_Modeling.md`](specs/Domain_and_Data_Modeling.md) | Entity definitions |
+| [`Coding_Standards.md`](specs/Coding_Standards.md) | Naming conventions |
+| [`Testing_Strategy.md`](specs/Testing_Strategy.md) | Test patterns |
 
 ## Before Generating Code
 
@@ -175,24 +220,18 @@ flutter run
 ## MVP Scope Summary
 
 ### Mobile (Member App)
+See [`specs/requirements/mobile.md`](specs/requirements/mobile.md)
 - M1: Register with phone + OTP
 - M2: Login with PIN/biometric
-- M3: View issues on map
-- M4: View issue list
-- M5: Report new issue
-- M6: View issue details
-- M7: View my reports
+- M3-M7: Issue viewing and reporting
 
 ### Web (Admin Portal)
-- W1: Login with email/password
-- W2: View dashboard
-- W3: View issues list
-- W4: View issue details
-- W5: Change issue state
-- W6: View heat report
-- W7: View members list
+See [`specs/requirements/web.md`](specs/requirements/web.md)
+- W1: Admin login
+- W2-W7: Dashboard, issue management, member management
 
-**Full details in [MVP_Development_Guide.md](specs/MVP_Development_Guide.md)**
+### API Contract
+See [`specs/contracts/api.md`](specs/contracts/api.md) for all endpoints.
 
 ## MCPs Available
 | MCP | Purpose | Use When |
