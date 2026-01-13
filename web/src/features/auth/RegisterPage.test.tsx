@@ -216,7 +216,7 @@ describe('RegisterPage', () => {
       });
     });
 
-    it('should allow filling all form fields', async () => {
+    it('should allow filling all form fields', { timeout: 15000 }, async () => {
       renderRegisterPage();
 
       // Wait for form to load

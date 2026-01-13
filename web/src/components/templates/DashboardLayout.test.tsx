@@ -38,6 +38,7 @@ vi.mock('@/features/auth/hooks', () => ({
 vi.mock('@/lib/i18n', () => ({
   SUPPORTED_LANGUAGES: ['en'] as const,
   LANGUAGE_NAMES: { en: 'English' },
+  LANGUAGE_NATIVE_NAMES: { en: 'English' },
 }));
 
 // Initialize i18next for tests

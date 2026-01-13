@@ -1,5 +1,7 @@
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 import { IssueStateBadge } from '@/components/molecules/IssueStateBadge';
 import { IssueTypeBadge } from '@/components/molecules/IssueTypeBadge';
@@ -57,25 +59,68 @@ export const IssueInfoCard: FC<IssueInfoCardProps> = ({ issue }) => {
   ];
 
   return (
-    <div className="rounded-lg border border-border bg-background p-6">
-      <dl className="space-y-4">
+    <Box
+      sx={{
+        borderRadius: 2,
+        border: 1,
+        borderColor: 'divider',
+        bgcolor: 'background.paper',
+        p: 3,
+      }}
+    >
+      <Box component="dl" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {infoItems.map((item) => (
-          <div key={item.label} className="flex flex-col gap-1 sm:flex-row sm:gap-4">
-            <dt className="w-32 flex-shrink-0 text-sm font-medium text-text-muted">
+          <Box
+            key={item.label}
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 0.5, sm: 2 },
+            }}
+          >
+            <Typography
+              component="dt"
+              variant="body2"
+              sx={{
+                width: { sm: 128 },
+                flexShrink: 0,
+                fontWeight: 500,
+                color: 'text.secondary',
+              }}
+            >
               {item.label}
-            </dt>
-            <dd className="text-sm text-text">{item.value}</dd>
-          </div>
+            </Typography>
+            <Typography component="dd" variant="body2" sx={{ color: 'text.primary' }}>
+              {item.value}
+            </Typography>
+          </Box>
         ))}
         {issue.description && (
-          <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
-            <dt className="w-32 flex-shrink-0 text-sm font-medium text-text-muted">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 0.5, sm: 2 },
+            }}
+          >
+            <Typography
+              component="dt"
+              variant="body2"
+              sx={{
+                width: { sm: 128 },
+                flexShrink: 0,
+                fontWeight: 500,
+                color: 'text.secondary',
+              }}
+            >
               {t('issues.description')}
-            </dt>
-            <dd className="text-sm text-text">{issue.description}</dd>
-          </div>
+            </Typography>
+            <Typography component="dd" variant="body2" sx={{ color: 'text.primary' }}>
+              {issue.description}
+            </Typography>
+          </Box>
         )}
-      </dl>
-    </div>
+      </Box>
+    </Box>
   );
 };
