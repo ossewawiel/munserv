@@ -19,7 +19,9 @@
     "noResults": "Geen resultate gevind nie",
     "confirm": "Bevestig",
     "yes": "Ja",
-    "no": "Nee"
+    "no": "Nee",
+    "close": "Sluit",
+    "notAvailable": "N.v.t."
   },
   "auth": {
     "login": "Teken aan",
@@ -98,6 +100,7 @@
     "changeState": "Verander Status",
     "stateHistory": "Statusgeskiedenis",
     "photos": "Foto's",
+    "viewOnMap": "Klik om op kaart te sien",
     "noIssuesDescription": "Geen probleme pas by jou huidige filters nie. Probeer om jou filters aan te pas of kyk later weer.",
     "selectState": "Kies nuwe status",
     "note": "Nota (opsioneel)",

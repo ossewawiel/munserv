@@ -19,7 +19,9 @@
     "noResults": "No results found",
     "confirm": "Confirm",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "close": "Close",
+    "notAvailable": "N/A"
   },
   "auth": {
     "login": "Login",
@@ -98,6 +100,7 @@
     "changeState": "Change State",
     "stateHistory": "State History",
     "photos": "Photos",
+    "viewOnMap": "Click to view on map",
     "noIssuesDescription": "No issues match your current filters. Try adjusting your filters or check back later.",
     "selectState": "Select new state",
     "note": "Note (optional)",

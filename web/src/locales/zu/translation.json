@@ -19,7 +19,9 @@
     "noResults": "Ayikho imiphumela etholakele",
     "confirm": "Qinisekisa",
     "yes": "Yebo",
-    "no": "Cha"
+    "no": "Cha",
+    "close": "Vala",
+    "notAvailable": "Ayitholakali"
   },
   "auth": {
     "login": "Ngena ngemvume",
@@ -98,6 +100,7 @@
     "changeState": "Shintsha Isimo",
     "stateHistory": "Umlando Wesimo",
     "photos": "Izithombe",
+    "viewOnMap": "Chofoza ukubona kumephu",
     "noIssuesDescription": "Azikho izinkinga ezifanele izihluzi zakho zamanje. Zama ukulungisa izihluzi zakho noma ubheke kamuva.",
     "selectState": "Khetha isimo esisha",
     "note": "Inothi (ayiphoqelekile)",

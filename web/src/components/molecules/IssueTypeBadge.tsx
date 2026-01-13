@@ -6,9 +6,12 @@ import SvgIcon from '@mui/material/SvgIcon';
 
 import type { IssueType } from '@/features/issues/types';
 
+type BadgeSize = 'sm' | 'md' | 'lg';
+
 interface IssueTypeBadgeProps {
   type: IssueType;
   showIcon?: boolean;
+  size?: BadgeSize;
 }
 
 const typeIcons: Record<IssueType, string> = {
@@ -21,23 +24,65 @@ const typeIcons: Record<IssueType, string> = {
   other: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
 };
 
+interface SizeConfig {
+  iconSize: number;
+  variant: 'body2' | 'body1' | 'h6';
+  iconContainerSize: number;
+  solidIcon: boolean;
+}
+
+const sizeConfig: Record<BadgeSize, SizeConfig> = {
+  sm: { iconSize: 16, variant: 'body2', iconContainerSize: 0, solidIcon: false },
+  md: { iconSize: 20, variant: 'body1', iconContainerSize: 0, solidIcon: false },
+  lg: { iconSize: 18, variant: 'h6', iconContainerSize: 32, solidIcon: true },
+};
+
 export const IssueTypeBadge: FC<IssueTypeBadgeProps> = ({
   type,
   showIcon = true,
+  size = 'sm',
 }) => {
   const { t } = useTranslation();
+  const { iconSize, variant, iconContainerSize, solidIcon } = sizeConfig[size];
 
   return (
     <Box
       sx={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 0.75,
+        gap: solidIcon ? 1.5 : 0.75,
       }}
     >
-      {showIcon && (
+      {showIcon && solidIcon && (
+        <Box
+          sx={{
+            width: iconContainerSize,
+            height: iconContainerSize,
+            borderRadius: '50%',
+            bgcolor: 'primary.main',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <SvgIcon
+            sx={{ fontSize: iconSize, color: 'white' }}
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d={typeIcons[type]}
+            />
+          </SvgIcon>
+        </Box>
+      )}
+      {showIcon && !solidIcon && (
         <SvgIcon
-          sx={{ fontSize: 16, color: 'text.secondary' }}
+          sx={{ fontSize: iconSize, color: 'text.secondary' }}
           viewBox="0 0 24 24"
         >
           <path
@@ -50,7 +95,7 @@ export const IssueTypeBadge: FC<IssueTypeBadgeProps> = ({
           />
         </SvgIcon>
       )}
-      <Typography variant="body2" color="text.primary">
+      <Typography variant={variant} color="text.primary">
         {t(`issues.types.${type}`)}
       </Typography>
     </Box>
