@@ -55,14 +55,16 @@ extension AuthStatePatterns on AuthState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( AuthStateInitial value)?  initial,TResult Function( AuthStateLoading value)?  loading,TResult Function( AuthStateAuthenticated value)?  authenticated,TResult Function( AuthStateUnauthenticated value)?  unauthenticated,TResult Function( AuthStateError value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( AuthStateInitial value)?  initial,TResult Function( AuthStateLoading value)?  loading,TResult Function( AuthStateUnauthenticated value)?  unauthenticated,TResult Function( AuthStateMustChangePassword value)?  mustChangePassword,TResult Function( AuthStatePendingPinSetup value)?  pendingPinSetup,TResult Function( AuthStateAuthenticated value)?  authenticated,TResult Function( AuthStateError value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case AuthStateInitial() when initial != null:
 return initial(_that);case AuthStateLoading() when loading != null:
-return loading(_that);case AuthStateAuthenticated() when authenticated != null:
-return authenticated(_that);case AuthStateUnauthenticated() when unauthenticated != null:
-return unauthenticated(_that);case AuthStateError() when error != null:
+return loading(_that);case AuthStateUnauthenticated() when unauthenticated != null:
+return unauthenticated(_that);case AuthStateMustChangePassword() when mustChangePassword != null:
+return mustChangePassword(_that);case AuthStatePendingPinSetup() when pendingPinSetup != null:
+return pendingPinSetup(_that);case AuthStateAuthenticated() when authenticated != null:
+return authenticated(_that);case AuthStateError() when error != null:
 return error(_that);case _:
   return orElse();
 
@@ -81,14 +83,16 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( AuthStateInitial value)  initial,required TResult Function( AuthStateLoading value)  loading,required TResult Function( AuthStateAuthenticated value)  authenticated,required TResult Function( AuthStateUnauthenticated value)  unauthenticated,required TResult Function( AuthStateError value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( AuthStateInitial value)  initial,required TResult Function( AuthStateLoading value)  loading,required TResult Function( AuthStateUnauthenticated value)  unauthenticated,required TResult Function( AuthStateMustChangePassword value)  mustChangePassword,required TResult Function( AuthStatePendingPinSetup value)  pendingPinSetup,required TResult Function( AuthStateAuthenticated value)  authenticated,required TResult Function( AuthStateError value)  error,}){
 final _that = this;
 switch (_that) {
 case AuthStateInitial():
 return initial(_that);case AuthStateLoading():
-return loading(_that);case AuthStateAuthenticated():
-return authenticated(_that);case AuthStateUnauthenticated():
-return unauthenticated(_that);case AuthStateError():
+return loading(_that);case AuthStateUnauthenticated():
+return unauthenticated(_that);case AuthStateMustChangePassword():
+return mustChangePassword(_that);case AuthStatePendingPinSetup():
+return pendingPinSetup(_that);case AuthStateAuthenticated():
+return authenticated(_that);case AuthStateError():
 return error(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -103,14 +107,16 @@ return error(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( AuthStateInitial value)?  initial,TResult? Function( AuthStateLoading value)?  loading,TResult? Function( AuthStateAuthenticated value)?  authenticated,TResult? Function( AuthStateUnauthenticated value)?  unauthenticated,TResult? Function( AuthStateError value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( AuthStateInitial value)?  initial,TResult? Function( AuthStateLoading value)?  loading,TResult? Function( AuthStateUnauthenticated value)?  unauthenticated,TResult? Function( AuthStateMustChangePassword value)?  mustChangePassword,TResult? Function( AuthStatePendingPinSetup value)?  pendingPinSetup,TResult? Function( AuthStateAuthenticated value)?  authenticated,TResult? Function( AuthStateError value)?  error,}){
 final _that = this;
 switch (_that) {
 case AuthStateInitial() when initial != null:
 return initial(_that);case AuthStateLoading() when loading != null:
-return loading(_that);case AuthStateAuthenticated() when authenticated != null:
-return authenticated(_that);case AuthStateUnauthenticated() when unauthenticated != null:
-return unauthenticated(_that);case AuthStateError() when error != null:
+return loading(_that);case AuthStateUnauthenticated() when unauthenticated != null:
+return unauthenticated(_that);case AuthStateMustChangePassword() when mustChangePassword != null:
+return mustChangePassword(_that);case AuthStatePendingPinSetup() when pendingPinSetup != null:
+return pendingPinSetup(_that);case AuthStateAuthenticated() when authenticated != null:
+return authenticated(_that);case AuthStateError() when error != null:
 return error(_that);case _:
   return null;
 
@@ -128,13 +134,15 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( AuthTokens tokens,  MemberProfile profile,  SectorInfo sector)?  authenticated,TResult Function()?  unauthenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  unauthenticated,TResult Function( AuthTokens tokens,  String memberId)?  mustChangePassword,TResult Function( AuthTokens tokens,  String memberId)?  pendingPinSetup,TResult Function( AuthTokens tokens,  MemberProfile profile,  SectorInfo sector)?  authenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case AuthStateInitial() when initial != null:
 return initial();case AuthStateLoading() when loading != null:
-return loading();case AuthStateAuthenticated() when authenticated != null:
-return authenticated(_that.tokens,_that.profile,_that.sector);case AuthStateUnauthenticated() when unauthenticated != null:
-return unauthenticated();case AuthStateError() when error != null:
+return loading();case AuthStateUnauthenticated() when unauthenticated != null:
+return unauthenticated();case AuthStateMustChangePassword() when mustChangePassword != null:
+return mustChangePassword(_that.tokens,_that.memberId);case AuthStatePendingPinSetup() when pendingPinSetup != null:
+return pendingPinSetup(_that.tokens,_that.memberId);case AuthStateAuthenticated() when authenticated != null:
+return authenticated(_that.tokens,_that.profile,_that.sector);case AuthStateError() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -153,13 +161,15 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( AuthTokens tokens,  MemberProfile profile,  SectorInfo sector)  authenticated,required TResult Function()  unauthenticated,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  unauthenticated,required TResult Function( AuthTokens tokens,  String memberId)  mustChangePassword,required TResult Function( AuthTokens tokens,  String memberId)  pendingPinSetup,required TResult Function( AuthTokens tokens,  MemberProfile profile,  SectorInfo sector)  authenticated,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case AuthStateInitial():
 return initial();case AuthStateLoading():
-return loading();case AuthStateAuthenticated():
-return authenticated(_that.tokens,_that.profile,_that.sector);case AuthStateUnauthenticated():
-return unauthenticated();case AuthStateError():
+return loading();case AuthStateUnauthenticated():
+return unauthenticated();case AuthStateMustChangePassword():
+return mustChangePassword(_that.tokens,_that.memberId);case AuthStatePendingPinSetup():
+return pendingPinSetup(_that.tokens,_that.memberId);case AuthStateAuthenticated():
+return authenticated(_that.tokens,_that.profile,_that.sector);case AuthStateError():
 return error(_that.message);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -174,13 +184,15 @@ return error(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( AuthTokens tokens,  MemberProfile profile,  SectorInfo sector)?  authenticated,TResult? Function()?  unauthenticated,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  unauthenticated,TResult? Function( AuthTokens tokens,  String memberId)?  mustChangePassword,TResult? Function( AuthTokens tokens,  String memberId)?  pendingPinSetup,TResult? Function( AuthTokens tokens,  MemberProfile profile,  SectorInfo sector)?  authenticated,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case AuthStateInitial() when initial != null:
 return initial();case AuthStateLoading() when loading != null:
-return loading();case AuthStateAuthenticated() when authenticated != null:
-return authenticated(_that.tokens,_that.profile,_that.sector);case AuthStateUnauthenticated() when unauthenticated != null:
-return unauthenticated();case AuthStateError() when error != null:
+return loading();case AuthStateUnauthenticated() when unauthenticated != null:
+return unauthenticated();case AuthStateMustChangePassword() when mustChangePassword != null:
+return mustChangePassword(_that.tokens,_that.memberId);case AuthStatePendingPinSetup() when pendingPinSetup != null:
+return pendingPinSetup(_that.tokens,_that.memberId);case AuthStateAuthenticated() when authenticated != null:
+return authenticated(_that.tokens,_that.profile,_that.sector);case AuthStateError() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -252,6 +264,192 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class AuthStateUnauthenticated implements AuthState {
+  const AuthStateUnauthenticated();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthStateUnauthenticated);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthState.unauthenticated()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class AuthStateMustChangePassword implements AuthState {
+  const AuthStateMustChangePassword({required this.tokens, required this.memberId});
+  
+
+ final  AuthTokens tokens;
+ final  String memberId;
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AuthStateMustChangePasswordCopyWith<AuthStateMustChangePassword> get copyWith => _$AuthStateMustChangePasswordCopyWithImpl<AuthStateMustChangePassword>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthStateMustChangePassword&&(identical(other.tokens, tokens) || other.tokens == tokens)&&(identical(other.memberId, memberId) || other.memberId == memberId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,tokens,memberId);
+
+@override
+String toString() {
+  return 'AuthState.mustChangePassword(tokens: $tokens, memberId: $memberId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $AuthStateMustChangePasswordCopyWith<$Res> implements $AuthStateCopyWith<$Res> {
+  factory $AuthStateMustChangePasswordCopyWith(AuthStateMustChangePassword value, $Res Function(AuthStateMustChangePassword) _then) = _$AuthStateMustChangePasswordCopyWithImpl;
+@useResult
+$Res call({
+ AuthTokens tokens, String memberId
+});
+
+
+$AuthTokensCopyWith<$Res> get tokens;
+
+}
+/// @nodoc
+class _$AuthStateMustChangePasswordCopyWithImpl<$Res>
+    implements $AuthStateMustChangePasswordCopyWith<$Res> {
+  _$AuthStateMustChangePasswordCopyWithImpl(this._self, this._then);
+
+  final AuthStateMustChangePassword _self;
+  final $Res Function(AuthStateMustChangePassword) _then;
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? tokens = null,Object? memberId = null,}) {
+  return _then(AuthStateMustChangePassword(
+tokens: null == tokens ? _self.tokens : tokens // ignore: cast_nullable_to_non_nullable
+as AuthTokens,memberId: null == memberId ? _self.memberId : memberId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AuthTokensCopyWith<$Res> get tokens {
+  
+  return $AuthTokensCopyWith<$Res>(_self.tokens, (value) {
+    return _then(_self.copyWith(tokens: value));
+  });
+}
+}
+
+/// @nodoc
+
+
+class AuthStatePendingPinSetup implements AuthState {
+  const AuthStatePendingPinSetup({required this.tokens, required this.memberId});
+  
+
+ final  AuthTokens tokens;
+ final  String memberId;
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AuthStatePendingPinSetupCopyWith<AuthStatePendingPinSetup> get copyWith => _$AuthStatePendingPinSetupCopyWithImpl<AuthStatePendingPinSetup>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthStatePendingPinSetup&&(identical(other.tokens, tokens) || other.tokens == tokens)&&(identical(other.memberId, memberId) || other.memberId == memberId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,tokens,memberId);
+
+@override
+String toString() {
+  return 'AuthState.pendingPinSetup(tokens: $tokens, memberId: $memberId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $AuthStatePendingPinSetupCopyWith<$Res> implements $AuthStateCopyWith<$Res> {
+  factory $AuthStatePendingPinSetupCopyWith(AuthStatePendingPinSetup value, $Res Function(AuthStatePendingPinSetup) _then) = _$AuthStatePendingPinSetupCopyWithImpl;
+@useResult
+$Res call({
+ AuthTokens tokens, String memberId
+});
+
+
+$AuthTokensCopyWith<$Res> get tokens;
+
+}
+/// @nodoc
+class _$AuthStatePendingPinSetupCopyWithImpl<$Res>
+    implements $AuthStatePendingPinSetupCopyWith<$Res> {
+  _$AuthStatePendingPinSetupCopyWithImpl(this._self, this._then);
+
+  final AuthStatePendingPinSetup _self;
+  final $Res Function(AuthStatePendingPinSetup) _then;
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? tokens = null,Object? memberId = null,}) {
+  return _then(AuthStatePendingPinSetup(
+tokens: null == tokens ? _self.tokens : tokens // ignore: cast_nullable_to_non_nullable
+as AuthTokens,memberId: null == memberId ? _self.memberId : memberId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AuthTokensCopyWith<$Res> get tokens {
+  
+  return $AuthTokensCopyWith<$Res>(_self.tokens, (value) {
+    return _then(_self.copyWith(tokens: value));
+  });
+}
+}
 
 /// @nodoc
 
@@ -349,38 +547,6 @@ $SectorInfoCopyWith<$Res> get sector {
   });
 }
 }
-
-/// @nodoc
-
-
-class AuthStateUnauthenticated implements AuthState {
-  const AuthStateUnauthenticated();
-  
-
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthStateUnauthenticated);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'AuthState.unauthenticated()';
-}
-
-
-}
-
-
-
 
 /// @nodoc
 

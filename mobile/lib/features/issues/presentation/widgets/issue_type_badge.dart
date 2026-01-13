@@ -65,6 +65,7 @@ class IssueTypeBadge extends StatelessWidget {
         IssueType.trafficLight => Icons.traffic,
         IssueType.streetLight => Icons.lightbulb,
         IssueType.illegalDumping => Icons.delete,
+        IssueType.roadDamage => Icons.remove_road,
         IssueType.other => Icons.help_outline,
       };
 
@@ -75,6 +76,7 @@ class IssueTypeBadge extends StatelessWidget {
         IssueType.trafficLight => const Color(0xFFC62828),
         IssueType.streetLight => const Color(0xFFFBC02D),
         IssueType.illegalDumping => const Color(0xFF558B2F),
+        IssueType.roadDamage => const Color(0xFF424242),
         IssueType.other => const Color(0xFF757575),
       };
 }

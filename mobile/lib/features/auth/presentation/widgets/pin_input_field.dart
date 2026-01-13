@@ -93,26 +93,26 @@ class PinInputFieldState extends State<PinInputField> {
                     color: hasError
                         ? theme.colorScheme.error
                         : isCurrent && _focusNode.hasFocus
-                            ? theme.colorScheme.primary
-                            : Colors.transparent,
+                        ? theme.colorScheme.primary
+                        : Colors.transparent,
                     width: 2,
                   ),
                 ),
                 child: Center(
                   child: isFilled
                       ? widget.obscureText
-                          ? Container(
-                              width: 16,
-                              height: 16,
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.onSurface,
-                                shape: BoxShape.circle,
-                              ),
-                            )
-                          : Text(
-                              _controller.text[index],
-                              style: theme.textTheme.headlineSmall,
-                            )
+                            ? Container(
+                                width: 16,
+                                height: 16,
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.onSurface,
+                                  shape: BoxShape.circle,
+                                ),
+                              )
+                            : Text(
+                                _controller.text[index],
+                                style: theme.textTheme.headlineSmall,
+                              )
                       : null,
                 ),
               );
@@ -130,9 +130,7 @@ class PinInputFieldState extends State<PinInputField> {
               enabled: widget.enabled,
               keyboardType: TextInputType.number,
               maxLength: widget.length,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onChanged: _onChanged,
             ),
           ),

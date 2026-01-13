@@ -1,3 +1,20 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"]
+    },
+    "sonarqube": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "SONARQUBE_TOKEN", "-e", "SONARQUBE_URL", "mcp/sonarqube"],
+      "env": {
+        "SONARQUBE_TOKEN": "squ_587cfc0019799be65ad1b695c3e922de370ca68c",
+        "SONARQUBE_URL": "http://host.docker.internal:9000"
+      }
+    }
+  }
 }

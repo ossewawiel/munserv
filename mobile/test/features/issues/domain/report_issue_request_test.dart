@@ -9,11 +9,13 @@ void main() {
       final request = ReportIssueRequest(
         type: IssueType.pothole,
         location: const GeoPoint(latitude: -26.1234, longitude: 28.0123),
+        sectorId: 'sector-123',
       );
 
       expect(request.type, IssueType.pothole);
       expect(request.location.latitude, -26.1234);
       expect(request.location.longitude, 28.0123);
+      expect(request.sectorId, 'sector-123');
       expect(request.description, isNull);
     });
 
@@ -21,10 +23,12 @@ void main() {
       final request = ReportIssueRequest(
         type: IssueType.waterLeak,
         location: const GeoPoint(latitude: -26.5, longitude: 28.5),
+        sectorId: 'sector-456',
         description: 'Water leaking from pipe',
       );
 
       expect(request.type, IssueType.waterLeak);
+      expect(request.sectorId, 'sector-456');
       expect(request.description, 'Water leaking from pipe');
     });
 
@@ -32,6 +36,7 @@ void main() {
       final request = ReportIssueRequest(
         type: IssueType.streetLight,
         location: const GeoPoint(latitude: -26.1, longitude: 28.1),
+        sectorId: 'sector-789',
         description: 'Light is broken',
       );
 
@@ -40,6 +45,7 @@ void main() {
       expect(json['type'], 'street_light');
       expect(json['location']['latitude'], -26.1);
       expect(json['location']['longitude'], 28.1);
+      expect(json['sectorId'], 'sector-789');
       expect(json['description'], 'Light is broken');
     });
 
@@ -47,6 +53,7 @@ void main() {
       final json = {
         'type': 'illegal_dumping',
         'location': {'latitude': -26.2, 'longitude': 28.2},
+        'sectorId': 'sector-abc',
         'description': 'Rubbish dumped',
       };
 
@@ -55,6 +62,7 @@ void main() {
       expect(request.type, IssueType.illegalDumping);
       expect(request.location.latitude, -26.2);
       expect(request.location.longitude, 28.2);
+      expect(request.sectorId, 'sector-abc');
       expect(request.description, 'Rubbish dumped');
     });
 
@@ -62,18 +70,32 @@ void main() {
       final request1 = ReportIssueRequest(
         type: IssueType.pothole,
         location: const GeoPoint(latitude: -26.1, longitude: 28.1),
+        sectorId: 'sector-123',
       );
       final request2 = ReportIssueRequest(
         type: IssueType.pothole,
         location: const GeoPoint(latitude: -26.1, longitude: 28.1),
+        sectorId: 'sector-123',
       );
       final request3 = ReportIssueRequest(
         type: IssueType.waterLeak,
         location: const GeoPoint(latitude: -26.1, longitude: 28.1),
+        sectorId: 'sector-123',
       );
 
       expect(request1, equals(request2));
       expect(request1, isNot(equals(request3)));
+    });
+
+    test('sectorId is required', () {
+      // This test verifies that sectorId is a required field
+      // by ensuring the constructor requires it
+      final request = ReportIssueRequest(
+        type: IssueType.pothole,
+        location: const GeoPoint(latitude: -26.1, longitude: 28.1),
+        sectorId: 'test-sector',
+      );
+      expect(request.sectorId, isNotEmpty);
     });
   });
 

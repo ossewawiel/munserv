@@ -1,0 +1,138 @@
+spring:
+  application:
+    name: munserv-api
+
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/munserv_dev}
+    username: ${DB_USER:munserv}
+    password: ${DB_PASSWORD:munserv_dev}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
+        format_sql: true
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+jwt:
+  secret: ${JWT_SECRET:dev-secret-key-change-in-production-must-be-at-least-256-bits}
+  access-token-expiry: 86400000    # 24 hours in milliseconds
+  refresh-token-expiry: 7776000000 # 90 days in milliseconds
+  temp-token-expiry: 600000        # 10 minutes in milliseconds
+
+otp:
+  expiry-seconds: 300  # 5 minutes
+  length: 6
+  log-to-console: true  # Development only - log OTP instead of sending SMS
+
+# MVP Admin Configuration
+# WARNING: This is for MVP development only. Replace with proper admin table in production.
+# These credentials should be overridden via environment variables in any non-local environment.
+admin:
+  email: ${ADMIN_EMAIL:admin@ward42.example.com}
+  password: ${ADMIN_PASSWORD:admin123}
+  id: ${ADMIN_ID:550e8400-e29b-41d4-a716-446655440020}
+  display-name: ${ADMIN_DISPLAY_NAME:Ward 42 Admin}
+  sector-id: ${ADMIN_SECTOR_ID:550e8400-e29b-41d4-a716-446655440001}
+  role: ${ADMIN_ROLE:SECTOR_ADMIN}
+  sector-name: ${ADMIN_SECTOR_NAME:Ward 42}
+  sector-center-lat: ${ADMIN_SECTOR_CENTER_LAT:-26.2041}
+  sector-center-lng: ${ADMIN_SECTOR_CENTER_LNG:28.0473}
+
+storage:
+  type: local
+  local:
+    upload-dir: ./uploads
+  r2:
+    bucket: ${R2_BUCKET:}
+    access-key: ${R2_ACCESS_KEY:}
+    secret-key: ${R2_SECRET_KEY:}
+    endpoint: ${R2_ENDPOINT:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+# OpenAPI / Swagger Configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    filter: true
+    display-request-duration: true
+  show-actuator: false
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+munserv:
+  email:
+    from: ${EMAIL_FROM:noreply@munserv.app}
+  app:
+    name: ${APP_NAME:MunServ}
+    download-url: ${APP_DOWNLOAD_URL:https://play.google.com/store/apps/details?id=com.munserv}
+
+logging:
+  level:
+    com.munserv: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web.servlet.DispatcherServlet: DEBUG

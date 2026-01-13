@@ -100,24 +100,6 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  /// Handle successful authentication
-  Future<void> _handleSuccessfulAuth(
-    AuthTokens tokens,
-    MemberProfile profile,
-    SectorInfo sector,
-  ) async {
-    // Save to secure storage
-    await _storage.saveTokens(tokens);
-    await _storage.saveProfile(profile);
-
-    // Update state
-    state = AuthState.authenticated(
-      tokens: tokens,
-      profile: profile,
-      sector: sector,
-    );
-  }
-
   /// Refresh access token
   Future<Result<AuthTokens>> refreshToken() async {
     final currentTokens = await _storage.getTokens();
@@ -168,8 +150,9 @@ class AuthNotifier extends _$AuthNotifier {
   /// Used for members who registered via web portal
   Future<Result<MemberLoginResponse>> loginWithEmail(
     String email,
-    String password,
-  ) async {
+    String password, {
+    bool savePasswordForQuickLogin = true,
+  }) async {
     // Don't change auth state to loading - the UI handles loading state locally
     // This prevents router from rebuilding the page and losing local state
 
@@ -182,6 +165,11 @@ class AuthNotifier extends _$AuthNotifier {
       success: (response) async {
         // Save email for future login convenience
         await _storage.saveEmail(email);
+
+        // Save password for quick login (encrypted in secure storage)
+        if (savePasswordForQuickLogin) {
+          await _storage.savePassword(password);
+        }
 
         // Create tokens from response
         final tokens = AuthTokens.fromMemberLoginResponse(
@@ -280,6 +268,53 @@ class AuthNotifier extends _$AuthNotifier {
     await _fetchAndSetProfile(currentState.tokens);
   }
 
+  // ===============================
+  // Quick Login (PIN/Biometric)
+  // ===============================
+
+  /// Quick login using PIN - validates PIN and re-authenticates with saved credentials
+  Future<Result<void>> quickLoginWithPin(String enteredPin) async {
+    // Verify PIN matches stored PIN
+    final storedPin = await _storage.getPin();
+    if (storedPin == null || enteredPin != storedPin) {
+      return const Result.failure(
+        AppError.validation(message: 'Invalid PIN'),
+      );
+    }
+
+    // Get saved credentials
+    final email = await _storage.getEmail();
+    final password = await _storage.getPassword();
+
+    if (email == null || password == null) {
+      return const Result.failure(
+        AppError.validation(
+          message: 'Saved credentials not found. Please login again.',
+        ),
+      );
+    }
+
+    // Re-authenticate with saved credentials
+    final result = await loginWithEmail(
+      email,
+      password,
+      savePasswordForQuickLogin: false, // Already saved
+    );
+
+    return result.when(
+      success: (_) => const Result.success(null),
+      failure: (error) => Result.failure(error),
+    );
+  }
+
+  /// Clear quick login data (used when switching accounts)
+  Future<void> clearQuickLoginData() async {
+    await _storage.clearQuickLoginData();
+    state = const AuthState.unauthenticated();
+    // Invalidate quick login provider
+    ref.invalidate(canUseQuickLoginProvider);
+  }
+
   /// Fetch profile and set authenticated state
   Future<void> _fetchAndSetProfile(AuthTokens tokens) async {
     final result = await _repository.getMe();
@@ -350,6 +385,42 @@ String? accessToken(Ref ref) {
 Future<String?> storedEmail(Ref ref) async {
   final storage = ref.watch(secureStorageProvider);
   return storage.getEmail();
+}
+
+/// Check if user can use quick login (PIN/biometric) instead of email/password
+/// Returns true if email, password, and PIN are all stored
+@riverpod
+Future<bool> canUseQuickLogin(Ref ref) async {
+  final storage = ref.watch(secureStorageProvider);
+  return storage.hasQuickLoginCredentials();
+}
+
+/// Quick login eligibility state - used by router for synchronous redirect decisions
+/// This is initialized at app startup and updated when auth state changes
+@Riverpod(keepAlive: true)
+class QuickLoginEligibility extends _$QuickLoginEligibility {
+  @override
+  bool? build() {
+    // Check eligibility asynchronously and update state
+    _checkEligibility();
+    return null; // Initial state is unknown
+  }
+
+  Future<void> _checkEligibility() async {
+    final storage = ref.read(secureStorageProvider);
+    final isEligible = await storage.hasQuickLoginCredentials();
+    state = isEligible;
+  }
+
+  /// Mark as not eligible (used when user chooses to use different account)
+  void markNotEligible() {
+    state = false;
+  }
+
+  /// Refresh eligibility check
+  Future<void> refresh() async {
+    await _checkEligibility();
+  }
 }
 
 // =============================================================================

@@ -241,7 +241,8 @@ class ReportIssueStateError extends ReportIssueState {
 }
 
 /// Manages issue reporting
-@riverpod
+/// keepAlive to prevent disposal during async operations
+@Riverpod(keepAlive: true)
 class ReportIssueNotifier extends _$ReportIssueNotifier {
   @override
   ReportIssueState build() => const ReportIssueStateInitial();
@@ -260,15 +261,18 @@ class ReportIssueNotifier extends _$ReportIssueNotifier {
       photoPaths: photoPaths,
     );
 
-    state = switch (result) {
-      Success(:final data) => ReportIssueStateSuccess(data),
-      Failure(:final error) => ReportIssueStateError(error.displayMessage),
-    };
+    // Check if provider is still mounted before updating state
+    if (ref.mounted) {
+      state = switch (result) {
+        Success(:final data) => ReportIssueStateSuccess(data),
+        Failure(:final error) => ReportIssueStateError(error.displayMessage),
+      };
 
-    // Invalidate issues list to refresh
-    if (result.isSuccess) {
-      ref.invalidate(issuesProvider);
-      ref.invalidate(myIssuesProvider);
+      // Invalidate issues list to refresh
+      if (result.isSuccess) {
+        ref.invalidate(issuesProvider);
+        ref.invalidate(myIssuesProvider);
+      }
     }
 
     return result;

@@ -206,14 +206,17 @@ final class AuthRepositoryProvider
 String _$authRepositoryHash() => r'2775d29e1d12d27bc8a6b1ba462dc9f8d37f4203';
 
 /// Manages authentication state throughout the app
+/// Updated for email + password authentication (Web Registration Flow)
 
 @ProviderFor(AuthNotifier)
 const authProvider = AuthNotifierProvider._();
 
 /// Manages authentication state throughout the app
+/// Updated for email + password authentication (Web Registration Flow)
 final class AuthNotifierProvider
     extends $NotifierProvider<AuthNotifier, AuthState> {
   /// Manages authentication state throughout the app
+  /// Updated for email + password authentication (Web Registration Flow)
   const AuthNotifierProvider._()
     : super(
         from: null,
@@ -241,9 +244,10 @@ final class AuthNotifierProvider
   }
 }
 
-String _$authNotifierHash() => r'5d3f348229446dc9703268775731310953e9d7d1';
+String _$authNotifierHash() => r'53d285815119d3ae67b02c701b9c799ac4b18940';
 
 /// Manages authentication state throughout the app
+/// Updated for email + password authentication (Web Registration Flow)
 
 abstract class _$AuthNotifier extends $Notifier<AuthState> {
   AuthState build();
@@ -402,30 +406,30 @@ final class AccessTokenProvider
 
 String _$accessTokenHash() => r'3371e484bbd4a5577c005f4adc96d39b2e0b29c6';
 
-/// Provides the stored phone number for login convenience
+/// Provides the stored email for login convenience (web registration flow)
 
-@ProviderFor(storedPhoneNumber)
-const storedPhoneNumberProvider = StoredPhoneNumberProvider._();
+@ProviderFor(storedEmail)
+const storedEmailProvider = StoredEmailProvider._();
 
-/// Provides the stored phone number for login convenience
+/// Provides the stored email for login convenience (web registration flow)
 
-final class StoredPhoneNumberProvider
+final class StoredEmailProvider
     extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
     with $FutureModifier<String?>, $FutureProvider<String?> {
-  /// Provides the stored phone number for login convenience
-  const StoredPhoneNumberProvider._()
+  /// Provides the stored email for login convenience (web registration flow)
+  const StoredEmailProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'storedPhoneNumberProvider',
+        name: r'storedEmailProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$storedPhoneNumberHash();
+  String debugGetCreateSourceHash() => _$storedEmailHash();
 
   @$internal
   @override
@@ -434,11 +438,116 @@ final class StoredPhoneNumberProvider
 
   @override
   FutureOr<String?> create(Ref ref) {
-    return storedPhoneNumber(ref);
+    return storedEmail(ref);
   }
 }
 
-String _$storedPhoneNumberHash() => r'eb265dcd0652314b3d9627883034892442c31cef';
+String _$storedEmailHash() => r'a02cfd1519bede421c538833dcc974830431830d';
+
+/// Check if user can use quick login (PIN/biometric) instead of email/password
+/// Returns true if email, password, and PIN are all stored
+
+@ProviderFor(canUseQuickLogin)
+const canUseQuickLoginProvider = CanUseQuickLoginProvider._();
+
+/// Check if user can use quick login (PIN/biometric) instead of email/password
+/// Returns true if email, password, and PIN are all stored
+
+final class CanUseQuickLoginProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  /// Check if user can use quick login (PIN/biometric) instead of email/password
+  /// Returns true if email, password, and PIN are all stored
+  const CanUseQuickLoginProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'canUseQuickLoginProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$canUseQuickLoginHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    return canUseQuickLogin(ref);
+  }
+}
+
+String _$canUseQuickLoginHash() => r'4629fe59159d0ffdf7d43f4c30aa24c631464d0c';
+
+/// Quick login eligibility state - used by router for synchronous redirect decisions
+/// This is initialized at app startup and updated when auth state changes
+
+@ProviderFor(QuickLoginEligibility)
+const quickLoginEligibilityProvider = QuickLoginEligibilityProvider._();
+
+/// Quick login eligibility state - used by router for synchronous redirect decisions
+/// This is initialized at app startup and updated when auth state changes
+final class QuickLoginEligibilityProvider
+    extends $NotifierProvider<QuickLoginEligibility, bool?> {
+  /// Quick login eligibility state - used by router for synchronous redirect decisions
+  /// This is initialized at app startup and updated when auth state changes
+  const QuickLoginEligibilityProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'quickLoginEligibilityProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$quickLoginEligibilityHash();
+
+  @$internal
+  @override
+  QuickLoginEligibility create() => QuickLoginEligibility();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool?>(value),
+    );
+  }
+}
+
+String _$quickLoginEligibilityHash() =>
+    r'baaf5e034c31a4243862f6cfcb8241f0b5457a96';
+
+/// Quick login eligibility state - used by router for synchronous redirect decisions
+/// This is initialized at app startup and updated when auth state changes
+
+abstract class _$QuickLoginEligibility extends $Notifier<bool?> {
+  bool? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<bool?, bool?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool?, bool?>,
+              bool?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
 /// Temporary PIN storage for biometric setup after login
 /// This is cleared after use or on app restart

@@ -120,9 +120,10 @@ Central Authority (Fleet Command)
 
 **Requirements to Join:**
 
-- Phone number (for contact and authentication)
+- Email address (for authentication and notifications)
+- Phone number (for contact purposes)
 - Address within the sector (proves community residency)
-- Vouched for by a Sector Administrator or Community Administrator
+- Approved by a Sector Administrator
 
 **Capabilities:**
 
@@ -135,6 +136,75 @@ Central Authority (Fleet Command)
 
 - Mobile app only (no web admin access)
 - Can be flagged/warned for misuse (privately, not publicly visible)
+
+---
+
+### 2.6 Member Registration Flow
+
+**Overview:** Members register through the web portal to avoid SMS costs. Admin approval is required before access is granted.
+
+**Registration Steps:**
+
+```
+1. REGISTER: Member visits web portal → fills registration form
+2. PENDING:  System creates member with "Pending Approval" status
+3. REVIEW:   Sector Admin reviews registration details
+4. APPROVE:  Admin approves → system generates temp password → email sent
+5. LOGIN:    Member downloads mobile app → logs in with email + temp password
+6. PASSWORD: Member must change password on first login
+7. PIN:      Member sets up 4-digit PIN for quick access
+8. BIOMETRIC: (Optional) Member enables fingerprint/face login
+```
+
+**Registration Form Fields:**
+- First name, Surname
+- Email address (will be username)
+- Phone number (for contact)
+- Address (street address)
+- Location (GPS coordinates - auto-captured)
+- Sector (dropdown selection)
+
+**State Diagram:**
+
+```
+[Web Registration]          [Admin Review]           [Member Access]
+       │                          │                        │
+       ▼                          ▼                        ▼
+┌──────────────┐           ┌─────────┐            ┌────────────────┐
+│ Registration │───────────│ Pending │────approve─│ Active Member  │
+│    Form      │           │ Approval│            │ (email sent)   │
+└──────────────┘           └─────────┘            └────────────────┘
+                                │                        │
+                                │reject                  │
+                                ▼                        ▼
+                           [Deleted]              [Mobile App Login]
+```
+
+**Email Notification:**
+On approval, system sends welcome email containing:
+- Login credentials (email + temporary password)
+- Link to download mobile app
+- Password requirements for first login
+
+---
+
+### 2.7 Member Status
+
+Members have the following status states:
+
+| Status | Description | Can Login | Transitions To |
+|--------|-------------|-----------|----------------|
+| **Pending Approval** | Registration submitted, awaiting admin review | No | Active, Deleted |
+| **Active** | Approved member, full app access | Yes | Suspended, Deleted |
+| **Suspended** | Temporarily blocked by admin | No | Active, Deleted |
+| **Deleted** | Permanently removed (terminal state) | No | - |
+
+**State Transition Rules:**
+- **Pending → Active**: Admin approves registration
+- **Pending → Deleted**: Admin rejects registration
+- **Active → Suspended**: Admin suspends for policy violation
+- **Suspended → Active**: Admin reinstates member
+- **Any → Deleted**: Admin permanently removes member
 
 ---
 
@@ -399,11 +469,15 @@ Data is owned by the community (sector/pod), not by Central Authority. Communiti
 
 The following items need decisions before detailed technical design:
 
-### 10.1 Authentication
+### 10.1 Authentication (RESOLVED)
 
-- [ ] Phone + OTP? Email + password? Social login?
-- [ ] How to handle device changes?
-- [ ] Session duration / re-authentication frequency?
+- [x] **Email + password** for member login (no SMS OTP - too expensive)
+- [x] Web-based registration with admin approval workflow
+- [x] First-time password change required after admin approval
+- [x] PIN/biometric for quick mobile app access after initial login
+- [x] JWT tokens with 15-minute access token, 7-day refresh token
+- [ ] How to handle device changes? (deferred to Phase 2)
+- [ ] Session duration / re-authentication frequency? (deferred to Phase 2)
 
 ### 10.2 Notifications
 
@@ -442,6 +516,7 @@ The following items need decisions before detailed technical design:
 | ------- | -------- | ------ | -------------------------------------- |
 | 0.1     | Dec 2025 | -      | Initial brain dump                     |
 | 0.2     | Dec 2025 | -      | Cleaned up, organized, gaps identified |
+| 0.3     | Jan 2026 | -      | Added web registration flow, member status states, authentication decisions |
 
 ---
 

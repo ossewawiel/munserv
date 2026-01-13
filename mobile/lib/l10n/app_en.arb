@@ -221,5 +221,222 @@
   "appTagline": "Municipal Service Watchdog",
   "@appTagline": {
     "description": "App tagline shown below logo in branding header"
+  },
+
+  "loginWithEmailSubtitle": "Enter your email and password to continue",
+  "@loginWithEmailSubtitle": {
+    "description": "Subtitle for email login screen"
+  },
+
+  "emailLabel": "Email Address",
+  "@emailLabel": {
+    "description": "Label for email input field"
+  },
+
+  "emailRequired": "Email is required",
+  "@emailRequired": {
+    "description": "Error when email is empty"
+  },
+
+  "invalidEmail": "Please enter a valid email address",
+  "@invalidEmail": {
+    "description": "Error for invalid email format"
+  },
+
+  "passwordLabel": "Password",
+  "@passwordLabel": {
+    "description": "Label for password input field"
+  },
+
+  "passwordRequired": "Password is required",
+  "@passwordRequired": {
+    "description": "Error when password is empty"
+  },
+
+  "loginButton": "Log In",
+  "@loginButton": {
+    "description": "Login button text"
+  },
+
+  "noAccountQuestion": "Don't have an account?",
+  "@noAccountQuestion": {
+    "description": "Question for users without account"
+  },
+
+  "registerOnWebInstruction": "Register at munserv.app to join your community",
+  "@registerOnWebInstruction": {
+    "description": "Instructions to register on web portal"
+  },
+
+  "changePasswordTitle": "Change Your Password",
+  "@changePasswordTitle": {
+    "description": "Title for change password screen"
+  },
+
+  "changePasswordSubtitle": "Please set a new secure password to continue",
+  "@changePasswordSubtitle": {
+    "description": "Subtitle for change password screen"
+  },
+
+  "currentPasswordLabel": "Current Password",
+  "@currentPasswordLabel": {
+    "description": "Label for current password field"
+  },
+
+  "tempPasswordHelp": "Enter the temporary password from your welcome email",
+  "@tempPasswordHelp": {
+    "description": "Helper text for temporary password field"
+  },
+
+  "newPasswordLabel": "New Password",
+  "@newPasswordLabel": {
+    "description": "Label for new password field"
+  },
+
+  "confirmPasswordLabel": "Confirm New Password",
+  "@confirmPasswordLabel": {
+    "description": "Label for confirm password field"
+  },
+
+  "changePasswordButton": "Change Password",
+  "@changePasswordButton": {
+    "description": "Change password button text"
+  },
+
+  "passwordTooShort": "Password must be at least 8 characters",
+  "@passwordTooShort": {
+    "description": "Error when password is too short"
+  },
+
+  "passwordNeedsUppercase": "Password must contain at least one uppercase letter",
+  "@passwordNeedsUppercase": {
+    "description": "Error when password lacks uppercase"
+  },
+
+  "passwordNeedsLowercase": "Password must contain at least one lowercase letter",
+  "@passwordNeedsLowercase": {
+    "description": "Error when password lacks lowercase"
+  },
+
+  "passwordNeedsNumber": "Password must contain at least one number",
+  "@passwordNeedsNumber": {
+    "description": "Error when password lacks number"
+  },
+
+  "passwordsMustMatch": "Passwords do not match",
+  "@passwordsMustMatch": {
+    "description": "Error when passwords don't match"
+  },
+
+  "passwordRequirements": "At least 8 characters, with uppercase, lowercase, and numbers",
+  "@passwordRequirements": {
+    "description": "Password requirements description"
+  },
+
+  "setupPinTitle": "Set Up Your PIN",
+  "@setupPinTitle": {
+    "description": "Title for PIN setup screen (email flow)"
+  },
+
+  "setupPinSubtitle": "Create a 4-digit PIN for quick access",
+  "@setupPinSubtitle": {
+    "description": "Subtitle for PIN setup screen (email flow)"
+  },
+
+  "confirmPinTitle": "Confirm Your PIN",
+  "@confirmPinTitle": {
+    "description": "Title for PIN confirmation screen"
+  },
+
+  "confirmPinSubtitle": "Enter your PIN again to confirm",
+  "@confirmPinSubtitle": {
+    "description": "Subtitle for PIN confirmation screen"
+  },
+
+  "startOver": "Start Over",
+  "@startOver": {
+    "description": "Button to restart PIN entry"
+  },
+
+  "enableBiometricTitle": "Enable Biometric Login",
+  "@enableBiometricTitle": {
+    "description": "Title for biometric enable dialog"
+  },
+
+  "enableBiometricMessage": "Would you like to use {biometricType} for faster login?",
+  "@enableBiometricMessage": {
+    "description": "Message for biometric enable dialog",
+    "placeholders": {
+      "biometricType": {
+        "type": "String",
+        "example": "Fingerprint"
+      }
+    }
+  },
+
+  "notNow": "Not Now",
+  "@notNow": {
+    "description": "Button to skip biometric setup"
+  },
+
+  "enable": "Enable",
+  "@enable": {
+    "description": "Button to enable a feature"
+  },
+
+  "locationPermissionDenied": "Location permission denied. Please enable in settings.",
+  "@locationPermissionDenied": {
+    "description": "Error when location permission is denied"
+  },
+
+  "locationError": "Unable to get your location. Please try again.",
+  "@locationError": {
+    "description": "Generic location error message"
+  },
+
+  "noSectorAssigned": "Your account is not assigned to a sector.",
+  "@noSectorAssigned": {
+    "description": "Error when user has no sector assigned"
+  },
+
+  "photoTooLarge": "Photo is too large. Maximum size is 5MB.",
+  "@photoTooLarge": {
+    "description": "Error when photo exceeds size limit"
+  },
+
+  "unsupportedPhotoFormat": "Unsupported photo format. Use JPEG, PNG, or WebP.",
+  "@unsupportedPhotoFormat": {
+    "description": "Error when photo format is not supported"
+  },
+
+  "issueSubmittedSuccess": "Issue reported successfully!",
+  "@issueSubmittedSuccess": {
+    "description": "Success message after issue submission"
+  },
+
+  "issueSubmitFailed": "Failed to submit issue. Please try again.",
+  "@issueSubmitFailed": {
+    "description": "Error message when issue submission fails"
+  },
+
+  "pinLoginSubtitle": "Enter your PIN to continue as {email}",
+  "@pinLoginSubtitle": {
+    "description": "Subtitle for PIN login screen showing user email",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "user@example.com"
+      }
+    }
+  },
+
+  "useDifferentAccount": "Use Different Account",
+  "@useDifferentAccount": {
+    "description": "Button to switch to a different account"
+  },
+
+  "pinLoginInfo": "Enter your 4-digit PIN to quickly access your account.",
+  "@pinLoginInfo": {
+    "description": "Info text on PIN login screen"
   }
 }

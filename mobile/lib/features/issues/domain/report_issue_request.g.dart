@@ -10,6 +10,7 @@ _ReportIssueRequest _$ReportIssueRequestFromJson(Map<String, dynamic> json) =>
     _ReportIssueRequest(
       type: $enumDecode(_$IssueTypeEnumMap, json['type']),
       location: GeoPoint.fromJson(json['location'] as Map<String, dynamic>),
+      sectorId: json['sectorId'] as String,
       description: json['description'] as String?,
     );
 
@@ -17,6 +18,7 @@ Map<String, dynamic> _$ReportIssueRequestToJson(_ReportIssueRequest instance) =>
     <String, dynamic>{
       'type': _$IssueTypeEnumMap[instance.type]!,
       'location': instance.location.toJson(),
+      'sectorId': instance.sectorId,
       'description': instance.description,
     };
 

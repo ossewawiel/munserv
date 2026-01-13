@@ -13,13 +13,13 @@ import jakarta.validation.constraints.Size
 data class CreateIssueRequest(
     @field:NotBlank(message = "Issue type is required")
     @field:Pattern(
-        regexp = "^(pothole|water_leak|street_light|sewage_leak|illegal_dumping|road_damage|other)$",
+        regexp = "^(pothole|water_leak|street_light|traffic_light|sewage_leak|illegal_dumping|road_damage|other)$",
         message = "Invalid issue type",
     )
     @Schema(
         description = "Type of issue",
         example = "pothole",
-        allowableValues = ["pothole", "water_leak", "street_light", "sewage_leak", "illegal_dumping", "road_damage", "other"],
+        allowableValues = ["pothole", "water_leak", "street_light", "traffic_light", "sewage_leak", "illegal_dumping", "road_damage", "other"],
     )
     val type: String,
     @field:NotBlank(message = "Sector ID is required")

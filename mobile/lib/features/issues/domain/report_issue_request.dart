@@ -13,6 +13,7 @@ abstract class ReportIssueRequest with _$ReportIssueRequest {
   const factory ReportIssueRequest({
     required IssueType type,
     required GeoPoint location,
+    required String sectorId,
     String? description,
   }) = _ReportIssueRequest;
 

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ReportIssueRequest {
 
- IssueType get type; GeoPoint get location; String? get description;
+ IssueType get type; GeoPoint get location; String get sectorId; String? get description;
 /// Create a copy of ReportIssueRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ReportIssueRequestCopyWith<ReportIssueRequest> get copyWith => _$ReportIssueReq
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportIssueRequest&&(identical(other.type, type) || other.type == type)&&(identical(other.location, location) || other.location == location)&&(identical(other.description, description) || other.description == description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportIssueRequest&&(identical(other.type, type) || other.type == type)&&(identical(other.location, location) || other.location == location)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.description, description) || other.description == description));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,location,description);
+int get hashCode => Object.hash(runtimeType,type,location,sectorId,description);
 
 @override
 String toString() {
-  return 'ReportIssueRequest(type: $type, location: $location, description: $description)';
+  return 'ReportIssueRequest(type: $type, location: $location, sectorId: $sectorId, description: $description)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ReportIssueRequestCopyWith<$Res>  {
   factory $ReportIssueRequestCopyWith(ReportIssueRequest value, $Res Function(ReportIssueRequest) _then) = _$ReportIssueRequestCopyWithImpl;
 @useResult
 $Res call({
- IssueType type, GeoPoint location, String? description
+ IssueType type, GeoPoint location, String sectorId, String? description
 });
 
 
@@ -65,11 +65,12 @@ class _$ReportIssueRequestCopyWithImpl<$Res>
 
 /// Create a copy of ReportIssueRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? location = null,Object? description = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? location = null,Object? sectorId = null,Object? description = freezed,}) {
   return _then(_self.copyWith(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as IssueType,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
-as GeoPoint,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as GeoPoint,sectorId: null == sectorId ? _self.sectorId : sectorId // ignore: cast_nullable_to_non_nullable
+as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -164,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( IssueType type,  GeoPoint location,  String? description)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( IssueType type,  GeoPoint location,  String sectorId,  String? description)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReportIssueRequest() when $default != null:
-return $default(_that.type,_that.location,_that.description);case _:
+return $default(_that.type,_that.location,_that.sectorId,_that.description);case _:
   return orElse();
 
 }
@@ -185,10 +186,10 @@ return $default(_that.type,_that.location,_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( IssueType type,  GeoPoint location,  String? description)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( IssueType type,  GeoPoint location,  String sectorId,  String? description)  $default,) {final _that = this;
 switch (_that) {
 case _ReportIssueRequest():
-return $default(_that.type,_that.location,_that.description);case _:
+return $default(_that.type,_that.location,_that.sectorId,_that.description);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +206,10 @@ return $default(_that.type,_that.location,_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( IssueType type,  GeoPoint location,  String? description)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( IssueType type,  GeoPoint location,  String sectorId,  String? description)?  $default,) {final _that = this;
 switch (_that) {
 case _ReportIssueRequest() when $default != null:
-return $default(_that.type,_that.location,_that.description);case _:
+return $default(_that.type,_that.location,_that.sectorId,_that.description);case _:
   return null;
 
 }
@@ -220,11 +221,12 @@ return $default(_that.type,_that.location,_that.description);case _:
 @JsonSerializable()
 
 class _ReportIssueRequest implements ReportIssueRequest {
-  const _ReportIssueRequest({required this.type, required this.location, this.description});
+  const _ReportIssueRequest({required this.type, required this.location, required this.sectorId, this.description});
   factory _ReportIssueRequest.fromJson(Map<String, dynamic> json) => _$ReportIssueRequestFromJson(json);
 
 @override final  IssueType type;
 @override final  GeoPoint location;
+@override final  String sectorId;
 @override final  String? description;
 
 /// Create a copy of ReportIssueRequest
@@ -240,16 +242,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReportIssueRequest&&(identical(other.type, type) || other.type == type)&&(identical(other.location, location) || other.location == location)&&(identical(other.description, description) || other.description == description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReportIssueRequest&&(identical(other.type, type) || other.type == type)&&(identical(other.location, location) || other.location == location)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.description, description) || other.description == description));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,location,description);
+int get hashCode => Object.hash(runtimeType,type,location,sectorId,description);
 
 @override
 String toString() {
-  return 'ReportIssueRequest(type: $type, location: $location, description: $description)';
+  return 'ReportIssueRequest(type: $type, location: $location, sectorId: $sectorId, description: $description)';
 }
 
 
@@ -260,7 +262,7 @@ abstract mixin class _$ReportIssueRequestCopyWith<$Res> implements $ReportIssueR
   factory _$ReportIssueRequestCopyWith(_ReportIssueRequest value, $Res Function(_ReportIssueRequest) _then) = __$ReportIssueRequestCopyWithImpl;
 @override @useResult
 $Res call({
- IssueType type, GeoPoint location, String? description
+ IssueType type, GeoPoint location, String sectorId, String? description
 });
 
 
@@ -277,11 +279,12 @@ class __$ReportIssueRequestCopyWithImpl<$Res>
 
 /// Create a copy of ReportIssueRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? location = null,Object? description = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? location = null,Object? sectorId = null,Object? description = freezed,}) {
   return _then(_ReportIssueRequest(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as IssueType,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
-as GeoPoint,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as GeoPoint,sectorId: null == sectorId ? _self.sectorId : sectorId // ignore: cast_nullable_to_non_nullable
+as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

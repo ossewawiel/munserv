@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../shared/models/geo_point.dart';
-import 'login_request.dart';
+import 'auth_types.dart';
 
 part 'member_profile_response.freezed.dart';
 part 'member_profile_response.g.dart';

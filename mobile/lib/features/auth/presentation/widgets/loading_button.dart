@@ -29,7 +29,8 @@ class LoadingButton extends StatelessWidget {
 
     final button = FilledButton(
       onPressed: isLoading || !enabled ? null : onPressed,
-      style: style ??
+      style:
+          style ??
           FilledButton.styleFrom(
             minimumSize: const Size(64, 40), // M3 spec: 40dp height
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -48,9 +49,7 @@ class LoadingButton extends StatelessWidget {
           : Text(label),
     );
 
-    return expand
-        ? SizedBox(width: double.infinity, child: button)
-        : button;
+    return expand ? SizedBox(width: double.infinity, child: button) : button;
   }
 }
 
@@ -83,7 +82,8 @@ class LoadingOutlinedButton extends StatelessWidget {
 
     final button = OutlinedButton(
       onPressed: isLoading || !enabled ? null : onPressed,
-      style: style ??
+      style:
+          style ??
           OutlinedButton.styleFrom(
             minimumSize: const Size(64, 40), // M3 spec: 40dp height
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -102,8 +102,6 @@ class LoadingOutlinedButton extends StatelessWidget {
           : Text(label),
     );
 
-    return expand
-        ? SizedBox(width: double.infinity, child: button)
-        : button;
+    return expand ? SizedBox(width: double.infinity, child: button) : button;
   }
 }

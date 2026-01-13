@@ -214,6 +214,7 @@ void main() {
         final request = ReportIssueRequest(
           type: IssueType.pothole,
           location: const GeoPoint(latitude: -26.1, longitude: 28.1),
+          sectorId: 'sector-123',
           description: 'Large pothole',
         );
 

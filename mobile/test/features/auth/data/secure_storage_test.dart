@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:munserv_mobile/features/auth/data/secure_storage.dart';
-import 'package:munserv_mobile/features/auth/domain/login_request.dart';
+import 'package:munserv_mobile/features/auth/domain/auth_types.dart';
 import 'package:munserv_mobile/shared/models/geo_point.dart';
 
 class MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
@@ -93,7 +93,7 @@ void main() {
               value: any(named: 'value'),
             )).thenAnswer((_) async {});
 
-        const profile = UserProfile(
+        const profile = MemberProfile(
           id: 'user_123',
           phoneNumber: '+27821234567',
           firstName: 'John',
@@ -180,6 +180,84 @@ void main() {
       });
     });
 
+    group('email', () {
+      test('saveEmail stores email address', () async {
+        when(() => mockStorage.write(
+              key: any(named: 'key'),
+              value: any(named: 'value'),
+            )).thenAnswer((_) async {});
+
+        await service.saveEmail('test@example.com');
+
+        verify(() => mockStorage.write(
+              key: SecureStorageKeys.email,
+              value: 'test@example.com',
+            )).called(1);
+      });
+
+      test('getEmail returns stored email', () async {
+        when(() => mockStorage.read(key: SecureStorageKeys.email))
+            .thenAnswer((_) async => 'test@example.com');
+
+        final email = await service.getEmail();
+
+        expect(email, 'test@example.com');
+      });
+
+      test('getEmail returns null when no email stored', () async {
+        when(() => mockStorage.read(key: SecureStorageKeys.email))
+            .thenAnswer((_) async => null);
+
+        final email = await service.getEmail();
+
+        expect(email, isNull);
+      });
+    });
+
+    group('PIN', () {
+      test('savePin stores PIN', () async {
+        when(() => mockStorage.write(
+              key: any(named: 'key'),
+              value: any(named: 'value'),
+            )).thenAnswer((_) async {});
+
+        await service.savePin('1234');
+
+        verify(() => mockStorage.write(
+              key: SecureStorageKeys.pin,
+              value: '1234',
+            )).called(1);
+      });
+
+      test('getPin returns stored PIN', () async {
+        when(() => mockStorage.read(key: SecureStorageKeys.pin))
+            .thenAnswer((_) async => '1234');
+
+        final pin = await service.getPin();
+
+        expect(pin, '1234');
+      });
+
+      test('getPin returns null when no PIN stored', () async {
+        when(() => mockStorage.read(key: SecureStorageKeys.pin))
+            .thenAnswer((_) async => null);
+
+        final pin = await service.getPin();
+
+        expect(pin, isNull);
+      });
+
+      test('clearPin removes PIN', () async {
+        when(() => mockStorage.delete(key: any(named: 'key')))
+            .thenAnswer((_) async {});
+
+        await service.clearPin();
+
+        verify(() => mockStorage.delete(key: SecureStorageKeys.pin))
+            .called(1);
+      });
+    });
+
     group('clearAll', () {
       test('clears all stored data', () async {
         when(() => mockStorage.deleteAll()).thenAnswer((_) async {});
@@ -207,6 +285,129 @@ void main() {
         final hasSession = await service.hasValidSession();
 
         expect(hasSession, false);
+      });
+    });
+
+    group('password storage (for quick login)', () {
+      test('savePassword stores password', () async {
+        when(() => mockStorage.write(
+              key: any(named: 'key'),
+              value: any(named: 'value'),
+            )).thenAnswer((_) async {});
+
+        await service.savePassword('securePass123');
+
+        verify(() => mockStorage.write(
+              key: SecureStorageKeys.password,
+              value: 'securePass123',
+            )).called(1);
+      });
+
+      test('getPassword returns stored password', () async {
+        when(() => mockStorage.read(key: SecureStorageKeys.password))
+            .thenAnswer((_) async => 'securePass123');
+
+        final password = await service.getPassword();
+
+        expect(password, 'securePass123');
+      });
+
+      test('getPassword returns null when no password stored', () async {
+        when(() => mockStorage.read(key: SecureStorageKeys.password))
+            .thenAnswer((_) async => null);
+
+        final password = await service.getPassword();
+
+        expect(password, isNull);
+      });
+
+      test('clearPassword removes stored password', () async {
+        when(() => mockStorage.delete(key: any(named: 'key')))
+            .thenAnswer((_) async {});
+
+        await service.clearPassword();
+
+        verify(() => mockStorage.delete(key: SecureStorageKeys.password))
+            .called(1);
+      });
+    });
+
+    group('quick login eligibility', () {
+      test('hasQuickLoginCredentials returns true when all credentials present',
+          () async {
+        when(() => mockStorage.read(key: SecureStorageKeys.email))
+            .thenAnswer((_) async => 'test@example.com');
+        when(() => mockStorage.read(key: SecureStorageKeys.password))
+            .thenAnswer((_) async => 'securePass123');
+        when(() => mockStorage.read(key: SecureStorageKeys.pin))
+            .thenAnswer((_) async => '1234');
+
+        final hasCredentials = await service.hasQuickLoginCredentials();
+
+        expect(hasCredentials, true);
+      });
+
+      test('hasQuickLoginCredentials returns false when email missing',
+          () async {
+        when(() => mockStorage.read(key: SecureStorageKeys.email))
+            .thenAnswer((_) async => null);
+        when(() => mockStorage.read(key: SecureStorageKeys.password))
+            .thenAnswer((_) async => 'securePass123');
+        when(() => mockStorage.read(key: SecureStorageKeys.pin))
+            .thenAnswer((_) async => '1234');
+
+        final hasCredentials = await service.hasQuickLoginCredentials();
+
+        expect(hasCredentials, false);
+      });
+
+      test('hasQuickLoginCredentials returns false when password missing',
+          () async {
+        when(() => mockStorage.read(key: SecureStorageKeys.email))
+            .thenAnswer((_) async => 'test@example.com');
+        when(() => mockStorage.read(key: SecureStorageKeys.password))
+            .thenAnswer((_) async => null);
+        when(() => mockStorage.read(key: SecureStorageKeys.pin))
+            .thenAnswer((_) async => '1234');
+
+        final hasCredentials = await service.hasQuickLoginCredentials();
+
+        expect(hasCredentials, false);
+      });
+
+      test('hasQuickLoginCredentials returns false when PIN missing', () async {
+        when(() => mockStorage.read(key: SecureStorageKeys.email))
+            .thenAnswer((_) async => 'test@example.com');
+        when(() => mockStorage.read(key: SecureStorageKeys.password))
+            .thenAnswer((_) async => 'securePass123');
+        when(() => mockStorage.read(key: SecureStorageKeys.pin))
+            .thenAnswer((_) async => null);
+
+        final hasCredentials = await service.hasQuickLoginCredentials();
+
+        expect(hasCredentials, false);
+      });
+    });
+
+    group('clearQuickLoginData', () {
+      test('clears password and session but keeps email for convenience',
+          () async {
+        when(() => mockStorage.delete(key: any(named: 'key')))
+            .thenAnswer((_) async {});
+
+        await service.clearQuickLoginData();
+
+        verify(() => mockStorage.delete(key: SecureStorageKeys.password))
+            .called(1);
+        verify(() => mockStorage.delete(key: SecureStorageKeys.pin)).called(1);
+        verify(() => mockStorage.delete(key: SecureStorageKeys.biometricPin))
+            .called(1);
+        verify(() => mockStorage.delete(key: SecureStorageKeys.accessToken))
+            .called(1);
+        verify(() => mockStorage.delete(key: SecureStorageKeys.refreshToken))
+            .called(1);
+        // Email should NOT be deleted - user can re-login with same email
+        verifyNever(() => mockStorage.delete(key: SecureStorageKeys.email));
       });
     });
   });

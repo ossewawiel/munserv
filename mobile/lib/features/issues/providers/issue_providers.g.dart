@@ -529,21 +529,24 @@ final class AllIssuesListProvider
 String _$allIssuesListHash() => r'9f393c1a00c1e754be58d6086a0d603f06861034';
 
 /// Manages issue reporting
+/// keepAlive to prevent disposal during async operations
 
 @ProviderFor(ReportIssueNotifier)
 const reportIssueProvider = ReportIssueNotifierProvider._();
 
 /// Manages issue reporting
+/// keepAlive to prevent disposal during async operations
 final class ReportIssueNotifierProvider
     extends $NotifierProvider<ReportIssueNotifier, ReportIssueState> {
   /// Manages issue reporting
+  /// keepAlive to prevent disposal during async operations
   const ReportIssueNotifierProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'reportIssueProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -565,9 +568,10 @@ final class ReportIssueNotifierProvider
 }
 
 String _$reportIssueNotifierHash() =>
-    r'4c55b8cbb0f4a3f3f8d93e81b41c431046ec0311';
+    r'270c9565ac77b62b2b630e9f26c4b1f63ab0be96';
 
 /// Manages issue reporting
+/// keepAlive to prevent disposal during async operations
 
 abstract class _$ReportIssueNotifier extends $Notifier<ReportIssueState> {
   ReportIssueState build();

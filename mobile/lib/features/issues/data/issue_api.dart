@@ -65,6 +65,7 @@ class IssueApi {
         'type': _issueTypeToApiString(request.type),
         'latitude': request.location.latitude,
         'longitude': request.location.longitude,
+        'sectorId': request.sectorId,
         if (request.description != null) 'description': request.description,
       },
     );
@@ -130,6 +131,7 @@ class IssueApi {
       IssueType.trafficLight => 'traffic_light',
       IssueType.streetLight => 'street_light',
       IssueType.illegalDumping => 'illegal_dumping',
+      IssueType.roadDamage => 'road_damage',
       IssueType.other => 'other',
     };
   }
@@ -143,6 +145,7 @@ class IssueApi {
       'traffic_light' => IssueType.trafficLight,
       'street_light' => IssueType.streetLight,
       'illegal_dumping' => IssueType.illegalDumping,
+      'road_damage' => IssueType.roadDamage,
       'other' => IssueType.other,
       _ => IssueType.other,
     };

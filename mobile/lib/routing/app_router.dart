@@ -13,57 +13,70 @@ import '../shell/app_shell.dart';
 
 part 'app_router.g.dart';
 
+/// Routes that don't require authentication
+const _publicRoutes = {'/auth/login', '/auth/pin-login'};
+
+/// Routes for authentication flow (intermediate states)
+const _authFlowRoutes = {
+  '/auth/login',
+  '/auth/pin-login',
+  '/auth/change-password',
+  '/auth/pin-setup',
+};
+
 @riverpod
 GoRouter appRouter(Ref ref) {
   final authState = ref.watch(authProvider);
-  final storedPhoneAsync = ref.watch(storedPhoneNumberProvider);
+  final quickLoginEligible = ref.watch(quickLoginEligibilityProvider);
 
-  // Determine initial location based on auth state
-  // Start at login to prevent briefly showing home while checking auth
-  final initialLocation = authState.isAuthenticated ? '/' : '/auth/login';
+  // Determine initial location based on auth state and quick login eligibility
+  String initialLocation;
+  if (authState.isAuthenticated) {
+    initialLocation = '/';
+  } else if (quickLoginEligible == true) {
+    initialLocation = '/auth/pin-login';
+  } else {
+    initialLocation = '/auth/login';
+  }
 
   return GoRouter(
     initialLocation: initialLocation,
-    debugLogDiagnostics: true,
-    refreshListenable: _GoRouterRefreshStream(ref, authProvider),
+    debugLogDiagnostics: kDebugMode,
+    refreshListenable: _GoRouterRefreshStream(ref, [authProvider, quickLoginEligibilityProvider]),
     redirect: (context, state) {
-      final isAuthenticated = authState.isAuthenticated;
-      final isLoading = authState.isLoading;
       final path = state.matchedLocation;
 
-      // While checking auth status, stay on current route (don't redirect)
-      if (isLoading) return null;
+      // Handle redirects based on auth state using pattern matching
+      return switch (authState) {
+        // Loading - stay on current route
+        AuthStateLoading() || AuthStateInitial() => null,
 
-      // Define auth routes
-      const authRoutes = [
-        '/auth/phone',
-        '/auth/otp',
-        '/auth/registration',
-        '/auth/pin-setup',
-        '/auth/login',
-      ];
+        // Fully authenticated - redirect to home if on auth routes
+        AuthStateAuthenticated() when _authFlowRoutes.contains(path) => '/',
 
-      final isOnAuthRoute = authRoutes.any((r) => path.startsWith(r));
+        // Must change password - force to password change screen
+        AuthStateMustChangePassword() when path != '/auth/change-password' =>
+          '/auth/change-password',
 
-      // If authenticated and on auth route, redirect to home
-      if (isAuthenticated && isOnAuthRoute) {
-        return '/';
-      }
+        // Pending PIN setup - force to PIN setup screen
+        AuthStatePendingPinSetup() when path != '/auth/pin-setup' =>
+          '/auth/pin-setup',
 
-      // If not authenticated and not on auth route, redirect to auth
-      if (!isAuthenticated && !isOnAuthRoute) {
-        // Check if user has stored phone number to show login vs phone entry
-        // If still loading, don't redirect yet - wait for value
-        final redirectPath = storedPhoneAsync.when(
-          data: (phone) => phone != null ? '/auth/login' : '/auth/phone',
-          loading: () => null, // Don't redirect while loading
-          error: (_, _) => '/auth/phone',
-        );
-        return redirectPath;
-      }
+        // User on email login but eligible for quick login - redirect to PIN login
+        AuthStateUnauthenticated()
+            when path == '/auth/login' && quickLoginEligible == true =>
+          '/auth/pin-login',
 
-      // No redirect needed
-      return null;
+        // Not authenticated and not on public route - redirect to appropriate login
+        AuthStateUnauthenticated() when !_publicRoutes.contains(path) =>
+          quickLoginEligible == true ? '/auth/pin-login' : '/auth/login',
+
+        // Error state - redirect to login
+        AuthStateError() when !_publicRoutes.contains(path) => '/auth/login',
+
+        // No redirect needed
+        _ => null,
+      };
     },
     routes: [
       // ===== App Shell with Bottom Navigation =====
@@ -109,61 +122,24 @@ GoRouter appRouter(Ref ref) {
 
       // ===== Auth Routes (outside shell) =====
       GoRoute(
-        path: '/auth/phone',
-        name: 'phone',
-        builder: (context, state) => const PhoneEntryPage(),
+        path: '/auth/login',
+        name: 'login',
+        builder: (context, state) => const EmailLoginPage(),
       ),
       GoRoute(
-        path: '/auth/otp',
-        name: 'otp',
-        builder: (context, state) {
-          final phone = state.uri.queryParameters['phone'] ?? '';
-          return OtpVerifyPage(phoneNumber: phone);
-        },
+        path: '/auth/pin-login',
+        name: 'pinLogin',
+        builder: (context, state) => const PinLoginPage(),
       ),
       GoRoute(
-        path: '/auth/registration',
-        name: 'registration',
-        builder: (context, state) {
-          final params = state.uri.queryParameters;
-          return RegistrationPage(
-            phoneNumber: params['phone'] ?? '',
-            tempToken: params['tempToken'] ?? '',
-          );
-        },
+        path: '/auth/change-password',
+        name: 'changePassword',
+        builder: (context, state) => const ChangePasswordPage(),
       ),
       GoRoute(
         path: '/auth/pin-setup',
         name: 'pinSetup',
-        builder: (context, state) {
-          final params = state.uri.queryParameters;
-          // TODO(MVP): Sector should be selected by user during registration
-          // or auto-detected based on location. For MVP, use default sector.
-          // See: specs/MVP_Development_Guide.md for sector selection requirements
-          final sectorId = params['sectorId'];
-          assert(
-            sectorId != null || kDebugMode,
-            'sectorId is required for registration',
-          );
-          return PinSetupPage(
-            phoneNumber: params['phone'] ?? '',
-            tempToken: params['tempToken'] ?? '',
-            firstName: params['firstName'] ?? '',
-            surname: params['surname'] ?? '',
-            address: params['address'] ?? '',
-            latitude: double.tryParse(params['latitude'] ?? '') ?? 0,
-            longitude: double.tryParse(params['longitude'] ?? '') ?? 0,
-            sectorId: sectorId ?? 'default-sector-mvp',
-          );
-        },
-      ),
-      GoRoute(
-        path: '/auth/login',
-        name: 'login',
-        builder: (context, state) {
-          final phone = state.uri.queryParameters['phone'];
-          return LoginPage(phoneNumber: phone);
-        },
+        builder: (context, state) => const PinSetupEmailPage(),
       ),
 
       // ===== Issue Detail Routes (outside shell for full-screen) =====
@@ -204,11 +180,13 @@ GoRouter appRouter(Ref ref) {
   );
 }
 
-/// Listenable that refreshes GoRouter when auth state changes
+/// Listenable that refreshes GoRouter when auth state or quick login eligibility changes
 class _GoRouterRefreshStream extends ChangeNotifier {
-  _GoRouterRefreshStream(Ref ref, ProviderListenable provider) {
-    ref.listen(provider, (prev, next) {
-      notifyListeners();
-    });
+  _GoRouterRefreshStream(Ref ref, List<ProviderListenable> providers) {
+    for (final provider in providers) {
+      ref.listen(provider, (prev, next) {
+        notifyListeners();
+      });
+    }
   }
 }

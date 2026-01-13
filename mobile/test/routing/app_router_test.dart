@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:munserv_mobile/features/auth/domain/auth_state.dart';
-import 'package:munserv_mobile/features/auth/domain/login_request.dart';
+import 'package:munserv_mobile/features/auth/domain/auth_types.dart';
 import 'package:munserv_mobile/shared/models/geo_point.dart';
 
 void main() {

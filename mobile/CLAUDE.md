@@ -589,3 +589,140 @@ After adding/modifying Freezed models or Riverpod providers:
 ```bash
 flutter pub run build_runner build --delete-conflicting-outputs
 ```
+
+## Testing (flutter_test + Mocktail)
+
+### Test Framework Stack
+- **flutter_test** - Core testing framework
+- **Mocktail** - Mocking library for Dart
+- **Riverpod** - ProviderContainer for provider tests
+
+### Unit Test Pattern (Providers)
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockIssueRepository extends Mock implements IssueRepository {}
+
+void main() {
+  late MockIssueRepository mockRepository;
+  late ProviderContainer container;
+
+  setUp(() {
+    mockRepository = MockIssueRepository();
+    container = ProviderContainer(
+      overrides: [
+        issueRepositoryProvider.overrideWithValue(mockRepository),
+      ],
+    );
+  });
+
+  tearDown(() {
+    container.dispose();
+  });
+
+  test('returns issues on success', () async {
+    // Arrange
+    when(() => mockRepository.getAll())
+        .thenAnswer((_) async => Result.success([testIssue]));
+
+    // Act
+    final result = await container.read(issuesProvider.future);
+
+    // Assert
+    expect(result, hasLength(1));
+    verify(() => mockRepository.getAll()).called(1);
+  });
+}
+```
+
+### Widget Test Pattern
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mocktail/mocktail.dart';
+
+void main() {
+  testWidgets('shows issue list when data loads', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          issueRepositoryProvider.overrideWithValue(mockRepository),
+        ],
+        child: const MaterialApp(home: IssueListPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(IssueCard), findsWidgets);
+  });
+}
+```
+
+### Test Commands
+```bash
+flutter test                       # Run all tests
+flutter test test/unit/            # Run specific directory
+flutter test --coverage            # Generate coverage report
+flutter test --reporter expanded   # Verbose output
+```
+
+### Mocktail Patterns
+```dart
+// Setup mock
+when(() => mock.method(any())).thenAnswer((_) async => result);
+when(() => mock.method(any())).thenThrow(Exception());
+
+// Verify calls
+verify(() => mock.method(any())).called(1);
+verifyNever(() => mock.otherMethod());
+
+// Capture arguments
+final captured = verify(() => mock.method(captureAny())).captured;
+```
+
+## Available Skills
+
+Skills are located in `.claude/commands/`. Use `/skill-name` to invoke.
+
+### Code Generation
+| Skill | Purpose |
+|-------|---------|
+| `/widget` | Generate Flutter widget (StatelessWidget/ConsumerWidget) |
+| `/feature` | Scaffold complete feature module |
+| `/provider` | Create Riverpod provider (async/notifier/family) |
+| `/repository` | Create repository with Result pattern |
+| `/model` | Generate Freezed model with JSON serialization |
+| `/screen` | Generate screen with GoRouter navigation |
+
+### Quality & Testing
+| Skill | Purpose |
+|-------|---------|
+| `/test` | Generate unit test (Mocktail) |
+| `/widget-test` | Generate widget test |
+| `/integration-test` | Generate integration test |
+| `/review` | Code review for Flutter/Dart patterns |
+| `/ci-fix` | Debug CI/CD failures (analyze, test, build) |
+
+### Workflow
+| Skill | Purpose |
+|-------|---------|
+| `/dev-cycle` | Full TDD workflow: Specify → Test → Code → Refactor → Quality Gate |
+
+## TDD Development Cycle
+
+When adding functionality, follow this workflow:
+
+```
+1. SPECIFY    → Define acceptance criteria
+2. TEST       → Write failing tests FIRST (Red)
+3. CODE       → Implement to pass tests (Green)
+4. REFACTOR   → Clean up, fix review issues
+5. QUALITY    → Run analyze, tests, format
+6. WIDGET     → Add widget tests for new UI
+7. PRE-COMMIT → Full build verification
+```
+
+Use `/dev-cycle "your task description"` to orchestrate this workflow.

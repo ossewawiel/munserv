@@ -29,10 +29,10 @@ Define MVP Scope → API Contract → Mock API → Build UI → Learn → Repeat
 ### Success Criteria
 
 MVP is complete when:
-- [x] Member can report an issue with photo and see it on a map ✅ (registration partial)
+- [x] Member can report an issue with photo and see it on a map ✅ **COMPLETE**
 - [x] Admin can view issues, change states, and see a basic heat list ✅ **COMPLETE**
-- [x] Both apps work against the same mock API ✅
-- [ ] Ready to swap mock for real backend (pending M1 registration)
+- [x] Both apps work against real backend ✅ **COMPLETE** (January 2026)
+- [ ] Member registration flow (M1 + W8/W9 pending)
 
 ---
 
@@ -42,7 +42,7 @@ MVP is complete when:
 
 | # | User Story | Acceptance Criteria | Status |
 |---|------------|---------------------|--------|
-| M1 | Register with phone number | Enter phone → receive OTP → verify → profile (name, address via GPS) → create PIN | 🔄 Partial |
+| M1 | Login with email/password | Enter email + password → if first login: change password → setup PIN → access app | 🔄 Pending |
 | M2 | Login with PIN/biometric | Enter PIN or use fingerprint → access app | ✅ Done |
 | M3 | View issues on map | See map centered on my sector with issue markers | ✅ Done |
 | M4 | View issue list | See list of issues, filter by type/state | ✅ Done |
@@ -50,9 +50,11 @@ MVP is complete when:
 | M6 | View issue details | See photo(s), type, state, location, timestamps | ✅ Done |
 | M7 | View my reports | See list of issues I reported with current status | ✅ Done |
 
+**Note:** M1 changed from phone+OTP to email+password. Registration now happens on web (see W8).
+
 **Infrastructure Complete:** January 2026 | **Stack:** Flutter 3.x + Riverpod + Freezed + Material Design 3
 
-### 2.2 Web Admin (Sector Administrator) ✅ **COMPLETE**
+### 2.2 Web Admin (Sector Administrator) 🔄 **IN PROGRESS**
 
 | # | User Story | Acceptance Criteria | Status |
 |---|------------|---------------------|--------|
@@ -62,7 +64,9 @@ MVP is complete when:
 | W4 | View issue details | See all info, photo(s), reporter (admin only), history | ✅ Done |
 | W5 | Change issue state | Select new state → add optional note → save | ✅ Done |
 | W6 | View heat report | See issues ranked by heat score | ✅ Done |
-| W7 | View members list | See sector members (Phase 2: manage them) | ✅ Done |
+| W7 | View members list | See sector members with status filter (all/pending/active/suspended) | ✅ Done |
+| W8 | Register as member | (Public) Fill form with name, email, phone, address, location → submit → pending status | 🔄 Pending |
+| W9 | Approve/reject member | Review pending registration → approve (sends email) or reject (deletes) | 🔄 Pending |
 
 **Implemented:** January 2026 | **Stack:** React 19 + TypeScript 5.9 + Vite 7 + Tailwind CSS 4 + React Query
 
@@ -70,8 +74,8 @@ MVP is complete when:
 
 | Feature | Why Deferred | Phase |
 |---------|--------------|-------|
-| Member approval workflow | Collect data now, approval later | 2 |
-| Member management (add/remove/warn) | Not core to proving concept | 2 |
+| ~~Member approval workflow~~ | **Now in MVP** - W8, W9 | ~~2~~ MVP |
+| Member management (suspend/warn) | Basic approve/reject in MVP, full management later | 2 |
 | Sector boundary editing | Complex, use fixed test boundary | 2 |
 | Push notifications | Requires backend infrastructure | 2 |
 | Duplicate issue linking | Needs AI or complex UX | 2 |
@@ -115,17 +119,18 @@ interface GeoPoint {
 
 // === MEMBER ===
 
-type MemberStatus = 'active' | 'pending' | 'suspended';
+type MemberStatus = 'active' | 'pending_approval' | 'suspended';
 
 interface Member {
   id: string;                    // UUID
+  email: string;                 // Email address (used for login)
   firstName: string;             // "John"
   surname: string;               // "Doe"
-  phoneNumber: string;           // E.164 format: +27821234567
+  phoneNumber: string;           // E.164 format: +27821234567 (for contact)
   address: string;               // Reverse geocoded from GPS at registration
   registrationLocation: GeoPoint; // GPS coordinates at time of registration
   sectorId: string;              // UUID - auto-assigned from location
-  status: MemberStatus;          // MVP: always 'active'. Phase 2: pending until approved
+  status: MemberStatus;          // pending_approval until admin approves
   createdAt: string;             // ISO 8601
 }
 

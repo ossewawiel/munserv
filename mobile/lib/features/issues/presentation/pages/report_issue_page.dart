@@ -11,6 +11,8 @@ import '../../../../shared/models/issue_type.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/utils/result.dart';
 import '../../../../shared/widgets/branded_scaffold.dart';
+import '../../../auth/domain/auth_state.dart';
+import '../../../auth/providers/auth_providers.dart';
 import '../../domain/domain.dart';
 import '../../providers/issue_providers.dart';
 import '../widgets/widgets.dart';
@@ -75,36 +77,82 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
   Future<void> _submit() async {
     if (_selectedType == null || _location == null) return;
 
+    // Get sectorId from auth state
+    final authState = ref.read(authProvider);
+    final sectorId = authState.sectorIdOrNull;
+
+    if (sectorId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(S.of(context).noSectorAssigned),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Capture context-dependent values before async gap
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final errorColor = Theme.of(context).colorScheme.error;
+    final router = GoRouter.of(context);
+
     setState(() => _isSubmitting = true);
 
     final request = ReportIssueRequest(
       type: _selectedType!,
       location: _location!,
+      sectorId: sectorId,
       description: _description,
     );
 
-    final result = await ref.read(reportIssueProvider.notifier).reportIssue(
-          request: request,
-          photoPaths: _photoPaths,
+    try {
+      debugPrint('📤 Starting issue submission...');
+      final result = await ref.read(reportIssueProvider.notifier).reportIssue(
+            request: request,
+            photoPaths: _photoPaths,
+          );
+      debugPrint('📤 Issue submission completed. isSuccess: ${result.isSuccess}');
+
+      // Update UI state if still mounted
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+
+      // Show feedback regardless of mounted state (using captured messenger)
+      if (result.isSuccess) {
+        debugPrint('📤 Showing success snackbar and navigating home');
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(
+            content: Text('Issue reported successfully!'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.green,
+          ),
         );
-
-    if (!mounted) return;
-
-    setState(() => _isSubmitting = false);
-
-    if (result.isSuccess) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Issue reported successfully!'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      context.pop();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+        // Navigate using captured router
+        router.go('/');
+      } else {
+        final errorMsg = result.errorOrNull?.displayMessage ?? 'Failed to report issue';
+        debugPrint('📤 Showing error snackbar: $errorMsg');
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: errorColor,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      // Handle unexpected errors
+      debugPrint('📤 Exception caught: $e');
+      debugPrint('📤 Stack trace: $stackTrace');
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+      scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text(result.errorOrNull?.displayMessage ?? 'Failed to report issue'),
-          backgroundColor: Theme.of(context).colorScheme.error,
+          content: Text('An error occurred: ${e.toString()}'),
+          backgroundColor: errorColor,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -281,7 +329,7 @@ class _StepIndicator extends StatelessWidget {
   }
 }
 
-class _PhotoStep extends StatelessWidget {
+class _PhotoStep extends StatefulWidget {
   final List<String> photoPaths;
   final void Function(List<String>) onPhotosChanged;
 
@@ -290,7 +338,19 @@ class _PhotoStep extends StatelessWidget {
     required this.onPhotosChanged,
   });
 
-  Future<void> _pickImage(BuildContext context, ImageSource source) async {
+  @override
+  State<_PhotoStep> createState() => _PhotoStepState();
+}
+
+class _PhotoStepState extends State<_PhotoStep> {
+  static const int _maxFileSizeMB = 5;
+  static const List<String> _allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+
+  Future<void> _pickAndValidatePhoto(BuildContext context, ImageSource source) async {
+    // Capture context-dependent values before async gap
+    final l10n = S.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     final picker = ImagePicker();
     final image = await picker.pickImage(
       source: source,
@@ -299,14 +359,49 @@ class _PhotoStep extends StatelessWidget {
       imageQuality: 85,
     );
 
-    if (image != null) {
-      onPhotosChanged([...photoPaths, image.path]);
+    if (image == null) return;
+
+    // Validate file size
+    final file = File(image.path);
+    final sizeInBytes = await file.length();
+    final sizeInMB = sizeInBytes / (1024 * 1024);
+
+    if (sizeInMB > _maxFileSizeMB) {
+      if (mounted) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.photoTooLarge),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
     }
+
+    // Validate file extension
+    final extension = image.path.toLowerCase().substring(
+          image.path.lastIndexOf('.'),
+        );
+
+    if (!_allowedExtensions.contains(extension)) {
+      if (mounted) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.unsupportedPhotoFormat),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Validation passed - add photo
+    widget.onPhotosChanged([...widget.photoPaths, image.path]);
   }
 
   void _removePhoto(int index) {
-    final updated = List<String>.from(photoPaths)..removeAt(index);
-    onPhotosChanged(updated);
+    final updated = List<String>.from(widget.photoPaths)..removeAt(index);
+    widget.onPhotosChanged(updated);
   }
 
   @override
@@ -332,29 +427,29 @@ class _PhotoStep extends StatelessWidget {
           const SizedBox(height: Spacing.lg),
 
           // Photo grid
-          if (photoPaths.isNotEmpty) ...[
+          if (widget.photoPaths.isNotEmpty) ...[
             Wrap(
               spacing: Spacing.sm,
               runSpacing: Spacing.sm,
               children: [
-                ...photoPaths.asMap().entries.map(
+                ...widget.photoPaths.asMap().entries.map(
                       (entry) => _PhotoTile(
                         path: entry.value,
                         onRemove: () => _removePhoto(entry.key),
                       ),
                     ),
-                if (photoPaths.length < 5)
+                if (widget.photoPaths.length < 5)
                   _AddPhotoTile(
-                    onCamera: () => _pickImage(context, ImageSource.camera),
-                    onGallery: () => _pickImage(context, ImageSource.gallery),
+                    onCamera: () => _pickAndValidatePhoto(context, ImageSource.camera),
+                    onGallery: () => _pickAndValidatePhoto(context, ImageSource.gallery),
                   ),
               ],
             ),
           ] else ...[
             // Initial state - large buttons
             _PhotoPickerButtons(
-              onCamera: () => _pickImage(context, ImageSource.camera),
-              onGallery: () => _pickImage(context, ImageSource.gallery),
+              onCamera: () => _pickAndValidatePhoto(context, ImageSource.camera),
+              onGallery: () => _pickAndValidatePhoto(context, ImageSource.gallery),
             ),
           ],
         ],

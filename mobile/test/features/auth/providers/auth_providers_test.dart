@@ -317,6 +317,7 @@ void main() {
         ),
       ).thenAnswer((_) async => const Result.success(testMemberLoginResponseMustChange));
       when(() => mockStorage.saveEmail('test@example.com')).thenAnswer((_) async {});
+      when(() => mockStorage.savePassword('temppass123')).thenAnswer((_) async {});
       when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
 
       final container = createContainer();
@@ -351,6 +352,7 @@ void main() {
         ),
       ).thenAnswer((_) async => const Result.success(testMemberLoginResponse));
       when(() => mockStorage.saveEmail('test@example.com')).thenAnswer((_) async {});
+      when(() => mockStorage.savePassword('password123')).thenAnswer((_) async {});
       when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
       when(() => mockStorage.getPin()).thenAnswer((_) async => null);
 
@@ -382,6 +384,7 @@ void main() {
         ),
       ).thenAnswer((_) async => const Result.success(testMemberLoginResponse));
       when(() => mockStorage.saveEmail('test@example.com')).thenAnswer((_) async {});
+      when(() => mockStorage.savePassword('password123')).thenAnswer((_) async {});
       when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
       when(() => mockStorage.getPin()).thenAnswer((_) async => '1234');
       when(() => mockRepository.getMe())
@@ -449,6 +452,7 @@ void main() {
         ),
       ).thenAnswer((_) async => const Result.success(testMemberLoginResponseMustChange));
       when(() => mockStorage.saveEmail('test@example.com')).thenAnswer((_) async {});
+      when(() => mockStorage.savePassword('temppass123')).thenAnswer((_) async {});
       when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
       when(
         () => mockRepository.changePassword(
@@ -510,6 +514,7 @@ void main() {
         ),
       ).thenAnswer((_) async => const Result.success(testMemberLoginResponse));
       when(() => mockStorage.saveEmail('test@example.com')).thenAnswer((_) async {});
+      when(() => mockStorage.savePassword('password123')).thenAnswer((_) async {});
       when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
       when(() => mockStorage.getPin()).thenAnswer((_) async => null);
       when(() => mockStorage.savePin('1234')).thenAnswer((_) async {});

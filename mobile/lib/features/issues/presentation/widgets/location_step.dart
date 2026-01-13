@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/models/geo_point.dart';
+import '../../../../shared/services/location_service.dart';
 import '../../../../shared/theme/typography.dart';
 
 /// Step widget for selecting/confirming location in issue reporting flow
@@ -20,6 +22,8 @@ class LocationStep extends StatefulWidget {
 
 class _LocationStepState extends State<LocationStep> {
   bool _isLoading = false;
+  String? _errorMessage;
+  final LocationService _locationService = LocationService();
 
   @override
   void initState() {
@@ -30,17 +34,32 @@ class _LocationStepState extends State<LocationStep> {
   }
 
   Future<void> _getCurrentLocation() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
-    // TODO: Implement actual location fetching with geolocator package
-    // For now, simulate with a mock location
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final location = await _locationService.getCurrentLocation();
 
-    if (mounted) {
-      widget.onLocationChanged(
-        const GeoPoint(latitude: -26.1052, longitude: 28.0564),
-      );
-      setState(() => _isLoading = false);
+      if (!mounted) return;
+
+      if (location != null) {
+        widget.onLocationChanged(location);
+        setState(() => _isLoading = false);
+      } else {
+        // Permission denied or service disabled
+        setState(() {
+          _isLoading = false;
+          _errorMessage = S.of(context).locationPermissionDenied;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = S.of(context).locationError;
+      });
     }
   }
 
@@ -79,11 +98,50 @@ class _LocationStepState extends State<LocationStep> {
 
           const SizedBox(height: Spacing.md),
 
+          // Error message
+          if (_errorMessage != null) ...[
+            Container(
+              padding: const EdgeInsets.all(Spacing.sm),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.errorContainer,
+                borderRadius: BorderRadius.circular(Radii.sm),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: theme.colorScheme.onErrorContainer,
+                    size: 20,
+                  ),
+                  const SizedBox(width: Spacing.sm),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onErrorContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: Spacing.md),
+          ],
+
           // Refresh location button
           OutlinedButton.icon(
-            onPressed: _getCurrentLocation,
-            icon: const Icon(Icons.my_location),
-            label: const Text('Refresh Location'),
+            onPressed: _isLoading ? null : _getCurrentLocation,
+            icon: _isLoading
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: theme.colorScheme.primary,
+                    ),
+                  )
+                : const Icon(Icons.my_location),
+            label: Text(_isLoading ? 'Getting Location...' : 'Refresh Location'),
           ),
         ],
       ),
@@ -97,9 +155,20 @@ class _LocationStepState extends State<LocationStep> {
 
     if (location == null) {
       return Center(
-        child: Text(
-          'Location unavailable',
-          style: theme.textTheme.bodyMedium,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.location_off,
+              size: 48,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: Spacing.sm),
+            Text(
+              'Location unavailable',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ],
         ),
       );
     }

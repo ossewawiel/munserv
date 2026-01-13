@@ -8,6 +8,7 @@ enum IssueType {
   trafficLight,
   streetLight,
   illegalDumping,
+  roadDamage,
   other;
 
   /// Parse from API string (snake_case format)
@@ -18,6 +19,7 @@ enum IssueType {
         'traffic_light' => trafficLight,
         'street_light' => streetLight,
         'illegal_dumping' => illegalDumping,
+        'road_damage' => roadDamage,
         _ => other,
       };
 
@@ -29,6 +31,7 @@ enum IssueType {
         trafficLight => 'traffic_light',
         streetLight => 'street_light',
         illegalDumping => 'illegal_dumping',
+        roadDamage => 'road_damage',
         other => 'other',
       };
 
@@ -39,6 +42,7 @@ enum IssueType {
         trafficLight => 'Traffic Light',
         streetLight => 'Street Light',
         illegalDumping => 'Illegal Dumping',
+        roadDamage => 'Road Damage',
         other => 'Other',
       };
 }

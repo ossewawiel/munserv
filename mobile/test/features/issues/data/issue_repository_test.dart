@@ -21,6 +21,7 @@ void main() {
     registerFallbackValue(ReportIssueRequest(
       type: IssueType.pothole,
       location: const GeoPoint(latitude: 0, longitude: 0),
+      sectorId: 'fallback-sector',
     ));
   });
 
@@ -198,6 +199,7 @@ void main() {
         final request = ReportIssueRequest(
           type: IssueType.pothole,
           location: const GeoPoint(latitude: -26.1, longitude: 28.1),
+          sectorId: 'sector-123',
         );
 
         final result = await repository.reportIssue(
@@ -228,6 +230,7 @@ void main() {
         final request = ReportIssueRequest(
           type: IssueType.pothole,
           location: const GeoPoint(latitude: -26.1, longitude: 28.1),
+          sectorId: 'sector-456',
         );
 
         final result = await repository.reportIssue(

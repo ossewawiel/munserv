@@ -49,6 +49,7 @@ backend/*.log
 .env.*.local
 *.pem
 *.key
+**/application-local.yml
 
 # OS
 .DS_Store

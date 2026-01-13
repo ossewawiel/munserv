@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'login_request.dart';
+import 'auth_types.dart';
 
 part 'backend_login_response.freezed.dart';
 part 'backend_login_response.g.dart';

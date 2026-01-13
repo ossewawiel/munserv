@@ -172,6 +172,140 @@ class IssueService(
 )
 ```
 
+### 2.6 Shared Infrastructure Services
+
+Infrastructure services provide cross-cutting concerns like email, SMS, file storage, and external integrations. They follow a consistent pattern:
+
+```kotlin
+// Interface in shared module
+interface EmailService {
+    fun sendEmail(to: String, subject: String, body: String): EmailResult
+    fun sendTemplatedEmail(to: String, template: EmailTemplate, context: Map<String, Any>): EmailResult
+}
+
+sealed interface EmailResult {
+    object Success : EmailResult
+    data class Failed(val reason: String) : EmailResult
+    data class InvalidAddress(val email: String) : EmailResult
+}
+
+// Implementation in shared module
+@Service
+class SmtpEmailService(
+    private val mailSender: JavaMailSender,
+    private val templateEngine: TemplateEngine
+) : EmailService {
+
+    override fun sendEmail(to: String, subject: String, body: String): EmailResult {
+        return try {
+            val message = SimpleMailMessage().apply {
+                setTo(to)
+                setSubject(subject)
+                setText(body)
+            }
+            mailSender.send(message)
+            EmailResult.Success
+        } catch (e: MailException) {
+            EmailResult.Failed(e.message ?: "Unknown error")
+        }
+    }
+
+    override fun sendTemplatedEmail(
+        to: String,
+        template: EmailTemplate,
+        context: Map<String, Any>
+    ): EmailResult {
+        val body = templateEngine.process(template.templateName, Context().apply {
+            setVariables(context)
+        })
+        return sendEmail(to, template.subject, body)
+    }
+}
+
+// Email templates as sealed class
+sealed class EmailTemplate(val templateName: String, val subject: String) {
+    object WelcomeMember : EmailTemplate(
+        templateName = "welcome-member",
+        subject = "Welcome to MunServ - Your Account Details"
+    )
+    object PasswordReset : EmailTemplate(
+        templateName = "password-reset",
+        subject = "MunServ - Password Reset Request"
+    )
+}
+```
+
+**Configuration pattern:**
+
+```yaml
+# application.yml
+spring:
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+munserv:
+  email:
+    from: ${EMAIL_FROM:noreply@munserv.app}
+    enabled: ${EMAIL_ENABLED:true}
+```
+
+**Usage in feature services:**
+
+```kotlin
+// Registration service uses EmailService
+class RegistrationService(
+    private val memberRepository: MemberRepository,
+    private val emailService: EmailService,
+    private val passwordService: PasswordService
+) {
+    fun approveMember(memberId: MemberId): RegistrationResult {
+        val member = memberRepository.findById(memberId)
+            ?: return RegistrationResult.MemberNotFound(memberId)
+
+        val tempPassword = passwordService.generateTemporary()
+        val updatedMember = member.copy(
+            status = MemberStatus.Active,
+            passwordHash = passwordService.hash(tempPassword),
+            mustChangePassword = true
+        )
+        memberRepository.save(updatedMember)
+
+        // Send welcome email
+        val emailResult = emailService.sendTemplatedEmail(
+            to = member.email.value,
+            template = EmailTemplate.WelcomeMember,
+            context = mapOf(
+                "firstName" to member.firstName,
+                "tempPassword" to tempPassword,
+                "appDownloadUrl" to "https://munserv.app/download"
+            )
+        )
+
+        return when (emailResult) {
+            is EmailResult.Success -> RegistrationResult.Approved(updatedMember)
+            is EmailResult.Failed -> RegistrationResult.EmailFailed(emailResult.reason)
+            is EmailResult.InvalidAddress -> RegistrationResult.InvalidEmail(member.email)
+        }
+    }
+}
+```
+
+**Infrastructure service rules:**
+
+| Rule | Description |
+|------|-------------|
+| Interface in shared | Define interface in `shared/` module for testability |
+| Sealed results | Return sealed results, never throw exceptions |
+| Configuration driven | Use environment variables for all external settings |
+| Feature services consume | Feature modules inject and use via interface |
+| Never direct access | Controllers never call infrastructure services directly |
+
 ---
 
 ## 3. Mobile Architecture (Flutter/Dart)
