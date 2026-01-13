@@ -4,7 +4,7 @@ import Tooltip from '@mui/material/Tooltip';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
-import { useThemeContext } from '@/theme/ThemeContext';
+import { useThemeContext } from '@/theme';
 import type { ColorMode } from '@/theme/types';
 
 interface ThemeToggleProps {

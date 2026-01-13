@@ -75,7 +75,7 @@ export class RegisterPage {
     await this.page.getByText(message).waitFor({ state: 'visible' });
   }
 
-  async expectValidationError(_fieldLabel: string | RegExp) {
+  async expectValidationError() {
     await this.page.getByText(/this field is required/i).waitFor({ state: 'visible' });
   }
 

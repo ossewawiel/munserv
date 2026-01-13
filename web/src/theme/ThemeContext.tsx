@@ -1,6 +1,4 @@
 import {
-  createContext,
-  useContext,
   useState,
   useEffect,
   useMemo,
@@ -15,24 +13,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 
 import { createPodTheme } from './createPodTheme';
 import { defaultPodConfig } from './defaultTheme';
+import { ThemeContext } from './ThemeContextValue';
 import type { PodThemeConfig, ColorMode } from './types';
-
-interface ThemeContextValue {
-  podConfig: PodThemeConfig;
-  colorMode: ColorMode;
-  setColorMode: (mode: ColorMode) => void;
-  isLoading: boolean;
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
-
-export const useThemeContext = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useThemeContext must be used within ThemeProvider');
-  }
-  return context;
-};
 
 interface ThemeProviderProps {
   children: ReactNode;

@@ -230,8 +230,9 @@ describe('ProfileMenu', () => {
       const trigger = screen.getByRole('button', { name: /profile/i });
       await user.click(trigger);
 
+      // Language is now shown as toggle button with language code
       await waitFor(() => {
-        expect(screen.getByText('English')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /english/i })).toBeInTheDocument();
       });
     });
   });

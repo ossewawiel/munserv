@@ -1,7 +1,8 @@
 // Theme exports
 export { createPodTheme } from './createPodTheme';
 export { defaultPodConfig } from './defaultTheme';
-export { ThemeProvider, useThemeContext } from './ThemeContext';
+export { ThemeProvider } from './ThemeContext';
+export { useThemeContext } from './useThemeContext';
 export {
   coreColors,
   lightScheme,
