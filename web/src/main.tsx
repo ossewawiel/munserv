@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 
 import { queryClient } from '@/lib/query-client';
 import { ThemeProvider } from '@/theme';
+import { SessionExpiredHandler } from '@/components/organisms/SessionExpiredHandler';
 import '@/lib/i18n'; // Initialize i18n
 import App from './App';
 
@@ -31,6 +32,7 @@ createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <ThemeProvider>
+            <SessionExpiredHandler />
             <App />
           </ThemeProvider>
         </BrowserRouter>

@@ -31,6 +31,8 @@
     "loginButton": "Sign In",
     "loginError": "Invalid email or password",
     "loggingIn": "Signing in...",
+    "sessionExpired": "Your session has expired",
+    "redirectingToLogin": "Redirecting to login...",
     "welcomeBack": "Hi, Welcome Back",
     "enterCredentials": "Enter your credentials to continue",
     "registerTitle": "Register as a Community Member",

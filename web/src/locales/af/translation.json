@@ -31,6 +31,8 @@
     "loginButton": "Teken aan",
     "loginError": "Ongeldige e-pos of wagwoord",
     "loggingIn": "Teken aan...",
+    "sessionExpired": "Jou sessie het verval",
+    "redirectingToLogin": "Herlei na aanteken...",
     "welcomeBack": "Hallo, Welkom Terug",
     "enterCredentials": "Voer jou geloofsbriewe in om voort te gaan",
     "registerTitle": "Registreer as 'n Gemeenskapslid",

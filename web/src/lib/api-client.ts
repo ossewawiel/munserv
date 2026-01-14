@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { authEvents } from './auth-events';
+
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1',
   headers: {
@@ -18,10 +20,26 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      globalThis.location.href = '/login';
+    const status = error.response?.status;
+    const requestUrl = error.config?.url ?? '';
+
+    // Handle authentication/authorization errors
+    // 401 = Invalid/expired token (session expired)
+    // 403 = No token or access denied (not authenticated)
+    if (status === 401 || status === 403) {
+      // Don't emit session expired for login attempts (401 means wrong credentials)
+      const isLoginRequest = requestUrl.includes('/auth/admin/login');
+      const isRegisterRequest = requestUrl.includes('/auth/register');
+
+      if (!isLoginRequest && !isRegisterRequest) {
+        // Clear auth data
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('admin');
+
+        // Emit event for React components to handle
+        authEvents.emit('session-expired');
+      }
     }
     return Promise.reject(error);
   }
