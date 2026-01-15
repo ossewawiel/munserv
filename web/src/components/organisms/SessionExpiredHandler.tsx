@@ -54,10 +54,11 @@ export const SessionExpiredHandler: FC = () => {
   }, [handleSessionExpired]);
 
   // Reset handler and close snackbar when reaching login page
+  // This is intentional - syncing UI state with navigation is a valid effect use case
   useEffect(() => {
     if (location.pathname === '/login') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: sync UI with navigation
       setShowExpiredMessage(false);
-    } else {
       hasHandledRef.current = false;
     }
   }, [location.pathname]);

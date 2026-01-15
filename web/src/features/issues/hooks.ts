@@ -37,7 +37,7 @@ export function useUpdateIssueState() {
 
   return useMutation({
     mutationFn: ({ id, state, note }: { id: string; state: IssueState; note?: string }) =>
-      issueApi.updateState(id, { state, notes: note }),
+      issueApi.updateState(id, { state, note }),
     onSuccess: (data, { id }) => {
       queryClient.setQueryData(['issues', id], data);
       queryClient.invalidateQueries({ queryKey: ['issues'] });

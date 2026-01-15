@@ -73,7 +73,7 @@ export const ISSUE_STATE_LABELS: Record<IssueState, string> = {
  */
 export interface UpdateIssueStateRequest {
   state: IssueState;
-  notes?: string;
+  note?: string;
 }
 
 /**

@@ -1,13 +1,8 @@
-import { type FC } from 'react';
+import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
-import { styled } from '@mui/material/styles';
 
 import { IssueStateBadge } from '@/components/molecules/IssueStateBadge';
 import type { StateHistoryEntry } from '../types';
@@ -16,43 +11,63 @@ interface HorizontalTimelineProps {
   history: StateHistoryEntry[];
 }
 
-const TimelineConnector = styled(StepConnector)(({ theme }) => ({
-  [`&.${stepConnectorClasses.alternativeLabel}`]: {
-    top: 12,
-  },
-  [`&.${stepConnectorClasses.completed}`]: {
-    [`& .${stepConnectorClasses.line}`]: {
-      backgroundColor: theme.palette.primary.main,
-    },
-  },
-  [`& .${stepConnectorClasses.line}`]: {
-    height: 3,
-    border: 0,
-    backgroundColor: theme.palette.divider,
-    borderRadius: 1,
-  },
-}));
+/**
+ * Calculate proportional positions (0-100%) for each timeline entry based on duration.
+ * First entry at 0%, last at 100%, others positioned proportionally by time elapsed.
+ */
+function calculateProportionalPositions(history: StateHistoryEntry[]): number[] {
+  if (history.length === 0) return [];
+  if (history.length === 1) return [50]; // Center single item
 
-const TimelineStepIcon: FC<{ completed: boolean }> = ({ completed }) => (
+  const timestamps = history.map((entry) => new Date(entry.changedAt).getTime());
+  const firstTime = timestamps[0];
+  const lastTime = timestamps[timestamps.length - 1];
+  const totalDuration = lastTime - firstTime;
+
+  // If all at same time, distribute evenly
+  if (totalDuration === 0) {
+    return history.map((_, i) => (i / (history.length - 1)) * 100);
+  }
+
+  // Calculate proportional positions as percentages
+  return timestamps.map((time) => {
+    const elapsed = time - firstTime;
+    return (elapsed / totalDuration) * 100;
+  });
+}
+
+/**
+ * Get the overall width percentage based on number of status entries.
+ * More statuses = wider timeline.
+ */
+function getTimelineWidthPercent(count: number): number {
+  if (count >= 5) return 80; // 80% for all 5 possible states
+  if (count >= 3) return 60; // 60% for 3-4 states
+  return 40; // 40% for 1-2 states
+}
+
+const TimelineNode: FC = () => (
   <Box
     sx={{
-      width: 24,
-      height: 24,
+      width: 16,
+      height: 16,
       borderRadius: '50%',
-      bgcolor: completed ? 'primary.main' : 'action.disabled',
+      bgcolor: 'primary.main',
       border: 2,
-      borderColor: completed ? 'primary.main' : 'divider',
+      borderColor: 'primary.main',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      flexShrink: 0,
+      zIndex: 1,
     }}
   >
     <Box
       sx={{
-        width: 8,
-        height: 8,
+        width: 6,
+        height: 6,
         borderRadius: '50%',
-        bgcolor: completed ? 'background.paper' : 'transparent',
+        bgcolor: 'background.paper',
       }}
     />
   </Box>
@@ -66,6 +81,9 @@ export const HorizontalTimeline: FC<HorizontalTimelineProps> = ({ history }) => 
       month: 'short',
       day: 'numeric',
     });
+
+  const positions = useMemo(() => calculateProportionalPositions(history), [history]);
+  const timelineWidth = useMemo(() => getTimelineWidthPercent(history.length), [history.length]);
 
   if (history.length === 0) {
     return (
@@ -102,44 +120,65 @@ export const HorizontalTimeline: FC<HorizontalTimelineProps> = ({ history }) => 
         {t('issues.stateHistory')}
       </Typography>
 
-      <Box sx={{ overflowX: 'auto', pb: 1 }}>
-        <Stepper
-          alternativeLabel
-          activeStep={history.length - 1}
-          connector={<TimelineConnector />}
+      {/* Timeline container - centered with proportional width */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%',
+          overflowX: 'auto',
+          pb: 1,
+        }}
+      >
+        <Box
           role="list"
-          sx={{ minWidth: history.length * 150 }}
+          sx={{
+            position: 'relative',
+            width: `${timelineWidth}%`,
+            minWidth: 250,
+            height: 85,
+          }}
         >
+          {/* Timeline track (horizontal line) */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 7,
+              left: 0,
+              right: 0,
+              height: 3,
+              bgcolor: 'primary.main',
+              borderRadius: 1,
+            }}
+          />
+
+          {/* Timeline entries positioned proportionally */}
           {history.map((entry, index) => (
-            <Step key={`${entry.state}-${entry.changedAt}`} completed={true}>
-              <StepLabel
-                StepIconComponent={() => (
-                  <TimelineStepIcon completed={index <= history.length - 1} />
-                )}
+            <Box
+              key={`${entry.state}-${entry.changedAt}`}
+              role="listitem"
+              sx={{
+                position: 'absolute',
+                left: `${positions[index]}%`,
+                transform: 'translateX(-50%)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 0.5,
+              }}
+            >
+              <TimelineNode />
+              <IssueStateBadge state={entry.state} />
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontWeight: 500, whiteSpace: 'nowrap' }}
               >
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-                  <IssueStateBadge state={entry.state} />
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ fontWeight: 500 }}
-                  >
-                    {formatDate(entry.changedAt)}
-                  </Typography>
-                  {entry.changedBy && (
-                    <Typography
-                      variant="caption"
-                      color="text.disabled"
-                      sx={{ fontSize: '0.65rem' }}
-                    >
-                      {entry.changedBy}
-                    </Typography>
-                  )}
-                </Box>
-              </StepLabel>
-            </Step>
+                {formatDate(entry.changedAt)}
+              </Typography>
+            </Box>
           ))}
-        </Stepper>
+        </Box>
       </Box>
     </Paper>
   );
