@@ -152,11 +152,12 @@ class _IssueMapPageState extends ConsumerState<IssueMapPage> {
           // Issue detail card (bottom sheet style)
           if (_selectedIssue != null)
             Positioned(
-              left: Spacing.md,
-              right: Spacing.md,
-              bottom: Spacing.md,
-              child: _IssuePreviewCard(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: IssueCard(
                 issue: _selectedIssue!,
+                variant: IssueCardVariant.mapPreview,
                 onTap: () => context.push('/issues/${_selectedIssue!.id}'),
                 onClose: _clearSelection,
               ),
@@ -249,8 +250,8 @@ class _IssueMap extends StatelessWidget {
 
     return Marker(
       point: LatLng(issue.location.latitude, issue.location.longitude),
-      width: isSelected ? 48 : 40,
-      height: isSelected ? 48 : 40,
+      width: isSelected ? IconSizes.xl : IconSizes.xl - 8,
+      height: isSelected ? IconSizes.xl : IconSizes.xl - 8,
       child: GestureDetector(
         onTap: () => onMarkerTapped(issue),
         child: _IssueMarkerIcon(
@@ -350,119 +351,3 @@ class _IssueMarkerIcon extends StatelessWidget {
   }
 }
 
-/// Card showing issue preview when a marker is selected
-class _IssuePreviewCard extends StatelessWidget {
-  final IssueSummary issue;
-  final VoidCallback onTap;
-  final VoidCallback onClose;
-
-  const _IssuePreviewCard({
-    required this.issue,
-    required this.onTap,
-    required this.onClose,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 8,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(Radii.lg),
-        child: Padding(
-          padding: const EdgeInsets.all(Spacing.md),
-          child: Row(
-            children: [
-              // Thumbnail
-              ClipRRect(
-                borderRadius: BorderRadius.circular(Radii.sm),
-                child: issue.thumbnailUrl != null
-                    ? Image.network(
-                        issue.thumbnailUrl!,
-                        width: 64,
-                        height: 64,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          width: 64,
-                          height: 64,
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          child: Icon(
-                            Icons.image_not_supported,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      )
-                    : Container(
-                        width: 64,
-                        height: 64,
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        child: Icon(
-                          Icons.report_problem_outlined,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-              ),
-              const SizedBox(width: Spacing.md),
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(child: IssueTypeBadge(type: issue.type)),
-                        const SizedBox(width: Spacing.sm),
-                        Flexible(
-                          child: IssueStateBadge(
-                            state: issue.state,
-                            compact: true,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: Spacing.xs),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 14,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 2),
-                        Expanded(
-                          child: Text(
-                            '${issue.location.latitude.toStringAsFixed(4)}, ${issue.location.longitude.toStringAsFixed(4)}',
-                            style: theme.textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // Heat and close
-              Column(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: onClose,
-                    iconSize: 20,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(height: Spacing.sm),
-                  HeatBadge(heat: issue.heat),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

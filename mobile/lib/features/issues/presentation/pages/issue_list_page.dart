@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/theme/typography.dart';
+import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/loading_spinner.dart';
 import '../../providers/issue_providers.dart';
@@ -39,8 +40,8 @@ class IssueListPage extends ConsumerWidget {
             child: issuesAsync.when(
               data: (paginated) {
                 if (paginated.items.isEmpty) {
-                  return _EmptyState(
-                    onReport: () => context.push('/issues/report'),
+                  return EmptyState.noIssues(
+                    onRefresh: () => ref.invalidate(issuesProvider),
                   );
                 }
 
@@ -81,49 +82,6 @@ class IssueListPage extends ConsumerWidget {
         onPressed: () => context.push('/issues/report'),
         icon: const Icon(Icons.add_a_photo),
         label: const Text('Report'),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  final VoidCallback onReport;
-
-  const _EmptyState({required this.onReport});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(Spacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.check_circle_outline,
-              size: 80,
-              color: theme.colorScheme.primary.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: Spacing.lg),
-            Text('No issues found', style: theme.textTheme.titleLarge),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              'There are no issues matching your filters.\nBe the first to report one!',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: Spacing.xl),
-            FilledButton.icon(
-              onPressed: onReport,
-              icon: const Icon(Icons.add_a_photo),
-              label: const Text('Report Issue'),
-            ),
-          ],
-        ),
       ),
     );
   }

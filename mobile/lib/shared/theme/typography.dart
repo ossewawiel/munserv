@@ -151,3 +151,42 @@ class Radii {
   static BorderRadius get lgRadius => BorderRadius.circular(lg);
   static BorderRadius get xlRadius => BorderRadius.circular(xl);
 }
+
+/// Standard icon sizes following M3 specifications.
+abstract class IconSizes {
+  /// Extra small icons (12dp) - Inline indicators
+  static const double xs = 12;
+
+  /// Small icons (16dp) - Dense UI elements
+  static const double sm = 16;
+
+  /// Medium icons (24dp) - Default Material icon size
+  static const double md = 24;
+
+  /// Large icons (32dp) - Prominent actions
+  static const double lg = 32;
+
+  /// Extra large icons (48dp) - Feature icons, map markers
+  static const double xl = 48;
+
+  /// Double extra large icons (64dp) - Card leading icons
+  static const double xxl = 64;
+
+  /// Display icons (80dp) - Empty state illustrations
+  static const double display = 80;
+}
+
+/// Standard thumbnail/image sizes.
+abstract class ThumbnailSizes {
+  /// Small thumbnails (48dp) - Compact avatars
+  static const double sm = 48;
+
+  /// Medium thumbnails (64dp) - Card thumbnails, standard avatars
+  static const double md = 64;
+
+  /// Large thumbnails (100dp) - Photo picker tiles
+  static const double lg = 100;
+
+  /// Extra large thumbnails (120dp) - Preview images
+  static const double xl = 120;
+}

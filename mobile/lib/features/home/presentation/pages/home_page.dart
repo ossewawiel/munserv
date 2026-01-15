@@ -6,6 +6,8 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/services/biometric_service.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/utils/result.dart';
+import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/quick_action_card.dart';
 import '../../../auth/providers/auth_providers.dart';
 import '../../../issues/providers/issue_providers.dart';
 import '../../../issues/presentation/widgets/widgets.dart';
@@ -188,23 +190,21 @@ class _HomePageState extends ConsumerState<HomePage> {
               data: (paginatedIssues) {
                 final issues = paginatedIssues.items.take(5).toList();
                 if (issues.isEmpty) {
-                  return const SliverToBoxAdapter(child: _EmptyState());
+                  return SliverFillRemaining(
+                    child: EmptyState.noIssues(
+                      onRefresh: () => ref.invalidate(issuesProvider),
+                    ),
+                  );
                 }
-                return SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final issue = issues[index];
-                      return Padding(
-                        key: ValueKey(issue.id),
-                        padding: const EdgeInsets.only(bottom: Spacing.md),
-                        child: IssueCard(
-                          issue: issue,
-                          onTap: () => context.push('/issues/${issue.id}'),
-                        ),
-                      );
-                    }, childCount: issues.length),
-                  ),
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final issue = issues[index];
+                    return IssueCard(
+                      key: ValueKey(issue.id),
+                      issue: issue,
+                      onTap: () => context.push('/issues/${issue.id}'),
+                    );
+                  }, childCount: issues.length),
                 );
               },
               loading: () => const SliverFillRemaining(
@@ -253,7 +253,7 @@ class _QuickActions extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _QuickActionCard(
+          child: QuickActionCard(
             icon: Icons.add_circle_outline,
             label: 'Report Issue',
             color: theme.colorScheme.primary,
@@ -262,7 +262,7 @@ class _QuickActions extends StatelessWidget {
         ),
         const SizedBox(width: Spacing.md),
         Expanded(
-          child: _QuickActionCard(
+          child: QuickActionCard(
             icon: Icons.list_alt,
             label: 'My Reports',
             color: theme.colorScheme.secondary,
@@ -274,89 +274,3 @@ class _QuickActions extends StatelessWidget {
   }
 }
 
-class _QuickActionCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _QuickActionCard({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(Spacing.lg),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(Spacing.md),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(height: Spacing.sm),
-              Text(
-                label,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.all(Spacing.xl),
-      child: Column(
-        children: [
-          Icon(
-            Icons.check_circle_outline,
-            size: 64,
-            color: theme.colorScheme.primary.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: Spacing.md),
-          Text('No issues reported yet', style: theme.textTheme.titleMedium),
-          const SizedBox(height: Spacing.xs),
-          Text(
-            'Be the first to report an issue in your area',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: Spacing.lg),
-          FilledButton.icon(
-            onPressed: () => context.push('/report'),
-            icon: const Icon(Icons.add),
-            label: const Text('Report Issue'),
-          ),
-        ],
-      ),
-    );
-  }
-}

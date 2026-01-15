@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/widgets/branded_scaffold.dart';
+import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/loading_spinner.dart';
 import '../../providers/issue_providers.dart';
@@ -22,7 +23,9 @@ class MyReportsPage extends ConsumerWidget {
       body: myIssuesAsync.when(
         data: (paginated) {
           if (paginated.items.isEmpty) {
-            return _EmptyState(onReport: () => context.push('/issues/report'));
+            return EmptyState.noReports(
+              onReport: () => context.push('/issues/report'),
+            );
           }
 
           return RefreshIndicator(
@@ -53,49 +56,6 @@ class MyReportsPage extends ConsumerWidget {
         onPressed: () => context.push('/issues/report'),
         icon: const Icon(Icons.add_a_photo),
         label: const Text('Report'),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  final VoidCallback onReport;
-
-  const _EmptyState({required this.onReport});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(Spacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.assignment_outlined,
-              size: 80,
-              color: theme.colorScheme.primary.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: Spacing.lg),
-            Text('No reports yet', style: theme.textTheme.titleLarge),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              'You haven\'t reported any issues yet.\nHelp improve your community!',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: Spacing.xl),
-            FilledButton.icon(
-              onPressed: onReport,
-              icon: const Icon(Icons.add_a_photo),
-              label: const Text('Report Issue'),
-            ),
-          ],
-        ),
       ),
     );
   }

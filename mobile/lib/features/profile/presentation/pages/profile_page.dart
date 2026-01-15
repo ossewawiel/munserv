@@ -184,9 +184,16 @@ class _UserInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final profile = authState.profileOrNull;
 
     return Card(
+      elevation: 0,
+      color: colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Radii.md),
+        side: BorderSide(color: colors.outlineVariant),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(Spacing.lg),
         child: Row(
@@ -289,9 +296,16 @@ class _SettingsItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return Card(
       margin: const EdgeInsets.only(bottom: Spacing.sm),
+      elevation: 0,
+      color: colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Radii.md),
+        side: BorderSide(color: colors.outlineVariant),
+      ),
       child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(Spacing.sm),

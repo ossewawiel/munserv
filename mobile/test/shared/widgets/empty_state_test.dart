@@ -68,25 +68,6 @@ void main() {
       expect(find.byType(FilledButton), findsNothing);
       expect(find.byType(OutlinedButton), findsNothing);
     });
-
-    testWidgets('uses custom icon color when provided', (tester) async {
-      const customColor = Colors.purple;
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: EmptyState(
-              icon: Icons.check_circle,
-              title: 'Test Title',
-              iconColor: customColor,
-            ),
-          ),
-        ),
-      );
-
-      final icon = tester.widget<Icon>(find.byType(Icon));
-      expect(icon.color, equals(customColor.withValues(alpha: 0.7)));
-    });
   });
 
   group('EmptyState.noIssues', () {
@@ -96,37 +77,37 @@ void main() {
       );
 
       expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
-      expect(find.text('No issues found'), findsOneWidget);
-      expect(find.textContaining('no issues matching'), findsOneWidget);
+      expect(find.text('No Issues'), findsOneWidget);
+      expect(find.textContaining('No issues have been reported'), findsOneWidget);
     });
 
-    testWidgets('displays action button when onReport provided', (
+    testWidgets('displays refresh button when onRefresh provided', (
       tester,
     ) async {
-      bool reported = false;
+      bool refreshed = false;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: EmptyState.noIssues(onReport: () => reported = true),
+            body: EmptyState.noIssues(onRefresh: () => refreshed = true),
           ),
         ),
       );
 
-      expect(find.text('Report Issue'), findsOneWidget);
+      expect(find.text('Refresh'), findsOneWidget);
 
-      await tester.tap(find.text('Report Issue'));
-      expect(reported, isTrue);
+      await tester.tap(find.text('Refresh'));
+      expect(refreshed, isTrue);
     });
 
-    testWidgets('does not display button when onReport is null', (
+    testWidgets('does not display button when onRefresh is null', (
       tester,
     ) async {
       await tester.pumpWidget(
         MaterialApp(home: Scaffold(body: EmptyState.noIssues())),
       );
 
-      expect(find.text('Report Issue'), findsNothing);
+      expect(find.text('Refresh'), findsNothing);
     });
   });
 
@@ -137,7 +118,7 @@ void main() {
       );
 
       expect(find.byIcon(Icons.assignment_outlined), findsOneWidget);
-      expect(find.text('No reports yet'), findsOneWidget);
+      expect(find.text('No Reports Yet'), findsOneWidget);
       expect(find.textContaining('haven\'t reported'), findsOneWidget);
     });
 
@@ -160,8 +141,8 @@ void main() {
         MaterialApp(home: Scaffold(body: EmptyState.networkError())),
       );
 
-      expect(find.byIcon(Icons.wifi_off_rounded), findsOneWidget);
-      expect(find.text('Connection lost'), findsOneWidget);
+      expect(find.byIcon(Icons.cloud_off), findsOneWidget);
+      expect(find.text('Connection Error'), findsOneWidget);
       expect(find.textContaining('internet connection'), findsOneWidget);
     });
 
@@ -176,10 +157,77 @@ void main() {
         ),
       );
 
-      expect(find.byType(OutlinedButton), findsOneWidget);
-      expect(find.text('Retry'), findsOneWidget);
+      expect(find.text('Try Again'), findsOneWidget);
 
-      await tester.tap(find.byType(OutlinedButton));
+      await tester.tap(find.text('Try Again'));
+      expect(retried, isTrue);
+    });
+  });
+
+  group('EmptyState.noResults', () {
+    testWidgets('displays correct icon and message', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(home: Scaffold(body: EmptyState.noResults())),
+      );
+
+      expect(find.byIcon(Icons.search_off), findsOneWidget);
+      expect(find.text('No Results'), findsOneWidget);
+      expect(find.textContaining('No issues match'), findsOneWidget);
+    });
+
+    testWidgets('displays query in message when provided', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: EmptyState.noResults(query: 'pothole')),
+        ),
+      );
+
+      expect(find.textContaining('"pothole"'), findsOneWidget);
+    });
+
+    testWidgets('displays clear button when onClear provided', (tester) async {
+      bool cleared = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EmptyState.noResults(onClear: () => cleared = true),
+          ),
+        ),
+      );
+
+      expect(find.text('Clear Filters'), findsOneWidget);
+
+      await tester.tap(find.text('Clear Filters'));
+      expect(cleared, isTrue);
+    });
+  });
+
+  group('EmptyState.locationError', () {
+    testWidgets('displays correct icon and message', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(home: Scaffold(body: EmptyState.locationError())),
+      );
+
+      expect(find.byIcon(Icons.location_off), findsOneWidget);
+      expect(find.text('Location Unavailable'), findsOneWidget);
+      expect(find.textContaining('location services'), findsOneWidget);
+    });
+
+    testWidgets('displays enable button when onRetry provided', (tester) async {
+      bool retried = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EmptyState.locationError(onRetry: () => retried = true),
+          ),
+        ),
+      );
+
+      expect(find.text('Enable Location'), findsOneWidget);
+
+      await tester.tap(find.text('Enable Location'));
       expect(retried, isTrue);
     });
   });

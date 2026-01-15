@@ -42,9 +42,9 @@ onTertiaryContainer:  #6d6b5c  - Text on tertiary container
 
 #### Surface Colors (M3 Elevation System)
 ```
-surface:                  #faf9f7  - Default surface
+surface:                  #faf9f7  - Default surface, Cards, AppBar
 surfaceContainerLowest:   #ffffff  - Lowest elevation
-surfaceContainerLow:      #f4f3f2  - Cards, dialogs
+surfaceContainerLow:      #f4f3f2  - Elevated surfaces
 surfaceContainer:         #efeeec  - Navigation bars
 surfaceContainerHigh:     #e9e8e6  - Dialogs, menus
 surfaceContainerHighest:  #e3e2e1  - Inputs, active states
@@ -131,18 +131,27 @@ OutlinedButton(
 
 ### 3.2 Cards
 
-| Property | Value |
-|----------|-------|
-| Corner Radius | 16dp (AppShapes.medium) |
-| Elevation | 1dp |
-| Background | surfaceContainerLow |
-| Clip Behavior | antiAlias |
+| Property | Value | Reason |
+|----------|-------|--------|
+| Corner Radius | 16dp (Radii.md) | Consistent rounded corners |
+| Elevation | 0 | No shadow or surface tint overlay |
+| Background | surface (#FAF9F7) | Matches AppBar header strip |
+| Border | outlineVariant | Distinct visible border |
+| Clip Behavior | antiAlias | Clean edge rendering |
+
+**Important:** Cards use `elevation: 0` and explicit `color: colors.surface` to exactly match the AppBar background. The default M3 card applies a `surfaceTint` overlay at elevation 1, making it visually different from the header.
 
 ```dart
-// Usage example
+// Standard card styling (REQUIRED)
 Card(
+  elevation: 0,
+  color: colors.surface,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(Radii.md),
+    side: BorderSide(color: colors.outlineVariant),
+  ),
   child: Padding(
-    padding: EdgeInsets.all(16),
+    padding: EdgeInsets.all(Spacing.md),
     child: Text('Card content'),
   ),
 )
@@ -308,7 +317,7 @@ final colors = Theme.of(context).colorScheme;
 Container(color: colors.primary)
 
 // Surface elevation
-Container(color: colors.surfaceContainerLow) // Cards
+Container(color: colors.surface) // Cards (matches AppBar)
 Container(color: colors.surfaceContainerHigh) // Dialogs
 
 // Text colors

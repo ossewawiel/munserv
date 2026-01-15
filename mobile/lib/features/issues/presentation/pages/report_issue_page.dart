@@ -13,6 +13,7 @@ import '../../../../shared/theme/issue_type_icons.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/utils/result.dart';
 import '../../../../shared/widgets/branded_scaffold.dart';
+import '../../../../shared/widgets/step_indicator.dart';
 import '../../../auth/domain/auth_state.dart';
 import '../../../auth/providers/auth_providers.dart';
 import '../../domain/domain.dart';
@@ -178,7 +179,11 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
       body: Column(
         children: [
           // Progress indicator
-          _StepIndicator(currentStep: _currentStep),
+          StepIndicator(
+            totalSteps: 4,
+            currentStep: _currentStep,
+            labels: const ['Photo', 'Type', 'Location', 'Review'],
+          ),
           // Steps content
           Expanded(
             child: PageView(
@@ -250,86 +255,6 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StepIndicator extends StatelessWidget {
-  final int currentStep;
-
-  const _StepIndicator({required this.currentStep});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final steps = ['Photo', 'Type', 'Location', 'Review'];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.sm,
-      ),
-      child: Row(
-        children: List.generate(steps.length * 2 - 1, (index) {
-          if (index.isOdd) {
-            // Connector
-            final stepIndex = index ~/ 2;
-            return Expanded(
-              child: Container(
-                height: 2,
-                color: currentStep > stepIndex
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.outlineVariant,
-              ),
-            );
-          }
-
-          // Step circle
-          final stepIndex = index ~/ 2;
-          final isActive = currentStep >= stepIndex;
-
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isActive
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.surfaceContainerHighest,
-                ),
-                child: Center(
-                  child: currentStep > stepIndex
-                      ? Icon(
-                          Icons.check,
-                          size: 16,
-                          color: theme.colorScheme.onPrimary,
-                        )
-                      : Text(
-                          '${stepIndex + 1}',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: isActive
-                                ? theme.colorScheme.onPrimary
-                                : theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                steps[stepIndex],
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: isActive
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          );
-        }),
       ),
     );
   }
@@ -484,23 +409,23 @@ class _PhotoTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(Radii.md),
           child: Image.file(
             File(path),
-            width: 100,
-            height: 100,
+            width: ThumbnailSizes.lg,
+            height: ThumbnailSizes.lg,
             fit: BoxFit.cover,
           ),
         ),
         Positioned(
-          top: 4,
-          right: 4,
+          top: Spacing.xs,
+          right: Spacing.xs,
           child: GestureDetector(
             onTap: onRemove,
             child: Container(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(Spacing.xs),
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.black54,
               ),
-              child: const Icon(Icons.close, size: 16, color: Colors.white),
+              child: Icon(Icons.close, size: IconSizes.sm, color: Colors.white),
             ),
           ),
         ),
@@ -522,8 +447,8 @@ class _AddPhotoTile extends StatelessWidget {
     return GestureDetector(
       onTap: () => _showOptions(context),
       child: Container(
-        width: 100,
-        height: 100,
+        width: ThumbnailSizes.lg,
+        height: ThumbnailSizes.lg,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(Radii.md),
           border: Border.all(color: theme.colorScheme.outlineVariant, width: 2),
@@ -588,7 +513,7 @@ class _PhotoPickerButtons extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.camera_alt,
-                      size: 64,
+                      size: IconSizes.xxl,
                       color: theme.colorScheme.primary,
                     ),
                     const SizedBox(height: Spacing.md),
