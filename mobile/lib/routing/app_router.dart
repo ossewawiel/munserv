@@ -42,7 +42,10 @@ GoRouter appRouter(Ref ref) {
   return GoRouter(
     initialLocation: initialLocation,
     debugLogDiagnostics: kDebugMode,
-    refreshListenable: _GoRouterRefreshStream(ref, [authProvider, quickLoginEligibilityProvider]),
+    refreshListenable: _GoRouterRefreshStream(ref, [
+      authProvider,
+      quickLoginEligibilityProvider,
+    ]),
     redirect: (context, state) {
       final path = state.matchedLocation;
 

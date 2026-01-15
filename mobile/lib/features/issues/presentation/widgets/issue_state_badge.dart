@@ -9,11 +9,7 @@ class IssueStateBadge extends StatelessWidget {
   final IssueState state;
   final bool compact;
 
-  const IssueStateBadge({
-    super.key,
-    required this.state,
-    this.compact = false,
-  });
+  const IssueStateBadge({super.key, required this.state, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +27,9 @@ class IssueStateBadge extends StatelessWidget {
       ),
       child: Text(
         state.displayName,
-        style: (compact ? theme.textTheme.labelSmall : theme.textTheme.labelMedium)
-            ?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-        ),
+        style:
+            (compact ? theme.textTheme.labelSmall : theme.textTheme.labelMedium)
+                ?.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
       ),
@@ -43,10 +37,10 @@ class IssueStateBadge extends StatelessWidget {
   }
 
   Color _getColor(IssueState state) => switch (state) {
-        IssueState.reported => IssueStateColors.reported,
-        IssueState.confirmed => IssueStateColors.confirmed,
-        IssueState.inProgress => IssueStateColors.inProgress,
-        IssueState.fixed => IssueStateColors.fixed,
-        IssueState.rejected => IssueStateColors.rejected,
-      };
+    IssueState.reported => IssueStateColors.reported,
+    IssueState.confirmed => IssueStateColors.confirmed,
+    IssueState.inProgress => IssueStateColors.inProgress,
+    IssueState.fixed => IssueStateColors.fixed,
+    IssueState.rejected => IssueStateColors.rejected,
+  };
 }

@@ -63,17 +63,19 @@ void main() {
   });
 
   setUpAll(() {
-    registerFallbackValue(const MemberProfile(
-      id: '',
-      firstName: '',
-      surname: '',
-      phoneNumber: '',
-      address: '',
-      registrationLocation: GeoPoint(latitude: 0, longitude: 0),
-      sectorId: '',
-      status: '',
-      createdAt: '',
-    ));
+    registerFallbackValue(
+      const MemberProfile(
+        id: '',
+        firstName: '',
+        surname: '',
+        phoneNumber: '',
+        address: '',
+        registrationLocation: GeoPoint(latitude: 0, longitude: 0),
+        sectorId: '',
+        status: '',
+        createdAt: '',
+      ),
+    );
   });
 
   Widget createTestWidget({
@@ -89,7 +91,8 @@ void main() {
         // Start in pendingPinSetup state
         authProvider.overrideWith(
           () => TestPinSetupAuthNotifier(
-            initialState: initialState ??
+            initialState:
+                initialState ??
                 const AuthState.pendingPinSetup(
                   tokens: testTokens,
                   memberId: 'member_123',
@@ -119,7 +122,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Set Up Your PIN'), findsOneWidget);
-      expect(find.text('Create a 4-digit PIN for quick access'), findsOneWidget);
+      expect(
+        find.text('Create a 4-digit PIN for quick access'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders PIN requirements hint', (tester) async {
@@ -127,12 +133,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Your PIN should be 4 digits and easy to remember but hard to guess.'),
+        find.text(
+          'Your PIN should be 4 digits and easy to remember but hard to guess.',
+        ),
         findsOneWidget,
       );
     });
 
-    testWidgets('changes to confirm mode after first PIN entry', (tester) async {
+    testWidgets('changes to confirm mode after first PIN entry', (
+      tester,
+    ) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
@@ -197,13 +207,16 @@ void main() {
 
     testWidgets('saves PIN when PINs match without biometric', (tester) async {
       when(() => mockStorage.savePin('1234')).thenAnswer((_) async {});
-      when(() => mockRepository.getMe())
-          .thenAnswer((_) async => const Result.success(testMemberProfileResponse));
+      when(() => mockRepository.getMe()).thenAnswer(
+        (_) async => const Result.success(testMemberProfileResponse),
+      );
       when(() => mockStorage.saveProfile(any())).thenAnswer((_) async {});
-      when(() => mockAuthApi.getSector('sector_1'))
-          .thenAnswer((_) async => testSector);
-      when(() => mockBiometricService.isBiometricAvailable())
-          .thenAnswer((_) async => false);
+      when(
+        () => mockAuthApi.getSector('sector_1'),
+      ).thenAnswer((_) async => testSector);
+      when(
+        () => mockBiometricService.isBiometricAvailable(),
+      ).thenAnswer((_) async => false);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();

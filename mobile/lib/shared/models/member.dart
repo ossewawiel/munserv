@@ -13,10 +13,10 @@ enum MemberStatus {
   suspended;
 
   String get displayName => switch (this) {
-        active => 'Active',
-        pending => 'Pending Approval',
-        suspended => 'Suspended',
-      };
+    active => 'Active',
+    pending => 'Pending Approval',
+    suspended => 'Suspended',
+  };
 }
 
 @freezed
@@ -39,7 +39,8 @@ abstract class Member with _$Member {
   String get fullName => '$firstName $surname';
 
   /// Short display name (first name + last initial)
-  String get displayName => '$firstName ${surname.isNotEmpty ? '${surname[0]}.' : ''}';
+  String get displayName =>
+      '$firstName ${surname.isNotEmpty ? '${surname[0]}.' : ''}';
 
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
 }

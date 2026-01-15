@@ -4,6 +4,21 @@ import '../models/pod_config.dart';
 import 'colors.dart';
 import 'typography.dart';
 
+/// M3 Shape Scale with slightly larger radii for approachable feel
+class AppShapes {
+  static const double extraSmall = 4;
+  static const double small = 8;
+  static const double medium = 16; // Increased from 12
+  static const double large = 20; // Increased from 16
+  static const double extraLarge = 28;
+
+  static BorderRadius get extraSmallRadius => BorderRadius.circular(extraSmall);
+  static BorderRadius get smallRadius => BorderRadius.circular(small);
+  static BorderRadius get mediumRadius => BorderRadius.circular(medium);
+  static BorderRadius get largeRadius => BorderRadius.circular(large);
+  static BorderRadius get extraLargeRadius => BorderRadius.circular(extraLarge);
+}
+
 /// Material Design 3 Theme builder
 /// Uses M3 tonal palettes from Material Theme Builder for proper accessibility
 /// and consistent visual hierarchy.
@@ -33,6 +48,11 @@ class AppTheme {
       colorScheme: colorScheme,
       textTheme: textTheme,
 
+      // Custom splash factory for terracotta-tinted feedback
+      splashFactory: InkSparkle.splashFactory,
+      splashColor: colorScheme.secondary.withValues(alpha: 0.12),
+      highlightColor: colorScheme.secondary.withValues(alpha: 0.08),
+
       // Scaffold - use M3 surface color
       scaffoldBackgroundColor: colorScheme.surface,
 
@@ -50,13 +70,13 @@ class AppTheme {
         ),
       ),
 
-      // Cards - M3: 12dp radius, 1dp elevation, surfaceContainerLow
+      // Cards - M3: 16dp radius (increased), 1dp elevation, surfaceContainerLow
       cardTheme: CardThemeData(
         elevation: 1,
         color: colorScheme.surfaceContainerLow,
         surfaceTintColor: colorScheme.surfaceTint,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12), // M3 medium shape
+          borderRadius: BorderRadius.circular(AppShapes.medium), // 16dp
         ),
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
@@ -86,25 +106,33 @@ class AppTheme {
           borderRadius: BorderRadius.circular(4),
           borderSide: BorderSide(color: colorScheme.error, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        hintStyle: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
-        labelStyle: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        hintStyle: textTheme.bodyLarge?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+        labelStyle: textTheme.bodyLarge?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
       ),
 
       // Elevated buttons - M3: 40dp height, 1dp elevation, stadium shape
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(64, 40), // M3 spec
-          elevation: 1,
-          backgroundColor: colorScheme.surfaceContainerLow,
-          foregroundColor: colorScheme.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          shape: const StadiumBorder(),
-          textStyle: textTheme.labelLarge,
-        ).copyWith(
-          // Ensure 48dp touch target
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
+        style:
+            ElevatedButton.styleFrom(
+              minimumSize: const Size(64, 40), // M3 spec
+              elevation: 1,
+              backgroundColor: colorScheme.surfaceContainerLow,
+              foregroundColor: colorScheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              shape: const StadiumBorder(),
+              textStyle: textTheme.labelLarge,
+            ).copyWith(
+              // Ensure 48dp touch target
+              tapTargetSize: MaterialTapTargetSize.padded,
+            ),
       ),
 
       // Filled buttons - M3: 40dp height, primary container, stadium shape
@@ -116,9 +144,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           shape: const StadiumBorder(),
           textStyle: textTheme.labelLarge,
-        ).copyWith(
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
+        ).copyWith(tapTargetSize: MaterialTapTargetSize.padded),
       ),
 
       // Outlined buttons - M3: 40dp height, outline, stadium shape
@@ -130,9 +156,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           shape: const StadiumBorder(),
           textStyle: textTheme.labelLarge,
-        ).copyWith(
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
+        ).copyWith(tapTargetSize: MaterialTapTargetSize.padded),
       ),
 
       // Text buttons - M3: 40dp height, no background
@@ -142,9 +166,7 @@ class AppTheme {
           foregroundColor: colorScheme.primary,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           textStyle: textTheme.labelLarge,
-        ).copyWith(
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
+        ).copyWith(tapTargetSize: MaterialTapTargetSize.padded),
       ),
 
       // Icon buttons - M3: 48dp touch target
@@ -170,10 +192,7 @@ class AppTheme {
               size: 24,
             );
           }
-          return IconThemeData(
-            color: colorScheme.onSurfaceVariant,
-            size: 24,
-          );
+          return IconThemeData(color: colorScheme.onSurfaceVariant, size: 24);
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -188,14 +207,14 @@ class AppTheme {
         }),
       ),
 
-      // FAB - M3: 56dp, 16dp radius, primaryContainer
+      // FAB - M3: 56dp, 20dp radius, secondary accent for distinction
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: colorScheme.primaryContainer,
-        foregroundColor: colorScheme.onPrimaryContainer,
+        backgroundColor: colorScheme.secondary, // Terracotta
+        foregroundColor: colorScheme.onSecondary,
         elevation: 3,
         highlightElevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16), // M3 spec
+          borderRadius: BorderRadius.circular(AppShapes.large), // 20dp
         ),
         sizeConstraints: const BoxConstraints.tightFor(
           width: 56, // M3 standard FAB
@@ -245,10 +264,7 @@ class AppTheme {
       ),
 
       // Icon theme
-      iconTheme: IconThemeData(
-        color: colorScheme.onSurface,
-        size: 24,
-      ),
+      iconTheme: IconThemeData(color: colorScheme.onSurface, size: 24),
 
       // Progress indicator - M3: primary
       progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -369,9 +385,7 @@ class AppTheme {
           color: colorScheme.inverseSurface,
           borderRadius: BorderRadius.circular(4),
         ),
-        textStyle: textTheme.bodySmall?.copyWith(
-          color: colorScheme.onSurface,
-        ),
+        textStyle: textTheme.bodySmall?.copyWith(color: colorScheme.onSurface),
       ),
 
       // Badge - M3 spec
@@ -384,14 +398,10 @@ class AppTheme {
   }
 
   /// Light theme using M3 generated colors
-  static ThemeData get lightTheme => buildTheme(
-        config: PodConfig.defaultConfig,
-        brightness: Brightness.light,
-      );
+  static ThemeData get lightTheme =>
+      buildTheme(config: PodConfig.defaultConfig, brightness: Brightness.light);
 
   /// Dark theme using M3 generated colors
-  static ThemeData get darkTheme => buildTheme(
-        config: PodConfig.defaultConfig,
-        brightness: Brightness.dark,
-      );
+  static ThemeData get darkTheme =>
+      buildTheme(config: PodConfig.defaultConfig, brightness: Brightness.dark);
 }

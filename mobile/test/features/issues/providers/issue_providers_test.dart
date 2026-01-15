@@ -77,11 +77,13 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(IssueFilter(sectorId: 'test'));
-    registerFallbackValue(ReportIssueRequest(
-      type: IssueType.pothole,
-      location: const GeoPoint(latitude: 0, longitude: 0),
-      sectorId: 'fallback-sector',
-    ));
+    registerFallbackValue(
+      ReportIssueRequest(
+        type: IssueType.pothole,
+        location: const GeoPoint(latitude: 0, longitude: 0),
+        sectorId: 'fallback-sector',
+      ),
+    );
   });
 
   setUp(() {
@@ -135,8 +137,9 @@ void main() {
 
   group('IssueRepository integration', () {
     test('getIssues returns paginated issues on success', () async {
-      when(() => mockRepository.getIssues(any()))
-          .thenAnswer((_) async => Result.success(testPaginatedIssues));
+      when(
+        () => mockRepository.getIssues(any()),
+      ).thenAnswer((_) async => Result.success(testPaginatedIssues));
 
       final filter = IssueFilter(sectorId: 'sector-1');
       final result = await mockRepository.getIssues(filter);
@@ -147,8 +150,9 @@ void main() {
     });
 
     test('getIssue returns issue detail on success', () async {
-      when(() => mockRepository.getIssue('issue-1'))
-          .thenAnswer((_) async => Result.success(testIssueDetail));
+      when(
+        () => mockRepository.getIssue('issue-1'),
+      ).thenAnswer((_) async => Result.success(testIssueDetail));
 
       final result = await mockRepository.getIssue('issue-1');
 
@@ -158,10 +162,12 @@ void main() {
     });
 
     test('reportIssue returns response on success', () async {
-      when(() => mockRepository.reportIssue(
-            request: any(named: 'request'),
-            photoPaths: any(named: 'photoPaths'),
-          )).thenAnswer((_) async => Result.success(testReportResponse));
+      when(
+        () => mockRepository.reportIssue(
+          request: any(named: 'request'),
+          photoPaths: any(named: 'photoPaths'),
+        ),
+      ).thenAnswer((_) async => Result.success(testReportResponse));
 
       final request = ReportIssueRequest(
         type: IssueType.pothole,
@@ -179,12 +185,16 @@ void main() {
     });
 
     test('reportIssue returns failure on error', () async {
-      when(() => mockRepository.reportIssue(
-            request: any(named: 'request'),
-            photoPaths: any(named: 'photoPaths'),
-          )).thenAnswer((_) async => const Result.failure(
-            AppError.validation(message: 'Photo required'),
-          ));
+      when(
+        () => mockRepository.reportIssue(
+          request: any(named: 'request'),
+          photoPaths: any(named: 'photoPaths'),
+        ),
+      ).thenAnswer(
+        (_) async => const Result.failure(
+          AppError.validation(message: 'Photo required'),
+        ),
+      );
 
       final request = ReportIssueRequest(
         type: IssueType.pothole,
@@ -208,20 +218,14 @@ void main() {
       addTearDown(container.dispose);
 
       // This will throw if provider setup is wrong
-      expect(
-        () => container.read(issueRepositoryProvider),
-        returnsNormally,
-      );
+      expect(() => container.read(issueRepositoryProvider), returnsNormally);
     });
 
     test('issueApiProvider creates IssueApi', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      expect(
-        () => container.read(issueApiProvider),
-        returnsNormally,
-      );
+      expect(() => container.read(issueApiProvider), returnsNormally);
     });
 
     test('reportIssueProvider starts with initial state', () {

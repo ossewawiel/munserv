@@ -41,7 +41,7 @@ abstract class IssueSummary with _$IssueSummary {
     required IssueState state,
     required GeoPoint location,
     required int heat,
-    String? thumbnailUrl,  // Nullable - not all issues have thumbnails
+    String? thumbnailUrl, // Nullable - not all issues have thumbnails
     required DateTime createdAt,
   }) = _IssueSummary;
 

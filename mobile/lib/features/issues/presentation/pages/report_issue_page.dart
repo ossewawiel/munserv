@@ -8,6 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/models/geo_point.dart';
 import '../../../../shared/models/issue_type.dart';
+import '../../../../shared/theme/app_theme.dart';
+import '../../../../shared/theme/issue_type_icons.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/utils/result.dart';
 import '../../../../shared/widgets/branded_scaffold.dart';
@@ -67,12 +69,12 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
   }
 
   bool get _canProceed => switch (_currentStep) {
-        0 => _photoPaths.isNotEmpty,
-        1 => _selectedType != null,
-        2 => _location != null,
-        3 => true,
-        _ => false,
-      };
+    0 => _photoPaths.isNotEmpty,
+    1 => _selectedType != null,
+    2 => _location != null,
+    3 => true,
+    _ => false,
+  };
 
   Future<void> _submit() async {
     if (_selectedType == null || _location == null) return;
@@ -108,11 +110,12 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
 
     try {
       debugPrint('📤 Starting issue submission...');
-      final result = await ref.read(reportIssueProvider.notifier).reportIssue(
-            request: request,
-            photoPaths: _photoPaths,
-          );
-      debugPrint('📤 Issue submission completed. isSuccess: ${result.isSuccess}');
+      final result = await ref
+          .read(reportIssueProvider.notifier)
+          .reportIssue(request: request, photoPaths: _photoPaths);
+      debugPrint(
+        '📤 Issue submission completed. isSuccess: ${result.isSuccess}',
+      );
 
       // Update UI state if still mounted
       if (mounted) {
@@ -132,7 +135,8 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
         // Navigate using captured router
         router.go('/');
       } else {
-        final errorMsg = result.errorOrNull?.displayMessage ?? 'Failed to report issue';
+        final errorMsg =
+            result.errorOrNull?.displayMessage ?? 'Failed to report issue';
         debugPrint('📤 Showing error snackbar: $errorMsg');
         scaffoldMessenger.showSnackBar(
           SnackBar(
@@ -189,7 +193,8 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
                 ),
                 _TypeStep(
                   selectedType: _selectedType,
-                  onTypeSelected: (type) => setState(() => _selectedType = type),
+                  onTypeSelected: (type) =>
+                      setState(() => _selectedType = type),
                 ),
                 LocationStep(
                   location: _location,
@@ -200,7 +205,8 @@ class _ReportIssuePageState extends ConsumerState<ReportIssuePage> {
                   type: _selectedType,
                   location: _location,
                   description: _description,
-                  onDescriptionChanged: (desc) => setState(() => _description = desc),
+                  onDescriptionChanged: (desc) =>
+                      setState(() => _description = desc),
                 ),
               ],
             ),
@@ -333,10 +339,7 @@ class _PhotoStep extends StatefulWidget {
   final List<String> photoPaths;
   final void Function(List<String>) onPhotosChanged;
 
-  const _PhotoStep({
-    required this.photoPaths,
-    required this.onPhotosChanged,
-  });
+  const _PhotoStep({required this.photoPaths, required this.onPhotosChanged});
 
   @override
   State<_PhotoStep> createState() => _PhotoStepState();
@@ -344,9 +347,17 @@ class _PhotoStep extends StatefulWidget {
 
 class _PhotoStepState extends State<_PhotoStep> {
   static const int _maxFileSizeMB = 5;
-  static const List<String> _allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+  static const List<String> _allowedExtensions = [
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.webp',
+  ];
 
-  Future<void> _pickAndValidatePhoto(BuildContext context, ImageSource source) async {
+  Future<void> _pickAndValidatePhoto(
+    BuildContext context,
+    ImageSource source,
+  ) async {
     // Capture context-dependent values before async gap
     final l10n = S.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -380,8 +391,8 @@ class _PhotoStepState extends State<_PhotoStep> {
 
     // Validate file extension
     final extension = image.path.toLowerCase().substring(
-          image.path.lastIndexOf('.'),
-        );
+      image.path.lastIndexOf('.'),
+    );
 
     if (!_allowedExtensions.contains(extension)) {
       if (mounted) {
@@ -413,10 +424,7 @@ class _PhotoStepState extends State<_PhotoStep> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Take a Photo',
-            style: theme.textTheme.titleLarge,
-          ),
+          Text('Take a Photo', style: theme.textTheme.titleLarge),
           const SizedBox(height: Spacing.sm),
           Text(
             'Capture a clear photo of the issue. You can add up to 5 photos.',
@@ -433,23 +441,27 @@ class _PhotoStepState extends State<_PhotoStep> {
               runSpacing: Spacing.sm,
               children: [
                 ...widget.photoPaths.asMap().entries.map(
-                      (entry) => _PhotoTile(
-                        path: entry.value,
-                        onRemove: () => _removePhoto(entry.key),
-                      ),
-                    ),
+                  (entry) => _PhotoTile(
+                    path: entry.value,
+                    onRemove: () => _removePhoto(entry.key),
+                  ),
+                ),
                 if (widget.photoPaths.length < 5)
                   _AddPhotoTile(
-                    onCamera: () => _pickAndValidatePhoto(context, ImageSource.camera),
-                    onGallery: () => _pickAndValidatePhoto(context, ImageSource.gallery),
+                    onCamera: () =>
+                        _pickAndValidatePhoto(context, ImageSource.camera),
+                    onGallery: () =>
+                        _pickAndValidatePhoto(context, ImageSource.gallery),
                   ),
               ],
             ),
           ] else ...[
             // Initial state - large buttons
             _PhotoPickerButtons(
-              onCamera: () => _pickAndValidatePhoto(context, ImageSource.camera),
-              onGallery: () => _pickAndValidatePhoto(context, ImageSource.gallery),
+              onCamera: () =>
+                  _pickAndValidatePhoto(context, ImageSource.camera),
+              onGallery: () =>
+                  _pickAndValidatePhoto(context, ImageSource.gallery),
             ),
           ],
         ],
@@ -462,10 +474,7 @@ class _PhotoTile extends StatelessWidget {
   final String path;
   final VoidCallback onRemove;
 
-  const _PhotoTile({
-    required this.path,
-    required this.onRemove,
-  });
+  const _PhotoTile({required this.path, required this.onRemove});
 
   @override
   Widget build(BuildContext context) {
@@ -491,11 +500,7 @@ class _PhotoTile extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Colors.black54,
               ),
-              child: const Icon(
-                Icons.close,
-                size: 16,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.close, size: 16, color: Colors.white),
             ),
           ),
         ),
@@ -508,10 +513,7 @@ class _AddPhotoTile extends StatelessWidget {
   final VoidCallback onCamera;
   final VoidCallback onGallery;
 
-  const _AddPhotoTile({
-    required this.onCamera,
-    required this.onGallery,
-  });
+  const _AddPhotoTile({required this.onCamera, required this.onGallery});
 
   @override
   Widget build(BuildContext context) {
@@ -524,15 +526,9 @@ class _AddPhotoTile extends StatelessWidget {
         height: 100,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(Radii.md),
-          border: Border.all(
-            color: theme.colorScheme.outlineVariant,
-            width: 2,
-          ),
+          border: Border.all(color: theme.colorScheme.outlineVariant, width: 2),
         ),
-        child: Icon(
-          Icons.add,
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
+        child: Icon(Icons.add, color: theme.colorScheme.onSurfaceVariant),
       ),
     );
   }
@@ -571,10 +567,7 @@ class _PhotoPickerButtons extends StatelessWidget {
   final VoidCallback onCamera;
   final VoidCallback onGallery;
 
-  const _PhotoPickerButtons({
-    required this.onCamera,
-    required this.onGallery,
-  });
+  const _PhotoPickerButtons({required this.onCamera, required this.onGallery});
 
   @override
   Widget build(BuildContext context) {
@@ -599,10 +592,7 @@ class _PhotoPickerButtons extends StatelessWidget {
                       color: theme.colorScheme.primary,
                     ),
                     const SizedBox(height: Spacing.md),
-                    Text(
-                      'Take Photo',
-                      style: theme.textTheme.titleMedium,
-                    ),
+                    Text('Take Photo', style: theme.textTheme.titleMedium),
                   ],
                 ),
               ),
@@ -628,10 +618,7 @@ class _TypeStep extends StatelessWidget {
   final IssueType? selectedType;
   final void Function(IssueType) onTypeSelected;
 
-  const _TypeStep({
-    required this.selectedType,
-    required this.onTypeSelected,
-  });
+  const _TypeStep({required this.selectedType, required this.onTypeSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -642,10 +629,7 @@ class _TypeStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'What type of issue?',
-            style: theme.textTheme.titleLarge,
-          ),
+          Text('What type of issue?', style: theme.textTheme.titleLarge),
           const SizedBox(height: Spacing.sm),
           Text(
             'Select the category that best describes the problem.',
@@ -682,15 +666,31 @@ class _TypeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final visuals = IssueTypeVisuals.forType(type);
 
     return Card(
       margin: const EdgeInsets.only(bottom: Spacing.sm),
-      color: isSelected ? theme.colorScheme.primaryContainer : null,
+      color: isSelected
+          ? visuals.color.withValues(alpha: 0.15)
+          : theme.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppShapes.medium),
+        side: BorderSide(
+          color: isSelected ? visuals.color : theme.colorScheme.outline,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
       child: ListTile(
-        leading: IssueTypeBadge(type: type, showLabel: false, iconSize: 24),
-        title: Text(type.displayName),
+        leading: IssueTypeIcon(type: type, size: 48, showBackground: false),
+        title: Text(
+          type.displayName,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: isSelected ? visuals.color : theme.colorScheme.onSurface,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          ),
+        ),
         trailing: isSelected
-            ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
+            ? Icon(Icons.check_circle, color: visuals.color)
             : null,
         onTap: onTap,
       ),
@@ -722,10 +722,7 @@ class _ReviewStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Review & Submit',
-            style: theme.textTheme.titleLarge,
-          ),
+          Text('Review & Submit', style: theme.textTheme.titleLarge),
           const SizedBox(height: Spacing.sm),
           Text(
             'Check your report details before submitting.',

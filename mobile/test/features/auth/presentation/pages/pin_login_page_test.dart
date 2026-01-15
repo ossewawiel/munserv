@@ -55,9 +55,15 @@ void main() {
     testWidgets('renders PIN input field', (tester) async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-      when(() => mockStorage.getEmail()).thenAnswer((_) async => 'test@example.com');
-      when(() => mockStorage.isBiometricEnabled()).thenAnswer((_) async => false);
-      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => false);
+      when(
+        () => mockStorage.getEmail(),
+      ).thenAnswer((_) async => 'test@example.com');
+      when(
+        () => mockStorage.isBiometricEnabled(),
+      ).thenAnswer((_) async => false);
+      when(
+        () => mockBiometricService.isBiometricAvailable(),
+      ).thenAnswer((_) async => false);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
@@ -68,9 +74,15 @@ void main() {
     testWidgets('renders page title', (tester) async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-      when(() => mockStorage.getEmail()).thenAnswer((_) async => 'test@example.com');
-      when(() => mockStorage.isBiometricEnabled()).thenAnswer((_) async => false);
-      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => false);
+      when(
+        () => mockStorage.getEmail(),
+      ).thenAnswer((_) async => 'test@example.com');
+      when(
+        () => mockStorage.isBiometricEnabled(),
+      ).thenAnswer((_) async => false);
+      when(
+        () => mockBiometricService.isBiometricAvailable(),
+      ).thenAnswer((_) async => false);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
@@ -81,22 +93,37 @@ void main() {
     testWidgets('shows user email in subtitle', (tester) async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-      when(() => mockStorage.getEmail()).thenAnswer((_) async => 'user@example.com');
-      when(() => mockStorage.isBiometricEnabled()).thenAnswer((_) async => false);
-      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => false);
+      when(
+        () => mockStorage.getEmail(),
+      ).thenAnswer((_) async => 'user@example.com');
+      when(
+        () => mockStorage.isBiometricEnabled(),
+      ).thenAnswer((_) async => false);
+      when(
+        () => mockBiometricService.isBiometricAvailable(),
+      ).thenAnswer((_) async => false);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      expect(find.text('Enter your PIN to continue as user@example.com'), findsOneWidget);
+      expect(
+        find.text('Enter your PIN to continue as user@example.com'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders "Use Different Account" button', (tester) async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-      when(() => mockStorage.getEmail()).thenAnswer((_) async => 'test@example.com');
-      when(() => mockStorage.isBiometricEnabled()).thenAnswer((_) async => false);
-      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => false);
+      when(
+        () => mockStorage.getEmail(),
+      ).thenAnswer((_) async => 'test@example.com');
+      when(
+        () => mockStorage.isBiometricEnabled(),
+      ).thenAnswer((_) async => false);
+      when(
+        () => mockBiometricService.isBiometricAvailable(),
+      ).thenAnswer((_) async => false);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
@@ -104,16 +131,27 @@ void main() {
       expect(find.text('Use Different Account'), findsOneWidget);
     });
 
-    testWidgets('shows biometric button when biometrics enabled', (tester) async {
+    testWidgets('shows biometric button when biometrics enabled', (
+      tester,
+    ) async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-      when(() => mockStorage.getEmail()).thenAnswer((_) async => 'test@example.com');
-      when(() => mockStorage.isBiometricEnabled()).thenAnswer((_) async => true);
+      when(
+        () => mockStorage.getEmail(),
+      ).thenAnswer((_) async => 'test@example.com');
+      when(
+        () => mockStorage.isBiometricEnabled(),
+      ).thenAnswer((_) async => true);
       when(() => mockStorage.getBiometricPin()).thenAnswer((_) async => '1234');
-      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => true);
+      when(
+        () => mockBiometricService.isBiometricAvailable(),
+      ).thenAnswer((_) async => true);
       // Mock biometric auth to fail silently (cancelled)
-      when(() => mockBiometricService.authenticate(localizedReason: any(named: 'localizedReason')))
-          .thenAnswer((_) async => BiometricResult.failed());
+      when(
+        () => mockBiometricService.authenticate(
+          localizedReason: any(named: 'localizedReason'),
+        ),
+      ).thenAnswer((_) async => BiometricResult.failed());
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
@@ -122,12 +160,20 @@ void main() {
       expect(find.byIcon(Icons.fingerprint), findsOneWidget);
     });
 
-    testWidgets('hides biometric button when biometrics not enabled', (tester) async {
+    testWidgets('hides biometric button when biometrics not enabled', (
+      tester,
+    ) async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-      when(() => mockStorage.getEmail()).thenAnswer((_) async => 'test@example.com');
-      when(() => mockStorage.isBiometricEnabled()).thenAnswer((_) async => false);
-      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => false);
+      when(
+        () => mockStorage.getEmail(),
+      ).thenAnswer((_) async => 'test@example.com');
+      when(
+        () => mockStorage.isBiometricEnabled(),
+      ).thenAnswer((_) async => false);
+      when(
+        () => mockBiometricService.isBiometricAvailable(),
+      ).thenAnswer((_) async => false);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
@@ -139,9 +185,15 @@ void main() {
     testWidgets('renders info box with PIN instructions', (tester) async {
       when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
       when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
-      when(() => mockStorage.getEmail()).thenAnswer((_) async => 'test@example.com');
-      when(() => mockStorage.isBiometricEnabled()).thenAnswer((_) async => false);
-      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => false);
+      when(
+        () => mockStorage.getEmail(),
+      ).thenAnswer((_) async => 'test@example.com');
+      when(
+        () => mockStorage.isBiometricEnabled(),
+      ).thenAnswer((_) async => false);
+      when(
+        () => mockBiometricService.isBiometricAvailable(),
+      ).thenAnswer((_) async => false);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();

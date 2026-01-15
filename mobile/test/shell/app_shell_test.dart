@@ -14,27 +14,33 @@ void main() {
             return AppShell(navigationShell: navigationShell);
           },
           branches: [
-            StatefulShellBranch(routes: [
-              GoRoute(
-                path: '/',
-                builder: (context, state) =>
-                    const Scaffold(body: Text('Home Content')),
-              ),
-            ]),
-            StatefulShellBranch(routes: [
-              GoRoute(
-                path: '/issues',
-                builder: (context, state) =>
-                    const Scaffold(body: Text('Issues Content')),
-              ),
-            ]),
-            StatefulShellBranch(routes: [
-              GoRoute(
-                path: '/profile',
-                builder: (context, state) =>
-                    const Scaffold(body: Text('Profile Content')),
-              ),
-            ]),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (context, state) =>
+                      const Scaffold(body: Text('Home Content')),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/issues',
+                  builder: (context, state) =>
+                      const Scaffold(body: Text('Issues Content')),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/profile',
+                  builder: (context, state) =>
+                      const Scaffold(body: Text('Profile Content')),
+                ),
+              ],
+            ),
           ],
         ),
       ],
@@ -42,8 +48,9 @@ void main() {
   }
 
   group('AppShell', () {
-    testWidgets('displays bottom navigation bar with 3 destinations',
-        (tester) async {
+    testWidgets('displays bottom navigation bar with 3 destinations', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: _buildRouter(),
@@ -92,8 +99,9 @@ void main() {
       expect(find.text('Home Content'), findsOneWidget);
     });
 
-    testWidgets('navigates to issues when issues tab is tapped',
-        (tester) async {
+    testWidgets('navigates to issues when issues tab is tapped', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: _buildRouter(),
@@ -112,8 +120,9 @@ void main() {
       expect(find.text('Issues Content'), findsOneWidget);
     });
 
-    testWidgets('navigates to profile when profile tab is tapped',
-        (tester) async {
+    testWidgets('navigates to profile when profile tab is tapped', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: _buildRouter(),

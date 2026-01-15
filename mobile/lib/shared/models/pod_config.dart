@@ -26,9 +26,9 @@ abstract class PodConfig with _$PodConfig {
   static const defaultConfig = PodConfig(
     podId: 'default',
     podName: 'MunServ',
-    primaryColor: '#2D4A47',   // Forest Green
+    primaryColor: '#2D4A47', // Forest Green
     secondaryColor: '#C75B39', // Terracotta
-    tertiaryColor: '#E8E4DC',  // Warm Beige
+    tertiaryColor: '#E8E4DC', // Warm Beige
     supportedLocales: ['en'],
     defaultLocale: 'en',
   );

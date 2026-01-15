@@ -65,10 +65,7 @@ class HeatIndicator extends StatelessWidget {
 class HeatBadge extends StatelessWidget {
   final int heat;
 
-  const HeatBadge({
-    super.key,
-    required this.heat,
-  });
+  const HeatBadge({super.key, required this.heat});
 
   @override
   Widget build(BuildContext context) {
@@ -88,11 +85,7 @@ class HeatBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.local_fire_department,
-            color: color,
-            size: 14,
-          ),
+          Icon(Icons.local_fire_department, color: color, size: 14),
           const SizedBox(width: 2),
           Text(
             heat.toString(),

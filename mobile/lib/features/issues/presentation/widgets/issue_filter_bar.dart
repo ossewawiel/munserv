@@ -28,7 +28,8 @@ class IssueFilterBar extends ConsumerWidget {
           _FilterChip(
             label: filter.state?.displayName ?? 'All States',
             isActive: filter.state != null,
-            onTap: () => _showStateFilter(context, filterNotifier, filter.state),
+            onTap: () =>
+                _showStateFilter(context, filterNotifier, filter.state),
           ),
           const SizedBox(width: Spacing.sm),
           // Type filter
@@ -42,7 +43,8 @@ class IssueFilterBar extends ConsumerWidget {
           _FilterChip(
             label: 'Sort: ${filter.sortBy.displayName}',
             isActive: filter.sortBy != IssueSortBy.heat,
-            onTap: () => _showSortOptions(context, filterNotifier, filter.sortBy),
+            onTap: () =>
+                _showSortOptions(context, filterNotifier, filter.sortBy),
           ),
           // Clear filters button
           if (filter.state != null || filter.type != null) ...[
@@ -176,10 +178,7 @@ class _FilterSheet<T> extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(Spacing.md),
-            child: Text(
-              title,
-              style: theme.textTheme.titleMedium,
-            ),
+            child: Text(title, style: theme.textTheme.titleMedium),
           ),
           const Divider(height: 1),
           ...options.map(

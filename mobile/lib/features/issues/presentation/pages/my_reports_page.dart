@@ -22,9 +22,7 @@ class MyReportsPage extends ConsumerWidget {
       body: myIssuesAsync.when(
         data: (paginated) {
           if (paginated.items.isEmpty) {
-            return _EmptyState(
-              onReport: () => context.push('/issues/report'),
-            );
+            return _EmptyState(onReport: () => context.push('/issues/report'));
           }
 
           return RefreshIndicator(
@@ -81,10 +79,7 @@ class _EmptyState extends StatelessWidget {
               color: theme.colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: Spacing.lg),
-            Text(
-              'No reports yet',
-              style: theme.textTheme.titleLarge,
-            ),
+            Text('No reports yet', style: theme.textTheme.titleLarge),
             const SizedBox(height: Spacing.sm),
             Text(
               'You haven\'t reported any issues yet.\nHelp improve your community!',

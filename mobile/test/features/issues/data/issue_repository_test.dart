@@ -18,11 +18,13 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(IssueFilter(sectorId: 'test'));
-    registerFallbackValue(ReportIssueRequest(
-      type: IssueType.pothole,
-      location: const GeoPoint(latitude: 0, longitude: 0),
-      sectorId: 'fallback-sector',
-    ));
+    registerFallbackValue(
+      ReportIssueRequest(
+        type: IssueType.pothole,
+        location: const GeoPoint(latitude: 0, longitude: 0),
+        sectorId: 'fallback-sector',
+      ),
+    );
   });
 
   setUp(() {
@@ -53,7 +55,9 @@ void main() {
           ),
         );
 
-        when(() => mockApi.getIssues(any())).thenAnswer((_) async => mockResponse);
+        when(
+          () => mockApi.getIssues(any()),
+        ).thenAnswer((_) async => mockResponse);
 
         final filter = IssueFilter(sectorId: 'sector-1');
         final result = await repository.getIssues(filter);
@@ -82,7 +86,9 @@ void main() {
       });
 
       test('returns Failure on unknown exception', () async {
-        when(() => mockApi.getIssues(any())).thenThrow(Exception('Network error'));
+        when(
+          () => mockApi.getIssues(any()),
+        ).thenThrow(Exception('Network error'));
 
         final filter = IssueFilter(sectorId: 'sector-1');
         final result = await repository.getIssues(filter);
@@ -109,7 +115,9 @@ void main() {
           updatedAt: DateTime.now(),
         );
 
-        when(() => mockApi.getIssue('issue-1')).thenAnswer((_) async => mockResponse);
+        when(
+          () => mockApi.getIssue('issue-1'),
+        ).thenAnswer((_) async => mockResponse);
 
         final result = await repository.getIssue('issue-1');
 
@@ -159,8 +167,9 @@ void main() {
           ),
         );
 
-        when(() => mockApi.getMyIssues(page: 1, limit: 20))
-            .thenAnswer((_) async => mockResponse);
+        when(
+          () => mockApi.getMyIssues(page: 1, limit: 20),
+        ).thenAnswer((_) async => mockResponse);
 
         final result = await repository.getMyIssues();
 
@@ -170,8 +179,12 @@ void main() {
       });
 
       test('returns Failure on error', () async {
-        when(() => mockApi.getMyIssues(page: any(named: 'page'), limit: any(named: 'limit')))
-            .thenThrow(DioException(requestOptions: RequestOptions()));
+        when(
+          () => mockApi.getMyIssues(
+            page: any(named: 'page'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenThrow(DioException(requestOptions: RequestOptions()));
 
         final result = await repository.getMyIssues();
 
@@ -191,10 +204,12 @@ void main() {
           createdAt: DateTime.now(),
         );
 
-        when(() => mockApi.reportIssue(
-              request: any(named: 'request'),
-              photoPaths: any(named: 'photoPaths'),
-            )).thenAnswer((_) async => mockResponse);
+        when(
+          () => mockApi.reportIssue(
+            request: any(named: 'request'),
+            photoPaths: any(named: 'photoPaths'),
+          ),
+        ).thenAnswer((_) async => mockResponse);
 
         final request = ReportIssueRequest(
           type: IssueType.pothole,
@@ -213,10 +228,12 @@ void main() {
       });
 
       test('returns Failure on validation error', () async {
-        when(() => mockApi.reportIssue(
-              request: any(named: 'request'),
-              photoPaths: any(named: 'photoPaths'),
-            )).thenThrow(
+        when(
+          () => mockApi.reportIssue(
+            request: any(named: 'request'),
+            photoPaths: any(named: 'photoPaths'),
+          ),
+        ).thenThrow(
           DioException(
             requestOptions: RequestOptions(),
             response: Response(
@@ -258,8 +275,9 @@ void main() {
           updatedAt: DateTime.now(),
         );
 
-        when(() => mockApi.getIssueFull('issue-1'))
-            .thenAnswer((_) async => mockResponse);
+        when(
+          () => mockApi.getIssueFull('issue-1'),
+        ).thenAnswer((_) async => mockResponse);
 
         final result = await repository.getIssueFull('issue-1');
 

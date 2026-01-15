@@ -168,10 +168,7 @@ void main() {
         totalPages: 1,
       );
 
-      final paginated = PaginatedIssues(
-        items: issues,
-        pagination: pagination,
-      );
+      final paginated = PaginatedIssues(items: issues, pagination: pagination);
 
       expect(paginated.items.length, 1);
       expect(paginated.items[0].id, 'issue-1');

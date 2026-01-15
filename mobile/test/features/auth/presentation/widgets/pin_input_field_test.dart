@@ -6,11 +6,7 @@ void main() {
   group('PinInputField', () {
     testWidgets('renders 4 pin boxes by default', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PinInputField(),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: PinInputField())),
       );
 
       // Find all pin boxes (containers with fixed size)
@@ -21,11 +17,7 @@ void main() {
 
     testWidgets('renders custom length pin boxes', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PinInputField(length: 6),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: PinInputField(length: 6))),
       );
 
       // Find the gesture detector that wraps the boxes
@@ -63,11 +55,7 @@ void main() {
     testWidgets('displays error text when provided', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PinInputField(
-              errorText: 'Invalid PIN',
-            ),
-          ),
+          home: Scaffold(body: PinInputField(errorText: 'Invalid PIN')),
         ),
       );
 
@@ -77,11 +65,7 @@ void main() {
     testWidgets('hides digits when obscureText is true', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PinInputField(
-              obscureText: true,
-            ),
-          ),
+          home: Scaffold(body: PinInputField(obscureText: true)),
         ),
       );
 

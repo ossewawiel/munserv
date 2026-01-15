@@ -6,11 +6,7 @@ void main() {
   group('HeatIndicator', () {
     testWidgets('displays heat value', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: HeatIndicator(heat: 75),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: HeatIndicator(heat: 75))),
       );
 
       expect(find.text('75'), findsOneWidget);
@@ -20,9 +16,7 @@ void main() {
     testWidgets('hides label when showLabel is false', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: HeatIndicator(heat: 75, showLabel: false),
-          ),
+          home: Scaffold(body: HeatIndicator(heat: 75, showLabel: false)),
         ),
       );
 
@@ -33,9 +27,7 @@ void main() {
     testWidgets('renders with custom size', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: HeatIndicator(heat: 50, size: 60),
-          ),
+          home: Scaffold(body: HeatIndicator(heat: 50, size: 60)),
         ),
       );
 
@@ -47,11 +39,7 @@ void main() {
     testWidgets('clamps heat to 0-100 range', (tester) async {
       // Test with value over 100
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: HeatIndicator(heat: 150),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: HeatIndicator(heat: 150))),
       );
 
       final progressIndicator = tester.widget<CircularProgressIndicator>(
@@ -65,11 +53,7 @@ void main() {
   group('HeatBadge', () {
     testWidgets('displays heat value with icon', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: HeatBadge(heat: 65),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: HeatBadge(heat: 65))),
       );
 
       expect(find.text('65'), findsOneWidget);
@@ -80,9 +64,7 @@ void main() {
       for (final heat in [10, 45, 65, 85]) {
         await tester.pumpWidget(
           MaterialApp(
-            home: Scaffold(
-              body: HeatBadge(heat: heat),
-            ),
+            home: Scaffold(body: HeatBadge(heat: heat)),
           ),
         );
 

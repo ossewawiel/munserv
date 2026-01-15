@@ -8,10 +8,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: LoadingButton(
-              label: 'Continue',
-              onPressed: () {},
-            ),
+            body: LoadingButton(label: 'Continue', onPressed: () {}),
           ),
         ),
       );
@@ -39,7 +36,9 @@ void main() {
       expect(wasTapped, true);
     });
 
-    testWidgets('shows loading indicator when isLoading is true', (tester) async {
+    testWidgets('shows loading indicator when isLoading is true', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -121,10 +120,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: LoadingOutlinedButton(
-              label: 'Cancel',
-              onPressed: () {},
-            ),
+            body: LoadingOutlinedButton(label: 'Cancel', onPressed: () {}),
           ),
         ),
       );
@@ -132,7 +128,9 @@ void main() {
       expect(find.text('Cancel'), findsOneWidget);
     });
 
-    testWidgets('shows loading indicator when isLoading is true', (tester) async {
+    testWidgets('shows loading indicator when isLoading is true', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

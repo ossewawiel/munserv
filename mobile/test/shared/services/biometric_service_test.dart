@@ -28,16 +28,21 @@ void main() {
         verify(() => mockAuth.isDeviceSupported()).called(1);
       });
 
-      test('should return false when device does not support biometrics', () async {
-        // Arrange
-        when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => false);
+      test(
+        'should return false when device does not support biometrics',
+        () async {
+          // Arrange
+          when(
+            () => mockAuth.isDeviceSupported(),
+          ).thenAnswer((_) async => false);
 
-        // Act
-        final result = await service.isDeviceSupported();
+          // Act
+          final result = await service.isDeviceSupported();
 
-        // Assert
-        expect(result, isFalse);
-      });
+          // Assert
+          expect(result, isFalse);
+        },
+      );
     });
 
     group('canCheckBiometrics', () {
@@ -93,7 +98,9 @@ void main() {
 
       test('should return empty list on exception', () async {
         // Arrange
-        when(() => mockAuth.getAvailableBiometrics()).thenThrow(Exception('Error'));
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenThrow(Exception('Error'));
 
         // Act
         final result = await service.getAvailableBiometrics();
@@ -104,20 +111,25 @@ void main() {
     });
 
     group('isBiometricAvailable', () {
-      test('should return true when device and biometrics are available', () async {
-        // Arrange
-        when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-        when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-        when(() => mockAuth.getAvailableBiometrics()).thenAnswer(
-          (_) async => [BiometricType.fingerprint],
-        );
+      test(
+        'should return true when device and biometrics are available',
+        () async {
+          // Arrange
+          when(
+            () => mockAuth.isDeviceSupported(),
+          ).thenAnswer((_) async => true);
+          when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
+          when(
+            () => mockAuth.getAvailableBiometrics(),
+          ).thenAnswer((_) async => [BiometricType.fingerprint]);
 
-        // Act
-        final result = await service.isBiometricAvailable();
+          // Act
+          final result = await service.isBiometricAvailable();
 
-        // Assert
-        expect(result, isTrue);
-      });
+          // Assert
+          expect(result, isTrue);
+        },
+      );
 
       test('should return false when device not supported', () async {
         // Arrange
@@ -146,7 +158,9 @@ void main() {
         // Arrange
         when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
         when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-        when(() => mockAuth.getAvailableBiometrics()).thenAnswer((_) async => []);
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenAnswer((_) async => []);
 
         // Act
         final result = await service.isBiometricAvailable();
@@ -161,9 +175,9 @@ void main() {
         // Arrange
         when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
         when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-        when(() => mockAuth.getAvailableBiometrics()).thenAnswer(
-          (_) async => [BiometricType.fingerprint],
-        );
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenAnswer((_) async => [BiometricType.fingerprint]);
         when(
           () => mockAuth.authenticate(
             localizedReason: 'Test reason',
@@ -187,9 +201,9 @@ void main() {
         // Arrange
         when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
         when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-        when(() => mockAuth.getAvailableBiometrics()).thenAnswer(
-          (_) async => [BiometricType.fingerprint],
-        );
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenAnswer((_) async => [BiometricType.fingerprint]);
         when(
           () => mockAuth.authenticate(
             localizedReason: 'Test reason',
@@ -209,26 +223,31 @@ void main() {
         expect(result.isFailed, isTrue);
       });
 
-      test('should return notAvailable when biometrics not available', () async {
-        // Arrange
-        when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => false);
+      test(
+        'should return notAvailable when biometrics not available',
+        () async {
+          // Arrange
+          when(
+            () => mockAuth.isDeviceSupported(),
+          ).thenAnswer((_) async => false);
 
-        // Act
-        final result = await service.authenticate(
-          localizedReason: 'Test reason',
-        );
+          // Act
+          final result = await service.authenticate(
+            localizedReason: 'Test reason',
+          );
 
-        // Assert
-        expect(result.isNotAvailable, isTrue);
-      });
+          // Assert
+          expect(result.isNotAvailable, isTrue);
+        },
+      );
 
       test('should return error when exception occurs', () async {
         // Arrange
         when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
         when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-        when(() => mockAuth.getAvailableBiometrics()).thenAnswer(
-          (_) async => [BiometricType.fingerprint],
-        );
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenAnswer((_) async => [BiometricType.fingerprint]);
         when(
           () => mockAuth.authenticate(
             localizedReason: 'Test reason',
@@ -251,24 +270,27 @@ void main() {
     });
 
     group('getBiometricDescription', () {
-      test('should return Fingerprint when only fingerprint available', () async {
-        // Arrange
-        when(() => mockAuth.getAvailableBiometrics()).thenAnswer(
-          (_) async => [BiometricType.fingerprint],
-        );
+      test(
+        'should return Fingerprint when only fingerprint available',
+        () async {
+          // Arrange
+          when(
+            () => mockAuth.getAvailableBiometrics(),
+          ).thenAnswer((_) async => [BiometricType.fingerprint]);
 
-        // Act
-        final result = await service.getBiometricDescription();
+          // Act
+          final result = await service.getBiometricDescription();
 
-        // Assert
-        expect(result, 'Fingerprint');
-      });
+          // Assert
+          expect(result, 'Fingerprint');
+        },
+      );
 
       test('should return Face ID when only face available', () async {
         // Arrange
-        when(() => mockAuth.getAvailableBiometrics()).thenAnswer(
-          (_) async => [BiometricType.face],
-        );
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenAnswer((_) async => [BiometricType.face]);
 
         // Act
         final result = await service.getBiometricDescription();
@@ -292,7 +314,9 @@ void main() {
 
       test('should return No biometrics available when empty', () async {
         // Arrange
-        when(() => mockAuth.getAvailableBiometrics()).thenAnswer((_) async => []);
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenAnswer((_) async => []);
 
         // Act
         final result = await service.getBiometricDescription();
@@ -303,9 +327,9 @@ void main() {
 
       test('should return Fingerprint when strong biometric type', () async {
         // Arrange
-        when(() => mockAuth.getAvailableBiometrics()).thenAnswer(
-          (_) async => [BiometricType.strong],
-        );
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenAnswer((_) async => [BiometricType.strong]);
 
         // Act
         final result = await service.getBiometricDescription();

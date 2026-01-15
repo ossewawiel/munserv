@@ -8,7 +8,7 @@ class BiometricService {
   final LocalAuthentication _auth;
 
   BiometricService([LocalAuthentication? auth])
-      : _auth = auth ?? LocalAuthentication();
+    : _auth = auth ?? LocalAuthentication();
 
   /// Check if device supports any form of local authentication
   Future<bool> isDeviceSupported() async {
@@ -84,7 +84,8 @@ class BiometricService {
       return 'No biometrics available';
     }
 
-    final hasFingerprint = biometrics.contains(BiometricType.fingerprint) ||
+    final hasFingerprint =
+        biometrics.contains(BiometricType.fingerprint) ||
         biometrics.contains(BiometricType.strong);
     final hasFace = biometrics.contains(BiometricType.face);
 
@@ -115,9 +116,9 @@ sealed class BiometricResult {
   bool get isError => this is BiometricError;
 
   String? get errorMessage => switch (this) {
-        BiometricError(:final message) => message,
-        _ => null,
-      };
+    BiometricError(:final message) => message,
+    _ => null,
+  };
 }
 
 class BiometricSuccess extends BiometricResult {

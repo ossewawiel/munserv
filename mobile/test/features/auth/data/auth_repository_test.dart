@@ -44,10 +44,7 @@ const testProfile = AuthProfile(
   sector: testSectorInfo,
 );
 
-const testAuthResponse = AuthResponse(
-  tokens: testTokens,
-  profile: testProfile,
-);
+const testAuthResponse = AuthResponse(tokens: testTokens, profile: testProfile);
 
 const testMemberProfileResponse = MemberProfileResponse(
   id: 'user_123',
@@ -92,8 +89,9 @@ void main() {
           refreshToken: 'new_refresh',
           expiresIn: 3600,
         );
-        when(() => mockApi.refreshToken(any()))
-            .thenAnswer((_) async => newBackendResponse);
+        when(
+          () => mockApi.refreshToken(any()),
+        ).thenAnswer((_) async => newBackendResponse);
         when(() => mockStorage.saveTokens(any())).thenAnswer((_) async {});
 
         final result = await repository.refreshToken('old_refresh');
@@ -111,7 +109,9 @@ void main() {
             type: DioExceptionType.badResponse,
             response: Response(
               statusCode: 401,
-              data: {'error': {'message': 'Token expired'}},
+              data: {
+                'error': {'message': 'Token expired'},
+              },
               requestOptions: RequestOptions(),
             ),
             requestOptions: RequestOptions(),
@@ -134,10 +134,12 @@ void main() {
       );
 
       test('returns Success with MemberLoginResponse', () async {
-        when(() => mockApi.loginWithEmail(
-              email: any(named: 'email'),
-              password: any(named: 'password'),
-            )).thenAnswer((_) async => testMemberLoginResponse);
+        when(
+          () => mockApi.loginWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => testMemberLoginResponse);
 
         final result = await repository.loginWithEmail(
           email: 'test@example.com',
@@ -151,15 +153,19 @@ void main() {
       });
 
       test('returns Failure on invalid credentials', () async {
-        when(() => mockApi.loginWithEmail(
-              email: any(named: 'email'),
-              password: any(named: 'password'),
-            )).thenThrow(
+        when(
+          () => mockApi.loginWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(
           DioException(
             type: DioExceptionType.badResponse,
             response: Response(
               statusCode: 401,
-              data: {'error': {'message': 'Invalid credentials'}},
+              data: {
+                'error': {'message': 'Invalid credentials'},
+              },
               requestOptions: RequestOptions(),
             ),
             requestOptions: RequestOptions(),
@@ -176,15 +182,19 @@ void main() {
       });
 
       test('returns Failure on account pending approval (403)', () async {
-        when(() => mockApi.loginWithEmail(
-              email: any(named: 'email'),
-              password: any(named: 'password'),
-            )).thenThrow(
+        when(
+          () => mockApi.loginWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(
           DioException(
             type: DioExceptionType.badResponse,
             response: Response(
               statusCode: 403,
-              data: {'error': {'message': 'Account pending approval'}},
+              data: {
+                'error': {'message': 'Account pending approval'},
+              },
               requestOptions: RequestOptions(),
             ),
             requestOptions: RequestOptions(),
@@ -204,10 +214,12 @@ void main() {
 
     group('changePassword', () {
       test('returns Success when password changed', () async {
-        when(() => mockApi.changePassword(
-              currentPassword: any(named: 'currentPassword'),
-              newPassword: any(named: 'newPassword'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockApi.changePassword(
+            currentPassword: any(named: 'currentPassword'),
+            newPassword: any(named: 'newPassword'),
+          ),
+        ).thenAnswer((_) async {});
 
         final result = await repository.changePassword(
           currentPassword: 'old_password',
@@ -218,15 +230,19 @@ void main() {
       });
 
       test('returns Failure on wrong current password', () async {
-        when(() => mockApi.changePassword(
-              currentPassword: any(named: 'currentPassword'),
-              newPassword: any(named: 'newPassword'),
-            )).thenThrow(
+        when(
+          () => mockApi.changePassword(
+            currentPassword: any(named: 'currentPassword'),
+            newPassword: any(named: 'newPassword'),
+          ),
+        ).thenThrow(
           DioException(
             type: DioExceptionType.badResponse,
             response: Response(
               statusCode: 401,
-              data: {'error': {'message': 'Wrong current password'}},
+              data: {
+                'error': {'message': 'Wrong current password'},
+              },
               requestOptions: RequestOptions(),
             ),
             requestOptions: RequestOptions(),
@@ -243,15 +259,19 @@ void main() {
       });
 
       test('returns Failure on password validation error', () async {
-        when(() => mockApi.changePassword(
-              currentPassword: any(named: 'currentPassword'),
-              newPassword: any(named: 'newPassword'),
-            )).thenThrow(
+        when(
+          () => mockApi.changePassword(
+            currentPassword: any(named: 'currentPassword'),
+            newPassword: any(named: 'newPassword'),
+          ),
+        ).thenThrow(
           DioException(
             type: DioExceptionType.badResponse,
             response: Response(
               statusCode: 400,
-              data: {'error': {'message': 'Password too weak'}},
+              data: {
+                'error': {'message': 'Password too weak'},
+              },
               requestOptions: RequestOptions(),
             ),
             requestOptions: RequestOptions(),
@@ -270,8 +290,9 @@ void main() {
 
     group('getMe', () {
       test('returns Success with MemberProfileResponse', () async {
-        when(() => mockApi.getMe())
-            .thenAnswer((_) async => testMemberProfileResponse);
+        when(
+          () => mockApi.getMe(),
+        ).thenAnswer((_) async => testMemberProfileResponse);
 
         final result = await repository.getMe();
 
@@ -286,7 +307,9 @@ void main() {
             type: DioExceptionType.badResponse,
             response: Response(
               statusCode: 401,
-              data: {'error': {'message': 'Unauthorized'}},
+              data: {
+                'error': {'message': 'Unauthorized'},
+              },
               requestOptions: RequestOptions(),
             ),
             requestOptions: RequestOptions(),

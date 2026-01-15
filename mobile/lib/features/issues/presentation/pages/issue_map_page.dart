@@ -78,7 +78,9 @@ class _IssueMapPageState extends ConsumerState<IssueMapPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Could not get current location. Please enable location services.'),
+            content: const Text(
+              'Could not get current location. Please enable location services.',
+            ),
             action: SnackBarAction(
               label: 'Settings',
               onPressed: () => locationService.openLocationSettings(),
@@ -225,7 +227,10 @@ class _IssueMap extends StatelessWidget {
             // Current location marker (if available)
             if (currentLocation != null)
               Marker(
-                point: LatLng(currentLocation!.latitude, currentLocation!.longitude),
+                point: LatLng(
+                  currentLocation!.latitude,
+                  currentLocation!.longitude,
+                ),
                 width: 24,
                 height: 24,
                 child: const _CurrentLocationMarker(),
@@ -270,10 +275,7 @@ class _CurrentLocationMarker extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.primary,
         shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white,
-          width: 3,
-        ),
+        border: Border.all(color: Colors.white, width: 3),
         boxShadow: [
           BoxShadow(
             color: theme.colorScheme.primary.withValues(alpha: 0.4),
@@ -316,10 +318,7 @@ class _IssueMarkerIcon extends StatelessWidget {
       decoration: BoxDecoration(
         color: isSelected ? color : color.withValues(alpha: 0.9),
         shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white,
-          width: isSelected ? 3 : 2,
-        ),
+        border: Border.all(color: Colors.white, width: isSelected ? 3 : 2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isSelected ? 0.4 : 0.25),
@@ -417,8 +416,11 @@ class _IssuePreviewCard extends StatelessWidget {
                         Flexible(child: IssueTypeBadge(type: issue.type)),
                         const SizedBox(width: Spacing.sm),
                         Flexible(
-                            child:
-                                IssueStateBadge(state: issue.state, compact: true)),
+                          child: IssueStateBadge(
+                            state: issue.state,
+                            compact: true,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: Spacing.xs),

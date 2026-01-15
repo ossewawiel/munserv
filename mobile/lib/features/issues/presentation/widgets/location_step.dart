@@ -73,10 +73,7 @@ class _LocationStepState extends State<LocationStep> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Confirm Location',
-            style: theme.textTheme.titleLarge,
-          ),
+          Text('Confirm Location', style: theme.textTheme.titleLarge),
           const SizedBox(height: Spacing.sm),
           Text(
             'We\'ll use your current location. You can adjust if needed.',
@@ -141,7 +138,9 @@ class _LocationStepState extends State<LocationStep> {
                     ),
                   )
                 : const Icon(Icons.my_location),
-            label: Text(_isLoading ? 'Getting Location...' : 'Refresh Location'),
+            label: Text(
+              _isLoading ? 'Getting Location...' : 'Refresh Location',
+            ),
           ),
         ],
       ),
@@ -164,10 +163,7 @@ class _LocationStepState extends State<LocationStep> {
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: Spacing.sm),
-            Text(
-              'Location unavailable',
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text('Location unavailable', style: theme.textTheme.bodyMedium),
           ],
         ),
       );
@@ -182,13 +178,12 @@ class _LocationStepState extends State<LocationStep> {
               Icon(
                 Icons.map,
                 size: 64,
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.5,
+                ),
               ),
               const SizedBox(height: Spacing.sm),
-              Text(
-                'Map preview',
-                style: theme.textTheme.bodySmall,
-              ),
+              Text('Map preview', style: theme.textTheme.bodySmall),
             ],
           ),
         ),
@@ -201,10 +196,7 @@ class _LocationStepState extends State<LocationStep> {
               padding: const EdgeInsets.all(Spacing.md),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.location_on,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.location_on, color: theme.colorScheme.primary),
                   const SizedBox(width: Spacing.sm),
                   Expanded(
                     child: Text(

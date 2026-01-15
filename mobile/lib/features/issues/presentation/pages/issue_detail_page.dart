@@ -16,10 +16,7 @@ import '../widgets/widgets.dart';
 class IssueDetailPage extends ConsumerWidget {
   final String issueId;
 
-  const IssueDetailPage({
-    super.key,
-    required this.issueId,
-  });
+  const IssueDetailPage({super.key, required this.issueId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -87,7 +84,8 @@ class _IssueDetailContent extends StatelessWidget {
                 _InfoSection(
                   icon: Icons.location_on,
                   title: 'Location',
-                  content: issue.address ??
+                  content:
+                      issue.address ??
                       '${issue.latitude.toStringAsFixed(6)}, ${issue.longitude.toStringAsFixed(6)}',
                 ),
 
@@ -134,10 +132,7 @@ class _IssueDetailContent extends StatelessWidget {
                 // State history
                 if (issue.stateHistory.isNotEmpty) ...[
                   const SizedBox(height: Spacing.lg),
-                  Text(
-                    'Status History',
-                    style: theme.textTheme.titleMedium,
-                  ),
+                  Text('Status History', style: theme.textTheme.titleMedium),
                   const SizedBox(height: Spacing.sm),
                   _StateHistoryList(history: issue.stateHistory),
                 ],
@@ -236,11 +231,7 @@ class _InfoSection extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 20,
-          color: theme.colorScheme.primary,
-        ),
+        Icon(icon, size: 20, color: theme.colorScheme.primary),
         const SizedBox(width: Spacing.sm),
         Expanded(
           child: Column(
@@ -253,10 +244,7 @@ class _InfoSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                content,
-                style: theme.textTheme.bodyMedium,
-              ),
+              Text(content, style: theme.textTheme.bodyMedium),
             ],
           ),
         ),
@@ -301,10 +289,7 @@ class _StatCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
-                    label,
-                    style: theme.textTheme.bodySmall,
-                  ),
+                  Text(label, style: theme.textTheme.bodySmall),
                 ],
               ),
             ),
@@ -319,10 +304,7 @@ class _TimestampInfo extends StatelessWidget {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  const _TimestampInfo({
-    required this.createdAt,
-    required this.updatedAt,
-  });
+  const _TimestampInfo({required this.createdAt, required this.updatedAt});
 
   @override
   Widget build(BuildContext context) {
@@ -334,10 +316,7 @@ class _TimestampInfo extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Reported',
-                style: theme.textTheme.labelSmall,
-              ),
+              Text('Reported', style: theme.textTheme.labelSmall),
               Text(
                 _formatDateTime(createdAt),
                 style: theme.textTheme.bodySmall,
@@ -349,10 +328,7 @@ class _TimestampInfo extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Last Updated',
-                style: theme.textTheme.labelSmall,
-              ),
+              Text('Last Updated', style: theme.textTheme.labelSmall),
               Text(
                 _formatDateTime(updatedAt),
                 style: theme.textTheme.bodySmall,
@@ -412,9 +388,7 @@ class _StateHistoryList extends StatelessWidget {
               // Content
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    bottom: isLast ? 0 : Spacing.md,
-                  ),
+                  padding: EdgeInsets.only(bottom: isLast ? 0 : Spacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -443,4 +417,3 @@ class _StateHistoryList extends StatelessWidget {
     return '${dt.day}/${dt.month}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 }
-

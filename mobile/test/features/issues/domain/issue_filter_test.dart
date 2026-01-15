@@ -74,10 +74,7 @@ void main() {
 
     test('copyWith creates new instance with updated fields', () {
       final original = IssueFilter(sectorId: 'sector-123');
-      final updated = original.copyWith(
-        state: IssueState.inProgress,
-        page: 5,
-      );
+      final updated = original.copyWith(state: IssueState.inProgress, page: 5);
 
       expect(original.state, isNull);
       expect(original.page, 1);

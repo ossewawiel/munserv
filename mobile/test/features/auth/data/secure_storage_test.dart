@@ -21,31 +21,41 @@ void main() {
   group('SecureStorageService', () {
     group('tokens', () {
       test('saveTokens stores both tokens', () async {
-        when(() => mockStorage.write(
-              key: any(named: 'key'),
-              value: any(named: 'value'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockStorage.write(
+            key: any(named: 'key'),
+            value: any(named: 'value'),
+          ),
+        ).thenAnswer((_) async {});
 
-        await service.saveTokens(const AuthTokens(
-          accessToken: 'access_abc',
-          refreshToken: 'refresh_xyz',
-        ));
+        await service.saveTokens(
+          const AuthTokens(
+            accessToken: 'access_abc',
+            refreshToken: 'refresh_xyz',
+          ),
+        );
 
-        verify(() => mockStorage.write(
-              key: SecureStorageKeys.accessToken,
-              value: 'access_abc',
-            )).called(1);
-        verify(() => mockStorage.write(
-              key: SecureStorageKeys.refreshToken,
-              value: 'refresh_xyz',
-            )).called(1);
+        verify(
+          () => mockStorage.write(
+            key: SecureStorageKeys.accessToken,
+            value: 'access_abc',
+          ),
+        ).called(1);
+        verify(
+          () => mockStorage.write(
+            key: SecureStorageKeys.refreshToken,
+            value: 'refresh_xyz',
+          ),
+        ).called(1);
       });
 
       test('getTokens returns tokens when stored', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.accessToken))
-            .thenAnswer((_) async => 'access_abc');
-        when(() => mockStorage.read(key: SecureStorageKeys.refreshToken))
-            .thenAnswer((_) async => 'refresh_xyz');
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.accessToken),
+        ).thenAnswer((_) async => 'access_abc');
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.refreshToken),
+        ).thenAnswer((_) async => 'refresh_xyz');
 
         final tokens = await service.getTokens();
 
@@ -54,10 +64,12 @@ void main() {
       });
 
       test('getTokens returns null when no tokens stored', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.accessToken))
-            .thenAnswer((_) async => null);
-        when(() => mockStorage.read(key: SecureStorageKeys.refreshToken))
-            .thenAnswer((_) async => null);
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.accessToken),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.refreshToken),
+        ).thenAnswer((_) async => null);
 
         final tokens = await service.getTokens();
 
@@ -65,8 +77,9 @@ void main() {
       });
 
       test('getAccessToken returns stored access token', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.accessToken))
-            .thenAnswer((_) async => 'access_abc');
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.accessToken),
+        ).thenAnswer((_) async => 'access_abc');
 
         final token = await service.getAccessToken();
 
@@ -74,24 +87,29 @@ void main() {
       });
 
       test('clearTokens removes all tokens', () async {
-        when(() => mockStorage.delete(key: any(named: 'key')))
-            .thenAnswer((_) async {});
+        when(
+          () => mockStorage.delete(key: any(named: 'key')),
+        ).thenAnswer((_) async {});
 
         await service.clearTokens();
 
-        verify(() => mockStorage.delete(key: SecureStorageKeys.accessToken))
-            .called(1);
-        verify(() => mockStorage.delete(key: SecureStorageKeys.refreshToken))
-            .called(1);
+        verify(
+          () => mockStorage.delete(key: SecureStorageKeys.accessToken),
+        ).called(1);
+        verify(
+          () => mockStorage.delete(key: SecureStorageKeys.refreshToken),
+        ).called(1);
       });
     });
 
     group('profile', () {
       test('saveProfile stores profile as JSON', () async {
-        when(() => mockStorage.write(
-              key: any(named: 'key'),
-              value: any(named: 'value'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockStorage.write(
+            key: any(named: 'key'),
+            value: any(named: 'value'),
+          ),
+        ).thenAnswer((_) async {});
 
         const profile = MemberProfile(
           id: 'user_123',
@@ -107,10 +125,12 @@ void main() {
 
         await service.saveProfile(profile);
 
-        verify(() => mockStorage.write(
-              key: SecureStorageKeys.userProfile,
-              value: jsonEncode(profile.toJson()),
-            )).called(1);
+        verify(
+          () => mockStorage.write(
+            key: SecureStorageKeys.userProfile,
+            value: jsonEncode(profile.toJson()),
+          ),
+        ).called(1);
       });
 
       test('getProfile returns profile when stored', () async {
@@ -125,8 +145,9 @@ void main() {
           'status': 'active',
           'createdAt': '2024-01-01T00:00:00Z',
         });
-        when(() => mockStorage.read(key: SecureStorageKeys.userProfile))
-            .thenAnswer((_) async => profileJson);
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.userProfile),
+        ).thenAnswer((_) async => profileJson);
 
         final profile = await service.getProfile();
 
@@ -136,8 +157,9 @@ void main() {
       });
 
       test('getProfile returns null when no profile stored', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.userProfile))
-            .thenAnswer((_) async => null);
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.userProfile),
+        ).thenAnswer((_) async => null);
 
         final profile = await service.getProfile();
 
@@ -145,34 +167,41 @@ void main() {
       });
 
       test('clearProfile removes profile', () async {
-        when(() => mockStorage.delete(key: any(named: 'key')))
-            .thenAnswer((_) async {});
+        when(
+          () => mockStorage.delete(key: any(named: 'key')),
+        ).thenAnswer((_) async {});
 
         await service.clearProfile();
 
-        verify(() => mockStorage.delete(key: SecureStorageKeys.userProfile))
-            .called(1);
+        verify(
+          () => mockStorage.delete(key: SecureStorageKeys.userProfile),
+        ).called(1);
       });
     });
 
     group('phone number', () {
       test('savePhoneNumber stores phone number', () async {
-        when(() => mockStorage.write(
-              key: any(named: 'key'),
-              value: any(named: 'value'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockStorage.write(
+            key: any(named: 'key'),
+            value: any(named: 'value'),
+          ),
+        ).thenAnswer((_) async {});
 
         await service.savePhoneNumber('+27821234567');
 
-        verify(() => mockStorage.write(
-              key: SecureStorageKeys.phoneNumber,
-              value: '+27821234567',
-            )).called(1);
+        verify(
+          () => mockStorage.write(
+            key: SecureStorageKeys.phoneNumber,
+            value: '+27821234567',
+          ),
+        ).called(1);
       });
 
       test('getPhoneNumber returns stored phone number', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.phoneNumber))
-            .thenAnswer((_) async => '+27821234567');
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.phoneNumber),
+        ).thenAnswer((_) async => '+27821234567');
 
         final phone = await service.getPhoneNumber();
 
@@ -182,22 +211,27 @@ void main() {
 
     group('email', () {
       test('saveEmail stores email address', () async {
-        when(() => mockStorage.write(
-              key: any(named: 'key'),
-              value: any(named: 'value'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockStorage.write(
+            key: any(named: 'key'),
+            value: any(named: 'value'),
+          ),
+        ).thenAnswer((_) async {});
 
         await service.saveEmail('test@example.com');
 
-        verify(() => mockStorage.write(
-              key: SecureStorageKeys.email,
-              value: 'test@example.com',
-            )).called(1);
+        verify(
+          () => mockStorage.write(
+            key: SecureStorageKeys.email,
+            value: 'test@example.com',
+          ),
+        ).called(1);
       });
 
       test('getEmail returns stored email', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.email))
-            .thenAnswer((_) async => 'test@example.com');
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.email),
+        ).thenAnswer((_) async => 'test@example.com');
 
         final email = await service.getEmail();
 
@@ -205,8 +239,9 @@ void main() {
       });
 
       test('getEmail returns null when no email stored', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.email))
-            .thenAnswer((_) async => null);
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.email),
+        ).thenAnswer((_) async => null);
 
         final email = await service.getEmail();
 
@@ -216,22 +251,24 @@ void main() {
 
     group('PIN', () {
       test('savePin stores PIN', () async {
-        when(() => mockStorage.write(
-              key: any(named: 'key'),
-              value: any(named: 'value'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockStorage.write(
+            key: any(named: 'key'),
+            value: any(named: 'value'),
+          ),
+        ).thenAnswer((_) async {});
 
         await service.savePin('1234');
 
-        verify(() => mockStorage.write(
-              key: SecureStorageKeys.pin,
-              value: '1234',
-            )).called(1);
+        verify(
+          () => mockStorage.write(key: SecureStorageKeys.pin, value: '1234'),
+        ).called(1);
       });
 
       test('getPin returns stored PIN', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.pin))
-            .thenAnswer((_) async => '1234');
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.pin),
+        ).thenAnswer((_) async => '1234');
 
         final pin = await service.getPin();
 
@@ -239,8 +276,9 @@ void main() {
       });
 
       test('getPin returns null when no PIN stored', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.pin))
-            .thenAnswer((_) async => null);
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.pin),
+        ).thenAnswer((_) async => null);
 
         final pin = await service.getPin();
 
@@ -248,13 +286,13 @@ void main() {
       });
 
       test('clearPin removes PIN', () async {
-        when(() => mockStorage.delete(key: any(named: 'key')))
-            .thenAnswer((_) async {});
+        when(
+          () => mockStorage.delete(key: any(named: 'key')),
+        ).thenAnswer((_) async {});
 
         await service.clearPin();
 
-        verify(() => mockStorage.delete(key: SecureStorageKeys.pin))
-            .called(1);
+        verify(() => mockStorage.delete(key: SecureStorageKeys.pin)).called(1);
       });
     });
 
@@ -270,8 +308,9 @@ void main() {
 
     group('hasValidSession', () {
       test('returns true when access token exists', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.accessToken))
-            .thenAnswer((_) async => 'access_abc');
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.accessToken),
+        ).thenAnswer((_) async => 'access_abc');
 
         final hasSession = await service.hasValidSession();
 
@@ -279,8 +318,9 @@ void main() {
       });
 
       test('returns false when no access token', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.accessToken))
-            .thenAnswer((_) async => null);
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.accessToken),
+        ).thenAnswer((_) async => null);
 
         final hasSession = await service.hasValidSession();
 
@@ -290,22 +330,27 @@ void main() {
 
     group('password storage (for quick login)', () {
       test('savePassword stores password', () async {
-        when(() => mockStorage.write(
-              key: any(named: 'key'),
-              value: any(named: 'value'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockStorage.write(
+            key: any(named: 'key'),
+            value: any(named: 'value'),
+          ),
+        ).thenAnswer((_) async {});
 
         await service.savePassword('securePass123');
 
-        verify(() => mockStorage.write(
-              key: SecureStorageKeys.password,
-              value: 'securePass123',
-            )).called(1);
+        verify(
+          () => mockStorage.write(
+            key: SecureStorageKeys.password,
+            value: 'securePass123',
+          ),
+        ).called(1);
       });
 
       test('getPassword returns stored password', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.password))
-            .thenAnswer((_) async => 'securePass123');
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.password),
+        ).thenAnswer((_) async => 'securePass123');
 
         final password = await service.getPassword();
 
@@ -313,8 +358,9 @@ void main() {
       });
 
       test('getPassword returns null when no password stored', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.password))
-            .thenAnswer((_) async => null);
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.password),
+        ).thenAnswer((_) async => null);
 
         final password = await service.getPassword();
 
@@ -322,66 +368,86 @@ void main() {
       });
 
       test('clearPassword removes stored password', () async {
-        when(() => mockStorage.delete(key: any(named: 'key')))
-            .thenAnswer((_) async {});
+        when(
+          () => mockStorage.delete(key: any(named: 'key')),
+        ).thenAnswer((_) async {});
 
         await service.clearPassword();
 
-        verify(() => mockStorage.delete(key: SecureStorageKeys.password))
-            .called(1);
+        verify(
+          () => mockStorage.delete(key: SecureStorageKeys.password),
+        ).called(1);
       });
     });
 
     group('quick login eligibility', () {
-      test('hasQuickLoginCredentials returns true when all credentials present',
-          () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.email))
-            .thenAnswer((_) async => 'test@example.com');
-        when(() => mockStorage.read(key: SecureStorageKeys.password))
-            .thenAnswer((_) async => 'securePass123');
-        when(() => mockStorage.read(key: SecureStorageKeys.pin))
-            .thenAnswer((_) async => '1234');
+      test(
+        'hasQuickLoginCredentials returns true when all credentials present',
+        () async {
+          when(
+            () => mockStorage.read(key: SecureStorageKeys.email),
+          ).thenAnswer((_) async => 'test@example.com');
+          when(
+            () => mockStorage.read(key: SecureStorageKeys.password),
+          ).thenAnswer((_) async => 'securePass123');
+          when(
+            () => mockStorage.read(key: SecureStorageKeys.pin),
+          ).thenAnswer((_) async => '1234');
 
-        final hasCredentials = await service.hasQuickLoginCredentials();
+          final hasCredentials = await service.hasQuickLoginCredentials();
 
-        expect(hasCredentials, true);
-      });
+          expect(hasCredentials, true);
+        },
+      );
 
-      test('hasQuickLoginCredentials returns false when email missing',
-          () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.email))
-            .thenAnswer((_) async => null);
-        when(() => mockStorage.read(key: SecureStorageKeys.password))
-            .thenAnswer((_) async => 'securePass123');
-        when(() => mockStorage.read(key: SecureStorageKeys.pin))
-            .thenAnswer((_) async => '1234');
+      test(
+        'hasQuickLoginCredentials returns false when email missing',
+        () async {
+          when(
+            () => mockStorage.read(key: SecureStorageKeys.email),
+          ).thenAnswer((_) async => null);
+          when(
+            () => mockStorage.read(key: SecureStorageKeys.password),
+          ).thenAnswer((_) async => 'securePass123');
+          when(
+            () => mockStorage.read(key: SecureStorageKeys.pin),
+          ).thenAnswer((_) async => '1234');
 
-        final hasCredentials = await service.hasQuickLoginCredentials();
+          final hasCredentials = await service.hasQuickLoginCredentials();
 
-        expect(hasCredentials, false);
-      });
+          expect(hasCredentials, false);
+        },
+      );
 
-      test('hasQuickLoginCredentials returns false when password missing',
-          () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.email))
-            .thenAnswer((_) async => 'test@example.com');
-        when(() => mockStorage.read(key: SecureStorageKeys.password))
-            .thenAnswer((_) async => null);
-        when(() => mockStorage.read(key: SecureStorageKeys.pin))
-            .thenAnswer((_) async => '1234');
+      test(
+        'hasQuickLoginCredentials returns false when password missing',
+        () async {
+          when(
+            () => mockStorage.read(key: SecureStorageKeys.email),
+          ).thenAnswer((_) async => 'test@example.com');
+          when(
+            () => mockStorage.read(key: SecureStorageKeys.password),
+          ).thenAnswer((_) async => null);
+          when(
+            () => mockStorage.read(key: SecureStorageKeys.pin),
+          ).thenAnswer((_) async => '1234');
 
-        final hasCredentials = await service.hasQuickLoginCredentials();
+          final hasCredentials = await service.hasQuickLoginCredentials();
 
-        expect(hasCredentials, false);
-      });
+          expect(hasCredentials, false);
+        },
+      );
 
       test('hasQuickLoginCredentials returns false when PIN missing', () async {
-        when(() => mockStorage.read(key: SecureStorageKeys.email))
-            .thenAnswer((_) async => 'test@example.com');
-        when(() => mockStorage.read(key: SecureStorageKeys.password))
-            .thenAnswer((_) async => 'securePass123');
-        when(() => mockStorage.read(key: SecureStorageKeys.pin))
-            .thenAnswer((_) async => null);
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.email),
+        ).thenAnswer((_) async => 'test@example.com');
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.password),
+        ).thenAnswer((_) async => 'securePass123');
+        when(
+          () => mockStorage.read(key: SecureStorageKeys.pin),
+        ).thenAnswer((_) async => null);
 
         final hasCredentials = await service.hasQuickLoginCredentials();
 
@@ -390,25 +456,34 @@ void main() {
     });
 
     group('clearQuickLoginData', () {
-      test('clears password and session but keeps email for convenience',
-          () async {
-        when(() => mockStorage.delete(key: any(named: 'key')))
-            .thenAnswer((_) async {});
+      test(
+        'clears password and session but keeps email for convenience',
+        () async {
+          when(
+            () => mockStorage.delete(key: any(named: 'key')),
+          ).thenAnswer((_) async {});
 
-        await service.clearQuickLoginData();
+          await service.clearQuickLoginData();
 
-        verify(() => mockStorage.delete(key: SecureStorageKeys.password))
-            .called(1);
-        verify(() => mockStorage.delete(key: SecureStorageKeys.pin)).called(1);
-        verify(() => mockStorage.delete(key: SecureStorageKeys.biometricPin))
-            .called(1);
-        verify(() => mockStorage.delete(key: SecureStorageKeys.accessToken))
-            .called(1);
-        verify(() => mockStorage.delete(key: SecureStorageKeys.refreshToken))
-            .called(1);
-        // Email should NOT be deleted - user can re-login with same email
-        verifyNever(() => mockStorage.delete(key: SecureStorageKeys.email));
-      });
+          verify(
+            () => mockStorage.delete(key: SecureStorageKeys.password),
+          ).called(1);
+          verify(
+            () => mockStorage.delete(key: SecureStorageKeys.pin),
+          ).called(1);
+          verify(
+            () => mockStorage.delete(key: SecureStorageKeys.biometricPin),
+          ).called(1);
+          verify(
+            () => mockStorage.delete(key: SecureStorageKeys.accessToken),
+          ).called(1);
+          verify(
+            () => mockStorage.delete(key: SecureStorageKeys.refreshToken),
+          ).called(1);
+          // Email should NOT be deleted - user can re-login with same email
+          verifyNever(() => mockStorage.delete(key: SecureStorageKeys.email));
+        },
+      );
     });
   });
 }

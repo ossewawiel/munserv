@@ -41,10 +41,7 @@ class IssueApi {
   }) async {
     final response = await _dio.get(
       '/issues/mine',
-      queryParameters: {
-        'page': page.toString(),
-        'limit': limit.toString(),
-      },
+      queryParameters: {'page': page.toString(), 'limit': limit.toString()},
     );
     return PaginatedIssueSummaries.fromJson(
       response.data as Map<String, dynamic>,

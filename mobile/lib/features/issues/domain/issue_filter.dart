@@ -13,9 +13,9 @@ enum IssueSortBy {
   createdAt;
 
   String get displayName => switch (this) {
-        heat => 'Priority',
-        createdAt => 'Date',
-      };
+    heat => 'Priority',
+    createdAt => 'Date',
+  };
 }
 
 /// Filter and pagination parameters for issue queries.

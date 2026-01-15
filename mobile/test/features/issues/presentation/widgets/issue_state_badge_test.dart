@@ -8,9 +8,7 @@ void main() {
     testWidgets('displays state name', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: IssueStateBadge(state: IssueState.reported),
-          ),
+          home: Scaffold(body: IssueStateBadge(state: IssueState.reported)),
         ),
       );
 
@@ -21,9 +19,7 @@ void main() {
       for (final state in IssueState.values) {
         await tester.pumpWidget(
           MaterialApp(
-            home: Scaffold(
-              body: IssueStateBadge(state: state),
-            ),
+            home: Scaffold(body: IssueStateBadge(state: state)),
           ),
         );
 
@@ -35,10 +31,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: IssueStateBadge(
-              state: IssueState.confirmed,
-              compact: true,
-            ),
+            body: IssueStateBadge(state: IssueState.confirmed, compact: true),
           ),
         ),
       );

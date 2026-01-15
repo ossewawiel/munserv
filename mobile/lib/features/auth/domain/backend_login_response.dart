@@ -24,11 +24,11 @@ abstract class BackendLoginResponse with _$BackendLoginResponse {
 
   /// Convert to existing AuthTokens format for compatibility
   AuthTokens toAuthTokens() => AuthTokens(
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        expiresAt: DateTime.now()
-            .add(Duration(seconds: expiresIn))
-            .toUtc()
-            .toIso8601String(),
-      );
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+    expiresAt: DateTime.now()
+        .add(Duration(seconds: expiresIn))
+        .toUtc()
+        .toIso8601String(),
+  );
 }

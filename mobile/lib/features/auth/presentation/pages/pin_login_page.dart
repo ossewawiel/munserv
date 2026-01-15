@@ -51,8 +51,9 @@ class _PinLoginPageState extends ConsumerState<PinLoginPage> {
     _biometricAttempted = true;
 
     // Check if biometric is enabled
-    final isBiometricEnabled =
-        await ref.read(isBiometricLoginEnabledProvider.future);
+    final isBiometricEnabled = await ref.read(
+      isBiometricLoginEnabledProvider.future,
+    );
     if (!isBiometricEnabled || !mounted) return;
 
     // Attempt biometric authentication

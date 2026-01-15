@@ -15,9 +15,9 @@ class BrandColors {
   /// Default MunServ brand colors - Forest Green & Terracotta palette
   /// Based on Environmental Emissions App design reference
   static const defaultBrand = BrandColors(
-    primary: Color(0xFF233D36),   // Forest Green - primary text, outlines
+    primary: Color(0xFF233D36), // Forest Green - primary text, outlines
     secondary: Color(0xFFD9613F), // Terracotta - accents, CTAs
-    tertiary: Color(0xFFF3EDDA),  // Warm Beige - secondary backgrounds
+    tertiary: Color(0xFFF3EDDA), // Warm Beige - secondary backgrounds
   );
 
   /// Create brand colors from hex strings
@@ -29,7 +29,9 @@ class BrandColors {
     return BrandColors(
       primary: _hexToColor(primary),
       secondary: _hexToColor(secondary),
-      tertiary: tertiary != null ? _hexToColor(tertiary) : const Color(0xFFF3EDDA),
+      tertiary: tertiary != null
+          ? _hexToColor(tertiary)
+          : const Color(0xFFF3EDDA),
     );
   }
 
@@ -368,6 +370,8 @@ class M3ColorSchemes {
 
   /// Get high contrast scheme for given brightness
   static ColorScheme getHighContrastScheme(Brightness brightness) {
-    return brightness == Brightness.light ? lightHighContrast : darkHighContrast;
+    return brightness == Brightness.light
+        ? lightHighContrast
+        : darkHighContrast;
   }
 }

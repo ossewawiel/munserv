@@ -80,11 +80,31 @@ info:           #2196F3  - Info states
 | High | Red | heat 60-79 |
 | Critical | Purple | heat >= 80 |
 
-## 2. Component Specifications
+## 2. Interaction Feedback
+
+The app uses terracotta-tinted splash colors for touch feedback:
+
+| Property | Value |
+|----------|-------|
+| Splash Factory | `InkSparkle.splashFactory` |
+| Splash Color | secondary @ 12% opacity |
+| Highlight Color | secondary @ 8% opacity |
+
+```dart
+// Custom splash applied to InkWell
+InkWell(
+  onTap: () {},
+  splashColor: theme.colorScheme.secondary.withValues(alpha: 0.12),
+  highlightColor: theme.colorScheme.secondary.withValues(alpha: 0.08),
+  child: ...,
+)
+```
+
+## 3. Component Specifications
 
 All components follow Material Design 3 specifications exactly.
 
-### 2.1 Buttons
+### 3.1 Buttons
 
 | Property | FilledButton | ElevatedButton | OutlinedButton | TextButton |
 |----------|-------------|----------------|----------------|------------|
@@ -109,11 +129,11 @@ OutlinedButton(
 )
 ```
 
-### 2.2 Cards
+### 3.2 Cards
 
 | Property | Value |
 |----------|-------|
-| Corner Radius | 12dp (M3 medium shape) |
+| Corner Radius | 16dp (AppShapes.medium) |
 | Elevation | 1dp |
 | Background | surfaceContainerLow |
 | Clip Behavior | antiAlias |
@@ -128,7 +148,7 @@ Card(
 )
 ```
 
-### 2.3 Navigation Bar
+### 3.3 Navigation Bar
 
 | Property | Value |
 |----------|-------|
@@ -140,21 +160,23 @@ Card(
 | Label Style | labelMedium |
 | Elevation | 2dp |
 
-### 2.4 Floating Action Button (FAB)
+### 3.4 Floating Action Button (FAB)
 
 | Size | Dimensions | Icon Size | Corner Radius |
 |------|------------|-----------|---------------|
-| Standard | 56x56dp | 24dp | 16dp |
+| Standard | 56x56dp | 24dp | 20dp (AppShapes.large) |
 | Small | 40x40dp | 24dp | 12dp |
 | Large | 96x96dp | 36dp | 28dp |
 
 | Property | Value |
 |----------|-------|
-| Background | primaryContainer |
-| Foreground | onPrimaryContainer |
+| Background | secondary (Terracotta) |
+| Foreground | onSecondary |
 | Elevation | 3dp |
 
-### 2.5 Chips
+> **Note:** FAB uses terracotta (secondary) color for visual distinction and brand accent.
+
+### 3.5 Chips
 
 | Property | Value |
 |----------|-------|
@@ -165,7 +187,7 @@ Card(
 | Selected Background | secondaryContainer |
 | Label Style | labelLarge |
 
-### 2.6 Text Fields
+### 3.6 Text Fields
 
 | Property | Value |
 |----------|-------|
@@ -176,7 +198,7 @@ Card(
 | Content Padding | 16dp horizontal, 16dp vertical |
 | Label Style | bodyLarge |
 
-### 2.7 Dialogs
+### 3.7 Dialogs
 
 | Property | Value |
 |----------|-------|
@@ -184,7 +206,7 @@ Card(
 | Background | surfaceContainerHigh |
 | Elevation | 6dp |
 
-### 2.8 Bottom Sheets
+### 3.8 Bottom Sheets
 
 | Property | Value |
 |----------|-------|
@@ -193,22 +215,22 @@ Card(
 | Elevation | 1dp |
 | Drag Handle | 32x4dp, onSurfaceVariant |
 
-## 3. Typography
+## 4. Typography
 
-### 3.1 Font Family
+### 4.1 Font Family
 
 **Primary Font:** Source Sans 3 (Google Fonts)
 
-### 3.2 Type Scale
+### 4.2 Type Scale
 
 | Style | Size | Weight | Letter Spacing |
 |-------|------|--------|----------------|
 | displayLarge | 57sp | 400 | -0.25 |
 | displayMedium | 45sp | 400 | 0 |
 | displaySmall | 36sp | 400 | 0 |
-| headlineLarge | 32sp | 600 | 0 |
-| headlineMedium | 28sp | 600 | 0 |
-| headlineSmall | 24sp | 600 | 0 |
+| headlineLarge | 32sp | **700** | 0 |
+| headlineMedium | 28sp | **700** | 0 |
+| headlineSmall | 24sp | **700** | 0 |
 | titleLarge | 24sp | 500 | 0 |
 | titleMedium | 18sp | 500 | 0.15 |
 | titleSmall | 16sp | 500 | 0.1 |
@@ -219,7 +241,9 @@ Card(
 | labelMedium | 14sp | 500 | 0.5 |
 | labelSmall | 13sp | 500 | 0.5 |
 
-## 4. Spacing Scale
+> **Note:** Headlines use weight 700 (bold) for stronger visual hierarchy.
+
+## 5. Spacing Scale
 
 | Token | Value | Usage |
 |-------|-------|-------|
@@ -230,19 +254,25 @@ Card(
 | xl | 32dp | Large gaps |
 | xxl | 48dp | Major sections |
 
-## 5. Corner Radius Scale (M3 Shape)
+## 6. Corner Radius Scale (AppShapes)
 
 | Token | Value | Usage |
 |-------|-------|-------|
 | None | 0dp | Sharp corners |
 | Extra Small | 4dp | Inputs, snackbars |
 | Small | 8dp | Chips |
-| Medium | 12dp | Cards, buttons |
-| Large | 16dp | FAB |
+| Medium | 16dp | Cards |
+| Large | 20dp | FAB |
 | Extra Large | 28dp | Dialogs, sheets |
 | Full | 9999dp | Pills, stadium shapes |
 
-## 6. Dark Theme
+```dart
+// Access via AppShapes class
+BorderRadius.circular(AppShapes.medium)  // 16dp
+BorderRadius.circular(AppShapes.large)   // 20dp
+```
+
+## 7. Dark Theme
 
 Dark theme uses the same color system with inverted brightness. Key differences:
 
@@ -253,7 +283,7 @@ Dark theme uses the same color system with inverted brightness. Key differences:
 | Primary | #0c2721 | #b0cdc3 |
 | Primary Container | #233d36 | #233d36 |
 
-## 7. Pod Configuration
+## 8. Pod Configuration
 
 Brand colors can be customized per pod deployment:
 
@@ -267,7 +297,7 @@ PodConfig(
 
 The theme system regenerates tonal palettes from these seed colors.
 
-## 8. Using Theme Colors
+## 9. Using Theme Colors
 
 ### DO: Use ColorScheme from Theme
 
@@ -299,16 +329,94 @@ Container(color: colors.primary.withOpacity(0.5))
 Container(color: colors.onSurfaceVariant) // for muted content
 ```
 
-## 9. Files Reference
+## 10. Issue Type Icons
+
+Each issue type has a distinctive visual representation using the `IssueTypeVisuals` system.
+
+### 10.1 Issue Type Colors
+
+| Type | Icon | Color | Light Color |
+|------|------|-------|-------------|
+| Pothole | `warning_rounded` | Deep Orange #E65100 | #FFF3E0 |
+| Water Leak | `water_drop` | Light Blue #0288D1 | #E1F5FE |
+| Sewage Leak | `waves` | Brown #5D4037 | #EFEBE9 |
+| Traffic Light | `traffic` | Red #C62828 | #FFEBEE |
+| Street Light | `lightbulb` | Amber #F9A825 | #FFFDE7 |
+| Illegal Dumping | `delete` | Green #2E7D32 | #E8F5E9 |
+| Road Damage | `trending_down` | Blue Grey #37474F | #ECEFF1 |
+| Other | `help` | Grey #616161 | #F5F5F5 |
+
+### 10.2 IssueTypeVisuals Class
+
+Centralized configuration for issue type visual representation:
+
+```dart
+final visuals = IssueTypeVisuals.forType(IssueType.pothole);
+
+visuals.icon          // Outline icon (warning_amber_rounded)
+visuals.filledIcon    // Filled icon (warning_rounded)
+visuals.color         // Main color (#E65100)
+visuals.lightColor    // Background color (#FFF3E0)
+visuals.semanticLabel // Accessibility label ("Pothole hazard")
+```
+
+### 10.3 IssueTypeIcon Widget
+
+Large distinctive icon for issue cards and lists:
+
+```dart
+// Square icon with rounded corners and background
+IssueTypeIcon(
+  type: IssueType.pothole,
+  size: 64,              // Default: 56
+  showBackground: true,  // Default: true
+  filled: true,          // Default: true
+)
+
+// Icon only without background
+IssueTypeIcon(
+  type: IssueType.pothole,
+  showBackground: false,
+)
+```
+
+### 10.4 IssueTypeIconCircle Widget
+
+Circular variant for map markers and compact displays:
+
+```dart
+IssueTypeIconCircle(
+  type: IssueType.waterLeak,
+  size: 40,           // Default: 40
+  showBorder: true,   // Default: true
+)
+```
+
+### 10.5 IssueTypeBadge Widget
+
+Compact badge with icon and optional label:
+
+```dart
+// With label
+IssueTypeBadge(type: IssueType.pothole)
+
+// Icon only
+IssueTypeBadge(type: IssueType.pothole, showLabel: false)
+```
+
+## 11. Files Reference
 
 | File | Purpose |
 |------|---------|
 | `mobile/lib/shared/theme/colors.dart` | Color definitions, M3ColorSchemes |
-| `mobile/lib/shared/theme/app_theme.dart` | ThemeData builder |
+| `mobile/lib/shared/theme/app_theme.dart` | ThemeData builder, AppShapes |
 | `mobile/lib/shared/theme/typography.dart` | TextTheme, Spacing, Radii |
+| `mobile/lib/shared/theme/issue_type_icons.dart` | IssueTypeVisuals configuration |
 | `mobile/lib/shared/providers/theme_provider.dart` | Theme state management |
+| `mobile/lib/features/issues/presentation/widgets/issue_type_icon.dart` | IssueTypeIcon, IssueTypeIconCircle |
+| `mobile/lib/shared/widgets/empty_state.dart` | EmptyState widget |
 
-## 10. Testing Theme
+## 12. Testing Theme
 
 Run the app and navigate to the theme showcase page to verify all components render correctly with the M3 theme.
 

@@ -58,19 +58,19 @@ extension AuthStateX on AuthState {
 
   /// Get tokens from any state that has them
   AuthTokens? get tokens => switch (this) {
-        AuthStateAuthenticated(:final tokens) => tokens,
-        AuthStateMustChangePassword(:final tokens) => tokens,
-        AuthStatePendingPinSetup(:final tokens) => tokens,
-        _ => null,
-      };
+    AuthStateAuthenticated(:final tokens) => tokens,
+    AuthStateMustChangePassword(:final tokens) => tokens,
+    AuthStatePendingPinSetup(:final tokens) => tokens,
+    _ => null,
+  };
 
   /// Get member ID from any state that has it
   String? get memberId => switch (this) {
-        AuthStateAuthenticated(:final profile) => profile.id,
-        AuthStateMustChangePassword(:final memberId) => memberId,
-        AuthStatePendingPinSetup(:final memberId) => memberId,
-        _ => null,
-      };
+    AuthStateAuthenticated(:final profile) => profile.id,
+    AuthStateMustChangePassword(:final memberId) => memberId,
+    AuthStatePendingPinSetup(:final memberId) => memberId,
+    _ => null,
+  };
 
   /// Get the authenticated state if available
   AuthStateAuthenticated? get authenticatedOrNull =>

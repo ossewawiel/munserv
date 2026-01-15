@@ -29,14 +29,14 @@ abstract class MemberProfileResponse with _$MemberProfileResponse {
 
   /// Convert to existing MemberProfile format for compatibility
   MemberProfile toMemberProfile() => MemberProfile(
-        id: id,
-        firstName: firstName,
-        surname: surname,
-        phoneNumber: phoneNumber,
-        address: address,
-        registrationLocation: registrationLocation,
-        sectorId: sectorId,
-        status: status,
-        createdAt: createdAt,
-      );
+    id: id,
+    firstName: firstName,
+    surname: surname,
+    phoneNumber: phoneNumber,
+    address: address,
+    registrationLocation: registrationLocation,
+    sectorId: sectorId,
+    status: status,
+    createdAt: createdAt,
+  );
 }

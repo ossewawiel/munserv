@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:munserv_mobile/features/issues/presentation/widgets/issue_type_badge.dart';
 import 'package:munserv_mobile/shared/models/issue_type.dart';
+import 'package:munserv_mobile/shared/theme/issue_type_icons.dart';
 
 void main() {
   group('IssueTypeBadge', () {
     testWidgets('displays type name and icon', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: IssueTypeBadge(type: IssueType.pothole),
-          ),
+          home: Scaffold(body: IssueTypeBadge(type: IssueType.pothole)),
         ),
       );
 
@@ -32,26 +31,16 @@ void main() {
     });
 
     testWidgets('displays correct icon for each type', (tester) async {
-      final typeIcons = {
-        IssueType.pothole: Icons.warning_rounded,
-        IssueType.waterLeak: Icons.water_drop,
-        IssueType.sewageLeak: Icons.water_damage,
-        IssueType.trafficLight: Icons.traffic,
-        IssueType.streetLight: Icons.lightbulb,
-        IssueType.illegalDumping: Icons.delete,
-        IssueType.other: Icons.help_outline,
-      };
+      for (final type in IssueType.values) {
+        final visuals = IssueTypeVisuals.forType(type);
 
-      for (final entry in typeIcons.entries) {
         await tester.pumpWidget(
           MaterialApp(
-            home: Scaffold(
-              body: IssueTypeBadge(type: entry.key),
-            ),
+            home: Scaffold(body: IssueTypeBadge(type: type)),
           ),
         );
 
-        expect(find.byIcon(entry.value), findsOneWidget);
+        expect(find.byIcon(visuals.filledIcon), findsOneWidget);
       }
     });
 
@@ -59,9 +48,7 @@ void main() {
       for (final type in IssueType.values) {
         await tester.pumpWidget(
           MaterialApp(
-            home: Scaffold(
-              body: IssueTypeBadge(type: type),
-            ),
+            home: Scaffold(body: IssueTypeBadge(type: type)),
           ),
         );
 

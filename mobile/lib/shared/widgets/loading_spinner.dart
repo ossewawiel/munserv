@@ -4,11 +4,7 @@ class LoadingSpinner extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const LoadingSpinner({
-    super.key,
-    this.size = 40,
-    this.color,
-  });
+  const LoadingSpinner({super.key, this.size = 40, this.color});
 
   @override
   Widget build(BuildContext context) {

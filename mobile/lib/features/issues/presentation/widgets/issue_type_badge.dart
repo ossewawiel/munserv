@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../shared/models/issue_type.dart';
+import '../../../../shared/theme/issue_type_icons.dart';
 import '../../../../shared/theme/typography.dart';
 
 /// Badge displaying the issue type with an icon
@@ -19,7 +20,7 @@ class IssueTypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = _getColor(type);
+    final visuals = IssueTypeVisuals.forType(type);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -27,25 +28,21 @@ class IssueTypeBadge extends StatelessWidget {
         vertical: Spacing.xs,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: visuals.lightColor,
         borderRadius: BorderRadius.circular(Radii.sm),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: visuals.color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            _getIcon(type),
-            color: color,
-            size: iconSize ?? 16,
-          ),
+          Icon(visuals.filledIcon, color: visuals.color, size: iconSize ?? 16),
           if (showLabel) ...[
             const SizedBox(width: Spacing.xs),
             Flexible(
               child: Text(
                 type.displayName,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: color,
+                  color: visuals.color,
                   fontWeight: FontWeight.w600,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -57,26 +54,4 @@ class IssueTypeBadge extends StatelessWidget {
       ),
     );
   }
-
-  IconData _getIcon(IssueType type) => switch (type) {
-        IssueType.pothole => Icons.warning_rounded,
-        IssueType.waterLeak => Icons.water_drop,
-        IssueType.sewageLeak => Icons.water_damage,
-        IssueType.trafficLight => Icons.traffic,
-        IssueType.streetLight => Icons.lightbulb,
-        IssueType.illegalDumping => Icons.delete,
-        IssueType.roadDamage => Icons.remove_road,
-        IssueType.other => Icons.help_outline,
-      };
-
-  Color _getColor(IssueType type) => switch (type) {
-        IssueType.pothole => const Color(0xFFE65100),
-        IssueType.waterLeak => const Color(0xFF0288D1),
-        IssueType.sewageLeak => const Color(0xFF795548),
-        IssueType.trafficLight => const Color(0xFFC62828),
-        IssueType.streetLight => const Color(0xFFFBC02D),
-        IssueType.illegalDumping => const Color(0xFF558B2F),
-        IssueType.roadDamage => const Color(0xFF424242),
-        IssueType.other => const Color(0xFF757575),
-      };
 }

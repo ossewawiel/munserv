@@ -93,7 +93,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('At least 8 characters, with uppercase, lowercase, and numbers'),
+        find.text(
+          'At least 8 characters, with uppercase, lowercase, and numbers',
+        ),
         findsOneWidget,
       );
     });
@@ -113,28 +115,22 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter current password
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        'temppass123',
-      );
+      await tester.enterText(find.byType(TextFormField).at(0), 'temppass123');
 
       // Enter new password (too short)
-      await tester.enterText(
-        find.byType(TextFormField).at(1),
-        'Short1',
-      );
+      await tester.enterText(find.byType(TextFormField).at(1), 'Short1');
 
       // Enter confirm password
-      await tester.enterText(
-        find.byType(TextFormField).at(2),
-        'Short1',
-      );
+      await tester.enterText(find.byType(TextFormField).at(2), 'Short1');
 
       // Submit
       await tester.tap(find.text('Change Password'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Password must be at least 8 characters'), findsOneWidget);
+      expect(
+        find.text('Password must be at least 8 characters'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('validates password needs uppercase', (tester) async {
@@ -142,22 +138,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter current password
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        'temppass123',
-      );
+      await tester.enterText(find.byType(TextFormField).at(0), 'temppass123');
 
       // Enter new password (no uppercase)
-      await tester.enterText(
-        find.byType(TextFormField).at(1),
-        'lowercase123',
-      );
+      await tester.enterText(find.byType(TextFormField).at(1), 'lowercase123');
 
       // Enter confirm password
-      await tester.enterText(
-        find.byType(TextFormField).at(2),
-        'lowercase123',
-      );
+      await tester.enterText(find.byType(TextFormField).at(2), 'lowercase123');
 
       // Submit
       await tester.tap(find.text('Change Password'));
@@ -174,22 +161,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter current password
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        'temppass123',
-      );
+      await tester.enterText(find.byType(TextFormField).at(0), 'temppass123');
 
       // Enter new password (no lowercase)
-      await tester.enterText(
-        find.byType(TextFormField).at(1),
-        'UPPERCASE123',
-      );
+      await tester.enterText(find.byType(TextFormField).at(1), 'UPPERCASE123');
 
       // Enter confirm password
-      await tester.enterText(
-        find.byType(TextFormField).at(2),
-        'UPPERCASE123',
-      );
+      await tester.enterText(find.byType(TextFormField).at(2), 'UPPERCASE123');
 
       // Submit
       await tester.tap(find.text('Change Password'));
@@ -206,22 +184,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter current password
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        'temppass123',
-      );
+      await tester.enterText(find.byType(TextFormField).at(0), 'temppass123');
 
       // Enter new password (no number)
-      await tester.enterText(
-        find.byType(TextFormField).at(1),
-        'NoNumberPass',
-      );
+      await tester.enterText(find.byType(TextFormField).at(1), 'NoNumberPass');
 
       // Enter confirm password
-      await tester.enterText(
-        find.byType(TextFormField).at(2),
-        'NoNumberPass',
-      );
+      await tester.enterText(find.byType(TextFormField).at(2), 'NoNumberPass');
 
       // Submit
       await tester.tap(find.text('Change Password'));
@@ -238,16 +207,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter current password
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        'temppass123',
-      );
+      await tester.enterText(find.byType(TextFormField).at(0), 'temppass123');
 
       // Enter new password (valid)
-      await tester.enterText(
-        find.byType(TextFormField).at(1),
-        'ValidPass123',
-      );
+      await tester.enterText(find.byType(TextFormField).at(1), 'ValidPass123');
 
       // Enter different confirm password
       await tester.enterText(

@@ -4,18 +4,14 @@ import '../../../../shared/models/issue.dart';
 import '../../../../shared/theme/typography.dart';
 import 'heat_indicator.dart';
 import 'issue_state_badge.dart';
-import 'issue_type_badge.dart';
+import 'issue_type_icon.dart';
 
 /// Card displaying an issue summary in a list
 class IssueCard extends StatelessWidget {
   final IssueSummary issue;
   final VoidCallback? onTap;
 
-  const IssueCard({
-    super.key,
-    required this.issue,
-    this.onTap,
-  });
+  const IssueCard({super.key, required this.issue, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -29,56 +25,41 @@ class IssueCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
+        // Use terracotta-tinted splash color
+        splashColor: theme.colorScheme.secondary.withValues(alpha: 0.12),
+        highlightColor: theme.colorScheme.secondary.withValues(alpha: 0.08),
         child: Padding(
           padding: const EdgeInsets.all(Spacing.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Thumbnail
-              ClipRRect(
-                borderRadius: BorderRadius.circular(Radii.sm),
-                child: issue.thumbnailUrl != null
-                    ? Image.network(
-                        issue.thumbnailUrl!,
-                        width: 72,
-                        height: 72,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          width: 72,
-                          height: 72,
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          child: Icon(
-                            Icons.image_not_supported,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      )
-                    : Container(
-                        width: 72,
-                        height: 72,
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        child: Icon(
-                          Icons.report_problem_outlined,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-              ),
+              // Issue Type Icon (replaces thumbnail)
+              IssueTypeIcon(type: issue.type, size: 64),
               const SizedBox(width: Spacing.md),
               // Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Type and state row
+                    // Type name and state row
                     Row(
                       children: [
-                        Flexible(child: IssueTypeBadge(type: issue.type)),
+                        Expanded(
+                          child: Text(
+                            issue.type.displayName,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                         const SizedBox(width: Spacing.sm),
-                        Flexible(child: IssueStateBadge(state: issue.state, compact: true)),
+                        IssueStateBadge(state: issue.state, compact: true),
                       ],
                     ),
                     const SizedBox(height: Spacing.sm),
-                    // Location placeholder
+                    // Location
                     Row(
                       children: [
                         Icon(

@@ -11,8 +11,14 @@ part 'dio_provider.g.dart';
 // Real device: flutter run --dart-define=API_HOST=192.168.1.100
 // Backend (default): port 8080
 // Mock API: flutter run --dart-define=API_PORT=3001
-const String _apiHost = String.fromEnvironment('API_HOST', defaultValue: '10.0.2.2');
-const String _apiPort = String.fromEnvironment('API_PORT', defaultValue: '8080');
+const String _apiHost = String.fromEnvironment(
+  'API_HOST',
+  defaultValue: '10.0.2.2',
+);
+const String _apiPort = String.fromEnvironment(
+  'API_PORT',
+  defaultValue: '8080',
+);
 const String _baseUrl = 'http://$_apiHost:$_apiPort/api/v1';
 
 // Debug flag - set to true to see API calls in console
@@ -51,7 +57,8 @@ Dio dio(Ref ref) {
       onRequest: (options, handler) async {
         // Skip auth header for public auth endpoints only
         final path = options.path;
-        final isPublicAuthEndpoint = path.contains('/auth/member/login') ||
+        final isPublicAuthEndpoint =
+            path.contains('/auth/member/login') ||
             path.contains('/auth/refresh') ||
             path.contains('/auth/admin/login');
 
@@ -63,7 +70,9 @@ Dio dio(Ref ref) {
         }
 
         if (_debugApi) {
-          print('🌐 API REQUEST: ${options.method} ${options.baseUrl}${options.path}');
+          print(
+            '🌐 API REQUEST: ${options.method} ${options.baseUrl}${options.path}',
+          );
           print('📦 Data: ${options.data}');
         }
 
@@ -71,14 +80,18 @@ Dio dio(Ref ref) {
       },
       onResponse: (response, handler) {
         if (_debugApi) {
-          print('✅ API RESPONSE: ${response.statusCode} ${response.requestOptions.path}');
+          print(
+            '✅ API RESPONSE: ${response.statusCode} ${response.requestOptions.path}',
+          );
           print('📦 Data: ${response.data}');
         }
         handler.next(response);
       },
       onError: (error, handler) async {
         if (_debugApi) {
-          print('❌ API ERROR: ${error.response?.statusCode} ${error.requestOptions.path}');
+          print(
+            '❌ API ERROR: ${error.response?.statusCode} ${error.requestOptions.path}',
+          );
           print('📦 Error: ${error.response?.data ?? error.message}');
         }
 

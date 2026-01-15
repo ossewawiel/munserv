@@ -221,9 +221,7 @@ class AuthNotifier extends _$AuthNotifier {
     final currentState = state;
     if (currentState is! AuthStateMustChangePassword) {
       return Result.failure(
-        const AppError.validation(
-          message: 'Must be in password change state',
-        ),
+        const AppError.validation(message: 'Must be in password change state'),
       );
     }
 
@@ -277,9 +275,7 @@ class AuthNotifier extends _$AuthNotifier {
     // Verify PIN matches stored PIN
     final storedPin = await _storage.getPin();
     if (storedPin == null || enteredPin != storedPin) {
-      return const Result.failure(
-        AppError.validation(message: 'Invalid PIN'),
-      );
+      return const Result.failure(AppError.validation(message: 'Invalid PIN'));
     }
 
     // Get saved credentials
@@ -476,7 +472,9 @@ class BiometricLoginNotifier extends _$BiometricLoginNotifier {
     if (!isAvailable) {
       if (ref.mounted) {
         state = AsyncError(
-          const AppError.validation(message: 'Biometrics not available on this device'),
+          const AppError.validation(
+            message: 'Biometrics not available on this device',
+          ),
           StackTrace.current,
         );
       }
@@ -491,9 +489,13 @@ class BiometricLoginNotifier extends _$BiometricLoginNotifier {
     );
 
     if (!authResult.isSuccess) {
-      final errorMsg = authResult.errorMessage ?? 'Biometric authentication failed';
+      final errorMsg =
+          authResult.errorMessage ?? 'Biometric authentication failed';
       if (ref.mounted) {
-        state = AsyncError(AppError.unauthorized(message: errorMsg), StackTrace.current);
+        state = AsyncError(
+          AppError.unauthorized(message: errorMsg),
+          StackTrace.current,
+        );
       }
       return Result.failure(AppError.unauthorized(message: errorMsg));
     }
@@ -546,9 +548,13 @@ class BiometricLoginNotifier extends _$BiometricLoginNotifier {
     );
 
     if (!authResult.isSuccess) {
-      final errorMsg = authResult.errorMessage ?? 'Biometric authentication failed';
+      final errorMsg =
+          authResult.errorMessage ?? 'Biometric authentication failed';
       if (ref.mounted) {
-        state = AsyncError(AppError.unauthorized(message: errorMsg), StackTrace.current);
+        state = AsyncError(
+          AppError.unauthorized(message: errorMsg),
+          StackTrace.current,
+        );
       }
       return Result.failure(AppError.unauthorized(message: errorMsg));
     }
@@ -558,7 +564,9 @@ class BiometricLoginNotifier extends _$BiometricLoginNotifier {
     if (pin == null) {
       if (ref.mounted) {
         state = AsyncError(
-          const AppError.validation(message: 'No PIN stored for biometric login'),
+          const AppError.validation(
+            message: 'No PIN stored for biometric login',
+          ),
           StackTrace.current,
         );
       }

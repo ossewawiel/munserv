@@ -32,21 +32,22 @@ class AppLogo extends StatelessWidget {
     this.height,
     this.semanticLabel = 'MunServ logo',
   }) : assert(
-          size != null || height != null,
-          'Either size or height must be provided',
-        );
+         size != null || height != null,
+         'Either size or height must be provided',
+       );
 
   /// Convenience constructor for small (AppBar) size
   const AppLogo.small({super.key, this.semanticLabel = 'MunServ logo'})
-      : size = AppLogoSize.small,
-        height = null;
+    : size = AppLogoSize.small,
+      height = null;
 
   /// Convenience constructor for large (auth screen) size
   const AppLogo.large({super.key, this.semanticLabel = 'MunServ logo'})
-      : size = AppLogoSize.large,
-        height = null;
+    : size = AppLogoSize.large,
+      height = null;
 
-  double get _height => height ??
+  double get _height =>
+      height ??
       switch (size!) {
         AppLogoSize.small => 32,
         AppLogoSize.medium => 48,

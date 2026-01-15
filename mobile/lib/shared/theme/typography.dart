@@ -36,20 +36,20 @@ class AppTypography {
         color: baseColor,
       ),
 
-      // Headline styles - Source Sans 3 (section headers)
+      // Headline styles - Source Sans 3 (section headers) - BOLDER
       headlineLarge: GoogleFonts.sourceSans3(
         fontSize: 32,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700, // Changed from w600
         color: baseColor,
       ),
       headlineMedium: GoogleFonts.sourceSans3(
         fontSize: 28,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700, // Changed from w600
         color: baseColor,
       ),
       headlineSmall: GoogleFonts.sourceSans3(
         fontSize: 24,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700, // Changed from w600
         color: baseColor,
       ),
 

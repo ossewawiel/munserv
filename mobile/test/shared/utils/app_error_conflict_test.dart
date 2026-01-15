@@ -4,30 +4,36 @@ import 'package:munserv_mobile/shared/utils/app_error.dart';
 
 void main() {
   group('AppError.fromDio 409 Conflict handling', () {
-    test('creates ConflictError from 409 response with nested error format', () {
-      // Format: {error: {code: 'x', message: 'y'}}
-      final dioException = DioException(
-        type: DioExceptionType.badResponse,
-        response: Response(
-          statusCode: 409,
-          data: {
-            'error': {
-              'code': 'phone_registered',
-              'message': 'Phone number is already registered',
+    test(
+      'creates ConflictError from 409 response with nested error format',
+      () {
+        // Format: {error: {code: 'x', message: 'y'}}
+        final dioException = DioException(
+          type: DioExceptionType.badResponse,
+          response: Response(
+            statusCode: 409,
+            data: {
+              'error': {
+                'code': 'phone_registered',
+                'message': 'Phone number is already registered',
+              },
             },
-          },
+            requestOptions: RequestOptions(),
+          ),
           requestOptions: RequestOptions(),
-        ),
-        requestOptions: RequestOptions(),
-      );
+        );
 
-      final error = AppError.fromDio(dioException);
+        final error = AppError.fromDio(dioException);
 
-      expect(error, isA<ConflictError>());
-      final conflictError = error as ConflictError;
-      expect(conflictError.errorCode, 'phone_registered');
-      expect(conflictError.displayMessage, 'Phone number is already registered');
-    });
+        expect(error, isA<ConflictError>());
+        final conflictError = error as ConflictError;
+        expect(conflictError.errorCode, 'phone_registered');
+        expect(
+          conflictError.displayMessage,
+          'Phone number is already registered',
+        );
+      },
+    );
 
     test('creates ConflictError from 409 response with flat error format', () {
       // Format: {error: 'x', message: 'y'} - actual backend format
@@ -49,7 +55,10 @@ void main() {
       expect(error, isA<ConflictError>());
       final conflictError = error as ConflictError;
       expect(conflictError.errorCode, 'phone_registered');
-      expect(conflictError.displayMessage, 'Phone number is already registered');
+      expect(
+        conflictError.displayMessage,
+        'Phone number is already registered',
+      );
     });
 
     test('creates ConflictError from 409 without error code', () {
@@ -58,9 +67,7 @@ void main() {
         response: Response(
           statusCode: 409,
           data: {
-            'error': {
-              'message': 'Conflict occurred',
-            },
+            'error': {'message': 'Conflict occurred'},
           },
           requestOptions: RequestOptions(),
         ),

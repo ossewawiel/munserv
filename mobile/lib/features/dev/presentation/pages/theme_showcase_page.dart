@@ -110,9 +110,9 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -132,7 +132,11 @@ class _ColorPaletteSection extends StatelessWidget {
         Row(
           children: [
             _ColorSwatch('primary', colors.primary, colors.onPrimary),
-            _ColorSwatch('primaryContainer', colors.primaryContainer, colors.onPrimaryContainer),
+            _ColorSwatch(
+              'primaryContainer',
+              colors.primaryContainer,
+              colors.onPrimaryContainer,
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -141,7 +145,11 @@ class _ColorPaletteSection extends StatelessWidget {
         Row(
           children: [
             _ColorSwatch('secondary', colors.secondary, colors.onSecondary),
-            _ColorSwatch('secondaryContainer', colors.secondaryContainer, colors.onSecondaryContainer),
+            _ColorSwatch(
+              'secondaryContainer',
+              colors.secondaryContainer,
+              colors.onSecondaryContainer,
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -150,7 +158,11 @@ class _ColorPaletteSection extends StatelessWidget {
         Row(
           children: [
             _ColorSwatch('tertiary', colors.tertiary, colors.onTertiary),
-            _ColorSwatch('tertiaryContainer', colors.tertiaryContainer, colors.onTertiaryContainer),
+            _ColorSwatch(
+              'tertiaryContainer',
+              colors.tertiaryContainer,
+              colors.onTertiaryContainer,
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -159,14 +171,26 @@ class _ColorPaletteSection extends StatelessWidget {
         Row(
           children: [
             _ColorSwatch('surface', colors.surface, colors.onSurface),
-            _ColorSwatch('surfaceContainerLow', colors.surfaceContainerLow, colors.onSurface),
+            _ColorSwatch(
+              'surfaceContainerLow',
+              colors.surfaceContainerLow,
+              colors.onSurface,
+            ),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            _ColorSwatch('surfaceContainer', colors.surfaceContainer, colors.onSurface),
-            _ColorSwatch('surfaceContainerHigh', colors.surfaceContainerHigh, colors.onSurface),
+            _ColorSwatch(
+              'surfaceContainer',
+              colors.surfaceContainer,
+              colors.onSurface,
+            ),
+            _ColorSwatch(
+              'surfaceContainerHigh',
+              colors.surfaceContainerHigh,
+              colors.onSurface,
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -175,7 +199,11 @@ class _ColorPaletteSection extends StatelessWidget {
         Row(
           children: [
             _ColorSwatch('error', colors.error, colors.onError),
-            _ColorSwatch('errorContainer', colors.errorContainer, colors.onErrorContainer),
+            _ColorSwatch(
+              'errorContainer',
+              colors.errorContainer,
+              colors.onErrorContainer,
+            ),
           ],
         ),
       ],
@@ -201,10 +229,7 @@ class _ColorSwatch extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(8),
-        child: Text(
-          label,
-          style: TextStyle(color: onColor, fontSize: 10),
-        ),
+        child: Text(label, style: TextStyle(color: onColor, fontSize: 10)),
       ),
     );
   }
@@ -251,33 +276,24 @@ class _ButtonsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Filled Button (40dp height)', style: Theme.of(context).textTheme.labelMedium),
-        const SizedBox(height: 8),
-        FilledButton(
-          onPressed: () {},
-          child: const Text('Filled Button'),
+        Text(
+          'Filled Button (40dp height)',
+          style: Theme.of(context).textTheme.labelMedium,
         ),
+        const SizedBox(height: 8),
+        FilledButton(onPressed: () {}, child: const Text('Filled Button')),
         const SizedBox(height: 16),
         Text('Elevated Button', style: Theme.of(context).textTheme.labelMedium),
         const SizedBox(height: 8),
-        ElevatedButton(
-          onPressed: () {},
-          child: const Text('Elevated Button'),
-        ),
+        ElevatedButton(onPressed: () {}, child: const Text('Elevated Button')),
         const SizedBox(height: 16),
         Text('Outlined Button', style: Theme.of(context).textTheme.labelMedium),
         const SizedBox(height: 8),
-        OutlinedButton(
-          onPressed: () {},
-          child: const Text('Outlined Button'),
-        ),
+        OutlinedButton(onPressed: () {}, child: const Text('Outlined Button')),
         const SizedBox(height: 16),
         Text('Text Button', style: Theme.of(context).textTheme.labelMedium),
         const SizedBox(height: 8),
-        TextButton(
-          onPressed: () {},
-          child: const Text('Text Button'),
-        ),
+        TextButton(onPressed: () {}, child: const Text('Text Button')),
         const SizedBox(height: 16),
         Text('Disabled States', style: Theme.of(context).textTheme.labelMedium),
         const SizedBox(height: 8),
@@ -311,10 +327,7 @@ class _ButtonsSection extends StatelessWidget {
               onPressed: () {},
               icon: const Icon(Icons.share_outlined),
             ),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.more_vert),
-            ),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
           ],
         ),
       ],
@@ -330,7 +343,10 @@ class _CardsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Card (12dp radius, 1dp elevation)', style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          'Card (12dp radius, 1dp elevation)',
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         const SizedBox(height: 8),
         Card(
           child: Padding(
@@ -338,7 +354,10 @@ class _CardsSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Card Title', style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  'Card Title',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'This is a card with M3 styling: 12dp corner radius, surfaceContainerLow background.',
@@ -349,7 +368,10 @@ class _CardsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Text('Card with Actions', style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          'Card with Actions',
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         const SizedBox(height: 8),
         Card(
           child: Padding(
@@ -357,7 +379,10 @@ class _CardsSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Interactive Card', style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  'Interactive Card',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Card with action buttons following M3 spacing.',
@@ -369,7 +394,10 @@ class _CardsSection extends StatelessWidget {
                   children: [
                     TextButton(onPressed: () {}, child: const Text('Cancel')),
                     const SizedBox(width: 8),
-                    FilledButton(onPressed: () {}, child: const Text('Confirm')),
+                    FilledButton(
+                      onPressed: () {},
+                      child: const Text('Confirm'),
+                    ),
                   ],
                 ),
               ],
@@ -389,7 +417,10 @@ class _FormInputsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Text Field (4dp radius, filled)', style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          'Text Field (4dp radius, filled)',
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         const SizedBox(height: 8),
         const TextField(
           decoration: InputDecoration(
@@ -433,7 +464,10 @@ class _ChipsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Chips (8dp radius)', style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          'Chips (8dp radius)',
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -447,10 +481,7 @@ class _ChipsSection extends StatelessWidget {
                 child: const Text('A', style: TextStyle(fontSize: 12)),
               ),
             ),
-            Chip(
-              label: const Text('Deletable'),
-              onDeleted: () {},
-            ),
+            Chip(label: const Text('Deletable'), onDeleted: () {}),
           ],
         ),
         const SizedBox(height: 16),
@@ -481,7 +512,8 @@ class _SelectionControlsSection extends StatefulWidget {
   const _SelectionControlsSection();
 
   @override
-  State<_SelectionControlsSection> createState() => _SelectionControlsSectionState();
+  State<_SelectionControlsSection> createState() =>
+      _SelectionControlsSectionState();
 }
 
 class _SelectionControlsSectionState extends State<_SelectionControlsSection> {
@@ -504,10 +536,7 @@ class _SelectionControlsSectionState extends State<_SelectionControlsSection> {
             ),
             const Text('Checked'),
             const SizedBox(width: 16),
-            Checkbox(
-              value: false,
-              onChanged: (v) {},
-            ),
+            Checkbox(value: false, onChanged: (v) {}),
             const Text('Unchecked'),
           ],
         ),
@@ -542,10 +571,7 @@ class _SelectionControlsSectionState extends State<_SelectionControlsSection> {
         const SizedBox(height: 16),
         Text('Slider', style: Theme.of(context).textTheme.labelMedium),
         const SizedBox(height: 8),
-        Slider(
-          value: 0.5,
-          onChanged: (_) {},
-        ),
+        Slider(value: 0.5, onChanged: (_) {}),
       ],
     );
   }
