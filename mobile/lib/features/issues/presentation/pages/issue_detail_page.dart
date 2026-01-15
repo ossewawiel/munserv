@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../shared/models/issue_state.dart';
 import '../../../../shared/models/issue_type.dart';
@@ -7,7 +8,9 @@ import '../../../../shared/theme/colors.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/widgets/branded_scaffold.dart';
 import '../../../../shared/widgets/error_display.dart';
+import '../../../../shared/widgets/issue_location_map.dart';
 import '../../../../shared/widgets/loading_spinner.dart';
+import '../../../../shared/widgets/photo_thumbnail_carousel.dart';
 import '../../domain/domain.dart';
 import '../../providers/issue_providers.dart';
 import '../widgets/widgets.dart';
@@ -24,14 +27,37 @@ class IssueDetailPage extends ConsumerWidget {
 
     return BrandedScaffold(
       appBar: AppBar(
-        title: const Text('Issue Details'),
+        titleSpacing: 0, // Align title closer to back button
+        title:
+            issueAsync.whenData((issue) {
+              final type = IssueType.fromString(issue.type);
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IssueTypeIcon(
+                    type: type,
+                    size: 32, // Compact size with background for AppBar
+                    monochrome: true,
+                  ),
+                  const SizedBox(width: Spacing.xs),
+                  Text(type.displayName),
+                ],
+              );
+            }).value ??
+            const Text('Issue Details'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {
-              // TODO: Implement share functionality
-            },
-          ),
+          // Show state badge in the app bar
+          issueAsync.whenData((issue) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: Spacing.sm),
+                  child: Center(
+                    child: IssueStateBadge(
+                      state: IssueState.fromString(issue.state),
+                    ),
+                  ),
+                );
+              }).value ??
+              const SizedBox.shrink(),
         ],
       ),
       body: issueAsync.when(
@@ -59,8 +85,23 @@ class _IssueDetailContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const SizedBox(height: Spacing.md),
+
+          // Map preview
+          IssueLocationMap(
+            latitude: issue.latitude,
+            longitude: issue.longitude,
+            onTap: () => context.push('/issues/${issue.id}/map'),
+          ),
+
+          const SizedBox(height: Spacing.md),
+
           // Photo carousel
-          _PhotoCarousel(photoUrls: issue.photoUrls),
+          PhotoThumbnailCarousel(
+            photoUrls: issue.photoUrls,
+            onPhotoTap: (index) =>
+                context.push('/issues/${issue.id}/photos?index=$index'),
+          ),
 
           // Main content
           Padding(
@@ -68,39 +109,17 @@ class _IssueDetailContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Type and State
-                Row(
-                  children: [
-                    IssueTypeBadge(type: IssueType.fromString(issue.type)),
-                    const SizedBox(width: Spacing.sm),
-                    IssueStateBadge(state: IssueState.fromString(issue.state)),
-                    const Spacer(),
-                    HeatIndicator(heat: issue.heat),
-                  ],
-                ),
-                const SizedBox(height: Spacing.lg),
-
-                // Location
-                _InfoSection(
-                  icon: Icons.location_on,
-                  title: 'Location',
-                  content:
-                      issue.address ??
-                      '${issue.latitude.toStringAsFixed(6)}, ${issue.longitude.toStringAsFixed(6)}',
-                ),
-
-                // Description
+                // Description (if available)
                 if (issue.description != null) ...[
-                  const SizedBox(height: Spacing.md),
                   _InfoSection(
                     icon: Icons.description,
                     title: 'Description',
                     content: issue.description!,
                   ),
+                  const SizedBox(height: Spacing.lg),
                 ],
 
-                // Stats
-                const SizedBox(height: Spacing.md),
+                // Stats - Reports and Heat cards
                 Row(
                   children: [
                     Expanded(
@@ -122,91 +141,25 @@ class _IssueDetailContent extends StatelessWidget {
                   ],
                 ),
 
-                // Timestamps
+                // Status Timeline (always show, even if empty it will show reported date)
                 const SizedBox(height: Spacing.lg),
-                _TimestampInfo(
-                  createdAt: issue.createdAt,
-                  updatedAt: issue.updatedAt,
-                ),
-
-                // State history
-                if (issue.stateHistory.isNotEmpty) ...[
-                  const SizedBox(height: Spacing.lg),
-                  Text('Status History', style: theme.textTheme.titleMedium),
-                  const SizedBox(height: Spacing.sm),
-                  _StateHistoryList(history: issue.stateHistory),
-                ],
+                Text('Status History', style: theme.textTheme.titleMedium),
+                const SizedBox(height: Spacing.sm),
+                if (issue.stateHistory.isNotEmpty)
+                  IssueTimeline(history: issue.stateHistory)
+                else
+                  // Fallback: show basic reported/updated if no state history
+                  _FallbackTimeline(
+                    createdAt: issue.createdAt,
+                    updatedAt: issue.updatedAt,
+                    currentState: issue.state,
+                  ),
 
                 // Bottom padding
                 const SizedBox(height: Spacing.xl),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PhotoCarousel extends StatefulWidget {
-  final List<String> photoUrls;
-
-  const _PhotoCarousel({required this.photoUrls});
-
-  @override
-  State<_PhotoCarousel> createState() => _PhotoCarouselState();
-}
-
-class _PhotoCarouselState extends State<_PhotoCarousel> {
-  int _currentIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return SizedBox(
-      height: 250,
-      child: Stack(
-        children: [
-          PageView.builder(
-            itemCount: widget.photoUrls.length,
-            onPageChanged: (index) => setState(() => _currentIndex = index),
-            itemBuilder: (context, index) => Image.network(
-              widget.photoUrls[index],
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: theme.colorScheme.surfaceContainerHighest,
-                child: Icon(
-                  Icons.image_not_supported,
-                  size: 64,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ),
-          if (widget.photoUrls.length > 1)
-            Positioned(
-              bottom: Spacing.sm,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  widget.photoUrls.length,
-                  (index) => Container(
-                    width: 8,
-                    height: 8,
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: index == _currentIndex
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -269,9 +222,16 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final displayColor = color ?? theme.colorScheme.primary;
+    final colors = theme.colorScheme;
+    final displayColor = color ?? colors.primary;
 
     return Card(
+      elevation: 0,
+      color: colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Radii.md),
+        side: BorderSide(color: colors.outlineVariant),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(Spacing.md),
         child: Row(
@@ -300,116 +260,108 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _TimestampInfo extends StatelessWidget {
+/// Fallback timeline when no state history is available.
+/// Shows the issue as "Reported" with the created date and current state.
+class _FallbackTimeline extends StatelessWidget {
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String currentState;
 
-  const _TimestampInfo({required this.createdAt, required this.updatedAt});
+  const _FallbackTimeline({
+    required this.createdAt,
+    required this.updatedAt,
+    required this.currentState,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final state = IssueState.fromString(currentState);
+    final stateColor = IssueStateColors.fromState(state.name);
 
-    return Row(
+    // Show at least the reported state and current state if different
+    final showCurrentState = state != IssueState.reported;
+
+    return Column(
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Reported', style: theme.textTheme.labelSmall),
-              Text(
-                _formatDateTime(createdAt),
-                style: theme.textTheme.bodySmall,
-              ),
-            ],
-          ),
+        // Reported entry
+        _TimelineEntry(
+          state: 'Reported',
+          date: createdAt,
+          color: IssueStateColors.fromState('reported'),
+          isLast: !showCurrentState,
         ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Last Updated', style: theme.textTheme.labelSmall),
-              Text(
-                _formatDateTime(updatedAt),
-                style: theme.textTheme.bodySmall,
-              ),
-            ],
+        // Current state if different from reported
+        if (showCurrentState)
+          _TimelineEntry(
+            state: state.displayName,
+            date: updatedAt,
+            color: stateColor,
+            isLast: true,
           ),
-        ),
       ],
     );
   }
-
-  String _formatDateTime(DateTime dt) {
-    return '${dt.day}/${dt.month}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-  }
 }
 
-class _StateHistoryList extends StatelessWidget {
-  final List<StateHistoryEntry> history;
+class _TimelineEntry extends StatelessWidget {
+  final String state;
+  final DateTime date;
+  final Color color;
+  final bool isLast;
 
-  const _StateHistoryList({required this.history});
+  const _TimelineEntry({
+    required this.state,
+    required this.date,
+    required this.color,
+    required this.isLast,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      children: history.asMap().entries.map((entry) {
-        final index = entry.key;
-        final item = entry.value;
-        final isLast = index == history.length - 1;
-
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Timeline indicator
+          Column(
             children: [
-              // Timeline indicator
-              Column(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: IssueStateColors.fromState(item.state.name),
-                    ),
-                  ),
-                  if (!isLast)
-                    Expanded(
-                      child: Container(
-                        width: 2,
-                        color: theme.colorScheme.outlineVariant,
-                      ),
-                    ),
-                ],
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: color),
               ),
-              const SizedBox(width: Spacing.sm),
-              // Content
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: isLast ? 0 : Spacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.state.displayName,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        _formatDateTime(item.changedAt),
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ],
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: theme.colorScheme.outlineVariant,
                   ),
                 ),
-              ),
             ],
           ),
-        );
-      }).toList(),
+          const SizedBox(width: Spacing.sm),
+          // Content
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : Spacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    state,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(_formatDateTime(date), style: theme.textTheme.bodySmall),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

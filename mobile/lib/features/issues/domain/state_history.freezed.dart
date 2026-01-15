@@ -287,7 +287,7 @@ as String?,
 /// @nodoc
 mixin _$IssueDetail {
 
- String get id; String get type; String get state; double get latitude; double get longitude; String? get address; String? get description; int get heat; List<String> get photoUrls; String get sectorId; String get reporterId; int get reportCount; DateTime get createdAt; DateTime get updatedAt; List<StateHistoryEntry> get stateHistory;
+ String get id; String get type; String get state; GeoPoint get location; String? get address; String? get description; int get heat; List<String> get photoUrls; String get sectorId; String get reporterId; int get reportCount; DateTime get createdAt; DateTime get updatedAt; List<StateHistoryEntry> get stateHistory;
 /// Create a copy of IssueDetail
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -300,16 +300,16 @@ $IssueDetailCopyWith<IssueDetail> get copyWith => _$IssueDetailCopyWithImpl<Issu
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IssueDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.state, state) || other.state == state)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.address, address) || other.address == address)&&(identical(other.description, description) || other.description == description)&&(identical(other.heat, heat) || other.heat == heat)&&const DeepCollectionEquality().equals(other.photoUrls, photoUrls)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.reporterId, reporterId) || other.reporterId == reporterId)&&(identical(other.reportCount, reportCount) || other.reportCount == reportCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.stateHistory, stateHistory));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is IssueDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.state, state) || other.state == state)&&(identical(other.location, location) || other.location == location)&&(identical(other.address, address) || other.address == address)&&(identical(other.description, description) || other.description == description)&&(identical(other.heat, heat) || other.heat == heat)&&const DeepCollectionEquality().equals(other.photoUrls, photoUrls)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.reporterId, reporterId) || other.reporterId == reporterId)&&(identical(other.reportCount, reportCount) || other.reportCount == reportCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.stateHistory, stateHistory));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,state,latitude,longitude,address,description,heat,const DeepCollectionEquality().hash(photoUrls),sectorId,reporterId,reportCount,createdAt,updatedAt,const DeepCollectionEquality().hash(stateHistory));
+int get hashCode => Object.hash(runtimeType,id,type,state,location,address,description,heat,const DeepCollectionEquality().hash(photoUrls),sectorId,reporterId,reportCount,createdAt,updatedAt,const DeepCollectionEquality().hash(stateHistory));
 
 @override
 String toString() {
-  return 'IssueDetail(id: $id, type: $type, state: $state, latitude: $latitude, longitude: $longitude, address: $address, description: $description, heat: $heat, photoUrls: $photoUrls, sectorId: $sectorId, reporterId: $reporterId, reportCount: $reportCount, createdAt: $createdAt, updatedAt: $updatedAt, stateHistory: $stateHistory)';
+  return 'IssueDetail(id: $id, type: $type, state: $state, location: $location, address: $address, description: $description, heat: $heat, photoUrls: $photoUrls, sectorId: $sectorId, reporterId: $reporterId, reportCount: $reportCount, createdAt: $createdAt, updatedAt: $updatedAt, stateHistory: $stateHistory)';
 }
 
 
@@ -320,11 +320,11 @@ abstract mixin class $IssueDetailCopyWith<$Res>  {
   factory $IssueDetailCopyWith(IssueDetail value, $Res Function(IssueDetail) _then) = _$IssueDetailCopyWithImpl;
 @useResult
 $Res call({
- String id, String type, String state, double latitude, double longitude, String? address, String? description, int heat, List<String> photoUrls, String sectorId, String reporterId, int reportCount, DateTime createdAt, DateTime updatedAt, List<StateHistoryEntry> stateHistory
+ String id, String type, String state, GeoPoint location, String? address, String? description, int heat, List<String> photoUrls, String sectorId, String reporterId, int reportCount, DateTime createdAt, DateTime updatedAt, List<StateHistoryEntry> stateHistory
 });
 
 
-
+$GeoPointCopyWith<$Res> get location;
 
 }
 /// @nodoc
@@ -337,14 +337,13 @@ class _$IssueDetailCopyWithImpl<$Res>
 
 /// Create a copy of IssueDetail
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? state = null,Object? latitude = null,Object? longitude = null,Object? address = freezed,Object? description = freezed,Object? heat = null,Object? photoUrls = null,Object? sectorId = null,Object? reporterId = null,Object? reportCount = null,Object? createdAt = null,Object? updatedAt = null,Object? stateHistory = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? state = null,Object? location = null,Object? address = freezed,Object? description = freezed,Object? heat = null,Object? photoUrls = null,Object? sectorId = null,Object? reporterId = null,Object? reportCount = null,Object? createdAt = null,Object? updatedAt = null,Object? stateHistory = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as String,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
-as String,latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
-as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
-as double,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
+as GeoPoint,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,heat: null == heat ? _self.heat : heat // ignore: cast_nullable_to_non_nullable
 as int,photoUrls: null == photoUrls ? _self.photoUrls : photoUrls // ignore: cast_nullable_to_non_nullable
@@ -357,7 +356,16 @@ as DateTime,stateHistory: null == stateHistory ? _self.stateHistory : stateHisto
 as List<StateHistoryEntry>,
   ));
 }
-
+/// Create a copy of IssueDetail
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GeoPointCopyWith<$Res> get location {
+  
+  return $GeoPointCopyWith<$Res>(_self.location, (value) {
+    return _then(_self.copyWith(location: value));
+  });
+}
 }
 
 
@@ -439,10 +447,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String type,  String state,  double latitude,  double longitude,  String? address,  String? description,  int heat,  List<String> photoUrls,  String sectorId,  String reporterId,  int reportCount,  DateTime createdAt,  DateTime updatedAt,  List<StateHistoryEntry> stateHistory)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String type,  String state,  GeoPoint location,  String? address,  String? description,  int heat,  List<String> photoUrls,  String sectorId,  String reporterId,  int reportCount,  DateTime createdAt,  DateTime updatedAt,  List<StateHistoryEntry> stateHistory)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _IssueDetail() when $default != null:
-return $default(_that.id,_that.type,_that.state,_that.latitude,_that.longitude,_that.address,_that.description,_that.heat,_that.photoUrls,_that.sectorId,_that.reporterId,_that.reportCount,_that.createdAt,_that.updatedAt,_that.stateHistory);case _:
+return $default(_that.id,_that.type,_that.state,_that.location,_that.address,_that.description,_that.heat,_that.photoUrls,_that.sectorId,_that.reporterId,_that.reportCount,_that.createdAt,_that.updatedAt,_that.stateHistory);case _:
   return orElse();
 
 }
@@ -460,10 +468,10 @@ return $default(_that.id,_that.type,_that.state,_that.latitude,_that.longitude,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String type,  String state,  double latitude,  double longitude,  String? address,  String? description,  int heat,  List<String> photoUrls,  String sectorId,  String reporterId,  int reportCount,  DateTime createdAt,  DateTime updatedAt,  List<StateHistoryEntry> stateHistory)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String type,  String state,  GeoPoint location,  String? address,  String? description,  int heat,  List<String> photoUrls,  String sectorId,  String reporterId,  int reportCount,  DateTime createdAt,  DateTime updatedAt,  List<StateHistoryEntry> stateHistory)  $default,) {final _that = this;
 switch (_that) {
 case _IssueDetail():
-return $default(_that.id,_that.type,_that.state,_that.latitude,_that.longitude,_that.address,_that.description,_that.heat,_that.photoUrls,_that.sectorId,_that.reporterId,_that.reportCount,_that.createdAt,_that.updatedAt,_that.stateHistory);case _:
+return $default(_that.id,_that.type,_that.state,_that.location,_that.address,_that.description,_that.heat,_that.photoUrls,_that.sectorId,_that.reporterId,_that.reportCount,_that.createdAt,_that.updatedAt,_that.stateHistory);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -480,10 +488,10 @@ return $default(_that.id,_that.type,_that.state,_that.latitude,_that.longitude,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String type,  String state,  double latitude,  double longitude,  String? address,  String? description,  int heat,  List<String> photoUrls,  String sectorId,  String reporterId,  int reportCount,  DateTime createdAt,  DateTime updatedAt,  List<StateHistoryEntry> stateHistory)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String type,  String state,  GeoPoint location,  String? address,  String? description,  int heat,  List<String> photoUrls,  String sectorId,  String reporterId,  int reportCount,  DateTime createdAt,  DateTime updatedAt,  List<StateHistoryEntry> stateHistory)?  $default,) {final _that = this;
 switch (_that) {
 case _IssueDetail() when $default != null:
-return $default(_that.id,_that.type,_that.state,_that.latitude,_that.longitude,_that.address,_that.description,_that.heat,_that.photoUrls,_that.sectorId,_that.reporterId,_that.reportCount,_that.createdAt,_that.updatedAt,_that.stateHistory);case _:
+return $default(_that.id,_that.type,_that.state,_that.location,_that.address,_that.description,_that.heat,_that.photoUrls,_that.sectorId,_that.reporterId,_that.reportCount,_that.createdAt,_that.updatedAt,_that.stateHistory);case _:
   return null;
 
 }
@@ -495,14 +503,13 @@ return $default(_that.id,_that.type,_that.state,_that.latitude,_that.longitude,_
 @JsonSerializable()
 
 class _IssueDetail extends IssueDetail {
-  const _IssueDetail({required this.id, required this.type, required this.state, required this.latitude, required this.longitude, this.address, this.description, required this.heat, required final  List<String> photoUrls, required this.sectorId, required this.reporterId, required this.reportCount, required this.createdAt, required this.updatedAt, final  List<StateHistoryEntry> stateHistory = const []}): _photoUrls = photoUrls,_stateHistory = stateHistory,super._();
+  const _IssueDetail({required this.id, required this.type, required this.state, required this.location, this.address, this.description, required this.heat, required final  List<String> photoUrls, required this.sectorId, required this.reporterId, required this.reportCount, required this.createdAt, required this.updatedAt, final  List<StateHistoryEntry> stateHistory = const []}): _photoUrls = photoUrls,_stateHistory = stateHistory,super._();
   factory _IssueDetail.fromJson(Map<String, dynamic> json) => _$IssueDetailFromJson(json);
 
 @override final  String id;
 @override final  String type;
 @override final  String state;
-@override final  double latitude;
-@override final  double longitude;
+@override final  GeoPoint location;
 @override final  String? address;
 @override final  String? description;
 @override final  int heat;
@@ -539,16 +546,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _IssueDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.state, state) || other.state == state)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.address, address) || other.address == address)&&(identical(other.description, description) || other.description == description)&&(identical(other.heat, heat) || other.heat == heat)&&const DeepCollectionEquality().equals(other._photoUrls, _photoUrls)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.reporterId, reporterId) || other.reporterId == reporterId)&&(identical(other.reportCount, reportCount) || other.reportCount == reportCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._stateHistory, _stateHistory));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _IssueDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.state, state) || other.state == state)&&(identical(other.location, location) || other.location == location)&&(identical(other.address, address) || other.address == address)&&(identical(other.description, description) || other.description == description)&&(identical(other.heat, heat) || other.heat == heat)&&const DeepCollectionEquality().equals(other._photoUrls, _photoUrls)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.reporterId, reporterId) || other.reporterId == reporterId)&&(identical(other.reportCount, reportCount) || other.reportCount == reportCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._stateHistory, _stateHistory));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,state,latitude,longitude,address,description,heat,const DeepCollectionEquality().hash(_photoUrls),sectorId,reporterId,reportCount,createdAt,updatedAt,const DeepCollectionEquality().hash(_stateHistory));
+int get hashCode => Object.hash(runtimeType,id,type,state,location,address,description,heat,const DeepCollectionEquality().hash(_photoUrls),sectorId,reporterId,reportCount,createdAt,updatedAt,const DeepCollectionEquality().hash(_stateHistory));
 
 @override
 String toString() {
-  return 'IssueDetail(id: $id, type: $type, state: $state, latitude: $latitude, longitude: $longitude, address: $address, description: $description, heat: $heat, photoUrls: $photoUrls, sectorId: $sectorId, reporterId: $reporterId, reportCount: $reportCount, createdAt: $createdAt, updatedAt: $updatedAt, stateHistory: $stateHistory)';
+  return 'IssueDetail(id: $id, type: $type, state: $state, location: $location, address: $address, description: $description, heat: $heat, photoUrls: $photoUrls, sectorId: $sectorId, reporterId: $reporterId, reportCount: $reportCount, createdAt: $createdAt, updatedAt: $updatedAt, stateHistory: $stateHistory)';
 }
 
 
@@ -559,11 +566,11 @@ abstract mixin class _$IssueDetailCopyWith<$Res> implements $IssueDetailCopyWith
   factory _$IssueDetailCopyWith(_IssueDetail value, $Res Function(_IssueDetail) _then) = __$IssueDetailCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String type, String state, double latitude, double longitude, String? address, String? description, int heat, List<String> photoUrls, String sectorId, String reporterId, int reportCount, DateTime createdAt, DateTime updatedAt, List<StateHistoryEntry> stateHistory
+ String id, String type, String state, GeoPoint location, String? address, String? description, int heat, List<String> photoUrls, String sectorId, String reporterId, int reportCount, DateTime createdAt, DateTime updatedAt, List<StateHistoryEntry> stateHistory
 });
 
 
-
+@override $GeoPointCopyWith<$Res> get location;
 
 }
 /// @nodoc
@@ -576,14 +583,13 @@ class __$IssueDetailCopyWithImpl<$Res>
 
 /// Create a copy of IssueDetail
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? state = null,Object? latitude = null,Object? longitude = null,Object? address = freezed,Object? description = freezed,Object? heat = null,Object? photoUrls = null,Object? sectorId = null,Object? reporterId = null,Object? reportCount = null,Object? createdAt = null,Object? updatedAt = null,Object? stateHistory = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? state = null,Object? location = null,Object? address = freezed,Object? description = freezed,Object? heat = null,Object? photoUrls = null,Object? sectorId = null,Object? reporterId = null,Object? reportCount = null,Object? createdAt = null,Object? updatedAt = null,Object? stateHistory = null,}) {
   return _then(_IssueDetail(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as String,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
-as String,latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
-as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
-as double,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
+as GeoPoint,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,heat: null == heat ? _self.heat : heat // ignore: cast_nullable_to_non_nullable
 as int,photoUrls: null == photoUrls ? _self._photoUrls : photoUrls // ignore: cast_nullable_to_non_nullable
@@ -597,7 +603,16 @@ as List<StateHistoryEntry>,
   ));
 }
 
-
+/// Create a copy of IssueDetail
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GeoPointCopyWith<$Res> get location {
+  
+  return $GeoPointCopyWith<$Res>(_self.location, (value) {
+    return _then(_self.copyWith(location: value));
+  });
+}
 }
 
 // dart format on

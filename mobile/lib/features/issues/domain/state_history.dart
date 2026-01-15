@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../shared/models/geo_point.dart';
 import '../../../shared/models/issue_state.dart';
 
 part 'state_history.freezed.dart';
@@ -28,8 +29,7 @@ abstract class IssueDetail with _$IssueDetail {
     required String id,
     required String type,
     required String state,
-    required double latitude,
-    required double longitude,
+    required GeoPoint location,
     String? address,
     String? description,
     required int heat,
@@ -41,6 +41,10 @@ abstract class IssueDetail with _$IssueDetail {
     required DateTime updatedAt,
     @Default([]) List<StateHistoryEntry> stateHistory,
   }) = _IssueDetail;
+
+  /// Convenience getters for backwards compatibility
+  double get latitude => location.latitude;
+  double get longitude => location.longitude;
 
   factory IssueDetail.fromJson(Map<String, dynamic> json) =>
       _$IssueDetailFromJson(json);

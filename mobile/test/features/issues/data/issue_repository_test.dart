@@ -104,8 +104,7 @@ void main() {
           id: 'issue-1',
           type: 'pothole',
           state: 'confirmed',
-          latitude: -26.1234,
-          longitude: 28.0123,
+          location: const GeoPoint(latitude: -26.1234, longitude: 28.0123),
           heat: 75,
           photoUrls: ['https://example.com/photo.jpg'],
           sectorId: 'sector-1',
@@ -142,6 +141,45 @@ void main() {
 
         expect(result.isSuccess, false);
         expect(result.errorOrNull, isNotNull);
+      });
+
+      test('deduplicates concurrent requests for same issue ID', () async {
+        // Track how many times the API is called
+        var apiCallCount = 0;
+        final mockResponse = IssueDetail(
+          id: 'issue-dedup',
+          type: 'pothole',
+          state: 'confirmed',
+          location: const GeoPoint(latitude: -26.1234, longitude: 28.0123),
+          heat: 75,
+          photoUrls: ['https://example.com/photo.jpg'],
+          sectorId: 'sector-1',
+          reporterId: 'member-1',
+          reportCount: 3,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        when(() => mockApi.getIssue('issue-dedup')).thenAnswer((_) async {
+          apiCallCount++;
+          // Simulate network delay
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          return mockResponse;
+        });
+
+        // Make 3 concurrent requests for the same issue
+        final futures = [
+          repository.getIssue('issue-dedup'),
+          repository.getIssue('issue-dedup'),
+          repository.getIssue('issue-dedup'),
+        ];
+
+        final results = await Future.wait(futures);
+
+        // All results should be successful
+        expect(results.every((r) => r.isSuccess), true);
+        // API should only be called ONCE due to deduplication
+        expect(apiCallCount, 1);
       });
     });
 
