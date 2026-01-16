@@ -1,16 +1,228 @@
-# munserv_mobile
+# MunServ Mobile
 
-A new Flutter project.
+Flutter mobile app for community members to report and track municipal issues.
 
-## Getting Started
+## Setup
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter 3.x
+- Android Studio or VS Code with Flutter extension
+- Android emulator or physical device
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Installation
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+cd mobile
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+```
+
+### Running the App
+
+```bash
+# Connect to backend (default)
+flutter run
+
+# Connect to mock API (for testing)
+flutter run --dart-define=API_PORT=3001
+
+# Real device on same network
+flutter run --dart-define=API_HOST=192.168.1.100
+```
+
+### WSL2 + Windows Emulator
+
+```bash
+# One-time setup on Windows (PowerShell as Admin):
+netsh interface portproxy add v4tov4 listenport=5555 listenaddress=0.0.0.0 connectport=5555 connectaddress=127.0.0.1
+netsh advfirewall firewall add rule name="ADB 5555" dir=in action=allow protocol=TCP localport=5555
+
+# Daily workflow
+./scripts/start-dev.sh  # Connects WSL2 to Windows emulator
+flutter run
+```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `flutter pub get` | Install dependencies |
+| `flutter run` | Run on connected device |
+| `flutter test` | Run all tests |
+| `flutter analyze` | Lint check |
+| `dart run build_runner build` | Generate Freezed/Riverpod code |
+| `dart format .` | Format code |
+
+## Tech Stack
+
+- **Flutter 3.x** with Dart
+- **Riverpod** for state management
+- **Freezed** for immutable models
+- **GoRouter** for navigation
+- **Dio** for HTTP client
+- **flutter_map** for maps
+
+## Project Structure
+
+```
+lib/
+├── main.dart
+├── app.dart
+├── features/
+│   ├── auth/          # Authentication
+│   ├── issues/        # Issue reporting & viewing
+│   ├── home/          # Home dashboard
+│   └── profile/       # User profile
+├── shared/
+│   ├── models/        # Shared domain models
+│   ├── widgets/       # Reusable widgets
+│   ├── theme/         # Colors, typography, spacing
+│   ├── providers/     # Global providers
+│   └── utils/         # Utilities
+└── routing/
+    └── app_router.dart
+```
+
+## Development with Claude Code
+
+### Available Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `/dev-cycle` | Full TDD workflow: Specify → Test → Code → Refactor → Quality |
+| `/screen` | Generate screen with GoRouter navigation |
+| `/widget` | Generate Flutter widget (StatelessWidget/ConsumerWidget) |
+| `/shared-widget` | Generate shared widget for design system |
+| `/provider` | Create Riverpod provider (async/notifier/family) |
+| `/repository` | Create repository with Result pattern |
+| `/model` | Generate Freezed model with JSON serialization |
+| `/test` | Generate unit test (Mocktail) |
+| `/widget-test` | Generate widget test |
+| `/integration-test` | Generate integration test |
+| `/review-code` | Code review for Flutter/Dart patterns |
+| `/ci-fix` | Debug CI/CD failures |
+
+### TDD Workflow
+
+```
+1. SPECIFY    → Define acceptance criteria
+2. TEST       → Write failing tests FIRST (Red)
+3. CODE       → Implement to pass tests (Green)
+4. REFACTOR   → Clean up, fix review issues
+5. QUALITY    → Run analyze, tests, format
+```
+
+Use `/dev-cycle "your task"` to orchestrate this workflow.
+
+## Architecture
+
+```
+Presentation (UI) → Providers (State) → Repository (Data) → API (Network)
+```
+
+| Layer | Responsibility |
+|-------|----------------|
+| Presentation | Widgets, pages, user interaction |
+| Providers | State management, business logic (Riverpod) |
+| Repository | Data operations, caching, Result pattern |
+| API | HTTP calls, serialization (Dio) |
+
+## Key Patterns
+
+### Result Type
+```dart
+Result<Issue> result = await repository.getIssue(id);
+switch (result) {
+  case Success(:final data): // use data
+  case Failure(:final error): // handle error
+}
+```
+
+### Freezed Models
+```dart
+@freezed
+class Issue with _$Issue {
+  const factory Issue({
+    required String id,
+    required IssueType type,
+    required IssueState state,
+  }) = _Issue;
+
+  factory Issue.fromJson(Map<String, dynamic> json) => _$IssueFromJson(json);
+}
+```
+
+### Riverpod Providers
+```dart
+@riverpod
+Future<List<Issue>> issues(IssuesRef ref) async {
+  final repository = ref.watch(issueRepositoryProvider);
+  final result = await repository.getIssues();
+  return switch (result) {
+    Success(:final data) => data,
+    Failure(:final error) => throw error,
+  };
+}
+```
+
+## Styling
+
+Use constants from `shared/theme/typography.dart`:
+
+```dart
+// Spacing
+SizedBox(height: Spacing.md)    // 16
+
+// Border radius
+BorderRadius.circular(Radii.md) // 8
+
+// Icon sizes
+Icon(icon, size: IconSizes.xl)  // 48
+
+// Colors from theme
+final colors = Theme.of(context).colorScheme;
+colors.primary
+colors.surface
+colors.onSurface
+```
+
+## Testing
+
+```bash
+flutter test                          # All tests
+flutter test test/unit/               # Specific directory
+flutter test --coverage               # With coverage
+flutter test --reporter expanded      # Verbose output
+```
+
+### Test Pattern
+```dart
+void main() {
+  group('IssueRepository', () {
+    late MockIssueApi mockApi;
+    late IssueRepository repository;
+
+    setUp(() {
+      mockApi = MockIssueApi();
+      repository = IssueRepository(mockApi);
+    });
+
+    test('returns issues on success', () async {
+      when(() => mockApi.getIssues()).thenAnswer(
+        (_) async => [testIssue],
+      );
+
+      final result = await repository.getIssues();
+
+      expect(result, isA<Success<List<Issue>>>());
+    });
+  });
+}
+```
+
+## Documentation
+
+- [CLAUDE.md](CLAUDE.md) — Architecture patterns, styling rules, coding conventions
+- [Mobile Theming Guide](../specs/Mobile_Theming_Guide.md) — M3 theming, colors
+- [Testing Strategy](../specs/Testing_Strategy.md) — Test patterns

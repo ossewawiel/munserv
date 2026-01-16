@@ -12,75 +12,170 @@ MunServ helps communities track and report infrastructure problems to local auth
 3. Admin reviews, confirms, and tracks progress
 4. Community can see status updates
 
-## Project Structure
-
-```
-munserv/
-├── mobile/          # Flutter app (iOS & Android)
-├── web/             # React admin dashboard
-├── backend/         # Kotlin + Spring Boot API (coming soon)
-├── infrastructure/  # Docker, mock API, deployment configs
-├── specs/           # Technical specifications
-└── database/        # Migrations and seeds (coming soon)
-```
-
 ## Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- Flutter 3.x
-- pnpm (for web)
+- **Backend:** JDK 21+, Gradle
+- **Web:** Node.js 20+, pnpm
+- **Mobile:** Flutter 3.x
 
-### 1. Start the Mock API
-
-```bash
-cd infrastructure/mock-api
-npm install
-npm start
-# Runs on http://localhost:3001
-```
-
-### 2. Run the Mobile App
+### 1. Start the Backend
 
 ```bash
-cd mobile
-flutter pub get
-flutter run
+cd backend
+./gradlew bootRun
+# Runs on http://localhost:8080
 ```
 
-### 3. Run the Web Admin
+### 2. Start the Web Admin
 
 ```bash
 cd web
 pnpm install
 pnpm dev
 # Runs on http://localhost:3000
+# Login: admin@ward42.example.com / admin123
 ```
+
+### 3. Start the Mobile App
+
+```bash
+cd mobile
+flutter pub get
+flutter run
+# Connects to backend on port 8080
+```
+
+**For mock API testing (mobile only):**
+```bash
+cd infrastructure/mock-api && npm start  # Port 3001
+flutter run --dart-define=API_PORT=3001
+```
+
+## Project Structure
+
+```
+munserv/
+├── backend/         # Kotlin + Spring Boot API
+├── web/             # React + TypeScript admin portal
+├── mobile/          # Flutter app (iOS & Android)
+├── database/        # PostgreSQL migrations
+├── infrastructure/  # Docker, mock API, deployment
+├── specs/           # Technical specifications
+│   ├── requirements/    # User stories by platform
+│   ├── contracts/       # API contract, shared types
+│   ├── architecture/    # Overview, patterns, ADRs
+│   ├── features/        # Feature specifications
+│   └── operations/      # DevOps, environments
+└── .claude/         # Claude Code skills
+```
+
+## Development with Claude Code
+
+This project uses Claude Code for AI-assisted development with specialized skills.
+
+### Project-Level Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `/add-story` | Add user story to requirements |
+| `/add-feature` | Create feature specification |
+| `/plan-feature` | Generate cross-platform implementation plan |
+| `/add-endpoint` | Add API endpoint to contract |
+| `/add-type` | Add shared type definition |
+| `/add-adr` | Create Architecture Decision Record |
+| `/add-pattern` | Add code pattern documentation |
+| `/update-readme` | Update README files |
+| `/sync-docs` | Validate documentation consistency |
+
+### Platform Skills
+
+Each platform has its own development skills:
+
+**Backend** (`cd backend`)
+| Skill | Purpose |
+|-------|---------|
+| `/dev-cycle` | Full TDD workflow |
+| `/entity` | Create JPA entity |
+| `/service` | Create service class |
+| `/controller` | Create REST controller |
+| `/repository` | Create Spring Data repository |
+| `/test` | Generate unit test |
+| `/contract-test` | Generate API contract test |
+| `/review` | Code review |
+
+**Web** (`cd web`)
+| Skill | Purpose |
+|-------|---------|
+| `/dev-cycle` | Full TDD workflow |
+| `/component` | Generate MUI component |
+| `/page` | Generate page with routing |
+| `/hook` | Create React Query hook |
+| `/api` | Add API endpoint function |
+| `/form` | Create form with validation |
+| `/test` | Generate Vitest test |
+| `/e2e` | Generate Playwright E2E test |
+| `/review` | Code review |
+
+**Mobile** (`cd mobile`)
+| Skill | Purpose |
+|-------|---------|
+| `/dev-cycle` | Full TDD workflow |
+| `/screen` | Generate screen with navigation |
+| `/widget` | Generate Flutter widget |
+| `/shared-widget` | Generate shared widget |
+| `/provider` | Create Riverpod provider |
+| `/repository` | Create repository class |
+| `/model` | Generate Freezed model |
+| `/test` | Generate unit test |
+| `/widget-test` | Generate widget test |
+| `/review-code` | Code review |
+
+### MCP Integrations
+
+| Server | Purpose |
+|--------|---------|
+| **postgres** | Query database schema |
+| **memory** | Persist architectural decisions |
+| **github** | Manage branches and PRs |
+
+### Recommended Workflow
+
+```
+1. /add-story     → Define user requirement
+2. /add-endpoint  → Define API contract (if needed)
+3. /plan-feature  → Generate implementation plan
+4. cd backend && /dev-cycle  → Implement backend
+5. cd web && /dev-cycle      → Implement web
+6. cd mobile && /dev-cycle   → Implement mobile
+```
+
+## Tech Stack
+
+| Layer | Technology | Status |
+|-------|------------|--------|
+| Backend | Kotlin + Spring Boot 3.x | Ready |
+| Web | React 18 + TypeScript + MUI v7 | Ready |
+| Mobile | Flutter 3.x + Riverpod + Freezed | Ready |
+| Database | PostgreSQL + PostGIS | Ready |
+| Storage | Local uploads (MVP) | Ready |
 
 ## MVP Features
 
 ### Mobile App (Members)
 - Phone + OTP registration
+- PIN/biometric quick login
 - Report issues with photos and GPS
 - View issues on map
-- Track your reported issues
+- Track reported issues with status timeline
 
 ### Web Dashboard (Admins)
 - Email/password login
-- Dashboard with stats
+- Dashboard with statistics
 - Manage issue states
 - View heat report (priority ranking)
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Mobile | Flutter, Riverpod, Freezed |
-| Web | React, TypeScript, React Query, Vite |
-| Backend | Kotlin, Spring Boot (Phase 2) |
-| Database | PostgreSQL + PostGIS (Phase 2) |
-| Storage | Cloudflare R2 (Phase 2) |
+- Member management
 
 ## Issue Types
 
@@ -107,12 +202,30 @@ Each deployment is a **pod** — an independent instance with its own database a
 
 ## Documentation
 
+### Quick Reference
 | Document | Description |
 |----------|-------------|
-| [MVP Development Guide](specs/MVP_Development_Guide.md) | Start here — scope, API contract, mock data |
-| [Architecture & Patterns](specs/Architecture_and_Design_Patterns.md) | Code structure and conventions |
-| [Domain & Data Modeling](specs/Domain_and_Data_Modeling.md) | Entities, workflows, state machines |
-| [Coding Standards](specs/Coding_Standards.md) | Style guides for all platforms |
+| [Requirements](specs/requirements/) | User stories by platform |
+| [API Contract](specs/contracts/api.md) | API endpoints (source of truth) |
+| [Shared Types](specs/contracts/types.md) | Data type definitions |
+| [Architecture](specs/architecture/overview.md) | System architecture |
+| [Patterns](specs/architecture/patterns.md) | Code patterns |
+
+### Detailed Guides
+| Document | Description |
+|----------|-------------|
+| [MVP Development Guide](specs/MVP_Development_Guide.md) | Full context, mock data |
+| [Architecture & Patterns](specs/Architecture_and_Design_Patterns.md) | Detailed patterns |
+| [Domain & Data Modeling](specs/Domain_and_Data_Modeling.md) | Entity definitions |
+| [Coding Standards](specs/Coding_Standards.md) | Naming conventions |
+| [Testing Strategy](specs/Testing_Strategy.md) | Test patterns |
+
+### Platform Guides
+| Platform | CLAUDE.md | README |
+|----------|-----------|--------|
+| Backend | [backend/CLAUDE.md](backend/CLAUDE.md) | [backend/README.md](backend/README.md) |
+| Web | [web/CLAUDE.md](web/CLAUDE.md) | [web/README.md](web/README.md) |
+| Mobile | [mobile/CLAUDE.md](mobile/CLAUDE.md) | [mobile/README.md](mobile/README.md) |
 
 ## Contributing
 
