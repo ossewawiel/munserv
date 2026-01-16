@@ -6,6 +6,7 @@ import { RegisterPage } from '@/features/auth/RegisterPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { HeatReportPage } from '@/features/dashboard/HeatReportPage';
 import { IssuesPage } from '@/features/issues/IssuesPage';
+import { IssueMapPage } from '@/features/issues/IssueMapPage';
 import { IssueDetailPage } from '@/features/issues/IssueDetailPage';
 import { MembersPage } from '@/features/members/MembersPage';
 
@@ -30,6 +31,14 @@ function App() {
         element={
           <ProtectedRoute>
             <IssuesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/issues/map"
+        element={
+          <ProtectedRoute>
+            <IssueMapPage />
           </ProtectedRoute>
         }
       />

@@ -18,4 +18,11 @@ export const issueApi = {
 
   updateState: (id: string, data: UpdateIssueStateRequest) =>
     apiClient.patch<Issue>(`/issues/${id}/state`, data).then((r) => r.data),
+
+  getAllForMap: () =>
+    apiClient
+      .get<PaginatedResponse<IssueSummary>>('/issues', {
+        params: { limit: 100 },
+      })
+      .then((r) => r.data.items),
 };

@@ -2,6 +2,7 @@ import { type FC, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
+import MapIcon from '@mui/icons-material/Map';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { Breadcrumbs } from '@/components/molecules/Breadcrumbs';
@@ -11,6 +12,7 @@ import { DataTableCard } from '@/components/organisms/DataTableCard';
 import { IssueStateBadge } from '@/components/molecules/IssueStateBadge';
 import { IssueTypeBadge } from '@/components/molecules/IssueTypeBadge';
 import { HeatBadge } from '@/components/molecules/HeatIndicator';
+import { ActionButton } from '@/components/atoms/ActionButton';
 import { useIssues } from './hooks';
 import { IssueFilters } from './components/IssueFilters';
 import type { Column } from '@/components/organisms/DataTable';
@@ -196,6 +198,14 @@ export const IssuesPage: FC = () => {
                 onTypeChange={handleTypeChange}
                 onClear={handleClearFilters}
               />
+            }
+            actionSlot={
+              <ActionButton
+                icon={<MapIcon />}
+                onClick={() => navigate('/issues/map')}
+              >
+                {t('issues.actions.viewMap')}
+              </ActionButton>
             }
             emptyMessage={
               <EmptyState

@@ -136,3 +136,16 @@ export function getHeatLevel(heat: number): HeatLevel {
   if (heat >= 20) return 'low';
   return 'minimal';
 }
+
+// Issue type colors for map pins and filter buttons
+export const issueTypeColors = {
+  pothole: '#795548',         // Brown
+  water_leak: '#2196F3',      // Blue
+  sewage_leak: '#4CAF50',     // Green
+  traffic_light: '#F44336',   // Red
+  street_light: '#FFC107',    // Amber
+  illegal_dumping: '#9C27B0', // Purple
+  other: '#9E9E9E',           // Gray
+} as const;
+
+export type IssueTypeColor = keyof typeof issueTypeColors;

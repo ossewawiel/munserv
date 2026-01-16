@@ -44,3 +44,11 @@ export function useUpdateIssueState() {
     },
   });
 }
+
+export function useIssuesForMap() {
+  return useQuery({
+    queryKey: ['issues', 'map'],
+    queryFn: () => issueApi.getAllForMap(),
+    staleTime: 30000, // 30 seconds
+  });
+}

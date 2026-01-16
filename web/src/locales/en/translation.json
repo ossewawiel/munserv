@@ -122,6 +122,13 @@
       "street_light": "Street Light",
       "illegal_dumping": "Illegal Dumping",
       "other": "Other"
+    },
+    "actions": {
+      "viewMap": "Map"
+    },
+    "map": {
+      "title": "Issue Map",
+      "filterByType": "Filter"
     }
   },
   "members": {
