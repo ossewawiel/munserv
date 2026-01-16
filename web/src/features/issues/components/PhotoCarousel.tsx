@@ -65,15 +65,17 @@ export const PhotoCarousel: FC<PhotoCarouselProps> = ({
   }, []);
 
   const handleLightboxPrevious = useCallback(() => {
-    setLightboxIndex((prev) =>
-      prev !== null ? (prev > 0 ? prev - 1 : photos.length - 1) : null
-    );
+    setLightboxIndex((prev) => {
+      if (prev === null) return null;
+      return prev > 0 ? prev - 1 : photos.length - 1;
+    });
   }, [photos.length]);
 
   const handleLightboxNext = useCallback(() => {
-    setLightboxIndex((prev) =>
-      prev !== null ? (prev < photos.length - 1 ? prev + 1 : 0) : null
-    );
+    setLightboxIndex((prev) => {
+      if (prev === null) return null;
+      return prev < photos.length - 1 ? prev + 1 : 0;
+    });
   }, [photos.length]);
 
   if (photos.length === 0) {
@@ -146,7 +148,7 @@ export const PhotoCarousel: FC<PhotoCarouselProps> = ({
         >
           {photos.map((photo, index) => (
             <ButtonBase
-              key={index}
+              key={photo}
               onClick={() => handleOpenLightbox(index)}
               role="tab"
               aria-selected={lightboxIndex === index}

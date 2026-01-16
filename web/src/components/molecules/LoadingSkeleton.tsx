@@ -38,9 +38,10 @@ export const LoadingSkeleton: FC<LoadingSkeletonProps> = ({
 
   return (
     <Stack spacing={1.5}>
+      {/* Static placeholder list - index keys are safe here */}
       {Array.from({ length: count }).map((_, index) => (
         <Skeleton
-          key={`skeleton-${index}`}
+          key={`skeleton-${index}`} // NOSONAR - static list, no reordering
           variant={variantMap[variant]}
           width={width}
           height={height}
@@ -62,13 +63,14 @@ export const TableSkeleton: FC<TableSkeletonProps> = ({
 }) => {
   return (
     <Box sx={{ width: '100%' }}>
+      {/* Static placeholder list - index keys are safe here */}
       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
         {Array.from({ length: columns }).map((_, i) => (
-          <Skeleton key={`header-${i}`} variant="text" sx={{ flex: 1, height: 24 }} animation="wave" />
+          <Skeleton key={`header-${i}`} variant="text" sx={{ flex: 1, height: 24 }} animation="wave" /> // NOSONAR
         ))}
       </Box>
       {Array.from({ length: rows }).map((_, rowIndex) => (
-        <Box key={`row-${rowIndex}`} sx={{ display: 'flex', gap: 2, mb: 1.5 }}>
+        <Box key={`row-${rowIndex}`} sx={{ display: 'flex', gap: 2, mb: 1.5 }}> {/* NOSONAR */}
           {Array.from({ length: columns }).map((_, colIndex) => (
             <Skeleton
               key={`cell-${rowIndex}-${colIndex}`}
@@ -90,8 +92,9 @@ interface CardSkeletonProps {
 export const CardSkeleton: FC<CardSkeletonProps> = ({ count = 4 }) => {
   return (
     <Grid container spacing={2}>
+      {/* Static placeholder list - index keys are safe here */}
       {Array.from({ length: count }).map((_, index) => (
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={`card-${index}`}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={`card-${index}`}> {/* NOSONAR */}
           <Card variant="outlined">
             <CardContent>
               <Skeleton variant="text" width={100} height={20} sx={{ mb: 1 }} animation="wave" />

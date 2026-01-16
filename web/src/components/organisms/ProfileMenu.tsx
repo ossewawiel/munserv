@@ -308,13 +308,9 @@ export const ProfileMenu: FC = () => {
                         {/* Theme Mood - Switch style like reference */}
                         <ListItem>
                           <ListItemIcon sx={{ minWidth: 36 }}>
-                            {colorMode === 'dark' ? (
-                              <DarkModeIcon sx={{ fontSize: '1.25rem' }} />
-                            ) : colorMode === 'system' ? (
-                              <SettingsBrightnessIcon sx={{ fontSize: '1.25rem' }} />
-                            ) : (
-                              <LightModeIcon sx={{ fontSize: '1.25rem' }} />
-                            )}
+                            {colorMode === 'dark' && <DarkModeIcon sx={{ fontSize: '1.25rem' }} />}
+                            {colorMode === 'system' && <SettingsBrightnessIcon sx={{ fontSize: '1.25rem' }} />}
+                            {colorMode === 'light' && <LightModeIcon sx={{ fontSize: '1.25rem' }} />}
                           </ListItemIcon>
                           <ListItemText
                             primary={
