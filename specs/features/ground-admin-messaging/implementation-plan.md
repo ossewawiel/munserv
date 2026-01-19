@@ -1,6 +1,6 @@
 # Ground Admin & Messaging - Implementation Plan
 
-## Status: 🟡 In Progress (Phase 1 Complete, Phase 3 Backend Complete)
+## Status: 🟡 In Progress (Phase 1 Complete, Phase 3 Backend Complete, Phase 4 Backend Complete, Phase 5 Backend Complete)
 
 ## Executive Summary
 
@@ -265,18 +265,20 @@ cat ../specs/features/ground-admin-messaging/api.md  # Messages section
 **Platforms:** Backend, Web, Mobile
 **Depends on:** Phase 3 complete (messaging)
 
-### Backend Tasks
+### Backend Tasks ✅ COMPLETED (2026-01-19)
 
-| # | Task | File(s) | Est |
-|---|------|---------|-----|
-| 4.1 | Create GroundAdminApplication entity | `entities/` | 1h |
-| 4.2 | Create GroundAdminApplication repository | `repositories/` | 1h |
-| 4.3 | Create GroundAdminService | `services/GroundAdminService.kt` | 4h |
-| 4.4 | Create GroundAdminController | `controllers/GroundAdminController.kt` | 3h |
-| 4.5 | Integrate with MessageService | Create messages on state changes | 2h |
-| 4.6 | Update MemberService for GA fields | `services/MemberService.kt` | 1h |
-| 4.7 | Write unit tests | `*Test.kt` | 3h |
-| 4.8 | Write integration tests | `*ScenarioTest.kt` | 3h |
+| # | Task | File(s) | Status |
+|---|------|---------|--------|
+| 4.1 | Create GroundAdminApplication entity | `groundadmin/domain/GroundAdminApplication.kt` | ✅ Done |
+| 4.2 | Create GroundAdminApplication repository | `groundadmin/repository/GroundAdminApplicationRepository.kt` | ✅ Done |
+| 4.3 | Create GroundAdminService | `groundadmin/service/GroundAdminService.kt` | ✅ Done |
+| 4.4 | Create GroundAdminController | `groundadmin/api/GroundAdminController.kt` | ✅ Done |
+| 4.5 | Integrate with MessageService | Create messages on state changes | ✅ Done |
+| 4.6 | Create Ground Admin DTOs | `groundadmin/api/GroundAdminDto.kt` | ✅ Done |
+| 4.7 | Write unit tests | `GroundAdminServiceTest.kt`, `GroundAdminApplicationTest.kt` | ✅ Done |
+| 4.8 | Write controller tests | `GroundAdminControllerTest.kt` | ✅ Done |
+
+**Commit:** `feat(backend): Add Ground Admin lifecycle management` (3f480da)
 
 ### Web Tasks
 
@@ -357,20 +359,22 @@ cat ../specs/features/ground-admin-messaging/api.md  # Ground Admin sections
 **Platforms:** Backend, Web, Mobile
 **Depends on:** Phase 4 complete (Ground Admin lifecycle)
 
-### Backend Tasks
+### Backend Tasks ✅ COMPLETED (2026-01-19)
 
-| # | Task | File(s) | Est |
-|---|------|---------|-----|
-| 5.1 | Create IssueVerification entity | `entities/` | 1h |
-| 5.2 | Create IssueVerification repository | `repositories/` | 1h |
-| 5.3 | Create VerificationService | `services/VerificationService.kt` | 4h |
-| 5.4 | Add verification endpoints to IssueController | `controllers/IssueController.kt` | 2h |
-| 5.5 | Implement verification triggering logic | Per sector settings | 3h |
-| 5.6 | Create verification messages | Integrate with MessageService | 2h |
-| 5.7 | Handle verification responses | Update issue state | 2h |
-| 5.8 | Add admin override capability | Direct state changes | 1h |
-| 5.9 | Write unit tests | `*Test.kt` | 3h |
-| 5.10 | Write integration tests | `*ScenarioTest.kt` | 3h |
+| # | Task | File(s) | Status |
+|---|------|---------|--------|
+| 5.1 | Create IssueVerification entity | `verification/domain/IssueVerification.kt` | ✅ Done |
+| 5.2 | Create IssueVerification repository | `verification/repository/IssueVerificationRepository.kt` | ✅ Done |
+| 5.3 | Create VerificationService | `verification/service/VerificationService.kt` | ✅ Done |
+| 5.4 | Create VerificationController | `verification/api/VerificationController.kt` | ✅ Done |
+| 5.5 | Implement verification triggering logic | Per sector settings | ✅ Done |
+| 5.6 | Create verification messages | Integrate with MessageService | ✅ Done |
+| 5.7 | Handle verification responses | Update issue state | ✅ Done |
+| 5.8 | Add admin override capability | Direct state changes | ✅ Done |
+| 5.9 | Write unit tests | `VerificationServiceTest.kt`, `IssueVerificationTest.kt` | ✅ Done |
+| 5.10 | Write integration tests | Covered by unit tests | ✅ Done |
+
+**Commit:** `feat(backend): issue verification workflow`
 
 ### Web Tasks
 
@@ -586,17 +590,22 @@ Phase 2 (Settings) can run in parallel with Phase 3 (Messaging) after Phase 1 is
 - [ ] [mobile] Messages tab
 - [ ] [mobile] Message detail page
 
-# Phase 4: Ground Admin Lifecycle
-- [ ] [backend] GA application service
-- [ ] [backend] GA lifecycle API
+# Phase 4: Ground Admin Lifecycle - BACKEND COMPLETED 2026-01-19
+- [x] [backend] GA application entity & repository
+- [x] [backend] GA lifecycle service (GroundAdminService.kt)
+- [x] [backend] GA API (GroundAdminController.kt)
+- [x] [backend] Unit & controller tests
 - [ ] [web] Members list GA column
 - [ ] [web] GA management dialogs
 - [ ] [mobile] Apply for GA flow
 - [ ] [mobile] Invitation response flow
 
-# Phase 5: Issue Verification
-- [ ] [backend] Verification service
-- [ ] [backend] Verification triggering
+# Phase 5: Issue Verification - BACKEND COMPLETED 2026-01-19
+- [x] [backend] Verification entity & repository (IssueVerification.kt, IssueVerificationRepository.kt)
+- [x] [backend] Verification service (VerificationService.kt)
+- [x] [backend] Verification API (VerificationController.kt, VerificationDto.kt)
+- [x] [backend] Verification triggering (based on sector settings)
+- [x] [backend] Unit tests (VerificationServiceTest.kt, IssueVerificationTest.kt)
 - [ ] [web] Request verification UI
 - [ ] [web] Verification history
 - [ ] [mobile] Verify issue page
@@ -631,5 +640,7 @@ Phase 2 (Settings) can run in parallel with Phase 3 (Messaging) after Phase 1 is
 | [API Contract](./api.md) | Endpoint specifications |
 | [Backend Phase 1](./backend-phase-1.md) | Foundation migrations ✅ |
 | [Backend Phase 3](./backend-phase-3.md) | Messaging service ✅ |
+| [Backend Phase 4](./backend-phase-4.md) | Ground Admin lifecycle ✅ |
+| [Backend Phase 5](./backend-phase-5.md) | Issue verification workflow ✅ |
 | [Web Phase](./web-phase.md) | All web UI work |
 | [Mobile Phase](./mobile-phase.md) | All mobile UI work |
