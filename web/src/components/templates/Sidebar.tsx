@@ -1,6 +1,7 @@
 import { type FC, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
@@ -16,9 +17,13 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import PeopleIcon from '@mui/icons-material/People';
+import EmailIcon from '@mui/icons-material/Email';
+import BadgeIcon from '@mui/icons-material/Badge';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 import { drawerWidth } from '@/theme';
 import { MiniDrawerStyled } from './MiniDrawerStyled';
+import { useUnreadCount } from '@/features/messages/hooks';
 
 /** Get the color for selected/hovered items based on theme mode */
 const getItemColor = (isDarkMode: boolean): string =>
@@ -28,6 +33,7 @@ interface NavItem {
   labelKey: string;
   href: string;
   icon: React.ElementType;
+  badgeKey?: 'unreadMessages';
 }
 
 const navItems: NavItem[] = [
@@ -35,6 +41,9 @@ const navItems: NavItem[] = [
   { labelKey: 'nav.issues', href: '/issues', icon: AssignmentIcon },
   { labelKey: 'nav.heatReport', href: '/reports/heat', icon: WhatshotIcon },
   { labelKey: 'nav.members', href: '/members', icon: PeopleIcon },
+  { labelKey: 'nav.messages', href: '/messages', icon: EmailIcon, badgeKey: 'unreadMessages' },
+  { labelKey: 'nav.groundAdmins', href: '/ground-admins', icon: BadgeIcon },
+  { labelKey: 'nav.sectorSettings', href: '/settings/sector', icon: SettingsIcon },
 ];
 
 interface SidebarProps {
@@ -48,12 +57,20 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
   const location = useLocation();
   const theme = useTheme();
   const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
+  const { data: unreadCount = 0 } = useUnreadCount();
 
   const isSelected = (href: string): boolean => {
     if (href === '/') {
       return location.pathname === '/';
     }
     return location.pathname.startsWith(href);
+  };
+
+  const getBadgeCount = (badgeKey?: NavItem['badgeKey']): number => {
+    if (badgeKey === 'unreadMessages') {
+      return unreadCount;
+    }
+    return 0;
   };
 
   const logo = useMemo(
@@ -85,6 +102,7 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
         {navItems.map((item) => {
           const Icon = item.icon;
           const selected = isSelected(item.href);
+          const badgeCount = getBadgeCount(item.badgeKey);
 
           const listItem = (
             <ListItemButton
@@ -128,7 +146,24 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
                     : 'text.primary',
                 }}
               >
-                <Icon />
+                {badgeCount > 0 ? (
+                  <Badge
+                    badgeContent={badgeCount}
+                    color="error"
+                    max={99}
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        fontSize: '0.6rem',
+                        height: 16,
+                        minWidth: 16,
+                      },
+                    }}
+                  >
+                    <Icon />
+                  </Badge>
+                ) : (
+                  <Icon />
+                )}
               </ListItemIcon>
               {open && (
                 <ListItemText

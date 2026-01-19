@@ -10,6 +10,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import MenuIcon from '@mui/icons-material/Menu';
 
 import { ProfileMenu } from '@/components/organisms/ProfileMenu';
+import { NotificationDropdown } from '@/components/organisms/NotificationDropdown';
 import { Sidebar } from './Sidebar';
 import {
   drawerWidth,
@@ -183,7 +184,8 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
         {/* Spacer */}
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* Right side actions - Profile Menu */}
+        {/* Right side actions - Notifications and Profile Menu */}
+        <NotificationDropdown />
         <ProfileMenu />
       </Toolbar>
     ),

@@ -49,12 +49,14 @@ pnpm install
 
 ## Tech Stack
 
-- **React 18** with TypeScript
+- **React 19** with TypeScript
 - **MUI v7** for components and theming
-- **React Query** for server state
-- **React Router** for navigation
+- **React Query** (@tanstack/react-query) for server state
+- **React Router v7** for navigation
 - **Axios** for HTTP client
-- **Vitest** for testing
+- **React Hook Form** + **Zod** for forms
+- **i18next** for internationalization
+- **Vitest** + **Testing Library** for testing
 - **Playwright** for E2E testing
 
 ## Project Structure
@@ -63,20 +65,25 @@ pnpm install
 src/
 ├── main.tsx
 ├── App.tsx
-├── theme/                # MUI theme configuration
+├── theme/                  # MUI theme configuration
 ├── components/
-│   ├── atoms/           # Thin wrappers around MUI
-│   ├── molecules/       # Combined atoms
-│   ├── organisms/       # Complex sections
-│   └── templates/       # Page layouts
+│   ├── atoms/              # Thin wrappers around MUI
+│   ├── molecules/          # Combined atoms (Breadcrumbs, Badges, etc.)
+│   ├── organisms/          # Complex sections (DataTableCard, NotificationDropdown)
+│   └── templates/          # Page layouts (DashboardLayout, Sidebar)
 ├── features/
-│   ├── issues/          # Issue management
-│   ├── members/         # Member management
-│   └── dashboard/       # Dashboard stats
+│   ├── auth/               # Authentication
+│   ├── dashboard/          # Dashboard stats
+│   ├── ground-admins/      # Ground Admin management
+│   ├── issues/             # Issue management
+│   ├── members/            # Member management
+│   ├── messages/           # Messaging inbox
+│   ├── sector-settings/    # Sector configuration
+│   └── verification/       # Issue verification
 ├── shared/
 │   ├── hooks/
 │   ├── utils/
-│   └── types/
+│   └── types/              # Shared TypeScript types
 └── lib/
     ├── api-client.ts
     └── query-client.ts

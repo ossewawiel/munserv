@@ -9,6 +9,9 @@ import { IssuesPage } from '@/features/issues/IssuesPage';
 import { IssueMapPage } from '@/features/issues/IssueMapPage';
 import { IssueDetailPage } from '@/features/issues/IssueDetailPage';
 import { MembersPage } from '@/features/members/MembersPage';
+import { MessagesPage } from '@/features/messages/MessagesPage';
+import { GroundAdminsPage } from '@/features/ground-admins/GroundAdminsPage';
+import { SectorSettingsPage } from '@/features/sector-settings/SectorSettingsPage';
 
 function App() {
   return (
@@ -63,6 +66,38 @@ function App() {
         element={
           <ProtectedRoute>
             <MembersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/messages"
+        element={
+          <ProtectedRoute>
+            <MessagesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/messages/:id"
+        element={
+          <ProtectedRoute>
+            <MessagesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ground-admins"
+        element={
+          <ProtectedRoute>
+            <GroundAdminsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings/sector"
+        element={
+          <ProtectedRoute>
+            <SectorSettingsPage />
           </ProtectedRoute>
         }
       />

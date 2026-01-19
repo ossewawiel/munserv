@@ -1,6 +1,6 @@
 # Ground Admin & Messaging - Implementation Plan
 
-## Status: 🟡 In Progress (Phase 1 Complete, Phase 3 Backend Complete, Phase 4 Backend Complete, Phase 5 Backend Complete)
+## Status: 🟡 In Progress (Phase 1 Complete, Phase 3 Complete, Phase 4 Backend + Web Complete, Phase 5 Backend + Web Complete)
 
 ## Executive Summary
 
@@ -184,21 +184,21 @@ cat ../specs/features/ground-admin-messaging/api.md  # Sector Settings section
 
 **Commit:** `feat(backend): Add messaging service for platform communications`
 
-### Web Tasks
+### Web Tasks ✅ COMPLETED (2026-01-19)
 
-| # | Task | File(s) | Est |
-|---|------|---------|-----|
-| 3.9 | Add Message TypeScript types | `types/message.ts` | 1h |
-| 3.10 | Create messages API functions | `api/messages.ts` | 1h |
-| 3.11 | Create useMessages hook | `hooks/useMessages.ts` | 1h |
-| 3.12 | Create useUnreadCount hook | `hooks/useUnreadCount.ts` | 1h |
-| 3.13 | Create MessagesPage (inbox layout) | `pages/MessagesPage.tsx` | 6h |
-| 3.14 | Create MessageList component | `components/MessageList.tsx` | 2h |
-| 3.15 | Create MessageDetail component | `components/MessageDetail.tsx` | 2h |
-| 3.16 | Create NotificationDropdown | `components/NotificationDropdown.tsx` | 3h |
-| 3.17 | Add notifications to header | `layout/Header.tsx` | 1h |
-| 3.18 | Add Messages to sidebar menu | `layout/Sidebar.tsx` | 0.5h |
-| 3.19 | Add i18n keys | `locales/` | 1h |
+| # | Task | File(s) | Status |
+|---|------|---------|--------|
+| 3.9 | Add Message TypeScript types | `shared/types/message.ts` | ✅ Done |
+| 3.10 | Create messages API functions | `features/messages/api.ts` | ✅ Done |
+| 3.11 | Create useMessages hook | `features/messages/hooks.ts` | ✅ Done |
+| 3.12 | Create useUnreadCount hook | `features/messages/hooks.ts` | ✅ Done |
+| 3.13 | Create MessagesPage (inbox layout) | `features/messages/MessagesPage.tsx` | ✅ Done |
+| 3.14 | Create MessageList component | `features/messages/components/MessageList.tsx` | ✅ Done |
+| 3.15 | Create MessageDetail component | `features/messages/components/MessageDetail.tsx` | ✅ Done |
+| 3.16 | Create NotificationDropdown | `components/organisms/NotificationDropdown.tsx` | ✅ Done |
+| 3.17 | Add notifications to header | `components/templates/DashboardLayout.tsx` | ✅ Done |
+| 3.18 | Add Messages to sidebar menu | `components/templates/Sidebar.tsx` | ✅ Done |
+| 3.19 | Add i18n keys | `locales/en/translation.json` | ✅ Done |
 
 ### Mobile Tasks
 
@@ -280,19 +280,19 @@ cat ../specs/features/ground-admin-messaging/api.md  # Messages section
 
 **Commit:** `feat(backend): Add Ground Admin lifecycle management` (3f480da)
 
-### Web Tasks
+### Web Tasks ✅ COMPLETED (2026-01-19)
 
-| # | Task | File(s) | Est |
-|---|------|---------|-----|
-| 4.9 | Add GroundAdmin TypeScript types | `types/groundAdmin.ts` | 1h |
-| 4.10 | Create groundAdmin API functions | `api/groundAdmin.ts` | 1h |
-| 4.11 | Update MembersPage with GA column | `pages/MembersPage.tsx` | 3h |
-| 4.12 | Create InviteGroundAdminDialog | `components/` | 2h |
-| 4.13 | Create ApproveApplicationDialog | `components/` | 2h |
-| 4.14 | Create RevokeGroundAdminDialog | `components/` | 2h |
-| 4.15 | Create GroundAdminsListPage | `pages/GroundAdminsListPage.tsx` | 3h |
-| 4.16 | Add message action handlers | `components/MessageDetail.tsx` | 2h |
-| 4.17 | Add i18n keys | `locales/` | 1h |
+| # | Task | File(s) | Status |
+|---|------|---------|--------|
+| 4.9 | Add GroundAdmin TypeScript types | `shared/types/groundAdmin.ts` | ✅ Done |
+| 4.10 | Create groundAdmin API functions | `features/ground-admins/api.ts` | ✅ Done |
+| 4.11 | Create GroundAdminsListPage | `features/ground-admins/GroundAdminsPage.tsx` | ✅ Done |
+| 4.12 | Create InviteGroundAdminDialog | `features/ground-admins/components/InviteDialog.tsx` | ✅ Done |
+| 4.13 | Create ApproveApplicationDialog | `features/ground-admins/components/ApproveDialog.tsx` | ✅ Done |
+| 4.14 | Create RevokeGroundAdminDialog | `features/ground-admins/components/RevokeDialog.tsx` | ✅ Done |
+| 4.15 | Add Ground Admins to sidebar | `components/templates/Sidebar.tsx` | ✅ Done |
+| 4.16 | Add message action handlers | `features/messages/components/MessageDetail.tsx` | ✅ Done |
+| 4.17 | Add i18n keys | `locales/en/translation.json` | ✅ Done |
 
 ### Mobile Tasks
 
@@ -376,18 +376,18 @@ cat ../specs/features/ground-admin-messaging/api.md  # Ground Admin sections
 
 **Commit:** `feat(backend): issue verification workflow`
 
-### Web Tasks
+### Web Tasks ✅ COMPLETED (2026-01-19)
 
-| # | Task | File(s) | Est |
-|---|------|---------|-----|
-| 5.11 | Add IssueVerification types | `types/verification.ts` | 1h |
-| 5.12 | Create verification API functions | `api/verification.ts` | 1h |
-| 5.13 | Add "Request Verification" to issue detail | `pages/IssueDetailPage.tsx` | 2h |
-| 5.14 | Create RequestVerificationDialog | `components/` | 2h |
-| 5.15 | Show verification history on issue | `components/VerificationHistory.tsx` | 2h |
-| 5.16 | Add verification status indicators | Issue list & detail | 1h |
-| 5.17 | Add admin override button | `pages/IssueDetailPage.tsx` | 1h |
-| 5.18 | Add i18n keys | `locales/` | 1h |
+| # | Task | File(s) | Status |
+|---|------|---------|--------|
+| 5.11 | Add IssueVerification types | `shared/types/verification.ts` | ✅ Done |
+| 5.12 | Create verification API functions | `features/verification/api.ts` | ✅ Done |
+| 5.13 | Create verification hooks | `features/verification/hooks.ts` | ✅ Done |
+| 5.14 | Create RequestVerificationDialog | `features/verification/components/RequestVerificationDialog.tsx` | ✅ Done |
+| 5.15 | Create VerificationHistory | `features/verification/components/VerificationHistory.tsx` | ✅ Done |
+| 5.16 | Add SectorSettings types & hooks | `shared/types/sectorSettings.ts`, `features/sector-settings/hooks.ts` | ✅ Done |
+| 5.17 | Create SectorSettingsPage | `features/sector-settings/SectorSettingsPage.tsx` | ✅ Done |
+| 5.18 | Add i18n keys | `locales/en/translation.json` | ✅ Done |
 
 ### Mobile Tasks
 
@@ -580,34 +580,38 @@ Phase 2 (Settings) can run in parallel with Phase 3 (Messaging) after Phase 1 is
 - [ ] [backend] Sector Chief permissions
 - [ ] [web] Sector settings page
 
-# Phase 3: Messaging System - BACKEND COMPLETED 2026-01-19
+# Phase 3: Messaging System - COMPLETED 2026-01-19
 - [x] [backend] Message service (MessageService.kt, MessageFactory.kt)
 - [x] [backend] Message API (MessageController.kt, MessageDto.kt)
 - [x] [backend] Message entity & repository (MessageEntity.kt, MessageRepository.kt)
 - [x] [backend] Unit tests (MessageServiceTest.kt, MessageFactoryTest.kt)
-- [ ] [web] Messages inbox page
-- [ ] [web] Notification dropdown
+- [x] [web] Messages inbox page (MessagesPage.tsx - email-style layout)
+- [x] [web] Notification dropdown (NotificationDropdown.tsx)
+- [x] [web] Message types, API, hooks
 - [ ] [mobile] Messages tab
 - [ ] [mobile] Message detail page
 
-# Phase 4: Ground Admin Lifecycle - BACKEND COMPLETED 2026-01-19
+# Phase 4: Ground Admin Lifecycle - BACKEND + WEB COMPLETED 2026-01-19
 - [x] [backend] GA application entity & repository
 - [x] [backend] GA lifecycle service (GroundAdminService.kt)
 - [x] [backend] GA API (GroundAdminController.kt)
 - [x] [backend] Unit & controller tests
-- [ ] [web] Members list GA column
-- [ ] [web] GA management dialogs
+- [x] [web] GroundAdminsPage (dedicated management page)
+- [x] [web] GA management dialogs (Invite, Approve, Revoke)
+- [x] [web] Ground Admin types, API, hooks
 - [ ] [mobile] Apply for GA flow
 - [ ] [mobile] Invitation response flow
 
-# Phase 5: Issue Verification - BACKEND COMPLETED 2026-01-19
+# Phase 5: Issue Verification - BACKEND + WEB COMPLETED 2026-01-19
 - [x] [backend] Verification entity & repository (IssueVerification.kt, IssueVerificationRepository.kt)
 - [x] [backend] Verification service (VerificationService.kt)
 - [x] [backend] Verification API (VerificationController.kt, VerificationDto.kt)
 - [x] [backend] Verification triggering (based on sector settings)
 - [x] [backend] Unit tests (VerificationServiceTest.kt, IssueVerificationTest.kt)
-- [ ] [web] Request verification UI
-- [ ] [web] Verification history
+- [x] [web] Request verification UI (RequestVerificationDialog.tsx)
+- [x] [web] Verification history (VerificationHistory.tsx)
+- [x] [web] Sector settings page (SectorSettingsPage.tsx)
+- [x] [web] Verification types, API, hooks
 - [ ] [mobile] Verify issue page
 - [ ] [mobile] Verify fix page
 
@@ -642,5 +646,5 @@ Phase 2 (Settings) can run in parallel with Phase 3 (Messaging) after Phase 1 is
 | [Backend Phase 3](./backend-phase-3.md) | Messaging service ✅ |
 | [Backend Phase 4](./backend-phase-4.md) | Ground Admin lifecycle ✅ |
 | [Backend Phase 5](./backend-phase-5.md) | Issue verification workflow ✅ |
-| [Web Phase](./web-phase.md) | All web UI work |
+| [Web Phase](./web-phase.md) | All web UI work ✅ |
 | [Mobile Phase](./mobile-phase.md) | All mobile UI work |

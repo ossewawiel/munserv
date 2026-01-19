@@ -77,7 +77,10 @@
     "dashboard": "Dashboard",
     "issues": "Issues",
     "heatReport": "Heat Report",
-    "members": "Members"
+    "members": "Members",
+    "messages": "Messages",
+    "groundAdmins": "Ground Admins",
+    "sectorSettings": "Settings"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -204,5 +207,184 @@
     "maxLength": "Maximum {{max}} characters allowed",
     "invalidEmail": "Please enter a valid email address",
     "invalidPhone": "Please enter a valid phone number (e.g., +27821234567)"
+  },
+  "messages": {
+    "title": "Messages",
+    "empty": "No messages",
+    "notifications": "Notifications",
+    "unreadCount": "{{count}} unread",
+    "viewAll": "View all messages",
+    "selectMessage": "Select a message to view",
+    "filterByStatus": "Status",
+    "additionalInfo": "Additional Information",
+    "actioned": "Actioned",
+    "declineReason": "Reason for Declining",
+    "reasonLabel": "Please provide a reason",
+    "status": {
+      "unread": "Unread",
+      "read": "Read",
+      "actioned": "Actioned",
+      "dismissed": "Dismissed"
+    },
+    "types": {
+      "groundAdminInvitation": "Ground Admin Invitation",
+      "groundAdminApplication": "Ground Admin Application",
+      "groundAdminApproved": "Application Approved",
+      "groundAdminDeclined": "Application Declined",
+      "groundAdminInvitationDeclined": "Invitation Declined",
+      "groundAdminRevocation": "Status Revoked",
+      "groundAdminStepdownRequest": "Step Down Request",
+      "verifyNewIssue": "Verify New Issue",
+      "verifyFix": "Verify Fix",
+      "memberRegistration": "Member Registration",
+      "monthlyReport": "Monthly Report"
+    },
+    "actions": {
+      "accept": "Accept",
+      "decline": "Decline",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirm": "Confirm",
+      "cannotVerify": "Cannot Verify",
+      "dismiss": "Dismiss"
+    },
+    "actionResults": {
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "confirmed": "Confirmed",
+      "dismissed": "Dismissed"
+    }
+  },
+  "groundAdmin": {
+    "title": "Ground Admins",
+    "subtitle": "Manage Ground Admins in your sector",
+    "empty": "No Ground Admins in this sector yet",
+    "emptyFiltered": "No Ground Admins with this status",
+    "filterByStatus": "Filter by status",
+    "inviteTitle": "Invite Ground Admin",
+    "inviteConfirm": "Are you sure you want to invite {{name}} to become a Ground Admin?",
+    "inviteDescription": "This will send an invitation message to the member. They can accept or decline the invitation.",
+    "inviteMessage": "Optional message",
+    "inviteMessagePlaceholder": "Add a personal note to the invitation...",
+    "sendInvitation": "Send Invitation",
+    "reviewTitle": "Review Ground Admin Application",
+    "declineTitle": "Decline Application",
+    "declineDescription": "Please provide a reason for declining this application. The member will be notified.",
+    "declineReason": "Reason for declining",
+    "applicationDescription": "This member has applied to become a Ground Admin in your sector. Ground Admins can verify reported issues and fix completions.",
+    "invitationPending": "This invitation is pending the member's response.",
+    "appliedOn": "Applied on {{date}}",
+    "approve": "Approve",
+    "decline": "Decline",
+    "manageTitle": "Manage Ground Admin",
+    "manageDescription": "You can temporarily put this Ground Admin on hold if they need a break, or revoke their status completely if needed.",
+    "revokeTitle": "Revoke Ground Admin Status",
+    "revokeWarning": "This action cannot be undone. The member will be notified and will lose their Ground Admin privileges.",
+    "revokeReason": "Reason for revocation",
+    "revoke": "Revoke Status",
+    "putOnHold": "Put on Hold",
+    "reactivate": "Reactivate",
+    "responseRate": "Response Rate",
+    "pendingVerifications": "Pending Verifications",
+    "status": {
+      "active": "Active",
+      "onHold": "On Hold",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "name": "Name",
+      "status": "Status",
+      "responseRate": "Response Rate",
+      "pending": "Pending",
+      "since": "Since"
+    }
+  },
+  "sectorSettings": {
+    "title": "Sector Settings",
+    "subtitle": "Configure Ground Admin verification and issue lifecycle settings",
+    "verificationSettings": "Verification Settings",
+    "verificationDescription": "Configure how Ground Admins are notified for verification tasks",
+    "newIssueMode": "New Issue Verification Mode",
+    "newIssueModeHelp": "How Ground Admins are notified when a new issue needs verification",
+    "fixMode": "Fix Verification Mode",
+    "fixModeHelp": "How Ground Admins are notified when a fix needs verification",
+    "lifecycle": "Issue Lifecycle",
+    "lifecycleDescription": "Configure automatic issue state transitions",
+    "daysBeforeClosed": "Days before fixed issues close",
+    "daysBeforeClosedHelp": "Issues in FIXED state will automatically move to CLOSED after this many days",
+    "groundAdminManagement": "Ground Admin Management",
+    "groundAdminDescription": "Configure Ground Admin requirements for your sector",
+    "minimumGroundAdmins": "Minimum Ground Admins",
+    "minimumGroundAdminsHelp": "You will see a warning if the number of active Ground Admins falls below this threshold",
+    "belowMinimum": "Below minimum",
+    "belowMinimumDescription": "You have {{current}} active Ground Admins, minimum is {{minimum}}",
+    "atOrAboveMinimum": "Requirement met",
+    "currentGroundAdmins": "{{count}} active Ground Admins",
+    "saveSuccess": "Settings saved successfully",
+    "saveError": "Failed to save settings",
+    "modeOptions": {
+      "allNotified": "Notify all Ground Admins",
+      "adminAssigns": "Admin assigns Ground Admin",
+      "nearestAuto": "Auto-assign nearest",
+      "firstCome": "First come, first served"
+    }
+  },
+  "verification": {
+    "history": "Verification History",
+    "noHistory": "No verification requests yet",
+    "requestExistence": "Request Existence Verification",
+    "requestFix": "Request Fix Verification",
+    "existenceVerification": "Existence Verification",
+    "fixVerification": "Fix Verification",
+    "existenceDescription": "Request a Ground Admin to physically verify that this reported issue exists at the specified location.",
+    "fixDescription": "Request a Ground Admin to physically verify that this issue has been properly fixed.",
+    "modeAllNotified": "All active Ground Admins in the sector will be notified.",
+    "modeAdminAssigns": "Select a Ground Admin to assign this verification task.",
+    "modeNearestAuto": "The system will automatically assign the nearest Ground Admin.",
+    "modeFirstCome": "All Ground Admins will be notified. The first one to respond will handle it.",
+    "selectGroundAdmin": "Select Ground Admin",
+    "noActiveGroundAdmins": "No active Ground Admins available",
+    "optionalMessage": "Optional message",
+    "messagePlaceholder": "Add any specific instructions for the Ground Admin...",
+    "sendRequest": "Send Request",
+    "by": "by",
+    "assignedTo": "Assigned to",
+    "reason": "Reason",
+    "status": {
+      "pending": "Pending",
+      "completed": "Completed",
+      "expired": "Expired"
+    },
+    "results": {
+      "confirmed": "Confirmed",
+      "notFound": "Not Found",
+      "notFixed": "Not Fixed",
+      "cannotVerify": "Cannot Verify"
+    },
+    "reasons": {
+      "busy": "Ground Admin is unavailable",
+      "away": "Ground Admin is out of area",
+      "cannotFind": "Issue location unclear",
+      "wrongLocation": "GPS coordinates incorrect",
+      "notAnIssue": "Not actually an issue"
+    }
+  },
+  "common": {
+    "buttons": {
+      "save": "Save Changes",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "back": "Back",
+      "retry": "Retry"
+    },
+    "saving": "Saving...",
+    "actions": "Actions",
+    "validation": {
+      "required": "This field is required",
+      "min": "Minimum value is {{value}}",
+      "max": "Maximum value is {{value}}"
+    }
   }
 }
