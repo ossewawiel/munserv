@@ -2,6 +2,7 @@ package com.munserv.auth.repository
 
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
+import com.munserv.shared.enums.GroundAdminStatus
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
 import org.springframework.data.jpa.repository.JpaRepository
@@ -32,6 +33,38 @@ interface MemberJpaRepository : JpaRepository<MemberEntity, UUID> {
     fun existsByPhoneHash(phoneHash: String): Boolean
 
     fun existsByEmailHash(emailHash: String): Boolean
+
+    // Ground Admin queries
+    fun findBySectorIdAndIsGroundAdmin(
+        sectorId: UUID,
+        isGroundAdmin: Boolean,
+    ): List<MemberEntity>
+
+    @Query(
+        value = """
+            SELECT * FROM members m
+            WHERE m.sector_id = :sectorId
+            AND m.is_ground_admin = :isGroundAdmin
+            AND m.ground_admin_status = CAST(:status AS ground_admin_status)
+        """,
+        nativeQuery = true,
+    )
+    fun findBySectorIdAndIsGroundAdminAndGroundAdminStatus(
+        sectorId: UUID,
+        isGroundAdmin: Boolean,
+        status: String,
+    ): List<MemberEntity>
+
+    @Query(
+        value = """
+            SELECT * FROM members m
+            WHERE m.sector_id = :sectorId
+            AND m.status = 'active'
+            AND (m.password_hash IS NOT NULL)
+        """,
+        nativeQuery = true,
+    )
+    fun findAdminsBySectorId(sectorId: UUID): List<MemberEntity>
 }
 
 /**
@@ -63,4 +96,23 @@ class JpaMemberRepository(
     override fun existsByPhoneHash(phoneHash: String): Boolean = jpa.existsByPhoneHash(phoneHash)
 
     override fun existsByEmailHash(emailHash: String): Boolean = jpa.existsByEmailHash(emailHash)
+
+    // Ground Admin methods
+    override fun findBySectorIdAndIsGroundAdmin(
+        sectorId: SectorId,
+        isGroundAdmin: Boolean,
+    ): List<Member> = jpa.findBySectorIdAndIsGroundAdmin(sectorId.value, isGroundAdmin).map { it.toDomain() }
+
+    override fun findBySectorIdAndIsGroundAdminAndGroundAdminStatus(
+        sectorId: SectorId,
+        isGroundAdmin: Boolean,
+        status: GroundAdminStatus,
+    ): List<Member> =
+        jpa.findBySectorIdAndIsGroundAdminAndGroundAdminStatus(
+            sectorId.value,
+            isGroundAdmin,
+            status.toApiString(),
+        ).map { it.toDomain() }
+
+    override fun findAdminsBySectorId(sectorId: SectorId): List<Member> = jpa.findAdminsBySectorId(sectorId.value).map { it.toDomain() }
 }

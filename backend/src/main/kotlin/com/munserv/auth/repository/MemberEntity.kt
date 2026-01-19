@@ -2,6 +2,7 @@ package com.munserv.auth.repository
 
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
+import com.munserv.shared.enums.GroundAdminStatus
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
@@ -14,6 +15,7 @@ import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.PrecisionModel
+import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID
 
@@ -68,6 +70,16 @@ class MemberEntity(
     val updatedAt: Instant,
     @Column(name = "deleted_at")
     val deletedAt: Instant? = null,
+    // Ground Admin fields
+    @Column(name = "is_ground_admin", nullable = false)
+    val isGroundAdmin: Boolean = false,
+    @Column(name = "ground_admin_status", columnDefinition = "ground_admin_status")
+    @ColumnTransformer(write = "?::ground_admin_status")
+    val groundAdminStatus: String? = null,
+    @Column(name = "ground_admin_since")
+    val groundAdminSince: Instant? = null,
+    @Column(name = "ground_admin_response_rate", precision = 5, scale = 2)
+    val groundAdminResponseRate: BigDecimal? = null,
 ) {
     fun toDomain(): Member =
         Member(
@@ -87,6 +99,10 @@ class MemberEntity(
             status = MemberStatus.fromString(status),
             createdAt = createdAt,
             updatedAt = updatedAt,
+            isGroundAdmin = isGroundAdmin,
+            groundAdminStatus = groundAdminStatus?.let { GroundAdminStatus.fromString(it) },
+            groundAdminSince = groundAdminSince,
+            groundAdminResponseRate = groundAdminResponseRate,
         )
 
     companion object {
@@ -116,6 +132,10 @@ class MemberEntity(
                 status = member.status.toString(),
                 createdAt = member.createdAt,
                 updatedAt = member.updatedAt,
+                isGroundAdmin = member.isGroundAdmin,
+                groundAdminStatus = member.groundAdminStatus?.toApiString(),
+                groundAdminSince = member.groundAdminSince,
+                groundAdminResponseRate = member.groundAdminResponseRate,
             )
     }
 }
