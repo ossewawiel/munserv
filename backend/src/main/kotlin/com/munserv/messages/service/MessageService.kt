@@ -1,0 +1,217 @@
+package com.munserv.messages.service
+
+import com.munserv.messages.api.MessageActionRequest
+import com.munserv.messages.api.MessageListResponse
+import com.munserv.messages.api.MessageResponse
+import com.munserv.messages.domain.MessageEntity
+import com.munserv.messages.domain.MessageRepository
+import com.munserv.shared.enums.MessageStatus
+import com.munserv.shared.enums.MessageType
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
+
+/**
+ * Service for managing messages.
+ *
+ * Handles message retrieval, status updates, and action processing.
+ * Uses sealed Result pattern for error handling.
+ */
+@Service
+class MessageService(
+    private val messageRepository: MessageRepository,
+) {
+    /**
+     * Retrieves paginated messages for a recipient with optional filtering.
+     */
+    fun getMessages(
+        recipientId: UUID,
+        recipientType: String,
+        status: MessageStatus? = null,
+        type: MessageType? = null,
+        page: Int = 1,
+        size: Int = 20,
+    ): MessageListResponse {
+        val pageable =
+            PageRequest.of(
+                page - 1,
+                size,
+                Sort.by(Sort.Direction.DESC, "createdAt"),
+            )
+
+        val messagePage =
+            when {
+                status != null && type != null ->
+                    messageRepository.findByRecipientIdAndRecipientTypeAndStatusAndType(
+                        recipientId,
+                        recipientType,
+                        status,
+                        type,
+                        pageable,
+                    )
+                status != null ->
+                    messageRepository.findByRecipientIdAndRecipientTypeAndStatus(
+                        recipientId,
+                        recipientType,
+                        status,
+                        pageable,
+                    )
+                type != null ->
+                    messageRepository.findByRecipientIdAndRecipientTypeAndType(
+                        recipientId,
+                        recipientType,
+                        type,
+                        pageable,
+                    )
+                else ->
+                    messageRepository.findByRecipientIdAndRecipientType(
+                        recipientId,
+                        recipientType,
+                        pageable,
+                    )
+            }
+
+        val unreadCount = messageRepository.countUnread(recipientId, recipientType)
+
+        return MessageListResponse(
+            items = messagePage.content.map { MessageResponse.from(it) },
+            total = messagePage.totalElements,
+            page = page,
+            unreadCount = unreadCount,
+        )
+    }
+
+    /**
+     * Retrieves a single message by ID, verifying recipient access.
+     */
+    fun getMessage(
+        id: UUID,
+        recipientId: UUID,
+        recipientType: String,
+    ): MessageResult {
+        val message =
+            messageRepository.findById(id).orElse(null)
+                ?: return MessageResult.NotFound("Message not found")
+
+        if (message.recipientId != recipientId || message.recipientType != recipientType) {
+            return MessageResult.NotFound("Message not found")
+        }
+
+        return MessageResult.Success(MessageResponse.from(message))
+    }
+
+    /**
+     * Marks a message as read.
+     */
+    @Transactional
+    fun markAsRead(
+        id: UUID,
+        recipientId: UUID,
+        recipientType: String,
+    ): MessageResult {
+        val message =
+            messageRepository.findById(id).orElse(null)
+                ?: return MessageResult.NotFound("Message not found")
+
+        if (message.recipientId != recipientId || message.recipientType != recipientType) {
+            return MessageResult.NotFound("Message not found")
+        }
+
+        message.markAsRead()
+        val saved = messageRepository.save(message)
+        return MessageResult.Success(MessageResponse.from(saved))
+    }
+
+    /**
+     * Performs an action on a message.
+     *
+     * Validates that:
+     * - Message exists and recipient has access
+     * - Message hasn't already been actioned
+     * - Action is valid for the message's action type
+     */
+    @Transactional
+    fun performAction(
+        id: UUID,
+        recipientId: UUID,
+        recipientType: String,
+        request: MessageActionRequest,
+    ): MessageResult {
+        val message =
+            messageRepository.findById(id).orElse(null)
+                ?: return MessageResult.NotFound("Message not found")
+
+        if (message.recipientId != recipientId || message.recipientType != recipientType) {
+            return MessageResult.NotFound("Message not found")
+        }
+
+        if (message.status == MessageStatus.ACTIONED) {
+            return MessageResult.Conflict("Message already actioned")
+        }
+
+        if (!isValidAction(message.actionType, request.action)) {
+            return MessageResult.ValidationError(listOf("Invalid action: ${request.action}"))
+        }
+
+        message.markAsActioned(request.action)
+        val saved = messageRepository.save(message)
+
+        return MessageResult.Success(MessageResponse.from(saved))
+    }
+
+    /**
+     * Creates and saves a new message.
+     */
+    @Transactional
+    fun createMessage(message: MessageEntity): MessageEntity {
+        return messageRepository.save(message)
+    }
+
+    /**
+     * Creates messages for multiple recipients.
+     *
+     * @param recipientIds List of recipient IDs
+     * @param recipientType Type of recipients (member/admin)
+     * @param messageBuilder Function to create a message for each recipient
+     */
+    @Transactional
+    fun createMessagesForRecipients(
+        recipientIds: List<UUID>,
+        recipientType: String,
+        messageBuilder: (UUID) -> MessageEntity,
+    ): List<MessageEntity> {
+        return recipientIds.map { recipientId ->
+            val message = messageBuilder(recipientId)
+            messageRepository.save(message)
+        }
+    }
+
+    /**
+     * Gets the count of unread messages for a recipient.
+     */
+    fun getUnreadCount(
+        recipientId: UUID,
+        recipientType: String,
+    ): Long {
+        return messageRepository.countUnread(recipientId, recipientType)
+    }
+
+    /**
+     * Validates that an action is allowed for a given action type.
+     */
+    private fun isValidAction(
+        actionType: String?,
+        action: String,
+    ): Boolean {
+        return when (actionType) {
+            "accept_decline" -> action in listOf("accept", "decline")
+            "approve_reject" -> action in listOf("approve", "reject")
+            "confirm_verify" -> action in listOf("confirm", "cannot_verify")
+            "acknowledge" -> action in listOf("dismiss", "acknowledge")
+            "view" -> action in listOf("dismiss")
+            else -> false
+        }
+    }
+}
