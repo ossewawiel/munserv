@@ -46,9 +46,9 @@ List issues with filters.
 **Errors:** 400 Invalid query
 
 ### GET /issues/{id}
-Get issue details.
+Get issue details including state history.
 
-**Response:** `Issue`
+**Response:** `IssueDetail` (includes `stateHistory: StateHistoryEntry[]`)
 **Errors:** 404 Not found
 
 ### POST /issues
@@ -112,3 +112,28 @@ Get sector details.
 
 **Response:** `Sector`
 **Errors:** 404 Not found
+
+---
+
+## Sector Settings
+
+### GET /sectors/{sectorId}/settings
+Get sector settings. Creates default settings if none exist.
+
+**Response:** `SectorSettings`
+**Errors:** 404 Sector not found
+
+### PATCH /sectors/{sectorId}/settings
+Partially update sector settings. Only provided fields are updated.
+
+**Request:**
+```json
+{
+  "newIssueVerificationMode": "ADMIN_ASSIGNS",  // optional
+  "fixVerificationMode": "NEAREST_AUTO",         // optional
+  "daysFixedBeforeClosed": 14,                   // optional, 1-365
+  "minimumGroundAdmins": 3                       // optional, 0-100
+}
+```
+**Response:** `SectorSettings`
+**Errors:** 400 Validation failed | 404 Sector not found
