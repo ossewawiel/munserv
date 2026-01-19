@@ -137,3 +137,41 @@ Partially update sector settings. Only provided fields are updated.
 ```
 **Response:** `SectorSettings`
 **Errors:** 400 Validation failed | 404 Sector not found
+
+---
+
+## Messages
+
+### GET /messages
+List messages for authenticated user with optional filtering.
+
+**Query:** `?status={status}&type={type}&page={n}&size={n}`
+**Response:** `MessageListResponse`
+```json
+{
+  "items": Message[],
+  "total": number,
+  "page": number,
+  "unreadCount": number
+}
+```
+**Errors:** 401 Unauthorized
+
+### GET /messages/{id}
+Get single message details.
+
+**Response:** `Message`
+**Errors:** 401 Unauthorized | 404 Not found
+
+### PATCH /messages/{id}/read
+Mark message as read.
+
+**Response:** `Message`
+**Errors:** 401 Unauthorized | 404 Not found
+
+### POST /messages/{id}/action
+Perform action on message (accept, decline, approve, reject, confirm, etc.).
+
+**Request:** `{ action: string, note?: string }`
+**Response:** `Message`
+**Errors:** 400 Invalid action | 401 Unauthorized | 404 Not found | 409 Already actioned

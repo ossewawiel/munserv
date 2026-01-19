@@ -76,6 +76,29 @@
 | url | string | Storage URL |
 | thumbnail | string | Thumbnail URL |
 
+## Message
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | MessageId | UUID |
+| type | MessageType | enum |
+| title | string | max 200 chars |
+| body | string | Message content |
+| recipientId | UUID | Member or Admin ID |
+| recipientType | string | "member" or "admin" |
+| senderId | UUID? | Optional sender |
+| senderType | string? | "member", "admin", "system" |
+| status | MessageStatus | enum |
+| actionType | string? | Action type for actionable messages |
+| relatedEntityId | UUID? | Related entity (issue, application) |
+| relatedEntityType | string? | Type of related entity |
+| actionResult | string? | Result after action performed |
+| metadata | object? | Additional JSON data |
+| createdAt | DateTime | ISO 8601 |
+| readAt | DateTime? | When marked as read |
+| actionedAt | DateTime? | When action performed |
+| expiresAt | DateTime? | Optional expiration |
+
 ---
 
 ## Enums
@@ -106,6 +129,31 @@
 | NEAREST_AUTO | Nearest Ground Admin auto-assigned |
 | FIRST_COME | First Ground Admin to accept |
 
+### MessageType
+
+| Value | Description |
+|-------|-------------|
+| GROUND_ADMIN_INVITATION | Invitation to become Ground Admin |
+| GROUND_ADMIN_APPLICATION | Application to become Ground Admin |
+| GROUND_ADMIN_APPROVED | Application/invitation approved |
+| GROUND_ADMIN_DECLINED | Application/invitation declined |
+| GROUND_ADMIN_INVITATION_DECLINED | Member declined invitation |
+| GROUND_ADMIN_REVOCATION | Ground Admin status revoked |
+| GROUND_ADMIN_STEPDOWN_REQUEST | Request to step down |
+| VERIFY_NEW_ISSUE | Request to verify new issue |
+| VERIFY_FIX | Request to verify fix |
+| MEMBER_REGISTRATION | New member registration notification |
+| MONTHLY_REPORT | Monthly activity report |
+
+### MessageStatus
+
+| Value | Description |
+|-------|-------------|
+| UNREAD | Not yet read |
+| READ | Marked as read |
+| ACTIONED | Action performed |
+| DISMISSED | Dismissed by recipient |
+
 ---
 
 ## ID Types
@@ -118,3 +166,4 @@ All IDs are UUID v4 wrapped in type-safe wrappers:
 - `SectorSettingsId` - Sector settings identifier
 - `IssueTypeId` - Issue type identifier
 - `PhotoId` - Photo identifier
+- `MessageId` - Message identifier

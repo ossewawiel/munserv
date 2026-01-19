@@ -62,7 +62,7 @@ interface MessageRepository : JpaRepository<MessageEntity, UUID> {
         SELECT COUNT(m) FROM MessageEntity m
         WHERE m.recipientId = :recipientId
         AND m.recipientType = :recipientType
-        AND m.status = 'UNREAD'
+        AND m.statusValue = 'unread'
         """,
     )
     fun countUnread(
