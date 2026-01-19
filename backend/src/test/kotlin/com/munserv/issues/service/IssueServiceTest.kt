@@ -3,8 +3,11 @@ package com.munserv.issues.service
 import com.munserv.issues.domain.Issue
 import com.munserv.issues.domain.IssueId
 import com.munserv.issues.domain.IssueState
+import com.munserv.issues.domain.IssueStateHistoryEntry
 import com.munserv.issues.domain.IssueType
 import com.munserv.issues.repository.IssueRepository
+import com.munserv.issues.repository.IssueStateHistoryRepository
+import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
@@ -13,6 +16,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -23,6 +27,7 @@ import java.util.UUID
 
 class IssueServiceTest {
     private lateinit var repository: IssueRepository
+    private lateinit var stateHistoryRepository: IssueStateHistoryRepository
     private lateinit var clock: Clock
     private lateinit var service: IssueService
 
@@ -30,13 +35,15 @@ class IssueServiceTest {
     private val testIssueId = IssueId(UUID.fromString("550e8400-e29b-41d4-a716-446655440100"))
     private val testSectorId = SectorId(UUID.fromString("550e8400-e29b-41d4-a716-446655440001"))
     private val testReporterId = MemberId(UUID.fromString("550e8400-e29b-41d4-a716-446655440010"))
+    private val testAdminId = AdminId(UUID.fromString("550e8400-e29b-41d4-a716-446655440020"))
     private val testLocation = GeoPoint(-26.1350, 27.9800)
 
     @BeforeEach
     fun setUp() {
         repository = mockk()
+        stateHistoryRepository = mockk()
         clock = Clock.fixed(fixedInstant, ZoneId.of("UTC"))
-        service = IssueService(repository, clock)
+        service = IssueService(repository, stateHistoryRepository, clock)
     }
 
     private fun createTestIssue(
@@ -140,7 +147,9 @@ class IssueServiceTest {
         @Test
         fun `should create issue with initial state and default heat`() {
             val savedIssueSlot = slot<Issue>()
+            val historySlot = slot<IssueStateHistoryEntry>()
             every { repository.save(capture(savedIssueSlot)) } answers { savedIssueSlot.captured }
+            every { stateHistoryRepository.save(capture(historySlot)) } answers { historySlot.captured }
 
             val command =
                 CreateIssueCommand(
@@ -162,6 +171,34 @@ class IssueServiceTest {
             savedIssue.createdAt shouldBe fixedInstant
             savedIssue.updatedAt shouldBe fixedInstant
         }
+
+        @Test
+        fun `should record initial state in history on creation`() {
+            val savedIssueSlot = slot<Issue>()
+            val historySlot = slot<IssueStateHistoryEntry>()
+            every { repository.save(capture(savedIssueSlot)) } answers { savedIssueSlot.captured }
+            every { stateHistoryRepository.save(capture(historySlot)) } answers { historySlot.captured }
+
+            val command =
+                CreateIssueCommand(
+                    sectorId = testSectorId,
+                    reporterId = testReporterId,
+                    type = IssueType.POTHOLE,
+                    location = testLocation,
+                    address = "123 Test Street",
+                    description = "A large pothole",
+                )
+
+            service.create(command)
+
+            verify(exactly = 1) { stateHistoryRepository.save(any()) }
+            val historyEntry = historySlot.captured
+            historyEntry.issueId shouldBe savedIssueSlot.captured.id
+            historyEntry.state shouldBe IssueState.Reported
+            historyEntry.changedAt shouldBe fixedInstant
+            historyEntry.changedBy shouldBe null
+            historyEntry.note shouldBe null
+        }
     }
 
     @Nested
@@ -170,9 +207,11 @@ class IssueServiceTest {
         fun `should update state when transition is valid`() {
             val issue = createTestIssue(state = IssueState.Reported)
             val updatedIssueSlot = slot<Issue>()
+            val historySlot = slot<IssueStateHistoryEntry>()
 
             every { repository.findByIdForUpdate(testIssueId) } returns issue
             every { repository.save(capture(updatedIssueSlot)) } answers { updatedIssueSlot.captured }
+            every { stateHistoryRepository.save(capture(historySlot)) } answers { historySlot.captured }
 
             val result = service.updateState(testIssueId, IssueState.Confirmed)
 
@@ -180,6 +219,44 @@ class IssueServiceTest {
             val updatedIssue = updatedIssueSlot.captured
             updatedIssue.state shouldBe IssueState.Confirmed
             updatedIssue.updatedAt shouldBe fixedInstant
+        }
+
+        @Test
+        fun `should record state change in history`() {
+            val issue = createTestIssue(state = IssueState.Reported)
+            val updatedIssueSlot = slot<Issue>()
+            val historySlot = slot<IssueStateHistoryEntry>()
+
+            every { repository.findByIdForUpdate(testIssueId) } returns issue
+            every { repository.save(capture(updatedIssueSlot)) } answers { updatedIssueSlot.captured }
+            every { stateHistoryRepository.save(capture(historySlot)) } answers { historySlot.captured }
+
+            service.updateState(testIssueId, IssueState.Confirmed, testAdminId, "Confirmed by inspection")
+
+            verify(exactly = 1) { stateHistoryRepository.save(any()) }
+            val historyEntry = historySlot.captured
+            historyEntry.issueId shouldBe testIssueId
+            historyEntry.state shouldBe IssueState.Confirmed
+            historyEntry.changedAt shouldBe fixedInstant
+            historyEntry.changedBy shouldBe testAdminId
+            historyEntry.note shouldBe "Confirmed by inspection"
+        }
+
+        @Test
+        fun `should record state change with null actor when not provided`() {
+            val issue = createTestIssue(state = IssueState.Reported)
+            val updatedIssueSlot = slot<Issue>()
+            val historySlot = slot<IssueStateHistoryEntry>()
+
+            every { repository.findByIdForUpdate(testIssueId) } returns issue
+            every { repository.save(capture(updatedIssueSlot)) } answers { updatedIssueSlot.captured }
+            every { stateHistoryRepository.save(capture(historySlot)) } answers { historySlot.captured }
+
+            service.updateState(testIssueId, IssueState.Confirmed)
+
+            val historyEntry = historySlot.captured
+            historyEntry.changedBy shouldBe null
+            historyEntry.note shouldBe null
         }
 
         @Test
@@ -208,9 +285,11 @@ class IssueServiceTest {
         fun `should transition Confirmed to InProgress`() {
             val issue = createTestIssue(state = IssueState.Confirmed)
             val updatedIssueSlot = slot<Issue>()
+            val historySlot = slot<IssueStateHistoryEntry>()
 
             every { repository.findByIdForUpdate(testIssueId) } returns issue
             every { repository.save(capture(updatedIssueSlot)) } answers { updatedIssueSlot.captured }
+            every { stateHistoryRepository.save(capture(historySlot)) } answers { historySlot.captured }
 
             val result = service.updateState(testIssueId, IssueState.InProgress)
 
@@ -222,9 +301,11 @@ class IssueServiceTest {
         fun `should transition InProgress to Fixed`() {
             val issue = createTestIssue(state = IssueState.InProgress)
             val updatedIssueSlot = slot<Issue>()
+            val historySlot = slot<IssueStateHistoryEntry>()
 
             every { repository.findByIdForUpdate(testIssueId) } returns issue
             every { repository.save(capture(updatedIssueSlot)) } answers { updatedIssueSlot.captured }
+            every { stateHistoryRepository.save(capture(historySlot)) } answers { historySlot.captured }
 
             val result = service.updateState(testIssueId, IssueState.Fixed)
 
@@ -236,9 +317,11 @@ class IssueServiceTest {
         fun `should transition Fixed to Reopened`() {
             val issue = createTestIssue(state = IssueState.Fixed)
             val updatedIssueSlot = slot<Issue>()
+            val historySlot = slot<IssueStateHistoryEntry>()
 
             every { repository.findByIdForUpdate(testIssueId) } returns issue
             every { repository.save(capture(updatedIssueSlot)) } answers { updatedIssueSlot.captured }
+            every { stateHistoryRepository.save(capture(historySlot)) } answers { historySlot.captured }
 
             val result = service.updateState(testIssueId, IssueState.Reopened)
 
@@ -254,6 +337,46 @@ class IssueServiceTest {
             val result = service.updateState(testIssueId, IssueState.Confirmed)
 
             result.shouldBeInstanceOf<IssueResult.InvalidTransition>()
+        }
+    }
+
+    @Nested
+    inner class GetStateHistory {
+        @Test
+        fun `should return state history for issue`() {
+            val historyEntries =
+                listOf(
+                    IssueStateHistoryEntry(
+                        id = com.munserv.issues.domain.IssueStateHistoryId.generate(),
+                        issueId = testIssueId,
+                        state = IssueState.Reported,
+                        changedAt = fixedInstant.minusSeconds(3600),
+                        changedBy = null,
+                        note = null,
+                    ),
+                    IssueStateHistoryEntry(
+                        id = com.munserv.issues.domain.IssueStateHistoryId.generate(),
+                        issueId = testIssueId,
+                        state = IssueState.Confirmed,
+                        changedAt = fixedInstant,
+                        changedBy = testAdminId,
+                        note = "Confirmed",
+                    ),
+                )
+            every { stateHistoryRepository.findByIssueId(testIssueId) } returns historyEntries
+
+            val result = service.getStateHistory(testIssueId)
+
+            result shouldBe historyEntries
+        }
+
+        @Test
+        fun `should return empty list when no history exists`() {
+            every { stateHistoryRepository.findByIssueId(testIssueId) } returns emptyList()
+
+            val result = service.getStateHistory(testIssueId)
+
+            result shouldBe emptyList()
         }
     }
 

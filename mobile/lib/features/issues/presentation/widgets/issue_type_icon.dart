@@ -11,23 +11,37 @@ class IssueTypeIcon extends StatelessWidget {
   final bool showBackground;
   final bool filled;
 
+  /// When true, uses primary color instead of per-type colors
+  final bool monochrome;
+
   const IssueTypeIcon({
     super.key,
     required this.type,
     this.size = 56,
     this.showBackground = true,
     this.filled = true,
+    this.monochrome = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final visuals = IssueTypeVisuals.forType(type);
     final iconSize = size * 0.5;
+    final colors = Theme.of(context).colorScheme;
+
+    // Use primary color for monochrome mode, otherwise use per-type color
+    final iconColor = monochrome ? colors.primary : visuals.color;
+    final backgroundColor = monochrome
+        ? colors.primary.withValues(alpha: 0.05)
+        : visuals.lightColor;
+    final borderColor = monochrome
+        ? colors.primary.withValues(alpha: 0.15)
+        : visuals.color.withValues(alpha: 0.2);
 
     if (!showBackground) {
       return Icon(
         filled ? visuals.filledIcon : visuals.icon,
-        color: visuals.color,
+        color: iconColor,
         size: iconSize,
         semanticLabel: visuals.semanticLabel,
       );
@@ -37,17 +51,17 @@ class IssueTypeIcon extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: visuals.lightColor,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(size * 0.25), // Rounded square
         border: Border.all(
-          color: visuals.color.withValues(alpha: 0.2),
+          color: borderColor,
           width: 1.5,
         ),
       ),
       child: Center(
         child: Icon(
           filled ? visuals.filledIcon : visuals.icon,
-          color: visuals.color,
+          color: iconColor,
           size: iconSize,
           semanticLabel: visuals.semanticLabel,
         ),

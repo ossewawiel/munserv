@@ -19,7 +19,10 @@ data class CreateIssueRequest(
     @Schema(
         description = "Type of issue",
         example = "pothole",
-        allowableValues = ["pothole", "water_leak", "street_light", "traffic_light", "sewage_leak", "illegal_dumping", "road_damage", "other"],
+        allowableValues = [
+            "pothole", "water_leak", "street_light", "traffic_light",
+            "sewage_leak", "illegal_dumping", "road_damage", "other",
+        ],
     )
     val type: String,
     @field:NotBlank(message = "Sector ID is required")

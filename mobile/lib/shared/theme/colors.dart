@@ -118,16 +118,31 @@ class IssueStateColors {
 
 /// Heat indicator colors (priority visualization)
 class HeatColors {
+  // Vibrant colors for full indicators
   static const Color low = Color(0xFF4CAF50);
   static const Color medium = Color(0xFFFF9800);
   static const Color high = Color(0xFFF44336);
   static const Color critical = Color(0xFF9C27B0);
+
+  // Muted variants (~60% saturation) for subtle displays
+  static const Color lowMuted = Color(0xFF7CB081);
+  static const Color mediumMuted = Color(0xFFCCAA66);
+  static const Color highMuted = Color(0xFFCC7A73);
+  static const Color criticalMuted = Color(0xFFA07BA8);
 
   static Color fromHeat(int heat) {
     if (heat >= 80) return critical;
     if (heat >= 60) return high;
     if (heat >= 40) return medium;
     return low;
+  }
+
+  /// Returns muted color variant for subtle heat displays
+  static Color fromHeatMuted(int heat) {
+    if (heat >= 80) return criticalMuted;
+    if (heat >= 60) return highMuted;
+    if (heat >= 40) return mediumMuted;
+    return lowMuted;
   }
 }
 

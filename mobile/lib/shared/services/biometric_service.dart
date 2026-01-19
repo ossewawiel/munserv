@@ -60,10 +60,8 @@ class BiometricService {
 
       final didAuthenticate = await _auth.authenticate(
         localizedReason: localizedReason,
-        options: AuthenticationOptions(
-          biometricOnly: biometricOnly,
-          stickyAuth: true,
-        ),
+        biometricOnly: biometricOnly,
+        persistAcrossBackgrounding: true,
       );
 
       if (didAuthenticate) {

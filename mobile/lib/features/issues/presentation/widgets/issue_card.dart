@@ -94,10 +94,11 @@ class IssueCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Issue type icon
+              // Issue type icon (monochrome)
               IssueTypeIcon(
                 type: issue.type,
                 size: IconSizes.xxl,
+                monochrome: true,
               ),
               const SizedBox(width: Spacing.md),
               // Content
@@ -105,8 +106,9 @@ class IssueCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Type and state row
+                    // Title row with heat badge on right
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: Text(
@@ -119,7 +121,7 @@ class IssueCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: Spacing.sm),
-                        IssueStateBadge(state: issue.state, compact: true),
+                        HeatBadge(heat: issue.heat, muted: true),
                       ],
                     ),
                     const SizedBox(height: Spacing.sm),
@@ -143,17 +145,21 @@ class IssueCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: Spacing.xs),
-                    // Date
-                    Text(
-                      _formatRelativeDate(issue.createdAt),
-                      style: theme.textTheme.bodySmall,
+                    // Date and state row
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _formatRelativeDate(issue.createdAt),
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                        IssueStateBadge(state: issue.state, compact: true),
+                      ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: Spacing.sm),
-              // Heat badge
-              HeatBadge(heat: issue.heat),
             ],
           ),
         ),
@@ -237,7 +243,7 @@ class IssueCard extends StatelessWidget {
                       constraints: const BoxConstraints(),
                     ),
                   const SizedBox(height: Spacing.sm),
-                  HeatBadge(heat: issue.heat),
+                  HeatBadge(heat: issue.heat, muted: true),
                 ],
               ),
             ],
@@ -272,7 +278,7 @@ class IssueCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              IssueTypeIcon(type: issue.type, size: IconSizes.lg),
+              IssueTypeIcon(type: issue.type, size: IconSizes.lg, monochrome: true),
               const SizedBox(width: Spacing.sm),
               Expanded(
                 child: Text(
@@ -315,6 +321,7 @@ class IssueCard extends StatelessWidget {
       child: IssueTypeIcon(
         type: issue.type,
         size: IconSizes.lg,
+        monochrome: true,
       ),
     );
   }

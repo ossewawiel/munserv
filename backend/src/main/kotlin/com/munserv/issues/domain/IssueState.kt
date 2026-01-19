@@ -6,7 +6,7 @@ package com.munserv.issues.domain
  *
  * State machine:
  * ```
- * Reported → Confirmed → InProgress → Fixed
+ * Reported → Confirmed → InProgress → Fixed → Closed
  *    ↓          ↓            ↓          ↓
  * Rejected  Rejected    Rejected   Reopened → Confirmed
  * ```
@@ -71,7 +71,7 @@ sealed class IssueState {
      * Issue has been resolved.
      */
     data object Fixed : IssueState() {
-        override val allowedTransitions: Set<IssueState> by lazy { setOf(Reopened) }
+        override val allowedTransitions: Set<IssueState> by lazy { setOf(Reopened, Closed) }
         override val isOpen: Boolean = false
 
         override fun toApiString(): String = "fixed"
@@ -98,6 +98,17 @@ sealed class IssueState {
         override fun toApiString(): String = "reopened"
     }
 
+    /**
+     * Issue has been permanently closed after being fixed for a period of time.
+     * This is a terminal state.
+     */
+    data object Closed : IssueState() {
+        override val allowedTransitions: Set<IssueState> = emptySet()
+        override val isOpen: Boolean = false
+
+        override fun toApiString(): String = "closed"
+    }
+
     companion object {
         /**
          * All possible issue states.
@@ -110,6 +121,7 @@ sealed class IssueState {
                 Fixed,
                 Rejected,
                 Reopened,
+                Closed,
             )
 
         /**
@@ -124,6 +136,7 @@ sealed class IssueState {
                 "fixed" -> Fixed
                 "rejected" -> Rejected
                 "reopened" -> Reopened
+                "closed" -> Closed
                 else -> throw IllegalArgumentException("Unknown issue state: $value")
             }
     }

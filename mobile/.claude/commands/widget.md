@@ -7,7 +7,7 @@ parameters:
     description: "Widget name in PascalCase (e.g., 'IssueCard', 'HeatBadge')"
     required: true
   - name: "feature"
-    description: "Feature folder (e.g., 'issues', 'members', 'auth')"
+    description: "Feature folder (e.g., 'issues', 'members', 'auth') or 'shared' for reusable widgets"
     required: true
   - name: "type"
     description: "Widget type: stateless, consumer, or hook"
@@ -17,6 +17,25 @@ parameters:
 ---
 
 You are an expert Flutter developer generating widgets for the MunServ mobile app.
+
+## IMPORTANT: Reusability Check (Do This First!)
+
+Before creating ANY widget, answer these questions:
+
+1. **Does a similar widget already exist?**
+   - Check `lib/shared/widgets/` first
+   - Check the target feature's `widgets/` folder
+   - If YES → Extend existing widget with variant instead
+
+2. **Will this be used in 2+ places?**
+   - If YES → Create in `lib/shared/widgets/` instead of feature folder
+   - Use `/shared-widget` skill for shared components
+
+3. **Is this a core UI pattern?** (card, badge, empty state, indicator)
+   - If YES → Create in `lib/shared/widgets/`
+
+4. **Are you about to create an inline `_EmptyState` or `_LoadingState`?**
+   - STOP! Use `EmptyState.noIssues()` or `LoadingSpinner()` from shared widgets
 
 ## Task
 
@@ -138,6 +157,26 @@ lib/features/{{feature}}/presentation/widgets/{{snake_case(name)}}.dart
 - [ ] NEVER hardcode colors with `Color(0xFF...)`
 - [ ] NEVER use `.withOpacity()` on theme colors
 
+### Sizing (CRITICAL)
+- [ ] Use `IconSizes.md` (24), `IconSizes.xxl` (64), `IconSizes.display` (80)
+- [ ] Use `ThumbnailSizes.md` (64), `ThumbnailSizes.lg` (100)
+- [ ] Use `Spacing.sm` (8), `Spacing.md` (16), `Spacing.lg` (24)
+- [ ] NEVER use magic numbers like `64`, `80`, `100`, `24`
+
+```dart
+import 'package:munserv/shared/theme/typography.dart';
+
+// ✅ DO
+Icon(Icons.inbox, size: IconSizes.display)
+Container(width: ThumbnailSizes.md, height: ThumbnailSizes.md)
+SizedBox(height: Spacing.lg)
+
+// ❌ DON'T
+Icon(Icons.inbox, size: 80)
+Container(width: 64, height: 64)
+SizedBox(height: 24)
+```
+
 ### Widget Composition
 - [ ] Extract sub-widgets if >50 lines
 - [ ] Use `_` prefix for private sub-widgets
@@ -217,10 +256,60 @@ import '../domain/issue.dart';
 import '../providers/issue_providers.dart';
 ```
 
+## Use Existing Shared Widgets
+
+Before creating new widgets, USE these from `shared/widgets/`:
+
+### Empty States (NEVER create inline _EmptyState)
+```dart
+// ✅ DO: Use factory constructors
+EmptyState.noIssues(onRefresh: () => ref.invalidate(provider))
+EmptyState.noReports(onReport: () => navigateToReport())
+EmptyState.noResults(query: searchQuery)
+EmptyState.networkError(onRetry: () => retry())
+EmptyState.locationError(onRetry: () => requestPermission())
+
+// ❌ DON'T: Create inline empty states
+class _EmptyState extends StatelessWidget { ... } // FORBIDDEN
+```
+
+### Loading & Error
+```dart
+// ✅ DO
+LoadingSpinner()
+LoadingSpinner.small()
+ErrorDisplay(error: error, onRetry: onRetry)
+
+// ❌ DON'T
+CircularProgressIndicator() // Use LoadingSpinner instead
+```
+
+### Issue Display (use variants)
+```dart
+// ✅ DO: Use IssueCard variants
+IssueCard(issue: issue, variant: IssueCardVariant.list)
+IssueCard(issue: issue, variant: IssueCardVariant.mapPreview, onClose: close)
+IssueCard(issue: issue, variant: IssueCardVariant.compact)
+
+// ❌ DON'T: Create new issue card widgets
+class _IssuePreviewCard extends StatelessWidget { ... } // FORBIDDEN
+```
+
+### Page Wrapper
+```dart
+// ✅ DO: Use BrandedScaffold for top-level pages
+BrandedScaffold(
+  title: 'Page Title',
+  body: content,
+)
+```
+
 ## Output
 
-1. Determine appropriate widget type based on requirements
-2. Create widget file at correct location
-3. Include proper imports
-4. Follow M3 theming patterns
-5. Add KDoc comment explaining widget purpose
+1. **CHECK** existing shared widgets first
+2. Determine appropriate widget type based on requirements
+3. Create widget file at correct location (shared/ if reusable)
+4. Include proper imports including `typography.dart` for sizing
+5. Follow M3 theming patterns
+6. Use sizing constants, not magic numbers
+7. Add KDoc comment explaining widget purpose

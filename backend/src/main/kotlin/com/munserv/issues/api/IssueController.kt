@@ -12,6 +12,7 @@ import com.munserv.shared.api.ErrorCodes
 import com.munserv.shared.api.ErrorResponse
 import com.munserv.shared.api.paginate
 import com.munserv.shared.api.toPaginationInfo
+import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
@@ -213,7 +214,8 @@ class IssueController(
         return when (val result = issueService.findById(issueId)) {
             is IssueResult.Success -> {
                 val photoUrls = photoService.getPhotoUrls(issueId)
-                ResponseEntity.ok(result.issue.toDetailResponse(photoUrls))
+                val stateHistory = issueService.getStateHistory(issueId).map { it.toResponse() }
+                ResponseEntity.ok(result.issue.toDetailResponse(photoUrls, stateHistory))
             }
             is IssueResult.NotFound ->
                 ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -335,14 +337,18 @@ class IssueController(
         )
         @Valid
         @RequestBody request: UpdateIssueStateRequest,
+        @Parameter(hidden = true)
+        @AuthenticationPrincipal adminIdStr: String?,
     ): ResponseEntity<*> {
         val issueId = IssueId(UUID.fromString(id))
         val newState = IssueState.fromString(request.state)
+        val adminId = adminIdStr?.let { runCatching { AdminId(UUID.fromString(it)) }.getOrNull() }
 
-        return when (val result = issueService.updateState(issueId, newState)) {
+        return when (val result = issueService.updateState(issueId, newState, adminId, request.note)) {
             is IssueResult.Success -> {
                 val photoUrls = photoService.getPhotoUrls(issueId)
-                ResponseEntity.ok(result.issue.toDetailResponse(photoUrls))
+                val stateHistory = issueService.getStateHistory(issueId).map { it.toResponse() }
+                ResponseEntity.ok(result.issue.toDetailResponse(photoUrls, stateHistory))
             }
             is IssueResult.NotFound ->
                 ResponseEntity.status(HttpStatus.NOT_FOUND)

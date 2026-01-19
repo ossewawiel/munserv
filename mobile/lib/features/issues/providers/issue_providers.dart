@@ -171,9 +171,10 @@ class IssuesNotifier extends _$IssuesNotifier {
 }
 
 /// Fetches a single issue detail by ID
-@riverpod
+/// keepAlive: true prevents refetch when navigating between detail sub-pages
+@Riverpod(keepAlive: true)
 Future<IssueDetail> issueDetail(Ref ref, String issueId) async {
-  final repository = ref.watch(issueRepositoryProvider);
+  final repository = ref.read(issueRepositoryProvider);
   final result = await repository.getIssue(issueId);
 
   return switch (result) {

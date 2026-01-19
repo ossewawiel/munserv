@@ -21,7 +21,7 @@ void main() {
       expect(find.byType(FlutterMap), findsOneWidget);
     });
 
-    testWidgets('renders with 1:1 aspect ratio', (tester) async {
+    testWidgets('renders with 16:10 aspect ratio', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -35,7 +35,7 @@ void main() {
 
       expect(find.byType(AspectRatio), findsOneWidget);
       final aspectRatio = tester.widget<AspectRatio>(find.byType(AspectRatio));
-      expect(aspectRatio.aspectRatio, equals(1.0));
+      expect(aspectRatio.aspectRatio, equals(16 / 10));
     });
 
     testWidgets('calls onTap when tapped', (tester) async {

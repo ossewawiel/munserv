@@ -37,6 +37,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:munserv/shared/widgets/loading_spinner.dart';
 import 'package:munserv/shared/widgets/error_display.dart';
+import 'package:munserv/shared/widgets/empty_state.dart';
+import 'package:munserv/shared/theme/typography.dart';
 import '../providers/{{feature}}_providers.dart';
 import '../domain/{{entity}}.dart';
 import 'widgets/{{entity}}_card.dart';
@@ -77,7 +79,10 @@ class {{name}}Page extends ConsumerWidget {
 
   Widget _buildList(BuildContext context, WidgetRef ref, List<{{Entity}}> items) {
     if (items.isEmpty) {
-      return const _EmptyState();
+      return EmptyState.noResults(
+        onAction: () => _navigateToCreate(context),
+        actionLabel: 'Create First Item',
+      );
     }
 
     return RefreshIndicator(
@@ -105,42 +110,13 @@ class {{name}}Page extends ConsumerWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.inbox_outlined,
-            size: 64,
-            color: colors.onSurfaceVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No items yet',
-            style: textTheme.titleMedium?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Create your first item to get started',
-            style: textTheme.bodyMedium?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// NOTE: DO NOT create inline _EmptyState classes!
+// Always use EmptyState factory constructors from shared/widgets/empty_state.dart:
+//   - EmptyState.noIssues(onRefresh: ...)
+//   - EmptyState.noReports(onReport: ...)
+//   - EmptyState.noResults(onAction: ..., actionLabel: ...)
+//   - EmptyState.networkError(onRetry: ...)
+//   - EmptyState.locationError(onRetry: ...)
 ```
 
 ### Detail Screen

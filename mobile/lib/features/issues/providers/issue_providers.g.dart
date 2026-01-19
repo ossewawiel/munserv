@@ -235,11 +235,13 @@ abstract class _$IssuesNotifier
 }
 
 /// Fetches a single issue detail by ID
+/// keepAlive: true prevents refetch when navigating between detail sub-pages
 
 @ProviderFor(issueDetail)
 const issueDetailProvider = IssueDetailFamily._();
 
 /// Fetches a single issue detail by ID
+/// keepAlive: true prevents refetch when navigating between detail sub-pages
 
 final class IssueDetailProvider
     extends
@@ -250,13 +252,14 @@ final class IssueDetailProvider
         >
     with $FutureModifier<IssueDetail>, $FutureProvider<IssueDetail> {
   /// Fetches a single issue detail by ID
+  /// keepAlive: true prevents refetch when navigating between detail sub-pages
   const IssueDetailProvider._({
     required IssueDetailFamily super.from,
     required String super.argument,
   }) : super(
          retry: null,
          name: r'issueDetailProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -294,9 +297,10 @@ final class IssueDetailProvider
   }
 }
 
-String _$issueDetailHash() => r'9cd7b8f265916bcb386ac88cd7221353b231a1dc';
+String _$issueDetailHash() => r'6247872d2e627e35473af2c04f3231b0f7a56d4a';
 
 /// Fetches a single issue detail by ID
+/// keepAlive: true prevents refetch when navigating between detail sub-pages
 
 final class IssueDetailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<IssueDetail>, String> {
@@ -306,10 +310,11 @@ final class IssueDetailFamily extends $Family
         name: r'issueDetailProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   /// Fetches a single issue detail by ID
+  /// keepAlive: true prevents refetch when navigating between detail sub-pages
 
   IssueDetailProvider call(String issueId) =>
       IssueDetailProvider._(argument: issueId, from: this);

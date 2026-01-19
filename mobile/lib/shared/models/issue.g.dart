@@ -47,6 +47,7 @@ const _$IssueTypeEnumMap = {
   IssueType.trafficLight: 'traffic_light',
   IssueType.streetLight: 'street_light',
   IssueType.illegalDumping: 'illegal_dumping',
+  IssueType.roadDamage: 'road_damage',
   IssueType.other: 'other',
 };
 

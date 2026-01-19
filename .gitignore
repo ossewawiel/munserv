@@ -31,8 +31,10 @@ web/coverage/
 # Backend (Kotlin/Spring)
 backend/.gradle/
 backend/build/
+backend/bin/
 backend/out/
 backend/*.log
+backend/uploads/
 
 # IDE
 .idea/
@@ -54,6 +56,8 @@ backend/*.log
 # OS
 .DS_Store
 Thumbs.db
+*:Zone.Identifier
+~$*
 
 # Logs
 *.log

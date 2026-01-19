@@ -65,12 +65,19 @@ class HeatIndicator extends StatelessWidget {
 class HeatBadge extends StatelessWidget {
   final int heat;
 
-  const HeatBadge({super.key, required this.heat});
+  /// When true, uses muted (desaturated) colors for subtle display
+  final bool muted;
+
+  const HeatBadge({super.key, required this.heat, this.muted = false});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = HeatColors.fromHeat(heat);
+    final color = muted ? HeatColors.fromHeatMuted(heat) : HeatColors.fromHeat(heat);
+
+    // Use slightly lower alpha values for muted mode
+    final bgAlpha = muted ? 0.08 : 0.1;
+    final borderAlpha = muted ? 0.2 : 0.3;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -78,9 +85,9 @@ class HeatBadge extends StatelessWidget {
         vertical: Spacing.xs,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withValues(alpha: bgAlpha),
         borderRadius: BorderRadius.circular(Radii.sm),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withValues(alpha: borderAlpha)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

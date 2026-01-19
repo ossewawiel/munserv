@@ -181,10 +181,8 @@ void main() {
         when(
           () => mockAuth.authenticate(
             localizedReason: 'Test reason',
-            options: const AuthenticationOptions(
-              biometricOnly: true,
-              stickyAuth: true,
-            ),
+            biometricOnly: true,
+            persistAcrossBackgrounding: true,
           ),
         ).thenAnswer((_) async => true);
 
@@ -207,10 +205,8 @@ void main() {
         when(
           () => mockAuth.authenticate(
             localizedReason: 'Test reason',
-            options: const AuthenticationOptions(
-              biometricOnly: true,
-              stickyAuth: true,
-            ),
+            biometricOnly: true,
+            persistAcrossBackgrounding: true,
           ),
         ).thenAnswer((_) async => false);
 
@@ -251,10 +247,8 @@ void main() {
         when(
           () => mockAuth.authenticate(
             localizedReason: 'Test reason',
-            options: const AuthenticationOptions(
-              biometricOnly: true,
-              stickyAuth: true,
-            ),
+            biometricOnly: true,
+            persistAcrossBackgrounding: true,
           ),
         ).thenThrow(Exception('Auth error'));
 

@@ -1,6 +1,7 @@
 package com.munserv.issues.api
 
 import com.munserv.issues.domain.Issue
+import com.munserv.issues.domain.IssueStateHistoryEntry
 
 /**
  * Summary response for issues list.
@@ -27,11 +28,22 @@ data class IssueDetailResponse(
     val description: String?,
     val heat: Int,
     val photoUrls: List<String>,
+    val stateHistory: List<StateHistoryEntryResponse>,
     val sectorId: String,
     val reporterId: String,
     val reportCount: Int,
     val createdAt: String,
     val updatedAt: String,
+)
+
+/**
+ * State history entry response.
+ */
+data class StateHistoryEntryResponse(
+    val state: String,
+    val changedAt: String,
+    val changedBy: String?,
+    val note: String?,
 )
 
 /**
@@ -73,19 +85,33 @@ fun Issue.toSummaryResponse(thumbnailUrl: String? = null) =
         createdAt = createdAt.toString(),
     )
 
-fun Issue.toDetailResponse(photoUrls: List<String> = emptyList()) =
-    IssueDetailResponse(
-        id = id.value.toString(),
-        type = type.toApiString(),
+fun Issue.toDetailResponse(
+    photoUrls: List<String> = emptyList(),
+    stateHistory: List<StateHistoryEntryResponse> = emptyList(),
+) = IssueDetailResponse(
+    id = id.value.toString(),
+    type = type.toApiString(),
+    state = state.toApiString(),
+    location = LocationResponse(location.latitude, location.longitude),
+    address = address,
+    description = description,
+    heat = heat,
+    photoUrls = photoUrls,
+    stateHistory = stateHistory,
+    sectorId = sectorId.value.toString(),
+    reporterId = reporterId.value.toString(),
+    reportCount = reportCount,
+    createdAt = createdAt.toString(),
+    updatedAt = updatedAt.toString(),
+)
+
+/**
+ * Convert state history entry to response.
+ */
+fun IssueStateHistoryEntry.toResponse(adminName: String? = null) =
+    StateHistoryEntryResponse(
         state = state.toApiString(),
-        location = LocationResponse(location.latitude, location.longitude),
-        address = address,
-        description = description,
-        heat = heat,
-        photoUrls = photoUrls,
-        sectorId = sectorId.value.toString(),
-        reporterId = reporterId.value.toString(),
-        reportCount = reportCount,
-        createdAt = createdAt.toString(),
-        updatedAt = updatedAt.toString(),
+        changedAt = changedAt.toString(),
+        changedBy = adminName ?: changedBy?.value?.toString(),
+        note = note,
     )

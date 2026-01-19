@@ -157,6 +157,24 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
+        path: '/issues/:id/map',
+        name: 'issueMap',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return FullscreenMapPage(issueId: id);
+        },
+      ),
+      GoRoute(
+        path: '/issues/:id/photos',
+        name: 'issuePhotos',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final indexStr = state.uri.queryParameters['index'] ?? '0';
+          final index = int.tryParse(indexStr) ?? 0;
+          return PhotoGalleryPage(issueId: id, initialIndex: index);
+        },
+      ),
+      GoRoute(
         path: '/report',
         name: 'report',
         builder: (context, state) => const ReportIssuePage(),

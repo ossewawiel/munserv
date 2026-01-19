@@ -281,11 +281,27 @@ class IssuesApiContractTest {
             content.contains("\"longitude\"") shouldBe true
             content.contains("\"heat\"") shouldBe true
             content.contains("\"photoUrls\"") shouldBe true
+            content.contains("\"stateHistory\"") shouldBe true
             content.contains("\"sectorId\"") shouldBe true
             content.contains("\"reporterId\"") shouldBe true
             content.contains("\"reportCount\"") shouldBe true
             content.contains("\"createdAt\"") shouldBe true
             content.contains("\"updatedAt\"") shouldBe true
+        }
+
+        @Test
+        fun `GET api-v1-issues-id should return stateHistory array`() {
+            mockMvc
+                .get("/api/v1/issues/$testIssueId") {
+                    header("Authorization", "Bearer $memberToken")
+                    accept = MediaType.APPLICATION_JSON
+                }
+                .andExpect {
+                    status { isOk() }
+                    jsonPath("$.stateHistory") { isArray() }
+                    jsonPath("$.stateHistory[0].state") { isNotEmpty() }
+                    jsonPath("$.stateHistory[0].changedAt") { isNotEmpty() }
+                }
         }
     }
 
@@ -418,6 +434,34 @@ class IssuesApiContractTest {
                     status { isOk() }
                     jsonPath("$.id") { value(issueId) }
                     jsonPath("$.state") { value("confirmed") }
+                }
+        }
+
+        @Test
+        fun `PATCH api-v1-issues-id-state should record state history with note`() {
+            // Create a fresh issue and update state
+            val issueId = createFreshIssue()
+
+            val request =
+                UpdateIssueStateRequest(
+                    state = "confirmed",
+                    note = "Confirmed by field inspection",
+                )
+
+            mockMvc
+                .patch("/api/v1/issues/$issueId/state") {
+                    header("Authorization", "Bearer $adminToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }
+                .andExpect {
+                    status { isOk() }
+                    jsonPath("$.stateHistory") { isArray() }
+                    // Should have 2 entries: initial "reported" + "confirmed"
+                    jsonPath("$.stateHistory.length()") { value(2) }
+                    jsonPath("$.stateHistory[0].state") { value("reported") }
+                    jsonPath("$.stateHistory[1].state") { value("confirmed") }
+                    jsonPath("$.stateHistory[1].note") { value("Confirmed by field inspection") }
                 }
         }
 

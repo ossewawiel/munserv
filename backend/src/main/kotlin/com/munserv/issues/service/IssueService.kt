@@ -3,7 +3,11 @@ package com.munserv.issues.service
 import com.munserv.issues.domain.Issue
 import com.munserv.issues.domain.IssueId
 import com.munserv.issues.domain.IssueState
+import com.munserv.issues.domain.IssueStateHistoryEntry
+import com.munserv.issues.domain.IssueStateHistoryId
 import com.munserv.issues.repository.IssueRepository
+import com.munserv.issues.repository.IssueStateHistoryRepository
+import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.MemberId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,6 +21,7 @@ import java.time.Instant
 @Service
 class IssueService(
     private val repository: IssueRepository,
+    private val stateHistoryRepository: IssueStateHistoryRepository,
     private val clock: Clock,
 ) {
     companion object {
@@ -54,6 +59,7 @@ class IssueService(
 
     /**
      * Create a new issue.
+     * Records initial "reported" state in history.
      */
     @Transactional
     fun create(command: CreateIssueCommand): IssueResult {
@@ -75,17 +81,33 @@ class IssueService(
             )
 
         val savedIssue = repository.save(issue)
+
+        // Record initial state in history
+        val historyEntry =
+            IssueStateHistoryEntry(
+                id = IssueStateHistoryId.generate(),
+                issueId = savedIssue.id,
+                state = IssueState.Reported,
+                changedAt = now,
+                changedBy = null,
+                note = null,
+            )
+        stateHistoryRepository.save(historyEntry)
+
         return IssueResult.Success(savedIssue)
     }
 
     /**
      * Update the state of an issue.
      * Validates that the transition is allowed by the state machine.
+     * Records the state change in history.
      */
     @Transactional
     fun updateState(
         id: IssueId,
         newState: IssueState,
+        actorId: AdminId? = null,
+        note: String? = null,
     ): IssueResult {
         val issue =
             repository.findByIdForUpdate(id)
@@ -95,14 +117,35 @@ class IssueService(
             return IssueResult.InvalidTransition(issue.state, newState)
         }
 
+        val now = Instant.now(clock)
         val updatedIssue =
             issue
                 .withState(newState)
-                .withUpdatedAt(Instant.now(clock))
+                .withUpdatedAt(now)
 
         val savedIssue = repository.save(updatedIssue)
+
+        // Record state change in history
+        val historyEntry =
+            IssueStateHistoryEntry(
+                id = IssueStateHistoryId.generate(),
+                issueId = id,
+                state = newState,
+                changedAt = now,
+                changedBy = actorId,
+                note = note,
+            )
+        stateHistoryRepository.save(historyEntry)
+
         return IssueResult.Success(savedIssue)
     }
+
+    /**
+     * Get the state history for an issue.
+     * Returns entries ordered chronologically (oldest first).
+     */
+    @Transactional(readOnly = true)
+    fun getStateHistory(issueId: IssueId): List<IssueStateHistoryEntry> = stateHistoryRepository.findByIssueId(issueId)
 
     /**
      * Increment the report count for an issue (when another member reports the same issue).
