@@ -10,6 +10,9 @@ import com.munserv.auth.domain.MemberStatus
 import com.munserv.auth.repository.MemberRepository
 import com.munserv.auth.service.RegistrationResult
 import com.munserv.auth.service.RegistrationService
+import com.munserv.groundadmin.domain.ApplicationStatus
+import com.munserv.groundadmin.domain.ApplicationType
+import com.munserv.groundadmin.repository.GroundAdminApplicationRepository
 import com.munserv.issues.repository.IssueRepository
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
@@ -52,6 +55,7 @@ class AdminController(
     private val memberRepository: MemberRepository,
     private val issueRepository: IssueRepository,
     private val registrationService: RegistrationService,
+    private val applicationRepository: GroundAdminApplicationRepository,
     private val clock: Clock,
 ) {
     /**
@@ -126,13 +130,14 @@ class AdminController(
     /**
      * GET /api/v1/admin/members
      * Returns paginated list of members for the sector with issue counts.
-     * Optionally filter by member status.
+     * Optionally filter by member status, Ground Admin status, or pending applications.
      */
     @Operation(
         summary = "List sector members",
         description =
             "Retrieve a paginated list of members in a sector with their issue counts. " +
-                "Optionally filter by member status.",
+                "Supports filtering by member status, Ground Admin status, pending applications, " +
+                "and pending invitations.",
     )
     @ApiResponses(
         value = [
@@ -157,6 +162,12 @@ class AdminController(
             schema = Schema(allowableValues = ["pending_approval", "active", "suspended", "deleted"]),
         )
         @RequestParam(required = false) status: String?,
+        @Parameter(description = "Filter by Ground Admin status (true = only Ground Admins)")
+        @RequestParam(required = false) isGroundAdmin: Boolean?,
+        @Parameter(description = "Filter by pending GA application (true = only members with pending applications)")
+        @RequestParam(required = false) hasPendingApplication: Boolean?,
+        @Parameter(description = "Filter by pending GA invitation (true = only members with pending invitations)")
+        @RequestParam(required = false) hasInvitationPending: Boolean?,
         @Parameter(description = "Page number (1-based)", example = "1")
         @RequestParam(defaultValue = "1")
         @Min(1, message = "Page must be at least 1")
@@ -184,13 +195,38 @@ class AdminController(
                 }
             }
 
-        // Fetch members - filter by status if provided
-        val allMembers =
-            if (memberStatus != null) {
-                memberRepository.findBySectorIdAndStatus(id, memberStatus)
-            } else {
-                memberRepository.findBySectorId(id)
-            }
+        // Fetch members based on filters
+        var allMembers: List<Member>
+
+        // If filtering by Ground Admin status
+        if (isGroundAdmin == true) {
+            allMembers = memberRepository.findBySectorIdAndIsGroundAdmin(id, true)
+        } else if (hasPendingApplication == true || hasInvitationPending == true) {
+            // If filtering by pending applications or invitations
+            val pendingApplications =
+                applicationRepository.findBySectorIdAndStatus(
+                    id,
+                    ApplicationStatus.PENDING.toDbValue(),
+                )
+
+            val memberIds =
+                pendingApplications
+                    .filter { app ->
+                        when {
+                            hasPendingApplication == true -> app.type == ApplicationType.APPLICATION
+                            hasInvitationPending == true -> app.type == ApplicationType.INVITATION
+                            else -> true
+                        }
+                    }
+                    .map { it.memberId }
+                    .toSet()
+
+            allMembers = memberIds.mapNotNull { memberRepository.findById(it) }
+        } else if (memberStatus != null) {
+            allMembers = memberRepository.findBySectorIdAndStatus(id, memberStatus)
+        } else {
+            allMembers = memberRepository.findBySectorId(id)
+        }
 
         val totalItems = allMembers.size
         val totalPages = if (totalItems == 0) 1 else ceil(totalItems.toDouble() / limit).toInt()
@@ -199,10 +235,32 @@ class AdminController(
         val startIndex = (validPage - 1) * limit
         val pagedMembers = allMembers.drop(startIndex).take(limit)
 
+        // Get pending application info for the paged members
+        val pendingApps =
+            applicationRepository.findBySectorIdAndStatus(
+                id,
+                ApplicationStatus.PENDING.toDbValue(),
+            )
+        val pendingAppsByMember =
+            pendingApps
+                .filter { it.type == ApplicationType.APPLICATION }
+                .associateBy { it.memberId }
+        val pendingInvitationsByMember =
+            pendingApps
+                .filter { it.type == ApplicationType.INVITATION }
+                .associateBy { it.memberId }
+
         val memberResponses =
             pagedMembers.map { member ->
                 val issueCount = issueRepository.findByReporterId(member.id).size
-                member.toMemberWithStats(issueCount).toResponse()
+                val pendingApp = pendingAppsByMember[member.id]
+                val pendingInvite = pendingInvitationsByMember[member.id]
+                member.toMemberWithStatsAndGAInfo(
+                    issueCount = issueCount,
+                    hasPendingApplication = pendingApp != null,
+                    hasInvitationPending = pendingInvite != null,
+                    pendingApplicationId = pendingApp?.id?.toString() ?: pendingInvite?.id?.toString(),
+                ).toResponse()
             }
 
         val response =
@@ -230,7 +288,30 @@ class AdminController(
             status = status,
             issueCount = issueCount,
             joinedAt = createdAt,
+            isGroundAdmin = isGroundAdmin,
+            groundAdminStatus = groundAdminStatus,
         )
+
+    private fun Member.toMemberWithStatsAndGAInfo(
+        issueCount: Int,
+        hasPendingApplication: Boolean,
+        hasInvitationPending: Boolean,
+        pendingApplicationId: String?,
+    ) = MemberWithStats(
+        id = id,
+        firstName = firstName,
+        surname = surname,
+        phoneNumber = phone.ifEmpty { "***-***-****" },
+        address = address,
+        status = status,
+        issueCount = issueCount,
+        joinedAt = createdAt,
+        isGroundAdmin = isGroundAdmin,
+        groundAdminStatus = groundAdminStatus,
+        hasPendingApplication = hasPendingApplication,
+        hasInvitationPending = hasInvitationPending,
+        pendingApplicationId = pendingApplicationId,
+    )
 
     /**
      * GET /api/v1/admin/members/pending-count
