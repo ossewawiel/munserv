@@ -29,6 +29,14 @@ Community-based infrastructure issue reporting. Members report issues (potholes,
 - Start mock: `cd infrastructure/mock-api && npm start` (port 3001)
 - Run mobile with: `flutter run --dart-define=API_PORT=3001`
 
+## Contributing
+
+**New to the project?** Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) for:
+- How to report bugs and request features
+- Bug fix and feature development workflows
+- Working with GitHub issues and Claude agent skills
+- Code standards and PR guidelines
+
 ## Platform-Specific Context (IMPORTANT)
 
 **When working on code in a subdirectory, ALWAYS read that directory's CLAUDE.md first:**

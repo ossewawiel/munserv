@@ -1,0 +1,157 @@
+name: Standards Check
+
+on:
+  pull_request:
+    branches: [master, main, develop]
+    paths:
+      - 'backend/src/**/*.kt'
+      - 'web/src/**/*.ts'
+      - 'web/src/**/*.tsx'
+      - 'mobile/lib/**/*.dart'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-standards:
+    name: Check Coding Standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for forbidden patterns
+        id: forbidden-check
+        run: |
+          VIOLATIONS=""
+          VIOLATION_COUNT=0
+
+          echo "## Standards Check Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Check for wildcard imports in Kotlin
+          echo "### Kotlin Checks" >> $GITHUB_STEP_SUMMARY
+          KOTLIN_WILDCARDS=$(grep -rn "import .*\.\*" backend/src --include="*.kt" || true)
+          if [ -n "$KOTLIN_WILDCARDS" ]; then
+            echo "- Wildcard imports found" >> $GITHUB_STEP_SUMMARY
+            VIOLATIONS="${VIOLATIONS}\n**Kotlin Wildcard Imports:**\n\`\`\`\n${KOTLIN_WILDCARDS}\n\`\`\`\n"
+            VIOLATION_COUNT=$((VIOLATION_COUNT + 1))
+          else
+            echo "- No wildcard imports" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Check for hardcoded URLs in Kotlin
+          KOTLIN_URLS=$(grep -rn "http://\|https://" backend/src --include="*.kt" | grep -v "test\|Test\|spec\|Spec" | grep -v "localhost\|127.0.0.1" || true)
+          if [ -n "$KOTLIN_URLS" ]; then
+            echo "- Hardcoded URLs found (review needed)" >> $GITHUB_STEP_SUMMARY
+            VIOLATIONS="${VIOLATIONS}\n**Kotlin Hardcoded URLs:**\n\`\`\`\n${KOTLIN_URLS}\n\`\`\`\n"
+            VIOLATION_COUNT=$((VIOLATION_COUNT + 1))
+          else
+            echo "- No hardcoded URLs in non-test code" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Check for any type in TypeScript
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### TypeScript Checks" >> $GITHUB_STEP_SUMMARY
+          TS_ANY=$(grep -rn ": any\b\|as any\b\|<any>" web/src --include="*.ts" --include="*.tsx" | grep -v "test\|Test\|spec\|Spec\|.test.\|.spec." || true)
+          if [ -n "$TS_ANY" ]; then
+            echo "- \`any\` type usage found" >> $GITHUB_STEP_SUMMARY
+            VIOLATIONS="${VIOLATIONS}\n**TypeScript \`any\` Usage:**\n\`\`\`\n${TS_ANY}\n\`\`\`\n"
+            VIOLATION_COUNT=$((VIOLATION_COUNT + 1))
+          else
+            echo "- No \`any\` type usage" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Check for wildcard imports in TypeScript
+          TS_WILDCARDS=$(grep -rn "import \* as" web/src --include="*.ts" --include="*.tsx" || true)
+          if [ -n "$TS_WILDCARDS" ]; then
+            # Filter out legitimate namespace imports
+            TS_WILDCARDS_FILTERED=$(echo "$TS_WILDCARDS" | grep -v "import \* as React" | grep -v "import \* as z" || true)
+            if [ -n "$TS_WILDCARDS_FILTERED" ]; then
+              echo "- Wildcard imports found (review needed)" >> $GITHUB_STEP_SUMMARY
+              VIOLATIONS="${VIOLATIONS}\n**TypeScript Wildcard Imports:**\n\`\`\`\n${TS_WILDCARDS_FILTERED}\n\`\`\`\n"
+              VIOLATION_COUNT=$((VIOLATION_COUNT + 1))
+            else
+              echo "- No problematic wildcard imports" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- No wildcard imports" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Check for dynamic in Dart
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Dart Checks" >> $GITHUB_STEP_SUMMARY
+          DART_DYNAMIC=$(grep -rn "\bdynamic\b" mobile/lib --include="*.dart" | grep -v ".freezed.dart\|.g.dart" || true)
+          if [ -n "$DART_DYNAMIC" ]; then
+            echo "- \`dynamic\` type usage found" >> $GITHUB_STEP_SUMMARY
+            VIOLATIONS="${VIOLATIONS}\n**Dart \`dynamic\` Usage:**\n\`\`\`\n${DART_DYNAMIC}\n\`\`\`\n"
+            VIOLATION_COUNT=$((VIOLATION_COUNT + 1))
+          else
+            echo "- No \`dynamic\` type usage" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Check for print statements in Dart
+          DART_PRINT=$(grep -rn "\bprint(" mobile/lib --include="*.dart" | grep -v ".freezed.dart\|.g.dart\|test\|Test" || true)
+          if [ -n "$DART_PRINT" ]; then
+            echo "- \`print\` statements found (should use logger)" >> $GITHUB_STEP_SUMMARY
+            VIOLATIONS="${VIOLATIONS}\n**Dart \`print\` Statements:**\n\`\`\`\n${DART_PRINT}\n\`\`\`\n"
+            VIOLATION_COUNT=$((VIOLATION_COUNT + 1))
+          else
+            echo "- No debug print statements" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Output results
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Summary" >> $GITHUB_STEP_SUMMARY
+          echo "**Total violations found: $VIOLATION_COUNT**" >> $GITHUB_STEP_SUMMARY
+
+          echo "violation_count=$VIOLATION_COUNT" >> $GITHUB_OUTPUT
+          echo "violations<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$VIOLATIONS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR with violations
+        if: steps.forbidden-check.outputs.violation_count != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const violations = `${{ steps.forbidden-check.outputs.violations }}`;
+            const body = `## Standards Check Warning
+
+            This PR contains potential coding standards violations. Please review:
+
+            ${violations}
+
+            ### Standards Reference
+            - CLAUDE.md#critical-rules
+            - CLAUDE.md#forbidden
+
+            ---
+            *This is a warning only - the PR is not blocked. Please review and fix if appropriate.*
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Check enum serialization format
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Enum Serialization Check" >> $GITHUB_STEP_SUMMARY
+
+          # Check Kotlin enums use @JsonValue with snake_case
+          echo "### Kotlin Enum Serialization" >> $GITHUB_STEP_SUMMARY
+          for file in backend/src/main/kotlin/com/munserv/shared/enums/*.kt; do
+            [ -f "$file" ] || continue
+            enum_name=$(basename "$file" .kt)
+
+            # Check for @JsonValue annotation
+            if grep -q "@JsonValue" "$file"; then
+              echo "- $enum_name: Uses @JsonValue" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- $enum_name: Missing @JsonValue annotation" >> $GITHUB_STEP_SUMMARY
+            fi
+          done

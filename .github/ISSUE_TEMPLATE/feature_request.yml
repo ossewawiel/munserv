@@ -1,0 +1,104 @@
+name: Feature Request
+description: Request a new feature or user story
+title: "[Feature]: "
+labels: ["type:feature", "status:triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Request
+        Use this template to request new functionality for MunServ.
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: Which platform(s) does this feature affect?
+      multiple: true
+      options:
+        - Backend
+        - Web
+        - Mobile
+        - Database
+    validations:
+      required: true
+
+  - type: input
+    id: story-id
+    attributes:
+      label: Story ID (if exists)
+      description: "Reference to existing story (e.g., M8, W10)"
+      placeholder: "M8"
+    validations:
+      required: false
+
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User Story
+      description: Describe the feature as a user story
+      placeholder: "As a [member/admin], I can [action] so that [benefit]"
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: List the criteria that must be met for this feature to be complete
+      placeholder: |
+        - [ ] User can...
+        - [ ] System validates...
+        - [ ] Error message shown when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Any technical considerations, API changes, or database migrations needed
+      placeholder: |
+        - API endpoint: POST /api/v1/...
+        - Database: New table needed for...
+        - Integration with existing...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this feature?
+      options:
+        - "Low - Nice to have"
+        - "Medium - Should have"
+        - "High - Must have for next release"
+        - "Critical - Blocking other work"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Request Source
+      description: Where did this request come from?
+      options:
+        - "User requested"
+        - "Agent requested"
+        - "Spec derived"
+        - "Tech debt"
+    validations:
+      required: true
+
+  - type: textarea
+    id: related
+    attributes:
+      label: Related Issues/Specs
+      description: Link to related issues, specs, or handoff documents
+      placeholder: |
+        - Spec: specs/features/feature-name/spec.md
+        - Handoff: specs/features/feature-name/handoff.md
+        - Related: #123
+    validations:
+      required: false

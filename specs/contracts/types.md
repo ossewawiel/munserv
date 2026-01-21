@@ -103,56 +103,89 @@
 
 ## Enums
 
+> **Type Generation:** Enums with `@generate` annotations can be auto-generated using `/generate-types` or `./scripts/generate-types.sh`.
+> All enum values use **snake_case** for JSON serialization.
+
 ### IssueState
+@enum @generate(kotlin, typescript, dart)
+@serialization(snake_case)
 
 | Value | Description |
 |-------|-------------|
-| REPORTED | Initial state |
-| CONFIRMED | Verified by admin |
-| IN_PROGRESS | Being addressed |
-| FIXED | Resolved |
-| REJECTED | Not valid |
+| reported | Initial state |
+| confirmed | Verified by admin |
+| in_progress | Being addressed |
+| fixed | Resolved |
+| rejected | Not valid |
 
 ### MemberRole
+@enum @generate(kotlin, typescript, dart)
+@serialization(snake_case)
 
 | Value | Description |
 |-------|-------------|
-| MEMBER | Regular user |
-| ADMIN | Administrator |
+| member | Regular user |
+| admin | Administrator |
 
 ### VerificationMode
+@enum @generate(kotlin, typescript, dart)
+@serialization(snake_case)
 
 | Value | Description |
 |-------|-------------|
-| ALL_NOTIFIED | All Ground Admins notified simultaneously |
-| ADMIN_ASSIGNS | Sector Admin manually assigns verification |
-| NEAREST_AUTO | Nearest Ground Admin auto-assigned |
-| FIRST_COME | First Ground Admin to accept |
+| all_notified | All Ground Admins notified simultaneously |
+| admin_assigns | Sector Admin manually assigns verification |
+| nearest_auto | Nearest Ground Admin auto-assigned |
+| first_come | First Ground Admin to accept |
 
 ### MessageType
+@enum @generate(kotlin, typescript, dart)
+@serialization(snake_case)
 
 | Value | Description |
 |-------|-------------|
-| GROUND_ADMIN_INVITATION | Invitation to become Ground Admin |
-| GROUND_ADMIN_APPLICATION | Application to become Ground Admin |
-| GROUND_ADMIN_APPROVED | Application/invitation approved |
-| GROUND_ADMIN_DECLINED | Application/invitation declined |
-| GROUND_ADMIN_INVITATION_DECLINED | Member declined invitation |
-| GROUND_ADMIN_REVOCATION | Ground Admin status revoked |
-| GROUND_ADMIN_STEPDOWN_REQUEST | Request to step down |
-| VERIFY_NEW_ISSUE | Request to verify new issue |
-| VERIFY_FIX | Request to verify fix |
-| MEMBER_REGISTRATION | New member registration notification |
-| MONTHLY_REPORT | Monthly activity report |
+| ground_admin_invitation | Invitation to become Ground Admin |
+| ground_admin_application | Application to become Ground Admin |
+| ground_admin_approved | Application/invitation approved |
+| ground_admin_declined | Application/invitation declined |
+| ground_admin_invitation_declined | Member declined invitation |
+| ground_admin_revocation | Ground Admin status revoked |
+| ground_admin_stepdown_request | Request to step down |
+| verify_new_issue | Request to verify new issue |
+| verify_fix | Request to verify fix |
+| member_registration | New member registration notification |
+| monthly_report | Monthly activity report |
 
 ### MessageStatus
+@enum @generate(kotlin, typescript, dart)
+@serialization(snake_case)
 
 | Value | Description |
 |-------|-------------|
-| UNREAD | Not yet read |
-| READ | Marked as read |
-| ACTIONED | Action performed |
-| DISMISSED | Dismissed by recipient |
+| unread | Not yet read |
+| read | Marked as read |
+| actioned | Action performed |
+| dismissed | Dismissed by recipient |
+
+### GroundAdminStatus
+@enum @generate(kotlin, typescript, dart)
+@serialization(snake_case)
+
+| Value | Description |
+|-------|-------------|
+| pending | Awaiting approval |
+| approved | Active ground admin |
+| rejected | Application denied |
+| revoked | Access removed |
+
+### VerificationReason
+@enum @generate(kotlin, typescript, dart)
+@serialization(snake_case)
+
+| Value | Description |
+|-------|-------------|
+| new_issue | Verify new issue report |
+| fix_verification | Verify issue has been fixed |
 
 ---
 

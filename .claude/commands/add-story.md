@@ -75,6 +75,7 @@ If this story belongs to an existing feature in `specs/features/`:
 - [ ] Criteria are testable (verifiable outcomes)
 - [ ] Story follows "As X, I can Y" format
 - [ ] Related feature updated if applicable
+- [ ] GitHub issue created (if approved)
 
 ## Status Indicators
 
@@ -82,9 +83,52 @@ If this story belongs to an existing feature in `specs/features/`:
 - 🟡 In Progress - Currently being worked on
 - 🔴 Pending - Not started
 
+## GitHub Integration
+
+### Step 5: Create GitHub Issue (Optional)
+
+Ask user:
+```
+Would you like me to create a GitHub issue for this story?
+- Yes, create issue
+- No, spec entry only
+```
+
+If yes, create issue using `/create-issue`:
+```bash
+gh issue create \
+  --title "[{{id}}]: {{short_story_title}}" \
+  --label "type:feature,platform:{{platform}},status:triage,source:spec-derived,story:{{id}}" \
+  --body "$(cat <<'EOF'
+## User Story
+
+{{story}}
+
+## Acceptance Criteria
+
+{{criteria_as_checklist}}
+
+## References
+
+- Spec: `specs/requirements/{{platform}}.md`
+
+---
+*Created from spec by Claude agent.*
+EOF
+)"
+```
+
+### Step 6: Update Spec with Issue Link
+
+Add issue number to spec table:
+```markdown
+| {{id}} | {{story}} | {{criteria}} | 🔴 Pending | [#{{issue_number}}](link) |
+```
+
 ## Next Steps
 
 After adding story:
 1. If new feature needed: `/add-feature`
 2. If API changes needed: `/add-endpoint`
 3. To plan implementation: `/plan-feature {{id}}`
+4. To track in GitHub: Issue already created (if approved)

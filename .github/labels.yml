@@ -1,0 +1,187 @@
+# GitHub Labels Configuration for MunServ
+# Apply with: gh label import .github/labels.yml
+# Or use: scripts/setup-github-labels.sh
+
+# ============================================
+# TYPE LABELS (What kind of work is this?)
+# ============================================
+- name: "type:feature"
+  color: "0E8A16"
+  description: "New functionality or user story"
+
+- name: "type:bug"
+  color: "D73A4A"
+  description: "Something isn't working correctly"
+
+- name: "type:docs"
+  color: "0075CA"
+  description: "Documentation improvements"
+
+- name: "type:standards"
+  color: "FBCA04"
+  description: "Coding standards or architecture violation"
+
+- name: "type:tech-debt"
+  color: "5319E7"
+  description: "Technical debt to address"
+
+- name: "type:chore"
+  color: "EDEDED"
+  description: "Maintenance tasks (dependencies, CI, etc.)"
+
+# ============================================
+# PLATFORM LABELS (Where does this apply?)
+# ============================================
+- name: "platform:backend"
+  color: "7057FF"
+  description: "Affects Kotlin/Spring Boot backend"
+
+- name: "platform:web"
+  color: "008672"
+  description: "Affects React/TypeScript web admin"
+
+- name: "platform:mobile"
+  color: "0366D6"
+  description: "Affects Flutter mobile app"
+
+- name: "platform:database"
+  color: "B60205"
+  description: "Affects database schema or migrations"
+
+- name: "platform:infra"
+  color: "6F42C1"
+  description: "Affects infrastructure or DevOps"
+
+# ============================================
+# STATUS LABELS (Where is this in the pipeline?)
+# ============================================
+- name: "status:triage"
+  color: "FFFFFF"
+  description: "Needs review and prioritization"
+
+- name: "status:ready"
+  color: "C2E0C6"
+  description: "Ready to be picked up"
+
+- name: "status:in-progress"
+  color: "FEF2C0"
+  description: "Currently being worked on"
+
+- name: "status:blocked"
+  color: "F9D0C4"
+  description: "Blocked by dependency or question"
+
+- name: "status:review"
+  color: "BFDADC"
+  description: "PR open, awaiting review"
+
+- name: "status:done"
+  color: "0E8A16"
+  description: "Completed and merged"
+
+# ============================================
+# PRIORITY LABELS (How urgent?)
+# ============================================
+- name: "priority:critical"
+  color: "B60205"
+  description: "Blocking release or other work"
+
+- name: "priority:high"
+  color: "D93F0B"
+  description: "Must have for next release"
+
+- name: "priority:medium"
+  color: "FBCA04"
+  description: "Should have"
+
+- name: "priority:low"
+  color: "0E8A16"
+  description: "Nice to have"
+
+# ============================================
+# SOURCE LABELS (Where did this come from?)
+# ============================================
+- name: "source:agent-requested"
+  color: "1D76DB"
+  description: "Created by Claude agent"
+
+- name: "source:user-requested"
+  color: "BFD4F2"
+  description: "Created by human user"
+
+- name: "source:spec-derived"
+  color: "D4C5F9"
+  description: "Derived from spec documents"
+
+- name: "source:automated"
+  color: "EDEDED"
+  description: "Created by automated workflow"
+
+# ============================================
+# STORY ID LABELS (For tracking spec stories)
+# ============================================
+# Mobile stories
+- name: "story:M1"
+  color: "0366D6"
+  description: "Mobile story M1: Login with email/password"
+
+- name: "story:M2"
+  color: "0366D6"
+  description: "Mobile story M2: Login with PIN/biometric"
+
+- name: "story:M3"
+  color: "0366D6"
+  description: "Mobile story M3: View issues on map"
+
+- name: "story:M4"
+  color: "0366D6"
+  description: "Mobile story M4: View issue list"
+
+- name: "story:M5"
+  color: "0366D6"
+  description: "Mobile story M5: Report new issue"
+
+- name: "story:M6"
+  color: "0366D6"
+  description: "Mobile story M6: View issue details"
+
+- name: "story:M7"
+  color: "0366D6"
+  description: "Mobile story M7: View my reports"
+
+# Web stories
+- name: "story:W1"
+  color: "008672"
+  description: "Web story W1: Login with email/password"
+
+- name: "story:W2"
+  color: "008672"
+  description: "Web story W2: View dashboard"
+
+- name: "story:W3"
+  color: "008672"
+  description: "Web story W3: View issues list"
+
+- name: "story:W4"
+  color: "008672"
+  description: "Web story W4: View issue details"
+
+- name: "story:W5"
+  color: "008672"
+  description: "Web story W5: Change issue state"
+
+- name: "story:W6"
+  color: "008672"
+  description: "Web story W6: View heat report"
+
+- name: "story:W7"
+  color: "008672"
+  description: "Web story W7: View members list"
+
+- name: "story:W8"
+  color: "008672"
+  description: "Web story W8: Register as member"
+
+- name: "story:W9"
+  color: "008672"
+  description: "Web story W9: Approve/reject member"

@@ -1,0 +1,119 @@
+name: Standards Violation
+description: Report a coding standards or architecture violation
+title: "[Standards]: "
+labels: ["type:standards", "status:triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Standards Violation Report
+        Use this template to track violations of coding standards defined in CLAUDE.md.
+
+  - type: dropdown
+    id: violation-type
+    attributes:
+      label: Violation Type
+      description: What category of violation is this?
+      options:
+        - "Code Pattern - Incorrect error handling"
+        - "Code Pattern - Mutable state where immutable required"
+        - "Code Pattern - Missing type-safe ID"
+        - "Forbidden - Wildcard imports"
+        - "Forbidden - any/dynamic type usage"
+        - "Forbidden - Business logic in wrong layer"
+        - "Forbidden - Hardcoded secrets/URLs"
+        - "Enum - Serialization format mismatch"
+        - "Enum - Missing value across platforms"
+        - "Architecture - Feature folder violation"
+        - "Architecture - Layer dependency violation"
+        - "Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: Which platform(s) are affected?
+      multiple: true
+      options:
+        - Backend (Kotlin)
+        - Web (TypeScript)
+        - Mobile (Dart)
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected-files
+    attributes:
+      label: Affected Files
+      description: List the files that have this violation
+      placeholder: |
+        - backend/src/main/kotlin/com/munserv/.../SomeFile.kt
+        - web/src/features/.../someFile.ts
+    validations:
+      required: true
+
+  - type: input
+    id: standard-reference
+    attributes:
+      label: Standard Reference
+      description: Which rule in CLAUDE.md is violated?
+      placeholder: "CLAUDE.md#critical-rules, backend/CLAUDE.md#forbidden"
+    validations:
+      required: true
+
+  - type: textarea
+    id: violation-detail
+    attributes:
+      label: Violation Details
+      description: Describe the violation with code examples
+      placeholder: |
+        **Current (Incorrect):**
+        ```kotlin
+        import com.munserv.* // Wildcard import
+        ```
+
+        **Should be:**
+        ```kotlin
+        import com.munserv.SpecificClass
+        ```
+    validations:
+      required: true
+
+  - type: dropdown
+    id: auto-detected
+    attributes:
+      label: Detection Method
+      description: How was this violation detected?
+      options:
+        - "Manual code review"
+        - "Automated PR check"
+        - "Weekly validation workflow"
+        - "Agent analysis"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: fix-complexity
+    attributes:
+      label: Fix Complexity
+      description: How complex is the fix?
+      options:
+        - "Simple - Single file, mechanical change"
+        - "Medium - Multiple files, same pattern"
+        - "Complex - Architectural change needed"
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: Suggested Fix
+      description: How should this be fixed?
+      placeholder: |
+        1. Replace wildcard with explicit imports
+        2. Run lint to verify
+        3. Update any tests
+    validations:
+      required: false

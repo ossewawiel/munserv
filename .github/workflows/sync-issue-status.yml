@@ -1,0 +1,134 @@
+name: Sync Issue Status
+
+on:
+  issues:
+    types: [closed, reopened]
+  pull_request:
+    types: [closed]
+    branches: [master, main]
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: read
+
+jobs:
+  sync-spec-status:
+    name: Sync Spec Status
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract story IDs from issue/PR
+        id: extract-stories
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STORY_IDS=""
+
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            # Get labels from the issue
+            LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels -q '.labels[].name')
+            BODY=$(gh issue view ${{ github.event.issue.number }} --json body -q '.body')
+            EVENT_TYPE="issue"
+            IS_CLOSED="${{ github.event.action == 'closed' }}"
+          else
+            # Get labels and body from PR
+            LABELS=$(gh pr view ${{ github.event.pull_request.number }} --json labels -q '.labels[].name')
+            BODY=$(gh pr view ${{ github.event.pull_request.number }} --json body -q '.body')
+            EVENT_TYPE="pr"
+            IS_CLOSED="true"
+          fi
+
+          # Extract story IDs from labels (story:M1, story:W5, etc.)
+          for label in $LABELS; do
+            if [[ "$label" =~ ^story:(M[0-9]+|W[0-9]+|S[0-9]+)$ ]]; then
+              STORY_ID="${label#story:}"
+              STORY_IDS="${STORY_IDS} ${STORY_ID}"
+            fi
+          done
+
+          # Also extract story IDs from body (patterns like M1, M2, W5)
+          BODY_STORIES=$(echo "$BODY" | grep -oE '\b(M[0-9]+|W[0-9]+|S[0-9]+)\b' | sort -u || true)
+          for story in $BODY_STORIES; do
+            if [[ ! "$STORY_IDS" =~ "$story" ]]; then
+              STORY_IDS="${STORY_IDS} ${story}"
+            fi
+          done
+
+          STORY_IDS=$(echo "$STORY_IDS" | xargs)
+          echo "Found story IDs: $STORY_IDS"
+          echo "story_ids=$STORY_IDS" >> $GITHUB_OUTPUT
+          echo "is_closed=$IS_CLOSED" >> $GITHUB_OUTPUT
+          echo "event_type=$EVENT_TYPE" >> $GITHUB_OUTPUT
+
+      - name: Update spec status
+        if: steps.extract-stories.outputs.story_ids != ''
+        run: |
+          STORY_IDS="${{ steps.extract-stories.outputs.story_ids }}"
+          IS_CLOSED="${{ steps.extract-stories.outputs.is_closed }}"
+          CHANGES_MADE=false
+
+          for STORY_ID in $STORY_IDS; do
+            # Determine which file to update
+            if [[ "$STORY_ID" =~ ^M ]]; then
+              SPEC_FILE="specs/requirements/mobile.md"
+            elif [[ "$STORY_ID" =~ ^W ]]; then
+              SPEC_FILE="specs/requirements/web.md"
+            elif [[ "$STORY_ID" =~ ^S ]]; then
+              SPEC_FILE="specs/requirements/shared.md"
+            else
+              echo "Unknown story prefix: $STORY_ID"
+              continue
+            fi
+
+            if [ ! -f "$SPEC_FILE" ]; then
+              echo "Spec file not found: $SPEC_FILE"
+              continue
+            fi
+
+            if [ "$IS_CLOSED" = "true" ]; then
+              # Change from Pending/InProgress to Done
+              if grep -q "| $STORY_ID |.*Pending" "$SPEC_FILE"; then
+                sed -i "s/| $STORY_ID |\\(.*\\)Pending/| $STORY_ID |\\1Done/g" "$SPEC_FILE"
+                CHANGES_MADE=true
+                echo "Updated $STORY_ID from Pending to Done"
+              elif grep -q "| $STORY_ID |.*In Progress" "$SPEC_FILE"; then
+                sed -i "s/| $STORY_ID |\\(.*\\)In Progress/| $STORY_ID |\\1Done/g" "$SPEC_FILE"
+                CHANGES_MADE=true
+                echo "Updated $STORY_ID from In Progress to Done"
+              fi
+            else
+              # Reopened - change from Done to In Progress
+              if grep -q "| $STORY_ID |.*Done" "$SPEC_FILE"; then
+                sed -i "s/| $STORY_ID |\\(.*\\)Done/| $STORY_ID |\\1In Progress/g" "$SPEC_FILE"
+                CHANGES_MADE=true
+                echo "Updated $STORY_ID from Done to In Progress"
+              fi
+            fi
+          done
+
+          echo "changes_made=$CHANGES_MADE" >> $GITHUB_OUTPUT
+
+      - name: Commit changes
+        if: steps.extract-stories.outputs.story_ids != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git add specs/requirements/*.md
+          git commit -m "chore(specs): sync story status from GitHub
+
+          Updated story status based on issue/PR #${{ github.event.issue.number || github.event.pull_request.number }}
+
+          Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+          git push

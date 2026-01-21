@@ -1,0 +1,105 @@
+name: Generate Changelog
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to generate changelog for (e.g., v1.2.0)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  generate-changelog:
+    name: Generate Changelog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install git-cliff
+        run: |
+          curl -sSL https://github.com/orhun/git-cliff/releases/download/v2.0.4/git-cliff-2.0.4-x86_64-unknown-linux-gnu.tar.gz | tar -xz
+          mv git-cliff-2.0.4/git-cliff /usr/local/bin/
+          chmod +x /usr/local/bin/git-cliff
+
+      - name: Generate changelog
+        run: |
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          echo "Generating changelog for $VERSION"
+
+          # Generate full changelog
+          git-cliff --config .github/cliff.toml -o CHANGELOG.md
+
+          # Generate release notes for this version only
+          git-cliff --config .github/cliff.toml --latest --strip header -o RELEASE_NOTES.md
+
+          cat RELEASE_NOTES.md
+
+      - name: Update spec story status from commits
+        run: |
+          # Extract story references from recent commits
+          STORIES=$(git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"%s %b" | grep -oE '\b(M[0-9]+|W[0-9]+|S[0-9]+)\b' | sort -u || true)
+
+          for STORY in $STORIES; do
+            if [[ "$STORY" =~ ^M ]]; then
+              SPEC_FILE="specs/requirements/mobile.md"
+            elif [[ "$STORY" =~ ^W ]]; then
+              SPEC_FILE="specs/requirements/web.md"
+            else
+              continue
+            fi
+
+            if [ -f "$SPEC_FILE" ]; then
+              # Mark completed stories
+              if grep -q "| $STORY |.*Pending\|In Progress" "$SPEC_FILE"; then
+                sed -i "s/| $STORY |\\(.*\\)Pending/| $STORY |\\1Done/g" "$SPEC_FILE"
+                sed -i "s/| $STORY |\\(.*\\)In Progress/| $STORY |\\1Done/g" "$SPEC_FILE"
+                echo "Marked $STORY as Done"
+              fi
+            fi
+          done
+
+      - name: Commit changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add CHANGELOG.md specs/requirements/*.md
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          git commit -m "chore: update changelog for $VERSION
+
+          Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+          git push origin HEAD:master
+
+      - name: Create/Update GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ github.ref_name }}"
+
+          # Check if release already exists
+          if gh release view "$VERSION" &>/dev/null; then
+            echo "Updating existing release $VERSION"
+            gh release edit "$VERSION" --notes-file RELEASE_NOTES.md
+          else
+            echo "Creating new release $VERSION"
+            gh release create "$VERSION" \
+              --title "$VERSION" \
+              --notes-file RELEASE_NOTES.md
+          fi

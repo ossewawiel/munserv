@@ -26,6 +26,21 @@ Read first:
 
 ## Process
 
+### Step 0: GitHub Milestone Setup
+
+Check if a milestone exists for this feature:
+```bash
+gh api repos/:owner/:repo/milestones --jq '.[] | select(.title | contains("{{feature}}"))'
+```
+
+If no milestone exists, create one (with approval):
+```bash
+gh api repos/:owner/:repo/milestones -X POST \
+  -f title="{{feature}}" \
+  -f description="Implementation of {{feature}} feature" \
+  -f state="open"
+```
+
 ### Step 1: Gather Requirements
 
 From feature spec, extract:
@@ -144,15 +159,90 @@ For each platform, generate:
 - [ ] Tests identified for each component
 - [ ] Dependencies documented
 - [ ] Order respects dependencies
+- [ ] GitHub milestone created/found
+- [ ] Platform issues created (if approved)
+
+## GitHub Integration
+
+### Step 5.5: Create Platform Issues (Optional)
+
+Ask user:
+```
+Would you like me to create GitHub issues for each platform?
+- Yes, create all platform issues
+- Create only for: [backend/web/mobile]
+- No, handoff docs only
+```
+
+If yes, create issues for each platform:
+
+**Backend Issue:**
+```bash
+gh issue create \
+  --title "[Backend] {{feature}}: API implementation" \
+  --label "type:feature,platform:backend,status:ready,story:{{story_ids}}" \
+  --milestone "{{feature}}" \
+  --body "$(cat <<'EOF'
+## Backend Implementation for {{feature}}
+
+### Tasks
+{{backend_tasks_as_checklist}}
+
+### Files to Create/Modify
+{{backend_files}}
+
+### Tests Required
+{{backend_tests}}
+
+### Handoff Document
+`specs/features/{{feature}}/backend-handoff.md`
+
+---
+*Part of {{feature}} milestone*
+EOF
+)"
+```
+
+**Web Issue:**
+```bash
+gh issue create \
+  --title "[Web] {{feature}}: Admin portal UI" \
+  --label "type:feature,platform:web,status:ready,story:{{story_ids}}" \
+  --milestone "{{feature}}" \
+  --body "..."
+```
+
+**Mobile Issue:**
+```bash
+gh issue create \
+  --title "[Mobile] {{feature}}: App implementation" \
+  --label "type:feature,platform:mobile,status:ready,story:{{story_ids}}" \
+  --milestone "{{feature}}" \
+  --body "..."
+```
+
+### Step 6: Link Issues in Handoff Docs
+
+Add issue references to handoff documents:
+```markdown
+## Handoff: Backend
+
+**GitHub Issue:** #{{backend_issue_number}}
+**Milestone:** {{feature}}
+
+...
+```
 
 ## Integration
 
 After generating plan:
 1. Review plan with user
-2. Hand off to platform `/dev-cycle`:
+2. Issues created automatically link to milestone
+3. Hand off to platform `/dev-cycle`:
    - `cd backend && /dev-cycle task="[backend handoff]"`
    - `cd web && /dev-cycle task="[web handoff]"`
    - `cd mobile && /dev-cycle task="[mobile handoff]"`
+4. Use `/close-handoff` when platform work is complete
 
 ## TodoWrite Integration
 

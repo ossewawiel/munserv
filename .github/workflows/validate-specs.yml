@@ -1,0 +1,190 @@
+name: Validate Specs
+
+on:
+  schedule:
+    # Run weekly on Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      create_issues:
+        description: 'Create issues for drift detected'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  validate-story-status:
+    name: Validate Story Status
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check spec status vs GitHub issues
+        id: check-status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## Spec Status Validation Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          DRIFT_FOUND=false
+          DRIFT_DETAILS=""
+
+          # Function to check story status
+          check_story() {
+            local story_id=$1
+            local spec_status=$2
+            local platform=$3
+
+            # Search for closed issues with this story label
+            closed_issues=$(gh issue list --state closed --label "story:$story_id" --json number,title --jq 'length')
+            open_issues=$(gh issue list --state open --label "story:$story_id" --json number,title --jq 'length')
+
+            # Check for drift
+            if [ "$spec_status" = "Done" ] && [ "$open_issues" -gt 0 ]; then
+              echo "::warning::$story_id: Spec says Done but has open issues"
+              DRIFT_DETAILS="${DRIFT_DETAILS}\n- $story_id: Spec=Done, Open Issues=$open_issues"
+              return 1
+            elif [ "$spec_status" = "Pending" ] && [ "$closed_issues" -gt 0 ]; then
+              echo "::warning::$story_id: Spec says Pending but issues are closed"
+              DRIFT_DETAILS="${DRIFT_DETAILS}\n- $story_id: Spec=Pending, Closed Issues=$closed_issues"
+              return 1
+            fi
+            return 0
+          }
+
+          # Parse mobile.md for story status
+          echo "### Mobile Stories" >> $GITHUB_STEP_SUMMARY
+          while IFS='|' read -r _ id story criteria status _; do
+            id=$(echo "$id" | xargs)
+            status=$(echo "$status" | xargs)
+
+            # Skip header and separator rows
+            [[ "$id" == "ID" ]] && continue
+            [[ "$id" == "-"* ]] && continue
+            [[ -z "$id" ]] && continue
+
+            # Determine status
+            case "$status" in
+              *"Done"*) spec_status="Done" ;;
+              *"In Progress"*) spec_status="InProgress" ;;
+              *"Pending"*) spec_status="Pending" ;;
+              *) continue ;;
+            esac
+
+            echo "- $id: $spec_status" >> $GITHUB_STEP_SUMMARY
+
+            if ! check_story "$id" "$spec_status" "mobile"; then
+              DRIFT_FOUND=true
+            fi
+          done < <(grep "^|" specs/requirements/mobile.md | tail -n +2)
+
+          # Parse web.md for story status
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Web Stories" >> $GITHUB_STEP_SUMMARY
+          while IFS='|' read -r _ id story criteria status _; do
+            id=$(echo "$id" | xargs)
+            status=$(echo "$status" | xargs)
+
+            [[ "$id" == "ID" ]] && continue
+            [[ "$id" == "-"* ]] && continue
+            [[ -z "$id" ]] && continue
+
+            case "$status" in
+              *"Done"*) spec_status="Done" ;;
+              *"In Progress"*) spec_status="InProgress" ;;
+              *"Pending"*) spec_status="Pending" ;;
+              *) continue ;;
+            esac
+
+            echo "- $id: $spec_status" >> $GITHUB_STEP_SUMMARY
+
+            if ! check_story "$id" "$spec_status" "web"; then
+              DRIFT_FOUND=true
+            fi
+          done < <(grep "^|" specs/requirements/web.md | tail -n +2)
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "$DRIFT_FOUND" = "true" ]; then
+            echo "### Drift Detected" >> $GITHUB_STEP_SUMMARY
+            echo -e "$DRIFT_DETAILS" >> $GITHUB_STEP_SUMMARY
+            echo "drift_found=true" >> $GITHUB_OUTPUT
+            echo "drift_details=$DRIFT_DETAILS" >> $GITHUB_OUTPUT
+          else
+            echo "### No Drift Detected" >> $GITHUB_STEP_SUMMARY
+            echo "drift_found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create reconciliation issue
+        if: steps.check-status.outputs.drift_found == 'true' && inputs.create_issues == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "[Automated] Spec Status Drift Detected" \
+            --label "type:docs,source:automated,status:triage" \
+            --body "## Spec Status Drift Detected
+
+          The weekly validation found inconsistencies between spec status indicators and GitHub issue states.
+
+          ### Details
+          ${{ steps.check-status.outputs.drift_details }}
+
+          ### Resolution
+          Run \`/sync-github\` to reconcile the differences.
+
+          ---
+          *This issue was automatically created by the validate-specs workflow.*"
+
+  validate-enum-sync:
+    name: Validate Enum Synchronization
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check enum definitions across platforms
+        run: |
+          echo "## Enum Synchronization Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # This script checks that enums are consistent across:
+          # - backend/src/main/kotlin/.../shared/enums/
+          # - web/src/shared/types/ or web/src/types/
+          # - mobile/lib/shared/models/
+
+          DRIFT_FOUND=false
+
+          # Find Kotlin enums
+          echo "### Kotlin Enums" >> $GITHUB_STEP_SUMMARY
+          for file in backend/src/main/kotlin/com/munserv/shared/enums/*.kt; do
+            [ -f "$file" ] || continue
+            enum_name=$(basename "$file" .kt)
+            values=$(grep -oP "(?<=\s)[A-Z_]+(?=\(|,|\s*$)" "$file" 2>/dev/null | sort | uniq)
+            echo "- **$enum_name**: $(echo $values | tr '\n' ', ')" >> $GITHUB_STEP_SUMMARY
+          done
+
+          # Find TypeScript enums/types
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### TypeScript Types" >> $GITHUB_STEP_SUMMARY
+          for file in web/src/types/*.ts web/src/shared/types/*.ts; do
+            [ -f "$file" ] || continue
+            type_name=$(basename "$file" .ts)
+            echo "- **$type_name**: found" >> $GITHUB_STEP_SUMMARY
+          done
+
+          # Find Dart enums
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Dart Models" >> $GITHUB_STEP_SUMMARY
+          for file in mobile/lib/shared/models/*.dart; do
+            [ -f "$file" ] || continue
+            model_name=$(basename "$file" .dart)
+            [[ "$model_name" == *.freezed ]] && continue
+            [[ "$model_name" == *.g ]] && continue
+            echo "- **$model_name**: found" >> $GITHUB_STEP_SUMMARY
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "*Note: Full enum value comparison requires the validate-enum-sync.sh script.*" >> $GITHUB_STEP_SUMMARY
