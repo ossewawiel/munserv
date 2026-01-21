@@ -91,22 +91,22 @@ jobs:
             fi
 
             if [ "$IS_CLOSED" = "true" ]; then
-              # Change from Pending/InProgress to Done
-              if grep -q "| $STORY_ID |.*Pending" "$SPEC_FILE"; then
-                sed -i "s/| $STORY_ID |\\(.*\\)Pending/| $STORY_ID |\\1Done/g" "$SPEC_FILE"
+              # Change from Pending/InProgress to Done (including emoji)
+              if grep -q "| $STORY_ID |.*🔴 Pending" "$SPEC_FILE"; then
+                sed -i "s/| $STORY_ID |\\(.*\\)🔴 Pending/| $STORY_ID |\\1🟢 Done/g" "$SPEC_FILE"
                 CHANGES_MADE=true
-                echo "Updated $STORY_ID from Pending to Done"
-              elif grep -q "| $STORY_ID |.*In Progress" "$SPEC_FILE"; then
-                sed -i "s/| $STORY_ID |\\(.*\\)In Progress/| $STORY_ID |\\1Done/g" "$SPEC_FILE"
+                echo "Updated $STORY_ID from 🔴 Pending to 🟢 Done"
+              elif grep -q "| $STORY_ID |.*🟡 In Progress" "$SPEC_FILE"; then
+                sed -i "s/| $STORY_ID |\\(.*\\)🟡 In Progress/| $STORY_ID |\\1🟢 Done/g" "$SPEC_FILE"
                 CHANGES_MADE=true
-                echo "Updated $STORY_ID from In Progress to Done"
+                echo "Updated $STORY_ID from 🟡 In Progress to 🟢 Done"
               fi
             else
               # Reopened - change from Done to In Progress
-              if grep -q "| $STORY_ID |.*Done" "$SPEC_FILE"; then
-                sed -i "s/| $STORY_ID |\\(.*\\)Done/| $STORY_ID |\\1In Progress/g" "$SPEC_FILE"
+              if grep -q "| $STORY_ID |.*🟢 Done" "$SPEC_FILE"; then
+                sed -i "s/| $STORY_ID |\\(.*\\)🟢 Done/| $STORY_ID |\\1🟡 In Progress/g" "$SPEC_FILE"
                 CHANGES_MADE=true
-                echo "Updated $STORY_ID from Done to In Progress"
+                echo "Updated $STORY_ID from 🟢 Done to 🟡 In Progress"
               fi
             fi
           done
