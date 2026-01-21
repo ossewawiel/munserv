@@ -29,6 +29,10 @@ class MessageService(
     private val messageRepository: MessageRepository,
     @Lazy private val groundAdminService: GroundAdminService,
 ) {
+    companion object {
+        private const val MESSAGE_NOT_FOUND = "Message not found"
+    }
+
     /**
      * Retrieves paginated messages for a recipient with optional filtering.
      */
@@ -99,10 +103,10 @@ class MessageService(
     ): MessageResult {
         val message =
             messageRepository.findById(id).orElse(null)
-                ?: return MessageResult.NotFound("Message not found")
+                ?: return MessageResult.NotFound(MESSAGE_NOT_FOUND)
 
         if (message.recipientId != recipientId || message.recipientType != recipientType) {
-            return MessageResult.NotFound("Message not found")
+            return MessageResult.NotFound(MESSAGE_NOT_FOUND)
         }
 
         return MessageResult.Success(MessageResponse.from(message))
@@ -119,10 +123,10 @@ class MessageService(
     ): MessageResult {
         val message =
             messageRepository.findById(id).orElse(null)
-                ?: return MessageResult.NotFound("Message not found")
+                ?: return MessageResult.NotFound(MESSAGE_NOT_FOUND)
 
         if (message.recipientId != recipientId || message.recipientType != recipientType) {
-            return MessageResult.NotFound("Message not found")
+            return MessageResult.NotFound(MESSAGE_NOT_FOUND)
         }
 
         message.markAsRead()
@@ -150,10 +154,10 @@ class MessageService(
     ): MessageResult {
         val message =
             messageRepository.findById(id).orElse(null)
-                ?: return MessageResult.NotFound("Message not found")
+                ?: return MessageResult.NotFound(MESSAGE_NOT_FOUND)
 
         if (message.recipientId != recipientId || message.recipientType != recipientType) {
-            return MessageResult.NotFound("Message not found")
+            return MessageResult.NotFound(MESSAGE_NOT_FOUND)
         }
 
         if (message.status == MessageStatus.ACTIONED) {
