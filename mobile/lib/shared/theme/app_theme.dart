@@ -235,12 +235,12 @@ class AppTheme {
         labelPadding: const EdgeInsets.symmetric(horizontal: 8),
       ),
 
-      // Snackbar - M3: inverseSurface
+      // Snackbar - M3: inverseSurface with onInverseSurface text
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: colorScheme.inverseSurface,
         contentTextStyle: textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurface,
+          color: colorScheme.onInverseSurface,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4), // M3 extra small shape
