@@ -6,6 +6,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/models/message.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/utils/result.dart';
+import '../../../../shared/widgets/branded_scaffold.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/loading_spinner.dart';
 import '../../providers/messages_providers.dart';
@@ -52,7 +53,7 @@ class _MessageDetailPageState extends ConsumerState<MessageDetailPage> {
     final actionState = ref.watch(messageActionProvider);
     final isLoading = actionState is MessageActionStateLoading;
 
-    return Scaffold(
+    return BrandedScaffold(
       appBar: AppBar(title: Text(l10n.messageDetail)),
       body: messageAsync.when(
         data: (message) => _buildContent(context, message, isLoading),
