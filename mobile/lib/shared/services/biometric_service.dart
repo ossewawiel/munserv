@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:local_auth/local_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -6,6 +8,8 @@ part 'biometric_service.g.dart';
 /// Service for handling biometric authentication
 class BiometricService {
   final LocalAuthentication _auth;
+  bool _isAuthenticating = false;
+  Completer<BiometricResult>? _authCompleter;
 
   BiometricService([LocalAuthentication? auth])
     : _auth = auth ?? LocalAuthentication();
@@ -47,16 +51,31 @@ class BiometricService {
   }
 
   /// Authenticate using biometrics
-  /// Returns true if authentication was successful
+  /// Returns the result of the authentication attempt.
+  /// If authentication is already in progress, waits for it to complete
+  /// and returns the same result.
   Future<BiometricResult> authenticate({
     required String localizedReason,
     bool biometricOnly = true,
   }) async {
+    // If auth is already in progress, return the existing future
+    if (_isAuthenticating && _authCompleter != null) {
+      return _authCompleter!.future;
+    }
+
+    _isAuthenticating = true;
+    _authCompleter = Completer<BiometricResult>();
+
     try {
       final isAvailable = await isBiometricAvailable();
       if (!isAvailable) {
-        return BiometricResult.notAvailable();
+        final result = BiometricResult.notAvailable();
+        _authCompleter!.complete(result);
+        return result;
       }
+
+      // Stop any lingering authentication before starting new one
+      await _auth.stopAuthentication();
 
       final didAuthenticate = await _auth.authenticate(
         localizedReason: localizedReason,
@@ -64,14 +83,40 @@ class BiometricService {
         persistAcrossBackgrounding: true,
       );
 
-      if (didAuthenticate) {
-        return BiometricResult.success();
-      } else {
-        return BiometricResult.failed();
-      }
+      final result =
+          didAuthenticate ? BiometricResult.success() : BiometricResult.failed();
+      _authCompleter!.complete(result);
+      return result;
+    } on LocalAuthException catch (e) {
+      // Handle specific LocalAuth exceptions
+      final result = switch (e.code) {
+        LocalAuthExceptionCode.authInProgress =>
+          BiometricResult.error('Authentication already in progress'),
+        LocalAuthExceptionCode.noBiometricsEnrolled ||
+        LocalAuthExceptionCode.noBiometricHardware ||
+        LocalAuthExceptionCode.noCredentialsSet ||
+        LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable =>
+          BiometricResult.notAvailable(),
+        LocalAuthExceptionCode.userCanceled ||
+        LocalAuthExceptionCode.userRequestedFallback =>
+          BiometricResult.failed(),
+        _ => BiometricResult.error(e.description ?? 'Authentication failed'),
+      };
+      _authCompleter!.complete(result);
+      return result;
     } catch (e) {
-      return BiometricResult.error(e.toString());
+      final result = BiometricResult.error(e.toString());
+      _authCompleter!.complete(result);
+      return result;
+    } finally {
+      _isAuthenticating = false;
+      _authCompleter = null;
     }
+  }
+
+  /// Stop any ongoing authentication
+  Future<void> stopAuthentication() async {
+    await _auth.stopAuthentication();
   }
 
   /// Get a human-readable description of available biometrics
