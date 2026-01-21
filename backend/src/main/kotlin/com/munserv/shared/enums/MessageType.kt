@@ -15,6 +15,7 @@ enum class MessageType(
     GROUND_ADMIN_APPROVED("ground_admin_approved"),
     GROUND_ADMIN_DECLINED("ground_admin_declined"),
     GROUND_ADMIN_INVITATION_DECLINED("ground_admin_invitation_declined"),
+    GROUND_ADMIN_INVITATION_ACCEPTED("ground_admin_invitation_accepted"),
     GROUND_ADMIN_REVOCATION("ground_admin_revocation"),
     GROUND_ADMIN_STEPDOWN_REQUEST("ground_admin_stepdown_request"),
     VERIFY_NEW_ISSUE("verify_new_issue"),

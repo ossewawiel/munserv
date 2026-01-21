@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -188,6 +189,22 @@ export const MessageDetail: FC<MessageDetailProps> = ({
         );
 
       case MESSAGE_ACTION_TYPES.VIEW:
+        // For acceptance messages, show a "View Ground Admin" button
+        if (message.relatedEntityType === 'member' && message.relatedEntityId) {
+          return (
+            <Button
+              variant="contained"
+              startIcon={<VisibilityIcon />}
+              component={Link}
+              to="/ground-admins"
+              onClick={() => handleAction('dismiss')}
+              disabled={isActioning}
+            >
+              {t('messages.actions.viewGroundAdmin', 'View Ground Admin')}
+            </Button>
+          );
+        }
+        return null;
       default:
         return null;
     }

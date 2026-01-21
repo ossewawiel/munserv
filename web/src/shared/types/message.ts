@@ -7,6 +7,7 @@ export type MessageType =
   | 'ground_admin_approved'
   | 'ground_admin_declined'
   | 'ground_admin_invitation_declined'
+  | 'ground_admin_invitation_accepted'
   | 'ground_admin_revocation'
   | 'ground_admin_stepdown_request'
   | 'verify_new_issue'
@@ -101,6 +102,7 @@ export const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
   ground_admin_approved: 'messages.types.groundAdminApproved',
   ground_admin_declined: 'messages.types.groundAdminDeclined',
   ground_admin_invitation_declined: 'messages.types.groundAdminInvitationDeclined',
+  ground_admin_invitation_accepted: 'messages.types.groundAdminInvitationAccepted',
   ground_admin_revocation: 'messages.types.groundAdminRevocation',
   ground_admin_stepdown_request: 'messages.types.groundAdminStepdownRequest',
   verify_new_issue: 'messages.types.verifyNewIssue',

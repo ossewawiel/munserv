@@ -242,6 +242,7 @@
       "groundAdminApproved": "Application Approved",
       "groundAdminDeclined": "Application Declined",
       "groundAdminInvitationDeclined": "Invitation Declined",
+      "groundAdminInvitationAccepted": "Invitation Accepted",
       "groundAdminRevocation": "Status Revoked",
       "groundAdminStepdownRequest": "Step Down Request",
       "verifyNewIssue": "Verify New Issue",
@@ -256,7 +257,8 @@
       "reject": "Reject",
       "confirm": "Confirm",
       "cannotVerify": "Cannot Verify",
-      "dismiss": "Dismiss"
+      "dismiss": "Dismiss",
+      "viewGroundAdmin": "View Ground Admin"
     },
     "actionResults": {
       "accepted": "Accepted",

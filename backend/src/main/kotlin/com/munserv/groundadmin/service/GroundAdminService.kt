@@ -105,6 +105,24 @@ class GroundAdminService(
         val promoted = member.promoteToGroundAdmin()
         memberRepository.save(promoted)
 
+        // Notify the inviter
+        application.invitedBy?.let { inviterId ->
+            val message =
+                MessageEntity(
+                    type = MessageType.GROUND_ADMIN_INVITATION_ACCEPTED,
+                    title = "Ground Admin Invitation Accepted",
+                    body = "${member.fullName} has accepted your invitation to become a Ground Admin.",
+                    recipientId = inviterId.value,
+                    recipientType = "admin",
+                    senderId = memberId.value,
+                    senderType = "member",
+                    relatedEntityId = memberId.value,
+                    relatedEntityType = "member",
+                    actionType = "view",
+                )
+            messageService.createMessage(message)
+        }
+
         return GroundAdminResult.Success(mapOf("applicationId" to application.id.toString(), "status" to "accepted"))
     }
 

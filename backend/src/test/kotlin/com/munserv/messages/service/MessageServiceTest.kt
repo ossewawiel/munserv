@@ -88,7 +88,7 @@ class MessageServiceTest {
                 repository.findByRecipientIdAndRecipientTypeAndStatus(
                     recipientId,
                     recipientType,
-                    MessageStatus.UNREAD,
+                    "unread",
                     any<Pageable>(),
                 )
             } returns PageImpl(listOf(message))
@@ -106,7 +106,7 @@ class MessageServiceTest {
                 repository.findByRecipientIdAndRecipientTypeAndStatus(
                     recipientId,
                     recipientType,
-                    MessageStatus.UNREAD,
+                    "unread",
                     any<Pageable>(),
                 )
             }
@@ -120,7 +120,7 @@ class MessageServiceTest {
                 repository.findByRecipientIdAndRecipientTypeAndType(
                     recipientId,
                     recipientType,
-                    MessageType.GROUND_ADMIN_INVITATION,
+                    "ground_admin_invitation",
                     any<Pageable>(),
                 )
             } returns PageImpl(listOf(message))
@@ -144,8 +144,8 @@ class MessageServiceTest {
                 repository.findByRecipientIdAndRecipientTypeAndStatusAndType(
                     recipientId,
                     recipientType,
-                    MessageStatus.UNREAD,
-                    MessageType.GROUND_ADMIN_INVITATION,
+                    "unread",
+                    "ground_admin_invitation",
                     any<Pageable>(),
                 )
             } returns PageImpl(listOf(message))
