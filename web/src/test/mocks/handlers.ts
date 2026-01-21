@@ -1,4 +1,8 @@
 import { http, HttpResponse } from 'msw';
+import type { Message, MessageStatus, MessageType } from '@/shared/types/message';
+import type { GroundAdmin, GroundAdminStatus } from '@/shared/types/groundAdmin';
+import type { IssueVerification, VerificationStatus } from '@/shared/types/verification';
+import type { SectorSettings, VerificationMode } from '@/shared/types/sectorSettings';
 
 // Default mock data
 const mockIssues = [
@@ -24,6 +28,11 @@ const mockMembers = [
     status: 'active',
     issueCount: 5,
     joinedAt: '2024-01-15T10:00:00Z',
+    // Ground Admin: Active
+    isGroundAdmin: true,
+    groundAdminStatus: 'active',
+    hasPendingApplication: false,
+    hasInvitationPending: false,
   },
   {
     id: 'member-2',
@@ -35,6 +44,10 @@ const mockMembers = [
     status: 'pending_approval',
     issueCount: 0,
     joinedAt: '2024-03-01T14:30:00Z',
+    // Not a Ground Admin (pending member approval)
+    isGroundAdmin: false,
+    hasPendingApplication: false,
+    hasInvitationPending: false,
   },
   {
     id: 'member-3',
@@ -46,6 +59,73 @@ const mockMembers = [
     status: 'suspended',
     issueCount: 2,
     joinedAt: '2023-06-20T09:15:00Z',
+    // Not a Ground Admin (suspended)
+    isGroundAdmin: false,
+    hasPendingApplication: false,
+    hasInvitationPending: false,
+  },
+  {
+    id: 'member-4',
+    firstName: 'Alice',
+    surname: 'Regular',
+    email: 'alice@example.com',
+    phoneNumber: '+27444555666',
+    address: '321 Elm Street',
+    status: 'active',
+    issueCount: 12,
+    joinedAt: '2023-08-10T11:20:00Z',
+    // Regular member - can be invited
+    isGroundAdmin: false,
+    hasPendingApplication: false,
+    hasInvitationPending: false,
+  },
+  {
+    id: 'member-5',
+    firstName: 'Charlie',
+    surname: 'Applied',
+    email: 'charlie@example.com',
+    phoneNumber: '+27777888999',
+    address: '555 Maple Drive',
+    status: 'active',
+    issueCount: 8,
+    joinedAt: '2023-09-05T16:45:00Z',
+    // Has pending GA application
+    isGroundAdmin: false,
+    hasPendingApplication: true,
+    hasInvitationPending: false,
+    pendingApplicationId: 'app-apply-1',
+  },
+  {
+    id: 'member-6',
+    firstName: 'Diana',
+    surname: 'Invited',
+    email: 'diana@example.com',
+    phoneNumber: '+27111000222',
+    address: '777 Cedar Court',
+    status: 'active',
+    issueCount: 15,
+    joinedAt: '2023-07-20T08:30:00Z',
+    // Was invited, pending response
+    isGroundAdmin: false,
+    hasPendingApplication: false,
+    hasInvitationPending: true,
+    pendingApplicationId: 'app-inv-1',
+  },
+  {
+    id: 'member-7',
+    firstName: 'Edward',
+    surname: 'OnHold',
+    email: 'edward@example.com',
+    phoneNumber: '+27333444555',
+    address: '999 Oak Boulevard',
+    status: 'active',
+    issueCount: 3,
+    joinedAt: '2023-05-15T13:00:00Z',
+    // Ground Admin on hold
+    isGroundAdmin: true,
+    groundAdminStatus: 'on_hold',
+    hasPendingApplication: false,
+    hasInvitationPending: false,
   },
 ];
 
@@ -67,6 +147,166 @@ const mockDashboardStats = {
     fixed: 100,
     rejected: 5,
   },
+};
+
+// =============================================
+// MESSAGES MOCK DATA
+// =============================================
+export const mockMessages: Message[] = [
+  {
+    id: 'msg-1',
+    type: 'ground_admin_application' as MessageType,
+    title: 'Ground Admin Application',
+    body: 'John Smith has applied to become a Ground Admin in your sector.',
+    recipientId: 'admin-1',
+    recipientType: 'admin',
+    senderId: 'member-1',
+    senderType: 'member',
+    status: 'unread' as MessageStatus,
+    actionType: 'approve_reject',
+    relatedEntityId: 'member-1',
+    relatedEntityType: 'member',
+    metadata: { memberSince: '2024-01-15', issuesReported: 47 },
+    createdAt: '2026-01-19T10:00:00Z',
+  },
+  {
+    id: 'msg-2',
+    type: 'verify_new_issue' as MessageType,
+    title: 'Verify New Issue',
+    body: 'A new pothole has been reported at 123 Main Street. Please verify this issue exists.',
+    recipientId: 'admin-1',
+    recipientType: 'admin',
+    senderType: 'system',
+    status: 'unread' as MessageStatus,
+    actionType: 'confirm_verify',
+    relatedEntityId: 'issue-1',
+    relatedEntityType: 'issue',
+    createdAt: '2026-01-19T09:30:00Z',
+  },
+  {
+    id: 'msg-3',
+    type: 'monthly_report' as MessageType,
+    title: 'Monthly Report - January 2026',
+    body: 'Your sector resolved 45 issues this month. View the full report for details.',
+    recipientId: 'admin-1',
+    recipientType: 'admin',
+    senderType: 'system',
+    status: 'read' as MessageStatus,
+    actionType: 'view',
+    createdAt: '2026-01-15T08:00:00Z',
+    readAt: '2026-01-15T09:00:00Z',
+  },
+  {
+    id: 'msg-4',
+    type: 'ground_admin_approved' as MessageType,
+    title: 'Ground Admin Status Approved',
+    body: 'Your application to become a Ground Admin has been approved.',
+    recipientId: 'member-1',
+    recipientType: 'member',
+    senderType: 'system',
+    status: 'actioned' as MessageStatus,
+    actionType: 'acknowledge',
+    actionResult: 'acknowledged',
+    createdAt: '2026-01-10T14:00:00Z',
+    readAt: '2026-01-10T14:30:00Z',
+    actionedAt: '2026-01-10T14:30:00Z',
+  },
+];
+
+// =============================================
+// GROUND ADMINS MOCK DATA
+// =============================================
+export const mockGroundAdmins: GroundAdmin[] = [
+  {
+    id: 'ga-1',
+    memberId: 'member-1',
+    name: 'John Smith',
+    status: 'active' as GroundAdminStatus,
+    since: '2025-06-15T00:00:00Z',
+    responseRate: 92,
+    pendingVerifications: 2,
+  },
+  {
+    id: 'ga-2',
+    memberId: 'member-4',
+    name: 'Sarah Johnson',
+    status: 'active' as GroundAdminStatus,
+    since: '2025-08-20T00:00:00Z',
+    responseRate: 85,
+    pendingVerifications: 1,
+  },
+  {
+    id: 'ga-3',
+    memberId: 'member-5',
+    name: 'Mike Wilson',
+    status: 'on_hold' as GroundAdminStatus,
+    since: '2025-04-10T00:00:00Z',
+    responseRate: 45,
+    pendingVerifications: 0,
+  },
+  {
+    id: 'ga-4',
+    memberId: 'member-6',
+    name: 'Emily Brown',
+    status: 'inactive' as GroundAdminStatus,
+    since: '2024-12-01T00:00:00Z',
+    responseRate: 78,
+    pendingVerifications: 0,
+  },
+];
+
+// =============================================
+// VERIFICATION MOCK DATA
+// =============================================
+export const mockVerifications: IssueVerification[] = [
+  {
+    id: 'ver-1',
+    issueId: 'issue-1',
+    verificationType: 'existence',
+    assignedTo: 'member-1',
+    assignedToName: 'John Smith',
+    verifiedBy: 'member-1',
+    verifiedByName: 'John Smith',
+    result: 'confirmed',
+    requestedAt: '2026-01-15T10:00:00Z',
+    respondedAt: '2026-01-15T11:30:00Z',
+    status: 'completed' as VerificationStatus,
+  },
+  {
+    id: 'ver-2',
+    issueId: 'issue-1',
+    verificationType: 'fix',
+    assignedToName: 'Sarah Johnson',
+    requestedAt: '2026-01-18T14:00:00Z',
+    status: 'pending' as VerificationStatus,
+  },
+  {
+    id: 'ver-3',
+    issueId: 'issue-2',
+    verificationType: 'existence',
+    result: 'cannot_verify',
+    reason: 'wrong_location',
+    note: 'The GPS coordinates seem to be off by about 500m.',
+    verifiedBy: 'member-4',
+    verifiedByName: 'Sarah Johnson',
+    requestedAt: '2026-01-10T09:00:00Z',
+    respondedAt: '2026-01-10T16:00:00Z',
+    status: 'completed' as VerificationStatus,
+  },
+];
+
+// =============================================
+// SECTOR SETTINGS MOCK DATA
+// =============================================
+export const mockSectorSettings: SectorSettings = {
+  id: 'settings-1',
+  sectorId: 'sector-1',
+  newIssueVerificationMode: 'all_notified' as VerificationMode,
+  fixVerificationMode: 'admin_assigns' as VerificationMode,
+  daysFixedBeforeClosed: 7,
+  minimumGroundAdmins: 3,
+  createdAt: '2025-01-01T00:00:00Z',
+  updatedAt: '2026-01-15T10:00:00Z',
 };
 
 export const handlers = [
@@ -135,10 +375,23 @@ export const handlers = [
     const page = Number(url.searchParams.get('page') || 1);
     const limit = Number(url.searchParams.get('limit') || 20);
     const status = url.searchParams.get('status');
+    const isGroundAdmin = url.searchParams.get('isGroundAdmin');
+    const hasPendingApplication = url.searchParams.get('hasPendingApplication');
+    const hasInvitationPending = url.searchParams.get('hasInvitationPending');
 
     let filteredMembers = mockMembers;
+
     if (status) {
-      filteredMembers = mockMembers.filter((m) => m.status === status);
+      filteredMembers = filteredMembers.filter((m) => m.status === status);
+    }
+    if (isGroundAdmin === 'true') {
+      filteredMembers = filteredMembers.filter((m) => m.isGroundAdmin);
+    }
+    if (hasPendingApplication === 'true') {
+      filteredMembers = filteredMembers.filter((m) => m.hasPendingApplication);
+    }
+    if (hasInvitationPending === 'true') {
+      filteredMembers = filteredMembers.filter((m) => m.hasInvitationPending);
     }
 
     return HttpResponse.json({
@@ -251,5 +504,282 @@ export const handlers = [
       },
       { status: 201 }
     );
+  }),
+
+  // =============================================
+  // MESSAGES HANDLERS
+  // =============================================
+
+  // GET /messages - List messages
+  http.get('*/messages', ({ request }) => {
+    const url = new URL(request.url);
+    const status = url.searchParams.get('status');
+    const page = Number(url.searchParams.get('page') || 1);
+
+    let filteredMessages = [...mockMessages];
+    if (status) {
+      filteredMessages = filteredMessages.filter((m) => m.status === status);
+    }
+
+    const unreadCount = mockMessages.filter((m) => m.status === 'unread').length;
+
+    return HttpResponse.json({
+      items: filteredMessages,
+      total: filteredMessages.length,
+      page,
+      unreadCount,
+    });
+  }),
+
+  // GET /messages/:id - Get single message
+  http.get('*/messages/:id', ({ params }) => {
+    const message = mockMessages.find((m) => m.id === params.id);
+    if (message) {
+      return HttpResponse.json(message);
+    }
+    return HttpResponse.json({ message: 'Message not found' }, { status: 404 });
+  }),
+
+  // PATCH /messages/:id/read - Mark message as read
+  http.patch('*/messages/:id/read', ({ params }) => {
+    const message = mockMessages.find((m) => m.id === params.id);
+    if (message) {
+      return HttpResponse.json({
+        ...message,
+        status: 'read',
+        readAt: new Date().toISOString(),
+      });
+    }
+    return HttpResponse.json({ message: 'Message not found' }, { status: 404 });
+  }),
+
+  // POST /messages/:id/action - Perform action on message
+  http.post('*/messages/:id/action', async ({ params, request }) => {
+    const body = (await request.json()) as { action: string; note?: string };
+    const message = mockMessages.find((m) => m.id === params.id);
+    if (!message) {
+      return HttpResponse.json({ message: 'Message not found' }, { status: 404 });
+    }
+    if (message.status === 'actioned') {
+      return HttpResponse.json({ message: 'Message already actioned' }, { status: 409 });
+    }
+    return HttpResponse.json({
+      ...message,
+      status: 'actioned',
+      actionResult: body.action,
+      actionedAt: new Date().toISOString(),
+    });
+  }),
+
+  // =============================================
+  // GROUND ADMIN HANDLERS
+  // =============================================
+
+  // GET /sectors/:id/ground-admins - List Ground Admins in sector
+  http.get('*/sectors/:sectorId/ground-admins', ({ request }) => {
+    const url = new URL(request.url);
+    const status = url.searchParams.get('status');
+
+    let filteredAdmins = [...mockGroundAdmins];
+    if (status) {
+      filteredAdmins = filteredAdmins.filter((ga) => ga.status === status);
+    }
+
+    return HttpResponse.json({
+      items: filteredAdmins,
+      total: filteredAdmins.length,
+    });
+  }),
+
+  // POST /members/:id/ground-admin/invite - Invite member to become Ground Admin
+  http.post('*/members/:memberId/ground-admin/invite', async ({ params, request }) => {
+    const body = (await request.json()) as { message?: string };
+    void body; // silence unused variable
+    const memberId = params.memberId as string;
+
+    // Check if already a ground admin
+    const isGroundAdmin = mockGroundAdmins.some((ga) => ga.memberId === memberId);
+    if (isGroundAdmin) {
+      return HttpResponse.json(
+        { message: 'Member is already a Ground Admin' },
+        { status: 409 }
+      );
+    }
+
+    return HttpResponse.json({
+      applicationId: `app-${Date.now()}`,
+      status: 'pending',
+    });
+  }),
+
+  // POST /members/:id/ground-admin/approve - Approve Ground Admin application
+  http.post('*/members/:memberId/ground-admin/approve', async ({ params, request }) => {
+    const body = (await request.json()) as { applicationId: string };
+    void body; // silence unused variable
+    const memberId = params.memberId as string;
+
+    return HttpResponse.json({
+      status: 'approved',
+      member: {
+        id: memberId,
+        name: 'Test Member',
+        isGroundAdmin: true,
+        groundAdminStatus: 'active',
+      },
+    });
+  }),
+
+  // POST /members/:id/ground-admin/decline - Decline Ground Admin application
+  http.post('*/members/:memberId/ground-admin/decline', async ({ request }) => {
+    const body = (await request.json()) as { applicationId: string; reason: string };
+    void body; // silence unused variable
+
+    return HttpResponse.json({
+      status: 'declined',
+    });
+  }),
+
+  // POST /members/:id/ground-admin/revoke - Revoke Ground Admin status
+  http.post('*/members/:memberId/ground-admin/revoke', async ({ params, request }) => {
+    const body = (await request.json()) as { reason: string };
+    void body; // silence unused variable
+    const memberId = params.memberId as string;
+
+    const groundAdmin = mockGroundAdmins.find((ga) => ga.memberId === memberId);
+    if (!groundAdmin) {
+      return HttpResponse.json(
+        { message: 'Member is not a Ground Admin' },
+        { status: 409 }
+      );
+    }
+
+    return HttpResponse.json({
+      status: 'revoked',
+      member: {
+        id: memberId,
+        name: groundAdmin.name,
+        isGroundAdmin: false,
+      },
+    });
+  }),
+
+  // PATCH /members/:id/ground-admin/status - Update Ground Admin status
+  http.patch('*/members/:memberId/ground-admin/status', async ({ params, request }) => {
+    const body = (await request.json()) as { status: 'active' | 'on_hold' };
+    const memberId = params.memberId as string;
+
+    const groundAdmin = mockGroundAdmins.find((ga) => ga.memberId === memberId);
+    if (!groundAdmin) {
+      return HttpResponse.json(
+        { message: 'Member is not a Ground Admin' },
+        { status: 409 }
+      );
+    }
+
+    return HttpResponse.json({
+      ...groundAdmin,
+      status: body.status,
+    });
+  }),
+
+  // DELETE /members/:id/ground-admin/invite/:applicationId - Revoke pending Ground Admin invitation
+  http.delete('*/members/:memberId/ground-admin/invite/:applicationId', () => {
+    return HttpResponse.json({ status: 'revoked' });
+  }),
+
+  // =============================================
+  // VERIFICATION HANDLERS
+  // =============================================
+
+  // POST /issues/:id/request-verification - Request verification for an issue
+  http.post('*/issues/:issueId/request-verification', async ({ params, request }) => {
+    const body = (await request.json()) as {
+      type: 'existence' | 'fix';
+      assignTo?: string;
+      message?: string;
+    };
+    const issueId = params.issueId as string;
+
+    const newVerification: IssueVerification = {
+      id: `ver-${Date.now()}`,
+      issueId,
+      verificationType: body.type,
+      assignedTo: body.assignTo,
+      assignedToName: body.assignTo ? 'Assigned Ground Admin' : undefined,
+      requestedAt: new Date().toISOString(),
+      status: 'pending',
+    };
+
+    return HttpResponse.json(newVerification);
+  }),
+
+  // GET /issues/:id/verifications - Get verification history for issue
+  http.get('*/issues/:issueId/verifications', ({ params }) => {
+    const issueId = params.issueId as string;
+    const verifications = mockVerifications.filter((v) => v.issueId === issueId);
+
+    return HttpResponse.json({
+      items: verifications,
+    });
+  }),
+
+  // =============================================
+  // SECTOR SETTINGS HANDLERS
+  // =============================================
+
+  // GET /sectors/:id/settings - Get sector settings
+  http.get('*/sectors/:sectorId/settings', ({ params }) => {
+    const sectorId = params.sectorId as string;
+
+    if (sectorId !== mockSectorSettings.sectorId) {
+      // Return default settings for any sector
+      return HttpResponse.json({
+        ...mockSectorSettings,
+        id: `settings-${sectorId}`,
+        sectorId,
+      });
+    }
+
+    return HttpResponse.json(mockSectorSettings);
+  }),
+
+  // PATCH /sectors/:id/settings - Update sector settings
+  http.patch('*/sectors/:sectorId/settings', async ({ params, request }) => {
+    const body = (await request.json()) as {
+      newIssueVerificationMode?: string;
+      fixVerificationMode?: string;
+      daysFixedBeforeClosed?: number;
+      minimumGroundAdmins?: number;
+    };
+    const sectorId = params.sectorId as string;
+
+    // Validate daysFixedBeforeClosed range
+    if (
+      body.daysFixedBeforeClosed !== undefined &&
+      (body.daysFixedBeforeClosed < 1 || body.daysFixedBeforeClosed > 90)
+    ) {
+      return HttpResponse.json(
+        { message: 'daysFixedBeforeClosed must be between 1 and 90' },
+        { status: 400 }
+      );
+    }
+
+    // Validate minimumGroundAdmins range
+    if (
+      body.minimumGroundAdmins !== undefined &&
+      (body.minimumGroundAdmins < 0 || body.minimumGroundAdmins > 50)
+    ) {
+      return HttpResponse.json(
+        { message: 'minimumGroundAdmins must be between 0 and 50' },
+        { status: 400 }
+      );
+    }
+
+    return HttpResponse.json({
+      ...mockSectorSettings,
+      sectorId,
+      ...body,
+      updatedAt: new Date().toISOString(),
+    });
   }),
 ];

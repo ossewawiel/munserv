@@ -1,6 +1,6 @@
 # Ground Admin & Messaging - Implementation Plan
 
-## Status: 🟡 In Progress (Phase 1 Complete, Phase 3 Complete, Phase 4 Backend + Web Complete, Phase 5 Backend + Web Complete)
+## Status: 🟡 In Progress (Phase 1 Complete, Phase 3 Complete + Web Tests, Phase 4 Backend + Web Complete + Tests, Phase 5 Backend + Web Complete + Tests)
 
 ## Executive Summary
 
@@ -580,7 +580,7 @@ Phase 2 (Settings) can run in parallel with Phase 3 (Messaging) after Phase 1 is
 - [ ] [backend] Sector Chief permissions
 - [ ] [web] Sector settings page
 
-# Phase 3: Messaging System - COMPLETED 2026-01-19
+# Phase 3: Messaging System - COMPLETED 2026-01-19, WEB TESTS 2026-01-20
 - [x] [backend] Message service (MessageService.kt, MessageFactory.kt)
 - [x] [backend] Message API (MessageController.kt, MessageDto.kt)
 - [x] [backend] Message entity & repository (MessageEntity.kt, MessageRepository.kt)
@@ -588,10 +588,12 @@ Phase 2 (Settings) can run in parallel with Phase 3 (Messaging) after Phase 1 is
 - [x] [web] Messages inbox page (MessagesPage.tsx - email-style layout)
 - [x] [web] Notification dropdown (NotificationDropdown.tsx)
 - [x] [web] Message types, API, hooks
+- [x] [web] Unit tests for messages API and hooks
+- [x] [web] Component tests for MessageList and MessageDetail
 - [ ] [mobile] Messages tab
 - [ ] [mobile] Message detail page
 
-# Phase 4: Ground Admin Lifecycle - BACKEND + WEB COMPLETED 2026-01-19
+# Phase 4: Ground Admin Lifecycle - BACKEND + WEB COMPLETED 2026-01-19, WEB TESTS 2026-01-20
 - [x] [backend] GA application entity & repository
 - [x] [backend] GA lifecycle service (GroundAdminService.kt)
 - [x] [backend] GA API (GroundAdminController.kt)
@@ -599,10 +601,13 @@ Phase 2 (Settings) can run in parallel with Phase 3 (Messaging) after Phase 1 is
 - [x] [web] GroundAdminsPage (dedicated management page)
 - [x] [web] GA management dialogs (Invite, Approve, Revoke)
 - [x] [web] Ground Admin types, API, hooks
+- [x] [web] Unit tests for ground-admins API and hooks
+- [x] [web] Component tests for InviteDialog
+- [ ] [web] Members table UX refactor (see members-table-refactor.md)
 - [ ] [mobile] Apply for GA flow
 - [ ] [mobile] Invitation response flow
 
-# Phase 5: Issue Verification - BACKEND + WEB COMPLETED 2026-01-19
+# Phase 5: Issue Verification - BACKEND + WEB COMPLETED 2026-01-19, WEB TESTS 2026-01-20
 - [x] [backend] Verification entity & repository (IssueVerification.kt, IssueVerificationRepository.kt)
 - [x] [backend] Verification service (VerificationService.kt)
 - [x] [backend] Verification API (VerificationController.kt, VerificationDto.kt)
@@ -612,6 +617,8 @@ Phase 2 (Settings) can run in parallel with Phase 3 (Messaging) after Phase 1 is
 - [x] [web] Verification history (VerificationHistory.tsx)
 - [x] [web] Sector settings page (SectorSettingsPage.tsx)
 - [x] [web] Verification types, API, hooks
+- [x] [web] Unit tests for verification API and hooks
+- [x] [web] Unit tests for sector-settings API and hooks
 - [ ] [mobile] Verify issue page
 - [ ] [mobile] Verify fix page
 
@@ -635,6 +642,31 @@ Phase 2 (Settings) can run in parallel with Phase 3 (Messaging) after Phase 1 is
 
 ---
 
+## Known Issues
+
+### Bug: Ground Admin Invitation Not Persisting (2026-01-20)
+
+**Status:** 🔴 Open
+**Priority:** Critical
+
+When inviting a member to become Ground Admin:
+- Dialog closes but member doesn't move to pending state
+- Member not shown in "Pending GA Invites" tab
+- Root cause: Case mismatch in status query (`"PENDING"` vs `"pending"`)
+
+**Fix Documents:**
+| Document | For |
+|----------|-----|
+| [Bug Analysis](./bug-fix-invitation-flow.md) | Full root cause analysis |
+| [Backend Fix](./backend-fix-handoff.md) | Backend changes required |
+| [Web Verification](./web-fix-handoff.md) | Web UI verification steps |
+| [Mobile Verification](./mobile-fix-handoff.md) | Mobile app verification steps |
+
+**Fix Summary:**
+Change `AdminController.kt` lines 205 and 234 from `"PENDING"` to `ApplicationStatus.PENDING.toDbValue()`.
+
+---
+
 ## Related Documents
 
 | Document | Purpose |
@@ -647,4 +679,9 @@ Phase 2 (Settings) can run in parallel with Phase 3 (Messaging) after Phase 1 is
 | [Backend Phase 4](./backend-phase-4.md) | Ground Admin lifecycle ✅ |
 | [Backend Phase 5](./backend-phase-5.md) | Issue verification workflow ✅ |
 | [Web Phase](./web-phase.md) | All web UI work ✅ |
+| [Members Table Refactor](./members-table-refactor.md) | UX improvements for Members table 🟡 |
 | [Mobile Phase](./mobile-phase.md) | All mobile UI work |
+| [Bug Fix: Invitation Flow](./bug-fix-invitation-flow.md) | Critical bug fix 🔴 |
+| [Backend Fix Handoff](./backend-fix-handoff.md) | Backend fix instructions |
+| [Web Fix Handoff](./web-fix-handoff.md) | Web verification checklist |
+| [Mobile Fix Handoff](./mobile-fix-handoff.md) | Mobile verification checklist |

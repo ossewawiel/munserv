@@ -46,6 +46,7 @@ const mockMember: MemberListItem = {
   status: 'pending_approval',
   issueCount: 0,
   joinedAt: '2024-03-01T14:30:00Z',
+  isGroundAdmin: false,
 };
 
 interface RenderOptions {

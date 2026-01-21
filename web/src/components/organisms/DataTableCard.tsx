@@ -75,10 +75,10 @@ export interface DataTableCardProps<T, TTabValue extends string = string> {
   readonly pageSize: number;
   /** Available page size options */
   readonly pageSizeOptions?: readonly number[];
-  /** Callback when page changes */
-  readonly onPageChange: (page: number) => void;
-  /** Callback when page size changes */
-  readonly onPageSizeChange: (pageSize: number) => void;
+  /** Callback when page changes (required unless hidePagination is true) */
+  readonly onPageChange?: (page: number) => void;
+  /** Callback when page size changes (required unless hidePagination is true) */
+  readonly onPageSizeChange?: (pageSize: number) => void;
   /** Optional callback when row is clicked */
   readonly onRowClick?: (item: T) => void;
   /**
@@ -103,6 +103,8 @@ export interface DataTableCardProps<T, TTabValue extends string = string> {
   readonly title?: ReactNode;
   /** Tab configuration - when provided, tabs appear above the toolbar */
   readonly tabs?: DataTableTabsConfig<TTabValue>;
+  /** Hide pagination footer */
+  readonly hidePagination?: boolean;
 }
 
 interface PaginationFooterProps {
@@ -218,6 +220,7 @@ export function DataTableCard<T, TTabValue extends string = string>({
   hideToolbarWhenEmpty = false,
   title,
   tabs,
+  hidePagination = false,
 }: DataTableCardProps<T, TTabValue>) {
   // Tab state management (uncontrolled mode)
   const [internalTabValue, setInternalTabValue] = useState<TTabValue | undefined>(
@@ -354,7 +357,7 @@ export function DataTableCard<T, TTabValue extends string = string>({
       )}
 
       {/* Pagination Footer */}
-      {!isLoading && totalItems > 0 && (
+      {!isLoading && !hidePagination && totalItems > 0 && onPageChange && onPageSizeChange && (
         <>
           <Divider />
           <PaginationFooter

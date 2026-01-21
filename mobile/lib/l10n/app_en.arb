@@ -438,5 +438,336 @@
   "pinLoginInfo": "Enter your 4-digit PIN to quickly access your account.",
   "@pinLoginInfo": {
     "description": "Info text on PIN login screen"
+  },
+
+  "messages": "Messages",
+  "@messages": {
+    "description": "Messages navigation label"
+  },
+
+  "noMessages": "No Messages",
+  "@noMessages": {
+    "description": "Empty state title when no messages"
+  },
+
+  "noMessagesSubtitle": "You don't have any messages yet. Check back later.",
+  "@noMessagesSubtitle": {
+    "description": "Empty state subtitle when no messages"
+  },
+
+  "unread": "Unread",
+  "@unread": {
+    "description": "Filter option for unread messages"
+  },
+
+  "actioned": "Actioned",
+  "@actioned": {
+    "description": "Filter option for actioned messages"
+  },
+
+  "all": "All",
+  "@all": {
+    "description": "Filter option for all items"
+  },
+
+  "filter": "Filter",
+  "@filter": {
+    "description": "Filter button tooltip"
+  },
+
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh button label"
+  },
+
+  "messageDetail": "Message",
+  "@messageDetail": {
+    "description": "Title for message detail page"
+  },
+
+  "actionCompleted": "Action completed",
+  "@actionCompleted": {
+    "description": "Success message after action"
+  },
+
+  "actionTaken": "Action taken",
+  "@actionTaken": {
+    "description": "Label showing action was taken"
+  },
+
+  "viewRelatedIssue": "View Related Issue",
+  "@viewRelatedIssue": {
+    "description": "Button to view related issue"
+  },
+
+  "verifyNow": "Verify Now",
+  "@verifyNow": {
+    "description": "Button to start verification"
+  },
+
+  "accept": "Accept",
+  "@accept": {
+    "description": "Accept button label"
+  },
+
+  "decline": "Decline",
+  "@decline": {
+    "description": "Decline button label"
+  },
+
+  "approve": "Approve",
+  "@approve": {
+    "description": "Approve button label"
+  },
+
+  "reject": "Reject",
+  "@reject": {
+    "description": "Reject button label"
+  },
+
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+
+  "dismiss": "Dismiss",
+  "@dismiss": {
+    "description": "Dismiss button label"
+  },
+
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+
+  "submit": "Submit",
+  "@submit": {
+    "description": "Submit button label"
+  },
+
+  "accepted": "Accepted",
+  "@accepted": {
+    "description": "Status when accepted"
+  },
+
+  "declined": "Declined",
+  "@declined": {
+    "description": "Status when declined"
+  },
+
+  "approved": "Approved",
+  "@approved": {
+    "description": "Status when approved"
+  },
+
+  "rejected": "Rejected",
+  "@rejected": {
+    "description": "Status when rejected"
+  },
+
+  "confirmed": "Confirmed",
+  "@confirmed": {
+    "description": "Status when confirmed"
+  },
+
+  "dismissed": "Dismissed",
+  "@dismissed": {
+    "description": "Status when dismissed"
+  },
+
+  "becomeGroundAdmin": "Become a Ground Admin",
+  "@becomeGroundAdmin": {
+    "description": "Title for ground admin application"
+  },
+
+  "whatIsGroundAdmin": "What is a Ground Admin?",
+  "@whatIsGroundAdmin": {
+    "description": "Section title explaining ground admin"
+  },
+
+  "groundAdminDescription": "Ground Admins are trusted community members who help verify issues on the ground. They confirm that reported problems exist and that fixes are complete.",
+  "@groundAdminDescription": {
+    "description": "Description of ground admin role"
+  },
+
+  "responsibilities": "Responsibilities",
+  "@responsibilities": {
+    "description": "Responsibilities section title"
+  },
+
+  "verifyNewIssues": "Verify that reported issues exist",
+  "@verifyNewIssues": {
+    "description": "Ground admin responsibility"
+  },
+
+  "confirmFixes": "Confirm when issues are properly fixed",
+  "@confirmFixes": {
+    "description": "Ground admin responsibility"
+  },
+
+  "providePhotoEvidence": "Provide photo evidence when needed",
+  "@providePhotoEvidence": {
+    "description": "Ground admin responsibility"
+  },
+
+  "respondPromptly": "Respond to verification requests promptly",
+  "@respondPromptly": {
+    "description": "Ground admin responsibility"
+  },
+
+  "applyNow": "Apply Now",
+  "@applyNow": {
+    "description": "Button to apply for ground admin"
+  },
+
+  "applicationSubmitted": "Your application has been submitted",
+  "@applicationSubmitted": {
+    "description": "Success message after application"
+  },
+
+  "groundAdminInvitation": "Ground Admin Invitation",
+  "@groundAdminInvitation": {
+    "description": "Title for invitation page"
+  },
+
+  "invitedByAdmin": "{name} has invited you to become a Ground Admin",
+  "@invitedByAdmin": {
+    "description": "Message showing who sent invitation",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John Smith"
+      }
+    }
+  },
+
+  "invitedToBeGroundAdmin": "You have been invited to become a Ground Admin",
+  "@invitedToBeGroundAdmin": {
+    "description": "Generic invitation message"
+  },
+
+  "groundAdminInvitationDescription": "As a Ground Admin, you'll help verify issues in your community. This is a volunteer role that helps keep your neighborhood safe and well-maintained.",
+  "@groundAdminInvitationDescription": {
+    "description": "Description of what being a ground admin means"
+  },
+
+  "asGroundAdminYouWill": "As a Ground Admin, you will:",
+  "@asGroundAdminYouWill": {
+    "description": "Benefits section header"
+  },
+
+  "helpYourCommunity": "Help improve your community",
+  "@helpYourCommunity": {
+    "description": "Ground admin benefit"
+  },
+
+  "groundAdminStatus": "Ground Admin",
+  "@groundAdminStatus": {
+    "description": "Ground admin status card title"
+  },
+
+  "responseRate": "Response Rate",
+  "@responseRate": {
+    "description": "Label for response rate stat"
+  },
+
+  "pendingVerifications": "Pending Verifications",
+  "@pendingVerifications": {
+    "description": "Label for pending verifications stat"
+  },
+
+  "totalVerifications": "Total Verifications",
+  "@totalVerifications": {
+    "description": "Label for total verifications stat"
+  },
+
+  "memberSince": "Member Since",
+  "@memberSince": {
+    "description": "Label for membership date"
+  },
+
+  "stepDownFromRole": "Step Down from Role",
+  "@stepDownFromRole": {
+    "description": "Button to step down from ground admin"
+  },
+
+  "verifyIssueExists": "Verify Issue Exists",
+  "@verifyIssueExists": {
+    "description": "Title for existence verification"
+  },
+
+  "verifyIssueFix": "Verify Fix",
+  "@verifyIssueFix": {
+    "description": "Title for fix verification"
+  },
+
+  "addPhoto": "Add Photo",
+  "@addPhoto": {
+    "description": "Photo section title"
+  },
+
+  "photoOptional": "Optional: Take a photo as evidence",
+  "@photoOptional": {
+    "description": "Photo section subtitle"
+  },
+
+  "camera": "Camera",
+  "@camera": {
+    "description": "Camera button label"
+  },
+
+  "gallery": "Gallery",
+  "@gallery": {
+    "description": "Gallery button label"
+  },
+
+  "additionalNote": "Additional Note",
+  "@additionalNote": {
+    "description": "Note section title"
+  },
+
+  "noteHint": "Add any additional observations...",
+  "@noteHint": {
+    "description": "Placeholder for note field"
+  },
+
+  "confirmExists": "Confirm Issue Exists",
+  "@confirmExists": {
+    "description": "Button to confirm existence"
+  },
+
+  "confirmFixed": "Confirm Fix is Complete",
+  "@confirmFixed": {
+    "description": "Button to confirm fix"
+  },
+
+  "cannotVerify": "Cannot Verify",
+  "@cannotVerify": {
+    "description": "Button when cannot verify"
+  },
+
+  "notFixed": "Not Fixed",
+  "@notFixed": {
+    "description": "Button when not fixed"
+  },
+
+  "verificationSubmitted": "Verification submitted",
+  "@verificationSubmitted": {
+    "description": "Success message after verification"
+  },
+
+  "verificationNotFound": "Verification request not found",
+  "@verificationNotFound": {
+    "description": "Error when verification not found"
+  },
+
+  "selectReason": "Please select a reason:",
+  "@selectReason": {
+    "description": "Prompt to select reason"
+  },
+
+  "viewOnMap": "View on Map",
+  "@viewOnMap": {
+    "description": "Button to view on map"
   }
 }

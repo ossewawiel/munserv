@@ -1,5 +1,8 @@
 package com.munserv.groundadmin.service
 
+import com.munserv.admin.domain.Admin
+import com.munserv.admin.domain.AdminRole
+import com.munserv.admin.repository.AdminRepository
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
 import com.munserv.auth.repository.MemberRepository
@@ -13,6 +16,7 @@ import com.munserv.messages.service.MessageService
 import com.munserv.sectors.domain.Sector
 import com.munserv.sectors.repository.SectorRepository
 import com.munserv.shared.enums.GroundAdminStatus
+import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.PodId
@@ -32,6 +36,7 @@ import java.time.Instant
 class GroundAdminServiceTest {
     private lateinit var applicationRepository: GroundAdminApplicationRepository
     private lateinit var memberRepository: MemberRepository
+    private lateinit var adminRepository: AdminRepository
     private lateinit var sectorRepository: SectorRepository
     private lateinit var messageService: MessageService
     private lateinit var service: GroundAdminService
@@ -45,12 +50,14 @@ class GroundAdminServiceTest {
         clearAllMocks()
         applicationRepository = mockk(relaxed = true)
         memberRepository = mockk(relaxed = true)
+        adminRepository = mockk(relaxed = true)
         sectorRepository = mockk(relaxed = true)
         messageService = mockk(relaxed = true)
         service =
             GroundAdminService(
                 applicationRepository = applicationRepository,
                 memberRepository = memberRepository,
+                adminRepository = adminRepository,
                 sectorRepository = sectorRepository,
                 messageService = messageService,
             )
@@ -91,6 +98,20 @@ class GroundAdminServiceTest {
             podId = PodId.generate(),
             name = "Test Sector",
             center = GeoPoint(27.9833, -26.1367),
+        )
+
+    private fun createTestAdmin(
+        id: MemberId = adminId,
+        sectorId: SectorId = this.sectorId,
+    ): Admin =
+        Admin(
+            id = AdminId(id.value),
+            sectorId = sectorId,
+            email = "admin@example.com",
+            displayName = "Test Admin",
+            role = AdminRole.SECTOR_ADMIN,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now(),
         )
 
     private fun createTestApplication(
@@ -296,11 +317,11 @@ class GroundAdminServiceTest {
     inner class Invite {
         @Test
         fun `should create invitation and send message to member`() {
-            val admin = createTestMember(id = adminId)
+            val admin = createTestAdmin()
             val member = createTestMember()
             val sector = createTestSector()
 
-            every { memberRepository.findById(adminId) } returns admin
+            every { adminRepository.findById(AdminId(adminId.value)) } returns admin
             every { memberRepository.findById(memberId) } returns member
             every { sectorRepository.findById(sectorId) } returns sector
             every { applicationRepository.findPendingForMemberInSector(memberId, sectorId) } returns null
@@ -313,11 +334,20 @@ class GroundAdminServiceTest {
         }
 
         @Test
+        fun `should return NotFound when admin not found`() {
+            every { adminRepository.findById(AdminId(adminId.value)) } returns null
+
+            val result = service.invite(adminId, memberId, null)
+
+            result.shouldBeInstanceOf<GroundAdminResult.NotFound>()
+        }
+
+        @Test
         fun `should return Conflict when member already ground admin`() {
-            val admin = createTestMember(id = adminId)
+            val admin = createTestAdmin()
             val member = createTestMember(isGroundAdmin = true, groundAdminStatus = GroundAdminStatus.ACTIVE)
 
-            every { memberRepository.findById(adminId) } returns admin
+            every { adminRepository.findById(AdminId(adminId.value)) } returns admin
             every { memberRepository.findById(memberId) } returns member
 
             val result = service.invite(adminId, memberId, null)
@@ -328,10 +358,10 @@ class GroundAdminServiceTest {
         @Test
         fun `should return Forbidden when member in different sector`() {
             val otherSectorId = SectorId.generate()
-            val admin = createTestMember(id = adminId)
+            val admin = createTestAdmin()
             val member = createTestMember(sectorId = otherSectorId)
 
-            every { memberRepository.findById(adminId) } returns admin
+            every { adminRepository.findById(AdminId(adminId.value)) } returns admin
             every { memberRepository.findById(memberId) } returns member
 
             val result = service.invite(adminId, memberId, null)

@@ -48,6 +48,7 @@ const mockMembers: MemberListItem[] = [
     status: 'active',
     issueCount: 5,
     joinedAt: '2024-01-15T10:00:00Z',
+    isGroundAdmin: false,
   },
   {
     id: 'member-2',
@@ -59,6 +60,7 @@ const mockMembers: MemberListItem[] = [
     status: 'pending_approval',
     issueCount: 0,
     joinedAt: '2024-03-01T14:30:00Z',
+    isGroundAdmin: false,
   },
   {
     id: 'member-3',
@@ -70,6 +72,7 @@ const mockMembers: MemberListItem[] = [
     status: 'suspended',
     issueCount: 2,
     joinedAt: '2023-06-20T09:15:00Z',
+    isGroundAdmin: false,
   },
 ];
 

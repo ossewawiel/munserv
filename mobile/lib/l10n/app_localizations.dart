@@ -590,6 +590,396 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Enter your 4-digit PIN to quickly access your account.'**
   String get pinLoginInfo;
+
+  /// Messages navigation label
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get messages;
+
+  /// Empty state title when no messages
+  ///
+  /// In en, this message translates to:
+  /// **'No Messages'**
+  String get noMessages;
+
+  /// Empty state subtitle when no messages
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any messages yet. Check back later.'**
+  String get noMessagesSubtitle;
+
+  /// Filter option for unread messages
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get unread;
+
+  /// Filter option for actioned messages
+  ///
+  /// In en, this message translates to:
+  /// **'Actioned'**
+  String get actioned;
+
+  /// Filter option for all items
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// Filter button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filter;
+
+  /// Refresh button label
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// Title for message detail page
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get messageDetail;
+
+  /// Success message after action
+  ///
+  /// In en, this message translates to:
+  /// **'Action completed'**
+  String get actionCompleted;
+
+  /// Label showing action was taken
+  ///
+  /// In en, this message translates to:
+  /// **'Action taken'**
+  String get actionTaken;
+
+  /// Button to view related issue
+  ///
+  /// In en, this message translates to:
+  /// **'View Related Issue'**
+  String get viewRelatedIssue;
+
+  /// Button to start verification
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Now'**
+  String get verifyNow;
+
+  /// Accept button label
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get accept;
+
+  /// Decline button label
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get decline;
+
+  /// Approve button label
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approve;
+
+  /// Reject button label
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reject;
+
+  /// Confirm button label
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// Dismiss button label
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
+
+  /// Cancel button label
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Submit button label
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// Status when accepted
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get accepted;
+
+  /// Status when declined
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get declined;
+
+  /// Status when approved
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get approved;
+
+  /// Status when rejected
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get rejected;
+
+  /// Status when confirmed
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get confirmed;
+
+  /// Status when dismissed
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get dismissed;
+
+  /// Title for ground admin application
+  ///
+  /// In en, this message translates to:
+  /// **'Become a Ground Admin'**
+  String get becomeGroundAdmin;
+
+  /// Section title explaining ground admin
+  ///
+  /// In en, this message translates to:
+  /// **'What is a Ground Admin?'**
+  String get whatIsGroundAdmin;
+
+  /// Description of ground admin role
+  ///
+  /// In en, this message translates to:
+  /// **'Ground Admins are trusted community members who help verify issues on the ground. They confirm that reported problems exist and that fixes are complete.'**
+  String get groundAdminDescription;
+
+  /// Responsibilities section title
+  ///
+  /// In en, this message translates to:
+  /// **'Responsibilities'**
+  String get responsibilities;
+
+  /// Ground admin responsibility
+  ///
+  /// In en, this message translates to:
+  /// **'Verify that reported issues exist'**
+  String get verifyNewIssues;
+
+  /// Ground admin responsibility
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm when issues are properly fixed'**
+  String get confirmFixes;
+
+  /// Ground admin responsibility
+  ///
+  /// In en, this message translates to:
+  /// **'Provide photo evidence when needed'**
+  String get providePhotoEvidence;
+
+  /// Ground admin responsibility
+  ///
+  /// In en, this message translates to:
+  /// **'Respond to verification requests promptly'**
+  String get respondPromptly;
+
+  /// Button to apply for ground admin
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Now'**
+  String get applyNow;
+
+  /// Success message after application
+  ///
+  /// In en, this message translates to:
+  /// **'Your application has been submitted'**
+  String get applicationSubmitted;
+
+  /// Title for invitation page
+  ///
+  /// In en, this message translates to:
+  /// **'Ground Admin Invitation'**
+  String get groundAdminInvitation;
+
+  /// Message showing who sent invitation
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has invited you to become a Ground Admin'**
+  String invitedByAdmin(String name);
+
+  /// Generic invitation message
+  ///
+  /// In en, this message translates to:
+  /// **'You have been invited to become a Ground Admin'**
+  String get invitedToBeGroundAdmin;
+
+  /// Description of what being a ground admin means
+  ///
+  /// In en, this message translates to:
+  /// **'As a Ground Admin, you\'ll help verify issues in your community. This is a volunteer role that helps keep your neighborhood safe and well-maintained.'**
+  String get groundAdminInvitationDescription;
+
+  /// Benefits section header
+  ///
+  /// In en, this message translates to:
+  /// **'As a Ground Admin, you will:'**
+  String get asGroundAdminYouWill;
+
+  /// Ground admin benefit
+  ///
+  /// In en, this message translates to:
+  /// **'Help improve your community'**
+  String get helpYourCommunity;
+
+  /// Ground admin status card title
+  ///
+  /// In en, this message translates to:
+  /// **'Ground Admin'**
+  String get groundAdminStatus;
+
+  /// Label for response rate stat
+  ///
+  /// In en, this message translates to:
+  /// **'Response Rate'**
+  String get responseRate;
+
+  /// Label for pending verifications stat
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Verifications'**
+  String get pendingVerifications;
+
+  /// Label for total verifications stat
+  ///
+  /// In en, this message translates to:
+  /// **'Total Verifications'**
+  String get totalVerifications;
+
+  /// Label for membership date
+  ///
+  /// In en, this message translates to:
+  /// **'Member Since'**
+  String get memberSince;
+
+  /// Button to step down from ground admin
+  ///
+  /// In en, this message translates to:
+  /// **'Step Down from Role'**
+  String get stepDownFromRole;
+
+  /// Title for existence verification
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Issue Exists'**
+  String get verifyIssueExists;
+
+  /// Title for fix verification
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Fix'**
+  String get verifyIssueFix;
+
+  /// Photo section title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Photo'**
+  String get addPhoto;
+
+  /// Photo section subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: Take a photo as evidence'**
+  String get photoOptional;
+
+  /// Camera button label
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// Gallery button label
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// Note section title
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Note'**
+  String get additionalNote;
+
+  /// Placeholder for note field
+  ///
+  /// In en, this message translates to:
+  /// **'Add any additional observations...'**
+  String get noteHint;
+
+  /// Button to confirm existence
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Issue Exists'**
+  String get confirmExists;
+
+  /// Button to confirm fix
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Fix is Complete'**
+  String get confirmFixed;
+
+  /// Button when cannot verify
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot Verify'**
+  String get cannotVerify;
+
+  /// Button when not fixed
+  ///
+  /// In en, this message translates to:
+  /// **'Not Fixed'**
+  String get notFixed;
+
+  /// Success message after verification
+  ///
+  /// In en, this message translates to:
+  /// **'Verification submitted'**
+  String get verificationSubmitted;
+
+  /// Error when verification not found
+  ///
+  /// In en, this message translates to:
+  /// **'Verification request not found'**
+  String get verificationNotFound;
+
+  /// Prompt to select reason
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a reason:'**
+  String get selectReason;
+
+  /// Button to view on map
+  ///
+  /// In en, this message translates to:
+  /// **'View on Map'**
+  String get viewOnMap;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

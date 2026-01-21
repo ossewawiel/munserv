@@ -42,11 +42,50 @@ lib/
 │   │       └── widgets/
 │   │           ├── issue_card.dart
 │   │           └── issue_status_badge.dart
+│   ├── messages/                     ← Messaging system
+│   │   ├── data/
+│   │   │   ├── messages_api.dart
+│   │   │   └── messages_repository.dart
+│   │   ├── providers/
+│   │   │   └── messages_providers.dart
+│   │   └── presentation/
+│   │       ├── pages/
+│   │       │   ├── messages_page.dart
+│   │       │   └── message_detail_page.dart
+│   │       └── widgets/
+│   │           ├── message_list_tile.dart
+│   │           └── message_action_buttons.dart
+│   ├── ground_admin/                 ← Ground Admin flows
+│   │   ├── data/
+│   │   │   ├── ground_admin_api.dart
+│   │   │   └── ground_admin_repository.dart
+│   │   ├── providers/
+│   │   │   └── ground_admin_providers.dart
+│   │   └── presentation/
+│   │       ├── pages/
+│   │       │   ├── apply_ground_admin_page.dart
+│   │       │   └── invitation_response_page.dart
+│   │       └── widgets/
+│   │           └── ground_admin_status_card.dart
+│   ├── verification/                 ← Issue verification
+│   │   ├── data/
+│   │   │   ├── verification_api.dart
+│   │   │   └── verification_repository.dart
+│   │   ├── providers/
+│   │   │   └── verification_providers.dart
+│   │   └── presentation/
+│   │       └── pages/
+│   │           └── verify_issue_page.dart
 │   ├── members/
 │   │   └── [same structure]
 │   └── auth/
 │       └── [same structure]
 ├── shared/
+│   ├── models/
+│   │   ├── message.dart              ← Message, MessageType
+│   │   ├── ground_admin.dart         ← GroundAdminInfo, Application
+│   │   ├── verification.dart         ← PendingVerification, IssueVerification
+│   │   └── notification_settings.dart
 │   ├── widgets/
 │   │   ├── loading_spinner.dart
 │   │   └── error_display.dart
@@ -56,6 +95,8 @@ lib/
 │   │   └── result.dart
 │   └── theme/
 │       └── app_theme.dart
+├── shell/
+│   └── app_shell.dart                ← 4-tab navigation (Home, Issues, Messages, Profile)
 └── routing/
     └── app_router.dart
 ```

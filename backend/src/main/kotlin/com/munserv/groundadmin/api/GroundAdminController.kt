@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -218,6 +219,46 @@ class GroundAdminController(
         val memberIdValue = MemberId(memberId)
 
         return when (val result = groundAdminService.invite(adminIdValue, memberIdValue, request.message)) {
+            is GroundAdminResult.Success -> ResponseEntity.ok(result.data)
+            is GroundAdminResult.NotFound -> notFoundResponse(result.message)
+            is GroundAdminResult.Conflict -> conflictResponse(result.message)
+            is GroundAdminResult.Forbidden -> forbiddenResponse(result.message)
+            is GroundAdminResult.ValidationError -> validationErrorResponse(result.errors)
+        }
+    }
+
+    @Operation(
+        summary = "Revoke Ground Admin invitation",
+        description = "Admin revokes/cancels a pending Ground Admin invitation",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Invitation revoked"),
+            ApiResponse(responseCode = "401", description = "Not authenticated"),
+            ApiResponse(responseCode = "404", description = "Invitation not found"),
+            ApiResponse(responseCode = "409", description = "Invitation already processed"),
+        ],
+    )
+    @DeleteMapping("/members/{memberId}/ground-admin/invite/{applicationId}")
+    fun revokeInvitation(
+        @Parameter(description = "Member UUID whose invitation to revoke")
+        @PathVariable memberId: UUID,
+        @Parameter(description = "Application/Invitation UUID")
+        @PathVariable applicationId: UUID,
+        @AuthenticationPrincipal adminId: String?,
+    ): ResponseEntity<*> {
+        val adminIdValue = parseMemberId(adminId) ?: return unauthorizedResponse()
+        val memberIdValue = MemberId(memberId)
+        val applicationIdValue = GroundAdminApplicationId(applicationId)
+
+        return when (
+            val result =
+                groundAdminService.revokeInvitation(
+                    adminIdValue,
+                    memberIdValue,
+                    applicationIdValue,
+                )
+        ) {
             is GroundAdminResult.Success -> ResponseEntity.ok(result.data)
             is GroundAdminResult.NotFound -> notFoundResponse(result.message)
             is GroundAdminResult.Conflict -> conflictResponse(result.message)

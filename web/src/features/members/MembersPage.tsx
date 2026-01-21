@@ -1,5 +1,5 @@
 import { type FC, useCallback, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -21,26 +21,58 @@ import {
   useApproveMember,
   useRejectMember,
   usePendingMemberCount,
+  useGARequestsCount,
 } from './hooks';
+import {
+  useInviteGroundAdmin,
+  useRevokeGroundAdminInvite,
+} from '@/features/ground-admins/hooks';
 import { MemberApprovalDialog } from './components/MemberApprovalDialog';
 import { MemberNameCell } from './components/MemberNameCell';
-import { MemberActionButtons } from './components/MemberActionButtons';
-import type { MemberListItem } from './types';
+import { MemberActionsCell } from './components/MemberActionsCell';
+import { InviteDialog } from '@/features/ground-admins/components/InviteDialog';
+import { RevokeInviteDialog } from '@/features/ground-admins/components/RevokeInviteDialog';
+import type { MemberListItem, MemberFilterParams } from './types';
 
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [5, 10, 20] as const;
 
-type StatusFilter = 'all' | MemberStatus;
+// Extended filter type to include Ground Admin filters
+type StatusFilter =
+  | 'all'
+  | MemberStatus
+  | 'ground_admins'
+  | 'ga_requests'
+  | 'pending_ga_invites';
+
+/**
+ * Maps tab filter value to API params
+ */
+function getFilterParams(filter: StatusFilter): Partial<MemberFilterParams> {
+  switch (filter) {
+    case 'all':
+      return {};
+    case 'ground_admins':
+      return { isGroundAdmin: true };
+    case 'ga_requests':
+      return { hasPendingApplication: true };
+    case 'pending_ga_invites':
+      return { hasInvitationPending: true };
+    default:
+      // MemberStatus values
+      return { status: filter as MemberStatus };
+  }
+}
 
 export const MembersPage: FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // URL state
   const statusFilter = (searchParams.get('status') as StatusFilter) || 'all';
   const currentPage = Number(searchParams.get('page')) || 1;
-  const pageSize =
-    Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE;
+  const pageSize = Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE;
 
   // Dialog state
   const [approvalDialog, setApprovalDialog] = useState<{
@@ -49,19 +81,35 @@ export const MembersPage: FC = () => {
     member: MemberListItem | null;
   }>({ open: false, action: 'approve', member: null });
 
-  // Data fetching
+  // Ground Admin invite dialog state
+  const [inviteDialog, setInviteDialog] = useState<{
+    open: boolean;
+    member: MemberListItem | null;
+  }>({ open: false, member: null });
+
+  // Revoke invite dialog state
+  const [revokeDialog, setRevokeDialog] = useState<{
+    open: boolean;
+    member: MemberListItem | null;
+  }>({ open: false, member: null });
+
+  // Data fetching with filter params
+  const filterParams = getFilterParams(statusFilter);
   const { data, isLoading, error, refetch } = useMembers({
     page: currentPage,
     limit: pageSize,
-    status: statusFilter === 'all' ? undefined : statusFilter,
+    ...filterParams,
   });
 
-  // Get pending count for badge
+  // Badge counts
   const { data: pendingCount } = usePendingMemberCount();
+  const { data: gaRequestsCount } = useGARequestsCount();
 
   // Mutations
   const approveMutation = useApproveMember();
   const rejectMutation = useRejectMember();
+  const inviteMutation = useInviteGroundAdmin();
+  const revokeInviteMutation = useRevokeGroundAdminInvite();
 
   // Tab change handler
   const handleTabChange = useCallback(
@@ -102,13 +150,19 @@ export const MembersPage: FC = () => {
   );
 
   // Approval handlers
-  const handleApproveClick = useCallback((member: MemberListItem) => {
-    setApprovalDialog({ open: true, action: 'approve', member });
-  }, []);
+  const handleApproveClick = useCallback(
+    (member: MemberListItem) => {
+      setApprovalDialog({ open: true, action: 'approve', member });
+    },
+    [setApprovalDialog]
+  );
 
-  const handleRejectClick = useCallback((member: MemberListItem) => {
-    setApprovalDialog({ open: true, action: 'reject', member });
-  }, []);
+  const handleRejectClick = useCallback(
+    (member: MemberListItem) => {
+      setApprovalDialog({ open: true, action: 'reject', member });
+    },
+    [setApprovalDialog]
+  );
 
   const handleApprovalConfirm = useCallback(() => {
     if (!approvalDialog.member) return;
@@ -122,11 +176,86 @@ export const MembersPage: FC = () => {
         refetch();
       },
     });
-  }, [approvalDialog, approveMutation, rejectMutation, refetch]);
+  }, [approvalDialog, approveMutation, rejectMutation, refetch, setApprovalDialog]);
 
   const handleApprovalCancel = useCallback(() => {
     setApprovalDialog({ open: false, action: 'approve', member: null });
-  }, []);
+  }, [setApprovalDialog]);
+
+  // Ground Admin invite handlers
+  const handleInviteClick = useCallback(
+    (member: MemberListItem) => {
+      setInviteDialog({ open: true, member });
+    },
+    [setInviteDialog]
+  );
+
+  const handleInviteConfirm = useCallback(
+    (message?: string) => {
+      if (!inviteDialog.member) return;
+
+      inviteMutation.mutate(
+        { memberId: inviteDialog.member.id, message },
+        {
+          onSuccess: () => {
+            setInviteDialog({ open: false, member: null });
+            refetch();
+          },
+          onError: (error) => {
+            // Log error for debugging - in production this would show a toast/snackbar
+            console.error('Failed to send Ground Admin invitation:', error);
+            // Still close the dialog on error to avoid stuck state
+            setInviteDialog({ open: false, member: null });
+          },
+        }
+      );
+    },
+    [inviteDialog.member, inviteMutation, refetch, setInviteDialog]
+  );
+
+  const handleInviteCancel = useCallback(() => {
+    setInviteDialog({ open: false, member: null });
+  }, [setInviteDialog]);
+
+  // Revoke invite handlers
+  const handleRevokeInviteClick = useCallback(
+    (member: MemberListItem) => {
+      setRevokeDialog({ open: true, member });
+    },
+    [setRevokeDialog]
+  );
+
+  const handleRevokeInviteConfirm = useCallback(() => {
+    if (!revokeDialog.member || !revokeDialog.member.pendingApplicationId)
+      return;
+
+    revokeInviteMutation.mutate(
+      {
+        memberId: revokeDialog.member.id,
+        applicationId: revokeDialog.member.pendingApplicationId,
+      },
+      {
+        onSuccess: () => {
+          setRevokeDialog({ open: false, member: null });
+          refetch();
+        },
+      }
+    );
+  }, [revokeDialog.member, revokeInviteMutation, refetch, setRevokeDialog]);
+
+  const handleRevokeInviteCancel = useCallback(() => {
+    setRevokeDialog({ open: false, member: null });
+  }, [setRevokeDialog]);
+
+  // Review application handler - navigate to messages
+  const handleReviewApplication = useCallback(() => {
+    navigate('/messages');
+  }, [navigate]);
+
+  // Manage Ground Admin handler - navigate to Ground Admins page
+  const handleManageGroundAdmin = useCallback(() => {
+    navigate('/ground-admins');
+  }, [navigate]);
 
   // Date formatter
   const formatDate = useCallback((dateStr: string) => {
@@ -138,7 +267,7 @@ export const MembersPage: FC = () => {
     });
   }, []);
 
-  // Tab configuration
+  // Tab configuration - 7 tabs total
   const tabs = useMemo<DataTableTab<StatusFilter>[]>(
     () => [
       {
@@ -159,11 +288,25 @@ export const MembersPage: FC = () => {
         value: 'suspended',
         label: t('members.filterSuspended'),
       },
+      {
+        value: 'ground_admins',
+        label: t('members.filterGroundAdmins'),
+      },
+      {
+        value: 'ga_requests',
+        label: t('members.filterGARequests'),
+        badge: gaRequestsCount,
+        badgeColor: 'info',
+      },
+      {
+        value: 'pending_ga_invites',
+        label: t('members.filterPendingInvites'),
+      },
     ],
-    [t, pendingCount]
+    [t, pendingCount, gaRequestsCount]
   );
 
-  // Column configuration
+  // Column configuration - SAME for all tabs (no conditional columns)
   const columns = useMemo<Column<MemberListItem>[]>(
     () => [
       {
@@ -236,27 +379,51 @@ export const MembersPage: FC = () => {
           </Typography>
         ),
       },
-      // Actions column - only show when filtering shows pending members
-      ...(statusFilter === 'pending_approval' || statusFilter === 'all'
-        ? [
-            {
-              key: 'actions',
-              header: t('members.actions'),
-              width: '120px',
-              align: 'center' as const,
-              render: (member: MemberListItem) =>
-                member.status === 'pending_approval' ? (
-                  <MemberActionButtons
-                    onApprove={() => handleApproveClick(member)}
-                    onReject={() => handleRejectClick(member)}
-                  />
-                ) : null,
-            },
-          ]
-        : []),
+      {
+        key: 'actions',
+        header: t('members.actions'),
+        width: '120px',
+        align: 'center',
+        render: (member) => (
+          <MemberActionsCell
+            member={member}
+            onApprove={handleApproveClick}
+            onReject={handleRejectClick}
+            onInvite={handleInviteClick}
+            onReviewApplication={handleReviewApplication}
+            onManage={handleManageGroundAdmin}
+            onRevokeInvite={handleRevokeInviteClick}
+          />
+        ),
+      },
     ],
-    [t, formatDate, statusFilter, handleApproveClick, handleRejectClick]
+    [
+      t,
+      formatDate,
+      handleApproveClick,
+      handleRejectClick,
+      handleInviteClick,
+      handleReviewApplication,
+      handleManageGroundAdmin,
+      handleRevokeInviteClick,
+    ]
   );
+
+  // Get empty message based on current filter
+  const getEmptyMessage = useCallback(() => {
+    switch (statusFilter) {
+      case 'pending_approval':
+        return t('members.noPendingMembers');
+      case 'ground_admins':
+        return t('members.noGroundAdmins');
+      case 'ga_requests':
+        return t('members.noGARequests');
+      case 'pending_ga_invites':
+        return t('members.noPendingInvites');
+      default:
+        return t('members.noMembersDescription');
+    }
+  }, [statusFilter, t]);
 
   if (error) {
     return (
@@ -311,11 +478,7 @@ export const MembersPage: FC = () => {
           emptyMessage={
             <EmptyState
               title={t('members.noMembers')}
-              description={
-                statusFilter === 'pending_approval'
-                  ? t('members.noPendingMembers')
-                  : t('members.noMembersDescription')
-              }
+              description={getEmptyMessage()}
             />
           }
         />
@@ -329,6 +492,38 @@ export const MembersPage: FC = () => {
         isLoading={approveMutation.isPending || rejectMutation.isPending}
         onConfirm={handleApprovalConfirm}
         onCancel={handleApprovalCancel}
+      />
+
+      {/* Ground Admin Invite Dialog */}
+      <InviteDialog
+        open={inviteDialog.open}
+        member={
+          inviteDialog.member
+            ? {
+                id: inviteDialog.member.id,
+                name: `${inviteDialog.member.firstName} ${inviteDialog.member.surname}`,
+              }
+            : null
+        }
+        onClose={handleInviteCancel}
+        onConfirm={handleInviteConfirm}
+        isLoading={inviteMutation.isPending}
+      />
+
+      {/* Revoke Invite Dialog */}
+      <RevokeInviteDialog
+        open={revokeDialog.open}
+        member={
+          revokeDialog.member
+            ? {
+                id: revokeDialog.member.id,
+                name: `${revokeDialog.member.firstName} ${revokeDialog.member.surname}`,
+              }
+            : null
+        }
+        onClose={handleRevokeInviteCancel}
+        onConfirm={handleRevokeInviteConfirm}
+        isLoading={revokeInviteMutation.isPending}
       />
     </DashboardLayout>
   );

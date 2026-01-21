@@ -120,3 +120,24 @@ export function useUpdateGroundAdminStatus() {
     },
   });
 }
+
+/**
+ * Mutation to revoke a pending Ground Admin invitation
+ */
+export function useRevokeGroundAdminInvite() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      memberId,
+      applicationId,
+    }: {
+      memberId: string;
+      applicationId: string;
+    }) => groundAdminApi.revokeInvite(memberId, applicationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groundAdmins'] });
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+    },
+  });
+}

@@ -1,5 +1,6 @@
 package com.munserv.groundadmin.service
 
+import com.munserv.admin.repository.AdminRepository
 import com.munserv.auth.repository.MemberRepository
 import com.munserv.groundadmin.api.GroundAdminInfoResponse
 import com.munserv.groundadmin.api.GroundAdminListResponse
@@ -12,6 +13,7 @@ import com.munserv.messages.service.MessageService
 import com.munserv.sectors.repository.SectorRepository
 import com.munserv.shared.enums.GroundAdminStatus
 import com.munserv.shared.enums.MessageType
+import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
 import org.springframework.stereotype.Service
@@ -32,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional
 class GroundAdminService(
     private val applicationRepository: GroundAdminApplicationRepository,
     private val memberRepository: MemberRepository,
+    private val adminRepository: AdminRepository,
     private val sectorRepository: SectorRepository,
     private val messageService: MessageService,
 ) {
@@ -218,8 +221,9 @@ class GroundAdminService(
         memberId: MemberId,
         message: String?,
     ): GroundAdminResult {
+        // Look up admin from admins table (not members table)
         val admin =
-            memberRepository.findById(adminId)
+            adminRepository.findById(AdminId(adminId.value))
                 ?: return GroundAdminResult.NotFound("Admin not found")
 
         val member =
@@ -254,7 +258,7 @@ class GroundAdminService(
                 recipientId = memberId.value,
                 recipientType = "member",
                 senderId = adminId.value,
-                senderType = "member",
+                senderType = "admin",
                 relatedEntityId = saved.id.value,
                 relatedEntityType = "ground_admin_application",
                 actionType = "accept_decline",
@@ -262,6 +266,38 @@ class GroundAdminService(
         messageService.createMessage(invitationMessage)
 
         return GroundAdminResult.Success(mapOf("applicationId" to saved.id.toString(), "status" to "pending"))
+    }
+
+    /**
+     * Admin revokes/cancels a pending Ground Admin invitation.
+     */
+    @Transactional
+    fun revokeInvitation(
+        adminId: MemberId,
+        memberId: MemberId,
+        applicationId: GroundAdminApplicationId,
+    ): GroundAdminResult {
+        val application =
+            applicationRepository.findById(applicationId)
+                ?: return GroundAdminResult.NotFound("Application not found")
+
+        if (application.memberId != memberId) {
+            return GroundAdminResult.NotFound("Application not found")
+        }
+
+        if (!application.isInvitation) {
+            return GroundAdminResult.ValidationError(listOf("Not an invitation"))
+        }
+
+        if (!application.isPending) {
+            return GroundAdminResult.Conflict("Invitation already processed")
+        }
+
+        // Revoke the invitation
+        val revoked = application.revokeByAdmin(adminId)
+        applicationRepository.save(revoked)
+
+        return GroundAdminResult.Success(mapOf("applicationId" to application.id.toString(), "status" to "revoked"))
     }
 
     /**

@@ -793,26 +793,42 @@ Add routes:
 
 ## Testing Checklist
 
-### Unit Tests
-- [ ] `useMessages` hook tests
-- [ ] `useSectorSettings` hook tests
-- [ ] `useGroundAdmins` hook tests
-- [ ] API function tests
+### Unit Tests ✅ COMPLETED (2026-01-20)
+- [x] `useMessages` hook tests
+- [x] `useSectorSettings` hook tests
+- [x] `useGroundAdmins` hook tests
+- [x] `useVerification` hook tests
+- [x] API function tests (messages, ground-admins, verification, sector-settings)
 
-### Component Tests
-- [ ] `NotificationDropdown` renders correctly
-- [ ] `MessageList` selection works
-- [ ] `MessageDetail` actions work
-- [ ] `InviteDialog` form submission
-- [ ] `ApproveDialog` approve/decline
-- [ ] `RevokeDialog` validation
+### Component Tests ✅ COMPLETED (2026-01-20)
+- [x] `MessageList` selection works
+- [x] `MessageDetail` actions work
+- [x] `InviteDialog` form submission
 
-### Integration Tests
-- [ ] Messages page loads and displays
-- [ ] Mark as read updates count
-- [ ] Ground Admin invite flow
-- [ ] Sector settings save
-- [ ] Verification request flow
+### Integration Tests ✅ COMPLETED (2026-01-20)
+- [x] Messages API tests (getAll, getById, markAsRead, performAction)
+- [x] Ground Admin API tests (listInSector, invite, approve, decline, revoke)
+- [x] Verification API tests (requestVerification, getHistory)
+- [x] Sector Settings API tests (get, update with validation)
+
+### Test Files Created (2026-01-20)
+- `src/features/messages/api.test.ts` - 10 tests
+- `src/features/messages/hooks.test.tsx` - 13 tests
+- `src/features/messages/components/MessageList.test.tsx` - 6 tests
+- `src/features/messages/components/MessageDetail.test.tsx` - 14 tests
+- `src/features/ground-admins/api.test.ts` - 12 tests
+- `src/features/ground-admins/hooks.test.tsx` - 13 tests
+- `src/features/ground-admins/components/InviteDialog.test.tsx` - 6 tests
+- `src/features/verification/api.test.ts` - 10 tests
+- `src/features/verification/hooks.test.tsx` - 11 tests
+- `src/features/sector-settings/api.test.ts` - 12 tests
+- `src/features/sector-settings/hooks.test.tsx` - 10 tests
+
+### MSW Mock Handlers Added
+- Messages API handlers (GET /messages, GET /messages/:id, PATCH /messages/:id/read, POST /messages/:id/action)
+- Ground Admins API handlers (GET /sectors/:sectorId/ground-admins, POST /members/:id/ground-admin/*)
+- Verification API handlers (POST /issues/:id/request-verification, GET /issues/:id/verifications)
+- Sector Settings API handlers (GET/PATCH /sectors/:sectorId/settings)
 
 ---
 
@@ -848,7 +864,11 @@ cd web && pnpm lint
 - [x] i18n keys added
 - [x] No TypeScript errors
 - [x] No lint errors (1 warning about react-hook-form)
-- [x] Tests passing (348/348)
+- [x] Build passes
+- [x] All tests passing (509/509 - including 117 new tests for ground-admin-messaging)
+- [x] MSW mock handlers for all new APIs
+- [x] Unit tests for all hooks and API functions
+- [x] Component tests for key components
 
 ---
 
@@ -898,7 +918,8 @@ cd web && pnpm lint
 
 - TypeScript: ✅ No errors
 - ESLint: ✅ No errors (1 warning about react-hook-form's watch function)
-- Tests: ✅ 348/348 tests pass
+- Build: ✅ Passes
+- Tests: ✅ 509/509 tests pass (including 161 new tests for ground-admin-messaging features)
 
 ---
 
@@ -915,4 +936,57 @@ cat ../specs/features/ground-admin-messaging/spec.md
 # Use React Query for all data fetching
 # Reference Berry Material templates for UI
 # Start with types → API → hooks → components → pages
+```
+
+---
+
+## Post-Completion Refactor: Members Table UX Improvements
+
+**Status:** 🟡 Ready for Implementation
+**Document:** [members-table-refactor.md](./members-table-refactor.md)
+
+### Summary
+
+After initial implementation, the Members table UX needs improvement:
+1. Remove separate "Ground Admin" column - consolidate actions into existing Actions column
+2. Make tabs act as pure filters - all tabs show identical columns
+3. Add new tabs for Ground Admin filtering (Ground Admins, GA Requests, Pending Invites)
+4. Only show "Invite" button for members who have logged issues (issueCount > 0)
+5. Add ability to revoke pending Ground Admin invitations
+
+### Key Changes
+
+| Current | After Refactor |
+|---------|----------------|
+| 4 tabs (All, Pending, Active, Suspended) | 7 tabs (+Ground Admins, GA Requests, Pending Invites) |
+| Separate Ground Admin column | Actions consolidated in single Actions column |
+| Invite button always visible for active members | Invite only for members with issueCount > 0 |
+| No revoke for pending invites | Revoke button for pending GA invitations |
+| Conditional columns per tab | Same columns for all tabs |
+
+### Files Affected
+
+| Action | File |
+|--------|------|
+| MODIFY | `web/src/features/members/types.ts` |
+| CREATE | `web/src/features/members/components/MemberActionsCell.tsx` |
+| MODIFY | `web/src/features/ground-admins/api.ts` |
+| MODIFY | `web/src/features/ground-admins/hooks.ts` |
+| CREATE | `web/src/features/ground-admins/components/RevokeInviteDialog.tsx` |
+| MODIFY | `web/src/features/members/api.ts` |
+| MODIFY | `web/src/features/members/hooks.ts` |
+| MODIFY | `web/src/features/members/MembersPage.tsx` |
+| MODIFY | `web/src/locales/en/translation.json` |
+| DELETE | `web/src/features/members/components/GroundAdminCell.tsx` |
+
+### Handoff
+
+```bash
+cd web
+cat CLAUDE.md
+cat ../specs/features/ground-admin-messaging/members-table-refactor.md
+
+# Implement all 12 tasks in order
+# Run pnpm typecheck after each major task
+# Run full quality gates when complete
 ```

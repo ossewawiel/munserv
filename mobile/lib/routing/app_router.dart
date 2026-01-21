@@ -6,9 +6,12 @@ import '../features/auth/domain/auth_state.dart';
 import '../features/auth/presentation/pages/pages.dart';
 import '../features/auth/providers/auth_providers.dart';
 import '../features/dev/presentation/pages/theme_showcase_page.dart';
+import '../features/ground_admin/presentation/pages/pages.dart';
 import '../features/home/presentation/pages/pages.dart';
 import '../features/issues/presentation/pages/pages.dart';
+import '../features/messages/presentation/pages/pages.dart';
 import '../features/profile/presentation/pages/pages.dart';
+import '../features/verification/presentation/pages/pages.dart';
 import '../shell/app_shell.dart';
 
 part 'app_router.g.dart';
@@ -110,6 +113,17 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
+          // Messages branch
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/messages',
+                name: 'messages',
+                builder: (context, state) => const MessagesPage(),
+              ),
+            ],
+          ),
+
           // Profile branch
           StatefulShellBranch(
             routes: [
@@ -188,6 +202,50 @@ GoRouter appRouter(Ref ref) {
         path: '/map',
         name: 'map',
         builder: (context, state) => const IssueMapPage(),
+      ),
+
+      // ===== Messages Routes (outside shell for full-screen) =====
+      GoRoute(
+        path: '/messages/:id',
+        name: 'messageDetail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return MessageDetailPage(messageId: id);
+        },
+      ),
+
+      // ===== Ground Admin Routes =====
+      GoRoute(
+        path: '/ground-admin/apply',
+        name: 'applyGroundAdmin',
+        builder: (context, state) => const ApplyGroundAdminPage(),
+      ),
+      GoRoute(
+        path: '/ground-admin/invitation/:applicationId',
+        name: 'groundAdminInvitation',
+        builder: (context, state) {
+          final applicationId = state.pathParameters['applicationId']!;
+          final inviterName = state.uri.queryParameters['inviter'];
+          return InvitationResponsePage(
+            applicationId: applicationId,
+            inviterName: inviterName,
+          );
+        },
+      ),
+
+      // ===== Verification Routes =====
+      GoRoute(
+        path: '/verify/:issueId',
+        name: 'verifyIssue',
+        builder: (context, state) {
+          final issueId = state.pathParameters['issueId']!;
+          final verificationType =
+              state.uri.queryParameters['type'] ?? 'existence';
+          return VerifyIssuePage(
+            issueId: issueId,
+            verificationType: verificationType,
+          );
+        },
       ),
 
       // ===== Dev Routes (debug only) =====

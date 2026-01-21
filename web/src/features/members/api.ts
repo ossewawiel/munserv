@@ -1,18 +1,28 @@
 import { apiClient } from '@/lib/api-client';
 import type { PaginatedResponse } from '@/shared/types/common';
-import type { MemberStatus } from '@/features/auth/types';
-import type { MemberListItem, MemberApproveResponse } from './types';
+import type { MemberListItem, MemberApproveResponse, MemberFilterParams } from './types';
 
 export const membersApi = {
-  getAll: (
-    sectorId: string,
-    params?: { page?: number; limit?: number; status?: MemberStatus }
-  ) =>
-    apiClient
+  getAll: (sectorId: string, params: MemberFilterParams = {}) => {
+    const queryParams: Record<string, string | number | boolean> = { sectorId };
+
+    if (params.page) queryParams.page = params.page;
+    if (params.limit) queryParams.limit = params.limit;
+    if (params.status) queryParams.status = params.status;
+    if (params.search) queryParams.search = params.search;
+    if (params.isGroundAdmin !== undefined)
+      queryParams.isGroundAdmin = params.isGroundAdmin;
+    if (params.hasPendingApplication !== undefined)
+      queryParams.hasPendingApplication = params.hasPendingApplication;
+    if (params.hasInvitationPending !== undefined)
+      queryParams.hasInvitationPending = params.hasInvitationPending;
+
+    return apiClient
       .get<PaginatedResponse<MemberListItem>>('/admin/members', {
-        params: { sectorId, ...params },
+        params: queryParams,
       })
-      .then((r) => r.data),
+      .then((r) => r.data);
+  },
 
   approve: (id: string) =>
     apiClient

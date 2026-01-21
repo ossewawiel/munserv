@@ -2,7 +2,7 @@
 
 **Goal:** Enable physical verification of issues through community Ground Admins with a unified messaging system for all platform communications.
 **Platforms:** backend, web, mobile
-**Status:** 🔴 Not Started
+**Status:** 🟡 In Progress (Mobile: Complete, Backend: Pending, Web: Pending)
 
 ## Summary
 
@@ -215,4 +215,5 @@ See: `specs/features/ground-admin-messaging/api.md` for full contract.
 | [Backend Phase 4](./backend-phase-4.md) | Ground Admin lifecycle |
 | [Backend Phase 5](./backend-phase-5.md) | Verification workflow |
 | [Web Phase](./web-phase.md) | Admin portal UI |
+| [Members Table Refactor](./members-table-refactor.md) | UX improvements for Members table |
 | [Mobile Phase](./mobile-phase.md) | Member app UI |

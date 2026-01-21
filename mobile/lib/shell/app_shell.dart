@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/messages/providers/messages_providers.dart';
 import '../l10n/app_localizations.dart';
 import '../shared/widgets/branding_header.dart';
 import '../shared/widgets/map_background.dart';
@@ -9,6 +11,7 @@ import '../shared/widgets/map_background.dart';
 enum NavDestination {
   home('/'),
   issues('/issues'),
+  messages('/messages'),
   profile('/profile');
 
   const NavDestination(this.path);
@@ -16,14 +19,16 @@ enum NavDestination {
 }
 
 /// App shell with bottom navigation bar and vintage map background
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const AppShell({super.key, required this.navigationShell});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
+    final unreadCountAsync = ref.watch(unreadCountProvider);
+    final unreadCount = unreadCountAsync.value ?? 0;
 
     return Scaffold(
       body: Column(
@@ -58,6 +63,19 @@ class AppShell extends StatelessWidget {
             icon: const Icon(Icons.list_alt_outlined),
             selectedIcon: const Icon(Icons.list_alt),
             label: l10n.issues,
+          ),
+          NavigationDestination(
+            icon: Badge(
+              label: Text(unreadCount.toString()),
+              isLabelVisible: unreadCount > 0,
+              child: const Icon(Icons.mail_outline),
+            ),
+            selectedIcon: Badge(
+              label: Text(unreadCount.toString()),
+              isLabelVisible: unreadCount > 0,
+              child: const Icon(Icons.mail),
+            ),
+            label: l10n.messages,
           ),
           NavigationDestination(
             icon: const Icon(Icons.person_outline),

@@ -1,10 +1,15 @@
 package com.munserv.shared.enums
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
+
 /**
  * Enum representing types of messages in the messaging system.
  * Matches database enum: message_type
  */
-enum class MessageType(private val apiString: String) {
+enum class MessageType(
+    @JsonValue private val apiString: String,
+) {
     GROUND_ADMIN_INVITATION("ground_admin_invitation"),
     GROUND_ADMIN_APPLICATION("ground_admin_application"),
     GROUND_ADMIN_APPROVED("ground_admin_approved"),
@@ -21,6 +26,8 @@ enum class MessageType(private val apiString: String) {
     fun toApiString(): String = apiString
 
     companion object {
+        @JsonCreator
+        @JvmStatic
         fun fromString(value: String): MessageType =
             entries.find { it.apiString.equals(value, ignoreCase = true) }
                 ?: throw IllegalArgumentException("Unknown MessageType: $value")

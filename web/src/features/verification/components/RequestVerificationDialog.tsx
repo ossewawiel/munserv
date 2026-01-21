@@ -16,8 +16,8 @@ import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import BuildIcon from '@mui/icons-material/Build';
 
 import type { GroundAdmin } from '@/shared/types/groundAdmin';
-import type { VerificationMode, VerificationType } from '@/shared/types/sectorSettings';
-import type { RequestVerificationRequest } from '@/shared/types/verification';
+import type { VerificationMode } from '@/shared/types/sectorSettings';
+import type { RequestVerificationRequest, VerificationType } from '@/shared/types/verification';
 
 interface Issue {
   id: string;

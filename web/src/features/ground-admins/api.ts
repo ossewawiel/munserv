@@ -71,4 +71,14 @@ export const groundAdminApi = {
         status,
       })
       .then((r) => r.data),
+
+  /**
+   * Revoke a pending Ground Admin invitation (Admin only)
+   */
+  revokeInvite: (memberId: string, applicationId: string) =>
+    apiClient
+      .delete<{ status: string }>(
+        `/members/${memberId}/ground-admin/invite/${applicationId}`
+      )
+      .then((r) => r.data),
 };

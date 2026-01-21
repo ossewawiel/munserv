@@ -69,8 +69,8 @@ class SectorSettingsControllerTest {
                 content { contentType(MediaType.APPLICATION_JSON) }
                 jsonPath("$.id") { value(testSettingsId.toString()) }
                 jsonPath("$.sectorId") { value(testSectorId.toString()) }
-                jsonPath("$.newIssueVerificationMode") { value("ALL_NOTIFIED") }
-                jsonPath("$.fixVerificationMode") { value("ALL_NOTIFIED") }
+                jsonPath("$.newIssueVerificationMode") { value("all_notified") }
+                jsonPath("$.fixVerificationMode") { value("all_notified") }
                 jsonPath("$.daysFixedBeforeClosed") { value(7) }
                 jsonPath("$.minimumGroundAdmins") { value(2) }
             }
@@ -121,7 +121,7 @@ class SectorSettingsControllerTest {
             }.andExpect {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.newIssueVerificationMode") { value("ADMIN_ASSIGNS") }
+                jsonPath("$.newIssueVerificationMode") { value("admin_assigns") }
                 jsonPath("$.daysFixedBeforeClosed") { value(14) }
             }
 
@@ -208,12 +208,12 @@ class SectorSettingsControllerTest {
                     content =
                         """
                         {
-                            "newIssueVerificationMode": "${mode.name}"
+                            "newIssueVerificationMode": "${mode.toApiString()}"
                         }
                         """.trimIndent()
                 }.andExpect {
                     status { isOk() }
-                    jsonPath("$.newIssueVerificationMode") { value(mode.name) }
+                    jsonPath("$.newIssueVerificationMode") { value(mode.toApiString()) }
                 }
             }
         }

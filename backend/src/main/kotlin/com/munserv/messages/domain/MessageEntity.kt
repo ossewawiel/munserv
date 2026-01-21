@@ -54,6 +54,7 @@ class MessageEntity(
     @Column(name = "action_type", length = 50)
     val actionType: String? = null,
     @Column(name = "metadata", columnDefinition = "JSONB")
+    @ColumnTransformer(write = "?::jsonb")
     val metadata: String? = null,
     @Column(name = "created_at", nullable = false)
     val createdAt: Instant = Instant.now(),

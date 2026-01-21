@@ -104,6 +104,18 @@ data class GroundAdminApplication(
             updatedAt = Instant.now(),
         )
 
+    /**
+     * Admin revokes/cancels a pending invitation.
+     * Transitions status from PENDING to WITHDRAWN.
+     */
+    fun revokeByAdmin(revokedBy: MemberId): GroundAdminApplication =
+        copy(
+            status = ApplicationStatus.WITHDRAWN,
+            processedBy = revokedBy,
+            processedAt = Instant.now(),
+            updatedAt = Instant.now(),
+        )
+
     companion object {
         /**
          * Creates a new application (member-initiated).

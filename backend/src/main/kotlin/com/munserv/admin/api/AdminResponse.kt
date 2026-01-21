@@ -100,6 +100,12 @@ data class MemberResponse(
     val status: String,
     val issueCount: Int,
     val joinedAt: String,
+    // Ground Admin fields
+    val isGroundAdmin: Boolean,
+    val groundAdminStatus: String?,
+    val hasPendingApplication: Boolean,
+    val hasInvitationPending: Boolean,
+    val pendingApplicationId: String?,
 )
 
 data class PaginationResponse(
@@ -123,6 +129,11 @@ fun MemberWithStats.toResponse() =
         status = status.toString(),
         issueCount = issueCount,
         joinedAt = joinedAt.toString(),
+        isGroundAdmin = isGroundAdmin,
+        groundAdminStatus = groundAdminStatus?.toApiString(),
+        hasPendingApplication = hasPendingApplication,
+        hasInvitationPending = hasInvitationPending,
+        pendingApplicationId = pendingApplicationId,
     )
 
 // Note: IssueType.toApiString() and IssueState.toApiString() are already defined

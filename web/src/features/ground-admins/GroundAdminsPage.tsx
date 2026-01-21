@@ -152,7 +152,7 @@ export const GroundAdminsPage: FC = () => {
   const columns = useMemo(
     () => [
       {
-        key: 'name' as const,
+        key: 'name',
         header: t('groundAdmin.columns.name', 'Name'),
         render: (admin: GroundAdmin) => (
           <Typography variant="body2" fontWeight={500}>
@@ -161,7 +161,7 @@ export const GroundAdminsPage: FC = () => {
         ),
       },
       {
-        key: 'status' as const,
+        key: 'status',
         header: t('groundAdmin.columns.status', 'Status'),
         render: (admin: GroundAdmin) => (
           <Chip
@@ -178,7 +178,7 @@ export const GroundAdminsPage: FC = () => {
         ),
       },
       {
-        key: 'responseRate' as const,
+        key: 'responseRate',
         header: t('groundAdmin.columns.responseRate', 'Response Rate'),
         render: (admin: GroundAdmin) => (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 100 }}>
@@ -201,7 +201,7 @@ export const GroundAdminsPage: FC = () => {
         ),
       },
       {
-        key: 'pendingVerifications' as const,
+        key: 'pendingVerifications',
         header: t('groundAdmin.columns.pending', 'Pending'),
         render: (admin: GroundAdmin) => (
           <Typography variant="body2">
@@ -210,7 +210,7 @@ export const GroundAdminsPage: FC = () => {
         ),
       },
       {
-        key: 'since' as const,
+        key: 'since',
         header: t('groundAdmin.columns.since', 'Since'),
         render: (admin: GroundAdmin) => (
           <Typography variant="body2" color="text.secondary">
@@ -219,7 +219,7 @@ export const GroundAdminsPage: FC = () => {
         ),
       },
       {
-        key: 'actions' as const,
+        key: 'actions',
         header: t('common.actions', 'Actions'),
         width: 80,
         render: (admin: GroundAdmin) => (

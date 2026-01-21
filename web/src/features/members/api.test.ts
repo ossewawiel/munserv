@@ -13,7 +13,7 @@ describe('membersApi', () => {
       const response = await membersApi.getAll('sector-1');
 
       expect(response.items).toBeDefined();
-      expect(response.items).toHaveLength(3);
+      expect(response.items).toHaveLength(7); // 7 members in mock data to cover all GA scenarios
       expect(response.pagination).toBeDefined();
     });
 
@@ -101,6 +101,87 @@ describe('membersApi', () => {
       );
 
       await expect(membersApi.getAll('sector-1')).rejects.toThrow();
+    });
+
+    it('should filter by isGroundAdmin', async () => {
+      const response = await membersApi.getAll('sector-1', { isGroundAdmin: true });
+
+      // Should return members 1 and 7 (both have isGroundAdmin: true)
+      expect(response.items.every((m) => m.isGroundAdmin === true)).toBe(true);
+      expect(response.items.length).toBeGreaterThan(0);
+    });
+
+    it('should pass isGroundAdmin as query parameter', async () => {
+      let capturedUrl: URL | null = null;
+
+      server.use(
+        http.get('*/admin/members', ({ request }) => {
+          capturedUrl = new URL(request.url);
+          return HttpResponse.json({
+            items: [],
+            pagination: { page: 1, limit: 20, totalItems: 0, totalPages: 0 },
+          });
+        })
+      );
+
+      await membersApi.getAll('sector-1', { isGroundAdmin: true });
+
+      expect(capturedUrl).not.toBeNull();
+      expect(capturedUrl!.searchParams.get('isGroundAdmin')).toBe('true');
+    });
+
+    it('should filter by hasPendingApplication', async () => {
+      const response = await membersApi.getAll('sector-1', { hasPendingApplication: true });
+
+      // Should return member 5 (has hasPendingApplication: true)
+      expect(response.items.every((m) => m.hasPendingApplication === true)).toBe(true);
+      expect(response.items.length).toBeGreaterThan(0);
+    });
+
+    it('should pass hasPendingApplication as query parameter', async () => {
+      let capturedUrl: URL | null = null;
+
+      server.use(
+        http.get('*/admin/members', ({ request }) => {
+          capturedUrl = new URL(request.url);
+          return HttpResponse.json({
+            items: [],
+            pagination: { page: 1, limit: 20, totalItems: 0, totalPages: 0 },
+          });
+        })
+      );
+
+      await membersApi.getAll('sector-1', { hasPendingApplication: true });
+
+      expect(capturedUrl).not.toBeNull();
+      expect(capturedUrl!.searchParams.get('hasPendingApplication')).toBe('true');
+    });
+
+    it('should filter by hasInvitationPending', async () => {
+      const response = await membersApi.getAll('sector-1', { hasInvitationPending: true });
+
+      // Should return member 6 (has hasInvitationPending: true)
+      expect(response.items.every((m) => m.hasInvitationPending === true)).toBe(true);
+      expect(response.items.length).toBeGreaterThan(0);
+    });
+
+    it('should pass hasInvitationPending as query parameter', async () => {
+      let capturedUrl: URL | null = null;
+
+      server.use(
+        http.get('*/admin/members', ({ request }) => {
+          capturedUrl = new URL(request.url);
+          return HttpResponse.json({
+            items: [],
+            pagination: { page: 1, limit: 20, totalItems: 0, totalPages: 0 },
+          });
+        })
+      );
+
+      await membersApi.getAll('sector-1', { hasInvitationPending: true });
+
+      expect(capturedUrl).not.toBeNull();
+      expect(capturedUrl!.searchParams.get('hasInvitationPending')).toBe('true');
     });
   });
 

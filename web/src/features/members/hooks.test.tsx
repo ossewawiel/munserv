@@ -59,7 +59,7 @@ describe('members hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data?.items).toHaveLength(3);
+      expect(result.current.data?.items).toHaveLength(7); // 7 members in mock data to cover all GA scenarios
     });
 
     it('should filter members by status', async () => {
