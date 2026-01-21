@@ -1,5 +1,8 @@
 package com.munserv.messages.service
 
+import com.munserv.groundadmin.domain.GroundAdminApplicationId
+import com.munserv.groundadmin.service.GroundAdminResult
+import com.munserv.groundadmin.service.GroundAdminService
 import com.munserv.messages.api.MessageActionRequest
 import com.munserv.messages.api.MessageListResponse
 import com.munserv.messages.api.MessageResponse
@@ -7,6 +10,8 @@ import com.munserv.messages.domain.MessageEntity
 import com.munserv.messages.domain.MessageRepository
 import com.munserv.shared.enums.MessageStatus
 import com.munserv.shared.enums.MessageType
+import com.munserv.shared.types.MemberId
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -22,6 +27,7 @@ import java.util.UUID
 @Service
 class MessageService(
     private val messageRepository: MessageRepository,
+    @Lazy private val groundAdminService: GroundAdminService,
 ) {
     /**
      * Retrieves paginated messages for a recipient with optional filtering.
@@ -131,6 +137,9 @@ class MessageService(
      * - Message exists and recipient has access
      * - Message hasn't already been actioned
      * - Action is valid for the message's action type
+     *
+     * For Ground Admin invitation messages, delegates to GroundAdminService
+     * to process the acceptance/decline before marking the message as actioned.
      */
     @Transactional
     fun performAction(
@@ -153,6 +162,40 @@ class MessageService(
 
         if (!isValidAction(message.actionType, request.action)) {
             return MessageResult.ValidationError(listOf("Invalid action: ${request.action}"))
+        }
+
+        // Handle Ground Admin invitation actions
+        if (message.type == MessageType.GROUND_ADMIN_INVITATION) {
+            val applicationId =
+                message.relatedEntityId
+                    ?: return MessageResult.ValidationError(listOf("Missing application ID"))
+
+            val gaResult =
+                when (request.action) {
+                    "accept" ->
+                        groundAdminService.acceptInvitation(
+                            MemberId(recipientId),
+                            GroundAdminApplicationId(applicationId),
+                        )
+                    "decline" ->
+                        groundAdminService.declineInvitation(
+                            MemberId(recipientId),
+                            GroundAdminApplicationId(applicationId),
+                            request.note,
+                        )
+                    else -> return MessageResult.ValidationError(listOf("Invalid action for invitation"))
+                }
+
+            // Map GroundAdminResult to MessageResult if failed
+            if (gaResult !is GroundAdminResult.Success) {
+                return when (gaResult) {
+                    is GroundAdminResult.NotFound -> MessageResult.NotFound(gaResult.message)
+                    is GroundAdminResult.Conflict -> MessageResult.Conflict(gaResult.message)
+                    is GroundAdminResult.ValidationError -> MessageResult.ValidationError(gaResult.errors)
+                    is GroundAdminResult.Forbidden -> MessageResult.ValidationError(listOf(gaResult.message))
+                    else -> MessageResult.ValidationError(listOf("Failed to process invitation"))
+                }
+            }
         }
 
         message.markAsActioned(request.action)
