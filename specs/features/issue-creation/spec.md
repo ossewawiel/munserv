@@ -1,9 +1,9 @@
 # Feature: Issue Creation Flow
 
+**Status:** 🟢 Done (All platforms complete)
+
 ## Summary
 Enable members to report infrastructure issues via mobile app with photos and GPS location, with proper backend storage and web admin visibility.
-
-## Status: Complete ✅
 
 **Completed:** January 2026
 

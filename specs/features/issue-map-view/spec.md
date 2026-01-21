@@ -1,5 +1,7 @@
 # Feature: Issue Map View
 
+**Status:** 🔴 Pending (Web only - not yet implemented)
+
 ## Overview
 
 Add a map view for the Issues list that displays all active issues on an interactive map with filtering by issue type.

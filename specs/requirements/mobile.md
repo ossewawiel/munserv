@@ -4,7 +4,7 @@
 
 | ID | Story | Acceptance Criteria | Status | Issue |
 |----|-------|---------------------|--------|-------|
-| M1 | Login with email/password | Enter email + password → if first login: change password → setup PIN → access app | 🔴 Pending | - |
+| M1 | Login with email/password | Enter email + password → if first login: change password → setup PIN → access app | 🔴 Pending | [#3](https://github.com/ossewawiel/munserv/issues/3) |
 | M2 | Login with PIN/biometric | Enter PIN or use fingerprint → access app | 🟢 Done | - |
 | M3 | View issues on map | See map centered on my sector with issue markers | 🟢 Done | - |
 | M4 | View issue list | See list of issues, filter by type/state | 🟢 Done | - |

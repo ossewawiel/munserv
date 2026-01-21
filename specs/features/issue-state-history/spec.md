@@ -1,5 +1,7 @@
 # Feature: Issue State History (Audit Log)
 
+**Status:** 🟢 Done (Backend and Web complete)
+
 ## Summary
 
 Implement a complete audit trail for issue state changes, enabling:

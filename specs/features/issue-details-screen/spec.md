@@ -6,7 +6,7 @@ Enhance the mobile Issue Details screen with an interactive map, photo carousel,
 
 **Platform:** Mobile (Flutter)
 **Priority:** High
-**Status:** Ready for Implementation
+**Status:** 🔴 Pending (Mobile - ready for implementation)
 
 ---
 

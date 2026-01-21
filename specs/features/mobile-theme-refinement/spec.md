@@ -1,5 +1,7 @@
 # Feature: Mobile Theme Refinement
 
+**Status:** 🟢 Done (Mobile complete)
+
 ## Summary
 
 Finalize the Material Design 3 look and feel for the MunServ mobile app with distinctive issue type icons and enhanced visual identity.
