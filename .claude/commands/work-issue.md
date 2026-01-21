@@ -1,7 +1,7 @@
 # Work Issue
 
 name: "work-issue"
-description: "Pick up a GitHub issue and start working on it"
+description: "Pick up a GitHub issue, investigate, and distribute to platform agents"
 parameters:
   - name: "issue"
     description: "Issue number or 'number title' (e.g., '6' or '6 Fix login redirect bug')"
@@ -11,7 +11,7 @@ parameters:
 
 ## Task
 
-Pick up an existing GitHub issue and set up the working context for fixing/implementing it.
+Pick up an existing GitHub issue, investigate the root cause, and create platform-specific handoff documents for implementation.
 
 ## Input Format
 
@@ -40,101 +40,199 @@ Parse the response to extract:
 ### Step 2: Classify Issue Type
 
 Based on labels, determine:
-- **Bug** (`type:bug`) → Create fix handoff doc
+- **Bug** (`type:bug`) → Investigate and create fix handoffs
 - **Feature** (`type:feature`) → Link to feature spec if exists
 - **Tech Debt** (`type:tech-debt`) → Document scope
 - **Standards** (`type:standards`) → Link to standards registry
 
 ### Step 3: Identify Platforms
 
-From `platform:*` labels, determine affected platforms:
-- `platform:backend` → Kotlin/Spring Boot
-- `platform:web` → React/TypeScript
-- `platform:mobile` → Flutter/Dart
-- `platform:database` → Migrations/SQL
+From `platform:*` labels OR from issue body, determine affected platforms:
+- `platform:backend` or "Backend" in body → Kotlin/Spring Boot
+- `platform:web` or "Web" in body → React/TypeScript
+- `platform:mobile` or "Mobile" in body → Flutter/Dart
+- `platform:database` or "Database" in body → Migrations/SQL
 
-### Step 4: Create Todo List
-
-Generate todos based on issue type:
-
-**For Bugs:**
-```
-- [ ] Investigate root cause
-- [ ] Identify affected files
-- [ ] Implement fix
-- [ ] Write/update tests
-- [ ] Verify fix locally
-- [ ] Create PR linked to issue
-```
-
-**For Features:**
-```
-- [ ] Review feature spec (if exists)
-- [ ] Implement backend changes
-- [ ] Implement web changes
-- [ ] Implement mobile changes
-- [ ] Write tests
-- [ ] Update documentation
-- [ ] Create PR linked to issue
-```
-
-### Step 5: Create Handoff Doc (Bugs Only)
-
-For bugs, create: `specs/features/{{feature}}/{{slug}}-fix-handoff.md`
-
-Template:
-```markdown
-# Bug Fix: {{title}}
-
-**Issue:** #{{number}}
-**Status:** In Progress
-**Platform(s):** {{platforms}}
-
-## Problem
-
-{{issue body or summary}}
-
-## Root Cause
-
-_To be determined during investigation_
-
-## Affected Files
-
-_List files that need changes_
-
-## Fix Approach
-
-_Document the solution_
-
-## Testing
-
-- [ ] Unit tests
-- [ ] Manual verification
-- [ ] Regression check
-
-## Verification
-
-_Steps to verify the fix works_
-```
-
-### Step 6: Update Issue Status
+### Step 4: Update Issue Status
 
 ```bash
-# Add in-progress label
 gh issue edit {{number}} --add-label "status:in-progress" --remove-label "status:ready,status:triage"
-
-# Assign to current user (optional)
 gh issue edit {{number}} --add-assignee @me
 ```
 
-### Step 7: Display Summary
+### Step 5: Investigate Root Cause (For Bugs)
 
-Show the user:
-1. Issue details
-2. Created todos
-3. Relevant files to check
-4. Handoff doc location (if created)
-5. Next steps
+Before creating handoff docs, investigate:
+1. Read relevant code across platforms
+2. Check database state if applicable
+3. Trace the data flow
+4. Identify the exact root cause
+
+Create central investigation record:
+```bash
+mkdir -p specs/features/{{feature}}
+```
+
+Create: `specs/features/{{feature}}/{{slug}}-investigation.md`
+
+```markdown
+# Investigation: {{title}}
+
+**Issue:** #{{number}}
+**Date:** {{date}}
+**Platforms:** {{platforms}}
+
+## Problem Statement
+{{issue body summary}}
+
+## Investigation Steps
+1. {{what you checked}}
+2. {{what you found}}
+
+## Root Cause
+{{detailed root cause explanation}}
+
+## Affected Components
+### Backend
+- {{files/modules affected}}
+
+### Web
+- {{files/modules affected}}
+
+### Mobile
+- {{files/modules affected}}
+
+## Fix Approach
+{{high-level approach}}
+```
+
+### Step 6: Create Platform Handoff Documents
+
+For EACH affected platform, create a handoff document:
+
+**Backend:** `backend/docs/issues/{{number}}-{{slug}}.md`
+**Web:** `web/docs/issues/{{number}}-{{slug}}.md`
+**Mobile:** `mobile/docs/issues/{{number}}-{{slug}}.md`
+
+Use this template with YAML frontmatter:
+
+```markdown
+---
+issue: {{number}}
+title: "{{title}}"
+platform: {{platform}}
+status: pending
+created_by: central-agent
+created_at: {{timestamp}}
+updated_at: null
+dependencies: []
+files_changed: []
+tests_added: []
+commits: []
+blockers: []
+---
+
+# Issue #{{number}}: {{title}} ({{Platform}})
+
+## Context
+
+{{Summary from investigation - why this fix is needed}}
+
+## Root Cause
+
+{{Platform-specific root cause from investigation}}
+
+## What To Fix
+
+{{Specific instructions for this platform}}
+
+### Files To Modify
+- `path/to/file1`
+- `path/to/file2`
+
+### Changes Required
+1. {{Specific change 1}}
+2. {{Specific change 2}}
+
+## Acceptance Criteria
+
+- [ ] {{Criterion 1}}
+- [ ] {{Criterion 2}}
+- [ ] Tests pass
+- [ ] Quality checks pass
+
+## Dependencies
+
+{{If this platform must wait for another, specify here}}
+- None | Depends on: backend (must complete first)
+
+## Implementation Notes
+
+_To be filled by platform agent_
+```
+
+### Step 7: Determine Execution Order
+
+Based on dependencies, determine which platforms can run in parallel vs sequential:
+
+Example for a bug that starts in backend and affects web display:
+```
+1. Backend (no dependencies) ← Can start immediately
+2. Web (depends on backend API fix) ← Must wait for backend
+```
+
+### Step 8: Output Agent Instructions
+
+Print clear instructions for running platform agents:
+
+```markdown
+## Issue #{{number}} Ready for Implementation
+
+### Investigation Complete
+- Central investigation: `specs/features/{{feature}}/{{slug}}-investigation.md`
+
+### Platform Handoffs Created
+{{For each platform}}
+- {{Platform}}: `{{platform}}/docs/issues/{{number}}-{{slug}}.md`
+
+### Execution Order
+
+**Phase 1 (Can run in parallel):**
+{{List platforms with no dependencies}}
+
+**Phase 2 (After Phase 1):**
+{{List platforms that depend on Phase 1}}
+
+### Commands to Run
+
+**Terminal 1 - Backend:**
+```bash
+cd /path/to/munserv/backend
+claude
+# Then run: /fix-issue {{number}}
+```
+
+**Terminal 2 - Web:** (after backend completes)
+```bash
+cd /path/to/munserv/web
+claude
+# Then run: /fix-issue {{number}}
+```
+
+### After All Platforms Complete
+
+Run from project root:
+```bash
+/close-handoff {{number}}
+```
+
+This will:
+1. Aggregate changes from all platforms
+2. Create unified commit
+3. Update GitHub issue
+4. Create PR
+5. Archive handoff documents
+```
 
 ## Output Format
 
@@ -148,96 +246,109 @@ Show the user:
 - **Platform(s):** {{platforms}}
 - **Priority:** {{priority}}
 
-### Description
-{{body summary}}
+### Investigation Summary
+{{Brief root cause}}
 
-### Todo List
-{{generated todos}}
+### Platform Handoffs
 
-### Relevant Files
-Based on the issue, check these locations:
-- {{file suggestions based on platform/type}}
+| Platform | Handoff Doc | Status | Dependencies |
+|----------|-------------|--------|--------------|
+| Backend | `backend/docs/issues/{{number}}-*.md` | pending | None |
+| Web | `web/docs/issues/{{number}}-*.md` | pending | Backend |
 
-### Handoff Doc
-Created: `specs/features/{{feature}}/{{slug}}-fix-handoff.md`
+### Execution Order
 
-### Next Steps
-1. Read the CLAUDE.md for affected platform(s)
-2. Investigate the issue
-3. Update handoff doc with findings
-4. Implement fix
-5. Run `/close-handoff` when done
-```
-
-## Platform-Specific Guidance
-
-### Backend Issues
-```
-Read: backend/CLAUDE.md
-Check: backend/src/main/kotlin/com/munserv/{{feature}}/
-Tests: backend/src/test/kotlin/com/munserv/{{feature}}/
-```
-
-### Web Issues
-```
-Read: web/CLAUDE.md
-Check: web/src/features/{{feature}}/
-Tests: web/src/features/{{feature}}/*.test.ts
-```
-
-### Mobile Issues
-```
-Read: mobile/CLAUDE.md
-Check: mobile/lib/features/{{feature}}/
-Tests: mobile/test/features/{{feature}}/
-```
-
-## Example Usage
-
-**Input:** `6 Fix login redirect after session timeout`
-
-**Output:**
-```markdown
-## Working on Issue #6
-
-**Fix login redirect after session timeout**
-
-### Details
-- **Type:** Bug
-- **Platform(s):** Web
-- **Priority:** High
-
-### Description
-Users are not redirected to login page when session expires...
-
-### Todo List
-- [ ] Investigate root cause
-- [ ] Identify affected files
-- [ ] Implement fix
-- [ ] Write/update tests
-- [ ] Verify fix locally
-- [ ] Create PR linked to issue
-
-### Relevant Files
-Based on the issue, check these locations:
-- web/src/features/auth/
-- web/src/shared/api/client.ts
-- web/src/routing/
-
-### Handoff Doc
-Created: `specs/features/auth/login-redirect-fix-handoff.md`
+1. **Backend** (no dependencies)
+2. **Web** (after backend)
 
 ### Next Steps
-1. Read web/CLAUDE.md
-2. Investigate the auth flow
-3. Update handoff doc with findings
-4. Implement fix
-5. Run `/close-handoff 6` when done
+
+Run these commands in separate terminals:
+
+**Backend Agent:**
+```bash
+cd backend && claude
+/fix-issue {{number}}
 ```
+
+**Web Agent:** (after backend completes)
+```bash
+cd web && claude
+/fix-issue {{number}}
+```
+
+**After all complete:**
+```bash
+/close-handoff {{number}}
+```
+```
+
+## Platform-Specific Handoff Content
+
+### Backend Handoffs Should Include:
+- Specific Kotlin files to modify
+- Service/Controller/Repository layer affected
+- Sealed Result patterns to follow
+- Test file locations
+
+### Web Handoffs Should Include:
+- React components affected
+- Hooks/API files to modify
+- MUI styling requirements
+- Test file locations
+
+### Mobile Handoffs Should Include:
+- Dart files affected
+- Riverpod providers involved
+- Widget/page changes
+- Test file locations
 
 ## Integration
 
 This skill works with:
-- `/close-handoff` - To complete the issue
-- `/sync-github` - To verify sync status
-- Platform `/dev-cycle` skills - For implementation guidance
+- `/fix-issue` (per platform) - Implements the fix
+- `/close-handoff` - Aggregates and closes
+- `/sync-github` - Keeps status in sync
+
+## Example
+
+**Input:** `/work-issue 8`
+
+**Output:**
+```markdown
+## Working on Issue #8
+
+**[Bug]: Ground Admin Acceptance not working**
+
+### Details
+- **Type:** Bug
+- **Platform(s):** Backend, Web
+- **Priority:** High
+
+### Investigation Summary
+`MessageService.performAction()` only marks messages as actioned but never
+calls `GroundAdminService.acceptInvitation()` to process the actual acceptance.
+
+### Platform Handoffs
+
+| Platform | Handoff Doc | Status | Dependencies |
+|----------|-------------|--------|--------------|
+| Backend | `backend/docs/issues/008-ground-admin-acceptance.md` | pending | None |
+
+### Execution Order
+
+1. **Backend** (no dependencies) - Fix MessageService
+
+### Next Steps
+
+**Backend Agent:**
+```bash
+cd backend && claude
+/fix-issue 8
+```
+
+**After backend completes:**
+```bash
+/close-handoff 8
+```
+```

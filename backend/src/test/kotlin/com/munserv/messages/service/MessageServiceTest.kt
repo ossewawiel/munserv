@@ -1,10 +1,14 @@
 package com.munserv.messages.service
 
+import com.munserv.groundadmin.domain.GroundAdminApplicationId
+import com.munserv.groundadmin.service.GroundAdminResult
+import com.munserv.groundadmin.service.GroundAdminService
 import com.munserv.messages.api.MessageActionRequest
 import com.munserv.messages.domain.MessageEntity
 import com.munserv.messages.domain.MessageRepository
 import com.munserv.shared.enums.MessageStatus
 import com.munserv.shared.enums.MessageType
+import com.munserv.shared.types.MemberId
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.clearAllMocks
@@ -22,6 +26,7 @@ import java.util.UUID
 
 class MessageServiceTest {
     private lateinit var repository: MessageRepository
+    private lateinit var groundAdminService: GroundAdminService
     private lateinit var service: MessageService
 
     private val recipientId = UUID.randomUUID()
@@ -31,16 +36,19 @@ class MessageServiceTest {
     fun setup() {
         clearAllMocks()
         repository = mockk()
-        service = MessageService(repository)
+        groundAdminService = mockk()
+        service = MessageService(repository, groundAdminService)
     }
 
     private fun createTestMessage(
         id: UUID = UUID.randomUUID(),
         status: MessageStatus = MessageStatus.UNREAD,
         actionType: String? = "accept_decline",
+        type: MessageType = MessageType.GROUND_ADMIN_INVITATION,
+        relatedEntityId: UUID? = null,
     ) = MessageEntity(
         id = id,
-        type = MessageType.GROUND_ADMIN_INVITATION,
+        type = type,
         title = "Test Title",
         body = "Test Body",
         recipientId = recipientId,
@@ -49,6 +57,8 @@ class MessageServiceTest {
         senderType = "admin",
         status = status,
         actionType = actionType,
+        relatedEntityId = relatedEntityId,
+        relatedEntityType = if (type == MessageType.GROUND_ADMIN_INVITATION) "ground_admin_application" else null,
         createdAt = Instant.now(),
     )
 
@@ -245,7 +255,12 @@ class MessageServiceTest {
     inner class PerformAction {
         @Test
         fun `should mark message as actioned with valid action`() {
-            val message = createTestMessage(actionType = "accept_decline")
+            // Use a non-GA invitation message to test basic action flow
+            val message =
+                createTestMessage(
+                    type = MessageType.MONTHLY_REPORT,
+                    actionType = "accept_decline",
+                )
 
             every { repository.findById(message.id) } returns Optional.of(message)
             every { repository.save(any()) } answers { firstArg() }
@@ -335,7 +350,12 @@ class MessageServiceTest {
 
         @Test
         fun `should accept 'approve' for approve_reject action type`() {
-            val message = createTestMessage(actionType = "approve_reject")
+            // Use GA application type (not invitation) which uses approve_reject
+            val message =
+                createTestMessage(
+                    type = MessageType.GROUND_ADMIN_APPLICATION,
+                    actionType = "approve_reject",
+                )
 
             every { repository.findById(message.id) } returns Optional.of(message)
             every { repository.save(any()) } answers { firstArg() }
@@ -354,7 +374,11 @@ class MessageServiceTest {
 
         @Test
         fun `should accept 'confirm' for confirm_verify action type`() {
-            val message = createTestMessage(actionType = "confirm_verify")
+            val message =
+                createTestMessage(
+                    type = MessageType.VERIFY_NEW_ISSUE,
+                    actionType = "confirm_verify",
+                )
 
             every { repository.findById(message.id) } returns Optional.of(message)
             every { repository.save(any()) } answers { firstArg() }
@@ -372,7 +396,11 @@ class MessageServiceTest {
 
         @Test
         fun `should accept 'dismiss' for acknowledge action type`() {
-            val message = createTestMessage(actionType = "acknowledge")
+            val message =
+                createTestMessage(
+                    type = MessageType.GROUND_ADMIN_APPROVED,
+                    actionType = "acknowledge",
+                )
 
             every { repository.findById(message.id) } returns Optional.of(message)
             every { repository.save(any()) } answers { firstArg() }
@@ -390,7 +418,11 @@ class MessageServiceTest {
 
         @Test
         fun `should accept 'dismiss' for view action type`() {
-            val message = createTestMessage(actionType = "view")
+            val message =
+                createTestMessage(
+                    type = MessageType.MONTHLY_REPORT,
+                    actionType = "view",
+                )
 
             every { repository.findById(message.id) } returns Optional.of(message)
             every { repository.save(any()) } answers { firstArg() }
@@ -404,6 +436,191 @@ class MessageServiceTest {
                 )
 
             result.shouldBeInstanceOf<MessageResult.Success>()
+        }
+
+        @Test
+        fun `should call GroundAdminService acceptInvitation when accepting GA invitation`() {
+            val applicationId = UUID.randomUUID()
+            val message =
+                createTestMessage(
+                    type = MessageType.GROUND_ADMIN_INVITATION,
+                    actionType = "accept_decline",
+                    relatedEntityId = applicationId,
+                )
+
+            every { repository.findById(message.id) } returns Optional.of(message)
+            every { repository.save(any()) } answers { firstArg() }
+            every {
+                groundAdminService.acceptInvitation(
+                    MemberId(recipientId),
+                    GroundAdminApplicationId(applicationId),
+                )
+            } returns GroundAdminResult.Success(mapOf("status" to "accepted"))
+
+            val result =
+                service.performAction(
+                    message.id,
+                    recipientId,
+                    recipientType,
+                    MessageActionRequest("accept"),
+                )
+
+            val success = result.shouldBeInstanceOf<MessageResult.Success>()
+            success.message.status shouldBe MessageStatus.ACTIONED
+            success.message.actionResult shouldBe "accept"
+            verify {
+                groundAdminService.acceptInvitation(
+                    MemberId(recipientId),
+                    GroundAdminApplicationId(applicationId),
+                )
+            }
+        }
+
+        @Test
+        fun `should call GroundAdminService declineInvitation when declining GA invitation`() {
+            val applicationId = UUID.randomUUID()
+            val message =
+                createTestMessage(
+                    type = MessageType.GROUND_ADMIN_INVITATION,
+                    actionType = "accept_decline",
+                    relatedEntityId = applicationId,
+                )
+
+            every { repository.findById(message.id) } returns Optional.of(message)
+            every { repository.save(any()) } answers { firstArg() }
+            every {
+                groundAdminService.declineInvitation(
+                    MemberId(recipientId),
+                    GroundAdminApplicationId(applicationId),
+                    null,
+                )
+            } returns GroundAdminResult.Success(mapOf("status" to "declined"))
+
+            val result =
+                service.performAction(
+                    message.id,
+                    recipientId,
+                    recipientType,
+                    MessageActionRequest("decline"),
+                )
+
+            val success = result.shouldBeInstanceOf<MessageResult.Success>()
+            success.message.status shouldBe MessageStatus.ACTIONED
+            success.message.actionResult shouldBe "decline"
+            verify {
+                groundAdminService.declineInvitation(
+                    MemberId(recipientId),
+                    GroundAdminApplicationId(applicationId),
+                    null,
+                )
+            }
+        }
+
+        @Test
+        fun `should return ValidationError when GA invitation has no relatedEntityId`() {
+            val message =
+                createTestMessage(
+                    type = MessageType.GROUND_ADMIN_INVITATION,
+                    actionType = "accept_decline",
+                    relatedEntityId = null,
+                )
+
+            every { repository.findById(message.id) } returns Optional.of(message)
+
+            val result =
+                service.performAction(
+                    message.id,
+                    recipientId,
+                    recipientType,
+                    MessageActionRequest("accept"),
+                )
+
+            val error = result.shouldBeInstanceOf<MessageResult.ValidationError>()
+            error.errors.first() shouldBe "Missing application ID"
+        }
+
+        @Test
+        fun `should return NotFound when GroundAdminService returns NotFound`() {
+            val applicationId = UUID.randomUUID()
+            val message =
+                createTestMessage(
+                    type = MessageType.GROUND_ADMIN_INVITATION,
+                    actionType = "accept_decline",
+                    relatedEntityId = applicationId,
+                )
+
+            every { repository.findById(message.id) } returns Optional.of(message)
+            every {
+                groundAdminService.acceptInvitation(
+                    MemberId(recipientId),
+                    GroundAdminApplicationId(applicationId),
+                )
+            } returns GroundAdminResult.NotFound("Application not found")
+
+            val result =
+                service.performAction(
+                    message.id,
+                    recipientId,
+                    recipientType,
+                    MessageActionRequest("accept"),
+                )
+
+            val notFound = result.shouldBeInstanceOf<MessageResult.NotFound>()
+            notFound.reason shouldBe "Application not found"
+        }
+
+        @Test
+        fun `should return Conflict when GroundAdminService returns Conflict`() {
+            val applicationId = UUID.randomUUID()
+            val message =
+                createTestMessage(
+                    type = MessageType.GROUND_ADMIN_INVITATION,
+                    actionType = "accept_decline",
+                    relatedEntityId = applicationId,
+                )
+
+            every { repository.findById(message.id) } returns Optional.of(message)
+            every {
+                groundAdminService.acceptInvitation(
+                    MemberId(recipientId),
+                    GroundAdminApplicationId(applicationId),
+                )
+            } returns GroundAdminResult.Conflict("Invitation already processed")
+
+            val result =
+                service.performAction(
+                    message.id,
+                    recipientId,
+                    recipientType,
+                    MessageActionRequest("accept"),
+                )
+
+            val conflict = result.shouldBeInstanceOf<MessageResult.Conflict>()
+            conflict.reason shouldBe "Invitation already processed"
+        }
+
+        @Test
+        fun `should not call GroundAdminService for non-GA invitation messages`() {
+            val message =
+                createTestMessage(
+                    type = MessageType.VERIFY_NEW_ISSUE,
+                    actionType = "confirm_verify",
+                )
+
+            every { repository.findById(message.id) } returns Optional.of(message)
+            every { repository.save(any()) } answers { firstArg() }
+
+            val result =
+                service.performAction(
+                    message.id,
+                    recipientId,
+                    recipientType,
+                    MessageActionRequest("confirm"),
+                )
+
+            result.shouldBeInstanceOf<MessageResult.Success>()
+            verify(exactly = 0) { groundAdminService.acceptInvitation(any(), any()) }
+            verify(exactly = 0) { groundAdminService.declineInvitation(any(), any(), any()) }
         }
     }
 
