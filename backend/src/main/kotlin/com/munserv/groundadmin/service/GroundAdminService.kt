@@ -38,6 +38,11 @@ class GroundAdminService(
     private val sectorRepository: SectorRepository,
     private val messageService: MessageService,
 ) {
+    companion object {
+        private const val ERROR_APPLICATION_NOT_FOUND = "Application not found"
+        private const val ERROR_MEMBER_NOT_FOUND = "Member not found"
+    }
+
     // ==================== Member Actions ====================
 
     /**
@@ -47,7 +52,7 @@ class GroundAdminService(
     fun apply(memberId: MemberId): GroundAdminResult {
         val member =
             memberRepository.findById(memberId)
-                ?: return GroundAdminResult.NotFound("Member not found")
+                ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
         if (member.isGroundAdmin) {
             return GroundAdminResult.Conflict("Already a Ground Admin")
@@ -77,10 +82,10 @@ class GroundAdminService(
     ): GroundAdminResult {
         val application =
             applicationRepository.findById(applicationId)
-                ?: return GroundAdminResult.NotFound("Application not found")
+                ?: return GroundAdminResult.NotFound(ERROR_APPLICATION_NOT_FOUND)
 
         if (application.memberId != memberId) {
-            return GroundAdminResult.NotFound("Application not found")
+            return GroundAdminResult.NotFound(ERROR_APPLICATION_NOT_FOUND)
         }
 
         if (!application.isInvitation) {
@@ -114,10 +119,10 @@ class GroundAdminService(
     ): GroundAdminResult {
         val application =
             applicationRepository.findById(applicationId)
-                ?: return GroundAdminResult.NotFound("Application not found")
+                ?: return GroundAdminResult.NotFound(ERROR_APPLICATION_NOT_FOUND)
 
         if (application.memberId != memberId) {
-            return GroundAdminResult.NotFound("Application not found")
+            return GroundAdminResult.NotFound(ERROR_APPLICATION_NOT_FOUND)
         }
 
         if (!application.isInvitation || !application.isPending) {
@@ -157,7 +162,7 @@ class GroundAdminService(
     ): GroundAdminResult {
         val member =
             memberRepository.findById(memberId)
-                ?: return GroundAdminResult.NotFound("Member not found")
+                ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
         if (!member.isGroundAdmin) {
             return GroundAdminResult.Conflict("Not a Ground Admin")
@@ -191,7 +196,7 @@ class GroundAdminService(
     fun getMyGroundAdminInfo(memberId: MemberId): GroundAdminResult {
         val member =
             memberRepository.findById(memberId)
-                ?: return GroundAdminResult.NotFound("Member not found")
+                ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
         if (!member.isGroundAdmin) {
             return GroundAdminResult.Success(null)
@@ -228,7 +233,7 @@ class GroundAdminService(
 
         val member =
             memberRepository.findById(memberId)
-                ?: return GroundAdminResult.NotFound("Member not found")
+                ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
         if (member.sectorId != admin.sectorId) {
             return GroundAdminResult.Forbidden("Member not in your sector")
@@ -279,10 +284,10 @@ class GroundAdminService(
     ): GroundAdminResult {
         val application =
             applicationRepository.findById(applicationId)
-                ?: return GroundAdminResult.NotFound("Application not found")
+                ?: return GroundAdminResult.NotFound(ERROR_APPLICATION_NOT_FOUND)
 
         if (application.memberId != memberId) {
-            return GroundAdminResult.NotFound("Application not found")
+            return GroundAdminResult.NotFound(ERROR_APPLICATION_NOT_FOUND)
         }
 
         if (!application.isInvitation) {
@@ -311,10 +316,10 @@ class GroundAdminService(
     ): GroundAdminResult {
         val application =
             applicationRepository.findById(applicationId)
-                ?: return GroundAdminResult.NotFound("Application not found")
+                ?: return GroundAdminResult.NotFound(ERROR_APPLICATION_NOT_FOUND)
 
         if (application.memberId != memberId) {
-            return GroundAdminResult.NotFound("Application not found")
+            return GroundAdminResult.NotFound(ERROR_APPLICATION_NOT_FOUND)
         }
 
         if (!application.isApplication || !application.isPending) {
@@ -359,10 +364,10 @@ class GroundAdminService(
     ): GroundAdminResult {
         val application =
             applicationRepository.findById(applicationId)
-                ?: return GroundAdminResult.NotFound("Application not found")
+                ?: return GroundAdminResult.NotFound(ERROR_APPLICATION_NOT_FOUND)
 
         if (application.memberId != memberId) {
-            return GroundAdminResult.NotFound("Application not found")
+            return GroundAdminResult.NotFound(ERROR_APPLICATION_NOT_FOUND)
         }
 
         if (!application.isApplication || !application.isPending) {
@@ -400,7 +405,7 @@ class GroundAdminService(
     ): GroundAdminResult {
         val member =
             memberRepository.findById(memberId)
-                ?: return GroundAdminResult.NotFound("Member not found")
+                ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
         if (!member.isGroundAdmin) {
             return GroundAdminResult.Conflict("Member is not a Ground Admin")
@@ -438,7 +443,7 @@ class GroundAdminService(
     ): GroundAdminResult {
         val member =
             memberRepository.findById(memberId)
-                ?: return GroundAdminResult.NotFound("Member not found")
+                ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
         if (!member.isGroundAdmin) {
             return GroundAdminResult.Conflict("Member is not a Ground Admin")

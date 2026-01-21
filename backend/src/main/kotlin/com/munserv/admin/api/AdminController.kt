@@ -196,37 +196,33 @@ class AdminController(
             }
 
         // Fetch members based on filters
-        var allMembers: List<Member>
+        val allMembers: List<Member> =
+            when {
+                isGroundAdmin == true -> memberRepository.findBySectorIdAndIsGroundAdmin(id, true)
+                hasPendingApplication == true || hasInvitationPending == true -> {
+                    val pendingApplications =
+                        applicationRepository.findBySectorIdAndStatus(
+                            id,
+                            ApplicationStatus.PENDING.toDbValue(),
+                        )
 
-        // If filtering by Ground Admin status
-        if (isGroundAdmin == true) {
-            allMembers = memberRepository.findBySectorIdAndIsGroundAdmin(id, true)
-        } else if (hasPendingApplication == true || hasInvitationPending == true) {
-            // If filtering by pending applications or invitations
-            val pendingApplications =
-                applicationRepository.findBySectorIdAndStatus(
-                    id,
-                    ApplicationStatus.PENDING.toDbValue(),
-                )
+                    val memberIds =
+                        pendingApplications
+                            .filter { app ->
+                                when {
+                                    hasPendingApplication == true -> app.type == ApplicationType.APPLICATION
+                                    hasInvitationPending == true -> app.type == ApplicationType.INVITATION
+                                    else -> true
+                                }
+                            }
+                            .map { it.memberId }
+                            .toSet()
 
-            val memberIds =
-                pendingApplications
-                    .filter { app ->
-                        when {
-                            hasPendingApplication == true -> app.type == ApplicationType.APPLICATION
-                            hasInvitationPending == true -> app.type == ApplicationType.INVITATION
-                            else -> true
-                        }
-                    }
-                    .map { it.memberId }
-                    .toSet()
-
-            allMembers = memberIds.mapNotNull { memberRepository.findById(it) }
-        } else if (memberStatus != null) {
-            allMembers = memberRepository.findBySectorIdAndStatus(id, memberStatus)
-        } else {
-            allMembers = memberRepository.findBySectorId(id)
-        }
+                    memberIds.mapNotNull { memberRepository.findById(it) }
+                }
+                memberStatus != null -> memberRepository.findBySectorIdAndStatus(id, memberStatus)
+                else -> memberRepository.findBySectorId(id)
+            }
 
         val totalItems = allMembers.size
         val totalPages = if (totalItems == 0) 1 else ceil(totalItems.toDouble() / limit).toInt()
@@ -277,20 +273,6 @@ class AdminController(
 
         return ResponseEntity.ok(response)
     }
-
-    private fun Member.toMemberWithStats(issueCount: Int) =
-        MemberWithStats(
-            id = id,
-            firstName = firstName,
-            surname = surname,
-            phoneNumber = phone.ifEmpty { "***-***-****" },
-            address = address,
-            status = status,
-            issueCount = issueCount,
-            joinedAt = createdAt,
-            isGroundAdmin = isGroundAdmin,
-            groundAdminStatus = groundAdminStatus,
-        )
 
     private fun Member.toMemberWithStatsAndGAInfo(
         issueCount: Int,

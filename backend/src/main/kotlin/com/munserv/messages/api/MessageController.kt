@@ -45,6 +45,11 @@ import java.util.UUID
 class MessageController(
     private val messageService: MessageService,
 ) {
+    companion object {
+        private const val ERROR_AUTH_REQUIRED = "Authentication required"
+        private const val ERROR_INVALID_AUTH = "Invalid authentication"
+    }
+
     /**
      * GET /api/v1/messages - List messages for the authenticated user.
      */
@@ -82,7 +87,7 @@ class MessageController(
     ): ResponseEntity<*> {
         if (userIdStr == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Authentication required")))
+                .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_AUTH_REQUIRED)))
         }
 
         val userId =
@@ -90,7 +95,7 @@ class MessageController(
                 UUID.fromString(userIdStr)
             } catch (e: IllegalArgumentException) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Invalid authentication")))
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
         // Determine recipient type based on token claims (simplified - in production would check claims)
@@ -136,7 +141,7 @@ class MessageController(
     ): ResponseEntity<*> {
         if (userIdStr == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Authentication required")))
+                .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_AUTH_REQUIRED)))
         }
 
         val userId =
@@ -144,7 +149,7 @@ class MessageController(
                 UUID.fromString(userIdStr)
             } catch (e: IllegalArgumentException) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Invalid authentication")))
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
         val recipientType = "member"
@@ -187,7 +192,7 @@ class MessageController(
     ): ResponseEntity<*> {
         if (userIdStr == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Authentication required")))
+                .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_AUTH_REQUIRED)))
         }
 
         val userId =
@@ -195,7 +200,7 @@ class MessageController(
                 UUID.fromString(userIdStr)
             } catch (e: IllegalArgumentException) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Invalid authentication")))
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
         val recipientType = "member"
@@ -247,7 +252,7 @@ class MessageController(
     ): ResponseEntity<*> {
         if (userIdStr == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Authentication required")))
+                .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_AUTH_REQUIRED)))
         }
 
         val userId =
@@ -255,7 +260,7 @@ class MessageController(
                 UUID.fromString(userIdStr)
             } catch (e: IllegalArgumentException) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Invalid authentication")))
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
         val recipientType = "member"
