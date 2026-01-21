@@ -44,7 +44,10 @@ class MessageService(
         page: Int = 1,
         size: Int = 20,
     ): MessageListResponse {
-        val pageable =
+        // Native queries have ORDER BY in SQL, so don't add sort to pageable
+        val nativePageable = PageRequest.of(page - 1, size)
+        // JPA-derived queries need sort in pageable
+        val jpaPageable =
             PageRequest.of(
                 page - 1,
                 size,
@@ -57,29 +60,29 @@ class MessageService(
                     messageRepository.findByRecipientIdAndRecipientTypeAndStatusAndType(
                         recipientId,
                         recipientType,
-                        status,
-                        type,
-                        pageable,
+                        status.toApiString(),
+                        type.toApiString(),
+                        nativePageable,
                     )
                 status != null ->
                     messageRepository.findByRecipientIdAndRecipientTypeAndStatus(
                         recipientId,
                         recipientType,
-                        status,
-                        pageable,
+                        status.toApiString(),
+                        nativePageable,
                     )
                 type != null ->
                     messageRepository.findByRecipientIdAndRecipientTypeAndType(
                         recipientId,
                         recipientType,
-                        type,
-                        pageable,
+                        type.toApiString(),
+                        nativePageable,
                     )
                 else ->
                     messageRepository.findByRecipientIdAndRecipientType(
                         recipientId,
                         recipientType,
-                        pageable,
+                        jpaPageable,
                     )
             }
 

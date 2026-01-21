@@ -36,6 +36,7 @@ function getMessageTypeColor(type: MessageType): string {
     case 'member_registration':
       return 'info.main';
     case 'ground_admin_approved':
+    case 'ground_admin_invitation_accepted':
       return 'success.main';
     case 'ground_admin_declined':
     case 'ground_admin_revocation':

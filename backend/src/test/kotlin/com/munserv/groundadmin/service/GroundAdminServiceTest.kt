@@ -16,6 +16,7 @@ import com.munserv.messages.service.MessageService
 import com.munserv.sectors.domain.Sector
 import com.munserv.sectors.repository.SectorRepository
 import com.munserv.shared.enums.GroundAdminStatus
+import com.munserv.shared.enums.MessageType
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
@@ -286,6 +287,42 @@ class GroundAdminServiceTest {
             val result = service.acceptInvitation(memberId, applicationId)
 
             result.shouldBeInstanceOf<GroundAdminResult.Conflict>()
+        }
+
+        @Test
+        fun `should notify inviter with acceptance message when invitation accepted`() {
+            val applicationId = GroundAdminApplicationId.generate()
+            val invitation =
+                createTestApplication(
+                    id = applicationId,
+                    type = ApplicationType.INVITATION,
+                    invitedBy = adminId,
+                )
+            val member = createTestMember()
+            val messageSlot = slot<MessageEntity>()
+
+            every { applicationRepository.findById(applicationId) } returns invitation
+            every { memberRepository.findById(memberId) } returns member
+            every { applicationRepository.save(any()) } answers { firstArg() }
+            every { memberRepository.save(any()) } answers { firstArg() }
+            every { messageService.createMessage(capture(messageSlot)) } answers { firstArg() }
+
+            val result = service.acceptInvitation(memberId, applicationId)
+
+            result.shouldBeInstanceOf<GroundAdminResult.Success>()
+
+            verify { messageService.createMessage(any()) }
+
+            with(messageSlot.captured) {
+                type shouldBe MessageType.GROUND_ADMIN_INVITATION_ACCEPTED
+                recipientId shouldBe adminId.value
+                recipientType shouldBe "admin"
+                senderId shouldBe memberId.value
+                senderType shouldBe "member"
+                relatedEntityId shouldBe memberId.value
+                relatedEntityType shouldBe "member"
+                actionType shouldBe "view"
+            }
         }
     }
 

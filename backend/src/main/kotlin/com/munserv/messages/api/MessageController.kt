@@ -21,6 +21,7 @@ import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -48,6 +49,17 @@ class MessageController(
     companion object {
         private const val ERROR_AUTH_REQUIRED = "Authentication required"
         private const val ERROR_INVALID_AUTH = "Invalid authentication"
+        private const val ROLE_ADMIN = "ROLE_ADMIN"
+    }
+
+    /**
+     * Determines the recipient type based on the user's authorities.
+     * Returns "admin" if user has ROLE_ADMIN, otherwise "member".
+     */
+    private fun getRecipientType(): String {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val isAdmin = authentication?.authorities?.any { it.authority == ROLE_ADMIN } == true
+        return if (isAdmin) "admin" else "member"
     }
 
     /**
@@ -98,8 +110,7 @@ class MessageController(
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
-        // Determine recipient type based on token claims (simplified - in production would check claims)
-        val recipientType = "member"
+        val recipientType = getRecipientType()
 
         val response =
             messageService.getMessages(
@@ -152,7 +163,7 @@ class MessageController(
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
-        val recipientType = "member"
+        val recipientType = getRecipientType()
 
         return when (val result = messageService.getMessage(id, userId, recipientType)) {
             is MessageResult.Success -> ResponseEntity.ok(result.message)
@@ -203,7 +214,7 @@ class MessageController(
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
-        val recipientType = "member"
+        val recipientType = getRecipientType()
 
         return when (val result = messageService.markAsRead(id, userId, recipientType)) {
             is MessageResult.Success -> ResponseEntity.ok(result.message)
@@ -263,7 +274,7 @@ class MessageController(
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
-        val recipientType = "member"
+        val recipientType = getRecipientType()
 
         return when (val result = messageService.performAction(id, userId, recipientType, request)) {
             is MessageResult.Success -> ResponseEntity.ok(result.message)
