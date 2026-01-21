@@ -65,6 +65,42 @@ Update issue state (admin only).
 **Response:** `Issue`
 **Errors:** 403 Forbidden | 404 Not found
 
+### POST /issues/{id}/request-verification
+Request Ground Admin verification (admin only).
+
+**Request:**
+```json
+{
+  "type": "existence" | "fix",
+  "assignTo": "member-id" | null,
+  "message": "Please verify this issue"
+}
+```
+**Response:** `IssueVerification`
+**Errors:** 400 Invalid state | 401 Unauthorized | 403 Forbidden | 404 Not found
+
+### POST /issues/{id}/verify
+Submit verification result (Ground Admin only).
+
+**Request:**
+```json
+{
+  "verificationId": "uuid",
+  "result": "confirmed" | "not_found" | "not_fixed",
+  "reason": "cannot_find" | "wrong_location" | "not_an_issue" | "busy" | "away",
+  "note": "Optional explanation",
+  "photoId": "uuid"
+}
+```
+**Response:** `IssueVerification`
+**Errors:** 400 Invalid result | 401 Unauthorized | 403 Not assigned | 404 Not found | 409 Already verified
+
+### GET /issues/{id}/verifications
+Get verification history for issue.
+
+**Response:** `{ items: IssueVerification[] }`
+**Errors:** 401 Unauthorized | 404 Not found
+
 ---
 
 ## Members
@@ -81,6 +117,98 @@ Get issues reported by member.
 **Response:** `{ items: Issue[], total: number }`
 **Errors:** 404 Member not found
 
+### GET /members/me/ground-admin
+Get current member's Ground Admin info (if applicable).
+
+**Response:** `GroundAdminInfo | null`
+**Errors:** 401 Unauthorized
+
+### POST /members/me/ground-admin/apply
+Apply to become a Ground Admin.
+
+**Request:** `{ }` (empty - uses current member's sector)
+**Response:** `{ applicationId: string, status: 'pending' }`
+**Errors:** 401 Unauthorized | 409 Already applied | 409 Already Ground Admin
+
+### POST /members/me/ground-admin/accept
+Accept Ground Admin invitation.
+
+**Request:** `{ applicationId: string }`
+**Response:** `{ status: 'accepted', member: Member }`
+**Errors:** 400 Invalid application | 401 Unauthorized | 404 Not found | 409 Not an invitation
+
+### POST /members/me/ground-admin/decline
+Decline Ground Admin invitation.
+
+**Request:** `{ applicationId: string, reason?: string }`
+**Response:** `{ status: 'declined' }`
+**Errors:** 400 Invalid application | 401 Unauthorized | 404 Not found
+
+### POST /members/me/ground-admin/stepdown
+Request to step down from Ground Admin role.
+
+**Request:** `{ reason?: string }`
+**Response:** `{ status: 'pending_approval' }`
+**Errors:** 401 Unauthorized | 409 Not a Ground Admin
+
+### GET /members/me/pending-verifications
+Get pending verifications for current Ground Admin.
+
+**Response:** `{ items: PendingVerification[] }`
+**Errors:** 401 Unauthorized
+
+### GET /members/me/notification-settings
+Get notification preferences.
+
+**Response:** `{ pushEnabled: boolean, verificationAlerts: boolean, monthlyReports: boolean }`
+**Errors:** 401 Unauthorized
+
+### PATCH /members/me/notification-settings
+Update notification preferences.
+
+**Request:** `{ pushEnabled?: boolean, verificationAlerts?: boolean, monthlyReports?: boolean }`
+**Response:** `NotificationSettings`
+**Errors:** 401 Unauthorized
+
+---
+
+## Ground Admin (Admin Actions)
+
+### POST /members/{id}/ground-admin/invite
+Invite member to become Ground Admin (admin only).
+
+**Request:** `{ message?: string }`
+**Response:** `{ applicationId: string, status: 'pending' }`
+**Errors:** 401 Unauthorized | 403 Forbidden | 404 Member not found | 409 Already Ground Admin | 409 Already invited
+
+### POST /members/{id}/ground-admin/approve
+Approve Ground Admin application (admin only).
+
+**Request:** `{ applicationId: string }`
+**Response:** `{ status: 'approved', member: Member }`
+**Errors:** 400 Invalid application | 401 Unauthorized | 403 Forbidden | 404 Not found
+
+### POST /members/{id}/ground-admin/decline
+Decline Ground Admin application (admin only).
+
+**Request:** `{ applicationId: string, reason: string }`
+**Response:** `{ status: 'declined' }`
+**Errors:** 400 Invalid application | 401 Unauthorized | 403 Forbidden | 404 Not found
+
+### POST /members/{id}/ground-admin/revoke
+Revoke Ground Admin status (admin only).
+
+**Request:** `{ reason: string }`
+**Response:** `{ status: 'revoked', member: Member }`
+**Errors:** 401 Unauthorized | 403 Forbidden | 404 Member not found | 409 Not a Ground Admin
+
+### PATCH /members/{id}/ground-admin/status
+Update Ground Admin status (admin only).
+
+**Request:** `{ status: 'active' | 'on_hold' }`
+**Response:** `Member`
+**Errors:** 401 Unauthorized | 403 Forbidden | 404 Member not found | 409 Not a Ground Admin
+
 ---
 
 ## Admin
@@ -94,8 +222,25 @@ Get dashboard statistics.
 ### GET /admin/members
 List members (admin only).
 
-**Query:** `?search={term}&page={n}&size={n}`
-**Response:** `{ items: Member[], total: number, page: number }`
+**Query:** `?search={term}&page={n}&size={n}&groundAdmin={true|false}`
+**Response:**
+```json
+{
+  "items": [
+    {
+      "id": "...",
+      "name": "...",
+      "phone": "...",
+      "status": "active",
+      "isGroundAdmin": true,
+      "groundAdminStatus": "active",
+      "hasPendingApplication": false
+    }
+  ],
+  "total": 100,
+  "page": 1
+}
+```
 **Errors:** 403 Forbidden
 
 ---
@@ -112,6 +257,29 @@ Get sector details.
 
 **Response:** `Sector`
 **Errors:** 404 Not found
+
+### GET /sectors/{id}/ground-admins
+List Ground Admins in sector.
+
+**Query:** `?status={status}` (optional filter: active, on_hold, inactive)
+**Response:**
+```json
+{
+  "items": [
+    {
+      "id": "...",
+      "memberId": "...",
+      "name": "...",
+      "status": "active",
+      "since": "2025-01-15T00:00:00Z",
+      "responseRate": 0.85,
+      "pendingVerifications": 2
+    }
+  ],
+  "total": 5
+}
+```
+**Errors:** 401 Unauthorized | 403 Forbidden | 404 Sector not found
 
 ---
 
