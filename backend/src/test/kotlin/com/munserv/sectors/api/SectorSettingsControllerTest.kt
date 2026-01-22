@@ -1,16 +1,23 @@
 package com.munserv.sectors.api
 
+import com.munserv.admin.domain.Admin
+import com.munserv.admin.domain.AdminRole
+import com.munserv.admin.repository.AdminRepository
+import com.munserv.auth.service.JwtService
 import com.munserv.sectors.domain.SectorSettings
 import com.munserv.sectors.service.SectorSettingsResult
 import com.munserv.sectors.service.SectorSettingsService
 import com.munserv.sectors.service.UpdateSectorSettingsCommand
 import com.munserv.shared.enums.VerificationMode
+import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
 import com.munserv.shared.types.SectorSettingsId
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,12 +38,43 @@ class SectorSettingsControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
+    @Autowired
+    private lateinit var jwtService: JwtService
+
     @MockkBean
     private lateinit var settingsService: SectorSettingsService
 
+    @MockkBean
+    private lateinit var adminRepository: AdminRepository
+
     private val testSectorId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001")
     private val testSettingsId = SectorSettingsId(UUID.fromString("550e8400-e29b-41d4-a716-446655440010"))
+    private val testAdminId = AdminId.fromString("550e8400-e29b-41d4-a716-446655440020")
     private val fixedInstant = Instant.parse("2025-01-15T10:00:00Z")
+    private lateinit var sectorChiefToken: String
+
+    @BeforeEach
+    fun setup() {
+        // Generate a JWT token for the sector chief
+        sectorChiefToken =
+            jwtService.generateAccessToken(
+                MemberId(testAdminId.value),
+                "admin",
+            )
+
+        // Mock the admin repository to return a sector chief
+        val sectorChief =
+            Admin(
+                id = testAdminId,
+                sectorId = SectorId(testSectorId),
+                email = "chief@example.com",
+                displayName = "Test Sector Chief",
+                role = AdminRole.SECTOR_CHIEF,
+                createdAt = fixedInstant,
+                updatedAt = fixedInstant,
+            )
+        every { adminRepository.findById(testAdminId) } returns sectorChief
+    }
 
     private fun createTestSettings(
         sectorId: SectorId = SectorId(testSectorId),
@@ -63,6 +101,7 @@ class SectorSettingsControllerTest {
             every { settingsService.getSettings(any()) } returns SectorSettingsResult.Success(settings)
 
             mockMvc.get("/api/v1/sectors/$testSectorId/settings") {
+                header("Authorization", "Bearer $sectorChiefToken")
                 accept = MediaType.APPLICATION_JSON
             }.andExpect {
                 status { isOk() }
@@ -84,6 +123,7 @@ class SectorSettingsControllerTest {
                 SectorSettingsResult.SectorNotFound(SectorId(testSectorId))
 
             mockMvc.get("/api/v1/sectors/$testSectorId/settings") {
+                header("Authorization", "Bearer $sectorChiefToken")
                 accept = MediaType.APPLICATION_JSON
             }.andExpect {
                 status { isNotFound() }
@@ -110,6 +150,7 @@ class SectorSettingsControllerTest {
             } returns SectorSettingsResult.Success(updatedSettings)
 
             mockMvc.patch("/api/v1/sectors/$testSectorId/settings") {
+                header("Authorization", "Bearer $sectorChiefToken")
                 contentType = MediaType.APPLICATION_JSON
                 content =
                     """
@@ -138,6 +179,7 @@ class SectorSettingsControllerTest {
                 )
 
             mockMvc.patch("/api/v1/sectors/$testSectorId/settings") {
+                header("Authorization", "Bearer $sectorChiefToken")
                 contentType = MediaType.APPLICATION_JSON
                 content =
                     """
@@ -158,6 +200,7 @@ class SectorSettingsControllerTest {
                 SectorSettingsResult.SectorNotFound(SectorId(testSectorId))
 
             mockMvc.patch("/api/v1/sectors/$testSectorId/settings") {
+                header("Authorization", "Bearer $sectorChiefToken")
                 contentType = MediaType.APPLICATION_JSON
                 content =
                     """
@@ -183,6 +226,7 @@ class SectorSettingsControllerTest {
             } returns SectorSettingsResult.Success(updatedSettings)
 
             mockMvc.patch("/api/v1/sectors/$testSectorId/settings") {
+                header("Authorization", "Bearer $sectorChiefToken")
                 contentType = MediaType.APPLICATION_JSON
                 content =
                     """
@@ -204,6 +248,7 @@ class SectorSettingsControllerTest {
                     SectorSettingsResult.Success(updatedSettings)
 
                 mockMvc.patch("/api/v1/sectors/$testSectorId/settings") {
+                    header("Authorization", "Bearer $sectorChiefToken")
                     contentType = MediaType.APPLICATION_JSON
                     content =
                         """

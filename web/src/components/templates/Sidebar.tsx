@@ -13,17 +13,21 @@ import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme, alpha } from '@mui/material/styles';
-import DashboardIcon from '@mui/icons-material/Dashboard';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import WhatshotIcon from '@mui/icons-material/Whatshot';
-import PeopleIcon from '@mui/icons-material/People';
-import EmailIcon from '@mui/icons-material/Email';
 import BadgeIcon from '@mui/icons-material/Badge';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import EmailIcon from '@mui/icons-material/Email';
+import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
 
 import { drawerWidth } from '@/theme';
 import { MiniDrawerStyled } from './MiniDrawerStyled';
 import { useUnreadCount } from '@/features/messages/hooks';
+import { useAuth } from '@/shared/hooks/useAuth';
+import { hasPermission, type AdminRole } from '@/shared/types/admin';
 
 /** Get the color for selected/hovered items based on theme mode */
 const getItemColor = (isDarkMode: boolean): string =>
@@ -34,16 +38,43 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
   badgeKey?: 'unreadMessages';
+  /** Minimum role required to see this nav item */
+  requiredRole?: AdminRole;
+  /** Child items for grouped navigation */
+  children?: NavItem[];
 }
 
 const navItems: NavItem[] = [
   { labelKey: 'nav.dashboard', href: '/', icon: DashboardIcon },
   { labelKey: 'nav.issues', href: '/issues', icon: AssignmentIcon },
-  { labelKey: 'nav.heatReport', href: '/reports/heat', icon: WhatshotIcon },
+  // Reports section (visible to all)
+  {
+    labelKey: 'nav.reports',
+    href: '/reports',
+    icon: AnalyticsIcon,
+    children: [{ labelKey: 'nav.heatReport', href: '/reports/heat', icon: WhatshotIcon }],
+  },
   { labelKey: 'nav.members', href: '/members', icon: PeopleIcon },
-  { labelKey: 'nav.messages', href: '/messages', icon: EmailIcon, badgeKey: 'unreadMessages' },
+  {
+    labelKey: 'nav.messages',
+    href: '/messages',
+    icon: EmailIcon,
+    badgeKey: 'unreadMessages',
+  },
   { labelKey: 'nav.groundAdmins', href: '/ground-admins', icon: BadgeIcon },
-  { labelKey: 'nav.sectorSettings', href: '/settings/sector', icon: SettingsIcon },
+  // Sector Chief only
+  {
+    labelKey: 'nav.adminManagement',
+    href: '/admin-management',
+    icon: AdminPanelSettingsIcon,
+    requiredRole: 'sector_chief',
+  },
+  {
+    labelKey: 'nav.sectorSettings',
+    href: '/settings/sector',
+    icon: SettingsIcon,
+    requiredRole: 'sector_chief',
+  },
 ];
 
 interface SidebarProps {
@@ -58,6 +89,35 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
   const theme = useTheme();
   const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
   const { data: unreadCount = 0 } = useUnreadCount();
+  const { admin } = useAuth();
+  const userRole = admin?.role ?? 'sector_admin';
+
+  // Filter nav items based on user role
+  const visibleNavItems = useMemo(() => {
+    const filterByRole = (items: NavItem[]): NavItem[] => {
+      return items
+        .filter((item) => !item.requiredRole || hasPermission(userRole, item.requiredRole))
+        .map((item) => {
+          if (item.children) {
+            return { ...item, children: filterByRole(item.children) };
+          }
+          return item;
+        });
+    };
+
+    // Flatten items with children for simpler rendering in MVP
+    // Future: implement collapsible menu groups
+    const flattenItems = (items: NavItem[]): NavItem[] => {
+      return items.flatMap((item) => {
+        if (item.children && item.children.length > 0) {
+          return item.children;
+        }
+        return [item];
+      });
+    };
+
+    return flattenItems(filterByRole(navItems));
+  }, [userRole]);
 
   const isSelected = (href: string): boolean => {
     if (href === '/') {
@@ -99,7 +159,7 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
   const drawerContent = (
     <Box sx={{ overflow: 'auto', mt: open ? 0 : 2 }}>
       <List sx={{ px: open ? 2 : 0.5 }}>
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const Icon = item.icon;
           const selected = isSelected(item.href);
           const badgeCount = getBadgeCount(item.badgeKey);

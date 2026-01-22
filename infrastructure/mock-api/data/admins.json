@@ -7,5 +7,14 @@
     "sectorId": "550e8400-e29b-41d4-a716-446655440001",
     "role": "SECTOR_ADMIN",
     "createdAt": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440021",
+    "email": "chief@ward42.example.com",
+    "password": "chief123",
+    "displayName": "Ward 42 Sector Chief",
+    "sectorId": "550e8400-e29b-41d4-a716-446655440001",
+    "role": "SECTOR_CHIEF",
+    "createdAt": "2025-01-01T00:00:00Z"
   }
 ]

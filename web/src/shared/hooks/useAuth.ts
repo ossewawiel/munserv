@@ -1,5 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import type { AdminUser } from '@/features/auth/types';
+import {
+  hasPermission as checkPermission,
+  normalizeRole,
+  type AdminRole,
+} from '@/shared/types/admin';
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -10,7 +15,12 @@ export function useAuth() {
     const stored = localStorage.getItem(ADMIN_KEY);
     if (!stored) return null;
     try {
-      return JSON.parse(stored) as AdminUser;
+      const parsed = JSON.parse(stored) as AdminUser;
+      // Normalize role from backend format to frontend format
+      return {
+        ...parsed,
+        role: normalizeRole(parsed.role as string),
+      };
     } catch {
       return null;
     }
@@ -22,10 +32,10 @@ export function useAuth() {
 
   const admin = useMemo(() => getStoredAdmin(), [getStoredAdmin]);
 
-  const login = useCallback((tokens: { accessToken: string; refreshToken: string }, admin: AdminUser) => {
+  const login = useCallback((tokens: { accessToken: string; refreshToken: string }, adminData: AdminUser) => {
     localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
-    localStorage.setItem(ADMIN_KEY, JSON.stringify(admin));
+    localStorage.setItem(ADMIN_KEY, JSON.stringify(adminData));
   }, []);
 
   const logout = useCallback(() => {
@@ -34,10 +44,22 @@ export function useAuth() {
     localStorage.removeItem(ADMIN_KEY);
   }, []);
 
+  /**
+   * Check if the current admin has at least the required permission level
+   */
+  const hasPermission = useCallback(
+    (requiredRole: AdminRole): boolean => {
+      if (!admin) return false;
+      return checkPermission(admin.role, requiredRole);
+    },
+    [admin]
+  );
+
   return {
     isAuthenticated,
     admin,
     login,
     logout,
+    hasPermission,
   };
 }

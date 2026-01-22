@@ -1,7 +1,9 @@
 package com.munserv.sectors.api
 
+import com.munserv.admin.domain.AdminRole
 import com.munserv.sectors.service.SectorSettingsResult
 import com.munserv.sectors.service.SectorSettingsService
+import com.munserv.shared.security.RequireRole
 import com.munserv.shared.types.SectorId
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -23,11 +25,15 @@ import java.util.UUID
 /**
  * REST controller for sector settings management.
  * Provides endpoints for viewing and updating sector configuration.
+ *
+ * Requires SECTOR_CHIEF role or higher for all operations.
+ * Sector admins (SECTOR_ADMIN) cannot access these endpoints.
  */
 @RestController
 @RequestMapping("/api/v1/sectors/{sectorId}/settings")
 @Tag(name = "Sector Settings", description = "Endpoints for managing sector configuration")
 @SecurityRequirement(name = "bearerAuth")
+@RequireRole(AdminRole.SECTOR_CHIEF)
 class SectorSettingsController(
     private val settingsService: SectorSettingsService,
 ) {

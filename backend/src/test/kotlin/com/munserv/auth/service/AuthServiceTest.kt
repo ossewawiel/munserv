@@ -1,11 +1,13 @@
 package com.munserv.auth.service
 
+import com.munserv.admin.repository.AdminRepository
 import com.munserv.auth.config.AdminConfig
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
 import com.munserv.auth.domain.PhoneNumber
 import com.munserv.auth.domain.Pin
 import com.munserv.auth.repository.MemberRepository
+import com.munserv.sectors.repository.SectorRepository
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
@@ -28,6 +30,8 @@ class AuthServiceTest {
     private lateinit var otpService: OtpService
     private lateinit var jwtService: JwtService
     private lateinit var adminConfig: AdminConfig
+    private lateinit var adminRepository: AdminRepository
+    private lateinit var sectorRepository: SectorRepository
     private lateinit var clock: Clock
 
     private val testPhone = "+27821234567"
@@ -39,6 +43,8 @@ class AuthServiceTest {
     fun setup() {
         clock = Clock.fixed(Instant.parse("2026-01-05T10:00:00Z"), ZoneOffset.UTC)
         memberRepository = mockk()
+        adminRepository = mockk()
+        sectorRepository = mockk()
         otpService = OtpService(clock = clock, otpTtl = Duration.ofMinutes(5))
         jwtService =
             JwtService(
@@ -59,7 +65,7 @@ class AuthServiceTest {
                 sectorCenterLat = -26.2041,
                 sectorCenterLng = 28.0473,
             )
-        authService = AuthService(memberRepository, otpService, jwtService, adminConfig)
+        authService = AuthService(memberRepository, otpService, jwtService, adminConfig, adminRepository, sectorRepository)
     }
 
     // Registration flow tests

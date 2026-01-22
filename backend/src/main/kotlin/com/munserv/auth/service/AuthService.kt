@@ -1,5 +1,6 @@
 package com.munserv.auth.service
 
+import com.munserv.admin.repository.AdminRepository
 import com.munserv.auth.config.AdminConfig
 import com.munserv.auth.domain.Email
 import com.munserv.auth.domain.Member
@@ -8,6 +9,7 @@ import com.munserv.auth.domain.Password
 import com.munserv.auth.domain.PhoneNumber
 import com.munserv.auth.domain.Pin
 import com.munserv.auth.repository.MemberRepository
+import com.munserv.sectors.repository.SectorRepository
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
 import org.springframework.stereotype.Service
@@ -24,6 +26,8 @@ class AuthService(
     private val otpService: OtpService,
     private val jwtService: JwtService,
     private val adminConfig: AdminConfig,
+    private val adminRepository: AdminRepository,
+    private val sectorRepository: SectorRepository,
 ) {
     companion object {
         private const val MEMBER_ROLE = "member"
@@ -172,29 +176,42 @@ class AuthService(
     /**
      * Admin login with email and password.
      *
-     * WARNING: MVP implementation using configuration-based credentials.
-     * TODO: Replace with proper admin table and secure authentication in production.
+     * Authenticates admin from database and returns admin details with tokens.
      */
+    @Transactional(readOnly = true)
     fun adminLogin(
         email: String,
         password: String,
     ): AuthResult {
-        if (email != adminConfig.email || password != adminConfig.password) {
+        // Look up admin from database
+        val adminWithPassword =
+            adminRepository.findByEmailWithPasswordHash(email)
+                ?: return AuthResult.InvalidCredentials
+
+        val admin = adminWithPassword.admin
+
+        // Verify password
+        if (!Password.verify(password, adminWithPassword.passwordHash)) {
             return AuthResult.InvalidCredentials
         }
 
-        val adminId = MemberId.fromString(adminConfig.id)
+        // Get sector details
+        val sector =
+            sectorRepository.findById(admin.sectorId)
+                ?: return AuthResult.InvalidCredentials // Should not happen if DB is consistent
+
+        val adminId = MemberId(admin.id.value)
         val tokens = jwtService.generateTokenPair(adminId, ADMIN_ROLE)
 
         return AuthResult.AdminLoginSuccess(
-            adminId = adminConfig.id,
-            email = adminConfig.email,
-            displayName = adminConfig.displayName,
-            sectorId = adminConfig.sectorId,
-            role = adminConfig.role,
-            sectorName = adminConfig.sectorName,
-            sectorCenterLat = adminConfig.sectorCenterLat,
-            sectorCenterLng = adminConfig.sectorCenterLng,
+            adminId = admin.id.value.toString(),
+            email = admin.email,
+            displayName = admin.displayName,
+            sectorId = admin.sectorId.value.toString(),
+            role = admin.role.toDbValue().uppercase(),
+            sectorName = sector.name,
+            sectorCenterLat = sector.center.latitude,
+            sectorCenterLng = sector.center.longitude,
             tokens = tokens,
         )
     }

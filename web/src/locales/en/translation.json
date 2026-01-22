@@ -76,10 +76,12 @@
   "nav": {
     "dashboard": "Dashboard",
     "issues": "Issues",
+    "reports": "Reports",
     "heatReport": "Heat Report",
     "members": "Members",
     "messages": "Messages",
     "groundAdmins": "Ground Admins",
+    "adminManagement": "Admin Management",
     "sectorSettings": "Settings"
   },
   "dashboard": {
@@ -315,6 +317,44 @@
       "responseRate": "Response Rate",
       "pending": "Pending",
       "since": "Since"
+    }
+  },
+  "adminManagement": {
+    "title": "Admin Management",
+    "subtitle": "Create and manage sector administrators",
+    "createAdmin": "Create Admin",
+    "editAdmin": "Edit Admin",
+    "deleteAdmin": "Delete Admin",
+    "confirmDelete": "Are you sure you want to delete this admin?",
+    "deleteWarning": "This action cannot be undone.",
+    "temporaryPassword": "Temporary Password",
+    "copyPassword": "Copy Password",
+    "passwordCopied": "Password copied to clipboard",
+    "passwordNote": "Save this password - it will only be shown once",
+    "empty": "No admins found",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "createdAt": "Created",
+      "actions": "Actions"
+    },
+    "form": {
+      "email": "Email Address",
+      "displayName": "Display Name",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "displayNameRequired": "Display name is required"
+    },
+    "success": {
+      "created": "Admin created successfully",
+      "updated": "Admin updated successfully",
+      "deleted": "Admin deleted successfully"
+    },
+    "errors": {
+      "createFailed": "Failed to create admin",
+      "updateFailed": "Failed to update admin",
+      "deleteFailed": "Failed to delete admin"
     }
   },
   "sectorSettings": {
