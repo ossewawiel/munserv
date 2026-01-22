@@ -1,16 +1,18 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
+import { RoleGuard } from '@/components/guards/RoleGuard';
+import { AdminManagementPage } from '@/features/admin-management/AdminManagementPage';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/RegisterPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { HeatReportPage } from '@/features/dashboard/HeatReportPage';
+import { GroundAdminsPage } from '@/features/ground-admins/GroundAdminsPage';
 import { IssuesPage } from '@/features/issues/IssuesPage';
 import { IssueMapPage } from '@/features/issues/IssueMapPage';
 import { IssueDetailPage } from '@/features/issues/IssueDetailPage';
 import { MembersPage } from '@/features/members/MembersPage';
 import { MessagesPage } from '@/features/messages/MessagesPage';
-import { GroundAdminsPage } from '@/features/ground-admins/GroundAdminsPage';
 import { SectorSettingsPage } from '@/features/sector-settings/SectorSettingsPage';
 
 function App() {
@@ -94,10 +96,22 @@ function App() {
         }
       />
       <Route
+        path="/admin-management"
+        element={
+          <ProtectedRoute>
+            <RoleGuard requiredRole="sector_chief">
+              <AdminManagementPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/settings/sector"
         element={
           <ProtectedRoute>
-            <SectorSettingsPage />
+            <RoleGuard requiredRole="sector_chief">
+              <SectorSettingsPage />
+            </RoleGuard>
           </ProtectedRoute>
         }
       />

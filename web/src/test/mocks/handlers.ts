@@ -3,6 +3,7 @@ import type { Message, MessageStatus, MessageType } from '@/shared/types/message
 import type { GroundAdmin, GroundAdminStatus } from '@/shared/types/groundAdmin';
 import type { IssueVerification, VerificationStatus } from '@/shared/types/verification';
 import type { SectorSettings, VerificationMode } from '@/shared/types/sectorSettings';
+import type { Admin, AdminCreatedResponse } from '@/features/admin-management/types';
 
 // Default mock data
 const mockIssues = [
@@ -308,6 +309,30 @@ export const mockSectorSettings: SectorSettings = {
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2026-01-15T10:00:00Z',
 };
+
+// =============================================
+// ADMIN MANAGEMENT MOCK DATA
+// =============================================
+export const mockAdmins: Admin[] = [
+  {
+    id: 'admin-2',
+    email: 'sectoradmin1@ward42.example.com',
+    displayName: 'Sector Admin One',
+    role: 'sector_admin',
+    sectorId: 'sector-1',
+    createdAt: '2025-06-15T10:00:00Z',
+    deletedAt: null,
+  },
+  {
+    id: 'admin-3',
+    email: 'sectoradmin2@ward42.example.com',
+    displayName: 'Sector Admin Two',
+    role: 'sector_admin',
+    sectorId: 'sector-1',
+    createdAt: '2025-08-20T14:30:00Z',
+    deletedAt: null,
+  },
+];
 
 export const handlers = [
   // Auth
@@ -781,5 +806,82 @@ export const handlers = [
       ...body,
       updatedAt: new Date().toISOString(),
     });
+  }),
+
+  // =============================================
+  // ADMIN MANAGEMENT HANDLERS
+  // =============================================
+
+  // GET /admins - List admins in sector
+  http.get('*/admins', () => {
+    return HttpResponse.json({
+      items: mockAdmins,
+      total: mockAdmins.length,
+    });
+  }),
+
+  // GET /admins/:id - Get single admin
+  http.get('*/admins/:id', ({ params }) => {
+    const admin = mockAdmins.find((a) => a.id === params.id);
+    if (admin) {
+      return HttpResponse.json(admin);
+    }
+    return HttpResponse.json({ message: 'Admin not found' }, { status: 404 });
+  }),
+
+  // POST /admins - Create new admin
+  http.post('*/admins', async ({ request }) => {
+    const body = (await request.json()) as {
+      email: string;
+      displayName: string;
+      role: string;
+    };
+
+    // Check if email already exists
+    if (mockAdmins.some((a) => a.email === body.email)) {
+      return HttpResponse.json(
+        { message: 'Email already exists' },
+        { status: 409 }
+      );
+    }
+
+    const newAdmin: AdminCreatedResponse = {
+      id: `admin-${Date.now()}`,
+      email: body.email,
+      displayName: body.displayName,
+      role: 'sector_admin',
+      sectorId: 'sector-1',
+      createdAt: new Date().toISOString(),
+      deletedAt: null,
+      temporaryPassword: 'TempPass123!',
+    };
+
+    return HttpResponse.json(newAdmin, { status: 201 });
+  }),
+
+  // PATCH /admins/:id - Update admin
+  http.patch('*/admins/:id', async ({ params, request }) => {
+    const body = (await request.json()) as { displayName?: string };
+    const admin = mockAdmins.find((a) => a.id === params.id);
+
+    if (!admin) {
+      return HttpResponse.json({ message: 'Admin not found' }, { status: 404 });
+    }
+
+    return HttpResponse.json({
+      ...admin,
+      displayName: body.displayName ?? admin.displayName,
+    });
+  }),
+
+  // DELETE /admins/:id - Delete admin
+  http.delete('*/admins/:id', ({ params }) => {
+    const admin = mockAdmins.find((a) => a.id === params.id);
+
+    if (!admin) {
+      return HttpResponse.json({ message: 'Admin not found' }, { status: 404 });
+    }
+
+    return new HttpResponse(null, { status: 204 });
   }),
 ];

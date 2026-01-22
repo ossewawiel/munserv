@@ -16,6 +16,10 @@ interface SpringDataAdminRepository : JpaRepository<AdminEntity, UUID> {
     fun findByEmailAndDeletedAtIsNull(email: String): AdminEntity?
 
     fun findByIdAndDeletedAtIsNull(id: UUID): AdminEntity?
+
+    fun existsByEmailAndDeletedAtIsNull(email: String): Boolean
+
+    fun countBySectorIdAndDeletedAtIsNull(sectorId: UUID): Int
 }
 
 /**
@@ -31,4 +35,30 @@ class JpaAdminRepository(
         jpa.findBySectorIdAndDeletedAtIsNull(sectorId.value).map { it.toDomain() }
 
     override fun findByEmail(email: String): Admin? = jpa.findByEmailAndDeletedAtIsNull(email)?.toDomain()
+
+    override fun save(
+        admin: Admin,
+        passwordHash: String,
+    ): Admin = jpa.save(AdminEntity.fromDomain(admin, passwordHash)).toDomain()
+
+    override fun update(admin: Admin): Admin {
+        val existing =
+            jpa.findById(admin.id.value).orElseThrow {
+                IllegalArgumentException("Admin not found: ${admin.id.value}")
+            }
+        val updated = AdminEntity.fromDomain(admin, existing.passwordHash)
+        return jpa.save(updated).toDomain()
+    }
+
+    override fun existsByEmail(email: String): Boolean = jpa.existsByEmailAndDeletedAtIsNull(email)
+
+    override fun countBySectorId(sectorId: SectorId): Int = jpa.countBySectorIdAndDeletedAtIsNull(sectorId.value)
+
+    override fun findByEmailWithPasswordHash(email: String): AdminWithPasswordHash? {
+        val entity = jpa.findByEmailAndDeletedAtIsNull(email) ?: return null
+        return AdminWithPasswordHash(
+            admin = entity.toDomain(),
+            passwordHash = entity.passwordHash,
+        )
+    }
 }

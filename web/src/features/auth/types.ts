@@ -1,4 +1,5 @@
 import type { GeoPoint } from '@/shared/types/common';
+import type { AdminRole } from '@/shared/types/admin';
 
 /**
  * Member status for registration workflow
@@ -46,7 +47,7 @@ export interface AdminUser {
   email: string;
   displayName: string;
   sectorId: string;
-  role: 'SECTOR_ADMIN' | 'COMMUNITY_ADMIN';
+  role: AdminRole;
 }
 
 export interface LoginRequest {
@@ -80,10 +81,8 @@ export interface AuthState {
   isLoading: boolean;
 }
 
-export const ADMIN_ROLE_LABELS: Record<AdminUser['role'], string> = {
-  SECTOR_ADMIN: 'Sector Admin',
-  COMMUNITY_ADMIN: 'Community Admin',
-};
+// Re-export for backward compatibility
+export { ADMIN_ROLE_LABELS } from '@/shared/types/admin';
 
 /**
  * Web registration request payload
