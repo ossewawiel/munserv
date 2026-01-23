@@ -1,7 +1,11 @@
+import { type FC } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { RoleGuard } from '@/components/guards/RoleGuard';
+import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { AdminManagementPage } from '@/features/admin-management/AdminManagementPage';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/RegisterPage';
@@ -14,6 +18,20 @@ import { IssueDetailPage } from '@/features/issues/IssueDetailPage';
 import { MembersPage } from '@/features/members/MembersPage';
 import { MessagesPage } from '@/features/messages/MessagesPage';
 import { SectorSettingsPage } from '@/features/sector-settings/SectorSettingsPage';
+
+/** Placeholder page for features not yet implemented */
+const PlaceholderPage: FC<{ title: string }> = ({ title }) => (
+  <DashboardLayout>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        {title}
+      </Typography>
+      <Typography variant="body1" color="text.secondary">
+        This feature is coming soon.
+      </Typography>
+    </Box>
+  </DashboardLayout>
+);
 
 function App() {
   return (
@@ -111,6 +129,26 @@ function App() {
           <ProtectedRoute>
             <RoleGuard requiredRole="sector_chief">
               <SectorSettingsPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings/ward"
+        element={
+          <ProtectedRoute>
+            <RoleGuard requiredRole="ward_chief">
+              <PlaceholderPage title="Ward Settings" />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings/pod"
+        element={
+          <ProtectedRoute>
+            <RoleGuard requiredRole="pod_chief">
+              <PlaceholderPage title="Pod Settings" />
             </RoleGuard>
           </ProtectedRoute>
         }

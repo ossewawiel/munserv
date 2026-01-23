@@ -2,7 +2,9 @@ package com.munserv.admin.repository
 
 import com.munserv.admin.domain.Admin
 import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.shared.types.WardId
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 import java.util.UUID
@@ -12,6 +14,10 @@ import java.util.UUID
  */
 interface SpringDataAdminRepository : JpaRepository<AdminEntity, UUID> {
     fun findBySectorIdAndDeletedAtIsNull(sectorId: UUID): List<AdminEntity>
+
+    fun findByWardIdAndDeletedAtIsNull(wardId: UUID): List<AdminEntity>
+
+    fun findByPodIdAndDeletedAtIsNull(podId: UUID): List<AdminEntity>
 
     fun findByEmailAndDeletedAtIsNull(email: String): AdminEntity?
 
@@ -33,6 +39,12 @@ class JpaAdminRepository(
 
     override fun findBySectorId(sectorId: SectorId): List<Admin> =
         jpa.findBySectorIdAndDeletedAtIsNull(sectorId.value).map { it.toDomain() }
+
+    override fun findByWardId(wardId: WardId): List<Admin> =
+        jpa.findByWardIdAndDeletedAtIsNull(wardId.value).map { it.toDomain() }
+
+    override fun findByPodId(podId: PodId): List<Admin> =
+        jpa.findByPodIdAndDeletedAtIsNull(podId.value).map { it.toDomain() }
 
     override fun findByEmail(email: String): Admin? = jpa.findByEmailAndDeletedAtIsNull(email)?.toDomain()
 

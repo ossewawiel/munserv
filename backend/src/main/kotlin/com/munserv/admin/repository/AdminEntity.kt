@@ -3,7 +3,9 @@ package com.munserv.admin.repository
 import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminRole
 import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.shared.types.WardId
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -14,15 +16,19 @@ import java.util.UUID
 
 /**
  * JPA entity for admins table.
- * Admins manage sectors via the web portal.
+ * Admins manage at different organizational levels: sector, ward, or pod.
  */
 @Entity
 @Table(name = "admins")
 class AdminEntity(
     @Id
     val id: UUID,
-    @Column(name = "sector_id", nullable = false)
-    val sectorId: UUID,
+    @Column(name = "pod_id")
+    val podId: UUID? = null,
+    @Column(name = "ward_id")
+    val wardId: UUID? = null,
+    @Column(name = "sector_id")
+    val sectorId: UUID? = null,
     @Column(nullable = false, length = 255)
     val email: String,
     @Column(name = "password_hash", nullable = false, length = 255)
@@ -45,7 +51,9 @@ class AdminEntity(
     fun toDomain(): Admin =
         Admin(
             id = AdminId(id),
-            sectorId = SectorId(sectorId),
+            podId = podId?.let { PodId(it) },
+            wardId = wardId?.let { WardId(it) },
+            sectorId = sectorId?.let { SectorId(it) },
             email = email,
             displayName = displayName,
             role = AdminRole.fromDbValue(role),
@@ -64,7 +72,9 @@ class AdminEntity(
         ): AdminEntity =
             AdminEntity(
                 id = admin.id.value,
-                sectorId = admin.sectorId.value,
+                podId = admin.podId?.value,
+                wardId = admin.wardId?.value,
+                sectorId = admin.sectorId?.value,
                 email = admin.email,
                 passwordHash = passwordHash,
                 displayName = admin.displayName,

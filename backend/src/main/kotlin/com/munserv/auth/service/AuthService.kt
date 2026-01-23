@@ -195,10 +195,8 @@ class AuthService(
             return AuthResult.InvalidCredentials
         }
 
-        // Get sector details
-        val sector =
-            sectorRepository.findById(admin.sectorId)
-                ?: return AuthResult.InvalidCredentials // Should not happen if DB is consistent
+        // Get sector details if admin has a sector
+        val sector = admin.sectorId?.let { sectorRepository.findById(it) }
 
         val adminId = MemberId(admin.id.value)
         val tokens = jwtService.generateTokenPair(adminId, ADMIN_ROLE)
@@ -207,12 +205,15 @@ class AuthService(
             adminId = admin.id.value.toString(),
             email = admin.email,
             displayName = admin.displayName,
-            sectorId = admin.sectorId.value.toString(),
             role = admin.role.toDbValue().uppercase(),
-            sectorName = sector.name,
-            sectorCenterLat = sector.center.latitude,
-            sectorCenterLng = sector.center.longitude,
+            level = admin.level.name.lowercase(),
             tokens = tokens,
+            podId = admin.podId?.value?.toString(),
+            wardId = admin.wardId?.value?.toString(),
+            sectorId = admin.sectorId?.value?.toString(),
+            sectorName = sector?.name,
+            sectorCenterLat = sector?.center?.latitude,
+            sectorCenterLng = sector?.center?.longitude,
         )
     }
 

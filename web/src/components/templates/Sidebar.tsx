@@ -62,7 +62,7 @@ const navItems: NavItem[] = [
     badgeKey: 'unreadMessages',
   },
   { labelKey: 'nav.groundAdmins', href: '/ground-admins', icon: BadgeIcon },
-  // Sector Chief only
+  // Sector Chief and above
   {
     labelKey: 'nav.adminManagement',
     href: '/admin-management',
@@ -74,6 +74,20 @@ const navItems: NavItem[] = [
     href: '/settings/sector',
     icon: SettingsIcon,
     requiredRole: 'sector_chief',
+  },
+  // Ward Chief and above
+  {
+    labelKey: 'nav.wardSettings',
+    href: '/settings/ward',
+    icon: SettingsIcon,
+    requiredRole: 'ward_chief',
+  },
+  // Pod Chief and above
+  {
+    labelKey: 'nav.podSettings',
+    href: '/settings/pod',
+    icon: SettingsIcon,
+    requiredRole: 'pod_chief',
   },
 ];
 

@@ -58,15 +58,18 @@ data class AdminTokens(
 
 data class AdminProfile(
     val admin: AdminUser,
-    val sector: AdminSector,
+    val sector: AdminSector? = null,
 )
 
 data class AdminUser(
     val id: String,
     val email: String,
     val displayName: String,
-    val sectorId: String,
     val role: String,
+    val level: String,
+    val podId: String? = null,
+    val wardId: String? = null,
+    val sectorId: String? = null,
 )
 
 data class AdminSector(

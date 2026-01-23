@@ -280,6 +280,25 @@ class AuthController(
                         .now()
                         .plusSeconds(result.tokens.expiresIn)
                         .toString()
+
+                // Build sector response only if admin has sector info
+                val sector =
+                    if (result.sectorId != null && result.sectorName != null &&
+                        result.sectorCenterLat != null && result.sectorCenterLng != null
+                    ) {
+                        AdminSector(
+                            id = result.sectorId,
+                            name = result.sectorName,
+                            center =
+                                GeoPointResponse(
+                                    lat = result.sectorCenterLat,
+                                    lng = result.sectorCenterLng,
+                                ),
+                        )
+                    } else {
+                        null
+                    }
+
                 ResponseEntity.ok(
                     AdminLoginResponse(
                         tokens =
@@ -295,19 +314,13 @@ class AuthController(
                                         id = result.adminId,
                                         email = result.email,
                                         displayName = result.displayName,
-                                        sectorId = result.sectorId,
                                         role = result.role,
+                                        level = result.level,
+                                        podId = result.podId,
+                                        wardId = result.wardId,
+                                        sectorId = result.sectorId,
                                     ),
-                                sector =
-                                    AdminSector(
-                                        id = result.sectorId,
-                                        name = result.sectorName,
-                                        center =
-                                            GeoPointResponse(
-                                                lat = result.sectorCenterLat,
-                                                lng = result.sectorCenterLng,
-                                            ),
-                                    ),
+                                sector = sector,
                             ),
                     ),
                 )

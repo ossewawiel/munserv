@@ -4,8 +4,11 @@ import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.domain.CreateAdminCommand
 import com.munserv.admin.domain.UpdateAdminCommand
+import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.shared.types.WardId
 import io.swagger.v3.oas.annotations.media.Schema
+import java.util.UUID
 
 /**
  * Request DTO for creating a new admin.
@@ -27,17 +30,41 @@ data class CreateAdminRequest(
     @field:Schema(
         description = "Admin role to assign",
         example = "sector_admin",
-        allowableValues = ["sector_admin"],
+        allowableValues = ["sector_admin", "sector_chief", "ward_admin", "ward_chief", "pod_admin", "pod_chief"],
         required = true,
     )
     val role: String,
+    @field:Schema(
+        description = "Pod UUID (required for pod_admin/pod_chief roles)",
+        example = "550e8400-e29b-41d4-a716-446655440000",
+        required = false,
+    )
+    val podId: String? = null,
+    @field:Schema(
+        description = "Ward UUID (required for ward_admin/ward_chief roles)",
+        example = "550e8400-e29b-41d4-a716-446655440030",
+        required = false,
+    )
+    val wardId: String? = null,
+    @field:Schema(
+        description = "Sector UUID (required for sector_admin/sector_chief roles)",
+        example = "550e8400-e29b-41d4-a716-446655440001",
+        required = false,
+    )
+    val sectorId: String? = null,
 ) {
-    fun toCommand(sectorId: SectorId): CreateAdminCommand =
+    /**
+     * Convert to domain command.
+     * For backwards compatibility, accepts an optional sectorId override for sector-level admins.
+     */
+    fun toCommand(defaultSectorId: SectorId? = null): CreateAdminCommand =
         CreateAdminCommand(
             email = email,
             displayName = displayName,
             role = AdminRole.fromDbValue(role),
-            sectorId = sectorId,
+            podId = podId?.let { PodId(UUID.fromString(it)) },
+            wardId = wardId?.let { WardId(UUID.fromString(it)) },
+            sectorId = sectorId?.let { SectorId(UUID.fromString(it)) } ?: defaultSectorId,
         )
 }
 
@@ -72,8 +99,14 @@ data class AdminResponse(
     val displayName: String,
     @field:Schema(description = "Admin role", example = "sector_admin")
     val role: String,
-    @field:Schema(description = "Sector UUID", example = "550e8400-e29b-41d4-a716-446655440001")
-    val sectorId: String,
+    @field:Schema(description = "Organizational level", example = "sector")
+    val level: String,
+    @field:Schema(description = "Pod UUID (for pod-level admins)", example = "550e8400-e29b-41d4-a716-446655440000")
+    val podId: String? = null,
+    @field:Schema(description = "Ward UUID (for ward-level admins)", example = "550e8400-e29b-41d4-a716-446655440030")
+    val wardId: String? = null,
+    @field:Schema(description = "Sector UUID (for sector-level admins)", example = "550e8400-e29b-41d4-a716-446655440001")
+    val sectorId: String? = null,
     @field:Schema(description = "Creation timestamp", example = "2026-01-22T10:00:00Z")
     val createdAt: String,
     @field:Schema(description = "Deletion timestamp (null if not deleted)", example = "null")
@@ -86,7 +119,10 @@ data class AdminResponse(
                 email = admin.email,
                 displayName = admin.displayName,
                 role = admin.role.toDbValue(),
-                sectorId = admin.sectorId.value.toString(),
+                level = admin.level.name.lowercase(),
+                podId = admin.podId?.value?.toString(),
+                wardId = admin.wardId?.value?.toString(),
+                sectorId = admin.sectorId?.value?.toString(),
                 createdAt = admin.createdAt.toString(),
                 deletedAt = admin.deletedAt?.toString(),
             )
@@ -106,8 +142,14 @@ data class AdminCreatedResponse(
     val displayName: String,
     @field:Schema(description = "Admin role", example = "sector_admin")
     val role: String,
-    @field:Schema(description = "Sector UUID", example = "550e8400-e29b-41d4-a716-446655440001")
-    val sectorId: String,
+    @field:Schema(description = "Organizational level", example = "sector")
+    val level: String,
+    @field:Schema(description = "Pod UUID (for pod-level admins)", example = "550e8400-e29b-41d4-a716-446655440000")
+    val podId: String? = null,
+    @field:Schema(description = "Ward UUID (for ward-level admins)", example = "550e8400-e29b-41d4-a716-446655440030")
+    val wardId: String? = null,
+    @field:Schema(description = "Sector UUID (for sector-level admins)", example = "550e8400-e29b-41d4-a716-446655440001")
+    val sectorId: String? = null,
     @field:Schema(description = "Temporary password (show once)", example = "TempPass123!")
     val temporaryPassword: String,
     @field:Schema(description = "Creation timestamp", example = "2026-01-22T10:00:00Z")
@@ -123,7 +165,10 @@ data class AdminCreatedResponse(
                 email = admin.email,
                 displayName = admin.displayName,
                 role = admin.role.toDbValue(),
-                sectorId = admin.sectorId.value.toString(),
+                level = admin.level.name.lowercase(),
+                podId = admin.podId?.value?.toString(),
+                wardId = admin.wardId?.value?.toString(),
+                sectorId = admin.sectorId?.value?.toString(),
                 temporaryPassword = temporaryPassword,
                 createdAt = admin.createdAt.toString(),
             )

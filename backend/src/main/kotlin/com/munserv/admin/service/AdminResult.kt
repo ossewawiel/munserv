@@ -3,7 +3,9 @@ package com.munserv.admin.service
 import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminRole
 import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.shared.types.WardId
 
 /**
  * Sealed interface representing the possible results of admin management operations.
@@ -57,11 +59,27 @@ sealed interface AdminResult {
     data class Unauthorized(val reason: String) : AdminResult
 
     /**
-     * Cannot manage admin in a different sector.
+     * Cannot manage admin in a different sector (for sector-level admins).
      */
     data class CrossSectorOperation(
         val actorSectorId: SectorId,
         val targetSectorId: SectorId,
+    ) : AdminResult
+
+    /**
+     * Cannot manage admin in a different ward (for ward-level admins).
+     */
+    data class CrossWardOperation(
+        val actorWardId: WardId,
+        val targetWardId: WardId?,
+    ) : AdminResult
+
+    /**
+     * Cannot manage admin in a different pod (for pod-level admins).
+     */
+    data class CrossPodOperation(
+        val actorPodId: PodId,
+        val targetPodId: PodId?,
     ) : AdminResult
 
     /**
@@ -76,4 +94,9 @@ sealed interface AdminResult {
      * Cannot delete own account.
      */
     data object CannotDeleteSelf : AdminResult
+
+    /**
+     * Target admin is outside the actor's scope.
+     */
+    data class OutOfScope(val reason: String) : AdminResult
 }

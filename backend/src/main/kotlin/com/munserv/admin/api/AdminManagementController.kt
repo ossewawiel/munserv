@@ -102,6 +102,21 @@ class AdminManagementController(
                     ErrorBody("cross_sector", "Cannot manage admins in a different sector"),
                 )
 
+            is AdminResult.CrossWardOperation ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("cross_ward", "Cannot manage admins in a different ward"),
+                )
+
+            is AdminResult.CrossPodOperation ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("cross_pod", "Cannot manage admins in a different pod"),
+                )
+
+            is AdminResult.OutOfScope ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("out_of_scope", result.reason),
+                )
+
             is AdminResult.Unauthorized ->
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", result.reason),
@@ -152,6 +167,21 @@ class AdminManagementController(
                     ErrorBody("cross_sector", "Cannot view admins in a different sector"),
                 )
 
+            is AdminResult.CrossWardOperation ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("cross_ward", "Cannot view admins in a different ward"),
+                )
+
+            is AdminResult.CrossPodOperation ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("cross_pod", "Cannot view admins in a different pod"),
+                )
+
+            is AdminResult.OutOfScope ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("out_of_scope", result.reason),
+                )
+
             is AdminResult.Unauthorized ->
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", result.reason),
@@ -199,6 +229,21 @@ class AdminManagementController(
             is AdminResult.CrossSectorOperation ->
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_sector", "Cannot view admin in a different sector"),
+                )
+
+            is AdminResult.CrossWardOperation ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("cross_ward", "Cannot view admin in a different ward"),
+                )
+
+            is AdminResult.CrossPodOperation ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("cross_pod", "Cannot view admin in a different pod"),
+                )
+
+            is AdminResult.OutOfScope ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("out_of_scope", result.reason),
                 )
 
             is AdminResult.Unauthorized ->
@@ -272,6 +317,21 @@ class AdminManagementController(
                     ErrorBody("cross_sector", "Cannot manage admin in a different sector"),
                 )
 
+            is AdminResult.CrossWardOperation ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("cross_ward", "Cannot manage admin in a different ward"),
+                )
+
+            is AdminResult.CrossPodOperation ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("cross_pod", "Cannot manage admin in a different pod"),
+                )
+
+            is AdminResult.OutOfScope ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("out_of_scope", result.reason),
+                )
+
             is AdminResult.Unauthorized ->
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", result.reason),
@@ -328,6 +388,21 @@ class AdminManagementController(
             is AdminResult.CrossSectorOperation ->
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_sector", "Cannot delete admin in a different sector"),
+                )
+
+            is AdminResult.CrossWardOperation ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("cross_ward", "Cannot delete admin in a different ward"),
+                )
+
+            is AdminResult.CrossPodOperation ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("cross_pod", "Cannot delete admin in a different pod"),
+                )
+
+            is AdminResult.OutOfScope ->
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    ErrorBody("out_of_scope", result.reason),
                 )
 
             is AdminResult.Unauthorized ->

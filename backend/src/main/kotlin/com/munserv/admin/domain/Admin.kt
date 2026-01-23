@@ -1,16 +1,25 @@
 package com.munserv.admin.domain
 
 import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.shared.types.WardId
 import java.time.Instant
 
 /**
  * Domain entity representing an Admin user.
- * Admins manage sectors via the web portal.
+ * Admins manage at different organizational levels: sector, ward, or pod.
+ *
+ * Scope rules:
+ * - SECTOR_ADMIN/SECTOR_CHIEF: must have sectorId set
+ * - WARD_ADMIN/WARD_CHIEF: must have wardId set
+ * - POD_ADMIN/POD_CHIEF: must have podId set
  */
 data class Admin(
     val id: AdminId,
-    val sectorId: SectorId,
+    val podId: PodId? = null,
+    val wardId: WardId? = null,
+    val sectorId: SectorId? = null,
     val email: String,
     val displayName: String,
     val role: AdminRole,
@@ -21,6 +30,21 @@ data class Admin(
     val fullName: String get() = displayName
 
     val isDeleted: Boolean get() = deletedAt != null
+
+    /**
+     * Returns the organizational level this admin operates at.
+     */
+    val level: AdminLevel
+        get() = role.level
+}
+
+/**
+ * Organizational level for admin roles.
+ */
+enum class AdminLevel {
+    SECTOR,
+    WARD,
+    POD,
 }
 
 /**
@@ -28,17 +52,35 @@ data class Admin(
  * Ordered by permission level (lowest to highest).
  * Each higher role inherits permissions of lower roles.
  *
- * Permission hierarchy:
- * POD_CHIEF (3) > POD_ADMIN (2) > SECTOR_CHIEF (1) > SECTOR_ADMIN (0)
+ * Permission hierarchy (6 levels):
+ * POD_CHIEF (5) > POD_ADMIN (4) > WARD_CHIEF (3) > WARD_ADMIN (2) > SECTOR_CHIEF (1) > SECTOR_ADMIN (0)
  */
 enum class AdminRole {
     SECTOR_ADMIN,
     SECTOR_CHIEF,
+    WARD_ADMIN,
+    WARD_CHIEF,
     POD_ADMIN,
     POD_CHIEF,
     ;
 
     fun toDbValue(): String = name.lowercase()
+
+    /**
+     * Returns the organizational level this role operates at.
+     */
+    val level: AdminLevel
+        get() = when (this) {
+            SECTOR_ADMIN, SECTOR_CHIEF -> AdminLevel.SECTOR
+            WARD_ADMIN, WARD_CHIEF -> AdminLevel.WARD
+            POD_ADMIN, POD_CHIEF -> AdminLevel.POD
+        }
+
+    /**
+     * Returns true if this is a chief (supervisor) role at its level.
+     */
+    val isChief: Boolean
+        get() = this in listOf(SECTOR_CHIEF, WARD_CHIEF, POD_CHIEF)
 
     /**
      * Check if this role has at least the given permission level.
@@ -57,6 +99,8 @@ enum class AdminRole {
             when (value.lowercase()) {
                 "sector_admin" -> SECTOR_ADMIN
                 "sector_chief" -> SECTOR_CHIEF
+                "ward_admin" -> WARD_ADMIN
+                "ward_chief" -> WARD_CHIEF
                 "pod_admin" -> POD_ADMIN
                 "pod_chief" -> POD_CHIEF
                 else -> throw IllegalArgumentException("Unknown admin role: $value")

@@ -82,7 +82,9 @@
     "messages": "Messages",
     "groundAdmins": "Ground Admins",
     "adminManagement": "Admin Management",
-    "sectorSettings": "Settings"
+    "sectorSettings": "Sector Settings",
+    "wardSettings": "Ward Settings",
+    "podSettings": "Pod Settings"
   },
   "dashboard": {
     "title": "Dashboard",

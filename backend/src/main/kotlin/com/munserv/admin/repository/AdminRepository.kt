@@ -2,7 +2,9 @@ package com.munserv.admin.repository
 
 import com.munserv.admin.domain.Admin
 import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.shared.types.WardId
 
 /**
  * Domain repository interface for Admin entities.
@@ -18,6 +20,16 @@ interface AdminRepository {
      * Find all admins in a sector.
      */
     fun findBySectorId(sectorId: SectorId): List<Admin>
+
+    /**
+     * Find all admins in a ward.
+     */
+    fun findByWardId(wardId: WardId): List<Admin>
+
+    /**
+     * Find all admins in a pod.
+     */
+    fun findByPodId(podId: PodId): List<Admin>
 
     /**
      * Find admin by email.

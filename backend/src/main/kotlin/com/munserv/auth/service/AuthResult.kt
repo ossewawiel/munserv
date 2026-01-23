@@ -43,12 +43,17 @@ sealed interface AuthResult {
         val adminId: String,
         val email: String,
         val displayName: String,
-        val sectorId: String,
         val role: String,
-        val sectorName: String,
-        val sectorCenterLat: Double,
-        val sectorCenterLng: Double,
+        val level: String,
         val tokens: TokenPair,
+        // Scope fields (nullable based on admin level)
+        val podId: String? = null,
+        val wardId: String? = null,
+        val sectorId: String? = null,
+        // Sector details (only for sector-level admins)
+        val sectorName: String? = null,
+        val sectorCenterLat: Double? = null,
+        val sectorCenterLng: Double? = null,
     ) : AuthResult
 
     data object InvalidCredentials : AuthResult
