@@ -84,7 +84,11 @@
     "adminManagement": "Admin Management",
     "sectorSettings": "Sector Settings",
     "wardSettings": "Ward Settings",
-    "podSettings": "Pod Settings"
+    "podSettings": "Pod Settings",
+    "podAdministrators": "Pod Administrators",
+    "wardDashboards": "Ward Dashboards",
+    "sectorDashboards": "Sector Dashboards",
+    "generalReports": "General"
   },
   "dashboard": {
     "title": "Dashboard",

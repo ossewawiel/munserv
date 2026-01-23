@@ -153,6 +153,66 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/pod-administrators"
+        element={
+          <ProtectedRoute>
+            <RoleGuard requiredRole="pod_chief">
+              <PlaceholderPage title="Pod Administrators" />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/ward/:wardId"
+        element={
+          <ProtectedRoute>
+            <RoleGuard requiredRole="pod_admin">
+              <PlaceholderPage title="Ward Dashboard" />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/sector/:sectorId"
+        element={
+          <ProtectedRoute>
+            <RoleGuard requiredRole="pod_admin">
+              <PlaceholderPage title="Sector Dashboard" />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reports/general"
+        element={
+          <ProtectedRoute>
+            <RoleGuard requiredRole="pod_admin">
+              <PlaceholderPage title="General Reports" />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reports/ward/:wardId"
+        element={
+          <ProtectedRoute>
+            <RoleGuard requiredRole="pod_admin">
+              <PlaceholderPage title="Ward Reports" />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reports/sector/:sectorId"
+        element={
+          <ProtectedRoute>
+            <RoleGuard requiredRole="pod_admin">
+              <PlaceholderPage title="Sector Reports" />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />

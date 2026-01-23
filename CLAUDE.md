@@ -115,9 +115,11 @@ Use these skills for cross-platform development and documentation management.
 ### Requirements & Features
 | Skill | Purpose |
 |-------|---------|
-| `/add-story` | Add user story to `specs/requirements/{platform}.md` |
-| `/add-feature` | Create feature spec in `specs/features/{name}/` |
-| `/plan-feature` | Generate cross-platform implementation plan |
+| `/create-feature` | Decompose feature requirements into stories and GitHub issues |
+| `/plan-feature` | Generate cross-platform implementation plan and handoffs |
+| `/work-story` | Implement a story using feature handoff, with auto back-updates |
+| `/add-story` | Add individual user story to `specs/requirements/{platform}.md` |
+| `/add-feature` | Create feature spec in `specs/features/{name}/` (manual) |
 
 ### Architecture & Contracts
 | Skill | Purpose |
@@ -135,11 +137,33 @@ Use these skills for cross-platform development and documentation management.
 | `/migrate-docs` | Migrate verbose docs to concise structure |
 
 ### Workflow Example
+
+**Complete feature workflow (recommended):**
 ```
-1. /add-story platform=mobile story="As a member, I can reset my PIN"
-2. /add-endpoint method=POST path="/auth/reset-pin" response="{ otpSent }"
-3. /plan-feature feature="reset-pin"
-4. Hand off to platform /dev-cycle skills
+1. /create-feature description="Members need to reset their PIN if forgotten..."
+   → Decomposes into stories, creates GitHub issues, milestone, and spec
+
+2. /plan-feature feature="pin-reset"
+   → Creates implementation plan and platform handoffs
+
+3. /work-story W21
+   → Implements story using handoff, auto-updates docs and GitHub
+   → Repeat for each story in the feature
+
+4. Feature complete when all stories done
+   → Milestone 100%, feature spec marked complete
+```
+
+**Bug fix workflow:**
+```
+1. /work-issue 42
+   → Investigates, creates platform handoffs
+
+2. cd backend && /fix-issue 42
+   → Platform agent implements fix
+
+3. /close-handoff 42
+   → Aggregates, creates PR, archives
 ```
 
 ## Documentation (Concise Structure)
