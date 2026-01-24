@@ -128,10 +128,13 @@ class AdminRoleTest {
     inner class RoleHierarchy {
         @Test
         fun `roles should be ordered from lowest to highest`() {
+            // 6-level hierarchy: SECTOR_ADMIN < SECTOR_CHIEF < WARD_ADMIN < WARD_CHIEF < POD_ADMIN < POD_CHIEF
             AdminRole.SECTOR_ADMIN.ordinal shouldBe 0
             AdminRole.SECTOR_CHIEF.ordinal shouldBe 1
-            AdminRole.POD_ADMIN.ordinal shouldBe 2
-            AdminRole.POD_CHIEF.ordinal shouldBe 3
+            AdminRole.WARD_ADMIN.ordinal shouldBe 2
+            AdminRole.WARD_CHIEF.ordinal shouldBe 3
+            AdminRole.POD_ADMIN.ordinal shouldBe 4
+            AdminRole.POD_CHIEF.ordinal shouldBe 5
         }
     }
 }
