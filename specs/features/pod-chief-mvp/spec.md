@@ -2,7 +2,7 @@
 
 **Goal:** Complete web portal MVP for Pod Chief role with navigation, dashboard, administrator management, messages, and settings.
 **Platforms:** web, backend
-**Status:** 🔴 Not Started
+**Status:** 🟡 In Progress
 **Milestone:** [pod-chief-mvp](https://github.com/ossewawiel/munserv/milestone/1)
 
 ## Original Requirements
