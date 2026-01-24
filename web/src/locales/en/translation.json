@@ -458,20 +458,56 @@
       "sectors": "Sectors"
     }
   },
-  "common": {
-    "buttons": {
-      "save": "Save Changes",
-      "cancel": "Cancel",
-      "confirm": "Confirm",
-      "back": "Back",
-      "retry": "Retry"
+  "podAdministrators": {
+    "title": "Pod Administrators",
+    "subtitle": "Manage administrators across all levels of your pod",
+    "addNew": "Add Administrator",
+    "editAdmin": "Edit Administrator",
+    "deleteAdmin": "Delete Administrator",
+    "confirmDelete": "Are you sure you want to delete this administrator?",
+    "deleteWarning": "This action cannot be undone. The administrator will lose access to the system.",
+    "temporaryPassword": "Temporary Password",
+    "passwordNote": "Save this password - it will only be shown once",
+    "passwordCopied": "Password copied to clipboard",
+    "empty": "No administrators found. Add your first administrator to get started.",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "assignedTo": "Assigned To",
+      "createdAt": "Created",
+      "actions": "Actions",
+      "podLevel": "Pod Level",
+      "wardAssigned": "Ward Assigned",
+      "sectorAssigned": "Sector Assigned"
     },
-    "saving": "Saving...",
-    "actions": "Actions",
-    "validation": {
-      "required": "This field is required",
-      "min": "Minimum value is {{value}}",
-      "max": "Maximum value is {{value}}"
+    "form": {
+      "email": "Email Address",
+      "displayName": "Display Name",
+      "role": "Role",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "displayNameRequired": "Display name is required",
+      "emailReadonly": "Email cannot be changed"
+    },
+    "success": {
+      "created": "Administrator created successfully",
+      "updated": "Administrator updated successfully",
+      "deleted": "Administrator deleted successfully"
+    },
+    "errors": {
+      "createFailed": "Failed to create administrator",
+      "updateFailed": "Failed to update administrator",
+      "deleteFailed": "Failed to delete administrator",
+      "loadFailed": "Failed to load administrators"
     }
+  },
+  "roles": {
+    "sector_admin": "Sector Admin",
+    "sector_chief": "Sector Chief",
+    "ward_admin": "Ward Admin",
+    "ward_chief": "Ward Chief",
+    "pod_admin": "Pod Admin",
+    "pod_chief": "Pod Chief"
   }
 }

@@ -19,6 +19,7 @@ import { MembersPage } from '@/features/members/MembersPage';
 import { MessagesPage } from '@/features/messages/MessagesPage';
 import { WardDashboardPage } from '@/features/pod-chief/WardDashboardPage';
 import { SectorDashboardPage } from '@/features/pod-chief/SectorDashboardPage';
+import { PodAdministratorsPage } from '@/features/pod-chief/PodAdministratorsPage';
 import { SectorSettingsPage } from '@/features/sector-settings/SectorSettingsPage';
 
 /** Placeholder page for features not yet implemented */
@@ -160,7 +161,7 @@ function App() {
         element={
           <ProtectedRoute>
             <RoleGuard requiredRole="pod_chief">
-              <PlaceholderPage title="Pod Administrators" />
+              <PodAdministratorsPage />
             </RoleGuard>
           </ProtectedRoute>
         }

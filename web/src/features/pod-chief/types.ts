@@ -52,3 +52,59 @@ export interface SectorDashboardStats {
   activeGroundAdmins: number;
   totalMembers: number;
 }
+
+// ============================================
+// Pod Administrators Types
+// ============================================
+
+import type { AdminRole } from '@/shared/types/admin';
+
+/**
+ * Pod administrator entity from GET /api/v1/pod/administrators
+ */
+export interface PodAdministrator {
+  id: string;
+  email: string;
+  displayName: string;
+  role: AdminRole;
+  level: string;
+  podId: string | null;
+  wardId: string | null;
+  sectorId: string | null;
+  createdAt: string;
+  deletedAt: string | null;
+}
+
+/**
+ * Response for listing pod administrators
+ */
+export interface PodAdministratorListResponse {
+  items: PodAdministrator[];
+  total: number;
+}
+
+/**
+ * Request to create a new pod administrator
+ */
+export interface CreatePodAdministratorRequest {
+  email: string;
+  displayName: string;
+  role: AdminRole;
+  podId?: string;
+  wardId?: string;
+  sectorId?: string;
+}
+
+/**
+ * Response when creating a new pod administrator (includes temporary password)
+ */
+export interface PodAdministratorCreatedResponse extends PodAdministrator {
+  temporaryPassword: string;
+}
+
+/**
+ * Request to update a pod administrator
+ */
+export interface UpdatePodAdministratorRequest {
+  displayName?: string;
+}
