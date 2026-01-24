@@ -18,6 +18,7 @@
     "all": "All",
     "noResults": "No results found",
     "confirm": "Confirm",
+    "configure": "Configure",
     "yes": "Yes",
     "no": "No",
     "close": "Close",
@@ -431,6 +432,18 @@
       "cannotFind": "Issue location unclear",
       "wrongLocation": "GPS coordinates incorrect",
       "notAnIssue": "Not actually an issue"
+    }
+  },
+  "podChief": {
+    "setup": {
+      "podName": "Set Pod Name",
+      "podNameDescription": "Configure your pod's display name that appears in the header.",
+      "podBoundaries": "Configure Pod Boundaries",
+      "podBoundariesDescription": "Define the geographic boundaries of your pod on the map.",
+      "wardsSectors": "Set Up Wards/Sectors",
+      "wardsSectorsDescription": "Create the organizational structure for your pod.",
+      "firstAdmin": "Add First Administrator",
+      "firstAdminDescription": "Invite your first pod administrator to help manage the pod."
     }
   },
   "common": {

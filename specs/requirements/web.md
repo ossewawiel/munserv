@@ -19,7 +19,7 @@
 | ID | Story | Acceptance Criteria | Status | Issue |
 |----|-------|---------------------|--------|-------|
 | W10 | As a Pod Chief, I can see a role-specific navigation menu | Menu shows: Dashboard, Pod Administrators (conditional), Reports, Messages, Pod Settings ǀ Ward/Sector Dashboards submenu appears after setup | 🟢 Done | [#21](https://github.com/ossewawiel/munserv/issues/21) |
-| W11 | As a Pod Chief, I can see setup task banners when pod is incomplete | Banners describe remaining setup tasks ǀ Each banner links to relevant settings ǀ Banners disappear when task completed | 🔴 Pending | [#22](https://github.com/ossewawiel/munserv/issues/22) |
+| W11 | As a Pod Chief, I can see setup task banners when pod is incomplete | Banners describe remaining setup tasks ǀ Each banner links to relevant settings ǀ Banners disappear when task completed | 🟢 Done | [#22](https://github.com/ossewawiel/munserv/issues/22) |
 | W12 | As a Pod Chief, I can see dashboard widgets when pod setup is complete | Shows Pod Chief indicators ǀ Summary stats for entire pod ǀ Key metrics visible | 🟢 Done | [#23](https://github.com/ossewawiel/munserv/issues/23) |
 | W13 | As a Pod Chief, I can view ward/sector-specific dashboards | Submenu lists configured wards/sectors ǀ Dashboard shows same widgets filtered by ward/sector ǀ Label adapts to "Ward" or "Sector" based on pod config | 🟢 Done | [#24](https://github.com/ossewawiel/munserv/issues/24) |
 | W14 | As a Pod Chief, I can view a table list of pod administrators | Shows name, contact, ward/sector assignment ǀ Actions column present ǀ Add button available ǀ Table prepared for search/sort/filter (disabled for MVP) | 🟢 Done | [#25](https://github.com/ossewawiel/munserv/issues/25) |

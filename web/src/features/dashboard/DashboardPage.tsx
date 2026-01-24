@@ -7,6 +7,8 @@ import Skeleton from '@mui/material/Skeleton';
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { ErrorState } from '@/components/molecules/ErrorState';
 import { CardSkeleton } from '@/components/molecules/LoadingSkeleton';
+import { SetupBanners } from '@/features/pod-chief/components';
+import { usePodSetup } from '@/shared/hooks/usePodSetup';
 import { useDashboardStats } from './hooks';
 import { StatsGrid } from './components/StatsGrid';
 import { IssuesByStateChart } from './components/IssuesByStateChart';
@@ -15,10 +17,23 @@ import { IssuesByTypeChart } from './components/IssuesByTypeChart';
 export const DashboardPage: FC = () => {
   const { t } = useTranslation();
   const { data, isLoading, error, refetch } = useDashboardStats();
+  const podSetup = usePodSetup();
+
+  // Show setup banners for pod-level users when setup is incomplete
+  const showSetupBanners =
+    podSetup.isPodLevel &&
+    !podSetup.isSetupComplete &&
+    podSetup.status?.missingSteps &&
+    podSetup.status.missingSteps.length > 0;
 
   return (
     <DashboardLayout>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* Setup task banners for Pod Chiefs (W11) */}
+        {showSetupBanners && (
+          <SetupBanners missingSteps={podSetup.status!.missingSteps} />
+        )}
+
         {isLoading && (
           <>
             <CardSkeleton count={4} />
