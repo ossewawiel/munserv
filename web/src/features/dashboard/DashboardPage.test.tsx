@@ -37,6 +37,25 @@ vi.mock('./hooks', () => ({
   }),
 }));
 
+vi.mock('@/features/pod-chief/hooks', () => ({
+  usePodDashboard: () => ({
+    data: {
+      totalIssues: 150,
+      openIssues: 45,
+      resolvedThisMonth: 23,
+      pendingIssues: 12,
+      activeAdministrators: 5,
+      totalMembers: 1250,
+      activeGroundAdmins: 8,
+      wardCount: 4,
+      sectorCount: 16,
+    },
+    isLoading: false,
+    error: null,
+    refetch: vi.fn(),
+  }),
+}));
+
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -75,6 +94,17 @@ vi.mock('./components/IssuesByTypeChart', () => ({
   IssuesByTypeChart: () => (
     <div data-testid="issues-by-type-chart">Issues by Type</div>
   ),
+}));
+
+vi.mock('@/features/pod-chief/components', () => ({
+  SetupBanners: ({ missingSteps }: { missingSteps: string[] }) => (
+    <div data-testid="setup-banners">
+      {missingSteps.map((step) => (
+        <div key={step}>{step === 'pod_name' ? 'Set Pod Name' : step === 'first_admin' ? 'Add First Administrator' : step}</div>
+      ))}
+    </div>
+  ),
+  PodChiefWidgets: () => <div data-testid="pod-chief-widgets">Pod Chief Widgets</div>,
 }));
 
 const queryClient = new QueryClient({
@@ -141,7 +171,7 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Add First Administrator')).toBeInTheDocument();
   });
 
-  it('does not show setup banners when pod setup is complete', () => {
+  it('shows pod chief widgets when pod setup is complete', () => {
     mockPodSetup.isPodLevel = true;
     mockPodSetup.isSetupComplete = true;
     mockPodSetup.status = {
@@ -153,11 +183,13 @@ describe('DashboardPage', () => {
 
     renderWithProviders(<DashboardPage />);
 
+    // Should show pod chief widgets, not sector dashboard
+    expect(screen.getByTestId('pod-chief-widgets')).toBeInTheDocument();
+    expect(screen.queryByTestId('stats-grid')).not.toBeInTheDocument();
     expect(screen.queryByText('Set Pod Name')).not.toBeInTheDocument();
-    expect(screen.queryByText('Add First Administrator')).not.toBeInTheDocument();
   });
 
-  it('renders dashboard widgets alongside setup banners', () => {
+  it('shows setup banners but no widgets when pod setup is incomplete', () => {
     mockPodSetup.isPodLevel = true;
     mockPodSetup.isSetupComplete = false;
     mockPodSetup.status = {
@@ -169,8 +201,10 @@ describe('DashboardPage', () => {
 
     renderWithProviders(<DashboardPage />);
 
-    // Both banners and stats should be visible
+    // Should show setup banners but no dashboard widgets
+    expect(screen.getByTestId('setup-banners')).toBeInTheDocument();
     expect(screen.getByText('Set Pod Name')).toBeInTheDocument();
-    expect(screen.getByTestId('stats-grid')).toBeInTheDocument();
+    expect(screen.queryByTestId('pod-chief-widgets')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('stats-grid')).not.toBeInTheDocument();
   });
 });

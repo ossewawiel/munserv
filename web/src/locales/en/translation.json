@@ -444,6 +444,18 @@
       "wardsSectorsDescription": "Create the organizational structure for your pod.",
       "firstAdmin": "Add First Administrator",
       "firstAdminDescription": "Invite your first pod administrator to help manage the pod."
+    },
+    "dashboard": {
+      "title": "Pod Dashboard",
+      "totalIssues": "Total Issues",
+      "openIssues": "Open Issues",
+      "resolvedThisMonth": "Resolved This Month",
+      "pendingIssues": "Pending Issues",
+      "activeAdmins": "Active Administrators",
+      "totalMembers": "Total Members",
+      "activeGroundAdmins": "Active Ground Admins",
+      "wards": "Wards",
+      "sectors": "Sectors"
     }
   },
   "common": {
