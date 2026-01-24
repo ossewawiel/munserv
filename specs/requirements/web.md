@@ -29,7 +29,7 @@
 | W18 | As a Pod Chief, I can configure the pod name and logo | Set pod name ǀ Name appears in header as "Munserv Pod [name]" ǀ Upload logo ǀ Munserv icon shows in orange on background | 🔴 Pending | [#29](https://github.com/ossewawiel/munserv/issues/29) |
 | W19 | As a Pod Chief, I can see placeholder for boundary configuration | Pod boundaries section visible but disabled ǀ Ward/sector boundaries section visible but disabled ǀ "Coming soon" indicator | 🔴 Pending | [#30](https://github.com/ossewawiel/munserv/issues/30) |
 | W20 | As a Pod Chief, I can see the Reports menu structure | Pod reports submenu entry ǀ Ward/sector submenu entries ǀ Clicking goes to placeholder page with tabbed structure | 🔴 Pending | [#31](https://github.com/ossewawiel/munserv/issues/31) |
-| W21 | As a developer, I can use a generic data table component | Supports column definitions ǀ Sort by columns (prepared) ǀ Search input (prepared) ǀ Filter slide-out panel (prepared) ǀ Actions column ǀ Add button slot | 🔴 Pending | [#32](https://github.com/ossewawiel/munserv/issues/32) |
+| W21 | As a developer, I can use a generic data table component | Supports column definitions ǀ Sort by columns (prepared) ǀ Search input (prepared) ǀ Filter slide-out panel (prepared) ǀ Actions column ǀ Add button slot | 🟢 Done | [#32](https://github.com/ossewawiel/munserv/issues/32) |
 
 ## Status Legend
 - 🟢 Done
