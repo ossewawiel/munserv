@@ -51,20 +51,18 @@ export function usePodSetup(): PodSetupState {
   const { admin } = useAuth();
   const isPodLevel = Boolean(admin && hasPermission(admin.role, 'pod_admin'));
 
-  // For MVP, use static mock data
+  // For MVP, use static mock data with real UUIDs from database
   // TODO: Replace with React Query hook when backend endpoint is available
   const mockStatus: PodSetupStatus = useMemo(
     () => ({
       isComplete: true,
       missingSteps: [],
       wards: [
-        { id: 'ward-1', name: 'Ward 1' },
-        { id: 'ward-2', name: 'Ward 2' },
+        { id: '550e8400-e29b-41d4-a716-446655440030', name: 'Test Ward North' },
       ],
       sectors: [
-        { id: 'sector-1', name: 'Sector A' },
-        { id: 'sector-2', name: 'Sector B' },
-        { id: 'sector-3', name: 'Sector C' },
+        { id: '550e8400-e29b-41d4-a716-446655440001', name: 'Ward 42 - Northcliff' },
+        { id: '550e8400-e29b-41d4-a716-446655440002', name: 'Ward 43 - Fairlands' },
       ],
     }),
     []

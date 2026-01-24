@@ -1,4 +1,4 @@
-import { type FC, useMemo, useState, useCallback, Fragment } from 'react';
+import { type FC, useMemo, useState, useCallback, useEffect, Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Badge from '@mui/material/Badge';
@@ -120,15 +120,24 @@ const podChiefNavItems: NavItem[] = [
     href: '/',
     icon: DashboardIcon,
   },
-  // Ward/Sector Dashboards - separate dropdown, appears only after setup (W13)
-  // This is dynamically shown/hidden and populated based on pod setup
+  // Ward Dashboards - appears when wards are configured (W13)
   {
-    labelKey: 'nav.wardDashboards', // or sectorDashboards - label set dynamically
-    href: '/dashboards', // Parent path for area dashboards
+    labelKey: 'nav.wardDashboards',
+    href: '/dashboard/wards', // Parent path for ward dashboards
     icon: GridViewIcon,
     collapsible: true,
-    dynamicChildren: true, // Wards/sectors added dynamically
-    children: [], // Populated dynamically with ward/sector items
+    dynamicChildren: true,
+    children: [], // Populated dynamically with ward items
+  },
+  // Sector Dashboards - appears when sectors are configured without wards (W13)
+  // For testing: shown separately when both exist
+  {
+    labelKey: 'nav.sectorDashboards',
+    href: '/dashboard/sectors', // Parent path for sector dashboards
+    icon: GridViewIcon,
+    collapsible: true,
+    dynamicChildren: true,
+    children: [], // Populated dynamically with sector items
   },
   // Pod Administrators - conditional on setup complete (W14)
   {
@@ -181,10 +190,6 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
   // Track which submenus are expanded
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
-  const toggleSubmenu = useCallback((href: string) => {
-    setExpandedMenus((prev) => ({ ...prev, [href]: !prev[href] }));
-  }, []);
-
   // Check if user is at pod level (pod_admin or pod_chief)
   const isPodLevel = hasPermission(userRole, 'pod_admin');
 
@@ -193,36 +198,43 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
     // For pod-level users, use pod-specific navigation
     if (isPodLevel) {
       const hasWards = podSetup.status && podSetup.status.wards.length > 0;
+      const hasSectors = podSetup.status && podSetup.status.sectors.length > 0;
 
       const items = podChiefNavItems
         .map((item) => {
-          // Ward/Sector Dashboards dropdown (W13) - only show if areas configured
-          if (item.href === '/dashboards') {
-            if (!podSetup.showAreaDashboards || !podSetup.status) {
-              return null; // Hide if no areas configured
+          // Ward Dashboards dropdown (W13) - show if wards exist
+          if (item.href === '/dashboard/wards') {
+            if (!hasWards || !podSetup.status) {
+              return null; // Hide if no wards configured
             }
 
-            // Build children from wards and sectors
-            const areaChildren: NavItem[] = [
-              ...podSetup.status.wards.map((ward) => ({
-                labelKey: ward.name, // Direct name
-                href: `/dashboard/ward/${ward.id}`,
-                icon: GridViewIcon,
-              })),
-              ...podSetup.status.sectors.map((sector) => ({
-                labelKey: sector.name, // Direct name
-                href: `/dashboard/sector/${sector.id}`,
-                icon: GridViewIcon,
-              })),
-            ];
-
-            // Use "Ward Dashboards" or "Sector Dashboards" label based on what's configured
-            const labelKey = hasWards ? 'nav.wardDashboards' : 'nav.sectorDashboards';
+            const wardChildren: NavItem[] = podSetup.status.wards.map((ward) => ({
+              labelKey: ward.name,
+              href: `/dashboard/ward/${ward.id}`,
+              icon: GridViewIcon,
+            }));
 
             return {
               ...item,
-              labelKey,
-              children: areaChildren,
+              children: wardChildren,
+            };
+          }
+
+          // Sector Dashboards dropdown (W13) - show if sectors exist
+          if (item.href === '/dashboard/sectors') {
+            if (!hasSectors || !podSetup.status) {
+              return null; // Hide if no sectors configured
+            }
+
+            const sectorChildren: NavItem[] = podSetup.status.sectors.map((sector) => ({
+              labelKey: sector.name,
+              href: `/dashboard/sector/${sector.id}`,
+              icon: GridViewIcon,
+            }));
+
+            return {
+              ...item,
+              children: sectorChildren,
             };
           }
 
@@ -305,6 +317,52 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
     return flattenItems(filterByRole(sectorNavItems));
   }, [userRole, isPodLevel, podSetup]);
 
+  // Find which parent menu should be expanded based on current path
+  const activeParentHref = useMemo(() => {
+    const currentPath = location.pathname;
+    for (const item of visibleNavItems) {
+      if (item.collapsible && item.children) {
+        const hasSelectedChild = item.children.some((child) =>
+          currentPath.startsWith(child.href)
+        );
+        if (hasSelectedChild) {
+          return item.href;
+        }
+      }
+    }
+    return null;
+  }, [location.pathname, visibleNavItems]);
+
+  // Compute effective expanded state - includes both user interactions and active parent
+  // This ensures the parent of the current page is always expanded without needing an effect
+  const effectiveExpandedMenus = useMemo(() => {
+    if (activeParentHref && !expandedMenus[activeParentHref]) {
+      return { ...expandedMenus, [activeParentHref]: true };
+    }
+    return expandedMenus;
+  }, [expandedMenus, activeParentHref]);
+
+  // Toggle submenu - close others when opening a new one
+  const toggleSubmenu = useCallback(
+    (href: string) => {
+      setExpandedMenus((prev) => {
+        const isCurrentlyExpanded = prev[href] || href === activeParentHref;
+        // Close all other submenus and toggle the clicked one
+        const newState: Record<string, boolean> = {};
+        for (const key of Object.keys(prev)) {
+          newState[key] = false;
+        }
+        // Keep active parent expanded unless explicitly toggling it
+        if (activeParentHref && href !== activeParentHref) {
+          newState[activeParentHref] = true;
+        }
+        newState[href] = !isCurrentlyExpanded;
+        return newState;
+      });
+    },
+    [activeParentHref]
+  );
+
   const isSelected = (href: string): boolean => {
     if (href === '/') {
       return location.pathname === '/';
@@ -361,7 +419,7 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
     const selected = isSelected(item.href);
     const badgeCount = getBadgeCount(item.badgeKey);
     const hasChildren = item.collapsible && item.children && item.children.length > 0;
-    const isExpanded = expandedMenus[item.href];
+    const isExpanded = effectiveExpandedMenus[item.href];
 
     const handleClick = () => {
       if (hasChildren && open) {
@@ -466,7 +524,7 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
       <List sx={{ px: open ? 2 : 0.5 }}>
         {visibleNavItems.map((item) => {
           const hasChildren = item.collapsible && item.children && item.children.length > 0;
-          const isExpanded = expandedMenus[item.href];
+          const isExpanded = effectiveExpandedMenus[item.href];
 
           return (
             <Fragment key={item.href}>

@@ -17,6 +17,8 @@ import { IssueMapPage } from '@/features/issues/IssueMapPage';
 import { IssueDetailPage } from '@/features/issues/IssueDetailPage';
 import { MembersPage } from '@/features/members/MembersPage';
 import { MessagesPage } from '@/features/messages/MessagesPage';
+import { WardDashboardPage } from '@/features/pod-chief/WardDashboardPage';
+import { SectorDashboardPage } from '@/features/pod-chief/SectorDashboardPage';
 import { SectorSettingsPage } from '@/features/sector-settings/SectorSettingsPage';
 
 /** Placeholder page for features not yet implemented */
@@ -168,7 +170,7 @@ function App() {
         element={
           <ProtectedRoute>
             <RoleGuard requiredRole="pod_admin">
-              <PlaceholderPage title="Ward Dashboard" />
+              <WardDashboardPage />
             </RoleGuard>
           </ProtectedRoute>
         }
@@ -178,7 +180,7 @@ function App() {
         element={
           <ProtectedRoute>
             <RoleGuard requiredRole="pod_admin">
-              <PlaceholderPage title="Sector Dashboard" />
+              <SectorDashboardPage />
             </RoleGuard>
           </ProtectedRoute>
         }
