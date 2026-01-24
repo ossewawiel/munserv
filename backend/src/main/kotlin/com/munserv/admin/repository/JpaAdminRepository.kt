@@ -6,6 +6,7 @@ import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
 import com.munserv.shared.types.WardId
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -34,6 +35,7 @@ interface SpringDataAdminRepository : JpaRepository<AdminEntity, UUID> {
 @Repository
 class JpaAdminRepository(
     private val jpa: SpringDataAdminRepository,
+    private val passwordEncoder: PasswordEncoder,
 ) : AdminRepository {
     override fun findById(id: AdminId): Admin? = jpa.findByIdAndDeletedAtIsNull(id.value)?.toDomain()
 
@@ -51,14 +53,27 @@ class JpaAdminRepository(
     override fun save(
         admin: Admin,
         passwordHash: String,
-    ): Admin = jpa.save(AdminEntity.fromDomain(admin, passwordHash)).toDomain()
+        temporaryPassword: String?,
+    ): Admin {
+        val temporaryPasswordHash = temporaryPassword?.let { passwordEncoder.encode(it) }
+        return jpa.save(AdminEntity.fromDomain(admin, passwordHash, temporaryPasswordHash)).toDomain()
+    }
 
     override fun update(admin: Admin): Admin {
         val existing =
             jpa.findById(admin.id.value).orElseThrow {
                 IllegalArgumentException("Admin not found: ${admin.id.value}")
             }
-        val updated = AdminEntity.fromDomain(admin, existing.passwordHash)
+        val updated = AdminEntity.fromDomain(admin, existing.passwordHash, existing.temporaryPasswordHash)
+        return jpa.save(updated).toDomain()
+    }
+
+    override fun updateWithPassword(
+        admin: Admin,
+        passwordHash: String,
+    ): Admin {
+        // Clear temporary password hash when password is changed
+        val updated = AdminEntity.fromDomain(admin, passwordHash, null)
         return jpa.save(updated).toDomain()
     }
 

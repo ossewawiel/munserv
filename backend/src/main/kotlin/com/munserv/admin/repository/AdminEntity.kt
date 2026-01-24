@@ -2,6 +2,7 @@ package com.munserv.admin.repository
 
 import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminRole
+import com.munserv.admin.domain.OnboardingStatus
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
@@ -38,6 +39,13 @@ class AdminEntity(
     @Column(nullable = false, columnDefinition = "admin_role")
     @ColumnTransformer(write = "?::admin_role")
     val role: String,
+    @Column(name = "onboarding_status", columnDefinition = "onboarding_status")
+    @ColumnTransformer(write = "?::onboarding_status")
+    val onboardingStatus: String = OnboardingStatus.ACTIVE.toDbValue(),
+    @Column(name = "temporary_password_hash", length = 255)
+    val temporaryPasswordHash: String? = null,
+    @Column(name = "onboarding_completed_at")
+    val onboardingCompletedAt: Instant? = null,
     @Column(name = "created_at", nullable = false)
     val createdAt: Instant,
     @Column(name = "updated_at", nullable = false)
@@ -57,6 +65,8 @@ class AdminEntity(
             email = email,
             displayName = displayName,
             role = AdminRole.fromDbValue(role),
+            onboardingStatus = OnboardingStatus.fromDbValue(onboardingStatus),
+            onboardingCompletedAt = onboardingCompletedAt,
             createdAt = createdAt,
             updatedAt = updatedAt,
             deletedAt = deletedAt,
@@ -69,6 +79,7 @@ class AdminEntity(
         fun fromDomain(
             admin: Admin,
             passwordHash: String,
+            temporaryPasswordHash: String? = null,
         ): AdminEntity =
             AdminEntity(
                 id = admin.id.value,
@@ -79,6 +90,9 @@ class AdminEntity(
                 passwordHash = passwordHash,
                 displayName = admin.displayName,
                 role = admin.role.toDbValue(),
+                onboardingStatus = admin.onboardingStatus.toDbValue(),
+                temporaryPasswordHash = temporaryPasswordHash,
+                onboardingCompletedAt = admin.onboardingCompletedAt,
                 createdAt = admin.createdAt,
                 updatedAt = admin.updatedAt,
                 deletedAt = admin.deletedAt,

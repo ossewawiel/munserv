@@ -4,6 +4,7 @@ import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminLevel
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.domain.CreateAdminCommand
+import com.munserv.admin.domain.OnboardingStatus
 import com.munserv.admin.domain.UpdateAdminCommand
 import com.munserv.admin.repository.AdminRepository
 import com.munserv.shared.types.AdminId
@@ -79,7 +80,7 @@ class AdminManagementService(
         val temporaryPassword = generateTemporaryPassword()
         val passwordHash = passwordEncoder.encode(temporaryPassword)
 
-        // Create the admin
+        // Create the admin with PENDING onboarding status
         val now = Instant.now(clock)
         val newAdmin =
             Admin(
@@ -90,11 +91,12 @@ class AdminManagementService(
                 email = command.email,
                 displayName = command.displayName,
                 role = command.role,
+                onboardingStatus = OnboardingStatus.PENDING,
                 createdAt = now,
                 updatedAt = now,
             )
 
-        val savedAdmin = adminRepository.save(newAdmin, passwordHash)
+        val savedAdmin = adminRepository.save(newAdmin, passwordHash, temporaryPassword)
 
         return AdminResult.Created(savedAdmin, temporaryPassword)
     }

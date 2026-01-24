@@ -39,10 +39,15 @@ interface AdminRepository {
     /**
      * Save a new admin with password hash.
      * Returns the saved admin.
+     *
+     * @param admin The admin domain object
+     * @param passwordHash The hashed password for authentication
+     * @param temporaryPassword The temporary password (for onboarding flow)
      */
     fun save(
         admin: Admin,
         passwordHash: String,
+        temporaryPassword: String? = null,
     ): Admin
 
     /**
@@ -50,6 +55,15 @@ interface AdminRepository {
      * Returns the updated admin.
      */
     fun update(admin: Admin): Admin
+
+    /**
+     * Update an existing admin with a new password.
+     * Returns the updated admin.
+     */
+    fun updateWithPassword(
+        admin: Admin,
+        passwordHash: String,
+    ): Admin
 
     /**
      * Check if an email is already registered.

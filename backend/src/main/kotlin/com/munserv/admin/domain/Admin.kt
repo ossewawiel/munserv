@@ -23,6 +23,8 @@ data class Admin(
     val email: String,
     val displayName: String,
     val role: AdminRole,
+    val onboardingStatus: OnboardingStatus = OnboardingStatus.ACTIVE,
+    val onboardingCompletedAt: Instant? = null,
     val createdAt: Instant,
     val updatedAt: Instant,
     val deletedAt: Instant? = null,
@@ -36,6 +38,24 @@ data class Admin(
      */
     val level: AdminLevel
         get() = role.level
+
+    /**
+     * Returns true if the administrator needs to complete onboarding.
+     */
+    val requiresOnboarding: Boolean
+        get() = !onboardingStatus.isOnboarded
+
+    /**
+     * Returns true if the administrator needs to change their password.
+     */
+    val requiresPasswordChange: Boolean
+        get() = onboardingStatus.requiresPasswordChange
+
+    /**
+     * Returns true if the administrator needs to complete their profile.
+     */
+    val requiresProfileCompletion: Boolean
+        get() = onboardingStatus.requiresProfileCompletion
 }
 
 /**
@@ -70,11 +90,12 @@ enum class AdminRole {
      * Returns the organizational level this role operates at.
      */
     val level: AdminLevel
-        get() = when (this) {
-            SECTOR_ADMIN, SECTOR_CHIEF -> AdminLevel.SECTOR
-            WARD_ADMIN, WARD_CHIEF -> AdminLevel.WARD
-            POD_ADMIN, POD_CHIEF -> AdminLevel.POD
-        }
+        get() =
+            when (this) {
+                SECTOR_ADMIN, SECTOR_CHIEF -> AdminLevel.SECTOR
+                WARD_ADMIN, WARD_CHIEF -> AdminLevel.WARD
+                POD_ADMIN, POD_CHIEF -> AdminLevel.POD
+            }
 
     /**
      * Returns true if this is a chief (supervisor) role at its level.

@@ -83,7 +83,7 @@ class AdminManagementServiceTest {
             every { adminRepository.findById(sectorChiefId) } returns sectorChief
             every { adminRepository.existsByEmail("newadmin@example.com") } returns false
             every { passwordEncoder.encode(any()) } returns "hashed_password"
-            every { adminRepository.save(any(), "hashed_password") } answers {
+            every { adminRepository.save(any(), "hashed_password", any()) } answers {
                 firstArg<Admin>()
             }
 
@@ -213,7 +213,7 @@ class AdminManagementServiceTest {
             every { adminRepository.findById(podAdminId) } returns podAdmin
             every { adminRepository.existsByEmail("newchief@example.com") } returns false
             every { passwordEncoder.encode(any()) } returns "hashed_password"
-            every { adminRepository.save(any(), "hashed_password") } answers {
+            every { adminRepository.save(any(), "hashed_password", any()) } answers {
                 firstArg<Admin>()
             }
 
