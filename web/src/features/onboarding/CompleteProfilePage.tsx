@@ -23,6 +23,9 @@ export const CompleteProfilePage: FC = () => {
   const completeProfileMutation = useCompleteProfile();
 
   const [displayName, setDisplayName] = useState(admin?.displayName ?? '');
+  const [knownAs, setKnownAs] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [address, setAddress] = useState('');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -46,7 +49,12 @@ export const CompleteProfilePage: FC = () => {
     (e: FormEvent) => {
       e.preventDefault();
       completeProfileMutation.mutate(
-        { displayName: displayName.trim() || undefined },
+        {
+          displayName: displayName.trim() || undefined,
+          knownAs: knownAs.trim() || undefined,
+          contactPhone: contactPhone.trim() || undefined,
+          address: address.trim() || undefined,
+        },
         {
           onSuccess: () => {
             navigate('/', { replace: true });
@@ -54,7 +62,7 @@ export const CompleteProfilePage: FC = () => {
         }
       );
     },
-    [completeProfileMutation, displayName, navigate]
+    [completeProfileMutation, displayName, knownAs, contactPhone, address, navigate]
   );
 
   const handleSkip = useCallback(() => {
@@ -107,7 +115,30 @@ export const CompleteProfilePage: FC = () => {
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder={admin?.displayName}
           disabled={completeProfileMutation.isPending}
+        />
+
+        <Input
+          label={t('onboarding.knownAs')}
+          value={knownAs}
+          onChange={(e) => setKnownAs(e.target.value)}
+          disabled={completeProfileMutation.isPending}
           helperText={t('onboarding.knownAsHelper')}
+        />
+
+        <Input
+          label={t('onboarding.contactPhone')}
+          value={contactPhone}
+          onChange={(e) => setContactPhone(e.target.value)}
+          disabled={completeProfileMutation.isPending}
+        />
+
+        <Input
+          label={t('onboarding.address')}
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          disabled={completeProfileMutation.isPending}
+          multiline
+          rows={2}
         />
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

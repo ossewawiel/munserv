@@ -30,6 +30,9 @@ export interface ChangePasswordRequest {
  */
 export interface CompleteProfileRequest {
   displayName?: string;
+  knownAs?: string;
+  contactPhone?: string;
+  address?: string;
 }
 
 /**
