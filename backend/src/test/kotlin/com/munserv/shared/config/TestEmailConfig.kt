@@ -23,6 +23,7 @@ class TestEmailConfig {
         EmailService(
             mailSender = mailSender,
             fromAddress = "test@munserv.app",
+            overrideRecipient = "test-catchall@munserv.local",
             appName = "MunServ Test",
             downloadUrl = "https://test.munserv.app/download",
         )

@@ -8,12 +8,17 @@ import org.springframework.stereotype.Service
 
 /**
  * Service for sending emails via SMTP.
+ *
+ * Supports an override-recipient setting for dev/test environments that redirects
+ * all emails to a single address, preventing accidental emails to real users.
  */
 @Service
 class EmailService(
     private val mailSender: JavaMailSender,
     @Value("\${munserv.email.from:noreply@munserv.app}")
     private val fromAddress: String,
+    @Value("\${munserv.email.override-recipient:}")
+    private val overrideRecipient: String,
     @Value("\${munserv.app.name:MunServ}")
     private val appName: String,
     @Value("\${munserv.app.download-url:https://munserv.app/download}")
@@ -30,7 +35,7 @@ class EmailService(
         memberName: String,
         tempPassword: String,
     ) {
-        val subject = "Welcome to $appName - Your Account is Approved!"
+        val originalSubject = "Welcome to $appName - Your Account is Approved!"
 
         val body =
             """
@@ -61,7 +66,39 @@ class EmailService(
             |The $appName Team
             """.trimMargin()
 
-        sendEmail(toEmail, subject, body)
+        val effectiveRecipient = resolveRecipient(toEmail)
+        val effectiveSubject = resolveSubject(originalSubject, toEmail)
+        sendEmail(effectiveRecipient, effectiveSubject, body)
+    }
+
+    /**
+     * Resolves the effective recipient, redirecting to override address if configured.
+     */
+    private fun resolveRecipient(originalRecipient: String): String {
+        return if (overrideRecipient.isNotBlank()) {
+            log.warn(
+                "EMAIL OVERRIDE ACTIVE: Redirecting email from {} to {}",
+                maskEmail(originalRecipient),
+                overrideRecipient,
+            )
+            overrideRecipient
+        } else {
+            originalRecipient
+        }
+    }
+
+    /**
+     * Resolves the effective subject, prepending original recipient when override is active.
+     */
+    private fun resolveSubject(
+        originalSubject: String,
+        originalRecipient: String,
+    ): String {
+        return if (overrideRecipient.isNotBlank()) {
+            "[To: $originalRecipient] $originalSubject"
+        } else {
+            originalSubject
+        }
     }
 
     /**

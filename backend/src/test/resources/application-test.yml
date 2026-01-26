@@ -59,6 +59,7 @@ logging:
 munserv:
   email:
     from: test@munserv.app
+    override-recipient: test-catchall@munserv.local  # Redirect all test emails
   app:
     name: MunServ Test
     download-url: https://test.munserv.app/download

@@ -126,6 +126,7 @@ springdoc:
 munserv:
   email:
     from: ${EMAIL_FROM:noreply@munserv.app}
+    override-recipient: ${EMAIL_OVERRIDE_RECIPIENT:}  # Set in dev/test to redirect all emails
   app:
     name: ${APP_NAME:MunServ}
     download-url: ${APP_DOWNLOAD_URL:https://play.google.com/store/apps/details?id=com.munserv}

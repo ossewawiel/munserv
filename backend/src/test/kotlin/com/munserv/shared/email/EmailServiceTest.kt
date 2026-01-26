@@ -22,6 +22,7 @@ class EmailServiceTest {
     private lateinit var emailService: EmailService
 
     private val fromAddress = "noreply@munserv.app"
+    private val overrideRecipient = "" // Empty = disabled (production behavior)
     private val appName = "MunServ"
     private val downloadUrl = "https://play.google.com/store/apps/details?id=com.munserv"
 
@@ -32,6 +33,7 @@ class EmailServiceTest {
             EmailService(
                 mailSender = mailSender,
                 fromAddress = fromAddress,
+                overrideRecipient = overrideRecipient,
                 appName = appName,
                 downloadUrl = downloadUrl,
             )
@@ -239,6 +241,139 @@ class EmailServiceTest {
 
             // The exception message should not contain the full email
             exception.message shouldBe "Failed to send email"
+        }
+    }
+
+    @Nested
+    inner class OverrideRecipient {
+        @Test
+        fun `should redirect email when override is configured`() {
+            // Arrange - create service with override enabled
+            val serviceWithOverride =
+                EmailService(
+                    mailSender = mailSender,
+                    fromAddress = fromAddress,
+                    overrideRecipient = "catchall@test.com",
+                    appName = appName,
+                    downloadUrl = downloadUrl,
+                )
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            serviceWithOverride.sendWelcomeEmail(
+                toEmail = "real-user@example.com",
+                memberName = "Real User",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert - email should go to override address
+            verify(exactly = 1) { mailSender.send(any<SimpleMailMessage>()) }
+            messageSlot.captured.to?.first() shouldBe "catchall@test.com"
+        }
+
+        @Test
+        fun `should prepend original recipient to subject when override is active`() {
+            // Arrange
+            val serviceWithOverride =
+                EmailService(
+                    mailSender = mailSender,
+                    fromAddress = fromAddress,
+                    overrideRecipient = "catchall@test.com",
+                    appName = appName,
+                    downloadUrl = downloadUrl,
+                )
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            serviceWithOverride.sendWelcomeEmail(
+                toEmail = "real-user@example.com",
+                memberName = "Real User",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert - subject should have original recipient prefix
+            val subject = messageSlot.captured.subject!!
+            subject shouldContain "[To: real-user@example.com]"
+            subject shouldContain "Welcome"
+        }
+
+        @Test
+        fun `should send to original recipient when no override configured`() {
+            // Arrange - service without override (empty string)
+            val serviceWithoutOverride =
+                EmailService(
+                    mailSender = mailSender,
+                    fromAddress = fromAddress,
+                    overrideRecipient = "",
+                    appName = appName,
+                    downloadUrl = downloadUrl,
+                )
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            serviceWithoutOverride.sendWelcomeEmail(
+                toEmail = "real-user@example.com",
+                memberName = "Real User",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert - email should go to original recipient
+            messageSlot.captured.to?.first() shouldBe "real-user@example.com"
+        }
+
+        @Test
+        fun `should not modify subject when no override configured`() {
+            // Arrange
+            val serviceWithoutOverride =
+                EmailService(
+                    mailSender = mailSender,
+                    fromAddress = fromAddress,
+                    overrideRecipient = "",
+                    appName = appName,
+                    downloadUrl = downloadUrl,
+                )
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            serviceWithoutOverride.sendWelcomeEmail(
+                toEmail = "real-user@example.com",
+                memberName = "Real User",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert - subject should NOT have [To: ...] prefix
+            val subject = messageSlot.captured.subject!!
+            subject.startsWith("[To:") shouldBe false
+            subject shouldContain "Welcome"
+        }
+
+        @Test
+        fun `should treat blank override as disabled`() {
+            // Arrange - service with blank (whitespace only) override
+            val serviceWithBlankOverride =
+                EmailService(
+                    mailSender = mailSender,
+                    fromAddress = fromAddress,
+                    overrideRecipient = "   ",
+                    appName = appName,
+                    downloadUrl = downloadUrl,
+                )
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            serviceWithBlankOverride.sendWelcomeEmail(
+                toEmail = "real-user@example.com",
+                memberName = "Real User",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert - email should go to original recipient (blank = disabled)
+            messageSlot.captured.to?.first() shouldBe "real-user@example.com"
         }
     }
 }

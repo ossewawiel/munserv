@@ -8,6 +8,11 @@ spring:
     username: marsel.pretorius@gmail.com  # Your email
     password: uunm xebm cskx aceq     # Your app password (NOT your regular password)
 
+# Redirect all emails to dev address (prevents sending to real users during testing)
+munserv:
+  email:
+    override-recipient: ${EMAIL_OVERRIDE_RECIPIENT:marsel.pretorius@gmail.com}
+
 logging:
   level:
     com.munserv: DEBUG
