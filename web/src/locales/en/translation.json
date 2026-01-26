@@ -528,7 +528,8 @@
     "passwordNote": "Save this password! It will only be shown once.",
     "passwordCopied": "Password copied to clipboard",
     "emailSent": "A welcome email has been sent to the Pod Chief.",
-    "goToLogin": "Go to Admin Login"
+    "goToLogin": "Go to Admin Login",
+    "emailAlreadyExists": "This email is already registered"
   },
   "onboarding": {
     "changePassword": "Change Password",

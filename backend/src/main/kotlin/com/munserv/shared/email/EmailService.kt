@@ -72,6 +72,54 @@ class EmailService(
     }
 
     /**
+     * Sends welcome email to newly created Pod Chief.
+     * Includes temporary password and admin portal instructions.
+     */
+    fun sendPodChiefWelcomeEmail(
+        toEmail: String,
+        displayName: String,
+        tempPassword: String,
+    ) {
+        val originalSubject = "Welcome to $appName - Your Pod Chief Account"
+
+        val body =
+            """
+            |Hello $displayName,
+            |
+            |You have been appointed as Pod Chief for your $appName pod.
+            |
+            |Please log in to the admin portal with the following credentials:
+            |
+            |Email: $toEmail
+            |Temporary Password: $tempPassword
+            |
+            |IMPORTANT: You will be required to change your password on first login.
+            |
+            |After changing your password, you can optionally complete your profile
+            |before accessing the dashboard.
+            |
+            |Password Requirements:
+            |- At least 8 characters
+            |- At least one uppercase letter (A-Z)
+            |- At least one lowercase letter (a-z)
+            |- At least one number (0-9)
+            |
+            |As Pod Chief, you will be responsible for:
+            |- Setting up your pod configuration
+            |- Managing pod administrators
+            |- Overseeing issue resolution across the pod
+            |
+            |If you did not expect this email, please contact support.
+            |
+            |The $appName Team
+            """.trimMargin()
+
+        val effectiveRecipient = resolveRecipient(toEmail)
+        val effectiveSubject = resolveSubject(originalSubject, toEmail)
+        sendEmail(effectiveRecipient, effectiveSubject, body)
+    }
+
+    /**
      * Resolves the effective recipient, redirecting to override address if configured.
      */
     private fun resolveRecipient(originalRecipient: String): String {

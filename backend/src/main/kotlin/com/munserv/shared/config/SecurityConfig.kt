@@ -51,6 +51,8 @@ class SecurityConfig(
                     .requestMatchers("/api/v1/issues/**").authenticated()
                     .requestMatchers("/api/v1/members/**").authenticated()
                     .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                    // Bootstrap endpoints require super user role
+                    .requestMatchers("/api/v1/bootstrap/**").hasRole("SUPER_USER")
                     // Default: allow all for now (remaining endpoints)
                     .anyRequest().permitAll()
             }

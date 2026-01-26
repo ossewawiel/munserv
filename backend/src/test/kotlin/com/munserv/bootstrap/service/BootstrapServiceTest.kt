@@ -6,22 +6,33 @@ import com.munserv.admin.domain.OnboardingStatus
 import com.munserv.admin.repository.AdminRepository
 import com.munserv.bootstrap.config.BootstrapConfig
 import com.munserv.bootstrap.domain.BootstrapStatus
+import com.munserv.shared.email.EmailService
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.PodId
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldHaveMinLength
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.security.crypto.password.PasswordEncoder
+import java.time.Clock
 import java.time.Instant
+import java.time.ZoneOffset
 import java.util.UUID
 
 class BootstrapServiceTest {
     private lateinit var adminRepository: AdminRepository
     private lateinit var bootstrapConfig: BootstrapConfig
+    private lateinit var passwordEncoder: PasswordEncoder
+    private lateinit var emailService: EmailService
+    private lateinit var clock: Clock
     private lateinit var service: BootstrapService
 
     private val testPodId = PodId(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"))
@@ -45,7 +56,10 @@ class BootstrapServiceTest {
     fun setUp() {
         adminRepository = mockk()
         bootstrapConfig = mockk()
-        service = BootstrapService(adminRepository, bootstrapConfig)
+        passwordEncoder = mockk()
+        emailService = mockk()
+        clock = Clock.fixed(fixedInstant, ZoneOffset.UTC)
+        service = BootstrapService(adminRepository, bootstrapConfig, passwordEncoder, emailService, clock)
     }
 
     @Nested
@@ -151,6 +165,181 @@ class BootstrapServiceTest {
             service.isBootstrapEnabled()
 
             verify { bootstrapConfig.isConfigured() }
+        }
+    }
+
+    @Nested
+    inner class CreatePodChief {
+        private val validEmail = "newpodchief@example.com"
+        private val validDisplayName = "New Pod Chief"
+
+        @Test
+        fun `should return PodChiefCreated when valid inputs and no existing Pod Chief`() {
+            // Arrange
+            every { adminRepository.findPodChief(testPodId) } returns null
+            every { adminRepository.existsByEmail(validEmail) } returns false
+            every { passwordEncoder.encode(any()) } returns "hashedPassword123"
+            every { emailService.sendPodChiefWelcomeEmail(any(), any(), any()) } just Runs
+
+            val adminSlot = slot<Admin>()
+            every {
+                adminRepository.save(capture(adminSlot), any(), any())
+            } answers { adminSlot.captured }
+
+            // Act
+            val result = service.createPodChief(validEmail, validDisplayName, testPodId)
+
+            // Assert
+            result.shouldBeInstanceOf<BootstrapResult.PodChiefCreated>()
+            val createdResult = result as BootstrapResult.PodChiefCreated
+            createdResult.admin.email shouldBe validEmail
+            createdResult.admin.displayName shouldBe validDisplayName
+            createdResult.admin.role shouldBe AdminRole.POD_CHIEF
+            createdResult.admin.onboardingStatus shouldBe OnboardingStatus.PENDING
+            createdResult.admin.podId shouldBe testPodId
+            createdResult.temporaryPassword.shouldHaveMinLength(12)
+        }
+
+        @Test
+        fun `should send welcome email when Pod Chief is created`() {
+            // Arrange
+            every { adminRepository.findPodChief(testPodId) } returns null
+            every { adminRepository.existsByEmail(validEmail) } returns false
+            every { passwordEncoder.encode(any()) } returns "hashedPassword123"
+            every { emailService.sendPodChiefWelcomeEmail(any(), any(), any()) } just Runs
+
+            val adminSlot = slot<Admin>()
+            every {
+                adminRepository.save(capture(adminSlot), any(), any())
+            } answers { adminSlot.captured }
+
+            // Act
+            service.createPodChief(validEmail, validDisplayName, testPodId)
+
+            // Assert
+            verify(exactly = 1) {
+                emailService.sendPodChiefWelcomeEmail(
+                    toEmail = validEmail,
+                    displayName = validDisplayName,
+                    tempPassword = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `should return PodAlreadyBootstrapped when Pod Chief exists`() {
+            // Arrange
+            val existingPodChief = createPodChief(OnboardingStatus.PENDING)
+            every { adminRepository.findPodChief(testPodId) } returns existingPodChief
+
+            // Act
+            val result = service.createPodChief(validEmail, validDisplayName, testPodId)
+
+            // Assert
+            result.shouldBeInstanceOf<BootstrapResult.PodAlreadyBootstrapped>()
+            verify(exactly = 0) { adminRepository.save(any(), any(), any()) }
+        }
+
+        @Test
+        fun `should return EmailAlreadyExists when email is taken`() {
+            // Arrange
+            every { adminRepository.findPodChief(testPodId) } returns null
+            every { adminRepository.existsByEmail(validEmail) } returns true
+
+            // Act
+            val result = service.createPodChief(validEmail, validDisplayName, testPodId)
+
+            // Assert
+            result.shouldBeInstanceOf<BootstrapResult.EmailAlreadyExists>()
+            val emailError = result as BootstrapResult.EmailAlreadyExists
+            emailError.email shouldBe validEmail
+            verify(exactly = 0) { adminRepository.save(any(), any(), any()) }
+        }
+
+        @Test
+        fun `should return ValidationError when email is blank`() {
+            // Act
+            val result = service.createPodChief("", validDisplayName, testPodId)
+
+            // Assert
+            result.shouldBeInstanceOf<BootstrapResult.ValidationError>()
+            val validationError = result as BootstrapResult.ValidationError
+            validationError.errors.any { it.contains("Email") } shouldBe true
+        }
+
+        @Test
+        fun `should return ValidationError when email format is invalid`() {
+            // Act
+            val result = service.createPodChief("not-an-email", validDisplayName, testPodId)
+
+            // Assert
+            result.shouldBeInstanceOf<BootstrapResult.ValidationError>()
+            val validationError = result as BootstrapResult.ValidationError
+            validationError.errors.any { it.contains("email") } shouldBe true
+        }
+
+        @Test
+        fun `should return ValidationError when displayName is blank`() {
+            // Act
+            val result = service.createPodChief(validEmail, "", testPodId)
+
+            // Assert
+            result.shouldBeInstanceOf<BootstrapResult.ValidationError>()
+            val validationError = result as BootstrapResult.ValidationError
+            validationError.errors.any { it.contains("Display name") } shouldBe true
+        }
+
+        @Test
+        fun `should return ValidationError with multiple errors when both fields are invalid`() {
+            // Act
+            val result = service.createPodChief("", "", testPodId)
+
+            // Assert
+            result.shouldBeInstanceOf<BootstrapResult.ValidationError>()
+            val validationError = result as BootstrapResult.ValidationError
+            validationError.errors.size shouldBe 2
+        }
+
+        @Test
+        fun `should hash password before saving`() {
+            // Arrange
+            every { adminRepository.findPodChief(testPodId) } returns null
+            every { adminRepository.existsByEmail(validEmail) } returns false
+            every { passwordEncoder.encode(any()) } returns "bcryptHashedPassword"
+            every { emailService.sendPodChiefWelcomeEmail(any(), any(), any()) } just Runs
+
+            val passwordHashSlot = slot<String>()
+            every {
+                adminRepository.save(any(), capture(passwordHashSlot), any())
+            } answers { firstArg() }
+
+            // Act
+            service.createPodChief(validEmail, validDisplayName, testPodId)
+
+            // Assert
+            verify { passwordEncoder.encode(any()) }
+            passwordHashSlot.captured shouldBe "bcryptHashedPassword"
+        }
+
+        @Test
+        fun `should use current timestamp from clock for createdAt and updatedAt`() {
+            // Arrange
+            every { adminRepository.findPodChief(testPodId) } returns null
+            every { adminRepository.existsByEmail(validEmail) } returns false
+            every { passwordEncoder.encode(any()) } returns "hashedPassword"
+            every { emailService.sendPodChiefWelcomeEmail(any(), any(), any()) } just Runs
+
+            val adminSlot = slot<Admin>()
+            every {
+                adminRepository.save(capture(adminSlot), any(), any())
+            } answers { adminSlot.captured }
+
+            // Act
+            service.createPodChief(validEmail, validDisplayName, testPodId)
+
+            // Assert
+            adminSlot.captured.createdAt shouldBe fixedInstant
+            adminSlot.captured.updatedAt shouldBe fixedInstant
         }
     }
 }
