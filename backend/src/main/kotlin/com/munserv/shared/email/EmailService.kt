@@ -23,6 +23,8 @@ class EmailService(
     private val appName: String,
     @Value("\${munserv.app.download-url:https://munserv.app/download}")
     private val downloadUrl: String,
+    @Value("\${munserv.app.admin-portal-url:http://localhost:3000}")
+    private val adminPortalUrl: String,
 ) {
     private val log = LoggerFactory.getLogger(EmailService::class.java)
 
@@ -92,6 +94,9 @@ class EmailService(
             |
             |Email: $toEmail
             |Temporary Password: $tempPassword
+            |
+            |Access the admin portal at:
+            |$adminPortalUrl
             |
             |IMPORTANT: You will be required to change your password on first login.
             |

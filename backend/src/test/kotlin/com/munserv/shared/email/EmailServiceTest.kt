@@ -25,6 +25,7 @@ class EmailServiceTest {
     private val overrideRecipient = "" // Empty = disabled (production behavior)
     private val appName = "MunServ"
     private val downloadUrl = "https://play.google.com/store/apps/details?id=com.munserv"
+    private val adminPortalUrl = "http://localhost:3000"
 
     @BeforeEach
     fun setUp() {
@@ -36,6 +37,7 @@ class EmailServiceTest {
                 overrideRecipient = overrideRecipient,
                 appName = appName,
                 downloadUrl = downloadUrl,
+                adminPortalUrl = adminPortalUrl,
             )
     }
 
@@ -219,6 +221,261 @@ class EmailServiceTest {
     }
 
     @Nested
+    inner class SendPodChiefWelcomeEmail {
+        @Test
+        fun `should send Pod Chief welcome email with correct recipient`() {
+            // Arrange
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            emailService.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert
+            verify(exactly = 1) { mailSender.send(any<SimpleMailMessage>()) }
+            messageSlot.captured.to?.first() shouldBe "podchief@example.com"
+        }
+
+        @Test
+        fun `should send Pod Chief welcome email with correct from address`() {
+            // Arrange
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            emailService.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert
+            messageSlot.captured.from shouldBe fromAddress
+        }
+
+        @Test
+        fun `should send Pod Chief welcome email with app name in subject`() {
+            // Arrange
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            emailService.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert
+            messageSlot.captured.subject shouldContain appName
+            messageSlot.captured.subject shouldContain "Welcome"
+            messageSlot.captured.subject shouldContain "Pod Chief"
+        }
+
+        @Test
+        fun `should include display name in email body`() {
+            // Arrange
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            emailService.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert
+            messageSlot.captured.text shouldContain "Pod Chief Name"
+        }
+
+        @Test
+        fun `should include temporary password in email body`() {
+            // Arrange
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            emailService.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert
+            messageSlot.captured.text shouldContain "TempPass123"
+        }
+
+        @Test
+        fun `should include email address in email body`() {
+            // Arrange
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            emailService.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert
+            messageSlot.captured.text shouldContain "podchief@example.com"
+        }
+
+        @Test
+        fun `should include admin portal URL in email body`() {
+            // Arrange
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            emailService.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert
+            messageSlot.captured.text shouldContain adminPortalUrl
+            messageSlot.captured.text shouldContain "Access the admin portal"
+        }
+
+        @Test
+        fun `should include password requirements in email body`() {
+            // Arrange
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            emailService.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert
+            val body = messageSlot.captured.text!!
+            body shouldContain "8 characters"
+            body shouldContain "uppercase"
+            body shouldContain "lowercase"
+            body shouldContain "number"
+        }
+
+        @Test
+        fun `should include password change warning in email body`() {
+            // Arrange
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            emailService.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert
+            messageSlot.captured.text shouldContain "change your password"
+        }
+
+        @Test
+        fun `should include Pod Chief responsibilities in email body`() {
+            // Arrange
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            emailService.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert
+            val body = messageSlot.captured.text!!
+            body shouldContain "pod configuration"
+            body shouldContain "Managing pod administrators"
+            body shouldContain "issue resolution"
+        }
+
+        @Test
+        fun `should throw EmailSendException when mail sender fails`() {
+            // Arrange
+            every { mailSender.send(any<SimpleMailMessage>()) } throws
+                MailSendException("SMTP connection failed")
+
+            // Act & Assert
+            shouldThrow<EmailSendException> {
+                emailService.sendPodChiefWelcomeEmail(
+                    toEmail = "podchief@example.com",
+                    displayName = "Pod Chief Name",
+                    tempPassword = "TempPass123",
+                )
+            }
+        }
+
+        @Test
+        fun `should redirect Pod Chief email when override is configured`() {
+            // Arrange - create service with override enabled
+            val serviceWithOverride =
+                EmailService(
+                    mailSender = mailSender,
+                    fromAddress = fromAddress,
+                    overrideRecipient = "catchall@test.com",
+                    appName = appName,
+                    downloadUrl = downloadUrl,
+                    adminPortalUrl = adminPortalUrl,
+                )
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            serviceWithOverride.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert - email should go to override address
+            verify(exactly = 1) { mailSender.send(any<SimpleMailMessage>()) }
+            messageSlot.captured.to?.first() shouldBe "catchall@test.com"
+        }
+
+        @Test
+        fun `should prepend original recipient to subject when override is active`() {
+            // Arrange
+            val serviceWithOverride =
+                EmailService(
+                    mailSender = mailSender,
+                    fromAddress = fromAddress,
+                    overrideRecipient = "catchall@test.com",
+                    appName = appName,
+                    downloadUrl = downloadUrl,
+                    adminPortalUrl = adminPortalUrl,
+                )
+            val messageSlot = slot<SimpleMailMessage>()
+            every { mailSender.send(capture(messageSlot)) } just Runs
+
+            // Act
+            serviceWithOverride.sendPodChiefWelcomeEmail(
+                toEmail = "podchief@example.com",
+                displayName = "Pod Chief Name",
+                tempPassword = "TempPass123",
+            )
+
+            // Assert - subject should have original recipient prefix
+            val subject = messageSlot.captured.subject!!
+            subject shouldContain "[To: podchief@example.com]"
+            subject shouldContain "Pod Chief"
+        }
+    }
+
+    @Nested
     inner class MaskEmail {
         @Test
         fun `should mask email correctly for normal email`() {
@@ -256,6 +513,7 @@ class EmailServiceTest {
                     overrideRecipient = "catchall@test.com",
                     appName = appName,
                     downloadUrl = downloadUrl,
+                    adminPortalUrl = adminPortalUrl,
                 )
             val messageSlot = slot<SimpleMailMessage>()
             every { mailSender.send(capture(messageSlot)) } just Runs
@@ -282,6 +540,7 @@ class EmailServiceTest {
                     overrideRecipient = "catchall@test.com",
                     appName = appName,
                     downloadUrl = downloadUrl,
+                    adminPortalUrl = adminPortalUrl,
                 )
             val messageSlot = slot<SimpleMailMessage>()
             every { mailSender.send(capture(messageSlot)) } just Runs
@@ -309,6 +568,7 @@ class EmailServiceTest {
                     overrideRecipient = "",
                     appName = appName,
                     downloadUrl = downloadUrl,
+                    adminPortalUrl = adminPortalUrl,
                 )
             val messageSlot = slot<SimpleMailMessage>()
             every { mailSender.send(capture(messageSlot)) } just Runs
@@ -334,6 +594,7 @@ class EmailServiceTest {
                     overrideRecipient = "",
                     appName = appName,
                     downloadUrl = downloadUrl,
+                    adminPortalUrl = adminPortalUrl,
                 )
             val messageSlot = slot<SimpleMailMessage>()
             every { mailSender.send(capture(messageSlot)) } just Runs
@@ -361,6 +622,7 @@ class EmailServiceTest {
                     overrideRecipient = "   ",
                     appName = appName,
                     downloadUrl = downloadUrl,
+                    adminPortalUrl = adminPortalUrl,
                 )
             val messageSlot = slot<SimpleMailMessage>()
             every { mailSender.send(capture(messageSlot)) } just Runs

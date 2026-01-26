@@ -139,6 +139,7 @@ munserv:
   app:
     name: ${APP_NAME:MunServ}
     download-url: ${APP_DOWNLOAD_URL:https://play.google.com/store/apps/details?id=com.munserv}
+    admin-portal-url: ${ADMIN_PORTAL_URL:http://localhost:3000}
 
 logging:
   level:

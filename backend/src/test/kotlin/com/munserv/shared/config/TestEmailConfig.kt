@@ -26,5 +26,6 @@ class TestEmailConfig {
             overrideRecipient = "test-catchall@munserv.local",
             appName = "MunServ Test",
             downloadUrl = "https://test.munserv.app/download",
+            adminPortalUrl = "http://localhost:3000",
         )
 }
