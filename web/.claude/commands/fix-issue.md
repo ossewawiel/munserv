@@ -15,7 +15,7 @@ Read the web-specific handoff document for an issue and implement the fix follow
 
 ## Prerequisites
 
-- Handoff document exists at `web/docs/issues/{number}-*.md`
+- Handoff document exists (see Step 1 for location)
 - Central agent has completed investigation and created this handoff
 - You have read `web/CLAUDE.md` for coding standards
 
@@ -23,8 +23,19 @@ Read the web-specific handoff document for an issue and implement the fix follow
 
 ### Step 1: Locate and Parse Handoff Document
 
+**IMPORTANT:** Always look in the central specs directory first, NOT in platform-specific directories.
+
+**Primary location (from project root):** `specs/features/{feature}/{number}-*-web.md`
+**When running from web directory:** `../specs/features/{feature}/{number}-*-web.md`
+
 ```bash
-ls web/docs/issues/{{number}}-*.md
+# First, search in the central specs directory (parent of current dir)
+find ../specs/features -name "{{number}}-*-web.md" 2>/dev/null || find specs/features -name "{{number}}-*-web.md" 2>/dev/null
+```
+
+If not found in specs, check legacy location as fallback:
+```bash
+ls docs/issues/{{number}}-*.md 2>/dev/null
 ```
 
 Read the handoff document and extract:
@@ -126,8 +137,9 @@ Add implementation notes section:
 ### Step 8: Stage Changes (Do NOT Commit)
 
 ```bash
-git add web/
-git add web/docs/issues/{{number}}-*.md
+git add src/
+# Stage the handoff document (in central specs directory)
+git add ../specs/features/**/{{number}}-*-web.md 2>/dev/null || git add specs/features/**/{{number}}-*-web.md 2>/dev/null
 ```
 
 Do NOT commit - the central agent will handle the final commit after all platforms complete.
@@ -153,7 +165,7 @@ Do NOT commit - the central agent will handle the final commit after all platfor
 - ✅ Build successful
 
 ### Handoff Updated
-`web/docs/issues/{{number}}-*.md` → status: completed
+`specs/features/{feature}/{{number}}-*-web.md` → status: completed
 
 ### Next Steps
 1. If other platforms need changes, run their `/fix-issue` commands
@@ -164,7 +176,11 @@ Do NOT commit - the central agent will handle the final commit after all platfor
 
 **Handoff not found:**
 ```
-Error: No handoff document found at web/docs/issues/{{number}}-*.md
+Error: No handoff document found.
+
+Searched locations:
+1. ../specs/features/**/{{number}}-*-web.md (primary - central specs directory)
+2. docs/issues/{{number}}-*.md (legacy fallback)
 
 This issue may not have web changes, or the central agent hasn't distributed yet.
 Run `/work-issue {{number}}` from the project root first.

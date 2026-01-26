@@ -15,7 +15,7 @@ Read the mobile-specific handoff document for an issue and implement the fix fol
 
 ## Prerequisites
 
-- Handoff document exists at `mobile/docs/issues/{number}-*.md`
+- Handoff document exists (see Step 1 for location)
 - Central agent has completed investigation and created this handoff
 - You have read `mobile/CLAUDE.md` for coding standards
 
@@ -23,8 +23,19 @@ Read the mobile-specific handoff document for an issue and implement the fix fol
 
 ### Step 1: Locate and Parse Handoff Document
 
+**IMPORTANT:** Always look in the central specs directory first, NOT in platform-specific directories.
+
+**Primary location (from project root):** `specs/features/{feature}/{number}-*-mobile.md`
+**When running from mobile directory:** `../specs/features/{feature}/{number}-*-mobile.md`
+
 ```bash
-ls mobile/docs/issues/{{number}}-*.md
+# First, search in the central specs directory (parent of current dir)
+find ../specs/features -name "{{number}}-*-mobile.md" 2>/dev/null || find specs/features -name "{{number}}-*-mobile.md" 2>/dev/null
+```
+
+If not found in specs, check legacy location as fallback:
+```bash
+ls docs/issues/{{number}}-*.md 2>/dev/null
 ```
 
 Read the handoff document and extract:
@@ -126,8 +137,9 @@ Add implementation notes section:
 ### Step 8: Stage Changes (Do NOT Commit)
 
 ```bash
-git add mobile/
-git add mobile/docs/issues/{{number}}-*.md
+git add lib/ test/
+# Stage the handoff document (in central specs directory)
+git add ../specs/features/**/{{number}}-*-mobile.md 2>/dev/null || git add specs/features/**/{{number}}-*-mobile.md 2>/dev/null
 ```
 
 Do NOT commit - the central agent will handle the final commit after all platforms complete.
@@ -152,7 +164,7 @@ Do NOT commit - the central agent will handle the final commit after all platfor
 - ✅ Build runner complete (if applicable)
 
 ### Handoff Updated
-`mobile/docs/issues/{{number}}-*.md` → status: completed
+`specs/features/{feature}/{{number}}-*-mobile.md` → status: completed
 
 ### Next Steps
 1. If other platforms need changes, run their `/fix-issue` commands
@@ -163,7 +175,11 @@ Do NOT commit - the central agent will handle the final commit after all platfor
 
 **Handoff not found:**
 ```
-Error: No handoff document found at mobile/docs/issues/{{number}}-*.md
+Error: No handoff document found.
+
+Searched locations:
+1. ../specs/features/**/{{number}}-*-mobile.md (primary - central specs directory)
+2. docs/issues/{{number}}-*.md (legacy fallback)
 
 This issue may not have mobile changes, or the central agent hasn't distributed yet.
 Run `/work-issue {{number}}` from the project root first.
