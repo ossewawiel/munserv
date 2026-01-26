@@ -21,6 +21,7 @@ import { WardDashboardPage } from '@/features/pod-chief/WardDashboardPage';
 import { SectorDashboardPage } from '@/features/pod-chief/SectorDashboardPage';
 import { PodAdministratorsPage } from '@/features/pod-chief/PodAdministratorsPage';
 import { SectorSettingsPage } from '@/features/sector-settings/SectorSettingsPage';
+import { CreatePodChiefPage } from '@/features/bootstrap/CreatePodChiefPage';
 
 /** Placeholder page for features not yet implemented */
 const PlaceholderPage: FC<{ title: string }> = ({ title }) => (
@@ -42,6 +43,9 @@ function App() {
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+
+      {/* Bootstrap routes (super user only) */}
+      <Route path="/bootstrap/create-pod-chief" element={<CreatePodChiefPage />} />
 
       {/* Protected routes */}
       <Route

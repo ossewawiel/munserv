@@ -6,6 +6,7 @@ import type { LoginRequest, RegisterRequest } from './types';
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const ADMIN_KEY = 'admin';
+const IS_SUPER_USER_KEY = 'isSuperUser';
 
 export function useLogin() {
   const queryClient = useQueryClient();
@@ -17,6 +18,14 @@ export function useLogin() {
       localStorage.setItem(ACCESS_TOKEN_KEY, response.tokens.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, response.tokens.refreshToken);
       localStorage.setItem(ADMIN_KEY, JSON.stringify(response.profile.admin));
+
+      // Track super user session
+      if (response.profile.admin.role === 'SUPER_USER') {
+        localStorage.setItem(IS_SUPER_USER_KEY, 'true');
+      } else {
+        localStorage.removeItem(IS_SUPER_USER_KEY);
+      }
+
       // Also update React Query cache
       queryClient.setQueryData(['auth', 'admin'], response.profile.admin);
     },
@@ -33,6 +42,7 @@ export function useLogout() {
       localStorage.removeItem(ACCESS_TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
       localStorage.removeItem(ADMIN_KEY);
+      localStorage.removeItem(IS_SUPER_USER_KEY);
       // Clear React Query cache
       queryClient.clear();
     },

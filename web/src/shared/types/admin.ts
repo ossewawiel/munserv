@@ -1,6 +1,7 @@
 /**
  * Admin roles in the system, ordered by permission level (lowest to highest)
  * 6-level hierarchy: sector_admin < sector_chief < ward_admin < ward_chief < pod_admin < pod_chief
+ * SUPER_USER is a special role used only during bootstrap for system configuration
  */
 export const ADMIN_ROLES = [
   'sector_admin',
@@ -12,6 +13,23 @@ export const ADMIN_ROLES = [
 ] as const;
 
 export type AdminRole = (typeof ADMIN_ROLES)[number];
+
+/**
+ * Super user role - used only during bootstrap
+ */
+export const SUPER_USER_ROLE = 'SUPER_USER' as const;
+
+/**
+ * All possible user roles including super user
+ */
+export type UserRole = AdminRole | typeof SUPER_USER_ROLE;
+
+/**
+ * Type guard to check if a role is a regular admin role (not super user)
+ */
+export function isAdminRole(role: UserRole): role is AdminRole {
+  return ADMIN_ROLES.includes(role as AdminRole);
+}
 
 /**
  * Organizational levels for admin roles

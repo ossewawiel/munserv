@@ -3,7 +3,10 @@ import type { AdminUser } from '@/features/auth/types';
 import {
   hasPermission as checkPermission,
   normalizeRole,
+  isAdminRole,
+  SUPER_USER_ROLE,
   type AdminRole,
+  type UserRole,
 } from '@/shared/types/admin';
 
 const ACCESS_TOKEN_KEY = 'accessToken';
@@ -16,10 +19,13 @@ export function useAuth() {
     if (!stored) return null;
     try {
       const parsed = JSON.parse(stored) as AdminUser;
-      // Normalize role from backend format to frontend format
+      const roleStr = parsed.role as string;
+      // Keep SUPER_USER as-is, normalize other roles
+      const normalizedRole: UserRole =
+        roleStr === SUPER_USER_ROLE ? SUPER_USER_ROLE : normalizeRole(roleStr);
       return {
         ...parsed,
-        role: normalizeRole(parsed.role as string),
+        role: normalizedRole,
       };
     } catch {
       return null;
@@ -45,12 +51,19 @@ export function useAuth() {
   }, []);
 
   /**
-   * Check if the current admin has at least the required permission level
+   * Check if the current admin has at least the required permission level.
+   * Super users always have all permissions.
    */
   const hasPermission = useCallback(
     (requiredRole: AdminRole): boolean => {
       if (!admin) return false;
-      return checkPermission(admin.role, requiredRole);
+      // Super user has all permissions
+      if (admin.role === SUPER_USER_ROLE) return true;
+      // Regular admin - check role hierarchy
+      if (isAdminRole(admin.role)) {
+        return checkPermission(admin.role, requiredRole);
+      }
+      return false;
     },
     [admin]
   );

@@ -9,12 +9,14 @@ import i18n from 'i18next';
 import { Sidebar } from './Sidebar';
 
 // Track location changes for testing navigation
-let testLocation: { pathname: string } = { pathname: '/' };
+let _testLocation: { pathname: string } = { pathname: '/' };
 function LocationTracker() {
   const location = useLocation();
-  testLocation = location;
+  _testLocation = location;
   return null;
 }
+// Use the location tracker variable to silence TS
+void _testLocation;
 
 // Mock useAuth
 const mockAdmin = { role: 'pod_chief' as const, displayName: 'Test User' };
@@ -109,7 +111,7 @@ function renderSidebar({ initialPath = '/' }: RenderOptions = {}) {
 
 describe('Sidebar', () => {
   beforeEach(() => {
-    testLocation = { pathname: '/' };
+    _testLocation = { pathname: '/' };
   });
 
   describe('submenu behavior', () => {

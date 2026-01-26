@@ -4,20 +4,22 @@ import { dashboardApi } from './api';
 
 export function useDashboardStats() {
   const { admin } = useAuth();
+  const sectorId = admin?.sectorId;
 
   return useQuery({
-    queryKey: ['dashboard', 'stats', admin?.sectorId],
-    queryFn: () => dashboardApi.getStats(admin!.sectorId),
-    enabled: !!admin?.sectorId,
+    queryKey: ['dashboard', 'stats', sectorId],
+    queryFn: () => dashboardApi.getStats(sectorId!),
+    enabled: !!sectorId,
   });
 }
 
 export function useHeatReport(limit?: number) {
   const { admin } = useAuth();
+  const sectorId = admin?.sectorId;
 
   return useQuery({
-    queryKey: ['dashboard', 'heatReport', admin?.sectorId, limit],
-    queryFn: () => dashboardApi.getHeatReport(admin!.sectorId, limit),
-    enabled: !!admin?.sectorId,
+    queryKey: ['dashboard', 'heatReport', sectorId, limit],
+    queryFn: () => dashboardApi.getHeatReport(sectorId!, limit),
+    enabled: !!sectorId,
   });
 }

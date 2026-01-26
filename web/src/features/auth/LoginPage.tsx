@@ -10,9 +10,35 @@ import { AuthLayout } from '@/components/templates/AuthLayout';
 import { LoginForm } from '@/components/molecules/LoginForm';
 import { useLogin } from './hooks';
 import { useAuth } from '@/shared/hooks/useAuth';
+import type { LoginResponse } from './types';
 
 interface LocationState {
   from?: { pathname: string };
+}
+
+/**
+ * Determines the redirect path based on the login response.
+ * Handles super user, onboarding, and regular admin flows.
+ */
+function getRedirectPath(response: LoginResponse, defaultPath: string): string {
+  const { admin } = response.profile;
+
+  // Super user - go to create Pod Chief
+  if (admin.role === 'SUPER_USER') {
+    return '/bootstrap/create-pod-chief';
+  }
+
+  // Regular admin - check onboarding status
+  if (admin.onboardingStatus === 'pending') {
+    return '/onboarding/change-password';
+  }
+
+  if (admin.onboardingStatus === 'password_changed') {
+    return '/onboarding/complete-profile';
+  }
+
+  // Fully onboarded - go to requested path or dashboard
+  return defaultPath;
 }
 
 export const LoginPage: FC = () => {
@@ -36,8 +62,9 @@ export const LoginPage: FC = () => {
       loginMutation.mutate(
         { email, password },
         {
-          onSuccess: () => {
-            navigate(from, { replace: true });
+          onSuccess: (response) => {
+            const redirectPath = getRedirectPath(response, from);
+            navigate(redirectPath, { replace: true });
           },
         }
       );

@@ -5,11 +5,12 @@ import type { MemberFilterParams } from './types';
 
 export function useMembers(params: MemberFilterParams = {}) {
   const { admin } = useAuth();
+  const sectorId = admin?.sectorId;
 
   return useQuery({
-    queryKey: ['members', admin?.sectorId, params],
-    queryFn: () => membersApi.getAll(admin!.sectorId, params),
-    enabled: !!admin?.sectorId,
+    queryKey: ['members', sectorId, params],
+    queryFn: () => membersApi.getAll(sectorId!, params),
+    enabled: !!sectorId,
   });
 }
 
@@ -39,28 +40,30 @@ export function useRejectMember() {
 
 export function usePendingMemberCount() {
   const { admin } = useAuth();
+  const sectorId = admin?.sectorId;
 
   return useQuery({
-    queryKey: ['members', 'pending-count', admin?.sectorId],
-    queryFn: () => membersApi.getPendingCount(admin!.sectorId),
-    enabled: !!admin?.sectorId,
+    queryKey: ['members', 'pending-count', sectorId],
+    queryFn: () => membersApi.getPendingCount(sectorId!),
+    enabled: !!sectorId,
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 }
 
 export function useGARequestsCount() {
   const { admin } = useAuth();
+  const sectorId = admin?.sectorId;
 
   return useQuery({
-    queryKey: ['members', 'gaRequestsCount', admin?.sectorId],
+    queryKey: ['members', 'gaRequestsCount', sectorId],
     queryFn: async () => {
-      const response = await membersApi.getAll(admin!.sectorId, {
+      const response = await membersApi.getAll(sectorId!, {
         hasPendingApplication: true,
         limit: 1,
       });
       return response.pagination.totalItems;
     },
-    enabled: !!admin?.sectorId,
+    enabled: !!sectorId,
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 }

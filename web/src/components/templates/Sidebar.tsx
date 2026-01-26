@@ -1,4 +1,4 @@
-import { type FC, useMemo, useState, useCallback, useEffect, Fragment } from 'react';
+import { type FC, useMemo, useState, useCallback, Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Badge from '@mui/material/Badge';
@@ -33,7 +33,7 @@ import { MiniDrawerStyled } from './MiniDrawerStyled';
 import { useUnreadCount } from '@/features/messages/hooks';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { usePodSetup } from '@/shared/hooks/usePodSetup';
-import { hasPermission, type AdminRole } from '@/shared/types/admin';
+import { hasPermission, isAdminRole, SUPER_USER_ROLE, type AdminRole } from '@/shared/types/admin';
 
 /** Get the color for selected/hovered items based on theme mode */
 const getItemColor = (isDarkMode: boolean): string =>
@@ -190,8 +190,17 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
   // Track which submenus are expanded
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
-  // Check if user is at pod level (pod_admin or pod_chief)
-  const isPodLevel = hasPermission(userRole, 'pod_admin');
+  // Helper to check permission handling super user
+  const checkPermission = useCallback(
+    (requiredRole: AdminRole): boolean => {
+      if (userRole === SUPER_USER_ROLE) return true;
+      return isAdminRole(userRole) && hasPermission(userRole, requiredRole);
+    },
+    [userRole]
+  );
+
+  // Check if user is at pod level (pod_admin or pod_chief or super user)
+  const isPodLevel = checkPermission('pod_admin');
 
   // Build navigation items based on role
   const visibleNavItems = useMemo(() => {
@@ -287,11 +296,11 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
       return items
         .filter((item) => {
           // Check minimum role requirement
-          if (item.requiredRole && !hasPermission(userRole, item.requiredRole)) {
+          if (item.requiredRole && !checkPermission(item.requiredRole)) {
             return false;
           }
           // Check maximum role - hide from higher roles
-          if (item.maxRole && hasPermission(userRole, item.maxRole)) {
+          if (item.maxRole && checkPermission(item.maxRole)) {
             return false;
           }
           return true;

@@ -513,5 +513,48 @@
     "ward_chief": "Ward Chief",
     "pod_admin": "Pod Admin",
     "pod_chief": "Pod Chief"
+  },
+  "bootstrap": {
+    "createPodChief": "Create Pod Chief",
+    "createPodChiefDescription": "Create the first Pod Chief account for this pod.",
+    "comingSoon": "Pod Chief creation form coming soon.",
+    "displayName": "Display Name",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email format",
+    "displayNameRequired": "Display name is required",
+    "createError": "Failed to create Pod Chief",
+    "podChiefCreated": "Pod Chief Created Successfully",
+    "temporaryPassword": "Temporary Password",
+    "passwordNote": "Save this password! It will only be shown once.",
+    "passwordCopied": "Password copied to clipboard",
+    "emailSent": "A welcome email has been sent to the Pod Chief.",
+    "goToLogin": "Go to Admin Login"
+  },
+  "onboarding": {
+    "changePassword": "Change Password",
+    "changePasswordDescription": "Please change your temporary password to continue.",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "passwordsMustMatch": "Passwords must match",
+    "passwordRequirements": "Password Requirements",
+    "requirements": {
+      "minLength": "At least 8 characters",
+      "uppercase": "At least one uppercase letter",
+      "lowercase": "At least one lowercase letter",
+      "number": "At least one number"
+    },
+    "changePasswordButton": "Change Password",
+    "changePasswordError": "Failed to change password",
+    "completeProfile": "Complete Your Profile",
+    "completeProfileDescription": "Add optional profile information or skip to continue.",
+    "displayName": "Display Name",
+    "knownAs": "Known As (Nickname)",
+    "knownAsHelper": "How you prefer to be addressed",
+    "contactPhone": "Contact Phone",
+    "address": "Address",
+    "skipForNow": "Skip for Now",
+    "complete": "Complete",
+    "profileError": "Failed to update profile"
   }
 }

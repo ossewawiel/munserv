@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { useAuth } from '@/shared/hooks/useAuth';
-import { hasPermission } from '@/shared/types/admin';
+import { hasPermission, isAdminRole, SUPER_USER_ROLE } from '@/shared/types/admin';
 
 /**
  * Setup step identifiers for tracking incomplete configuration
@@ -49,7 +49,12 @@ export interface PodSetupState {
  */
 export function usePodSetup(): PodSetupState {
   const { admin } = useAuth();
-  const isPodLevel = Boolean(admin && hasPermission(admin.role, 'pod_admin'));
+  // Super users and pod-level admins can see pod setup
+  const isPodLevel = Boolean(
+    admin &&
+      (admin.role === SUPER_USER_ROLE ||
+        (isAdminRole(admin.role) && hasPermission(admin.role, 'pod_admin')))
+  );
 
   // For MVP, use static mock data with real UUIDs from database
   // TODO: Replace with React Query hook when backend endpoint is available

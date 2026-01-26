@@ -1,5 +1,5 @@
 import type { GeoPoint } from '@/shared/types/common';
-import type { AdminRole } from '@/shared/types/admin';
+import type { UserRole } from '@/shared/types/admin';
 
 /**
  * Member status for registration workflow
@@ -46,8 +46,12 @@ export interface AdminUser {
   id: string;
   email: string;
   displayName: string;
-  sectorId: string;
-  role: AdminRole;
+  sectorId: string | null;
+  role: UserRole;
+  level?: string;
+  podId?: string | null;
+  wardId?: string | null;
+  onboardingStatus?: string | null;
 }
 
 export interface LoginRequest {
@@ -57,7 +61,8 @@ export interface LoginRequest {
 
 export interface AdminProfile {
   admin: AdminUser;
-  sector: Sector;
+  sector: Sector | null;
+  bootstrapStatus?: string;
 }
 
 export interface LoginResponse {

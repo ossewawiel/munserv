@@ -5,15 +5,16 @@ import type { IssueFilterParams, IssueState } from './types';
 
 export function useIssues(params?: Omit<IssueFilterParams, 'sectorId'>) {
   const { admin } = useAuth();
+  const sectorId = admin?.sectorId;
   const fullParams: IssueFilterParams = {
     ...params,
-    sectorId: admin?.sectorId,
+    sectorId: sectorId ?? undefined,
   };
 
   return useQuery({
     queryKey: ['issues', fullParams],
     queryFn: () => issueApi.getAll(fullParams),
-    enabled: !!admin?.sectorId,
+    enabled: !!sectorId,
   });
 }
 
