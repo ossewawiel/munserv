@@ -4,6 +4,7 @@ import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.domain.OnboardingStatus
 import com.munserv.admin.repository.AdminRepository
+import com.munserv.audit.service.AuditService
 import com.munserv.bootstrap.config.BootstrapConfig
 import com.munserv.bootstrap.domain.BootstrapStatus
 import com.munserv.shared.email.EmailService
@@ -32,6 +33,7 @@ class BootstrapServiceTest {
     private lateinit var bootstrapConfig: BootstrapConfig
     private lateinit var passwordEncoder: PasswordEncoder
     private lateinit var emailService: EmailService
+    private lateinit var auditService: AuditService
     private lateinit var clock: Clock
     private lateinit var service: BootstrapService
 
@@ -58,8 +60,12 @@ class BootstrapServiceTest {
         bootstrapConfig = mockk()
         passwordEncoder = mockk()
         emailService = mockk()
+        auditService = mockk(relaxed = true)
         clock = Clock.fixed(fixedInstant, ZoneOffset.UTC)
-        service = BootstrapService(adminRepository, bootstrapConfig, passwordEncoder, emailService, clock)
+        service = BootstrapService(adminRepository, bootstrapConfig, passwordEncoder, emailService, auditService, clock)
+
+        // Default mock for bootstrapConfig.email used in audit logging
+        every { bootstrapConfig.email } returns "super@example.com"
     }
 
     @Nested
@@ -340,6 +346,55 @@ class BootstrapServiceTest {
             // Assert
             adminSlot.captured.createdAt shouldBe fixedInstant
             adminSlot.captured.updatedAt shouldBe fixedInstant
+        }
+
+        @Test
+        fun `should log Pod Chief creation to audit service`() {
+            // Arrange
+            every { adminRepository.findPodChief(testPodId) } returns null
+            every { adminRepository.existsByEmail(validEmail) } returns false
+            every { passwordEncoder.encode(any()) } returns "hashedPassword"
+            every { emailService.sendPodChiefWelcomeEmail(any(), any(), any()) } just Runs
+
+            val adminSlot = slot<Admin>()
+            every {
+                adminRepository.save(capture(adminSlot), any(), any())
+            } answers { adminSlot.captured }
+
+            // Act
+            service.createPodChief(validEmail, validDisplayName, testPodId)
+
+            // Assert
+            verify(exactly = 1) {
+                auditService.logPodChiefCreated(
+                    superUserEmail = "super@example.com",
+                    adminId = any(),
+                    adminEmail = validEmail,
+                    podId = testPodId,
+                )
+            }
+        }
+
+        @Test
+        fun `should not log to audit service when validation fails`() {
+            // Act
+            service.createPodChief("", validDisplayName, testPodId)
+
+            // Assert
+            verify(exactly = 0) { auditService.logPodChiefCreated(any(), any(), any(), any(), any(), any()) }
+        }
+
+        @Test
+        fun `should not log to audit service when Pod Chief already exists`() {
+            // Arrange
+            val existingPodChief = createPodChief(OnboardingStatus.PENDING)
+            every { adminRepository.findPodChief(testPodId) } returns existingPodChief
+
+            // Act
+            service.createPodChief(validEmail, validDisplayName, testPodId)
+
+            // Assert
+            verify(exactly = 0) { auditService.logPodChiefCreated(any(), any(), any(), any(), any(), any()) }
         }
     }
 }

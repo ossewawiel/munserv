@@ -1,6 +1,7 @@
 package com.munserv.auth.service
 
 import com.munserv.admin.repository.AdminRepository
+import com.munserv.audit.service.AuditService
 import com.munserv.auth.config.AdminConfig
 import com.munserv.auth.domain.Email
 import com.munserv.auth.domain.Member
@@ -36,6 +37,7 @@ class AuthService(
     private val bootstrapConfig: BootstrapConfig,
     private val bootstrapService: BootstrapService,
     private val podRepository: PodRepository,
+    private val auditService: AuditService,
 ) {
     companion object {
         private const val MEMBER_ROLE = "member"
@@ -246,16 +248,28 @@ class AuthService(
     private fun handleSuperUserLogin(podId: PodId): AuthResult {
         // Check bootstrap eligibility
         val status = bootstrapService.getStatus(podId)
+        val superUserEmail = bootstrapConfig.email ?: "unknown"
 
         return when (status) {
             is BootstrapStatus.NotEligible -> {
                 // Pod already bootstrapped - super user cannot log in
+                auditService.logSuperUserLoginAttempt(
+                    email = superUserEmail,
+                    success = false,
+                    podId = podId,
+                )
                 AuthResult.InvalidCredentials
             }
             is BootstrapStatus.Eligible,
             is BootstrapStatus.PodChiefOnboarding,
             -> {
-                // Super user can log in
+                // Super user can log in - log successful login
+                auditService.logSuperUserLoginAttempt(
+                    email = superUserEmail,
+                    success = true,
+                    podId = podId,
+                )
+
                 val memberId = MemberId(UUID.randomUUID())
                 val tokens = jwtService.generateTokenPair(memberId, SUPER_USER_ROLE)
 

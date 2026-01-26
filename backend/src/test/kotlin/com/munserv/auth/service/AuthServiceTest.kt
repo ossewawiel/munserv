@@ -1,6 +1,7 @@
 package com.munserv.auth.service
 
 import com.munserv.admin.repository.AdminRepository
+import com.munserv.audit.service.AuditService
 import com.munserv.auth.config.AdminConfig
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
@@ -38,6 +39,7 @@ class AuthServiceTest {
     private lateinit var bootstrapConfig: BootstrapConfig
     private lateinit var bootstrapService: BootstrapService
     private lateinit var podRepository: PodRepository
+    private lateinit var auditService: AuditService
     private lateinit var clock: Clock
 
     private val testPhone = "+27821234567"
@@ -76,6 +78,7 @@ class AuthServiceTest {
             )
         // Default: no pod found (MVP single-pod not set up yet)
         every { podRepository.findFirst() } returns null
+        auditService = mockk(relaxed = true)
         authService =
             AuthService(
                 memberRepository,
@@ -87,6 +90,7 @@ class AuthServiceTest {
                 bootstrapConfig,
                 bootstrapService,
                 podRepository,
+                auditService,
             )
     }
 

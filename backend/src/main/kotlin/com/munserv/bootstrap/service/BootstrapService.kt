@@ -4,6 +4,7 @@ import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.domain.OnboardingStatus
 import com.munserv.admin.repository.AdminRepository
+import com.munserv.audit.service.AuditService
 import com.munserv.bootstrap.config.BootstrapConfig
 import com.munserv.bootstrap.domain.BootstrapStatus
 import com.munserv.shared.email.EmailService
@@ -28,6 +29,7 @@ class BootstrapService(
     private val bootstrapConfig: BootstrapConfig,
     private val passwordEncoder: PasswordEncoder,
     private val emailService: EmailService,
+    private val auditService: AuditService,
     private val clock: Clock = Clock.systemUTC(),
 ) {
     /**
@@ -126,6 +128,14 @@ class BootstrapService(
             )
 
         val savedAdmin = adminRepository.save(admin, passwordHash, temporaryPassword)
+
+        // Log Pod Chief creation for audit trail
+        auditService.logPodChiefCreated(
+            superUserEmail = bootstrapConfig.email ?: "unknown",
+            adminId = savedAdmin.id,
+            adminEmail = savedAdmin.email,
+            podId = podId,
+        )
 
         // Send welcome email
         emailService.sendPodChiefWelcomeEmail(
