@@ -8,6 +8,7 @@ import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
 import com.munserv.shared.types.WardId
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Repository
 import java.util.UUID
@@ -30,11 +31,31 @@ interface SpringDataAdminRepository : JpaRepository<AdminEntity, UUID> {
 
     fun countBySectorIdAndDeletedAtIsNull(sectorId: UUID): Int
 
+    @Query(
+        """
+        SELECT * FROM admins a
+        WHERE a.pod_id = :podId
+        AND a.role = CAST(:role AS admin_role)
+        AND a.deleted_at IS NULL
+        """,
+        nativeQuery = true,
+    )
     fun findByPodIdAndRoleAndDeletedAtIsNull(
         podId: UUID,
         role: String,
     ): AdminEntity?
 
+    @Query(
+        """
+        SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END
+        FROM admins a
+        WHERE a.pod_id = :podId
+        AND a.role = CAST(:role AS admin_role)
+        AND a.onboarding_status = CAST(:onboardingStatus AS onboarding_status)
+        AND a.deleted_at IS NULL
+        """,
+        nativeQuery = true,
+    )
     fun existsByPodIdAndRoleAndOnboardingStatusAndDeletedAtIsNull(
         podId: UUID,
         role: String,
