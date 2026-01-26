@@ -8,12 +8,21 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, admin } = useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {
     // Redirect to login, saving the attempted URL for redirect after login
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Check onboarding status - redirect if not complete
+  if (admin?.onboardingStatus === 'pending') {
+    return <Navigate to="/onboarding/change-password" replace />;
+  }
+
+  if (admin?.onboardingStatus === 'password_changed') {
+    return <Navigate to="/onboarding/complete-profile" replace />;
   }
 
   return <>{children}</>;
