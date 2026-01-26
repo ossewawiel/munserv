@@ -31,6 +31,20 @@
 | W20 | As a Pod Chief, I can see the Reports menu structure | Pod reports submenu entry ǀ Ward/sector submenu entries ǀ Clicking goes to placeholder page with tabbed structure | 🔴 Pending | [#31](https://github.com/ossewawiel/munserv/issues/31) |
 | W21 | As a developer, I can use a generic data table component | Supports column definitions ǀ Sort by columns (prepared) ǀ Search input (prepared) ǀ Filter slide-out panel (prepared) ǀ Actions column ǀ Add button slot | 🟢 Done | [#32](https://github.com/ossewawiel/munserv/issues/32) |
 
+## Pod Chief Bootstrap Stories
+
+| ID | Story | Acceptance Criteria | Status | Issue |
+|----|-------|---------------------|--------|-------|
+| W22 | As a super user, I can log in to a fresh pod | Login form accepts super user credentials ǀ Validates against env config ǀ Returns JWT with `role: super_user` ǀ Rate limited | 🟢 Done | [#37](https://github.com/ossewawiel/munserv/issues/37) |
+| W23 | As a super user, I can create a Pod Chief | Form: email, display name ǀ Triggers welcome email with temp password ǀ Shows temp password in success dialog ǀ Pod Chief created with PENDING status | 🟢 Done | [#38](https://github.com/ossewawiel/munserv/issues/38) |
+| W24 | As a super user, I cannot log in after Pod Chief is onboarded | Login denied with clear error ǀ Error message explains pod already bootstrapped ǀ Shows option to request temporary access | 🟢 Done | [#39](https://github.com/ossewawiel/munserv/issues/39) |
+| W25 | As a Pod Chief, I receive email with temp password | Welcome email sent ǀ Contains login instructions ǀ Contains temp password ǀ Contains download/access link | 🔴 Pending | [#40](https://github.com/ossewawiel/munserv/issues/40) |
+| W26 | As a Pod Chief, I must change password on first login | Redirect to change password page ǀ Cannot skip or access dashboard ǀ Password validated against requirements ǀ Status changes to PASSWORD_CHANGED | 🔴 Pending | [#41](https://github.com/ossewawiel/munserv/issues/41) |
+| W27 | As a Pod Chief, I can complete optional profile info | Display name editable ǀ Known-as, contact, address fields optional ǀ Can skip to dashboard ǀ Status changes to ACTIVE when complete | 🔴 Pending | [#42](https://github.com/ossewawiel/munserv/issues/42) |
+| W28 | As a Pod Chief, I can grant super user temporary access | Located in Pod Settings > Support Access section ǀ Grant button opens dialog ǀ Select role (from manageable roles) ǀ Set purpose/reason ǀ Access auto-revokes after logout OR 1 hour inactivity ǀ Audit logged | 🔴 Pending | [#43](https://github.com/ossewawiel/munserv/issues/43) |
+| W29 | As a super user, I can use temporary access for debugging | Login with temp grant ǀ Role-limited access ǀ Session shows expiry timer ǀ Auto-logout on expiry ǀ All actions audit logged | 🔴 Pending | [#44](https://github.com/ossewawiel/munserv/issues/44) |
+| W30 | As a Pod Chief, I can view/revoke active super user sessions | Located in Pod Settings > Support Access section ǀ See active sessions with role, granted time, last activity ǀ Manual revoke button ǀ Session history log | 🔴 Pending | [#45](https://github.com/ossewawiel/munserv/issues/45) |
+
 ## Status Legend
 - 🟢 Done
 - 🟡 In Progress
