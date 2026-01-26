@@ -18,7 +18,8 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
-import { ADMIN_ROLE_LABELS, getManageableRoles, type AdminRole } from '@/shared/types/admin';
+import { ADMIN_ROLE_LABELS, getManageableRoles, getRoleLevel, type AdminRole } from '@/shared/types/admin';
+import { usePodSetup } from '@/shared/hooks/usePodSetup';
 import type { CreatePodAdministratorRequest } from '../types';
 
 interface CreatePodAdminDialogProps {
@@ -44,15 +45,29 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
   temporaryPassword,
 }) => {
   const { t } = useTranslation();
+  const { status: podSetupStatus } = usePodSetup();
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [role, setRole] = useState<AdminRole>('pod_admin');
+  const [wardId, setWardId] = useState('');
+  const [sectorId, setSectorId] = useState('');
   const [emailError, setEmailError] = useState('');
   const [nameError, setNameError] = useState('');
+  const [wardError, setWardError] = useState('');
+  const [sectorError, setSectorError] = useState('');
   const [passwordCopied, setPasswordCopied] = useState(false);
 
   // Pod Chief can manage all roles below their own
   const manageableRoles = getManageableRoles('pod_chief');
+
+  // Determine if ward/sector selection is needed based on role level
+  const roleLevel = getRoleLevel(role);
+  const requiresWard = roleLevel === 'ward';
+  const requiresSector = roleLevel === 'sector';
+
+  // Get available wards and sectors from pod setup
+  const wards = podSetupStatus?.wards ?? [];
+  const sectors = podSetupStatus?.sectors ?? [];
 
   const validateEmailField = (value: string): boolean => {
     if (!value.trim()) {
@@ -76,16 +91,52 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
     return true;
   };
 
+  const validateWardField = (): boolean => {
+    if (requiresWard && !wardId) {
+      setWardError(t('podAdministrators.form.wardRequired'));
+      return false;
+    }
+    setWardError('');
+    return true;
+  };
+
+  const validateSectorField = (): boolean => {
+    if (requiresSector && !sectorId) {
+      setSectorError(t('podAdministrators.form.sectorRequired'));
+      return false;
+    }
+    setSectorError('');
+    return true;
+  };
+
   const handleSubmit = () => {
     const isEmailValid = validateEmailField(email);
     const isNameValid = validateNameField(displayName);
+    const isWardValid = validateWardField();
+    const isSectorValid = validateSectorField();
 
-    if (isEmailValid && isNameValid) {
+    if (isEmailValid && isNameValid && isWardValid && isSectorValid) {
       onSubmit({
         email: email.trim(),
         displayName: displayName.trim(),
         role,
+        wardId: requiresWard ? wardId : undefined,
+        sectorId: requiresSector ? sectorId : undefined,
       });
+    }
+  };
+
+  const handleRoleChange = (newRole: AdminRole) => {
+    setRole(newRole);
+    // Clear ward/sector selection when role level changes
+    const newRoleLevel = getRoleLevel(newRole);
+    if (newRoleLevel !== 'ward') {
+      setWardId('');
+      setWardError('');
+    }
+    if (newRoleLevel !== 'sector') {
+      setSectorId('');
+      setSectorError('');
     }
   };
 
@@ -93,8 +144,12 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
     setEmail('');
     setDisplayName('');
     setRole('pod_admin');
+    setWardId('');
+    setSectorId('');
     setEmailError('');
     setNameError('');
+    setWardError('');
+    setSectorError('');
     setPasswordCopied(false);
     onClose();
   };
@@ -197,7 +252,7 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
               labelId="role-select-label"
               value={role}
               label={t('podAdministrators.form.role')}
-              onChange={(e) => setRole(e.target.value as AdminRole)}
+              onChange={(e) => handleRoleChange(e.target.value as AdminRole)}
             >
               {manageableRoles.map((roleOption) => (
                 <MenuItem key={roleOption} value={roleOption}>
@@ -206,6 +261,60 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
               ))}
             </Select>
           </FormControl>
+
+          {/* Ward selection - shown for ward-level roles */}
+          {requiresWard && (
+            <FormControl fullWidth disabled={isLoading} error={!!wardError}>
+              <InputLabel id="ward-select-label">{t('podAdministrators.form.selectWard')}</InputLabel>
+              <Select
+                labelId="ward-select-label"
+                value={wardId}
+                label={t('podAdministrators.form.selectWard')}
+                onChange={(e) => {
+                  setWardId(e.target.value);
+                  if (wardError) setWardError('');
+                }}
+              >
+                {wards.map((ward) => (
+                  <MenuItem key={ward.id} value={ward.id}>
+                    {ward.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {wardError && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
+                  {wardError}
+                </Typography>
+              )}
+            </FormControl>
+          )}
+
+          {/* Sector selection - shown for sector-level roles */}
+          {requiresSector && (
+            <FormControl fullWidth disabled={isLoading} error={!!sectorError}>
+              <InputLabel id="sector-select-label">{t('podAdministrators.form.selectSector')}</InputLabel>
+              <Select
+                labelId="sector-select-label"
+                value={sectorId}
+                label={t('podAdministrators.form.selectSector')}
+                onChange={(e) => {
+                  setSectorId(e.target.value);
+                  if (sectorError) setSectorError('');
+                }}
+              >
+                {sectors.map((sector) => (
+                  <MenuItem key={sector.id} value={sector.id}>
+                    {sector.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {sectorError && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
+                  {sectorError}
+                </Typography>
+              )}
+            </FormControl>
+          )}
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>

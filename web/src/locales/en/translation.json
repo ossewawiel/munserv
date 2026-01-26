@@ -485,9 +485,13 @@
       "email": "Email Address",
       "displayName": "Display Name",
       "role": "Role",
+      "selectWard": "Assign to Ward",
+      "selectSector": "Assign to Sector",
       "emailRequired": "Email is required",
       "emailInvalid": "Invalid email format",
       "displayNameRequired": "Display name is required",
+      "wardRequired": "Ward selection is required for this role",
+      "sectorRequired": "Sector selection is required for this role",
       "emailReadonly": "Email cannot be changed"
     },
     "success": {
