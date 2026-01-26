@@ -7,6 +7,9 @@ import com.munserv.auth.domain.MemberStatus
 import com.munserv.auth.domain.PhoneNumber
 import com.munserv.auth.domain.Pin
 import com.munserv.auth.repository.MemberRepository
+import com.munserv.bootstrap.config.BootstrapConfig
+import com.munserv.bootstrap.service.BootstrapService
+import com.munserv.pod.repository.PodRepository
 import com.munserv.sectors.repository.SectorRepository
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
@@ -32,6 +35,9 @@ class AuthServiceTest {
     private lateinit var adminConfig: AdminConfig
     private lateinit var adminRepository: AdminRepository
     private lateinit var sectorRepository: SectorRepository
+    private lateinit var bootstrapConfig: BootstrapConfig
+    private lateinit var bootstrapService: BootstrapService
+    private lateinit var podRepository: PodRepository
     private lateinit var clock: Clock
 
     private val testPhone = "+27821234567"
@@ -45,6 +51,9 @@ class AuthServiceTest {
         memberRepository = mockk()
         adminRepository = mockk()
         sectorRepository = mockk()
+        bootstrapConfig = BootstrapConfig(enabled = false, email = null, password = null)
+        bootstrapService = mockk()
+        podRepository = mockk()
         otpService = OtpService(clock = clock, otpTtl = Duration.ofMinutes(5))
         jwtService =
             JwtService(
@@ -65,7 +74,20 @@ class AuthServiceTest {
                 sectorCenterLat = -26.2041,
                 sectorCenterLng = 28.0473,
             )
-        authService = AuthService(memberRepository, otpService, jwtService, adminConfig, adminRepository, sectorRepository)
+        // Default: no pod found (MVP single-pod not set up yet)
+        every { podRepository.findFirst() } returns null
+        authService =
+            AuthService(
+                memberRepository,
+                otpService,
+                jwtService,
+                adminConfig,
+                adminRepository,
+                sectorRepository,
+                bootstrapConfig,
+                bootstrapService,
+                podRepository,
+            )
     }
 
     // Registration flow tests

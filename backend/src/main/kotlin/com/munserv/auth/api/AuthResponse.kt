@@ -59,6 +59,7 @@ data class AdminTokens(
 data class AdminProfile(
     val admin: AdminUser,
     val sector: AdminSector? = null,
+    val bootstrapStatus: String? = null,
 )
 
 data class AdminUser(
@@ -70,6 +71,7 @@ data class AdminUser(
     val podId: String? = null,
     val wardId: String? = null,
     val sectorId: String? = null,
+    val onboardingStatus: String? = null,
 )
 
 data class AdminSector(

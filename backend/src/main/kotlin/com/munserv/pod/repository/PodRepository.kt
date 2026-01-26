@@ -14,6 +14,12 @@ interface PodRepository {
     fun findById(id: PodId): Pod?
 
     /**
+     * Find the first/default pod.
+     * Used for MVP single-pod deployment where there's only one pod.
+     */
+    fun findFirst(): Pod?
+
+    /**
      * Check if a pod exists.
      */
     fun existsById(id: PodId): Boolean

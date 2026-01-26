@@ -14,7 +14,13 @@ import java.util.UUID
 /**
  * Spring Data JPA repository for pods.
  */
-interface SpringDataPodRepository : JpaRepository<PodEntity, UUID>
+interface SpringDataPodRepository : JpaRepository<PodEntity, UUID> {
+    /**
+     * Find the first pod ordered by creation date.
+     * Used for MVP single-pod deployment.
+     */
+    fun findFirstByOrderByCreatedAtAsc(): PodEntity?
+}
 
 /**
  * Spring Data JPA repository for pod setup steps.
@@ -24,7 +30,10 @@ interface SpringDataPodSetupStepRepository : JpaRepository<PodSetupStepEntity, P
     fun findAllByPodId(podId: UUID): List<PodSetupStepEntity>
 
     @Query("SELECT COUNT(e) > 0 FROM PodSetupStepEntity e WHERE e.podId = :podId AND e.step = :step")
-    fun existsByPodIdAndStep(podId: UUID, step: String): Boolean
+    fun existsByPodIdAndStep(
+        podId: UUID,
+        step: String,
+    ): Boolean
 }
 
 /**
@@ -34,14 +43,13 @@ interface SpringDataPodSetupStepRepository : JpaRepository<PodSetupStepEntity, P
 class JpaPodRepository(
     private val springDataRepository: SpringDataPodRepository,
 ) : PodRepository {
-    override fun findById(id: PodId): Pod? =
-        springDataRepository.findByIdOrNull(id.value)?.toDomain()
+    override fun findById(id: PodId): Pod? = springDataRepository.findByIdOrNull(id.value)?.toDomain()
 
-    override fun existsById(id: PodId): Boolean =
-        springDataRepository.existsById(id.value)
+    override fun findFirst(): Pod? = springDataRepository.findFirstByOrderByCreatedAtAsc()?.toDomain()
 
-    override fun save(pod: Pod): Pod =
-        springDataRepository.save(PodEntity.fromDomain(pod)).toDomain()
+    override fun existsById(id: PodId): Boolean = springDataRepository.existsById(id.value)
+
+    override fun save(pod: Pod): Pod = springDataRepository.save(PodEntity.fromDomain(pod)).toDomain()
 }
 
 /**
@@ -57,10 +65,15 @@ class JpaPodSetupStepRepository(
             .map { it.toSetupStep() }
             .toSet()
 
-    override fun isStepCompleted(podId: PodId, step: SetupStep): Boolean =
-        springDataRepository.existsByPodIdAndStep(podId.value, step.toDbValue())
+    override fun isStepCompleted(
+        podId: PodId,
+        step: SetupStep,
+    ): Boolean = springDataRepository.existsByPodIdAndStep(podId.value, step.toDbValue())
 
-    override fun markComplete(podId: PodId, step: SetupStep) {
+    override fun markComplete(
+        podId: PodId,
+        step: SetupStep,
+    ) {
         if (!isStepCompleted(podId, step)) {
             val entity = PodSetupStepEntity.create(podId, step, Instant.now(clock))
             springDataRepository.save(entity)

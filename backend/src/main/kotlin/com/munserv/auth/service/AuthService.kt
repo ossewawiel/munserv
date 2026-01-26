@@ -9,8 +9,13 @@ import com.munserv.auth.domain.Password
 import com.munserv.auth.domain.PhoneNumber
 import com.munserv.auth.domain.Pin
 import com.munserv.auth.repository.MemberRepository
+import com.munserv.bootstrap.config.BootstrapConfig
+import com.munserv.bootstrap.domain.BootstrapStatus
+import com.munserv.bootstrap.service.BootstrapService
+import com.munserv.pod.repository.PodRepository
 import com.munserv.sectors.repository.SectorRepository
 import com.munserv.shared.types.MemberId
+import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,10 +33,14 @@ class AuthService(
     private val adminConfig: AdminConfig,
     private val adminRepository: AdminRepository,
     private val sectorRepository: SectorRepository,
+    private val bootstrapConfig: BootstrapConfig,
+    private val bootstrapService: BootstrapService,
+    private val podRepository: PodRepository,
 ) {
     companion object {
         private const val MEMBER_ROLE = "member"
         private const val ADMIN_ROLE = "admin"
+        private const val SUPER_USER_ROLE = "super_user"
     }
 
     /**
@@ -176,14 +185,27 @@ class AuthService(
     /**
      * Admin login with email and password.
      *
-     * Authenticates admin from database and returns admin details with tokens.
+     * Checks super user credentials first, then falls back to database admin.
      */
     @Transactional(readOnly = true)
     fun adminLogin(
         email: String,
         password: String,
     ): AuthResult {
-        // Look up admin from database
+        // Get the current pod (MVP: single pod deployment)
+        val pod = podRepository.findFirst()
+        val podId = pod?.let { PodId(it.id.value) }
+
+        // 1. Check if this is a super user login attempt
+        if (podId != null &&
+            bootstrapConfig.isConfigured() &&
+            email == bootstrapConfig.email &&
+            password == bootstrapConfig.password
+        ) {
+            return handleSuperUserLogin(podId)
+        }
+
+        // 2. Fall back to database admin lookup
         val adminWithPassword =
             adminRepository.findByEmailWithPasswordHash(email)
                 ?: return AuthResult.InvalidCredentials
@@ -214,7 +236,43 @@ class AuthService(
             sectorName = sector?.name,
             sectorCenterLat = sector?.center?.latitude,
             sectorCenterLng = sector?.center?.longitude,
+            onboardingStatus = admin.onboardingStatus.toDbValue(),
         )
+    }
+
+    /**
+     * Handle super user login for bootstrap.
+     */
+    private fun handleSuperUserLogin(podId: PodId): AuthResult {
+        // Check bootstrap eligibility
+        val status = bootstrapService.getStatus(podId)
+
+        return when (status) {
+            is BootstrapStatus.NotEligible -> {
+                // Pod already bootstrapped - super user cannot log in
+                AuthResult.InvalidCredentials
+            }
+            is BootstrapStatus.Eligible,
+            is BootstrapStatus.PodChiefOnboarding,
+            -> {
+                // Super user can log in
+                val memberId = MemberId(UUID.randomUUID())
+                val tokens = jwtService.generateTokenPair(memberId, SUPER_USER_ROLE)
+
+                val bootstrapStatus =
+                    when (status) {
+                        is BootstrapStatus.Eligible -> "requires_bootstrap"
+                        is BootstrapStatus.PodChiefOnboarding -> "pod_chief_pending"
+                        else -> "unknown"
+                    }
+
+                AuthResult.SuperUserLoginSuccess(
+                    tokens = tokens,
+                    podId = podId.value.toString(),
+                    bootstrapStatus = bootstrapStatus,
+                )
+            }
+        }
     }
 
     /**

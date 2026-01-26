@@ -54,6 +54,15 @@ sealed interface AuthResult {
         val sectorName: String? = null,
         val sectorCenterLat: Double? = null,
         val sectorCenterLng: Double? = null,
+        // Onboarding status
+        val onboardingStatus: String? = null,
+    ) : AuthResult
+
+    // Super user login result for bootstrap
+    data class SuperUserLoginSuccess(
+        val tokens: TokenPair,
+        val podId: String,
+        val bootstrapStatus: String,
     ) : AuthResult
 
     data object InvalidCredentials : AuthResult

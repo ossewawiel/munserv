@@ -77,6 +77,7 @@ class AuthController(
             is AuthResult.PhoneCheckResult,
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
+            is AuthResult.SuperUserLoginSuccess,
             is AuthResult.InvalidCredentials,
             is AuthResult.AccountSuspended,
             is AuthResult.TokenRefreshed,
@@ -124,6 +125,7 @@ class AuthController(
             is AuthResult.PhoneCheckResult,
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
+            is AuthResult.SuperUserLoginSuccess,
             is AuthResult.InvalidCredentials,
             is AuthResult.AccountSuspended,
             is AuthResult.TokenRefreshed,
@@ -196,6 +198,7 @@ class AuthController(
             is AuthResult.PhoneCheckResult,
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
+            is AuthResult.SuperUserLoginSuccess,
             is AuthResult.InvalidCredentials,
             is AuthResult.AccountSuspended,
             is AuthResult.TokenRefreshed,
@@ -252,6 +255,7 @@ class AuthController(
             is AuthResult.InvalidSectorId,
             is AuthResult.PhoneCheckResult,
             is AuthResult.AdminLoginSuccess,
+            is AuthResult.SuperUserLoginSuccess,
             is AuthResult.TokenRefreshed,
             is AuthResult.InvalidToken,
             is AuthResult.MemberLoginSuccess,
@@ -319,8 +323,45 @@ class AuthController(
                                         podId = result.podId,
                                         wardId = result.wardId,
                                         sectorId = result.sectorId,
+                                        onboardingStatus = result.onboardingStatus,
                                     ),
                                 sector = sector,
+                            ),
+                    ),
+                )
+            }
+
+            is AuthResult.SuperUserLoginSuccess -> {
+                val expiresAt =
+                    java.time.Instant
+                        .now()
+                        .plusSeconds(result.tokens.expiresIn)
+                        .toString()
+
+                ResponseEntity.ok(
+                    AdminLoginResponse(
+                        tokens =
+                            AdminTokens(
+                                accessToken = result.tokens.accessToken,
+                                refreshToken = result.tokens.refreshToken,
+                                expiresAt = expiresAt,
+                            ),
+                        profile =
+                            AdminProfile(
+                                admin =
+                                    AdminUser(
+                                        id = "super-user",
+                                        email = "",
+                                        displayName = "Super User",
+                                        role = "SUPER_USER",
+                                        level = "system",
+                                        podId = result.podId,
+                                        wardId = null,
+                                        sectorId = null,
+                                        onboardingStatus = null,
+                                    ),
+                                sector = null,
+                                bootstrapStatus = result.bootstrapStatus,
                             ),
                     ),
                 )
@@ -385,6 +426,7 @@ class AuthController(
             is AuthResult.PhoneCheckResult,
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
+            is AuthResult.SuperUserLoginSuccess,
             is AuthResult.InvalidCredentials,
             is AuthResult.AccountSuspended,
             is AuthResult.MemberLoginSuccess,
@@ -425,6 +467,7 @@ class AuthController(
             is AuthResult.InvalidSectorId,
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
+            is AuthResult.SuperUserLoginSuccess,
             is AuthResult.InvalidCredentials,
             is AuthResult.AccountSuspended,
             is AuthResult.TokenRefreshed,
@@ -553,6 +596,7 @@ class AuthController(
             is AuthResult.PhoneCheckResult,
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
+            is AuthResult.SuperUserLoginSuccess,
             is AuthResult.TokenRefreshed,
             is AuthResult.InvalidToken,
             is AuthResult.PasswordChanged,
@@ -624,6 +668,7 @@ class AuthController(
             is AuthResult.PhoneCheckResult,
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
+            is AuthResult.SuperUserLoginSuccess,
             is AuthResult.AccountSuspended,
             is AuthResult.TokenRefreshed,
             is AuthResult.InvalidToken,
