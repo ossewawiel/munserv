@@ -108,11 +108,15 @@ Create: `specs/features/{{feature}}/{{slug}}-investigation.md`
 
 ### Step 6: Create Platform Handoff Documents
 
-For EACH affected platform, create a handoff document:
+For EACH affected platform, create a handoff document.
 
-**Backend:** `backend/docs/issues/{{number}}-{{slug}}.md`
-**Web:** `web/docs/issues/{{number}}-{{slug}}.md`
-**Mobile:** `mobile/docs/issues/{{number}}-{{slug}}.md`
+**IMPORTANT:** Always create handoff docs in the central specs directory, NOT in platform-specific directories. When running from a platform subdirectory (e.g., `backend/`), look in the parent directory first:
+
+**Location:** `specs/features/{{feature}}/` (or `../specs/features/{{feature}}/` when in a subdirectory)
+
+**Backend:** `specs/features/{{feature}}/{{number}}-{{slug}}-backend.md`
+**Web:** `specs/features/{{feature}}/{{number}}-{{slug}}-web.md`
+**Mobile:** `specs/features/{{feature}}/{{number}}-{{slug}}-mobile.md`
 
 Use this template with YAML frontmatter:
 
@@ -193,7 +197,7 @@ Print clear instructions for running platform agents:
 
 ### Platform Handoffs Created
 {{For each platform}}
-- {{Platform}}: `{{platform}}/docs/issues/{{number}}-{{slug}}.md`
+- {{Platform}}: `specs/features/{{feature}}/{{number}}-{{slug}}-{{platform}}.md`
 
 ### Execution Order
 
@@ -253,8 +257,8 @@ This will:
 
 | Platform | Handoff Doc | Status | Dependencies |
 |----------|-------------|--------|--------------|
-| Backend | `backend/docs/issues/{{number}}-*.md` | pending | None |
-| Web | `web/docs/issues/{{number}}-*.md` | pending | Backend |
+| Backend | `specs/features/{{feature}}/{{number}}-*-backend.md` | pending | None |
+| Web | `specs/features/{{feature}}/{{number}}-*-web.md` | pending | Backend |
 
 ### Execution Order
 
@@ -282,6 +286,19 @@ cd web && claude
 /close-handoff {{number}}
 ```
 ```
+
+## Handoff Location Rules
+
+**CRITICAL:** All handoff documents are stored centrally in `specs/features/`, NOT in platform subdirectories.
+
+When running from a platform directory (e.g., `backend/`, `web/`, `mobile/`):
+- Look in `../specs/features/{{feature}}/` for existing handoffs
+- The path from project root is always `specs/features/{{feature}}/`
+
+This ensures:
+1. All platforms reference the same source of truth
+2. Handoffs are easy to find regardless of current working directory
+3. Investigation and handoff docs stay together
 
 ## Platform-Specific Handoff Content
 
@@ -333,7 +350,7 @@ calls `GroundAdminService.acceptInvitation()` to process the actual acceptance.
 
 | Platform | Handoff Doc | Status | Dependencies |
 |----------|-------------|--------|--------------|
-| Backend | `backend/docs/issues/008-ground-admin-acceptance.md` | pending | None |
+| Backend | `specs/features/ground-admin/008-ground-admin-acceptance-backend.md` | pending | None |
 
 ### Execution Order
 
