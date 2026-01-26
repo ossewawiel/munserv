@@ -13,6 +13,14 @@ munserv:
   email:
     override-recipient: ${EMAIL_OVERRIDE_RECIPIENT:marsel.pretorius@gmail.com}
 
+# Bootstrap super user for local development
+# WARNING: Development only - never use these in production
+bootstrap:
+  super-user:
+    enabled: true
+    email: superuser@munserv.local
+    password: super123
+
 logging:
   level:
     com.munserv: DEBUG

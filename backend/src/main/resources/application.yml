@@ -87,6 +87,15 @@ admin:
   sector-center-lat: ${ADMIN_SECTOR_CENTER_LAT:-26.2041}
   sector-center-lng: ${ADMIN_SECTOR_CENTER_LNG:28.0473}
 
+# Bootstrap Super User Configuration
+# Used for creating the first Pod Chief on a fresh pod deployment.
+# SECURITY: Disabled by default. Enable only during initial setup.
+bootstrap:
+  super-user:
+    enabled: ${BOOTSTRAP_SUPER_USER_ENABLED:false}
+    email: ${SUPER_USER_EMAIL:}
+    password: ${SUPER_USER_PASSWORD:}
+
 storage:
   type: local
   local:
