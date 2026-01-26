@@ -227,6 +227,81 @@ class OnboardingServiceTest {
             updatedAdmin.displayName shouldBe "New Admin" // unchanged
             updatedAdmin.onboardingStatus shouldBe OnboardingStatus.ACTIVE
         }
+
+        @Test
+        fun `should complete profile with all optional fields`() {
+            val capturedAdmin = slot<Admin>()
+
+            every { adminRepository.findById(testAdminId) } returns passwordChangedAdmin
+            every { adminRepository.update(capture(capturedAdmin)) } answers { capturedAdmin.captured }
+
+            val result =
+                service.completeProfile(
+                    testAdminId,
+                    displayName = "John D. Smith",
+                    knownAs = "Johnny",
+                    contactPhone = "+27123456789",
+                    address = "123 Main St, City",
+                )
+
+            result.shouldBeInstanceOf<OnboardingResult.Completed>()
+            val updatedAdmin = (result as OnboardingResult.Completed).admin
+            updatedAdmin.displayName shouldBe "John D. Smith"
+            updatedAdmin.knownAs shouldBe "Johnny"
+            updatedAdmin.contactPhone shouldBe "+27123456789"
+            updatedAdmin.address shouldBe "123 Main St, City"
+            updatedAdmin.onboardingStatus shouldBe OnboardingStatus.ACTIVE
+            updatedAdmin.onboardingCompletedAt shouldBe fixedInstant
+        }
+
+        @Test
+        fun `should complete profile with displayName only (skip scenario)`() {
+            val capturedAdmin = slot<Admin>()
+
+            every { adminRepository.findById(testAdminId) } returns passwordChangedAdmin
+            every { adminRepository.update(capture(capturedAdmin)) } answers { capturedAdmin.captured }
+
+            val result =
+                service.completeProfile(
+                    testAdminId,
+                    displayName = "John Smith",
+                    knownAs = null,
+                    contactPhone = null,
+                    address = null,
+                )
+
+            result.shouldBeInstanceOf<OnboardingResult.Completed>()
+            val updatedAdmin = (result as OnboardingResult.Completed).admin
+            updatedAdmin.displayName shouldBe "John Smith"
+            updatedAdmin.knownAs shouldBe null
+            updatedAdmin.contactPhone shouldBe null
+            updatedAdmin.address shouldBe null
+            updatedAdmin.onboardingStatus shouldBe OnboardingStatus.ACTIVE
+        }
+
+        @Test
+        fun `should complete profile with partial optional fields`() {
+            val capturedAdmin = slot<Admin>()
+
+            every { adminRepository.findById(testAdminId) } returns passwordChangedAdmin
+            every { adminRepository.update(capture(capturedAdmin)) } answers { capturedAdmin.captured }
+
+            val result =
+                service.completeProfile(
+                    testAdminId,
+                    displayName = null,
+                    knownAs = "Johnny",
+                    contactPhone = null,
+                    address = "123 Main St",
+                )
+
+            result.shouldBeInstanceOf<OnboardingResult.Completed>()
+            val updatedAdmin = (result as OnboardingResult.Completed).admin
+            updatedAdmin.displayName shouldBe "New Admin" // unchanged
+            updatedAdmin.knownAs shouldBe "Johnny"
+            updatedAdmin.contactPhone shouldBe null
+            updatedAdmin.address shouldBe "123 Main St"
+        }
     }
 
     @Nested

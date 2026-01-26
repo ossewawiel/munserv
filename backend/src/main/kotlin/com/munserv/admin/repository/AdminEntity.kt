@@ -36,6 +36,12 @@ class AdminEntity(
     val passwordHash: String,
     @Column(name = "display_name", nullable = false, length = 100)
     val displayName: String,
+    @Column(name = "known_as", length = 50)
+    val knownAs: String? = null,
+    @Column(name = "contact_phone", length = 20)
+    val contactPhone: String? = null,
+    @Column(name = "address", length = 255)
+    val address: String? = null,
     @Column(nullable = false, columnDefinition = "admin_role")
     @ColumnTransformer(write = "?::admin_role")
     val role: String,
@@ -64,6 +70,9 @@ class AdminEntity(
             sectorId = sectorId?.let { SectorId(it) },
             email = email,
             displayName = displayName,
+            knownAs = knownAs,
+            contactPhone = contactPhone,
+            address = address,
             role = AdminRole.fromDbValue(role),
             onboardingStatus = OnboardingStatus.fromDbValue(onboardingStatus),
             onboardingCompletedAt = onboardingCompletedAt,
@@ -89,6 +98,9 @@ class AdminEntity(
                 email = admin.email,
                 passwordHash = passwordHash,
                 displayName = admin.displayName,
+                knownAs = admin.knownAs,
+                contactPhone = admin.contactPhone,
+                address = admin.address,
                 role = admin.role.toDbValue(),
                 onboardingStatus = admin.onboardingStatus.toDbValue(),
                 temporaryPasswordHash = temporaryPasswordHash,

@@ -72,12 +72,18 @@ class OnboardingService(
      *
      * @param adminId The administrator to update
      * @param displayName Optional new display name
+     * @param knownAs Optional nickname or preferred name
+     * @param contactPhone Optional contact phone number
+     * @param address Optional physical address
      * @return Success with updated admin, or error
      */
     @Transactional
     fun completeProfile(
         adminId: AdminId,
         displayName: String?,
+        knownAs: String? = null,
+        contactPhone: String? = null,
+        address: String? = null,
     ): OnboardingResult {
         val admin =
             adminRepository.findById(adminId)
@@ -101,6 +107,9 @@ class OnboardingService(
         val updatedAdmin =
             admin.copy(
                 displayName = displayName ?: admin.displayName,
+                knownAs = knownAs,
+                contactPhone = contactPhone,
+                address = address,
                 onboardingStatus = OnboardingStatus.ACTIVE,
                 onboardingCompletedAt = now,
                 updatedAt = now,

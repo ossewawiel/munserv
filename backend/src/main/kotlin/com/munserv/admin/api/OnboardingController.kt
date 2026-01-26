@@ -143,7 +143,16 @@ class OnboardingController(
                     ErrorBody("unauthorized", "Not authenticated"),
                 )
 
-        return when (val result = onboardingService.completeProfile(adminId, request.displayName)) {
+        return when (
+            val result =
+                onboardingService.completeProfile(
+                    adminId,
+                    request.displayName,
+                    request.knownAs,
+                    request.contactPhone,
+                    request.address,
+                )
+        ) {
             is OnboardingResult.Success ->
                 ResponseEntity.ok(OnboardingStatusResponse.from(result.admin))
             is OnboardingResult.Completed ->
@@ -228,4 +237,13 @@ data class CompleteProfileRequest(
     @field:Size(max = 100, message = "Display name must be 100 characters or less")
     @field:Schema(description = "Display name (optional update)", example = "John D. Smith")
     val displayName: String? = null,
+    @field:Size(max = 50, message = "Known-as must be 50 characters or less")
+    @field:Schema(description = "Nickname or preferred name", example = "Johnny")
+    val knownAs: String? = null,
+    @field:Size(max = 20, message = "Contact phone must be 20 characters or less")
+    @field:Schema(description = "Contact phone number", example = "+27123456789")
+    val contactPhone: String? = null,
+    @field:Size(max = 255, message = "Address must be 255 characters or less")
+    @field:Schema(description = "Physical address", example = "123 Main St, City")
+    val address: String? = null,
 )
