@@ -15,17 +15,17 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 
 ### Web (9 stories)
 
-| ID | Title | Issue |
-|----|-------|-------|
-| W22 | Super user login to fresh pod | [#37](https://github.com/ossewawiel/munserv/issues/37) |
-| W23 | Super user creates Pod Chief | [#38](https://github.com/ossewawiel/munserv/issues/38) |
-| W24 | Super user blocked after Pod Chief onboarded | [#39](https://github.com/ossewawiel/munserv/issues/39) |
-| W25 | Pod Chief welcome email with temp password | [#40](https://github.com/ossewawiel/munserv/issues/40) |
-| W26 | Pod Chief must change password on first login | [#41](https://github.com/ossewawiel/munserv/issues/41) |
-| W27 | Pod Chief completes optional profile info | [#42](https://github.com/ossewawiel/munserv/issues/42) |
-| W28 | Pod Chief grants super user temporary access | [#43](https://github.com/ossewawiel/munserv/issues/43) |
-| W29 | Super user uses temporary access for debugging | [#44](https://github.com/ossewawiel/munserv/issues/44) |
-| W30 | Pod Chief views/revokes super user sessions | [#45](https://github.com/ossewawiel/munserv/issues/45) |
+| ID | Title | Issue | Handoff |
+|----|-------|-------|---------|
+| W22 | Super user login to fresh pod | [#37](https://github.com/ossewawiel/munserv/issues/37) | |
+| W23 | Super user creates Pod Chief | [#38](https://github.com/ossewawiel/munserv/issues/38) | |
+| W24 | Super user blocked after Pod Chief onboarded | [#39](https://github.com/ossewawiel/munserv/issues/39) | |
+| W25 | Pod Chief welcome email with temp password | [#40](https://github.com/ossewawiel/munserv/issues/40) | |
+| W26 | Pod Chief must change password on first login | [#41](https://github.com/ossewawiel/munserv/issues/41) | [Handoff](041-change-password-handoff.md) |
+| W27 | Pod Chief completes optional profile info | [#42](https://github.com/ossewawiel/munserv/issues/42) | |
+| W28 | Pod Chief grants super user temporary access | [#43](https://github.com/ossewawiel/munserv/issues/43) | |
+| W29 | Super user uses temporary access for debugging | [#44](https://github.com/ossewawiel/munserv/issues/44) | |
+| W30 | Pod Chief views/revokes super user sessions | [#45](https://github.com/ossewawiel/munserv/issues/45) | |
 
 ### Backend (4 stories)
 

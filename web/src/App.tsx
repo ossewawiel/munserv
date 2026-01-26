@@ -22,6 +22,8 @@ import { SectorDashboardPage } from '@/features/pod-chief/SectorDashboardPage';
 import { PodAdministratorsPage } from '@/features/pod-chief/PodAdministratorsPage';
 import { SectorSettingsPage } from '@/features/sector-settings/SectorSettingsPage';
 import { CreatePodChiefPage } from '@/features/bootstrap/CreatePodChiefPage';
+import { ChangePasswordPage } from '@/features/onboarding/ChangePasswordPage';
+import { CompleteProfilePage } from '@/features/onboarding/CompleteProfilePage';
 
 /** Placeholder page for features not yet implemented */
 const PlaceholderPage: FC<{ title: string }> = ({ title }) => (
@@ -46,6 +48,10 @@ function App() {
 
       {/* Bootstrap routes (super user only) */}
       <Route path="/bootstrap/create-pod-chief" element={<CreatePodChiefPage />} />
+
+      {/* Onboarding routes */}
+      <Route path="/onboarding/change-password" element={<ChangePasswordPage />} />
+      <Route path="/onboarding/complete-profile" element={<CompleteProfilePage />} />
 
       {/* Protected routes */}
       <Route
