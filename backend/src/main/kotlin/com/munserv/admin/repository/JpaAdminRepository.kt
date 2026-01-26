@@ -1,6 +1,8 @@
 package com.munserv.admin.repository
 
 import com.munserv.admin.domain.Admin
+import com.munserv.admin.domain.AdminRole
+import com.munserv.admin.domain.OnboardingStatus
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
@@ -27,6 +29,17 @@ interface SpringDataAdminRepository : JpaRepository<AdminEntity, UUID> {
     fun existsByEmailAndDeletedAtIsNull(email: String): Boolean
 
     fun countBySectorIdAndDeletedAtIsNull(sectorId: UUID): Int
+
+    fun findByPodIdAndRoleAndDeletedAtIsNull(
+        podId: UUID,
+        role: String,
+    ): AdminEntity?
+
+    fun existsByPodIdAndRoleAndOnboardingStatusAndDeletedAtIsNull(
+        podId: UUID,
+        role: String,
+        onboardingStatus: String,
+    ): Boolean
 }
 
 /**
@@ -42,11 +55,9 @@ class JpaAdminRepository(
     override fun findBySectorId(sectorId: SectorId): List<Admin> =
         jpa.findBySectorIdAndDeletedAtIsNull(sectorId.value).map { it.toDomain() }
 
-    override fun findByWardId(wardId: WardId): List<Admin> =
-        jpa.findByWardIdAndDeletedAtIsNull(wardId.value).map { it.toDomain() }
+    override fun findByWardId(wardId: WardId): List<Admin> = jpa.findByWardIdAndDeletedAtIsNull(wardId.value).map { it.toDomain() }
 
-    override fun findByPodId(podId: PodId): List<Admin> =
-        jpa.findByPodIdAndDeletedAtIsNull(podId.value).map { it.toDomain() }
+    override fun findByPodId(podId: PodId): List<Admin> = jpa.findByPodIdAndDeletedAtIsNull(podId.value).map { it.toDomain() }
 
     override fun findByEmail(email: String): Admin? = jpa.findByEmailAndDeletedAtIsNull(email)?.toDomain()
 
@@ -88,4 +99,17 @@ class JpaAdminRepository(
             passwordHash = entity.passwordHash,
         )
     }
+
+    override fun findPodChief(podId: PodId): Admin? =
+        jpa.findByPodIdAndRoleAndDeletedAtIsNull(
+            podId.value,
+            AdminRole.POD_CHIEF.toDbValue(),
+        )?.toDomain()
+
+    override fun existsPodChiefOnboarded(podId: PodId): Boolean =
+        jpa.existsByPodIdAndRoleAndOnboardingStatusAndDeletedAtIsNull(
+            podId.value,
+            AdminRole.POD_CHIEF.toDbValue(),
+            OnboardingStatus.ACTIVE.toDbValue(),
+        )
 }

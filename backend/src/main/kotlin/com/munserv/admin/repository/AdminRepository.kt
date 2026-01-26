@@ -80,6 +80,18 @@ interface AdminRepository {
      * Returns null if admin not found or deleted.
      */
     fun findByEmailWithPasswordHash(email: String): AdminWithPasswordHash?
+
+    /**
+     * Find the Pod Chief for a given pod.
+     * Returns null if no Pod Chief exists.
+     */
+    fun findPodChief(podId: PodId): Admin?
+
+    /**
+     * Check if a Pod Chief exists and has completed onboarding.
+     * Returns true if Pod Chief exists with onboardingStatus == ACTIVE.
+     */
+    fun existsPodChiefOnboarded(podId: PodId): Boolean
 }
 
 /**
