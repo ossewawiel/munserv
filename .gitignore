@@ -7,6 +7,8 @@ build/
 dist/
 out/
 *.jar
+# ...but the Gradle wrapper jar must be tracked, or clones cannot bootstrap Gradle
+!**/gradle/wrapper/gradle-wrapper.jar
 
 # Mobile (Flutter)
 mobile/.dart_tool/
