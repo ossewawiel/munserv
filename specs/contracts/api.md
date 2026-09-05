@@ -343,6 +343,62 @@ Partially update sector settings. Only provided fields are updated.
 
 ---
 
+## Pod
+
+Pod configuration and setup status. See [`domain/pod.md`](../../domain/pod.md).
+Every endpoint in this section requires an authenticated admin with role `pod_chief`
+(`@RequireRole(AdminRole.POD_CHIEF)` on `PodController`).
+
+### GET /pod/status
+Setup completion status of the caller's pod.
+
+**Response:** `200` `PodSetupStatusResponse`
+```json
+{
+  "isComplete": false,
+  "missingSteps": ["pod_boundaries", "first_admin"]
+}
+```
+`missingSteps` values are the snake_case `SetupStep` wire values:
+`pod_name`, `pod_boundaries`, `wards_sectors`, `first_admin`. The list is empty when `isComplete` is true.
+The response does **not** carry wards or sectors (tracked in #59).
+
+**Errors:** 401 Unauthorized (`{ code, message }`) | 403 Not pod chief | 404 Pod not found
+
+### GET /pod/settings
+Name and logo of the caller's pod.
+
+**Response:** `200` `PodSettingsResponse`
+```json
+{
+  "name": "Ward42",
+  "displayName": "Munserv Pod Ward42",
+  "logoUrl": "https://example.com/logo.png"
+}
+```
+`displayName` is server-derived as `"Munserv Pod {name}"`; clients render it, never build it.
+`logoUrl` is `null` when no logo is set.
+
+**Errors:** 401 Unauthorized (`{ code, message }`) | 403 Not pod chief | 404 Pod not found
+
+### PATCH /pod/settings
+Partially update pod settings. Only provided fields are updated.
+
+**Request:**
+```json
+{
+  "name": "Ward42",                              // optional, 2-100 chars
+  "logoUrl": "https://example.com/logo.png"      // optional, max 500 chars
+}
+```
+**Response:** `200` `PodSettingsResponse` (as above, with `displayName` recomputed)
+**Errors:** 400 Validation error (`{ code: "validation_error", message: string }`) | 401 Unauthorized | 403 Not pod chief | 404 Pod not found
+
+There is **no** logo file-upload endpoint. `logoUrl` is a URL the caller supplies;
+multipart upload is not implemented.
+
+---
+
 ## Messages
 
 ### GET /messages
