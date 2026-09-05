@@ -18,3 +18,5 @@ Registry row, story or use-case, then the component. The reviewer blocks a PR th
 
 ## Sign-off
 Every feature with UI gets a design canvas built from these tokens and this registry before planning; the approved canvas URL goes into the feature spec. Screenshot and golden tests keep the build honest against it (PR 5b).
+- `cd mobile && flutter test test/goldens` — run the mobile golden suite.
+- `cd mobile && flutter test test/goldens --update-goldens` — refresh the mobile golden PNGs after an approved visual change.
