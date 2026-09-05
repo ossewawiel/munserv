@@ -18,3 +18,5 @@ Registry row, story or use-case, then the component. The reviewer blocks a PR th
 
 ## Sign-off
 Every feature with UI gets a design canvas built from these tokens and this registry before planning; the approved canvas URL goes into the feature spec. Screenshot and golden tests keep the build honest against it (PR 5b).
+
+Web: `pnpm --dir web test:visual` screenshots every Storybook story (light and dark) against the baselines committed under `web/e2e/visual/__screenshots__/` and fails on more than a 0.2% pixel difference; `pnpm --dir web test:visual:update` refreshes them after an intentional visual change. CI blocks a PR that changes those baselines unless it carries the `design-approved` label.

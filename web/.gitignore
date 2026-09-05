@@ -25,6 +25,8 @@ dist-ssr
 
 # Test reports and coverage
 playwright-report/
+playwright-report-visual/
+test-results/
 screenshots/
 coverage/
 
