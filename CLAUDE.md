@@ -32,5 +32,18 @@ Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patt
 ## Quality gate
 CI (`.github/workflows/ci.yml`) is required on `master`: domain-language validation, backend ktlint + tests (Testcontainers) + build, web lint + `tsc -b` + Vitest + build, mobile format + analyze (infos fatal) + tests + debug APK. Run the same commands locally before opening a PR. Squash-merge; conventional commit titles (`feat(web): ...`, scopes: backend, web, mobile, db, api, infra, specs, ci).
 
+## The factory
+Delivery runs through agents defined in `.claude/agents/` and orchestrated by `/factory`:
+
+| Agent | Model | Does |
+|---|---|---|
+| `feature-planner` | Opus | Paragraph → stories (you approve) → issues, milestone, spec, one handoff per story per platform |
+| `investigator` | Opus | Bug → root cause → investigation record + fix handoffs |
+| `backend-implementer`, `web-implementer`, `mobile-implementer` | Sonnet | One handoff → branch in an isolated worktree, tests first, cannot finish while the platform gate is red |
+| `reviewer` | Opus | PR against handoff and domain: verdict per acceptance criterion |
+| `syncer` | Sonnet | After merge: specs status, issue labels, handoff archive |
+
+Handoffs are written from `specs/features/_template/story-handoff.md` and live under `specs/features/<feature>/`. Human gates: story approval and PR merge. `/factory status` shows the queue; `/factory run` dispatches up to three stories.
+
 ## Working with GitHub
-`gh` is the tool. Labels: `type:*`, `platform:*`, `status:*`, `priority:*`, `story:<id>`. Stories are `M*` (mobile), `W*` (web), `B*` (backend). Workflow skills in `.claude/commands/`: `/create-feature`, `/plan-feature`, `/work-story`, `/work-issue`, `/close-handoff`, `/sync-github`, `/create-issue`. Handoffs live under `specs/features/<feature>/`.
+`gh` is the tool. Labels: `type:*`, `platform:*`, `status:*` (`ready` → `in-progress` → `review` → `done`, or `blocked`), `priority:*`, `story:<id>`. Stories are `M*` (mobile), `W*` (web), `B*` (backend). Legacy workflow commands stay in `.claude/commands/`. `.claude/hooks/guard-git.sh` blocks force pushes, pushes to master and history rewrites in every session.

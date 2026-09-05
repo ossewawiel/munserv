@@ -38,7 +38,7 @@ jobs:
               - '.github/workflows/ci.yml'
 
   domain:
-    name: Domain language
+    name: Domain language and guardrails
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -50,6 +50,8 @@ jobs:
         run: pip install --quiet pyyaml
       - name: Validate domain/language.yaml against the code
         run: python3 scripts/validate-domain-language.py
+      - name: Test the git guard hook
+        run: python3 scripts/test-hooks.py
 
   backend:
     name: Backend (Kotlin)
