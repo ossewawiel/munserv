@@ -92,7 +92,7 @@ Backend tests do not use this database; they start their own PostGIS container t
 | `ADMIN_PORTAL_URL`, `APP_DOWNLOAD_URL`, `APP_NAME` | Links in emails | localhost:3000 |
 
 ## CI
-`.github/workflows/ci.yml`: `domain` (language validation), `backend`, `web`, `mobile`, each path-filtered, plus the `CI status` aggregate that branch protection requires. Other workflows: `standards-check` (advisory), `sync-issue-status`, `validate-specs` (weekly), `generate-changelog` (on tags).
+`.github/workflows/ci.yml`: `domain` (language validation), `backend`, `web`, `mobile`, each path-filtered, plus the `CI status` aggregate that branch protection requires. Other workflows: `standards-check` (advisory), `validate-specs` (weekly), `generate-changelog` (on tags).
 
 ## MCP servers
 Declared in `.mcp.json`: `memory`, `fetch`, `postgres` (points at 5435). Set `GITHUB_TOKEN` to enable the GitHub server declared in `.claude/settings.json`; `gh` works without it.

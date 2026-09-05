@@ -193,6 +193,5 @@ Run `/sync-github dry_run=false` to apply these changes.
 ## Integration
 
 This skill is used by:
-- `.github/workflows/sync-issue-status.yml` (automated)
 - Manual runs via `/sync-github` command
 - Weekly validation workflow (creates reconciliation issues)
