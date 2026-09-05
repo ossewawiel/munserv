@@ -14,6 +14,70 @@ cd infrastructure/docker
 docker compose up -d                 # start
 docker compose down -v && docker compose up -d   # reset (destroys data)
 psql postgresql://munserv:munserv_dev@localhost:5435/munserv_dev
+
+# Stop services
+docker compose down
+
+# Reset database (destroys all data)
+docker compose down -v && docker compose up -d
+```
+
+### Services
+
+| Service | Image | Port |
+|---------|-------|------|
+| PostgreSQL + PostGIS | postgis/postgis:18-3.6 | 5435 (host) → 5432 |
+
+### Connection Strings
+
+```
+PostgreSQL: postgresql://munserv:munserv_dev@localhost:5435/munserv_dev
+```
+
+---
+
+## Port Allocations
+
+| Service | Port |
+|---------|------|
+| PostgreSQL | 5435 |
+| Backend API | 8080 |
+| Mock API | 3001 |
+| Web Dev Server | 3000 |
+
+---
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `DB_URL` | Database JDBC URL |
+| `DB_USER` | Database user |
+| `DB_PASSWORD` | Database password |
+| `R2_BUCKET` | Cloudflare R2 bucket |
+| `R2_ACCESS_KEY` | R2 access key |
+| `R2_SECRET_KEY` | R2 secret key |
+| `JWT_SECRET` | JWT signing key |
+| `SMS_API_KEY` | SMS provider key |
+| `GITHUB_TOKEN` | GitHub PAT for MCP |
+
+---
+
+## Folder Structure
+
+```
+infrastructure/
+├── CLAUDE.md                    # This file
+├── claude_desktop_config.example.json  # Example for Claude Desktop
+├── docker/
+│   ├── docker-compose.yml       # Local dev services
+│   └── init/
+│       └── 01-extensions.sql    # PostGIS setup
+├── mock-api/                    # JSON Server mock API
+│   ├── server.js
+│   ├── package.json
+│   └── data/
+└── scripts/                     # Utility scripts
 ```
 Backend tests do not use this database; they start their own PostGIS container through Testcontainers.
 
