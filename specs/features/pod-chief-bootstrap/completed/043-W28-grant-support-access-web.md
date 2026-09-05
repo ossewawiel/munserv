@@ -3,7 +3,7 @@ issue: 43
 story: W28
 title: "Pod Chief grants super user temporary access"
 platform: web
-status: completed
+status: done
 depends_on: [49]        # B8 backend support grants, merged (PR #65)
 touches:
   - web/src/features/support-access
