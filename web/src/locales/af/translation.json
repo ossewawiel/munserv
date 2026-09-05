@@ -202,8 +202,7 @@
     "title": "Ondersteuningstoegang",
     "subtitle": "Verleen die Sentrale Owerheid tydelike toegang om te help met 'n probleem op hierdie pod.",
     "grantButton": "Verleen ondersteuningstoegang",
-    "activeGrant": "Aktiewe toekenning",
-    "noActiveGrant": "Geen ondersteuningstoegang is tans aktief nie. Niemand buite hierdie pod kan nou aanmeld nie.",
+    "activeGrant": "Ondersteuningstoegang is aktief",
     "expiresAt": "Verval",
     "grantedBy": "Toegestaan deur",
     "purpose": "Doel",
@@ -220,9 +219,13 @@
       "purposeRequired": "Doel word vereis",
       "purposeTooShort": "Doel moet ten minste 10 karakters wees",
       "purposeTooLong": "Doel moet 500 karakters of minder wees",
-      "activeGrantExists": "'n Aktiewe toekenning bestaan reeds",
+      "activeGrantExists": "Hierdie pod het reeds 'n aktiewe ondersteuningstoekenning. Herroep dit voordat jy 'n ander toeken.",
       "loadFailed": "Kon nie ondersteuningstoegang laai nie"
-    }
+    },
+    "grantedOn": "op {{date}}",
+    "expiresUntilIdle": "{{date}}, of een uur na die laaste aktiwiteit, wat ook al eerste kom.",
+    "emptyTitle": "Nog geen ondersteuningstoekennings nie",
+    "emptyDescription": "Wanneer jy ondersteuningstoegang verleen, verskyn die toekenning hier met sy rol, doel en vervaldatum totdat dit herroep word of verval."
   },
   "podSettings": {
     "title": "Pod-instellings",
