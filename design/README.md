@@ -6,7 +6,7 @@ The design system's source of truth, in three parts:
 |---|---|---|
 | Tokens | `tokens/*.tokens.json` (W3C DTCG) | `sd.config.mjs` generates `web/src/theme/generated/tokens.ts` and `mobile/lib/shared/theme/generated/tokens.dart`; CI fails on drift |
 | Registry | `registry/web.md`, `registry/mobile.md` | Agents, before creating or styling any component |
-| Catalog | Storybook (`web/`) and Widgetbook (`mobile/widgetbook/`) | Humans and the design reviewer; published to GitHub Pages |
+| Catalog | Storybook (`web/`) and Widgetbook (`mobile/widgetbook/`) | Humans and the design reviewer; published by `.github/workflows/pages.yml` to https://ossewawiel.github.io/munserv/ (`storybook/`, `widgetbook/`) |
 
 ## Changing a colour or size
 1. Edit the token in `tokens/`.

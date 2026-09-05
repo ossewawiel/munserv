@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MunServ Design</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@87.5,500;87.5,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+  :root { --ink:#1c2a25; --ink-2:#4a5b54; --ink-3:#7a8a83; --ground:#fbfaf6; --paper:#fff; --rule:#dcd9cd; --forest:#233d36; --forest-soft:#e2ebe6; --clay:#d9613f; --clay-soft:#fbe6de; --clay-ink:#8f3418; }
+  @media (prefers-color-scheme: dark) { :root { --ink:#eef0ea; --ink-2:#b9c2bb; --ink-3:#8a958e; --ground:#141b18; --paper:#1b2420; --rule:#34423b; --forest:#a9c8ba; --forest-soft:#23342d; --clay:#f0805e; --clay-soft:#46271d; --clay-ink:#ffb79f; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:"IBM Plex Sans",system-ui,sans-serif; font-size:16px; line-height:1.55; }
+  .wrap { max-width:920px; margin:0 auto; padding:56px 28px 80px; display:flex; flex-direction:column; gap:36px; }
+  .eyebrow { font-family:"Archivo",sans-serif; font-stretch:87.5%; font-size:.74rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--clay); }
+  h1 { font-family:"Archivo",sans-serif; font-stretch:87.5%; font-size:2.4rem; font-weight:700; line-height:1.05; margin:6px 0 10px; text-wrap:balance; }
+  p { margin:0; max-width:64ch; color:var(--ink-2); }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+  a.card { display:flex; flex-direction:column; gap:8px; padding:18px 20px; background:var(--paper); border:1px solid var(--rule); border-top:3px solid var(--forest); color:inherit; text-decoration:none; }
+  a.card:hover, a.card:focus-visible { border-top-color:var(--clay); outline:none; }
+  a.card h2 { font-family:"Archivo",sans-serif; font-stretch:87.5%; font-size:1.15rem; margin:0; }
+  a.card span { font-size:.9rem; color:var(--ink-2); }
+  a.card.soon { opacity:.6; pointer-events:none; }
+  .meta { font-family:"IBM Plex Mono",monospace; font-size:.8rem; color:var(--ink-3); }
+  code { font-family:"IBM Plex Mono",monospace; font-size:.86em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">MunServ · design system</div>
+    <h1>The components as they really are</h1>
+    <p>Both catalogues render the shipped components with the shipped theme, generated from one token file. What you see here is what members and administrators get.</p>
+  </header>
+  <div class="cards">
+    <a class="card" href="storybook/">
+      <h2>Web components</h2>
+      <span>Storybook: atoms, molecules and organisms of the admin portal, light and dark, with the token swatches.</span>
+    </a>
+    <a class="card" href="widgetbook/">
+      <h2>Mobile widgets</h2>
+      <span>Widgetbook: the shared widgets and IssueCard variants of the member app, on device frames.</span>
+    </a>
+    <a class="card soon" href="dashboard/">
+      <h2>Progress dashboard</h2>
+      <span>Milestones, PR queue, CI health and the domain language. Arrives with the visibility work.</span>
+    </a>
+  </div>
+  <p>Tokens: <code>design/tokens/*.tokens.json</code>. Registry: <code>design/registry/</code>. Vocabulary: <code>domain/</code> (<a href="domain-language.yaml">language.yaml</a>).</p>
+  <div class="meta" id="build">Built from master.</div>
+</div>
+<script>
+  fetch('build.txt').then(r => r.ok ? r.text() : '').then(t => { if (t) document.getElementById('build').textContent = 'Built from ' + t.trim(); }).catch(() => {});
+</script>
+</body>
+</html>
