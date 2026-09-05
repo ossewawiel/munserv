@@ -64,7 +64,7 @@ StyleDictionary.registerFormat({
       }
       s += `}\n\n`;
     }
-    return s;
+    return s.trimEnd() + '\n';
   },
 });
 
