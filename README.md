@@ -74,7 +74,7 @@ munserv/
 
 ## Development with Claude Code
 
-This project uses Claude Code for AI-assisted development with specialized skills.
+This project is built by an agent factory. Agents in `.claude/agents/` plan (Opus), implement (Sonnet, one story per isolated worktree, tests first), review (Opus) and sync bookkeeping (Sonnet); `/factory` orchestrates them and a human approves stories and merges PRs. `domain/` is the shared vocabulary and CI validates it against the code. See `CLAUDE.md` for the roster.
 
 ### Project-Level Skills
 

@@ -2,26 +2,116 @@
   "mcpServers": {
     "memory": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
     },
     "fetch": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-fetch"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ]
     },
     "github": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       }
     },
     "postgres": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://munserv:munserv_dev@localhost:5435/munserv_dev"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://munserv:munserv_dev@localhost:5435/munserv_dev"
+      ]
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp"]
+      "args": [
+        "-y",
+        "@playwright/mcp"
+      ]
     }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew *)",
+      "Bash(cd backend && ./gradlew *)",
+      "Bash(pnpm *)",
+      "Bash(cd web && pnpm *)",
+      "Bash(npx vitest *)",
+      "Bash(flutter *)",
+      "Bash(dart *)",
+      "Bash(cd mobile && flutter *)",
+      "Bash(cd mobile && dart *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git branch*)",
+      "Bash(git checkout *)",
+      "Bash(git switch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git fetch*)",
+      "Bash(git pull --ff-only*)",
+      "Bash(git worktree *)",
+      "Bash(git rev-parse*)",
+      "Bash(gh issue *)",
+      "Bash(gh pr *)",
+      "Bash(gh api *)",
+      "Bash(gh run *)",
+      "Bash(python3 scripts/validate-domain-language.py*)",
+      "Bash(./scripts/validate-enum-sync.sh*)",
+      "Bash(docker compose *)",
+      "Bash(docker ps*)",
+      "Bash(docker logs*)",
+      "Read(./**)",
+      "Edit(./backend/**)",
+      "Edit(./web/**)",
+      "Edit(./mobile/**)",
+      "Edit(./specs/**)",
+      "Edit(./domain/**)",
+      "Write(./backend/**)",
+      "Write(./web/**)",
+      "Write(./mobile/**)",
+      "Write(./specs/**)",
+      "Write(./domain/**)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/application-local.yml)",
+      "Bash(git reset --hard*)",
+      "Bash(git filter-repo*)",
+      "Bash(rm -rf /*)",
+      "Bash(docker compose down -v*)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push * --force)",
+      "Bash(git push * -f)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-git.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }

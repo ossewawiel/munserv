@@ -1,0 +1,18 @@
+0	git push -u origin feat/x
+0	git push --force-with-lease origin feat/x
+0	git commit -m "no force push here, git push origin master is bad"
+0	git status && git log --oneline -3
+0	git add -A && git commit -q -m "feat: x" && git push -q -u origin chore/y 2>&1 | tail -1; gh pr create --title "x" --body "no force push, no push to master"
+0	cd backend && ./gradlew test
+0	gh pr create --body "$(cat <<'EOF'
+Bash(git push --force*) is denied; git push origin master too
+EOF
+)"
+2	git push --force origin feat/x
+2	git push -f origin feat/x
+2	git push origin master
+2	git push origin HEAD:master
+2	git reset --hard HEAD~1
+2	git branch -D feat/x
+2	cd backend && git push --delete origin feat/x
+2	git checkout feat/x; git clean -fd
