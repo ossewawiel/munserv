@@ -12,12 +12,16 @@ sealed interface IssueResult {
     /**
      * Operation completed successfully.
      */
-    data class Success(val issue: Issue) : IssueResult
+    data class Success(
+        val issue: Issue,
+    ) : IssueResult
 
     /**
      * Issue was not found.
      */
-    data class NotFound(val id: IssueId) : IssueResult
+    data class NotFound(
+        val id: IssueId,
+    ) : IssueResult
 
     /**
      * State transition is not allowed.
@@ -30,10 +34,14 @@ sealed interface IssueResult {
     /**
      * Validation errors occurred.
      */
-    data class ValidationError(val errors: List<String>) : IssueResult
+    data class ValidationError(
+        val errors: List<String>,
+    ) : IssueResult
 
     /**
      * Operation not authorized.
      */
-    data class Unauthorized(val reason: String) : IssueResult
+    data class Unauthorized(
+        val reason: String,
+    ) : IssueResult
 }

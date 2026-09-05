@@ -101,18 +101,29 @@ class PhotoController(
         val issueIdValue = IssueId(UUID.fromString(issueId))
 
         return when (val result = photoService.uploadPhoto(issueIdValue, file)) {
-            is PhotoResult.Success ->
-                ResponseEntity.status(HttpStatus.CREATED)
+            is PhotoResult.Success -> {
+                ResponseEntity
+                    .status(HttpStatus.CREATED)
                     .body(result.photo.toResponse())
-            is PhotoResult.ValidationError ->
-                ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            }
+
+            is PhotoResult.ValidationError -> {
+                ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.VALIDATION_ERROR, result.errors.joinToString(", "))))
-            is PhotoResult.StorageError ->
-                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+
+            is PhotoResult.StorageError -> {
+                ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.INTERNAL_ERROR, result.message)))
-            is PhotoResult.NotFound ->
-                ResponseEntity.status(HttpStatus.NOT_FOUND)
+            }
+
+            is PhotoResult.NotFound -> {
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Photo not found")))
+            }
         }
     }
 
@@ -168,7 +179,8 @@ class PhotoController(
         return if (deleted) {
             ResponseEntity.noContent().build<Unit>()
         } else {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
+            ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
                 .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Photo not found")))
         }
     }

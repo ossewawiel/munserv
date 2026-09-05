@@ -1,6 +1,5 @@
 package com.munserv.integration.scenarios
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.TestContainersConfig
 import com.munserv.auth.service.JwtService
 import com.munserv.issues.api.CreateIssueRequest
@@ -14,8 +13,8 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -23,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.ObjectMapper
 
 /**
  * Scenario test: Complete admin workflow.
@@ -77,8 +77,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $adminToken")
                 param("sectorId", testSectorId)
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.sectorId") { value(testSectorId) }
                 jsonPath("$.sectorName") { isNotEmpty() }
@@ -97,8 +96,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $adminToken")
                 param("sectorId", testSectorId)
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.generatedAt") { isNotEmpty() }
                 jsonPath("$.items") { isArray() }
@@ -113,8 +111,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $adminToken")
                 param("sectorId", testSectorId)
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.items") { isArray() }
                 jsonPath("$.pagination.page") { value(1) }
@@ -134,8 +131,7 @@ class AdminWorkflowScenarioTest {
                 param("sectorId", testSectorId)
                 param("status", "active")
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.items") { isArray() }
                 jsonPath("$.pagination.totalItems") { isNumber() }
@@ -151,8 +147,7 @@ class AdminWorkflowScenarioTest {
                 param("sectorId", testSectorId)
                 param("status", "pending_approval")
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.items") { isArray() }
             }
@@ -167,8 +162,7 @@ class AdminWorkflowScenarioTest {
                 param("sectorId", testSectorId)
                 param("status", "invalid")
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isBadRequest() }
                 jsonPath("$.error") { value("invalid_status") }
             }
@@ -182,8 +176,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $adminToken")
                 param("sectorId", testSectorId)
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.items") { isArray() }
                 jsonPath("$.pagination") { isMap() }
@@ -209,8 +202,7 @@ class AdminWorkflowScenarioTest {
                     header("Authorization", "Bearer $memberToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(createRequest)
-                }
-                .andExpect { status { isCreated() } }
+                }.andExpect { status { isCreated() } }
                 .andReturn()
 
         val createResponse = objectMapper.readTree(createResult.response.contentAsString)
@@ -229,8 +221,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $adminToken")
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.id") { value(stateTestIssueId) }
                 jsonPath("$.state") { value("confirmed") }
@@ -254,8 +245,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $adminToken")
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isUnprocessableEntity() }
                 jsonPath("$.error.code") { value("INVALID_STATE_TRANSITION") }
             }
@@ -277,8 +267,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $adminToken")
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.state") { value("in_progress") }
             }
@@ -300,8 +289,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $adminToken")
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.state") { value("fixed") }
             }
@@ -315,8 +303,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $memberToken")
                 param("sectorId", testSectorId)
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isForbidden() }
             }
 
@@ -325,8 +312,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $memberToken")
                 param("sectorId", testSectorId)
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isForbidden() }
             }
 
@@ -335,8 +321,7 @@ class AdminWorkflowScenarioTest {
                 header("Authorization", "Bearer $memberToken")
                 param("sectorId", testSectorId)
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isForbidden() }
             }
     }
@@ -350,11 +335,9 @@ class AdminWorkflowScenarioTest {
                     header("Authorization", "Bearer $adminToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
-                }
-                .andReturn()
+                }.andReturn()
 
         val content = result.response.contentAsString
         content.contains("\"sectorId\"") shouldBe true
@@ -375,11 +358,9 @@ class AdminWorkflowScenarioTest {
                     header("Authorization", "Bearer $adminToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
-                }
-                .andReturn()
+                }.andReturn()
 
         val content = result.response.contentAsString
         content.contains("\"generatedAt\"") shouldBe true
@@ -395,11 +376,9 @@ class AdminWorkflowScenarioTest {
                     header("Authorization", "Bearer $adminToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
-                }
-                .andReturn()
+                }.andReturn()
 
         val content = result.response.contentAsString
         content.contains("\"items\"") shouldBe true

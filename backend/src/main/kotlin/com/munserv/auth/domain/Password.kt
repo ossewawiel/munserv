@@ -21,7 +21,7 @@ object Password {
     /**
      * Hashes a plain-text password using BCrypt.
      */
-    fun hash(plaintext: String): String = encoder.encode(plaintext)
+    fun hash(plaintext: String): String = requireNotNull(encoder.encode(plaintext))
 
     /**
      * Verifies a plain-text password against a BCrypt hash.
@@ -94,6 +94,10 @@ object Password {
         }
 
         // Shuffle to randomize position of required characters
-        return password.toString().toList().shuffled(secureRandom).joinToString("")
+        return password
+            .toString()
+            .toList()
+            .shuffled(secureRandom)
+            .joinToString("")
     }
 }

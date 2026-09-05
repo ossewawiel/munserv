@@ -14,8 +14,8 @@ import io.mockk.every
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
@@ -49,7 +49,8 @@ class MemberControllerTest {
     @Test
     fun `GET me should return 403 when not authenticated`() {
         // Spring Security returns 403 Forbidden for missing authentication token
-        mockMvc.get("/api/v1/members/me")
+        mockMvc
+            .get("/api/v1/members/me")
             .andExpect {
                 status { isForbidden() }
             }
@@ -63,10 +64,10 @@ class MemberControllerTest {
         every { memberService.findById(memberId) } returns MemberResult.Success(member)
 
         // Act & Assert
-        mockMvc.get("/api/v1/members/me") {
-            header("Authorization", "Bearer $memberToken")
-        }
-            .andExpect {
+        mockMvc
+            .get("/api/v1/members/me") {
+                header("Authorization", "Bearer $memberToken")
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.id") { value(memberId.value.toString()) }
                 jsonPath("$.firstName") { value("Test") }
@@ -82,10 +83,10 @@ class MemberControllerTest {
         every { memberService.findById(memberId) } returns MemberResult.NotFound(memberId)
 
         // Act & Assert
-        mockMvc.get("/api/v1/members/me") {
-            header("Authorization", "Bearer $memberToken")
-        }
-            .andExpect {
+        mockMvc
+            .get("/api/v1/members/me") {
+                header("Authorization", "Bearer $memberToken")
+            }.andExpect {
                 status { isNotFound() }
             }
     }
@@ -93,10 +94,10 @@ class MemberControllerTest {
     @Test
     fun `GET me should return 403 when token is invalid`() {
         // Spring Security returns 403 Forbidden for invalid authentication token
-        mockMvc.get("/api/v1/members/me") {
-            header("Authorization", "Bearer invalid-token")
-        }
-            .andExpect {
+        mockMvc
+            .get("/api/v1/members/me") {
+                header("Authorization", "Bearer invalid-token")
+            }.andExpect {
                 status { isForbidden() }
             }
     }

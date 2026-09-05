@@ -23,8 +23,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -104,22 +104,23 @@ class PodDashboardControllerTest {
                 )
             every { dashboardService.getPodStats(testPodId) } returns PodResult.Success(stats)
 
-            mockMvc.get("/api/v1/pod/dashboard") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.totalIssues") { value(150) }
-                jsonPath("$.openIssues") { value(45) }
-                jsonPath("$.resolvedThisMonth") { value(23) }
-                jsonPath("$.pendingIssues") { value(12) }
-                jsonPath("$.activeAdministrators") { value(5) }
-                jsonPath("$.totalMembers") { value(1250) }
-                jsonPath("$.activeGroundAdmins") { value(8) }
-                jsonPath("$.wardCount") { value(4) }
-                jsonPath("$.sectorCount") { value(16) }
-            }
+            mockMvc
+                .get("/api/v1/pod/dashboard") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.totalIssues") { value(150) }
+                    jsonPath("$.openIssues") { value(45) }
+                    jsonPath("$.resolvedThisMonth") { value(23) }
+                    jsonPath("$.pendingIssues") { value(12) }
+                    jsonPath("$.activeAdministrators") { value(5) }
+                    jsonPath("$.totalMembers") { value(1250) }
+                    jsonPath("$.activeGroundAdmins") { value(8) }
+                    jsonPath("$.wardCount") { value(4) }
+                    jsonPath("$.sectorCount") { value(16) }
+                }
 
             verify { dashboardService.getPodStats(testPodId) }
         }
@@ -140,26 +141,28 @@ class PodDashboardControllerTest {
                 )
             every { dashboardService.getPodStats(testPodId) } returns PodResult.Success(stats)
 
-            mockMvc.get("/api/v1/pod/dashboard") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$.totalIssues") { value(0) }
-                jsonPath("$.wardCount") { value(0) }
-            }
+            mockMvc
+                .get("/api/v1/pod/dashboard") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$.totalIssues") { value(0) }
+                    jsonPath("$.wardCount") { value(0) }
+                }
         }
 
         @Test
         fun `should return 404 when pod not found`() {
             every { dashboardService.getPodStats(testPodId) } returns PodResult.NotFound(testPodId)
 
-            mockMvc.get("/api/v1/pod/dashboard") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mockMvc
+                .get("/api/v1/pod/dashboard") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
     }
 
@@ -179,20 +182,21 @@ class PodDashboardControllerTest {
                 )
             every { dashboardService.getWardStats(testWardId) } returns DashboardResult.Success(stats)
 
-            mockMvc.get("/api/v1/pod/dashboard/wards/${testWardId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.wardId") { value(testWardId.value.toString()) }
-                jsonPath("$.wardName") { value("Ward 42") }
-                jsonPath("$.totalIssues") { value(45) }
-                jsonPath("$.openIssues") { value(15) }
-                jsonPath("$.resolvedThisMonth") { value(8) }
-                jsonPath("$.sectorCount") { value(4) }
-                jsonPath("$.activeGroundAdmins") { value(3) }
-            }
+            mockMvc
+                .get("/api/v1/pod/dashboard/wards/${testWardId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.wardId") { value(testWardId.value.toString()) }
+                    jsonPath("$.wardName") { value("Ward 42") }
+                    jsonPath("$.totalIssues") { value(45) }
+                    jsonPath("$.openIssues") { value(15) }
+                    jsonPath("$.resolvedThisMonth") { value(8) }
+                    jsonPath("$.sectorCount") { value(4) }
+                    jsonPath("$.activeGroundAdmins") { value(3) }
+                }
 
             verify { dashboardService.getWardStats(testWardId) }
         }
@@ -201,22 +205,24 @@ class PodDashboardControllerTest {
         fun `should return 404 when ward not found`() {
             every { dashboardService.getWardStats(testWardId) } returns DashboardResult.WardNotFound(testWardId)
 
-            mockMvc.get("/api/v1/pod/dashboard/wards/${testWardId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mockMvc
+                .get("/api/v1/pod/dashboard/wards/${testWardId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
 
         @Test
         fun `should return 400 for invalid UUID format`() {
-            mockMvc.get("/api/v1/pod/dashboard/wards/invalid-uuid") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isBadRequest() }
-            }
+            mockMvc
+                .get("/api/v1/pod/dashboard/wards/invalid-uuid") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isBadRequest() }
+                }
         }
     }
 
@@ -236,20 +242,21 @@ class PodDashboardControllerTest {
                 )
             every { dashboardService.getSectorStats(testSectorId) } returns DashboardResult.Success(stats)
 
-            mockMvc.get("/api/v1/pod/dashboard/sectors/${testSectorId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.sectorId") { value(testSectorId.value.toString()) }
-                jsonPath("$.sectorName") { value("Sector A") }
-                jsonPath("$.totalIssues") { value(25) }
-                jsonPath("$.openIssues") { value(8) }
-                jsonPath("$.resolvedThisMonth") { value(5) }
-                jsonPath("$.activeGroundAdmins") { value(2) }
-                jsonPath("$.totalMembers") { value(320) }
-            }
+            mockMvc
+                .get("/api/v1/pod/dashboard/sectors/${testSectorId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.sectorId") { value(testSectorId.value.toString()) }
+                    jsonPath("$.sectorName") { value("Sector A") }
+                    jsonPath("$.totalIssues") { value(25) }
+                    jsonPath("$.openIssues") { value(8) }
+                    jsonPath("$.resolvedThisMonth") { value(5) }
+                    jsonPath("$.activeGroundAdmins") { value(2) }
+                    jsonPath("$.totalMembers") { value(320) }
+                }
 
             verify { dashboardService.getSectorStats(testSectorId) }
         }
@@ -258,22 +265,24 @@ class PodDashboardControllerTest {
         fun `should return 404 when sector not found`() {
             every { dashboardService.getSectorStats(testSectorId) } returns DashboardResult.SectorNotFound(testSectorId)
 
-            mockMvc.get("/api/v1/pod/dashboard/sectors/${testSectorId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mockMvc
+                .get("/api/v1/pod/dashboard/sectors/${testSectorId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
 
         @Test
         fun `should return 400 for invalid UUID format`() {
-            mockMvc.get("/api/v1/pod/dashboard/sectors/invalid-uuid") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isBadRequest() }
-            }
+            mockMvc
+                .get("/api/v1/pod/dashboard/sectors/invalid-uuid") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isBadRequest() }
+                }
         }
     }
 }

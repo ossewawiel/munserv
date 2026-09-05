@@ -57,8 +57,8 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MissingServletRequestParameterException::class)
-    fun handleMissingParameter(ex: MissingServletRequestParameterException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity
+    fun handleMissingParameter(ex: MissingServletRequestParameterException): ResponseEntity<ErrorResponse> =
+        ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(
                 validationError(
@@ -66,11 +66,10 @@ class GlobalExceptionHandler {
                     mapOf("parameter" to ex.parameterName),
                 ),
             )
-    }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
-    fun handleTypeMismatch(ex: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity
+    fun handleTypeMismatch(ex: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponse> =
+        ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(
                 validationError(
@@ -78,14 +77,12 @@ class GlobalExceptionHandler {
                     mapOf("parameter" to (ex.name ?: "unknown"), "value" to (ex.value?.toString() ?: "null")),
                 ),
             )
-    }
 
     @ExceptionHandler(NoResourceFoundException::class)
-    fun handleNotFound(ex: NoResourceFoundException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity
+    fun handleNotFound(ex: NoResourceFoundException): ResponseEntity<ErrorResponse> =
+        ResponseEntity
             .status(HttpStatus.NOT_FOUND)
             .body(notFoundError("Resource", ex.resourcePath))
-    }
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {

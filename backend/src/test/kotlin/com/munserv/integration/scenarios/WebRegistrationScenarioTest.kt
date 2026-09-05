@@ -1,6 +1,5 @@
 package com.munserv.integration.scenarios
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.TestContainersConfig
 import com.munserv.auth.api.ChangePasswordRequest
 import com.munserv.auth.api.MemberLoginRequest
@@ -14,14 +13,15 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.ObjectMapper
 
 /**
  * Scenario test: Complete web registration flow with admin approval.
@@ -79,12 +79,10 @@ class WebRegistrationScenarioTest {
                 .post("/api/v1/auth/admin/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.tokens.accessToken") { isNotEmpty() }
-                }
-                .andReturn()
+                }.andReturn()
 
         val response = objectMapper.readTree(result.response.contentAsString)
         adminAccessToken = response.get("tokens").get("accessToken").asText()
@@ -112,13 +110,11 @@ class WebRegistrationScenarioTest {
                 .post("/api/v1/auth/register/web") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isCreated() }
                     jsonPath("$.message") { value("Registration submitted. You will be notified once approved.") }
                     jsonPath("$.memberId") { isNotEmpty() }
-                }
-                .andReturn()
+                }.andReturn()
 
         val response = objectMapper.readTree(result.response.contentAsString)
         pendingMemberId = response.get("memberId").asText()
@@ -138,8 +134,7 @@ class WebRegistrationScenarioTest {
             .post("/api/v1/auth/member/login") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isForbidden() }
                 jsonPath("$.error") { value("pending_approval") }
             }
@@ -155,14 +150,12 @@ class WebRegistrationScenarioTest {
             mockMvc
                 .post("/api/v1/admin/members/$memberId/approve") {
                     header("Authorization", "Bearer $token")
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.memberId") { value(memberId) }
                     jsonPath("$.email") { value(memberEmail) }
                     jsonPath("$.message") { isNotEmpty() }
-                }
-                .andReturn()
+                }.andReturn()
 
         // Extract temporary password from message
         val response = objectMapper.readTree(result.response.contentAsString)
@@ -187,14 +180,12 @@ class WebRegistrationScenarioTest {
                 .post("/api/v1/auth/member/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.accessToken") { isNotEmpty() }
                     jsonPath("$.refreshToken") { isNotEmpty() }
                     jsonPath("$.mustChangePassword") { value(true) }
-                }
-                .andReturn()
+                }.andReturn()
 
         val response = objectMapper.readTree(result.response.contentAsString)
         memberAccessToken = response.get("accessToken").asText()
@@ -218,8 +209,7 @@ class WebRegistrationScenarioTest {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
                 header("Authorization", "Bearer $token")
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.message") { value("Password changed successfully") }
             }
@@ -241,8 +231,7 @@ class WebRegistrationScenarioTest {
             .post("/api/v1/auth/member/login") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.accessToken") { isNotEmpty() }
                 jsonPath("$.mustChangePassword") { value(false) }
@@ -270,12 +259,10 @@ class WebRegistrationScenarioTest {
                 .post("/api/v1/auth/register/web") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isCreated() }
                     jsonPath("$.memberId") { isNotEmpty() }
-                }
-                .andReturn()
+                }.andReturn()
 
         val response = objectMapper.readTree(result.response.contentAsString)
         rejectionMemberId = response.get("memberId").asText()
@@ -291,8 +278,7 @@ class WebRegistrationScenarioTest {
         mockMvc
             .delete("/api/v1/admin/members/$memberId") {
                 header("Authorization", "Bearer $token")
-            }
-            .andExpect {
+            }.andExpect {
                 // 204 No Content is returned for successful deletion
                 status { isNoContent() }
             }
@@ -308,8 +294,7 @@ class WebRegistrationScenarioTest {
                 .post("/api/v1/auth/admin/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect { status { isOk() } }
+                }.andExpect { status { isOk() } }
                 .andReturn()
 
         val response = objectMapper.readTree(result.response.contentAsString)

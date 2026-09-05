@@ -69,7 +69,8 @@ class LocalPhotoStorageServiceTest {
 
             // Verify file exists on disk
             val storedFiles =
-                Files.walk(tempDir)
+                Files
+                    .walk(tempDir)
                     .filter { Files.isRegularFile(it) }
                     .toList()
             storedFiles.size shouldBe 1
@@ -123,7 +124,8 @@ class LocalPhotoStorageServiceTest {
             deleted shouldBe true
             // Verify file is deleted from disk
             val storedFiles =
-                Files.walk(tempDir)
+                Files
+                    .walk(tempDir)
                     .filter { Files.isRegularFile(it) }
                     .filter { it.fileName.toString().contains(photoId.value.toString()) }
                     .toList()

@@ -155,7 +155,7 @@ Each platform has its own development skills:
 
 | Layer | Technology | Status |
 |-------|------------|--------|
-| Backend | Kotlin + Spring Boot 3.x | Ready |
+| Backend | Kotlin + Spring Boot 4.x | Ready |
 | Web | React 18 + TypeScript + MUI v7 | Ready |
 | Mobile | Flutter 3.x + Riverpod + Freezed | Ready |
 | Database | PostgreSQL + PostGIS | Ready |

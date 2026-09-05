@@ -1,8 +1,8 @@
 package com.munserv.messages.service
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.munserv.messages.domain.MessageEntity
 import com.munserv.shared.enums.MessageType
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 
 /**

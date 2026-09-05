@@ -22,8 +22,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -104,16 +104,17 @@ class PodControllerTest {
             every { podService.getSetupStatus(testPodId) } returns
                 PodResult.Success(PodSetupStatus.Complete)
 
-            mockMvc.get("/api/v1/pod/status") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.isComplete") { value(true) }
-                jsonPath("$.missingSteps") { isArray() }
-                jsonPath("$.missingSteps.length()") { value(0) }
-            }
+            mockMvc
+                .get("/api/v1/pod/status") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.isComplete") { value(true) }
+                    jsonPath("$.missingSteps") { isArray() }
+                    jsonPath("$.missingSteps.length()") { value(0) }
+                }
 
             verify { podService.getSetupStatus(testPodId) }
         }
@@ -124,18 +125,19 @@ class PodControllerTest {
             every { podService.getSetupStatus(testPodId) } returns
                 PodResult.Success(PodSetupStatus.Incomplete(missingSteps))
 
-            mockMvc.get("/api/v1/pod/status") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.isComplete") { value(false) }
-                jsonPath("$.missingSteps") { isArray() }
-                jsonPath("$.missingSteps.length()") { value(2) }
-                jsonPath("$.missingSteps[0]") { value("pod_boundaries") }
-                jsonPath("$.missingSteps[1]") { value("first_admin") }
-            }
+            mockMvc
+                .get("/api/v1/pod/status") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.isComplete") { value(false) }
+                    jsonPath("$.missingSteps") { isArray() }
+                    jsonPath("$.missingSteps.length()") { value(2) }
+                    jsonPath("$.missingSteps[0]") { value("pod_boundaries") }
+                    jsonPath("$.missingSteps[1]") { value("first_admin") }
+                }
         }
 
         @Test
@@ -143,12 +145,13 @@ class PodControllerTest {
             every { podService.getSetupStatus(testPodId) } returns
                 PodResult.NotFound(testPodId)
 
-            mockMvc.get("/api/v1/pod/status") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mockMvc
+                .get("/api/v1/pod/status") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
     }
 
@@ -159,16 +162,17 @@ class PodControllerTest {
             val settings = createTestSettings(logoUrl = "https://example.com/logo.png")
             every { podService.getSettings(testPodId) } returns PodResult.Success(settings)
 
-            mockMvc.get("/api/v1/pod/settings") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.name") { value("TestPod") }
-                jsonPath("$.displayName") { value("Munserv Pod TestPod") }
-                jsonPath("$.logoUrl") { value("https://example.com/logo.png") }
-            }
+            mockMvc
+                .get("/api/v1/pod/settings") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.name") { value("TestPod") }
+                    jsonPath("$.displayName") { value("Munserv Pod TestPod") }
+                    jsonPath("$.logoUrl") { value("https://example.com/logo.png") }
+                }
 
             verify { podService.getSettings(testPodId) }
         }
@@ -178,25 +182,27 @@ class PodControllerTest {
             val settings = createTestSettings(logoUrl = null)
             every { podService.getSettings(testPodId) } returns PodResult.Success(settings)
 
-            mockMvc.get("/api/v1/pod/settings") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$.logoUrl") { doesNotExist() }
-            }
+            mockMvc
+                .get("/api/v1/pod/settings") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$.logoUrl") { doesNotExist() }
+                }
         }
 
         @Test
         fun `should return 404 when pod not found`() {
             every { podService.getSettings(testPodId) } returns PodResult.NotFound(testPodId)
 
-            mockMvc.get("/api/v1/pod/settings") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mockMvc
+                .get("/api/v1/pod/settings") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
     }
 
@@ -215,21 +221,22 @@ class PodControllerTest {
                 podService.updateSettings(testPodId, capture(commandSlot))
             } returns PodResult.Success(updatedSettings)
 
-            mockMvc.patch("/api/v1/pod/settings") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    """
-                    {
-                        "name": "NewPodName"
-                    }
-                    """.trimIndent()
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.name") { value("NewPodName") }
-                jsonPath("$.displayName") { value("Munserv Pod NewPodName") }
-            }
+            mockMvc
+                .patch("/api/v1/pod/settings") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content =
+                        """
+                        {
+                            "name": "NewPodName"
+                        }
+                        """.trimIndent()
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.name") { value("NewPodName") }
+                    jsonPath("$.displayName") { value("Munserv Pod NewPodName") }
+                }
 
             verify { podService.updateSettings(testPodId, any()) }
             commandSlot.captured.name shouldBe "NewPodName"
@@ -246,19 +253,20 @@ class PodControllerTest {
                 podService.updateSettings(testPodId, any())
             } returns PodResult.Success(updatedSettings)
 
-            mockMvc.patch("/api/v1/pod/settings") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    """
-                    {
-                        "logoUrl": "https://example.com/new-logo.png"
-                    }
-                    """.trimIndent()
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$.logoUrl") { value("https://example.com/new-logo.png") }
-            }
+            mockMvc
+                .patch("/api/v1/pod/settings") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content =
+                        """
+                        {
+                            "logoUrl": "https://example.com/new-logo.png"
+                        }
+                        """.trimIndent()
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$.logoUrl") { value("https://example.com/new-logo.png") }
+                }
         }
 
         @Test
@@ -268,37 +276,39 @@ class PodControllerTest {
                 podService.updateSettings(testPodId, any())
             } returns PodResult.ValidationError(listOf("Pod name is invalid"))
 
-            mockMvc.patch("/api/v1/pod/settings") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    """
-                    {
-                        "name": "AA"
-                    }
-                    """.trimIndent()
-            }.andExpect {
-                status { isBadRequest() }
-                jsonPath("$.code") { value("validation_error") }
-                jsonPath("$.message") { value("Pod name is invalid") }
-            }
+            mockMvc
+                .patch("/api/v1/pod/settings") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content =
+                        """
+                        {
+                            "name": "AA"
+                        }
+                        """.trimIndent()
+                }.andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.code") { value("validation_error") }
+                    jsonPath("$.message") { value("Pod name is invalid") }
+                }
         }
 
         @Test
         fun `should return 400 when spring validation fails`() {
             // Empty name fails Spring @Size(min=2) validation
-            mockMvc.patch("/api/v1/pod/settings") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    """
-                    {
-                        "name": ""
-                    }
-                    """.trimIndent()
-            }.andExpect {
-                status { isBadRequest() }
-            }
+            mockMvc
+                .patch("/api/v1/pod/settings") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content =
+                        """
+                        {
+                            "name": ""
+                        }
+                        """.trimIndent()
+                }.andExpect {
+                    status { isBadRequest() }
+                }
         }
 
         @Test
@@ -307,18 +317,19 @@ class PodControllerTest {
                 podService.updateSettings(testPodId, any())
             } returns PodResult.NotFound(testPodId)
 
-            mockMvc.patch("/api/v1/pod/settings") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    """
-                    {
-                        "name": "ValidName"
-                    }
-                    """.trimIndent()
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mockMvc
+                .patch("/api/v1/pod/settings") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content =
+                        """
+                        {
+                            "name": "ValidName"
+                        }
+                        """.trimIndent()
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
 
         @Test
@@ -335,21 +346,22 @@ class PodControllerTest {
                 podService.updateSettings(testPodId, capture(commandSlot))
             } returns PodResult.Success(updatedSettings)
 
-            mockMvc.patch("/api/v1/pod/settings") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    """
-                    {
-                        "name": "UpdatedPod",
-                        "logoUrl": "https://example.com/logo.png"
-                    }
-                    """.trimIndent()
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$.name") { value("UpdatedPod") }
-                jsonPath("$.logoUrl") { value("https://example.com/logo.png") }
-            }
+            mockMvc
+                .patch("/api/v1/pod/settings") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content =
+                        """
+                        {
+                            "name": "UpdatedPod",
+                            "logoUrl": "https://example.com/logo.png"
+                        }
+                        """.trimIndent()
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$.name") { value("UpdatedPod") }
+                    jsonPath("$.logoUrl") { value("https://example.com/logo.png") }
+                }
 
             commandSlot.captured.name shouldBe "UpdatedPod"
             commandSlot.captured.logoUrl shouldBe "https://example.com/logo.png"

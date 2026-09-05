@@ -1,10 +1,10 @@
 package com.munserv.messages.api
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.munserv.messages.domain.MessageEntity
 import com.munserv.shared.enums.MessageStatus
 import com.munserv.shared.enums.MessageType
 import io.swagger.v3.oas.annotations.media.Schema
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.Instant
 
 /**

@@ -8,7 +8,9 @@ sealed class PodSetupStatus {
     /**
      * Pod setup is incomplete with the given missing steps.
      */
-    data class Incomplete(val missingSteps: List<SetupStep>) : PodSetupStatus() {
+    data class Incomplete(
+        val missingSteps: List<SetupStep>,
+    ) : PodSetupStatus() {
         init {
             require(missingSteps.isNotEmpty()) { "Incomplete status must have at least one missing step" }
         }

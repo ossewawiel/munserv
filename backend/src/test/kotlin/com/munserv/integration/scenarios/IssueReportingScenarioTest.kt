@@ -1,6 +1,5 @@
 package com.munserv.integration.scenarios
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.TestContainersConfig
 import com.munserv.auth.api.LoginRequest
 import com.munserv.auth.service.JwtService
@@ -14,14 +13,15 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.ObjectMapper
 
 /**
  * Scenario test: Complete issue reporting flow.
@@ -76,13 +76,11 @@ class IssueReportingScenarioTest {
                 .post("/api/v1/auth/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.accessToken") { isNotEmpty() }
                     jsonPath("$.memberId") { isNotEmpty() }
-                }
-                .andReturn()
+                }.andReturn()
 
         val response = objectMapper.readTree(result.response.contentAsString)
         accessToken = response.get("accessToken").asText()
@@ -95,8 +93,7 @@ class IssueReportingScenarioTest {
         mockMvc
             .get("/api/v1/sectors") {
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.items") { isArray() }
                 jsonPath("$.items[0].id") { isNotEmpty() }
@@ -114,8 +111,7 @@ class IssueReportingScenarioTest {
                 header("Authorization", "Bearer $accessToken")
                 param("sectorId", testSectorId)
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.items") { isArray() }
                 jsonPath("$.pagination.page") { value(1) }
@@ -141,8 +137,7 @@ class IssueReportingScenarioTest {
                     header("Authorization", "Bearer $accessToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isCreated() }
                     jsonPath("$.id") { isNotEmpty() }
                     jsonPath("$.type") { value("pothole") }
@@ -150,8 +145,7 @@ class IssueReportingScenarioTest {
                     jsonPath("$.heat") { isNumber() }
                     jsonPath("$.location.latitude") { value(-26.1350) }
                     jsonPath("$.location.longitude") { value(27.9800) }
-                }
-                .andReturn()
+                }.andReturn()
 
         val response = objectMapper.readTree(result.response.contentAsString)
         createdIssueId = response.get("id").asText()
@@ -167,8 +161,7 @@ class IssueReportingScenarioTest {
             .get("/api/v1/issues/$issueId") {
                 header("Authorization", "Bearer $accessToken")
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.id") { value(issueId) }
                 jsonPath("$.type") { value("pothole") }
@@ -187,8 +180,7 @@ class IssueReportingScenarioTest {
             .get("/api/v1/issues/mine") {
                 header("Authorization", "Bearer $accessToken")
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.items") { isArray() }
                 jsonPath("$.pagination") { isMap() }
@@ -215,8 +207,7 @@ class IssueReportingScenarioTest {
                     header("Authorization", "Bearer $accessToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isCreated() }
                     jsonPath("$.type") { value(type) }
                 }
@@ -232,8 +223,7 @@ class IssueReportingScenarioTest {
                 param("sectorId", testSectorId)
                 param("state", "reported")
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.items") { isArray() }
             }
@@ -248,8 +238,7 @@ class IssueReportingScenarioTest {
                 param("sectorId", testSectorId)
                 param("type", "pothole")
                 accept = MediaType.APPLICATION_JSON
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.items") { isArray() }
             }
@@ -264,11 +253,9 @@ class IssueReportingScenarioTest {
                     header("Authorization", "Bearer $accessToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
-                }
-                .andReturn()
+                }.andReturn()
 
         val content = result.response.contentAsString
 

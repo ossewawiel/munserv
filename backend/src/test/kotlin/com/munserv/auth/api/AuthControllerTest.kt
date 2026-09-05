@@ -1,6 +1,5 @@
 package com.munserv.auth.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.TestContainersConfig
 import com.munserv.auth.repository.MemberRepository
 import com.munserv.auth.service.OtpService
@@ -8,13 +7,14 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.ObjectMapper
 
 @SpringBootTest
 @Import(TestContainersConfig::class)
@@ -50,8 +50,7 @@ class AuthControllerTest {
             .post("/api/v1/auth/register") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.message") { value("OTP sent successfully") }
             }
@@ -65,8 +64,7 @@ class AuthControllerTest {
             .post("/api/v1/auth/register") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isBadRequest() }
                 jsonPath("$.error") { value("invalid_phone") }
             }
@@ -81,8 +79,7 @@ class AuthControllerTest {
             .post("/api/v1/auth/login") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.accessToken") { isNotEmpty() }
                 jsonPath("$.refreshToken") { isNotEmpty() }
@@ -99,8 +96,7 @@ class AuthControllerTest {
             .post("/api/v1/auth/login") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isUnauthorized() }
                 jsonPath("$.error") { value("invalid_credentials") }
             }
@@ -114,8 +110,7 @@ class AuthControllerTest {
             .post("/api/v1/auth/login") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isUnauthorized() }
                 jsonPath("$.error") { value("invalid_credentials") }
             }
@@ -131,11 +126,9 @@ class AuthControllerTest {
                 .post("/api/v1/auth/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(loginRequest)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
-                }
-                .andReturn()
+                }.andReturn()
 
         val loginResponse = objectMapper.readTree(loginResult.response.contentAsString)
         val refreshToken = loginResponse.get("refreshToken").asText()
@@ -147,8 +140,7 @@ class AuthControllerTest {
             .post("/api/v1/auth/refresh") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(refreshRequest)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.accessToken") { isNotEmpty() }
                 jsonPath("$.refreshToken") { isNotEmpty() }
@@ -164,8 +156,7 @@ class AuthControllerTest {
             .post("/api/v1/auth/refresh") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isUnauthorized() }
                 jsonPath("$.error") { value("invalid_token") }
             }
@@ -180,11 +171,9 @@ class AuthControllerTest {
                 .post("/api/v1/auth/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
-                }
-                .andReturn()
+                }.andReturn()
 
         // Verify response matches mock API format
         val content = result.response.contentAsString

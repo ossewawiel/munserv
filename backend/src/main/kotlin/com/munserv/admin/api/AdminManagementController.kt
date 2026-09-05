@@ -74,56 +74,66 @@ class AdminManagementController(
         val command = request.toCommand(SectorId(UUID.fromString(sectorId)))
 
         return when (val result = adminManagementService.createAdmin(command, actorId)) {
-            is AdminResult.Created ->
+            is AdminResult.Created -> {
                 ResponseEntity.status(HttpStatus.CREATED).body(
                     AdminCreatedResponse.from(result.admin, result.temporaryPassword),
                 )
+            }
 
-            is AdminResult.EmailAlreadyExists ->
+            is AdminResult.EmailAlreadyExists -> {
                 ResponseEntity.status(HttpStatus.CONFLICT).body(
                     ErrorBody("email_exists", "Email ${result.email} is already registered"),
                 )
+            }
 
-            is AdminResult.ValidationError ->
+            is AdminResult.ValidationError -> {
                 ResponseEntity.badRequest().body(
                     ErrorBody("validation_error", result.errors.joinToString("; ")),
                 )
+            }
 
-            is AdminResult.InsufficientRoleToManage ->
+            is AdminResult.InsufficientRoleToManage -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody(
                         "insufficient_permissions",
                         "Role ${result.actorRole.toDbValue()} cannot manage ${result.targetRole.toDbValue()} role",
                     ),
                 )
+            }
 
-            is AdminResult.CrossSectorOperation ->
+            is AdminResult.CrossSectorOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_sector", "Cannot manage admins in a different sector"),
                 )
+            }
 
-            is AdminResult.CrossWardOperation ->
+            is AdminResult.CrossWardOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_ward", "Cannot manage admins in a different ward"),
                 )
+            }
 
-            is AdminResult.CrossPodOperation ->
+            is AdminResult.CrossPodOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_pod", "Cannot manage admins in a different pod"),
                 )
+            }
 
-            is AdminResult.OutOfScope ->
+            is AdminResult.OutOfScope -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("out_of_scope", result.reason),
                 )
+            }
 
-            is AdminResult.Unauthorized ->
+            is AdminResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", result.reason),
                 )
+            }
 
-            else ->
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 
@@ -154,41 +164,48 @@ class AdminManagementController(
                 )
 
         return when (val result = adminManagementService.listAdmins(SectorId(UUID.fromString(sectorId)), actorId)) {
-            is AdminResult.ListSuccess ->
+            is AdminResult.ListSuccess -> {
                 ResponseEntity.ok(
                     AdminListResponse(
                         items = result.admins.map { AdminResponse.from(it) },
                         total = result.total,
                     ),
                 )
+            }
 
-            is AdminResult.CrossSectorOperation ->
+            is AdminResult.CrossSectorOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_sector", "Cannot view admins in a different sector"),
                 )
+            }
 
-            is AdminResult.CrossWardOperation ->
+            is AdminResult.CrossWardOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_ward", "Cannot view admins in a different ward"),
                 )
+            }
 
-            is AdminResult.CrossPodOperation ->
+            is AdminResult.CrossPodOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_pod", "Cannot view admins in a different pod"),
                 )
+            }
 
-            is AdminResult.OutOfScope ->
+            is AdminResult.OutOfScope -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("out_of_scope", result.reason),
                 )
+            }
 
-            is AdminResult.Unauthorized ->
+            is AdminResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", result.reason),
                 )
+            }
 
-            else ->
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 
@@ -220,39 +237,47 @@ class AdminManagementController(
                 )
 
         return when (val result = adminManagementService.getAdmin(AdminId(UUID.fromString(id)), actorId)) {
-            is AdminResult.Success ->
+            is AdminResult.Success -> {
                 ResponseEntity.ok(AdminResponse.from(result.admin))
+            }
 
-            is AdminResult.NotFound ->
+            is AdminResult.NotFound -> {
                 ResponseEntity.notFound().build<Any>()
+            }
 
-            is AdminResult.CrossSectorOperation ->
+            is AdminResult.CrossSectorOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_sector", "Cannot view admin in a different sector"),
                 )
+            }
 
-            is AdminResult.CrossWardOperation ->
+            is AdminResult.CrossWardOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_ward", "Cannot view admin in a different ward"),
                 )
+            }
 
-            is AdminResult.CrossPodOperation ->
+            is AdminResult.CrossPodOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_pod", "Cannot view admin in a different pod"),
                 )
+            }
 
-            is AdminResult.OutOfScope ->
+            is AdminResult.OutOfScope -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("out_of_scope", result.reason),
                 )
+            }
 
-            is AdminResult.Unauthorized ->
+            is AdminResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", result.reason),
                 )
+            }
 
-            else ->
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 
@@ -293,52 +318,62 @@ class AdminManagementController(
                     actorId,
                 )
         ) {
-            is AdminResult.Success ->
+            is AdminResult.Success -> {
                 ResponseEntity.ok(AdminResponse.from(result.admin))
+            }
 
-            is AdminResult.NotFound ->
+            is AdminResult.NotFound -> {
                 ResponseEntity.notFound().build<Any>()
+            }
 
-            is AdminResult.ValidationError ->
+            is AdminResult.ValidationError -> {
                 ResponseEntity.badRequest().body(
                     ErrorBody("validation_error", result.errors.joinToString("; ")),
                 )
+            }
 
-            is AdminResult.InsufficientRoleToManage ->
+            is AdminResult.InsufficientRoleToManage -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody(
                         "insufficient_permissions",
                         "Role ${result.actorRole.toDbValue()} cannot manage ${result.targetRole.toDbValue()} role",
                     ),
                 )
+            }
 
-            is AdminResult.CrossSectorOperation ->
+            is AdminResult.CrossSectorOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_sector", "Cannot manage admin in a different sector"),
                 )
+            }
 
-            is AdminResult.CrossWardOperation ->
+            is AdminResult.CrossWardOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_ward", "Cannot manage admin in a different ward"),
                 )
+            }
 
-            is AdminResult.CrossPodOperation ->
+            is AdminResult.CrossPodOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_pod", "Cannot manage admin in a different pod"),
                 )
+            }
 
-            is AdminResult.OutOfScope ->
+            is AdminResult.OutOfScope -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("out_of_scope", result.reason),
                 )
+            }
 
-            is AdminResult.Unauthorized ->
+            is AdminResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", result.reason),
                 )
+            }
 
-            else ->
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 
@@ -366,52 +401,62 @@ class AdminManagementController(
                 )
 
         return when (val result = adminManagementService.deleteAdmin(AdminId(UUID.fromString(id)), actorId)) {
-            is AdminResult.Deleted ->
+            is AdminResult.Deleted -> {
                 ResponseEntity.noContent().build<Any>()
+            }
 
-            is AdminResult.NotFound ->
+            is AdminResult.NotFound -> {
                 ResponseEntity.notFound().build<Any>()
+            }
 
-            is AdminResult.CannotDeleteSelf ->
+            is AdminResult.CannotDeleteSelf -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cannot_delete_self", "Cannot delete your own account"),
                 )
+            }
 
-            is AdminResult.InsufficientRoleToManage ->
+            is AdminResult.InsufficientRoleToManage -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody(
                         "insufficient_permissions",
                         "Role ${result.actorRole.toDbValue()} cannot manage ${result.targetRole.toDbValue()} role",
                     ),
                 )
+            }
 
-            is AdminResult.CrossSectorOperation ->
+            is AdminResult.CrossSectorOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_sector", "Cannot delete admin in a different sector"),
                 )
+            }
 
-            is AdminResult.CrossWardOperation ->
+            is AdminResult.CrossWardOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_ward", "Cannot delete admin in a different ward"),
                 )
+            }
 
-            is AdminResult.CrossPodOperation ->
+            is AdminResult.CrossPodOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("cross_pod", "Cannot delete admin in a different pod"),
                 )
+            }
 
-            is AdminResult.OutOfScope ->
+            is AdminResult.OutOfScope -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorBody("out_of_scope", result.reason),
                 )
+            }
 
-            is AdminResult.Unauthorized ->
+            is AdminResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", result.reason),
                 )
+            }
 
-            else ->
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 

@@ -438,22 +438,27 @@ class GroundAdminController(
         }
 
     private fun unauthorizedResponse(): ResponseEntity<ErrorResponse> =
-        ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
             .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Authentication required")))
 
     private fun notFoundResponse(message: String): ResponseEntity<ErrorResponse> =
-        ResponseEntity.status(HttpStatus.NOT_FOUND)
+        ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
             .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, message)))
 
     private fun conflictResponse(message: String): ResponseEntity<ErrorResponse> =
-        ResponseEntity.status(HttpStatus.CONFLICT)
+        ResponseEntity
+            .status(HttpStatus.CONFLICT)
             .body(ErrorResponse(ErrorBody(ErrorCodes.CONFLICT, message)))
 
     private fun forbiddenResponse(message: String): ResponseEntity<ErrorResponse> =
-        ResponseEntity.status(HttpStatus.FORBIDDEN)
+        ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
             .body(ErrorResponse(ErrorBody(ErrorCodes.FORBIDDEN, message)))
 
     private fun validationErrorResponse(errors: List<String>): ResponseEntity<ErrorResponse> =
-        ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
             .body(ErrorResponse(ErrorBody(ErrorCodes.VALIDATION_ERROR, errors.joinToString(", "))))
 }

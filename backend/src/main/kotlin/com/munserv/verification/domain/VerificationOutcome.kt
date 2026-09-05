@@ -3,7 +3,9 @@ package com.munserv.verification.domain
 /**
  * Enum representing the outcome of a completed verification.
  */
-enum class VerificationOutcome(private val dbValue: String) {
+enum class VerificationOutcome(
+    private val dbValue: String,
+) {
     /**
      * Issue existence or fix has been confirmed.
      */

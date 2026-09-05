@@ -7,7 +7,9 @@ import java.util.UUID
  * Prevents accidentally mixing member IDs with other UUID types.
  */
 @JvmInline
-value class MemberId(val value: UUID) {
+value class MemberId(
+    val value: UUID,
+) {
     override fun toString(): String = value.toString()
 
     companion object {

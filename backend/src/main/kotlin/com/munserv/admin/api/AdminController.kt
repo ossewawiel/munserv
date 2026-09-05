@@ -198,7 +198,10 @@ class AdminController(
         // Fetch members based on filters
         val allMembers: List<Member> =
             when {
-                isGroundAdmin == true -> memberRepository.findBySectorIdAndIsGroundAdmin(id, true)
+                isGroundAdmin == true -> {
+                    memberRepository.findBySectorIdAndIsGroundAdmin(id, true)
+                }
+
                 hasPendingApplication == true || hasInvitationPending == true -> {
                     val pendingApplications =
                         applicationRepository.findBySectorIdAndStatus(
@@ -214,14 +217,19 @@ class AdminController(
                                     hasInvitationPending == true -> app.type == ApplicationType.INVITATION
                                     else -> true
                                 }
-                            }
-                            .map { it.memberId }
+                            }.map { it.memberId }
                             .toSet()
 
                     memberIds.mapNotNull { memberRepository.findById(it) }
                 }
-                memberStatus != null -> memberRepository.findBySectorIdAndStatus(id, memberStatus)
-                else -> memberRepository.findBySectorId(id)
+
+                memberStatus != null -> {
+                    memberRepository.findBySectorIdAndStatus(id, memberStatus)
+                }
+
+                else -> {
+                    memberRepository.findBySectorId(id)
+                }
             }
 
         val totalItems = allMembers.size
@@ -251,12 +259,13 @@ class AdminController(
                 val issueCount = issueRepository.findByReporterId(member.id).size
                 val pendingApp = pendingAppsByMember[member.id]
                 val pendingInvite = pendingInvitationsByMember[member.id]
-                member.toMemberWithStatsAndGAInfo(
-                    issueCount = issueCount,
-                    hasPendingApplication = pendingApp != null,
-                    hasInvitationPending = pendingInvite != null,
-                    pendingApplicationId = pendingApp?.id?.toString() ?: pendingInvite?.id?.toString(),
-                ).toResponse()
+                member
+                    .toMemberWithStatsAndGAInfo(
+                        issueCount = issueCount,
+                        hasPendingApplication = pendingApp != null,
+                        hasInvitationPending = pendingInvite != null,
+                        pendingApplicationId = pendingApp?.id?.toString() ?: pendingInvite?.id?.toString(),
+                    ).toResponse()
             }
 
         val response =
@@ -352,21 +361,25 @@ class AdminController(
         @PathVariable id: String,
     ): ResponseEntity<*> =
         when (val result = registrationService.approveMember(MemberId(UUID.fromString(id)))) {
-            is RegistrationResult.Approved ->
+            is RegistrationResult.Approved -> {
                 ResponseEntity.ok(
                     MemberApprovedResponse(
-                        memberId = result.member.id.value.toString(),
+                        memberId =
+                            result.member.id.value
+                                .toString(),
                         email = result.member.email,
                         message = "Member approved. Temporary password: ${result.temporaryPassword}",
                     ),
                 )
+            }
 
-            is RegistrationResult.MemberNotFound ->
+            is RegistrationResult.MemberNotFound -> {
                 ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse("not_found", "Member not found"))
+            }
 
-            is RegistrationResult.InvalidStatus ->
+            is RegistrationResult.InvalidStatus -> {
                 ResponseEntity
                     .badRequest()
                     .body(
@@ -375,13 +388,16 @@ class AdminController(
                             "Member status is ${result.current}, expected ${result.expected}",
                         ),
                     )
+            }
 
             is RegistrationResult.Success,
             is RegistrationResult.Rejected,
             is RegistrationResult.EmailAlreadyRegistered,
             is RegistrationResult.InvalidSector,
             is RegistrationResult.ValidationError,
-            -> ResponseEntity.internalServerError().build<Unit>()
+            -> {
+                ResponseEntity.internalServerError().build<Unit>()
+            }
         }
 
     /**
@@ -408,15 +424,17 @@ class AdminController(
         @PathVariable id: String,
     ): ResponseEntity<*> =
         when (val result = registrationService.rejectMember(MemberId(UUID.fromString(id)))) {
-            is RegistrationResult.Rejected ->
+            is RegistrationResult.Rejected -> {
                 ResponseEntity.noContent().build<Unit>()
+            }
 
-            is RegistrationResult.MemberNotFound ->
+            is RegistrationResult.MemberNotFound -> {
                 ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse("not_found", "Member not found"))
+            }
 
-            is RegistrationResult.InvalidStatus ->
+            is RegistrationResult.InvalidStatus -> {
                 ResponseEntity
                     .badRequest()
                     .body(
@@ -425,12 +443,15 @@ class AdminController(
                             "Member status is ${result.current}, expected ${result.expected}",
                         ),
                     )
+            }
 
             is RegistrationResult.Success,
             is RegistrationResult.Approved,
             is RegistrationResult.EmailAlreadyRegistered,
             is RegistrationResult.InvalidSector,
             is RegistrationResult.ValidationError,
-            -> ResponseEntity.internalServerError().build<Unit>()
+            -> {
+                ResponseEntity.internalServerError().build<Unit>()
+            }
         }
 }

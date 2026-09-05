@@ -117,9 +117,18 @@ class VerificationService(
         val saved = verificationRepository.save(verification)
 
         when (mode) {
-            VerificationMode.ALL_NOTIFIED -> notifyAllGroundAdmins(issue, saved)
-            VerificationMode.FIRST_COME -> notifyAllGroundAdmins(issue, saved)
-            VerificationMode.NEAREST_AUTO -> notifyAllGroundAdmins(issue, saved)
+            VerificationMode.ALL_NOTIFIED -> {
+                notifyAllGroundAdmins(issue, saved)
+            }
+
+            VerificationMode.FIRST_COME -> {
+                notifyAllGroundAdmins(issue, saved)
+            }
+
+            VerificationMode.NEAREST_AUTO -> {
+                notifyAllGroundAdmins(issue, saved)
+            }
+
             VerificationMode.ADMIN_ASSIGNS -> {
                 // Don't send messages, admin will assign manually
             }
@@ -276,6 +285,7 @@ class VerificationService(
                     null
                 }
             }
+
             VerificationType.FIX -> {
                 if (issue.state != IssueState.Fixed) {
                     VerificationResult.ValidationError(listOf("Issue must be in FIXED state for fix verification"))
@@ -346,10 +356,12 @@ class VerificationService(
                 val updated = issue.withState(IssueState.Confirmed)
                 issueRepository.save(updated)
             }
+
             verification.isExistenceVerification && verification.outcome == VerificationOutcome.NOT_FOUND -> {
                 val updated = issue.withState(IssueState.Rejected)
                 issueRepository.save(updated)
             }
+
             verification.isFixVerification && verification.outcome == VerificationOutcome.NOT_FIXED -> {
                 val updated = issue.withState(IssueState.Reopened)
                 issueRepository.save(updated)

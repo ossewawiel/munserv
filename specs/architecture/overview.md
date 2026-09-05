@@ -4,7 +4,7 @@
 
 | Layer | Technology |
 |-------|------------|
-| Backend | Kotlin + Spring Boot 3 |
+| Backend | Kotlin + Spring Boot 4 |
 | Mobile | Flutter + Riverpod + Freezed |
 | Web | React + TypeScript + MUI |
 | Database | PostgreSQL + PostGIS |

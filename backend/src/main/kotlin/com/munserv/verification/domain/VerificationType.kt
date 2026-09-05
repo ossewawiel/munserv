@@ -3,7 +3,9 @@ package com.munserv.verification.domain
 /**
  * Enum representing the type of verification being performed.
  */
-enum class VerificationType(private val dbValue: String) {
+enum class VerificationType(
+    private val dbValue: String,
+) {
     /**
      * Verification that a reported issue actually exists.
      */

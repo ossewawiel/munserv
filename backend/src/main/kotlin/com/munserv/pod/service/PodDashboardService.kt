@@ -111,9 +111,15 @@ class PodDashboardService(
  * Distinct from PodResult to handle ward/sector not found cases.
  */
 sealed interface DashboardResult<out T> {
-    data class Success<T>(val data: T) : DashboardResult<T>
+    data class Success<T>(
+        val data: T,
+    ) : DashboardResult<T>
 
-    data class WardNotFound(val wardId: WardId) : DashboardResult<Nothing>
+    data class WardNotFound(
+        val wardId: WardId,
+    ) : DashboardResult<Nothing>
 
-    data class SectorNotFound(val sectorId: SectorId) : DashboardResult<Nothing>
+    data class SectorNotFound(
+        val sectorId: SectorId,
+    ) : DashboardResult<Nothing>
 }

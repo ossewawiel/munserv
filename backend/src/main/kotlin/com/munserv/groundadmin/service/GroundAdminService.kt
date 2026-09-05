@@ -220,7 +220,7 @@ class GroundAdminService(
             return GroundAdminResult.Success(null)
         }
 
-        // TODO: Get actual verification counts from verification service
+        // Tracked in #57: source verification counts from the verification module
         val info =
             GroundAdminInfoResponse(
                 status = member.groundAdminStatus!!,
@@ -492,7 +492,7 @@ class GroundAdminService(
                 memberRepository.findBySectorIdAndIsGroundAdmin(sectorId, true)
             }
 
-        // TODO: Get actual pending verification counts from verification service
+        // Tracked in #57: source pending verification counts from the verification module
         val items =
             members.map { member ->
                 GroundAdminResponse(

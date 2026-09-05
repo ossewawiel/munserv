@@ -127,8 +127,8 @@ class EmailService(
     /**
      * Resolves the effective recipient, redirecting to override address if configured.
      */
-    private fun resolveRecipient(originalRecipient: String): String {
-        return if (overrideRecipient.isNotBlank()) {
+    private fun resolveRecipient(originalRecipient: String): String =
+        if (overrideRecipient.isNotBlank()) {
             log.warn(
                 "EMAIL OVERRIDE ACTIVE: Redirecting email from {} to {}",
                 maskEmail(originalRecipient),
@@ -138,7 +138,6 @@ class EmailService(
         } else {
             originalRecipient
         }
-    }
 
     /**
      * Resolves the effective subject, prepending original recipient when override is active.
@@ -146,13 +145,12 @@ class EmailService(
     private fun resolveSubject(
         originalSubject: String,
         originalRecipient: String,
-    ): String {
-        return if (overrideRecipient.isNotBlank()) {
+    ): String =
+        if (overrideRecipient.isNotBlank()) {
             "[To: $originalRecipient] $originalSubject"
         } else {
             originalSubject
         }
-    }
 
     /**
      * Sends a simple email.
@@ -190,4 +188,7 @@ class EmailService(
 /**
  * Exception thrown when email sending fails.
  */
-class EmailSendException(message: String, cause: Throwable) : RuntimeException(message, cause)
+class EmailSendException(
+    message: String,
+    cause: Throwable,
+) : RuntimeException(message, cause)

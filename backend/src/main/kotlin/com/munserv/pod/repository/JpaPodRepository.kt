@@ -61,7 +61,8 @@ class JpaPodSetupStepRepository(
     private val clock: Clock,
 ) : PodSetupStepRepository {
     override fun findCompletedSteps(podId: PodId): Set<SetupStep> =
-        springDataRepository.findAllByPodId(podId.value)
+        springDataRepository
+            .findAllByPodId(podId.value)
             .map { it.toSetupStep() }
             .toSet()
 

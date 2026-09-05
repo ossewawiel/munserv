@@ -59,12 +59,17 @@ class SectorSettingsController(
         @PathVariable sectorId: UUID,
     ): ResponseEntity<*> =
         when (val result = settingsService.getSettings(SectorId(sectorId))) {
-            is SectorSettingsResult.Success ->
+            is SectorSettingsResult.Success -> {
                 ResponseEntity.ok(SectorSettingsResponse.from(result.settings))
-            is SectorSettingsResult.SectorNotFound ->
+            }
+
+            is SectorSettingsResult.SectorNotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is SectorSettingsResult.ValidationError ->
+            }
+
+            is SectorSettingsResult.ValidationError -> {
                 ResponseEntity.badRequest().body(mapOf("errors" to result.errors))
+            }
         }
 
     @Operation(
@@ -91,11 +96,16 @@ class SectorSettingsController(
         @RequestBody request: UpdateSectorSettingsRequest,
     ): ResponseEntity<*> =
         when (val result = settingsService.updateSettings(SectorId(sectorId), request.toCommand())) {
-            is SectorSettingsResult.Success ->
+            is SectorSettingsResult.Success -> {
                 ResponseEntity.ok(SectorSettingsResponse.from(result.settings))
-            is SectorSettingsResult.SectorNotFound ->
+            }
+
+            is SectorSettingsResult.SectorNotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is SectorSettingsResult.ValidationError ->
+            }
+
+            is SectorSettingsResult.ValidationError -> {
                 ResponseEntity.badRequest().body(mapOf("errors" to result.errors))
+            }
         }
 }

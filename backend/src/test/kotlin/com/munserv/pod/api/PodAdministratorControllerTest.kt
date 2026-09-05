@@ -1,6 +1,5 @@
 package com.munserv.pod.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.TestContainersConfig
 import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminRole
@@ -18,8 +17,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -28,6 +27,7 @@ import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.ObjectMapper
 import java.time.Instant
 import java.util.UUID
 
@@ -106,11 +106,11 @@ class PodAdministratorControllerTest {
             every { adminService.listAdminsByPod(testPodId, testAdminId) } returns
                 AdminResult.ListSuccess(admins, 2)
 
-            mockMvc.get("/api/v1/pod/administrators") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }
-                .andExpect {
+            mockMvc
+                .get("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.total") { value(2) }
                     jsonPath("$.items[0].email") { value("wardadmin@example.com") }
@@ -125,11 +125,11 @@ class PodAdministratorControllerTest {
             every { adminService.listAdminsByPod(testPodId, testAdminId) } returns
                 AdminResult.ListSuccess(emptyList(), 0)
 
-            mockMvc.get("/api/v1/pod/administrators") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }
-                .andExpect {
+            mockMvc
+                .get("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.total") { value(0) }
                     jsonPath("$.items") { isEmpty() }
@@ -144,11 +144,11 @@ class PodAdministratorControllerTest {
             every { adminService.getAdmin(otherAdminId, testAdminId) } returns
                 AdminResult.Success(testAdmin)
 
-            mockMvc.get("/api/v1/pod/administrators/${otherAdminId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }
-                .andExpect {
+            mockMvc
+                .get("/api/v1/pod/administrators/${otherAdminId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.email") { value("wardadmin@example.com") }
                     jsonPath("$.role") { value("ward_admin") }
@@ -161,11 +161,11 @@ class PodAdministratorControllerTest {
             every { adminService.getAdmin(otherAdminId, testAdminId) } returns
                 AdminResult.NotFound(otherAdminId)
 
-            mockMvc.get("/api/v1/pod/administrators/${otherAdminId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }
-                .andExpect {
+            mockMvc
+                .get("/api/v1/pod/administrators/${otherAdminId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
                     status { isNotFound() }
                 }
         }
@@ -176,11 +176,11 @@ class PodAdministratorControllerTest {
             every { adminService.getAdmin(otherAdminId, testAdminId) } returns
                 AdminResult.CrossPodOperation(testPodId, otherPodId)
 
-            mockMvc.get("/api/v1/pod/administrators/${otherAdminId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }
-                .andExpect {
+            mockMvc
+                .get("/api/v1/pod/administrators/${otherAdminId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
                     status { isForbidden() }
                     jsonPath("$.code") { value("cross_pod") }
                 }
@@ -195,7 +195,9 @@ class PodAdministratorControllerTest {
                 Admin(
                     id = AdminId.generate(),
                     podId = testPodId,
-                    wardId = com.munserv.shared.types.WardId(UUID.fromString("550e8400-e29b-41d4-a716-446655440030")),
+                    wardId =
+                        com.munserv.shared.types
+                            .WardId(UUID.fromString("550e8400-e29b-41d4-a716-446655440030")),
                     email = "newadmin@example.com",
                     displayName = "New Admin",
                     role = AdminRole.WARD_ADMIN,
@@ -215,12 +217,12 @@ class PodAdministratorControllerTest {
                     "wardId" to "550e8400-e29b-41d4-a716-446655440030",
                 )
 
-            mockMvc.post("/api/v1/pod/administrators") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }
-                .andExpect {
+            mockMvc
+                .post("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
                     status { isCreated() }
                     jsonPath("$.email") { value("newadmin@example.com") }
                     jsonPath("$.temporaryPassword") { value(tempPassword) }
@@ -240,12 +242,12 @@ class PodAdministratorControllerTest {
                     "wardId" to "550e8400-e29b-41d4-a716-446655440030",
                 )
 
-            mockMvc.post("/api/v1/pod/administrators") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }
-                .andExpect {
+            mockMvc
+                .post("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
                     status { isConflict() }
                     jsonPath("$.code") { value("email_exists") }
                 }
@@ -263,12 +265,12 @@ class PodAdministratorControllerTest {
                     "role" to "ward_admin",
                 )
 
-            mockMvc.post("/api/v1/pod/administrators") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }
-                .andExpect {
+            mockMvc
+                .post("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
                     status { isBadRequest() }
                     jsonPath("$.code") { value("validation_error") }
                 }
@@ -287,12 +289,12 @@ class PodAdministratorControllerTest {
                     "podId" to testPodId.value.toString(),
                 )
 
-            mockMvc.post("/api/v1/pod/administrators") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }
-                .andExpect {
+            mockMvc
+                .post("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
                     status { isForbidden() }
                     jsonPath("$.code") { value("insufficient_permissions") }
                 }
@@ -309,12 +311,12 @@ class PodAdministratorControllerTest {
 
             val request = mapOf("displayName" to "Updated Name")
 
-            mockMvc.patch("/api/v1/pod/administrators/${otherAdminId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }
-                .andExpect {
+            mockMvc
+                .patch("/api/v1/pod/administrators/${otherAdminId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.displayName") { value("Updated Name") }
                 }
@@ -327,12 +329,12 @@ class PodAdministratorControllerTest {
 
             val request = mapOf("displayName" to "Updated Name")
 
-            mockMvc.patch("/api/v1/pod/administrators/${otherAdminId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }
-                .andExpect {
+            mockMvc
+                .patch("/api/v1/pod/administrators/${otherAdminId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
                     status { isNotFound() }
                 }
         }
@@ -345,10 +347,10 @@ class PodAdministratorControllerTest {
             every { adminService.deleteAdmin(otherAdminId, testAdminId) } returns
                 AdminResult.Deleted
 
-            mockMvc.delete("/api/v1/pod/administrators/${otherAdminId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-            }
-                .andExpect {
+            mockMvc
+                .delete("/api/v1/pod/administrators/${otherAdminId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                }.andExpect {
                     status { isNoContent() }
                 }
         }
@@ -358,10 +360,10 @@ class PodAdministratorControllerTest {
             every { adminService.deleteAdmin(otherAdminId, testAdminId) } returns
                 AdminResult.NotFound(otherAdminId)
 
-            mockMvc.delete("/api/v1/pod/administrators/${otherAdminId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-            }
-                .andExpect {
+            mockMvc
+                .delete("/api/v1/pod/administrators/${otherAdminId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                }.andExpect {
                     status { isNotFound() }
                 }
         }
@@ -371,10 +373,10 @@ class PodAdministratorControllerTest {
             every { adminService.deleteAdmin(testAdminId, testAdminId) } returns
                 AdminResult.CannotDeleteSelf
 
-            mockMvc.delete("/api/v1/pod/administrators/${testAdminId.value}") {
-                header("Authorization", "Bearer $podChiefToken")
-            }
-                .andExpect {
+            mockMvc
+                .delete("/api/v1/pod/administrators/${testAdminId.value}") {
+                    header("Authorization", "Bearer $podChiefToken")
+                }.andExpect {
                     status { isForbidden() }
                     jsonPath("$.code") { value("cannot_delete_self") }
                 }

@@ -7,7 +7,9 @@ import java.util.UUID
  * Prevents mixing application IDs with other UUID types.
  */
 @JvmInline
-value class GroundAdminApplicationId(val value: UUID) {
+value class GroundAdminApplicationId(
+    val value: UUID,
+) {
     companion object {
         fun generate(): GroundAdminApplicationId = GroundAdminApplicationId(UUID.randomUUID())
 

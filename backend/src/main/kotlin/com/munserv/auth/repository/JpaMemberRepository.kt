@@ -108,11 +108,12 @@ class JpaMemberRepository(
         isGroundAdmin: Boolean,
         status: GroundAdminStatus,
     ): List<Member> =
-        jpa.findBySectorIdAndIsGroundAdminAndGroundAdminStatus(
-            sectorId.value,
-            isGroundAdmin,
-            status.toApiString(),
-        ).map { it.toDomain() }
+        jpa
+            .findBySectorIdAndIsGroundAdminAndGroundAdminStatus(
+                sectorId.value,
+                isGroundAdmin,
+                status.toApiString(),
+            ).map { it.toDomain() }
 
     override fun findAdminsBySectorId(sectorId: SectorId): List<Member> = jpa.findAdminsBySectorId(sectorId.value).map { it.toDomain() }
 }

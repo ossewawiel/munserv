@@ -7,7 +7,9 @@ import java.util.UUID
  * Prevents accidentally mixing admin IDs with other UUID types.
  */
 @JvmInline
-value class AdminId(val value: UUID) {
+value class AdminId(
+    val value: UUID,
+) {
     override fun toString(): String = value.toString()
 
     companion object {

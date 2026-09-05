@@ -8,8 +8,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -49,8 +49,7 @@ class AdminControllerTest {
                     header("Authorization", "Bearer $adminToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
                     jsonPath("$.sectorId") { value(testSectorId) }
@@ -69,8 +68,7 @@ class AdminControllerTest {
                     header("Authorization", "Bearer $memberToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isForbidden() }
                 }
         }
@@ -83,8 +81,7 @@ class AdminControllerTest {
                 .get("/api/v1/admin/dashboard") {
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isForbidden() }
                 }
         }
@@ -96,8 +93,7 @@ class AdminControllerTest {
                     header("Authorization", "Bearer $adminToken")
                     param("sectorId", "00000000-0000-0000-0000-000000000000")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isNotFound() }
                 }
         }
@@ -112,8 +108,7 @@ class AdminControllerTest {
                     header("Authorization", "Bearer $adminToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
                     jsonPath("$.generatedAt") { isNotEmpty() }
@@ -129,8 +124,7 @@ class AdminControllerTest {
                     param("sectorId", testSectorId)
                     param("limit", "5")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.items") { isArray() }
                 }
@@ -143,8 +137,7 @@ class AdminControllerTest {
                     header("Authorization", "Bearer $memberToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isForbidden() }
                 }
         }
@@ -159,8 +152,7 @@ class AdminControllerTest {
                     header("Authorization", "Bearer $adminToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
                     jsonPath("$.items") { isArray() }
@@ -180,8 +172,7 @@ class AdminControllerTest {
                     param("page", "1")
                     param("limit", "5")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.pagination.page") { value(1) }
                     jsonPath("$.pagination.limit") { value(5) }
@@ -195,8 +186,7 @@ class AdminControllerTest {
                     header("Authorization", "Bearer $memberToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isForbidden() }
                 }
         }
@@ -208,11 +198,9 @@ class AdminControllerTest {
                     header("Authorization", "Bearer $adminToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
-                }
-                .andReturn()
+                }.andReturn()
                 .let { result ->
                     val content = result.response.contentAsString
                     // Verify response contains expected structure
@@ -229,14 +217,12 @@ class AdminControllerTest {
                     param("sectorId", testSectorId)
                     param("status", "active")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
                     jsonPath("$.items") { isArray() }
                     jsonPath("$.pagination.totalItems") { isNumber() }
-                }
-                .andReturn()
+                }.andReturn()
                 .let { result ->
                     val content = result.response.contentAsString
                     // All returned members should have active status
@@ -255,8 +241,7 @@ class AdminControllerTest {
                     param("sectorId", testSectorId)
                     param("status", "pending_approval")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
                     jsonPath("$.items") { isArray() }
@@ -271,8 +256,7 @@ class AdminControllerTest {
                     param("sectorId", testSectorId)
                     param("status", "invalid_status")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isBadRequest() }
                     jsonPath("$.error") { value("invalid_status") }
                     jsonPath("$.message") { isNotEmpty() }
@@ -288,11 +272,9 @@ class AdminControllerTest {
                         header("Authorization", "Bearer $adminToken")
                         param("sectorId", testSectorId)
                         accept = MediaType.APPLICATION_JSON
-                    }
-                    .andExpect {
+                    }.andExpect {
                         status { isOk() }
-                    }
-                    .andReturn()
+                    }.andReturn()
 
             val contentWithoutFilter = resultWithoutFilter.response.contentAsString
             contentWithoutFilter.contains("\"totalItems\"") shouldBe true
@@ -308,8 +290,7 @@ class AdminControllerTest {
                     param("page", "1")
                     param("limit", "5")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.pagination.page") { value(1) }
                     jsonPath("$.pagination.limit") { value(5) }
@@ -318,7 +299,9 @@ class AdminControllerTest {
 
         @Test
         fun `GET api-v1-admin-members filtered counts should sum to total unfiltered count`() {
-            val objectMapper = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
+            val objectMapper =
+                tools.jackson.module.kotlin
+                    .jacksonObjectMapper()
 
             // Get total count without filter
             val totalResult =
@@ -328,8 +311,7 @@ class AdminControllerTest {
                         param("sectorId", testSectorId)
                         param("limit", "1")
                         accept = MediaType.APPLICATION_JSON
-                    }
-                    .andExpect { status { isOk() } }
+                    }.andExpect { status { isOk() } }
                     .andReturn()
             val totalJson = objectMapper.readTree(totalResult.response.contentAsString)
             val totalCount = totalJson.get("pagination").get("totalItems").asInt()
@@ -347,8 +329,7 @@ class AdminControllerTest {
                             param("status", status)
                             param("limit", "1")
                             accept = MediaType.APPLICATION_JSON
-                        }
-                        .andExpect { status { isOk() } }
+                        }.andExpect { status { isOk() } }
                         .andReturn()
                 val json = objectMapper.readTree(result.response.contentAsString)
                 sumOfFilteredCounts += json.get("pagination").get("totalItems").asInt()
@@ -360,7 +341,9 @@ class AdminControllerTest {
 
         @Test
         fun `GET api-v1-admin-members filtered by status should return only members with that status`() {
-            val objectMapper = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
+            val objectMapper =
+                tools.jackson.module.kotlin
+                    .jacksonObjectMapper()
 
             // Test that all items returned for active filter have active status
             val result =
@@ -371,8 +354,7 @@ class AdminControllerTest {
                         param("status", "active")
                         param("limit", "100")
                         accept = MediaType.APPLICATION_JSON
-                    }
-                    .andExpect { status { isOk() } }
+                    }.andExpect { status { isOk() } }
                     .andReturn()
 
             val json = objectMapper.readTree(result.response.contentAsString)
@@ -392,8 +374,7 @@ class AdminControllerTest {
                         param("status", "pending_approval")
                         param("limit", "100")
                         accept = MediaType.APPLICATION_JSON
-                    }
-                    .andExpect { status { isOk() } }
+                    }.andExpect { status { isOk() } }
                     .andReturn()
 
             val pendingJson = objectMapper.readTree(pendingResult.response.contentAsString)
@@ -415,11 +396,9 @@ class AdminControllerTest {
                         header("Authorization", "Bearer $adminToken")
                         param("sectorId", testSectorId)
                         accept = MediaType.APPLICATION_JSON
-                    }
-                    .andExpect {
+                    }.andExpect {
                         status { isOk() }
-                    }
-                    .andReturn()
+                    }.andReturn()
 
             val content = result.response.contentAsString
             content.contains("\"sectorId\"") shouldBe true
@@ -439,11 +418,9 @@ class AdminControllerTest {
                         header("Authorization", "Bearer $adminToken")
                         param("sectorId", testSectorId)
                         accept = MediaType.APPLICATION_JSON
-                    }
-                    .andExpect {
+                    }.andExpect {
                         status { isOk() }
-                    }
-                    .andReturn()
+                    }.andReturn()
 
             val content = result.response.contentAsString
             content.contains("\"generatedAt\"") shouldBe true
@@ -458,11 +435,9 @@ class AdminControllerTest {
                         header("Authorization", "Bearer $adminToken")
                         param("sectorId", testSectorId)
                         accept = MediaType.APPLICATION_JSON
-                    }
-                    .andExpect {
+                    }.andExpect {
                         status { isOk() }
-                    }
-                    .andReturn()
+                    }.andReturn()
 
             val content = result.response.contentAsString
             content.contains("\"items\"") shouldBe true

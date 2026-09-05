@@ -50,7 +50,8 @@ class MemberController(
         @AuthenticationPrincipal memberId: String?,
     ): ResponseEntity<*> {
         if (memberId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Authentication required")))
         }
 
@@ -58,15 +59,21 @@ class MemberController(
             try {
                 MemberId(UUID.fromString(memberId))
             } catch (e: IllegalArgumentException) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Invalid authentication")))
             }
 
         return when (val result = memberService.findById(memberIdValue)) {
-            is MemberResult.Success -> ResponseEntity.ok(result.member.toResponse())
-            is MemberResult.NotFound ->
-                ResponseEntity.status(HttpStatus.NOT_FOUND)
+            is MemberResult.Success -> {
+                ResponseEntity.ok(result.member.toResponse())
+            }
+
+            is MemberResult.NotFound -> {
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Member not found")))
+            }
         }
     }
 }

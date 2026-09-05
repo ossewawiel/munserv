@@ -7,7 +7,9 @@ import java.util.UUID
  * Prevents accidentally mixing issue IDs with other UUID types.
  */
 @JvmInline
-value class IssueId(val value: UUID) {
+value class IssueId(
+    val value: UUID,
+) {
     override fun toString(): String = value.toString()
 
     companion object {

@@ -56,7 +56,7 @@ class MessageService(
 
         val messagePage =
             when {
-                status != null && type != null ->
+                status != null && type != null -> {
                     messageRepository.findByRecipientIdAndRecipientTypeAndStatusAndType(
                         recipientId,
                         recipientType,
@@ -64,26 +64,33 @@ class MessageService(
                         type.toApiString(),
                         nativePageable,
                     )
-                status != null ->
+                }
+
+                status != null -> {
                     messageRepository.findByRecipientIdAndRecipientTypeAndStatus(
                         recipientId,
                         recipientType,
                         status.toApiString(),
                         nativePageable,
                     )
-                type != null ->
+                }
+
+                type != null -> {
                     messageRepository.findByRecipientIdAndRecipientTypeAndType(
                         recipientId,
                         recipientType,
                         type.toApiString(),
                         nativePageable,
                     )
-                else ->
+                }
+
+                else -> {
                     messageRepository.findByRecipientIdAndRecipientType(
                         recipientId,
                         recipientType,
                         jpaPageable,
                     )
+                }
             }
 
         val unreadCount = messageRepository.countUnread(recipientId, recipientType)
@@ -179,18 +186,24 @@ class MessageService(
 
             val gaResult =
                 when (request.action) {
-                    "accept" ->
+                    "accept" -> {
                         groundAdminService.acceptInvitation(
                             MemberId(recipientId),
                             GroundAdminApplicationId(applicationId),
                         )
-                    "decline" ->
+                    }
+
+                    "decline" -> {
                         groundAdminService.declineInvitation(
                             MemberId(recipientId),
                             GroundAdminApplicationId(applicationId),
                             request.note,
                         )
-                    else -> return MessageResult.ValidationError(listOf("Invalid action for invitation"))
+                    }
+
+                    else -> {
+                        return MessageResult.ValidationError(listOf("Invalid action for invitation"))
+                    }
                 }
 
             // Map GroundAdminResult to MessageResult if failed
@@ -215,9 +228,7 @@ class MessageService(
      * Creates and saves a new message.
      */
     @Transactional
-    fun createMessage(message: MessageEntity): MessageEntity {
-        return messageRepository.save(message)
-    }
+    fun createMessage(message: MessageEntity): MessageEntity = messageRepository.save(message)
 
     /**
      * Creates messages for multiple recipients.
@@ -231,12 +242,11 @@ class MessageService(
         recipientIds: List<UUID>,
         recipientType: String,
         messageBuilder: (UUID) -> MessageEntity,
-    ): List<MessageEntity> {
-        return recipientIds.map { recipientId ->
+    ): List<MessageEntity> =
+        recipientIds.map { recipientId ->
             val message = messageBuilder(recipientId)
             messageRepository.save(message)
         }
-    }
 
     /**
      * Gets the count of unread messages for a recipient.
@@ -244,9 +254,7 @@ class MessageService(
     fun getUnreadCount(
         recipientId: UUID,
         recipientType: String,
-    ): Long {
-        return messageRepository.countUnread(recipientId, recipientType)
-    }
+    ): Long = messageRepository.countUnread(recipientId, recipientType)
 
     /**
      * Validates that an action is allowed for a given action type.
@@ -254,8 +262,8 @@ class MessageService(
     private fun isValidAction(
         actionType: String?,
         action: String,
-    ): Boolean {
-        return when (actionType) {
+    ): Boolean =
+        when (actionType) {
             "accept_decline" -> action in listOf("accept", "decline")
             "approve_reject" -> action in listOf("approve", "reject")
             "confirm_verify" -> action in listOf("confirm", "cannot_verify")
@@ -263,5 +271,4 @@ class MessageService(
             "view" -> action in listOf("dismiss")
             else -> false
         }
-    }
 }

@@ -7,7 +7,9 @@ import java.security.MessageDigest
  * Provides hashing for privacy-preserving lookups and masking for display.
  */
 @JvmInline
-value class Email private constructor(val value: String) {
+value class Email private constructor(
+    val value: String,
+) {
     /**
      * Returns SHA-256 hash for database lookups.
      * Never store plain email for query purposes.

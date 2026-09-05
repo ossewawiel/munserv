@@ -64,14 +64,21 @@ class PodController(
                 )
 
         return when (val result = podService.getSetupStatus(podId)) {
-            is PodResult.Success ->
+            is PodResult.Success -> {
                 ResponseEntity.ok(PodSetupStatusResponse.from(result.data))
-            is PodResult.NotFound ->
+            }
+
+            is PodResult.NotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is PodResult.ValidationError ->
+            }
+
+            is PodResult.ValidationError -> {
                 ResponseEntity.badRequest().body(ErrorResponse("validation_error", result.errors.joinToString("; ")))
-            is PodResult.Unauthorized ->
+            }
+
+            is PodResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse("forbidden", result.reason))
+            }
         }
     }
 
@@ -100,14 +107,21 @@ class PodController(
                 )
 
         return when (val result = podService.getSettings(podId)) {
-            is PodResult.Success ->
+            is PodResult.Success -> {
                 ResponseEntity.ok(PodSettingsResponse.from(result.data))
-            is PodResult.NotFound ->
+            }
+
+            is PodResult.NotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is PodResult.ValidationError ->
+            }
+
+            is PodResult.ValidationError -> {
                 ResponseEntity.badRequest().body(ErrorResponse("validation_error", result.errors.joinToString("; ")))
-            is PodResult.Unauthorized ->
+            }
+
+            is PodResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse("forbidden", result.reason))
+            }
         }
     }
 
@@ -139,14 +153,21 @@ class PodController(
                 )
 
         return when (val result = podService.updateSettings(podId, request.toCommand())) {
-            is PodResult.Success ->
+            is PodResult.Success -> {
                 ResponseEntity.ok(PodSettingsResponse.from(result.data))
-            is PodResult.NotFound ->
+            }
+
+            is PodResult.NotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is PodResult.ValidationError ->
+            }
+
+            is PodResult.ValidationError -> {
                 ResponseEntity.badRequest().body(ErrorResponse("validation_error", result.errors.joinToString("; ")))
-            is PodResult.Unauthorized ->
+            }
+
+            is PodResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse("forbidden", result.reason))
+            }
         }
     }
 

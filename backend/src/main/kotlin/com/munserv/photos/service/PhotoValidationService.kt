@@ -9,7 +9,9 @@ import org.springframework.web.multipart.MultipartFile
 sealed interface ValidationResult {
     data object Valid : ValidationResult
 
-    data class Invalid(val errors: List<String>) : ValidationResult
+    data class Invalid(
+        val errors: List<String>,
+    ) : ValidationResult
 }
 
 /**
