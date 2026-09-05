@@ -37,6 +37,20 @@ jobs:
               - 'mobile/**'
               - '.github/workflows/ci.yml'
 
+  domain:
+    name: Domain language
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PyYAML
+        run: pip install --quiet pyyaml
+      - name: Validate domain/language.yaml against the code
+        run: python3 scripts/validate-domain-language.py
+
   backend:
     name: Backend (Kotlin)
     needs: changes
@@ -134,14 +148,14 @@ jobs:
   # triggered platform job passed and none failed.
   ci-status:
     name: CI status
-    needs: [changes, backend, web, mobile]
+    needs: [changes, domain, backend, web, mobile]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate
         run: |
-          echo "backend=${{ needs.backend.result }} web=${{ needs.web.result }} mobile=${{ needs.mobile.result }}"
-          for r in "${{ needs.backend.result }}" "${{ needs.web.result }}" "${{ needs.mobile.result }}"; do
+          echo "domain=${{ needs.domain.result }} backend=${{ needs.backend.result }} web=${{ needs.web.result }} mobile=${{ needs.mobile.result }}"
+          for r in "${{ needs.domain.result }}" "${{ needs.backend.result }}" "${{ needs.web.result }}" "${{ needs.mobile.result }}"; do
             case "$r" in
               success|skipped) ;;
               *) echo "A platform job did not pass: $r"; exit 1 ;;

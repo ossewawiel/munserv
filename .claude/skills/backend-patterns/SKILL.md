@@ -1,26 +1,124 @@
-# Backend card - Kotlin 2.3 + Spring Boot 4.1
+---
+name: backend-patterns
+description: Full Kotlin/Spring Boot 4 code patterns for the MunServ backend - domain entities, sealed states and results, services, controllers, JPA entities, repositories, DTOs, OpenAPI annotations, and the MockK/Kotest/Testcontainers test patterns. Load when writing or reviewing backend code beyond what backend/CLAUDE.md covers.
+---
 
-Read `domain/README.md` first. Load the `backend-patterns` skill for worked examples of everything below.
+# Backend patterns
 
-## Layers
-`Controller (api/)` → `Service (service/)` → `Domain (domain/)` ← `Repository (repository/)`. Dependencies point down only; the domain has none. One package per feature under `com.munserv.<feature>/{api,domain,service,repository}`; cross-module access goes through the other module's service interface, never its repository.
+The core rules live in `backend/CLAUDE.md`. This skill is the worked-example catalogue.
 
-## The five patterns
-1. **Type-safe ids**: `@JvmInline value class IssueId(val value: UUID)`; never pass raw UUIDs between layers.
-2. **Pure domain**: `data class` with behaviour (`canTransitionTo`, `withState`), no JPA or Spring annotations. JPA lives in `repository/*Entity.kt` with `toDomain()` / `fromDomain()`.
-3. **Sealed state**: lifecycle as a sealed class with `allowedTransitions`; the domain is the only authority on legal moves.
-4. **Sealed result**: services return `sealed interface XResult { Success; NotFound; ValidationError; ... }`, never throw for business outcomes. Controllers `when` over the result and map to HTTP.
-5. **DTOs at the edge**: `*Request` with `toCommand()`, `*Response` via `toResponse()` extension; enums serialise as snake_case wire values with `@JsonValue`.
+## Value Objects (Type-Safe IDs)
 
-## Spring Boot 4 specifics
-- Starters are `spring-boot-starter-webmvc`, `-data-jpa`, `-security`, `-validation`, `-actuator`, `-mail`, `-aspectj`, `-flyway`. Versions come from the BOM; do not pin what the BOM manages.
-- Jackson 3: `tools.jackson.databind.ObjectMapper`, `tools.jackson.module.kotlin.jacksonObjectMapper`; annotations stay `com.fasterxml.jackson.annotation.*`. Boot auto-registers the Kotlin module; do not add a custom mapper.
-- Spring 7 nullability: `PasswordEncoder.encode` returns `String?`; wrap with `requireNotNull`. Domain classes decide nullability explicitly.
-- Hibernate 7 + PostGIS: no dialect property; `GEOGRAPHY(POINT,4326)` columns map to JTS `Point`.
-- Test slices: `org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc`, `org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest`, `org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase`.
+```kotlin
+// Always wrap IDs - prevents mixing issue_id with sector_id
+@JvmInline value class IssueId(val value: UUID)
+@JvmInline value class SectorId(val value: UUID)
+@JvmInline value class MemberId(val value: UUID)
 
-## Tests
-JUnit 6, MockK + SpringMockK, Kotest assertions, Testcontainers 2. Every Spring context test does `@Import(TestContainersConfig::class)`; the container is PostGIS 18 via `@ServiceConnection`, so there is no datasource in `application-test.yml`. Domain and service tests are written first (TDD); controller and repository tests after. Names: `` `should X when Y` ``; Arrange / Act / Assert.
+// Usage
+fun findById(id: IssueId): Issue?  // Can't accidentally pass SectorId
+```
+
+## Domain Entity Pattern
+
+```kotlin
+// Domain entity - PURE, no JPA annotations, no framework dependencies
+data class Issue(
+    val id: IssueId,
+    val sectorId: SectorId,
+    val reporterId: MemberId,
+    val type: IssueType,
+    val state: IssueState,
+    val location: GeoPoint,
+    val heat: Int,
+    val reportedAt: Instant
+) {
+    // Business logic lives HERE
+    fun canTransitionTo(newState: IssueState): Boolean =
+        state.allowedTransitions.contains(newState)
+
+    // Immutable updates via copy
+    fun withState(newState: IssueState): Issue = copy(state = newState)
+    fun withHeat(newHeat: Int): Issue = copy(heat = newHeat)
+}
+```
+
+## Sealed State Pattern
+
+```kotlin
+sealed class IssueState(val allowedTransitions: Set<IssueState>) {
+    object Reported : IssueState(setOf(Confirmed, Rejected))
+    object Confirmed : IssueState(setOf(InProgress, Rejected))
+    object InProgress : IssueState(setOf(Fixed, Rejected))
+    object Fixed : IssueState(setOf(Reopened))
+    object Rejected : IssueState(emptySet())
+    object Reopened : IssueState(setOf(Confirmed))
+    
+    companion object {
+        fun fromString(value: String): IssueState = when (value.lowercase()) {
+            "reported" -> Reported
+            "confirmed" -> Confirmed
+            "in_progress" -> InProgress
+            "fixed" -> Fixed
+            "rejected" -> Rejected
+            "reopened" -> Reopened
+            else -> throw IllegalArgumentException("Unknown state: $value")
+        }
+    }
+}
+```
+
+## Sealed Result Pattern
+
+```kotlin
+// Return results, not exceptions
+sealed interface IssueResult {
+    data class Success(val issue: Issue) : IssueResult
+    data class NotFound(val id: IssueId) : IssueResult
+    data class InvalidTransition(val from: IssueState, val to: IssueState) : IssueResult
+    data class ValidationError(val errors: List<String>) : IssueResult
+    data class Unauthorized(val reason: String) : IssueResult
+}
+```
+
+## Service Pattern
+
+```kotlin
+@Service
+class IssueService(
+    private val repository: IssueRepository,
+    private val sectorService: SectorService  // Cross-module via interface
+) {
+    fun updateState(id: IssueId, newState: IssueState, actor: MemberId): IssueResult {
+        // 1. Fetch
+        val issue = repository.findById(id)
+            ?: return IssueResult.NotFound(id)
+        
+        // 2. Validate (domain logic)
+        if (!issue.canTransitionTo(newState))
+            return IssueResult.InvalidTransition(issue.state, newState)
+        
+        // 3. Apply & persist
+        val updated = issue.withState(newState)
+        return IssueResult.Success(repository.save(updated))
+    }
+}
+```
+
+## Controller Pattern
+
+```kotlin
+@RestController
+@RequestMapping("/v1/issues")
+class IssueController(private val service: IssueService) {
+
+    @GetMapping("/{id}")
+    fun getById(@PathVariable id: UUID): ResponseEntity<IssueResponse> =
+        when (val result = service.findById(IssueId(id))) {
+            is IssueResult.Success -> ResponseEntity.ok(result.issue.toResponse())
+            is IssueResult.NotFound -> ResponseEntity.notFound().build()
+            else -> ResponseEntity.internalServerError().build()
+        }
 
     @PatchMapping("/{id}/state")
     fun updateState(
@@ -248,16 +346,6 @@ data class CreateIssueRequest(
 | `@SecurityRequirement` | Auth required | Class/method |
 | `@Hidden` | Exclude from docs | Any |
 
-## Forbidden
-- `!!` (force unwrap) without preceding null check
-- `var` for state (use `val` + `copy()`)
-- Throwing exceptions for business logic flow
-- JPA annotations on domain classes
-- Mutable collections in public APIs
-- `@Autowired` on fields (use constructor injection)
-- Business logic in controllers
-- Direct repository access across modules
-
 ## Testing (JUnit 5 + MockK + Kotest)
 
 ### Test Framework Stack
@@ -337,15 +425,29 @@ class IssueApiContractTest {
 
 ### Test Commands
 ```bash
-./gradlew ktlintFormat && ./gradlew ktlintCheck   # style (ktlint 1.8)
-./gradlew test                                    # 1054 tests, needs Docker
-./gradlew build -x test                           # jar
-./gradlew bootRun                                 # port 8080; dev DB on 5435
+./gradlew test                    # Run all tests
+./gradlew test --tests "*.IssueServiceTest"  # Run specific test
+./gradlew test --info             # Verbose output
+./gradlew jacocoTestReport        # Generate coverage
 ```
-Swagger: http://localhost:8080/swagger-ui.html. OpenAPI annotations (`@Tag`, `@Operation`, `@ApiResponses`, `@Schema`) on every public endpoint and DTO.
 
-## Forbidden
-`!!` without a preceding check; `var` for state; exceptions for business flow; JPA annotations on domain classes; mutable collections in public APIs; field `@Autowired`; business logic in controllers; direct repository access across modules; a new enum value without the matching migration, web and mobile change and `domain/` update.
+### Kotest Assertions
+```kotlin
+result shouldBe expected
+result shouldNotBe other
+result.shouldBeInstanceOf<Type>()
+result.shouldNotBeNull()
+list.shouldContain(element)
+list.shouldHaveSize(3)
+shouldThrow<Exception> { code() }
+```
 
-## Skills
-`/dev-cycle`, `/fix-issue`, `/feature`, `/entity`, `/service`, `/controller`, `/repository`, `/migration`, `/test`, `/integration-test`, `/contract-test`, `/review`, `/ci-fix` in `backend/.claude/commands/`.
+### MockK Patterns
+```kotlin
+every { mock.method(any()) } returns value
+every { mock.method(any()) } returns null
+verify { mock.method(any()) }
+verify(exactly = 1) { mock.method(testId) }
+val slot = slot<Issue>()
+every { repo.save(capture(slot)) } answers { slot.captured }
+```

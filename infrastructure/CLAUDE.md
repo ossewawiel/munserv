@@ -1,126 +1,18 @@
-# Infrastructure Context - Docker & Deployment
+# Infrastructure card
 
-## Primary Reference
-**See `/specs/DevOps_Strategy.md` for complete DevOps specifications.**
+## Local services
+`infrastructure/docker/docker-compose.yml` runs the only local dependency:
 
-This file contains quick reference for infrastructure tasks. Full details in the spec.
+| Service | Image | Host port | Notes |
+|---|---|---|---|
+| PostgreSQL + PostGIS | `postgis/postgis:18-3.6` | 5435 | Volume mounted at `/var/lib/postgresql` as the 18 image requires |
 
----
-
-## MCP Server Setup (Claude Code in WSL2)
-
-Based on official Claude Code documentation: https://code.claude.com/docs/en/mcp
-
-### Quick Setup
+Ports 5432, 5433, 5434 and 6379 belong to other projects on the dev machine; do not reuse them.
 
 ```bash
-# From WSL2, navigate to project
-cd /mnt/d/SourceCode/pocs/munserv
-
-# Run setup script
-chmod +x scripts/setup-mcp.sh
-./scripts/setup-mcp.sh
-```
-
-### Manual Setup
-
-No global npm install needed - `npx` downloads packages on-demand.
-
-```bash
-# Navigate to project
-cd /mnt/d/SourceCode/pocs/munserv
-
-# 1. Memory server (persists decisions across sessions)
-claude mcp add --transport stdio memory -- npx -y @modelcontextprotocol/server-memory
-
-# 2. Fetch server (HTTP requests, test endpoints)
-claude mcp add --transport stdio fetch -- npx -y @modelcontextprotocol/server-fetch
-
-# 3. Sequential thinking (complex reasoning tasks)
-claude mcp add --transport stdio thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
-
-# 4. Verify
-claude mcp list
-```
-
-### GitHub MCP (when needed)
-
-```bash
-# Option A: HTTP transport with token (recommended)
-export GITHUB_TOKEN='ghp_your_token_here'
-claude mcp add --transport http github https://api.githubcopilot.com/mcp/ \
-  --header "Authorization: Bearer $GITHUB_TOKEN"
-
-# Option B: Docker transport
-claude mcp add --transport stdio github \
-  -e GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here \
-  -- docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server
-```
-
-### PostgreSQL MCP (Backend Phase)
-
-```bash
-# 1. Start the database first
-cd infrastructure/docker && docker-compose up -d
-
-# 2. Add PostgreSQL MCP
-claude mcp add --transport stdio postgres \
-  -- npx -y @modelcontextprotocol/server-postgres \
-  "postgresql://munserv:munserv_dev@localhost:5435/munserv_dev"
-```
-
-### MCP Servers for MunServ
-
-| MCP | Purpose | When to Add |
-|-----|---------|-------------|
-| memory | Persist architectural decisions | Always |
-| fetch | Test API endpoints | MVP phase |
-| thinking | Complex multi-step reasoning | As needed |
-| github | PRs, issues, branches | When using GitHub |
-| postgres | Query schema, validate SQL | Backend phase |
-
-### Managing MCP Servers
-
-```bash
-claude mcp list              # List all configured servers
-claude mcp get <name>        # Get server details  
-claude mcp remove <name>     # Remove a server
-/mcp                         # Check status inside Claude Code
-```
-
-### MCP Scopes
-
-| Scope | Flag | Storage | Use Case |
-|-------|------|---------|----------|
-| local | `--scope local` (default) | `~/.claude.json` | Personal, project-specific |
-| project | `--scope project` | `.mcp.json` | Shared with team via git |
-| user | `--scope user` | `~/.claude.json` | Personal, cross-project |
-
-### Configuration Files
-
-| File | Purpose |
-|------|---------|
-| `~/.claude.json` | User/local scope MCP configs |
-| `.mcp.json` | Project scope (checked into git) |
-
----
-
-## Docker Compose (Local Dev)
-
-**Location:** `infrastructure/docker/docker-compose.yml`
-
-### Quick Start
-
-```bash
-# Start services
 cd infrastructure/docker
-docker compose up -d
-
-# Verify
-docker compose ps
-docker compose logs -f postgres
-
-# Connect to database
+docker compose up -d                 # start
+docker compose down -v && docker compose up -d   # reset (destroys data)
 psql postgresql://munserv:munserv_dev@localhost:5435/munserv_dev
 
 # Stop services
@@ -187,17 +79,26 @@ infrastructure/
 │   └── data/
 └── scripts/                     # Utility scripts
 ```
+Backend tests do not use this database; they start their own PostGIS container through Testcontainers.
 
----
+## Environment variables (backend)
+| Variable | Purpose | Default |
+|---|---|---|
+| `DB_URL`, `DB_USER`, `DB_PASSWORD` | Datasource | `jdbc:postgresql://localhost:5435/munserv_dev`, `munserv`, `munserv_dev` |
+| `JWT_SECRET` | Token signing | dev value in `application.yml`; must be set outside local |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `EMAIL_FROM`, `EMAIL_OVERRIDE_RECIPIENT` | Mail | localhost:587; override redirects all mail in dev/test |
+| `BOOTSTRAP_SUPER_USER_ENABLED`, `SUPER_USER_EMAIL`, `SUPER_USER_PASSWORD` | Bootstrap (see `domain/bootstrap.md`) | disabled |
+| `R2_BUCKET`, `R2_ACCESS_KEY`, `R2_SECRET_KEY`, `R2_ENDPOINT` | Photo storage when `storage.type: r2` | local disk |
+| `ADMIN_PORTAL_URL`, `APP_DOWNLOAD_URL`, `APP_NAME` | Links in emails | localhost:3000 |
 
-## CI/CD Reference
+## CI
+`.github/workflows/ci.yml`: `domain` (language validation), `backend`, `web`, `mobile`, each path-filtered, plus the `CI status` aggregate that branch protection requires. Other workflows: `standards-check` (advisory), `sync-issue-status`, `validate-specs` (weekly), `generate-changelog` (on tags).
 
-**Platform:** GitHub Actions
+## MCP servers
+Declared in `.mcp.json`: `memory`, `fetch`, `postgres` (points at 5435). Set `GITHUB_TOKEN` to enable the GitHub server declared in `.claude/settings.json`; `gh` works without it.
 
-| Workflow | Purpose | Trigger |
-|----------|---------|---------|
-| `ci.yml` | Build, lint, test | Every push |
-| `security.yml` | Dependency scan | PRs to main |
-| `deploy.yml` | Deployment | Merge to main, tags |
+## Mock API
+`infrastructure/mock-api` (Express) on port 3001 for mobile UI work without the backend: `npm start`, then `flutter run --dart-define=API_PORT=3001`.
 
-See `/specs/DevOps_Strategy.md` Section 6 for full pipeline definitions.
+## Deployment
+Not set up yet. The target from the archived DevOps and tech-stack documents is DigitalOcean App Platform plus managed PostgreSQL and Cloudflare R2; nothing is provisioned.

@@ -2,12 +2,12 @@
 
 | # | Decision | Status | Date |
 |---|----------|--------|------|
-| 001 | [Kotlin for Backend](001-kotlin-backend.md) | Accepted | 2024 |
-| 002 | [Flutter for Mobile](002-flutter-mobile.md) | Accepted | 2024 |
-| 003 | [React for Web](003-react-web.md) | Accepted | 2024 |
-| 004 | [Result Pattern](004-result-pattern.md) | Accepted | 2024 |
-| 005 | [Feature-based Folders](005-feature-folders.md) | Accepted | 2024 |
-| 006 | [PostGIS for Geospatial](006-postgis-database.md) | Accepted | 2024 |
+| 001 | [Kotlin for Backend](001-kotlin-backend.md) | Accepted | 2024-12 |
+| 002 | [Flutter for Mobile](002-flutter-mobile.md) | Accepted | 2024-12 |
+| 003 | [React for Web](003-react-web.md) | Accepted | 2024-12 |
+| 004 | [Result Pattern](004-result-pattern.md) | Accepted | 2024-12 |
+| 005 | [Feature-based Folders](005-feature-folders.md) | Accepted | 2024-12 |
+| 006 | [PostGIS for Geospatial](006-postgis-database.md) | Accepted | 2024-12 |
 
 ## ADR Template
 

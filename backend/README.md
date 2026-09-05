@@ -242,5 +242,5 @@ See [API Contract](../specs/contracts/api.md) for full documentation.
 
 - [CLAUDE.md](CLAUDE.md) — Architecture patterns, coding conventions
 - [API Contract](../specs/contracts/api.md) — Endpoint specifications
-- [Domain Modeling](../specs/Domain_and_Data_Modeling.md) — Entity definitions
-- [Testing Strategy](../specs/Testing_Strategy.md) — Test patterns
+- [Domain Modeling](../specs/archive/Domain_and_Data_Modeling.md) — Entity definitions
+- [Testing Strategy](../specs/archive/Testing_Strategy.md) — Test patterns

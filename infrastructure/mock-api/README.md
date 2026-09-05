@@ -30,7 +30,7 @@ Server runs at `http://localhost:3001`
 
 ## API Endpoints
 
-See [`specs/MVP_Development_Guide.md`](../../specs/MVP_Development_Guide.md) for complete API documentation.
+See [`specs/archive/MVP_Development_Guide.md`](../../specs/archive/MVP_Development_Guide.md) for complete API documentation.
 
 ### Quick Reference
 

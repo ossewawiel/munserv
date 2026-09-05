@@ -31,17 +31,14 @@ flutter run --dart-define=API_PORT=3001
 flutter run --dart-define=API_HOST=192.168.1.100
 ```
 
-### WSL2 + Windows Emulator
+### Android emulator (Linux)
 
 ```bash
-# One-time setup on Windows (PowerShell as Admin):
-netsh interface portproxy add v4tov4 listenport=5555 listenaddress=0.0.0.0 connectport=5555 connectaddress=127.0.0.1
-netsh advfirewall firewall add rule name="ADB 5555" dir=in action=allow protocol=TCP localport=5555
-
-# Daily workflow
-./scripts/start-dev.sh  # Connects WSL2 to Windows emulator
-flutter run
+# The Android SDK comes from mise (see ../mise.local.toml); create an AVD once, then:
+flutter emulators --launch <avd-name>
+flutter run                    # 10.0.2.2:8080 reaches the backend on the host
 ```
+`scripts/start-dev.sh` is the legacy WSL2-to-Windows emulator bridge and is not needed on Linux.
 
 ## Commands
 
@@ -225,4 +222,4 @@ void main() {
 
 - [CLAUDE.md](CLAUDE.md) — Architecture patterns, styling rules, coding conventions
 - [Mobile Theming Guide](../specs/Mobile_Theming_Guide.md) — M3 theming, colors
-- [Testing Strategy](../specs/Testing_Strategy.md) — Test patterns
+- [Testing Strategy](../specs/archive/Testing_Strategy.md) — Test patterns

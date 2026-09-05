@@ -1,308 +1,36 @@
-# MunServ - Municipal Service Issue Tracker
+# MunServ
 
-## Project
-Community-based infrastructure issue reporting. Members report issues (potholes, leaks, broken lights) via mobile app with photos and GPS. Administrators manage via web portal. Each deployment is an independent "pod" with own database and infrastructure.
+Community infrastructure issue tracker. Members report potholes, leaks and broken lights from a Flutter app with photos and GPS; administrators manage them in a React portal; a Kotlin backend on PostgreSQL/PostGIS serves both. Each deployment is an independent **pod**.
 
-## Current Phase: MVP Development
+## Read in this order
+1. `domain/README.md` - the vocabulary. Every term used in code, issues and UI is defined there. A term that is not there does not exist yet.
+2. The platform card for the code you are touching: `backend/CLAUDE.md`, `web/CLAUDE.md`, `mobile/CLAUDE.md`, `database/CLAUDE.md`, `infrastructure/CLAUDE.md`.
+3. Only what the task needs from `specs/`: `requirements/` (stories, status), `contracts/api.md` and `contracts/types.md` (wire contract), `architecture/decisions/` (ADRs), `features/<name>/` (spec, plan, handoffs).
 
-**Start here:** [`specs/MVP_Development_Guide.md`](specs/MVP_Development_Guide.md)
+Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patterns`, `web-patterns`, `web-data-table`, `mobile-patterns`, `mobile-design-system`). Load one when the card is not enough. `specs/archive/` is history; do not read it unless asked why something is the way it is.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  CURRENT FOCUS                                               │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│   Mobile App (Flutter)  ←──── Backend (Spring Boot) ✓       │
-│                                                              │
-│   Web Admin (React)     ←──── Backend (Spring Boot) ✓       │
-│                                                              │
-│   Both mobile and web now connected to real backend.        │
-└─────────────────────────────────────────────────────────────┘
-```
+## Critical rules, all platforms
+1. Immutability: `val` / `const` / `readonly`, change by copy.
+2. Errors are values: sealed Result types, never exceptions for control flow.
+3. Type-safe ids: wrapper types for every entity id.
+4. Feature folders: group by domain feature, not by technical layer.
+5. No dead code and no TODOs: delete it, or open an issue and reference it.
+6. Wire values are `snake_case`; `state` is for issues, `status` for everything else (see `domain/README.md`).
 
-**Development workflow:**
-1. Start backend: `cd backend && ./gradlew bootRun` (port 8080)
-2. Start web: `cd web && pnpm dev` (port 3000)
-3. Start mobile: `cd mobile && flutter run` (connects to backend on 8080)
+## Forbidden, all platforms
+`any` / `dynamic`; force-unwrap without a null check; business logic in controllers, widgets or components; hardcoded secrets, URLs or magic numbers; print/console debugging in committed code; wildcard imports.
 
-**For mobile mock API testing:**
-- Start mock: `cd infrastructure/mock-api && npm start` (port 3001)
-- Run mobile with: `flutter run --dart-define=API_PORT=3001`
+## Running things
+| What | Command | Where |
+|---|---|---|
+| Dev database (PostGIS 18) | `cd infrastructure/docker && docker compose up -d` | localhost:5435 |
+| Backend | `cd backend && ./gradlew bootRun` | http://localhost:8080 (Swagger at `/swagger-ui.html`) |
+| Web | `cd web && pnpm dev` | http://localhost:3000, login `admin@ward42.example.com` / `admin123` |
+| Mobile | `cd mobile && flutter run` | emulator reaches the backend on 10.0.2.2:8080 |
+| Mock API (optional) | `cd infrastructure/mock-api && npm start` | localhost:3001, `flutter run --dart-define=API_PORT=3001` |
 
-## Contributing
+## Quality gate
+CI (`.github/workflows/ci.yml`) is required on `master`: domain-language validation, backend ktlint + tests (Testcontainers) + build, web lint + `tsc -b` + Vitest + build, mobile format + analyze (infos fatal) + tests + debug APK. Run the same commands locally before opening a PR. Squash-merge; conventional commit titles (`feat(web): ...`, scopes: backend, web, mobile, db, api, infra, specs, ci).
 
-**New to the project?** Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) for:
-- How to report bugs and request features
-- Bug fix and feature development workflows
-- Working with GitHub issues and Claude agent skills
-- Code standards and PR guidelines
-
-## Platform-Specific Context (IMPORTANT)
-
-**When working on code in a subdirectory, ALWAYS read that directory's CLAUDE.md first:**
-
-| Working On | Read First | Contains |
-|------------|------------|----------|
-| `mobile/lib/**` | [`mobile/CLAUDE.md`](mobile/CLAUDE.md) | Riverpod, Freezed, Result patterns, widget rules |
-| `web/src/**` | [`web/CLAUDE.md`](web/CLAUDE.md) | React Query, atomic design, hooks patterns |
-| `backend/src/**` | [`backend/CLAUDE.md`](backend/CLAUDE.md) | Sealed results, value objects, layer rules |
-| `database/migrations/**` | [`database/CLAUDE.md`](database/CLAUDE.md) | PostGIS, naming conventions, Flyway |
-| `infrastructure/**` | [`infrastructure/CLAUDE.md`](infrastructure/CLAUDE.md) | Docker, CI/CD, environments |
-| `shared/**` | [`shared/CLAUDE.md`](shared/CLAUDE.md) | API contracts, shared types |
-
-**Example:** Before creating a Flutter widget, run:
-```
-Read mobile/CLAUDE.md, then create a ConsumerWidget for displaying issue details.
-```
-
-## Tech Stack
-| Layer | Technology | Status |
-|-------|------------|--------|
-| Backend | Kotlin + Spring Boot | ✅ Ready |
-| Mobile | Flutter + Riverpod + Freezed | ✅ Ready |
-| Web | React + TypeScript + React Query | ✅ Ready |
-| Database | PostgreSQL + PostGIS | ✅ Ready |
-| Storage | Local uploads (photos) | 🔄 MVP |
-| Mock API | JSON Server / Express | 📦 Optional (for testing) |
-
-## Repository Structure
-```
-/backend        → Kotlin/Spring Boot API
-/mobile         → Flutter app
-/web            → React admin portal
-/database       → Migrations, seeds
-/shared         → API contracts, shared types
-/infrastructure → Docker, mock-api, IaC
-/specs          → Documentation (see below)
-/.claude        → Project-level skills
-```
-
-### Specs Structure (Concise)
-```
-/specs
-├── requirements/      → User stories (mobile.md, web.md, backlog.md)
-├── contracts/         → API contract (api.md, types.md)
-├── architecture/      → Overview, patterns, decisions/
-├── features/          → Feature specs per feature
-└── operations/        → DevOps, environments
-```
-
-## Quick Start
-
-```bash
-# 1. Start backend (required for web)
-cd backend
-./gradlew bootRun            # Runs on http://localhost:8080
-
-# 2. Start web development (new terminal)
-cd web
-pnpm install
-pnpm dev                     # Runs on http://localhost:3000
-# Login: admin@ward42.example.com / admin123
-
-# 3. Start mobile development (new terminal)
-cd infrastructure/mock-api
-npm install && npm start     # Mock API on http://localhost:3001
-cd ../mobile
-flutter pub get
-flutter run
-```
-
-## Project-Level Skills
-
-Use these skills for cross-platform development and documentation management.
-
-### Requirements & Features
-| Skill | Purpose |
-|-------|---------|
-| `/create-feature` | Decompose feature requirements into stories and GitHub issues |
-| `/plan-feature` | Generate cross-platform implementation plan and handoffs |
-| `/work-story` | Implement a story using feature handoff, with auto back-updates |
-| `/add-story` | Add individual user story to `specs/requirements/{platform}.md` |
-| `/add-feature` | Create feature spec in `specs/features/{name}/` (manual) |
-
-### Architecture & Contracts
-| Skill | Purpose |
-|-------|---------|
-| `/add-adr` | Create Architecture Decision Record |
-| `/add-pattern` | Add code pattern to `specs/architecture/patterns.md` |
-| `/add-endpoint` | Add API endpoint to `specs/contracts/api.md` |
-| `/add-type` | Add shared type to `specs/contracts/types.md` |
-
-### Documentation
-| Skill | Purpose |
-|-------|---------|
-| `/update-readme` | Update README with agentic workflow |
-| `/sync-docs` | Validate documentation consistency |
-| `/migrate-docs` | Migrate verbose docs to concise structure |
-
-### Workflow Example
-
-**Complete feature workflow (recommended):**
-```
-1. /create-feature description="Members need to reset their PIN if forgotten..."
-   → Decomposes into stories, creates GitHub issues, milestone, and spec
-
-2. /plan-feature feature="pin-reset"
-   → Creates implementation plan and platform handoffs
-
-3. /work-story W21
-   → Implements story using handoff, auto-updates docs and GitHub
-   → Repeat for each story in the feature
-
-4. Feature complete when all stories done
-   → Milestone 100%, feature spec marked complete
-```
-
-**Bug fix workflow:**
-```
-1. /work-issue 42
-   → Investigates, creates platform handoffs
-
-2. cd backend && /fix-issue 42
-   → Platform agent implements fix
-
-3. /close-handoff 42
-   → Aggregates, creates PR, archives
-```
-
-## Documentation (Concise Structure)
-
-### Quick Reference (SHORT and SWEET)
-| Document | Purpose |
-|----------|---------|
-| [`specs/requirements/`](specs/requirements/) | User stories by platform |
-| [`specs/contracts/api.md`](specs/contracts/api.md) | API endpoints (source of truth) |
-| [`specs/contracts/types.md`](specs/contracts/types.md) | Shared data types |
-| [`specs/architecture/overview.md`](specs/architecture/overview.md) | System architecture |
-| [`specs/architecture/patterns.md`](specs/architecture/patterns.md) | Code patterns |
-| [`specs/architecture/decisions/`](specs/architecture/decisions/) | ADRs (why we chose X) |
-| [`specs/operations/`](specs/operations/) | DevOps, environments |
-
-### Legacy Documents (Detailed Reference)
-| Document | Use When |
-|----------|----------|
-| [`MVP_Development_Guide.md`](specs/MVP_Development_Guide.md) | Full context, mock data |
-| [`Architecture_and_Design_Patterns.md`](specs/Architecture_and_Design_Patterns.md) | Detailed patterns |
-| [`Domain_and_Data_Modeling.md`](specs/Domain_and_Data_Modeling.md) | Entity definitions |
-| [`Coding_Standards.md`](specs/Coding_Standards.md) | Naming conventions |
-| [`Testing_Strategy.md`](specs/Testing_Strategy.md) | Test patterns |
-
-## Before Generating Code
-
-### For Mobile (Flutter)
-```
-1. READ mobile/CLAUDE.md FIRST (required patterns)
-2. Then if needed:
-   - specs/MVP_Development_Guide.md §2.1, §3.2, §4 (scope, Dart models, API)
-   - specs/Architecture_and_Design_Patterns.md §3 (Flutter patterns)
-   - specs/Coding_Standards.md §3 (Dart standards)
-```
-
-### For Web (React)
-```
-1. READ web/CLAUDE.md FIRST (required patterns)
-2. Then if needed:
-   - specs/MVP_Development_Guide.md §2.2, §3.1, §4 (scope, TS types, API)
-   - specs/Architecture_and_Design_Patterns.md §4 (React patterns)
-   - specs/Coding_Standards.md §4 (TypeScript standards)
-```
-
-### For Backend (Kotlin)
-```
-1. READ backend/CLAUDE.md FIRST (required patterns)
-2. Then if needed:
-   - specs/MVP_Development_Guide.md §4 (API to implement)
-   - specs/Architecture_and_Design_Patterns.md §2 (Kotlin patterns)
-   - specs/Coding_Standards.md §2 (Kotlin standards)
-   - specs/Domain_and_Data_Modeling.md
-```
-
-### For Database
-```
-1. READ database/CLAUDE.md FIRST (naming, PostGIS patterns)
-2. Query postgres MCP for current schema before writing migrations
-3. specs/Domain_and_Data_Modeling.md for entity definitions
-```
-
-## Critical Rules (All Platforms)
-1. **Immutability** — `val`/`const`/`readonly`, mutate via copy
-2. **Errors as values** — Sealed Result types, never exceptions for flow control
-3. **Type-safe IDs** — Wrapper types for all entity IDs
-4. **Feature folders** — Group by domain feature, not technical layer
-5. **No dead code** — Delete unused code, don't comment it out
-
-## Forbidden (All Platforms)
-- `any` / `dynamic` / force-unwrap without null check
-- Business logic in controllers/widgets/components
-- Hardcoded secrets, URLs, or magic numbers
-- Print/console debugging in committed code
-- Wildcard imports
-
-## Domain Glossary
-| Term | Meaning |
-|------|---------|
-| Pod | Independent deployment (own DB, infrastructure) |
-| Sector | Geographic area where issues are managed |
-| Issue | Reported problem with photos and GPS location |
-| Heat | Priority score: f(age, report count, type) |
-| Member | Community resident who reports/views issues |
-| State | Issue lifecycle: Reported→Confirmed→InProgress→Fixed |
-
-## MVP Scope Summary
-
-### Mobile (Member App)
-See [`specs/requirements/mobile.md`](specs/requirements/mobile.md)
-- M1: Register with phone + OTP
-- M2: Login with PIN/biometric
-- M3-M7: Issue viewing and reporting
-
-### Web (Admin Portal)
-See [`specs/requirements/web.md`](specs/requirements/web.md)
-- W1: Admin login
-- W2-W7: Dashboard, issue management, member management
-
-### API Contract
-See [`specs/contracts/api.md`](specs/contracts/api.md) for all endpoints.
-
-## MCPs Available
-| MCP | Purpose | Use When |
-|-----|---------|----------|
-| postgres | Query schema, validate SQL | Before writing migrations or queries |
-| memory | Persist decisions across sessions | Store/retrieve architectural decisions |
-| github | Branches, PRs, issues | Creating features, code review |
-| fetch | HTTP requests | Testing API endpoints |
-
-## Memory MCP Key Convention
-
-### Pattern: `{category}:{scope}:{topic}`
-
-### Decision Keys (persist architectural choices)
-```
-decision:architecture:{topic}     → system-wide patterns
-decision:backend:{topic}          → Kotlin/Spring choices
-decision:mobile:{topic}           → Flutter/Dart choices
-decision:web:{topic}              → React/TypeScript choices
-decision:database:{topic}         → schema/query patterns
-decision:api:{topic}              → endpoint/contract choices
-```
-
-### Context Keys (current working state)
-```
-context:current-feature           → feature being developed
-context:current-module            → module being worked on
-context:blockers                  → known issues blocking progress
-context:next-steps                → planned next actions
-```
-
-### Memory MCP Usage
-- **Before generating**: Check memory for relevant `decision:` keys
-- **After deciding**: Store new decisions immediately
-- **Session start**: Query `context:` keys to resume work
-- **Contradiction found**: Query memory, discuss before overriding
-
-## WSL2 Environment
-- Path: `/mnt/d/SourceCode/pocs/munserv/`
-- All builds run in WSL2 (gradlew, flutter, npm)
-- Line endings: LF only (`git config core.autocrlf input`)
-- Ensure scripts executable: `chmod +x gradlew`
+## Working with GitHub
+`gh` is the tool. Labels: `type:*`, `platform:*`, `status:*`, `priority:*`, `story:<id>`. Stories are `M*` (mobile), `W*` (web), `B*` (backend). Workflow skills in `.claude/commands/`: `/create-feature`, `/plan-feature`, `/work-story`, `/work-issue`, `/close-handoff`, `/sync-github`, `/create-issue`. Handoffs live under `specs/features/<feature>/`.

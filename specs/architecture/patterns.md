@@ -1,6 +1,6 @@
 # Code Patterns
 
-> **Full examples**: See [Architecture_and_Design_Patterns.md](../Architecture_and_Design_Patterns.md) for comprehensive patterns with detailed code.
+> **Full examples**: load the `backend-patterns`, `web-patterns`, `mobile-patterns` and `database-patterns` skills under `.claude/skills/`.
 
 ## Backend Patterns
 

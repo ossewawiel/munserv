@@ -1,0 +1,226 @@
+# MunServ ubiquitous language - machine-readable mirror of domain/*.md
+#
+# Rules
+# - One entry per concept. The Markdown file of the same name is the human text.
+# - `code` lists the exact identifiers each platform uses. scripts/validate-domain-language.py
+#   fails CI if any of them stops existing.
+# - `values` are the canonical wire values (snake_case, as the API and database use them).
+#   Platform-specific spellings (Kotlin UPPER_CASE, Dart camelCase) map to these 1:1.
+# - `drift_issue` marks a concept whose web/mobile copies are known to differ; the validator
+#   reports the mismatch as a warning instead of an error until the issue is closed.
+
+version: 1
+concepts:
+
+  pod:
+    definition: One independent deployment of MunServ, with its own database and infrastructure, serving one or more communities.
+    file: pod.md
+    code:
+      kotlin: [com.munserv.pod.domain.Pod, com.munserv.pod.domain.PodSettings, com.munserv.pod.domain.PodSetupStatus, com.munserv.pod.domain.SetupStep]
+      db: { tables: [pods, pod_setup_steps] }
+      typescript: [PodDashboardStats, PodSetupStatus]
+      dart: [PodConfig]
+    values:
+      setup_step: [pod_name, pod_boundaries, wards_sectors, first_admin]
+    relationships: { has_many: [ward, sector, admin] }
+
+  ward:
+    definition: An optional grouping tier inside a pod that holds several sectors, used by large pods to reduce span of control.
+    file: ward.md
+    code:
+      kotlin: [com.munserv.shared.types.WardId]
+      db: { tables: [wards] }
+      typescript: [WardDashboardStats]
+      dart: []
+    relationships: { belongs_to: [pod], has_many: [sector] }
+    synonyms_avoid: ["sector group (unimplemented spec term)", "region"]
+
+  sector:
+    definition: The operational unit where issues are reported and managed; a ward, community or defined geographic area with a boundary and a member base.
+    file: sector.md
+    code:
+      kotlin: [com.munserv.sectors.domain.Sector, com.munserv.sectors.domain.SectorSettings, com.munserv.shared.types.SectorId]
+      db: { tables: [sectors, sector_settings] }
+      typescript: [Sector, SectorSettings, SectorDashboardStats]
+      dart: [Sector]
+    relationships: { belongs_to: [pod, ward], has_many: [member, issue, admin] }
+    synonyms_avoid: ["community (use sector)", "area"]
+
+  member:
+    definition: A community resident, registered on the web and approved by a sector administrator, who reports and views issues through the mobile app.
+    file: member.md
+    code:
+      kotlin: [com.munserv.auth.domain.Member, com.munserv.auth.domain.MemberStatus, com.munserv.shared.types.MemberId]
+      db: { tables: [members], enums: [member_status] }
+      typescript: [Member, MemberStatus, MemberProfile]
+      dart: [Member, MemberStatus]
+    values:
+      member_status: [pending_approval, active, suspended, deleted]
+    transitions:
+      member_status:
+        pending_approval: [active, deleted]
+        active: [suspended, deleted]
+        suspended: [active, deleted]
+        deleted: []
+    drift_issue: 61
+    relationships: { belongs_to: [sector], has_many: [issue] }
+    synonyms_avoid: ["user", "citizen", "resident"]
+
+  admin-role:
+    definition: The six-level administrator hierarchy that manages a pod, its wards and its sectors from the web portal, plus the out-of-band super user.
+    file: admin-role.md
+    code:
+      kotlin: [com.munserv.admin.domain.Admin, com.munserv.admin.domain.AdminRole, com.munserv.admin.domain.AdminLevel, com.munserv.admin.domain.OnboardingStatus, com.munserv.shared.types.AdminId]
+      db: { tables: [admins], enums: [admin_role, onboarding_status] }
+      typescript: [AdminRole, AdminLevel, UserRole, ADMIN_ROLES, ROLE_HIERARCHY, SUPER_USER_ROLE, OnboardingStatusValue]
+      dart: []
+    values:
+      admin_role: [sector_admin, sector_chief, ward_admin, ward_chief, pod_admin, pod_chief]
+      admin_level: [sector, ward, pod]
+      onboarding_status: [pending, password_changed, profile_complete, active]
+      super_user: [super_user]
+    transitions:
+      onboarding_status:
+        pending: [password_changed]
+        password_changed: [profile_complete, active]
+        profile_complete: [active]
+        active: []
+    relationships: { belongs_to: [pod, ward, sector] }
+    synonyms_avoid: ["community administrator (legacy name for ground admin)", "manager", "supervisor"]
+
+  issue:
+    definition: A reported infrastructure problem at a GPS location inside a sector, with photos, a type, a lifecycle state and a heat score.
+    file: issue.md
+    code:
+      kotlin: [com.munserv.issues.domain.Issue, com.munserv.issues.domain.IssueStateHistoryEntry, com.munserv.issues.domain.IssueId]
+      db: { tables: [issues, issue_state_history] }
+      typescript: [Issue, IssueSummary, StateHistoryEntry]
+      dart: [Issue]
+    relationships: { belongs_to: [sector, member], has_many: [photo, verification], has_one: [issue-state, issue-type, heat] }
+    synonyms_avoid: ["ticket", "report (a report is one member's submission; several reports can raise one issue's heat)", "case"]
+
+  issue-state:
+    definition: Where an issue is in its lifecycle. Only the transitions listed are legal; the backend enforces them.
+    file: issue-state.md
+    code:
+      kotlin: [com.munserv.issues.domain.IssueState]
+      db: { enums: [issue_state] }
+      typescript: [IssueState]
+      dart: [IssueState]
+    values:
+      issue_state: [reported, confirmed, in_progress, fixed, rejected, reopened, closed]
+    transitions:
+      issue_state:
+        reported: [confirmed, rejected]
+        confirmed: [in_progress, rejected]
+        in_progress: [fixed, rejected]
+        fixed: [reopened, closed]
+        rejected: []
+        reopened: [confirmed]
+        closed: []
+    open_states: [reported, confirmed, in_progress, reopened]
+    drift_issue: 61
+    synonyms_avoid: ["status (use state for issues; status is for members, admins, messages, verifications)"]
+
+  issue-type:
+    definition: The category of infrastructure problem an issue describes.
+    file: issue-type.md
+    code:
+      kotlin: [com.munserv.issues.domain.IssueType]
+      db: { enums: [issue_type] }
+      typescript: [IssueType]
+      dart: [IssueType]
+    values:
+      issue_type: [pothole, water_leak, sewage_leak, traffic_light, street_light, illegal_dumping, other]
+    drift_issue: 61
+    synonyms_avoid: ["category", "sewerage_leak (spelling used in old specs; the wire value is sewage_leak)"]
+
+  heat:
+    definition: The computed urgency score of an issue, 0 to 100, driven by how many members reported it. It replaces manual priority.
+    file: heat.md
+    code:
+      kotlin: [com.munserv.issues.service.IssueService, com.munserv.admin.domain.HeatReportItem]
+      db: { tables: [issues] }
+      typescript: [HeatReport, HeatReportItem]
+      dart: []
+    formula: "heat = min(100, 10 + 5 * (reportCount - 1))"
+    synonyms_avoid: ["priority", "severity", "score"]
+
+  photo:
+    definition: Evidence attached to an issue; a stored image with a thumbnail, captured through the app.
+    file: photo.md
+    code:
+      kotlin: [com.munserv.photos.domain.IssuePhoto, com.munserv.photos.domain.PhotoId]
+      db: { tables: [issue_photos] }
+      typescript: []
+      dart: []
+    relationships: { belongs_to: [issue] }
+    synonyms_avoid: ["image", "attachment", "upload"]
+
+  verification:
+    definition: A request for a ground admin to confirm on site that a reported issue exists or that a fix is real, with an outcome and an optional reason.
+    file: verification.md
+    code:
+      kotlin: [com.munserv.verification.domain.IssueVerification, com.munserv.verification.domain.VerificationType, com.munserv.verification.domain.VerificationStatus, com.munserv.verification.domain.VerificationOutcome, com.munserv.shared.enums.VerificationReason, com.munserv.shared.enums.VerificationMode, com.munserv.verification.domain.IssueVerificationId]
+      db: { tables: [issue_verifications], enums: [verification_mode, verification_reason] }
+      typescript: [IssueVerification, VerificationType, VerificationStatus, VerificationResult, VerificationReason, VerificationMode]
+      dart: [VerificationType, VerificationResult, VerificationReason]
+    values:
+      verification_type: [existence, fix]
+      verification_status: [pending, completed, expired]
+      verification_outcome: [confirmed, not_found, not_fixed, cannot_verify]
+      verification_reason: [busy, away, cannot_find, wrong_location, not_an_issue]
+      verification_mode: [all_notified, admin_assigns, nearest_auto, first_come]
+    relationships: { belongs_to: [issue, ground-admin] }
+    synonyms_avoid: ["inspection", "review", "audit (audit is the security log)"]
+
+  ground-admin:
+    definition: A trusted member who verifies issues and fixes on the ground for their sector; the implemented name for the spec's community administrator.
+    file: ground-admin.md
+    code:
+      kotlin: [com.munserv.groundadmin.domain.GroundAdminApplication, com.munserv.groundadmin.domain.ApplicationStatus, com.munserv.groundadmin.domain.ApplicationType, com.munserv.shared.enums.GroundAdminStatus, com.munserv.groundadmin.domain.GroundAdminApplicationId]
+      db: { tables: [ground_admin_applications], enums: [ground_admin_status] }
+      typescript: [GroundAdmin, GroundAdminStatus, GroundAdminApplication]
+      dart: [GroundAdminStatus]
+    values:
+      ground_admin_status: [active, on_hold, inactive]
+      application_status: [pending, approved, declined, accepted, rejected, withdrawn]
+      application_type: [application, invitation]
+    relationships: { is_a: [member], belongs_to: [sector], has_many: [verification] }
+    synonyms_avoid: ["community administrator", "community admin", "verifier"]
+
+  message:
+    definition: A system-generated notification to a member or administrator that may require an action, such as accepting an invitation or verifying an issue.
+    file: message.md
+    code:
+      kotlin: [com.munserv.shared.enums.MessageType, com.munserv.shared.enums.MessageStatus]
+      db: { tables: [messages], enums: [message_type, message_status] }
+      typescript: [Message, MessageType, MessageStatus]
+      dart: [MessageType, MessageStatus]
+    values:
+      message_status: [unread, read, actioned, dismissed]
+      message_type: [ground_admin_invitation, ground_admin_application, ground_admin_approved, ground_admin_declined, ground_admin_invitation_declined, ground_admin_invitation_accepted, ground_admin_revocation, ground_admin_stepdown_request, verify_new_issue, verify_fix, member_registration, monthly_report]
+    synonyms_avoid: ["notification (push notifications are a future channel; a message is the record)", "alert"]
+
+  bootstrap:
+    definition: The one-time process by which the super user, authenticated from environment configuration, creates the first pod chief of a fresh pod and then loses access.
+    file: bootstrap.md
+    code:
+      kotlin: [com.munserv.bootstrap.domain.BootstrapStatus, com.munserv.bootstrap.service.BootstrapService]
+      db: { tables: [] }
+      typescript: [CreatePodChiefRequest, CreatePodChiefResponse]
+      dart: []
+    relationships: { creates: [admin-role] }
+    synonyms_avoid: ["setup (setup is the pod chief's configuration work after bootstrap)", "install"]
+
+  audit:
+    definition: The append-only security log of super user and support-access actions.
+    file: audit.md
+    code:
+      kotlin: [com.munserv.audit.domain.AuditLog, com.munserv.audit.domain.AuditAction, com.munserv.audit.domain.AuditActorType]
+      db: { tables: [audit_logs], enums: [audit_action_type] }
+      typescript: []
+      dart: []
+    values:
+      audit_action: [SUPER_USER_LOGIN_SUCCESS, SUPER_USER_LOGIN_FAILURE, POD_CHIEF_CREATED, SUPPORT_ACCESS_GRANTED, SUPPORT_ACCESS_REVOKED, SUPPORT_ACCESS_EXPIRED, SUPPORT_ACCESS_LOGIN, SUPPORT_ACCESS_ACTIVITY]
+    synonyms_avoid: ["log (application logs are not the audit log)", "history (issue state history is a different record)"]

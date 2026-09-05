@@ -13,6 +13,10 @@ parameters:
 
 Work on a story that's part of a feature milestone, using the existing feature handoff documents. Automatically update all tracking docs and GitHub when complete.
 
+## Context
+
+Read `domain/README.md` first: every term in the story, handoff and code must be defined there.
+
 ## Process
 
 ### Step 1: Resolve Story Reference
