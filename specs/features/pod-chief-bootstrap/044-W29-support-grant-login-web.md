@@ -13,8 +13,8 @@ touches:
   - web/src/test/mocks
   - web/src/locales
 ui: true
-design_canvas: ""
-design_artboards: []
+design_canvas: "https://claude.ai/code/artifact/e74d590c-6be1-40e5-8864-88e5e85d52c9"
+design_artboards: [SupportGrantBannerActive.dc.html, SupportGrantBannerExpiring.dc.html, SupportGrantBannerExpired.dc.html]
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-05"
@@ -45,9 +45,30 @@ the web writes no audit call. AC2 also falls out of B9 — the login response al
 **granted** role as `profile.admin.role` — but you must prove it with a test.
 
 ## Visual (ui stories only)
-Match artboard: to be produced by the designer under `design/canvases/support-access/`. Expect one
-artboard for the header banner with time remaining and one for the last-minutes (warning) state;
-the designer fills the exact file names into `design_artboards` before this story is dispatched.
+Match these artboards on the **Support Access** canvas (`design/canvases/support-access/`), bottom row:
+
+- `SupportGrantBannerActive.dc.html` — banner with the countdown well clear of expiry.
+- `SupportGrantBannerExpiring.dc.html` — under five minutes, `color="warning"`.
+- `SupportGrantBannerExpired.dc.html` — countdown at zero, plus the existing session-expired snackbar.
+
+All three reuse the approved `SupportAccessActive.dc.html` body unchanged, so the only thing to
+match is the toolbar. Anatomy, from the artboards and the sticky notes beside them:
+
+- MUI `Chip`, medium, as the theme already renders one: 32px high, 8px radius (the `MuiChip`
+  override in `createPodTheme.ts`), 13px at weight 500, icon 18px (`ml: '5px'`, `mr: '-6px'`),
+  label padding `0 12px`, and `mr: 2` before `<NotificationDropdown />`. Do not pad it to the 34px
+  of the avatars beside it.
+- Icon: the same shield (`VerifiedUserIcon`) the support-access empty state uses.
+- Active: `bgcolor: 'primary.light'` (#D0E0DA) on `color: 'primary.dark'` (#0C2721) — the pair the
+  `ProfileMenu` pill next to it already uses.
+- Under five minutes and at zero: `color="warning"` filled (#FF9800 on #FFFFFF). No third colour.
+- Wrap the `mm:ss` in a span with `fontVariantNumeric: 'tabular-nums'` so the chip does not twitch
+  on every tick.
+- The expired frame draws `SessionExpiredHandler` as it already exists; do not restyle it.
+
+`SupportGrantBanner` is a **new organism**: `design/registry/web.md` has no row for it and nothing
+existing fits. Add the registry row under Organisms and a Storybook story covering the three states
+above, per the "Adding a component" rule in `design/README.md`.
 
 ## Contract
 Shipped by B9. No contract changes; do not edit `specs/contracts/`.
