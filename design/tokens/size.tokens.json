@@ -1,0 +1,197 @@
+{
+  "$schema": "https://tr.designtokens.org/format/",
+  "spacing": {
+    "xs": {
+      "$type": "dimension",
+      "$value": {
+        "value": 4.0,
+        "unit": "px"
+      }
+    },
+    "sm": {
+      "$type": "dimension",
+      "$value": {
+        "value": 8.0,
+        "unit": "px"
+      }
+    },
+    "md": {
+      "$type": "dimension",
+      "$value": {
+        "value": 16.0,
+        "unit": "px"
+      }
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": {
+        "value": 24.0,
+        "unit": "px"
+      }
+    },
+    "xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 32.0,
+        "unit": "px"
+      }
+    },
+    "xxl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 48.0,
+        "unit": "px"
+      }
+    }
+  },
+  "radius": {
+    "sm": {
+      "$type": "dimension",
+      "$value": {
+        "value": 4.0,
+        "unit": "px"
+      }
+    },
+    "md": {
+      "$type": "dimension",
+      "$value": {
+        "value": 8.0,
+        "unit": "px"
+      }
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": {
+        "value": 12.0,
+        "unit": "px"
+      }
+    },
+    "xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 16.0,
+        "unit": "px"
+      }
+    },
+    "full": {
+      "$type": "dimension",
+      "$value": {
+        "value": 999.0,
+        "unit": "px"
+      }
+    }
+  },
+  "iconSize": {
+    "xs": {
+      "$type": "dimension",
+      "$value": {
+        "value": 12.0,
+        "unit": "px"
+      }
+    },
+    "sm": {
+      "$type": "dimension",
+      "$value": {
+        "value": 16.0,
+        "unit": "px"
+      }
+    },
+    "md": {
+      "$type": "dimension",
+      "$value": {
+        "value": 24.0,
+        "unit": "px"
+      }
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": {
+        "value": 32.0,
+        "unit": "px"
+      }
+    },
+    "xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 48.0,
+        "unit": "px"
+      }
+    },
+    "xxl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 64.0,
+        "unit": "px"
+      }
+    },
+    "display": {
+      "$type": "dimension",
+      "$value": {
+        "value": 80.0,
+        "unit": "px"
+      }
+    }
+  },
+  "thumbnailSize": {
+    "sm": {
+      "$type": "dimension",
+      "$value": {
+        "value": 48.0,
+        "unit": "px"
+      }
+    },
+    "md": {
+      "$type": "dimension",
+      "$value": {
+        "value": 64.0,
+        "unit": "px"
+      }
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": {
+        "value": 100.0,
+        "unit": "px"
+      }
+    },
+    "xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 120.0,
+        "unit": "px"
+      }
+    }
+  },
+  "layout": {
+    "$description": "Web portal layout constants (Berry-derived)",
+    "gridSpacing": {
+      "$type": "dimension",
+      "$value": {
+        "value": 3,
+        "unit": "unit"
+      },
+      "$description": "MUI spacing units, not px"
+    },
+    "drawerWidth": {
+      "$type": "dimension",
+      "$value": {
+        "value": 260,
+        "unit": "px"
+      }
+    },
+    "drawerWidthMini": {
+      "$type": "dimension",
+      "$value": {
+        "value": 72,
+        "unit": "px"
+      }
+    },
+    "headerHeight": {
+      "$type": "dimension",
+      "$value": {
+        "value": 88,
+        "unit": "px"
+      }
+    }
+  }
+}

@@ -53,6 +53,25 @@ jobs:
       - name: Test the git guard hook
         run: python3 scripts/test-hooks.py
 
+  design:
+    name: Design tokens
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: design/pnpm-lock.yaml
+      - name: Install
+        run: pnpm --dir design install --frozen-lockfile
+      - name: Generated theme files match the tokens
+        run: pnpm --dir design check
+
   backend:
     name: Backend (Kotlin)
     needs: changes
@@ -150,14 +169,14 @@ jobs:
   # triggered platform job passed and none failed.
   ci-status:
     name: CI status
-    needs: [changes, domain, backend, web, mobile]
+    needs: [changes, domain, design, backend, web, mobile]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate
         run: |
-          echo "domain=${{ needs.domain.result }} backend=${{ needs.backend.result }} web=${{ needs.web.result }} mobile=${{ needs.mobile.result }}"
-          for r in "${{ needs.domain.result }}" "${{ needs.backend.result }}" "${{ needs.web.result }}" "${{ needs.mobile.result }}"; do
+          echo "domain=${{ needs.domain.result }} design=${{ needs.design.result }} backend=${{ needs.backend.result }} web=${{ needs.web.result }} mobile=${{ needs.mobile.result }}"
+          for r in "${{ needs.domain.result }}" "${{ needs.design.result }}" "${{ needs.backend.result }}" "${{ needs.web.result }}" "${{ needs.mobile.result }}"; do
             case "$r" in
               success|skipped) ;;
               *) echo "A platform job did not pass: $r"; exit 1 ;;

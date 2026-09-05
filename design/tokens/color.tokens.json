@@ -1,0 +1,521 @@
+{
+  "$schema": "https://tr.designtokens.org/format/",
+  "brand": {
+    "$description": "Seed colours from the pod's brand; Material Theme Builder derives the schemes from these",
+    "primary": {
+      "$type": "color",
+      "$value": "#233D36",
+      "$description": "Forest green"
+    },
+    "secondary": {
+      "$type": "color",
+      "$value": "#D9613F",
+      "$description": "Terracotta"
+    },
+    "tertiary": {
+      "$type": "color",
+      "$value": "#F1EDDA",
+      "$description": "Warm beige"
+    }
+  },
+  "scheme": {
+    "$description": "Material 3 colour roles. Values from web/material-theme.json plus the Berry-style light/dark tints (primaryLight, secondaryLight, tertiaryLight).",
+    "light": {
+      "primary": {
+        "$type": "color",
+        "$value": "#0C2721"
+      },
+      "onPrimary": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "primaryContainer": {
+        "$type": "color",
+        "$value": "#233D36"
+      },
+      "onPrimaryContainer": {
+        "$type": "color",
+        "$value": "#8BA89E"
+      },
+      "primaryLight": {
+        "$type": "color",
+        "$value": "#D0E0DA"
+      },
+      "secondaryLight": {
+        "$type": "color",
+        "$value": "#FFDDD4"
+      },
+      "tertiaryLight": {
+        "$type": "color",
+        "$value": "#F7F5F0"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#A2391A"
+      },
+      "onSecondary": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "secondaryContainer": {
+        "$type": "color",
+        "$value": "#C35130"
+      },
+      "onSecondaryContainer": {
+        "$type": "color",
+        "$value": "#FFFBFF"
+      },
+      "tertiary": {
+        "$type": "color",
+        "$value": "#615F50"
+      },
+      "onTertiary": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "tertiaryContainer": {
+        "$type": "color",
+        "$value": "#F1EDDA"
+      },
+      "onTertiaryContainer": {
+        "$type": "color",
+        "$value": "#6D6B5C"
+      },
+      "error": {
+        "$type": "color",
+        "$value": "#BA1A1A"
+      },
+      "onError": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "errorContainer": {
+        "$type": "color",
+        "$value": "#FFDAD6"
+      },
+      "onErrorContainer": {
+        "$type": "color",
+        "$value": "#93000A"
+      },
+      "background": {
+        "$type": "color",
+        "$value": "#FAF9F7"
+      },
+      "onBackground": {
+        "$type": "color",
+        "$value": "#1A1C1B"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#FAF9F7"
+      },
+      "onSurface": {
+        "$type": "color",
+        "$value": "#1A1C1B"
+      },
+      "surfaceVariant": {
+        "$type": "color",
+        "$value": "#DDE4E0"
+      },
+      "onSurfaceVariant": {
+        "$type": "color",
+        "$value": "#424846"
+      },
+      "outline": {
+        "$type": "color",
+        "$value": "#727975"
+      },
+      "outlineVariant": {
+        "$type": "color",
+        "$value": "#C1C8C4"
+      },
+      "shadow": {
+        "$type": "color",
+        "$value": "#000000"
+      },
+      "scrim": {
+        "$type": "color",
+        "$value": "#000000"
+      },
+      "inverseSurface": {
+        "$type": "color",
+        "$value": "#2F3130"
+      },
+      "inverseOnSurface": {
+        "$type": "color",
+        "$value": "#F1F1EF"
+      },
+      "inversePrimary": {
+        "$type": "color",
+        "$value": "#B0CDC3"
+      },
+      "surfaceDim": {
+        "$type": "color",
+        "$value": "#DADAD8"
+      },
+      "surfaceBright": {
+        "$type": "color",
+        "$value": "#FAF9F7"
+      },
+      "surfaceContainerLowest": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "surfaceContainerLow": {
+        "$type": "color",
+        "$value": "#F4F3F2"
+      },
+      "surfaceContainer": {
+        "$type": "color",
+        "$value": "#EFEEEC"
+      },
+      "surfaceContainerHigh": {
+        "$type": "color",
+        "$value": "#E9E8E6"
+      },
+      "surfaceContainerHighest": {
+        "$type": "color",
+        "$value": "#E3E2E1"
+      }
+    },
+    "dark": {
+      "primary": {
+        "$type": "color",
+        "$value": "#B0CDC3"
+      },
+      "onPrimary": {
+        "$type": "color",
+        "$value": "#1B352E"
+      },
+      "primaryContainer": {
+        "$type": "color",
+        "$value": "#233D36"
+      },
+      "onPrimaryContainer": {
+        "$type": "color",
+        "$value": "#8BA89E"
+      },
+      "primaryLight": {
+        "$type": "color",
+        "$value": "#1E3830"
+      },
+      "secondaryLight": {
+        "$type": "color",
+        "$value": "#3D2E2A"
+      },
+      "tertiaryLight": {
+        "$type": "color",
+        "$value": "#1A1F1D"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#FFB5A0"
+      },
+      "onSecondary": {
+        "$type": "color",
+        "$value": "#601400"
+      },
+      "secondaryContainer": {
+        "$type": "color",
+        "$value": "#E76C49"
+      },
+      "onSecondaryContainer": {
+        "$type": "color",
+        "$value": "#400A00"
+      },
+      "tertiary": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "onTertiary": {
+        "$type": "color",
+        "$value": "#323124"
+      },
+      "tertiaryContainer": {
+        "$type": "color",
+        "$value": "#E7E3D0"
+      },
+      "onTertiaryContainer": {
+        "$type": "color",
+        "$value": "#676556"
+      },
+      "error": {
+        "$type": "color",
+        "$value": "#FFB4AB"
+      },
+      "onError": {
+        "$type": "color",
+        "$value": "#690005"
+      },
+      "errorContainer": {
+        "$type": "color",
+        "$value": "#93000A"
+      },
+      "onErrorContainer": {
+        "$type": "color",
+        "$value": "#FFDAD6"
+      },
+      "background": {
+        "$type": "color",
+        "$value": "#0E1816"
+      },
+      "onBackground": {
+        "$type": "color",
+        "$value": "#D5E0DC"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#0E1816"
+      },
+      "onSurface": {
+        "$type": "color",
+        "$value": "#D5E0DC"
+      },
+      "surfaceVariant": {
+        "$type": "color",
+        "$value": "#3A4742"
+      },
+      "onSurfaceVariant": {
+        "$type": "color",
+        "$value": "#BDC9C4"
+      },
+      "outline": {
+        "$type": "color",
+        "$value": "#87938E"
+      },
+      "outlineVariant": {
+        "$type": "color",
+        "$value": "#3A4742"
+      },
+      "shadow": {
+        "$type": "color",
+        "$value": "#000000"
+      },
+      "scrim": {
+        "$type": "color",
+        "$value": "#000000"
+      },
+      "inverseSurface": {
+        "$type": "color",
+        "$value": "#D5E0DC"
+      },
+      "inverseOnSurface": {
+        "$type": "color",
+        "$value": "#2A3532"
+      },
+      "inversePrimary": {
+        "$type": "color",
+        "$value": "#49645C"
+      },
+      "surfaceDim": {
+        "$type": "color",
+        "$value": "#0E1816"
+      },
+      "surfaceBright": {
+        "$type": "color",
+        "$value": "#3A4743"
+      },
+      "surfaceContainerLowest": {
+        "$type": "color",
+        "$value": "#091210"
+      },
+      "surfaceContainerLow": {
+        "$type": "color",
+        "$value": "#141D1A"
+      },
+      "surfaceContainer": {
+        "$type": "color",
+        "$value": "#1F2926"
+      },
+      "surfaceContainerHigh": {
+        "$type": "color",
+        "$value": "#2A3633"
+      },
+      "surfaceContainerHighest": {
+        "$type": "color",
+        "$value": "#354240"
+      }
+    }
+  },
+  "semantic": {
+    "$description": "Meaning colours shared by both apps; not part of the M3 scheme",
+    "issueState": {
+      "reported": {
+        "$type": "color",
+        "$value": "#FF9800"
+      },
+      "confirmed": {
+        "$type": "color",
+        "$value": "#2196F3"
+      },
+      "in_progress": {
+        "$type": "color",
+        "$value": "#9C27B0"
+      },
+      "fixed": {
+        "$type": "color",
+        "$value": "#4CAF50"
+      },
+      "rejected": {
+        "$type": "color",
+        "$value": "#9E9E9E"
+      },
+      "reopened": {
+        "$type": "color",
+        "$value": "#F44336"
+      }
+    },
+    "issueType": {
+      "pothole": {
+        "$type": "color",
+        "$value": "#795548"
+      },
+      "water_leak": {
+        "$type": "color",
+        "$value": "#2196F3"
+      },
+      "sewage_leak": {
+        "$type": "color",
+        "$value": "#4CAF50"
+      },
+      "traffic_light": {
+        "$type": "color",
+        "$value": "#F44336"
+      },
+      "street_light": {
+        "$type": "color",
+        "$value": "#FFC107"
+      },
+      "illegal_dumping": {
+        "$type": "color",
+        "$value": "#9C27B0"
+      },
+      "other": {
+        "$type": "color",
+        "$value": "#9E9E9E"
+      }
+    },
+    "heat": {
+      "minimal": {
+        "$type": "color",
+        "$value": "#9E9E9E"
+      },
+      "low": {
+        "$type": "color",
+        "$value": "#4CAF50"
+      },
+      "medium": {
+        "$type": "color",
+        "$value": "#FF9800"
+      },
+      "high": {
+        "$type": "color",
+        "$value": "#F44336"
+      },
+      "critical": {
+        "$type": "color",
+        "$value": "#9C27B0"
+      },
+      "muted": {
+        "low": {
+          "$type": "color",
+          "$value": "#7CB081"
+        },
+        "medium": {
+          "$type": "color",
+          "$value": "#CCAA66"
+        },
+        "high": {
+          "$type": "color",
+          "$value": "#CC7A73"
+        },
+        "critical": {
+          "$type": "color",
+          "$value": "#A07BA8"
+        }
+      }
+    },
+    "status": {
+      "success": {
+        "$type": "color",
+        "$value": "#4CAF50"
+      },
+      "successLight": {
+        "$type": "color",
+        "$value": "#E8F5E9"
+      },
+      "warning": {
+        "$type": "color",
+        "$value": "#FF9800"
+      },
+      "warningLight": {
+        "$type": "color",
+        "$value": "#FFF3E0"
+      },
+      "error": {
+        "$type": "color",
+        "$value": "#D32F2F"
+      },
+      "errorLight": {
+        "$type": "color",
+        "$value": "#FFEBEE"
+      },
+      "info": {
+        "$type": "color",
+        "$value": "#2196F3"
+      },
+      "infoLight": {
+        "$type": "color",
+        "$value": "#E3F2FD"
+      }
+    },
+    "text": {
+      "primary": {
+        "$type": "color",
+        "$value": "#2D4A47"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#4A6360"
+      },
+      "muted": {
+        "$type": "color",
+        "$value": "#6B7B78"
+      },
+      "onDark": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "onLight": {
+        "$type": "color",
+        "$value": "#2D4A47"
+      }
+    },
+    "surface": {
+      "background": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "white": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "cream": {
+        "$type": "color",
+        "$value": "#F3EDDA"
+      },
+      "beige": {
+        "$type": "color",
+        "$value": "#F3EDDA"
+      },
+      "backgroundDark": {
+        "$type": "color",
+        "$value": "#1A1A1A"
+      },
+      "surfaceDark": {
+        "$type": "color",
+        "$value": "#2D2D2D"
+      }
+    }
+  }
+}

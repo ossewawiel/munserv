@@ -1,0 +1,15 @@
+{
+  "name": "munserv-design",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Design tokens (W3C DTCG) and the generator that writes the web and mobile theme constants",
+  "type": "module",
+  "scripts": {
+    "build": "node sd.config.mjs",
+    "check": "node sd.config.mjs && git diff --exit-code -- ../web/src/theme/generated ../mobile/lib/shared/theme/generated"
+  },
+  "devDependencies": {
+    "style-dictionary": "5.5.2"
+  },
+  "packageManager": "pnpm@10.34.5"
+}
