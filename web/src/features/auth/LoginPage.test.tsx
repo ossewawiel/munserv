@@ -5,8 +5,10 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { I18nextProvider } from 'react-i18next';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { http, HttpResponse } from 'msw';
 import i18n from 'i18next';
 
+import { server } from '@/test/mocks/server';
 import { LoginPage } from './LoginPage';
 
 // Mock useThemeContext
@@ -112,6 +114,10 @@ function renderLoginPage({ initialRoute = '/login', isAuthenticated = false }: R
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<div data-testid="register-page">Register Page</div>} />
               <Route path="/" element={<div data-testid="dashboard">Dashboard</div>} />
+              <Route
+                path="/bootstrap/create-pod-chief"
+                element={<div data-testid="create-pod-chief">Create Pod Chief</div>}
+              />
             </Routes>
           </MemoryRouter>
         </I18nextProvider>
@@ -194,6 +200,52 @@ describe('LoginPage', () => {
       await waitFor(() => {
         expect(screen.getByTestId('dashboard')).toBeInTheDocument();
       });
+    });
+
+    it('should redirect to the dashboard when the super user logs in under a support grant', async () => {
+      server.use(
+        http.post('*/auth/admin/login', () => {
+          return HttpResponse.json({
+            tokens: {
+              accessToken: 'mock-access-token',
+              refreshToken: 'mock-refresh-token',
+              expiresAt: '2026-09-05T10:15:00Z',
+            },
+            profile: {
+              admin: {
+                id: 'grant-1',
+                email: 'support@central-authority.example.com',
+                displayName: 'Support User',
+                role: 'POD_ADMIN',
+                level: 'pod',
+                podId: 'pod-1',
+                wardId: null,
+                sectorId: null,
+                onboardingStatus: null,
+              },
+              sector: null,
+              bootstrapStatus: null,
+              supportGrant: {
+                grantId: 'grant-1',
+                grantedRole: 'pod_admin',
+                expiresAt: '2026-09-05T11:00:00Z',
+              },
+            },
+          });
+        })
+      );
+
+      renderLoginPage();
+
+      await userEvent.type(screen.getByLabelText(/email/i), 'support@central-authority.example.com');
+      await userEvent.type(screen.getByLabelText(/password/i), 'irrelevant');
+      await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dashboard')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('create-pod-chief')).not.toBeInTheDocument();
     });
   });
 });

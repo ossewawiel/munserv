@@ -33,6 +33,9 @@ vi.mock('@/features/auth/hooks', () => ({
     mutate: vi.fn(),
     isPending: false,
   }),
+  useCurrentSupportGrant: () => ({
+    data: undefined,
+  }),
 }));
 
 // Mock useAuth

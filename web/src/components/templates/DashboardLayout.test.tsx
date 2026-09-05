@@ -26,12 +26,21 @@ vi.mock('@/theme/ThemeContext', async () => {
   };
 });
 
-// Mock useLogout
+// Mock useLogout and useCurrentSupportGrant
 vi.mock('@/features/auth/hooks', () => ({
   useLogout: () => ({
     mutate: vi.fn(),
     isPending: false,
   }),
+  useCurrentSupportGrant: () => ({
+    data: undefined,
+  }),
+}));
+
+// Mock useAuth
+const mockUseAuth = vi.fn();
+vi.mock('@/shared/hooks/useAuth', () => ({
+  useAuth: () => mockUseAuth(),
 }));
 
 // Mock i18n constants
@@ -67,6 +76,12 @@ i18n.init({
           issues: 'Issues',
           heatReport: 'Heat Report',
           members: 'Members',
+        },
+        roles: { pod_admin: 'Pod Admin' },
+        supportGrant: {
+          banner: 'Support access as {{role}} · <time>{{remaining}}</time> left',
+          remainingLabel: 'Time remaining',
+          expired: 'Support access expired',
         },
       },
     },
@@ -141,6 +156,8 @@ function renderWithProviders(
 
 beforeEach(() => {
   mockUseThemeContext.mockReset();
+  mockUseAuth.mockReset();
+  mockUseAuth.mockReturnValue({ supportGrant: null });
 });
 
 describe('DashboardLayout', () => {
@@ -175,6 +192,24 @@ describe('DashboardLayout', () => {
 
       const mainElement = container.querySelector('main');
       expect(mainElement).toBeInTheDocument();
+    });
+
+    it('should show the support grant banner when a grant is stored', () => {
+      mockUseAuth.mockReturnValue({
+        supportGrant: {
+          grantId: 'grant-1',
+          grantedRole: 'pod_admin',
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+        },
+      });
+
+      const { container } = renderWithProviders(
+        <DashboardLayout>
+          <div>Content</div>
+        </DashboardLayout>
+      );
+
+      expect(container.querySelector('.MuiChip-root')).toBeInTheDocument();
     });
   });
 

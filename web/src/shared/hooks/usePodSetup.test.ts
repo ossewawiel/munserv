@@ -19,6 +19,7 @@ describe('usePodSetup', () => {
   describe('when user is not at pod level', () => {
     it('should return empty state for sector_admin', () => {
       mockUseAuth.mockReturnValue({
+        supportGrant: null,
         admin: { id: '1', email: 'test@test.com', displayName: 'Test', sectorId: 's1', role: 'sector_admin' },
         isAuthenticated: true,
         login: vi.fn(),
@@ -37,6 +38,7 @@ describe('usePodSetup', () => {
 
     it('should return empty state for sector_chief', () => {
       mockUseAuth.mockReturnValue({
+        supportGrant: null,
         admin: { id: '1', email: 'test@test.com', displayName: 'Test', sectorId: 's1', role: 'sector_chief' },
         isAuthenticated: true,
         login: vi.fn(),
@@ -52,6 +54,7 @@ describe('usePodSetup', () => {
 
     it('should return empty state for ward_chief', () => {
       mockUseAuth.mockReturnValue({
+        supportGrant: null,
         admin: { id: '1', email: 'test@test.com', displayName: 'Test', sectorId: 's1', role: 'ward_chief' },
         isAuthenticated: true,
         login: vi.fn(),
@@ -68,6 +71,7 @@ describe('usePodSetup', () => {
   describe('when user is at pod level', () => {
     it('should return full state for pod_admin', () => {
       mockUseAuth.mockReturnValue({
+        supportGrant: null,
         admin: { id: '1', email: 'test@test.com', displayName: 'Test', sectorId: 's1', role: 'pod_admin' },
         isAuthenticated: true,
         login: vi.fn(),
@@ -86,6 +90,7 @@ describe('usePodSetup', () => {
 
     it('should return full state for pod_chief', () => {
       mockUseAuth.mockReturnValue({
+        supportGrant: null,
         admin: { id: '1', email: 'test@test.com', displayName: 'Test', sectorId: 's1', role: 'pod_chief' },
         isAuthenticated: true,
         login: vi.fn(),
@@ -102,6 +107,7 @@ describe('usePodSetup', () => {
 
     it('should return mock wards and sectors for navigation', () => {
       mockUseAuth.mockReturnValue({
+        supportGrant: null,
         admin: { id: '1', email: 'test@test.com', displayName: 'Test', sectorId: 's1', role: 'pod_chief' },
         isAuthenticated: true,
         login: vi.fn(),
@@ -121,6 +127,7 @@ describe('usePodSetup', () => {
   describe('when user is not authenticated', () => {
     it('should return empty state', () => {
       mockUseAuth.mockReturnValue({
+        supportGrant: null,
         admin: null,
         isAuthenticated: false,
         login: vi.fn(),

@@ -3,7 +3,7 @@ issue: 44
 story: W29
 title: "Super user uses temporary access for debugging"
 platform: web
-status: pending
+status: completed
 depends_on: [68]        # B9 grant login + GET /support-access/grants/current, merged in PR #73
 touches:
   - web/src/features/auth
@@ -15,11 +15,49 @@ touches:
 ui: true
 design_canvas: "https://claude.ai/code/artifact/e74d590c-6be1-40e5-8864-88e5e85d52c9"
 design_artboards: [SupportGrantBannerActive.dc.html, SupportGrantBannerExpiring.dc.html, SupportGrantBannerExpired.dc.html]
-design_approved: false
+design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/features/auth/types.ts
+  - web/src/features/auth/api.ts
+  - web/src/features/auth/api.test.ts
+  - web/src/features/auth/hooks.ts
+  - web/src/features/auth/hooks.test.tsx
+  - web/src/features/auth/LoginPage.test.tsx
+  - web/src/shared/hooks/useAuth.ts
+  - web/src/shared/hooks/useAuth.test.ts
+  - web/src/shared/hooks/usePodSetup.test.ts
+  - web/src/components/organisms/SupportGrantBanner.tsx
+  - web/src/components/organisms/SupportGrantBanner.test.tsx
+  - web/src/components/organisms/SupportGrantBanner.stories.tsx
+  - web/src/components/templates/DashboardLayout.tsx
+  - web/src/components/templates/DashboardLayout.test.tsx
+  - web/src/features/members/MembersPage.test.tsx
+  - web/src/test/mocks/handlers.ts
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+  - design/registry/web.md
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-supportgrantbanner--active--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-supportgrantbanner--active--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-supportgrantbanner--expiring--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-supportgrantbanner--expiring--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-supportgrantbanner--expired--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-supportgrantbanner--expired--dark.png
+tests_added:
+  - "authApi.getCurrentSupportGrant: should return the slid expiry from the current grant endpoint"
+  - "auth hooks useLogin: should store the support grant when the login response carries one"
+  - "auth hooks useLogin: should not request the current grant when there is no support grant"
+  - "auth hooks useLogout: should clear the stored support grant on logout"
+  - "LoginPage: should redirect to the dashboard when the super user logs in under a support grant"
+  - "useAuth: should expose the stored support grant"
+  - "useAuth: should limit permissions to the granted role under a support grant"
+  - "useAuth: should clear the support grant on logout"
+  - "SupportGrantBanner: should render nothing when there is no support grant"
+  - "SupportGrantBanner: should count down to the server expiry"
+  - "SupportGrantBanner: should show the slid expiry after a route change"
+  - "DashboardLayout: should show the support grant banner when a grant is stored"
 ---
 
 # W29 · Super user uses temporary access for debugging (Web)

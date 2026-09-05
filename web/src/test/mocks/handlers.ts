@@ -354,6 +354,20 @@ export const mockSupportGrants: SupportGrant[] = [
   },
 ];
 
+export const mockCurrentSupportGrant: SupportGrant = {
+  id: 'grant-1',
+  grantedRole: 'pod_admin',
+  purpose: 'Investigate duplicate issue reports in sector 3',
+  status: 'active',
+  grantedBy: 'admin-1',
+  grantedByName: 'Thandi Mokoena',
+  grantedAt: '2026-09-05T09:41:00Z',
+  expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+  lastActivity: '2026-09-05T09:41:00Z',
+  revokedAt: null,
+  expiredAt: null,
+};
+
 export const handlers = [
   // Auth
   http.post('*/auth/admin/login', async ({ request }) => {
@@ -381,6 +395,10 @@ export const handlers = [
       });
     }
     return HttpResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+  }),
+
+  http.post('*/auth/logout', () => {
+    return new HttpResponse(null, { status: 204 });
   }),
 
   // Issues
@@ -954,5 +972,10 @@ export const handlers = [
   // DELETE /support-access/grants/:id - Revoke a support grant
   http.delete('*/support-access/grants/:id', () => {
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  // GET /support-access/grants/current - The caller's own support grant (grant-scoped tokens only)
+  http.get('*/support-access/grants/current', () => {
+    return HttpResponse.json(mockCurrentSupportGrant);
   }),
 ];

@@ -621,6 +621,11 @@
       "revoked": "Revoked"
     }
   },
+  "supportGrant": {
+    "banner": "Support access as {{role}} · <time>{{remaining}}</time> left",
+    "remainingLabel": "Time remaining",
+    "expired": "Support access expired"
+  },
   "podSettings": {
     "title": "Pod Settings",
     "subtitle": "Pod-wide configuration, including support access for Central Authority."

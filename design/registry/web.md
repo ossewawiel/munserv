@@ -36,6 +36,7 @@ The catalogue of web building blocks, as agents must use them. Every entry has a
 | `DataTableCard` (`organisms`) | Every admin list | Tabs, toolbar, pagination, URL-synced state. See the `web-data-table` skill. Never hand-roll a table. |
 | `DataTable` | Only inside `DataTableCard` | Base table. |
 | `NotificationDropdown`, `ProfileMenu`, `SessionExpiredHandler` | Header and session chrome | One instance each, in `DashboardLayout`. |
+| `SupportGrantBanner` | Header, only while the signed-in user holds an active support grant | Renders `null` with no stored grant. Counts down to the grant's server-owned, sliding `expires_at`; refreshes on route change and once at zero, never on a timer (see `domain/support-grant.md`). |
 | `DashboardLayout`, `AuthLayout` (`templates`) | Page shells | Authenticated pages use `DashboardLayout`; login, register and onboarding use `AuthLayout`. `Sidebar` and `MiniDrawerStyled` belong to `DashboardLayout` only. |
 
 ## Theme

@@ -1,5 +1,5 @@
 import type { GeoPoint } from '@/shared/types/common';
-import type { UserRole } from '@/shared/types/admin';
+import type { AdminRole, UserRole } from '@/shared/types/admin';
 
 /**
  * Member status for registration workflow
@@ -59,10 +59,29 @@ export interface LoginRequest {
   password: string;
 }
 
+/**
+ * A support grant carried on a login response when the super user signs in
+ * while a support grant is active (see domain/support-grant.md).
+ */
+export interface SupportGrantInfo {
+  grantId: string;
+  grantedRole: AdminRole;
+  expiresAt: string;
+}
+
 export interface AdminProfile {
   admin: AdminUser;
   sector: Sector | null;
   bootstrapStatus?: string;
+  supportGrant?: SupportGrantInfo | null;
+}
+
+/**
+ * Response from GET /support-access/grants/current. The endpoint returns the
+ * full grant; this story only consumes the slid `expiresAt`.
+ */
+export interface CurrentSupportGrantResponse {
+  expiresAt: string;
 }
 
 export interface LoginResponse {

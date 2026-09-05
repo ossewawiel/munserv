@@ -7,6 +7,7 @@ const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const ADMIN_KEY = 'admin';
 const IS_SUPER_USER_KEY = 'isSuperUser';
+const SUPPORT_GRANT_KEY = 'supportGrant';
 
 export function useLogin() {
   const queryClient = useQueryClient();
@@ -26,6 +27,13 @@ export function useLogin() {
         localStorage.removeItem(IS_SUPER_USER_KEY);
       }
 
+      // Store the support grant carried on a login under an active grant
+      if (response.profile.supportGrant) {
+        localStorage.setItem(SUPPORT_GRANT_KEY, JSON.stringify(response.profile.supportGrant));
+      } else {
+        localStorage.removeItem(SUPPORT_GRANT_KEY);
+      }
+
       // Also update React Query cache
       queryClient.setQueryData(['auth', 'admin'], response.profile.admin);
     },
@@ -43,9 +51,30 @@ export function useLogout() {
       localStorage.removeItem(REFRESH_TOKEN_KEY);
       localStorage.removeItem(ADMIN_KEY);
       localStorage.removeItem(IS_SUPER_USER_KEY);
+      localStorage.removeItem(SUPPORT_GRANT_KEY);
       // Clear React Query cache
       queryClient.clear();
     },
+  });
+}
+
+/**
+ * The caller's own support grant, refreshed on route change (real activity)
+ * and once when the countdown reaches zero. Never polled: every authenticated
+ * request slides the grant's server-owned expiry.
+ */
+export function useCurrentSupportGrant(options: {
+  pathname: string;
+  expired: boolean;
+  enabled: boolean;
+}) {
+  return useQuery({
+    queryKey: ['auth', 'support-grant', 'current', options.pathname, options.expired],
+    queryFn: authApi.getCurrentSupportGrant,
+    enabled: options.enabled,
+    retry: false,
+    refetchOnWindowFocus: false,
+    gcTime: 0,
   });
 }
 

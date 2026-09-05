@@ -11,6 +11,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 import { ProfileMenu } from '@/components/organisms/ProfileMenu';
 import { NotificationDropdown } from '@/components/organisms/NotificationDropdown';
+import { SupportGrantBanner } from '@/components/organisms/SupportGrantBanner';
 import { Sidebar } from './Sidebar';
 import {
   drawerWidth,
@@ -184,7 +185,8 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
         {/* Spacer */}
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* Right side actions - Notifications and Profile Menu */}
+        {/* Right side actions - Support access banner, Notifications and Profile Menu */}
+        <SupportGrantBanner />
         <NotificationDropdown />
         <ProfileMenu />
       </Toolbar>
