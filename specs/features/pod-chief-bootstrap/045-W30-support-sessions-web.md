@@ -11,7 +11,7 @@ touches:
 ui: true
 design_canvas: "https://claude.ai/code/artifact/e74d590c-6be1-40e5-8864-88e5e85d52c9"
 design_artboards: [Main.dc.html, SupportAccessActive.dc.html, SupportGrantsHistory.dc.html, GrantDialog.dc.html, GrantDialogError.dc.html, RevokeConfirm.dc.html]
-design_approved: false
+design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
 files_changed: []
