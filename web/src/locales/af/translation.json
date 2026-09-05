@@ -226,7 +226,6 @@
     },
     "grantedOn": "op {{date}}",
     "expiresUntilIdle": "{{date}}, of een uur na die laaste aktiwiteit, wat ook al eerste kom.",
-    "emptyTitle": "Nog geen ondersteuningstoekennings nie",
     "emptyDescription": "Wanneer jy ondersteuningstoegang verleen, verskyn die toekenning hier met sy rol, doel en vervaldatum totdat dit herroep word of verval.",
     "tabsLabel": "Ondersteuningstoekennings",
     "revoke": "Herroep",

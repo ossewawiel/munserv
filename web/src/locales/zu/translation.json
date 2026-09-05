@@ -226,7 +226,6 @@
     },
     "grantedOn": "ngo-{{date}}",
     "expiresUntilIdle": "{{date}}, noma ihora elilodwa ngemva komsebenzi wokugcina, noma yikuphi okufika kuqala.",
-    "emptyTitle": "Azikho izabelo zokusekela okwamanje",
     "emptyDescription": "Lapho unika ukufinyelela kokusekela, isabelo sivela lapha ngendima yaso, injongo kanye nesikhathi sokuphelelwa kuze kube sikhansela noma siphele.",
     "tabsLabel": "Izabelo zokusekela",
     "revoke": "Khansela",

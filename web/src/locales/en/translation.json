@@ -586,7 +586,6 @@
     },
     "grantedOn": "on {{date}}",
     "expiresUntilIdle": "{{date}}, or one hour after the last activity, whichever comes first.",
-    "emptyTitle": "No support grants yet",
     "emptyDescription": "When you grant support access, the grant appears here with its role, purpose and expiry until it is revoked or expires.",
     "tabsLabel": "Support grants",
     "revoke": "Revoke",
