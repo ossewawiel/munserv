@@ -1,5 +1,6 @@
 package com.munserv.issues.repository
 
+import com.munserv.TestContainersConfig
 import com.munserv.issues.domain.IssueId
 import com.munserv.issues.domain.IssueState
 import com.munserv.issues.domain.IssueStateHistoryEntry
@@ -21,7 +22,7 @@ import java.util.UUID
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(JpaIssueStateHistoryRepository::class)
+@Import(TestContainersConfig::class, JpaIssueStateHistoryRepository::class)
 class IssueStateHistoryRepositoryTest {
     @Autowired
     private lateinit var repository: IssueStateHistoryRepository
