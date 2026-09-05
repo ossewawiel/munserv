@@ -220,12 +220,45 @@
       "purposeTooShort": "Injongo kufanele ibe okungenani izinhlamvu ezingu-10",
       "purposeTooLong": "Injongo kufanele ibe izinhlamvu ezingu-500 noma ngaphansi",
       "activeGrantExists": "Le pod isivele inesabelo sokusekela esisebenzayo. Sikhansele ngaphambi kokunika esinye.",
-      "loadFailed": "Yehlulekile ukulayisha ukufinyelela kokusekela"
+      "loadFailed": "Yehlulekile ukulayisha ukufinyelela kokusekela",
+      "grantNotActive": "Lesi sabelo asisasebenzi. Layisha kabusha ukuze ubone isimo saso samanje.",
+      "revokeFailed": "Yehlulekile ukukhansela ukufinyelela kokusekela"
     },
     "grantedOn": "ngo-{{date}}",
     "expiresUntilIdle": "{{date}}, noma ihora elilodwa ngemva komsebenzi wokugcina, noma yikuphi okufika kuqala.",
     "emptyTitle": "Azikho izabelo zokusekela okwamanje",
-    "emptyDescription": "Lapho unika ukufinyelela kokusekela, isabelo sivela lapha ngendima yaso, injongo kanye nesikhathi sokuphelelwa kuze kube sikhansela noma siphele."
+    "emptyDescription": "Lapho unika ukufinyelela kokusekela, isabelo sivela lapha ngendima yaso, injongo kanye nesikhathi sokuphelelwa kuze kube sikhansela noma siphele.",
+    "tabsLabel": "Izabelo zokusekela",
+    "revoke": "Khansela",
+    "tabs": {
+      "active": "Okusebenzayo",
+      "history": "Umlando"
+    },
+    "table": {
+      "role": "Indima",
+      "purpose": "Injongo",
+      "grantedBy": "Kunikwe ngu",
+      "grantedAt": "Kunikiwe",
+      "lastActivity": "Umsebenzi wokugcina",
+      "expiresAt": "Iphelelwa yisikhathi",
+      "status": "Isimo",
+      "endedAt": "Kuphelile",
+      "actions": "Izenzo",
+      "never": "Awukaze",
+      "emptyActive": "Asikho isabelo sokusekela esisebenzayo",
+      "emptyHistory": "Azikho izabelo zokusekela zangaphambilini"
+    },
+    "revokeDialog": {
+      "title": "Khansela ukufinyelela kokusekela",
+      "body": "Ukusekelwa kulahlekelwa ukufinyelela kule pod ngokushesha njengo-{{role}}, futhi noma iyiphi iseshini yokusekela engenile iyaphela.",
+      "warning": "Lokhu akwenzeki nakabili. Nika kabusha ukufinyelela kokusekela uma kusadingeka.",
+      "confirm": "Khansela ukufinyelela"
+    },
+    "status": {
+      "active": "Kuyasebenza",
+      "expired": "Kuphelelwe yisikhathi",
+      "revoked": "Kukhanseliwe"
+    }
   },
   "podSettings": {
     "title": "Izilungiselelo ze-Pod",

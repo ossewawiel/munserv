@@ -950,4 +950,9 @@ export const handlers = [
 
     return HttpResponse.json(newGrant, { status: 201 });
   }),
+
+  // DELETE /support-access/grants/:id - Revoke a support grant
+  http.delete('*/support-access/grants/:id', () => {
+    return new HttpResponse(null, { status: 204 });
+  }),
 ];

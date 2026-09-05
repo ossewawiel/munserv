@@ -22,4 +22,10 @@ export const supportAccessApi = {
    */
   grant: (request: GrantSupportAccessRequest) =>
     apiClient.post<SupportGrant>('/support-access/grants', request).then((r) => r.data),
+
+  /**
+   * Revoke an active support grant
+   */
+  revoke: (id: string) =>
+    apiClient.delete<void>(`/support-access/grants/${id}`).then((r) => r.data),
 };

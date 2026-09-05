@@ -580,12 +580,45 @@
       "purposeTooShort": "Purpose must be at least 10 characters",
       "purposeTooLong": "Purpose must be 500 characters or fewer",
       "activeGrantExists": "This pod already has an active support grant. Revoke it before granting another.",
-      "loadFailed": "Failed to load support access"
+      "loadFailed": "Failed to load support access",
+      "grantNotActive": "This grant is no longer active. Reload to see its current status.",
+      "revokeFailed": "Failed to revoke support access"
     },
     "grantedOn": "on {{date}}",
     "expiresUntilIdle": "{{date}}, or one hour after the last activity, whichever comes first.",
     "emptyTitle": "No support grants yet",
-    "emptyDescription": "When you grant support access, the grant appears here with its role, purpose and expiry until it is revoked or expires."
+    "emptyDescription": "When you grant support access, the grant appears here with its role, purpose and expiry until it is revoked or expires.",
+    "tabsLabel": "Support grants",
+    "revoke": "Revoke",
+    "tabs": {
+      "active": "Active",
+      "history": "History"
+    },
+    "table": {
+      "role": "Role",
+      "purpose": "Purpose",
+      "grantedBy": "Granted by",
+      "grantedAt": "Granted",
+      "lastActivity": "Last activity",
+      "expiresAt": "Expires",
+      "status": "Status",
+      "endedAt": "Ended",
+      "actions": "Actions",
+      "never": "Never",
+      "emptyActive": "No active support grant",
+      "emptyHistory": "No past support grants"
+    },
+    "revokeDialog": {
+      "title": "Revoke support access",
+      "body": "Support loses access to this pod as {{role}} straight away, and any signed-in support session ends.",
+      "warning": "This cannot be undone. Grant support access again if it is still needed.",
+      "confirm": "Revoke access"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    }
   },
   "podSettings": {
     "title": "Pod Settings",

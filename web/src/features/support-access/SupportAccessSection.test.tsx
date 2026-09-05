@@ -1,6 +1,6 @@
 import '@/lib/i18n';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
@@ -31,6 +31,20 @@ const activeGrant: SupportGrant = {
   expiresAt: '2026-09-05T10:41:00Z',
   lastActivity: null,
   revokedAt: null,
+  expiredAt: null,
+};
+
+const historyGrant: SupportGrant = {
+  id: 'grant-past',
+  grantedRole: 'ward_admin',
+  purpose: 'Ward 4 heat scores stuck after the bulk import',
+  status: 'revoked',
+  grantedBy: 'admin-1',
+  grantedByName: 'Thandi Mokoena',
+  grantedAt: '2026-08-28T14:02:00Z',
+  expiresAt: '2026-08-28T15:02:00Z',
+  lastActivity: '2026-08-28T14:20:00Z',
+  revokedAt: '2026-08-28T14:35:00Z',
   expiredAt: null,
 };
 
@@ -87,5 +101,39 @@ describe('SupportAccessSection', () => {
     await user.click(screen.getByRole('button', { name: /grant support access/i }));
 
     expect(screen.getByRole('textbox')).toHaveValue('');
+  });
+
+  it('should open the confirmation dialog before revoking', async () => {
+    server.use(
+      http.get('*/support-access/grants', () =>
+        HttpResponse.json({ items: [activeGrant], total: 1 })
+      )
+    );
+
+    renderWithClient(<SupportAccessSection />);
+
+    const revokeButton = await screen.findByRole('button', { name: /revoke/i });
+    fireEvent.click(revokeButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/revoke support access/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should show the past grants in the history tab', async () => {
+    server.use(
+      http.get('*/support-access/grants', () =>
+        HttpResponse.json({ items: [activeGrant, historyGrant], total: 2 })
+      )
+    );
+
+    renderWithClient(<SupportAccessSection />);
+
+    const historyTab = await screen.findByRole('tab', { name: /history/i });
+    fireEvent.click(historyTab);
+
+    await waitFor(() => {
+      expect(screen.getByText(historyGrant.purpose)).toBeInTheDocument();
+    });
   });
 });

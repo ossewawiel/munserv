@@ -1,11 +1,14 @@
-import { type FC, useState, useCallback } from 'react';
+import { type FC, useState, useCallback, useMemo, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AxiosError } from 'axios';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
@@ -16,14 +19,18 @@ import { ErrorState } from '@/components/molecules/ErrorState';
 import { EmptyState } from '@/components/molecules/EmptyState';
 import { ADMIN_ROLE_LABELS } from '@/shared/types/admin';
 import { formatDateTime } from '@/shared/utils/formatters';
-import { useSupportGrants, useGrantSupportAccess } from './hooks';
+import { useSupportGrants, useGrantSupportAccess, useRevokeSupportGrant } from './hooks';
 import { GrantAccessDialog } from './components/GrantAccessDialog';
-import type { GrantSupportAccessRequest } from './types';
+import { RevokeGrantDialog } from './components/RevokeGrantDialog';
+import { SupportGrantsTable } from './components/SupportGrantsTable';
+import type { GrantSupportAccessRequest, SupportGrant } from './types';
 
 interface SupportAccessErrorBody {
   code?: string;
   message?: string;
 }
+
+type SupportGrantsTab = 'active' | 'history';
 
 /**
  * Pod Settings section that lets a pod chief grant the super user temporary
@@ -31,15 +38,31 @@ interface SupportAccessErrorBody {
  */
 export const SupportAccessSection: FC = () => {
   const { t } = useTranslation();
-  const { data, isLoading, isError, refetch } = useSupportGrants('active');
+  const { data, isLoading, isError, refetch } = useSupportGrants();
   const grantMutation = useGrantSupportAccess();
+  const revokeMutation = useRevokeSupportGrant();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [tab, setTab] = useState<SupportGrantsTab>('active');
+  const [grantToRevoke, setGrantToRevoke] = useState<SupportGrant | null>(null);
 
-  const activeGrant = data?.items[0];
+  const activeGrants = useMemo(
+    () => data?.items.filter((grant) => grant.status === 'active') ?? [],
+    [data]
+  );
+  const historyGrants = useMemo(
+    () => data?.items.filter((grant) => grant.status !== 'active') ?? [],
+    [data]
+  );
+  const activeGrant = activeGrants[0];
 
   const errorCode =
     grantMutation.error instanceof AxiosError
       ? (grantMutation.error.response?.data as SupportAccessErrorBody | undefined)?.code
+      : undefined;
+
+  const revokeErrorCode =
+    revokeMutation.error instanceof AxiosError
+      ? (revokeMutation.error.response?.data as SupportAccessErrorBody | undefined)?.code
       : undefined;
 
   const handleOpenDialog = useCallback(() => {
@@ -59,6 +82,26 @@ export const SupportAccessSection: FC = () => {
     },
     [grantMutation]
   );
+
+  const handleTabChange = useCallback((_event: SyntheticEvent, newTab: SupportGrantsTab) => {
+    setTab(newTab);
+  }, []);
+
+  const handleRequestRevoke = useCallback((grant: SupportGrant) => {
+    revokeMutation.reset();
+    setGrantToRevoke(grant);
+  }, [revokeMutation]);
+
+  const handleCloseRevokeDialog = useCallback(() => {
+    setGrantToRevoke(null);
+  }, []);
+
+  const handleConfirmRevoke = useCallback(() => {
+    if (!grantToRevoke) return;
+    revokeMutation.mutate(grantToRevoke.id, {
+      onSuccess: () => setGrantToRevoke(null),
+    });
+  }, [grantToRevoke, revokeMutation]);
 
   return (
     <MainCard
@@ -114,7 +157,7 @@ export const SupportAccessSection: FC = () => {
         </Alert>
       )}
 
-      {!isLoading && !isError && !activeGrant && (
+      {!isLoading && !isError && data?.items.length === 0 && (
         <EmptyState
           title={t('supportAccess.emptyTitle', 'No support grants yet')}
           icon={<ShieldOutlinedIcon sx={{ fontSize: 48 }} />}
@@ -123,6 +166,67 @@ export const SupportAccessSection: FC = () => {
             'When you grant support access, the grant appears here with its role, purpose and expiry until it is revoked or expires.'
           )}
         />
+      )}
+
+      {!isLoading && !isError && (data?.items.length ?? 0) > 0 && (
+        <Box sx={{ mt: 3 }}>
+          {revokeErrorCode === 'grant_not_active' && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              {t(
+                'supportAccess.errors.grantNotActive',
+                'This grant is no longer active. Reload to see its current status.'
+              )}
+            </Alert>
+          )}
+
+          {revokeMutation.isError && revokeErrorCode !== 'grant_not_active' && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {t('supportAccess.errors.revokeFailed', 'Failed to revoke support access')}
+            </Alert>
+          )}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+            <Tabs
+              value={tab}
+              onChange={handleTabChange}
+              aria-label={t('supportAccess.tabsLabel', 'Support grants')}
+            >
+              <Tab
+                value="active"
+                label={
+                  <Badge
+                    badgeContent={activeGrants.length}
+                    color="primary"
+                    sx={{ '& .MuiBadge-badge': { right: -16, top: 2 } }}
+                  >
+                    {t('supportAccess.tabs.active', 'Active')}
+                  </Badge>
+                }
+              />
+              <Tab
+                value="history"
+                label={
+                  <Badge
+                    badgeContent={historyGrants.length}
+                    color="primary"
+                    sx={{ '& .MuiBadge-badge': { right: -16, top: 2 } }}
+                  >
+                    {t('supportAccess.tabs.history', 'History')}
+                  </Badge>
+                }
+              />
+            </Tabs>
+          </Box>
+
+          {tab === 'active' ? (
+            <SupportGrantsTable
+              variant="active"
+              grants={activeGrants}
+              onRevoke={handleRequestRevoke}
+            />
+          ) : (
+            <SupportGrantsTable variant="history" grants={historyGrants} />
+          )}
+        </Box>
       )}
 
       {dialogOpen && (
@@ -134,6 +238,14 @@ export const SupportAccessSection: FC = () => {
           errorCode={errorCode}
         />
       )}
+
+      <RevokeGrantDialog
+        open={!!grantToRevoke}
+        grant={grantToRevoke}
+        onClose={handleCloseRevokeDialog}
+        onConfirm={handleConfirmRevoke}
+        isLoading={revokeMutation.isPending}
+      />
     </MainCard>
   );
 };
