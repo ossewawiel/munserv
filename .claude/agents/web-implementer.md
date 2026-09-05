@@ -9,7 +9,7 @@ skills:
   - web-patterns
   - web-data-table
 isolation: worktree
-maxTurns: 120
+maxTurns: 200
 color: green
 hooks:
   PreToolUse:
@@ -33,7 +33,7 @@ The task names a handoff file under `specs/features/<feature>/`. Read, in this o
 1. Create a branch `feat/<story>-<slug>` (or `fix/<issue>-<slug>`) from the current HEAD.
 2. Write the failing test(s) named in the handoff first (`*.test.tsx`, MSW handlers for API calls). Run them; they must fail for the expected reason.
 3. Implement the minimum that makes them pass: types → `api.ts` → `hooks.ts` → components → page → i18n keys in every locale file under `src/locales/`.
-4. Run the "Done when" commands from the handoff (`pnpm lint`, `pnpm typecheck`, `pnpm test:run`). All must exit 0.
+4. Run the "Done when" commands from the handoff (`pnpm lint`, `pnpm typecheck`, `pnpm test:run`) once, at the end; while iterating run only the affected test files. All must exit 0.
 5. Update the handoff frontmatter: `status: completed`, `files_changed`, `tests_added`.
 6. Commit with `feat(web): <story title> (#<issue>)` and push the branch. Do not open the PR.
 

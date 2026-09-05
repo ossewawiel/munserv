@@ -8,7 +8,7 @@ disallowedTools: Agent, WebFetch, WebSearch
 skills:
   - backend-patterns
 isolation: worktree
-maxTurns: 120
+maxTurns: 200
 color: purple
 hooks:
   PreToolUse:
@@ -32,7 +32,7 @@ The task names a handoff file under `specs/features/<feature>/`. Read, in this o
 1. Create a branch `feat/<story>-<slug>` (or `fix/<issue>-<slug>`) from the current HEAD.
 2. Write the failing tests named in the handoff first (domain and service). Run them; they must fail for the expected reason.
 3. Implement the minimum that makes them pass, following the five patterns in `backend/CLAUDE.md`.
-4. Run `./gradlew ktlintFormat`, then the "Done when" commands from the handoff. All must exit 0.
+4. Run `./gradlew ktlintFormat`, then the "Done when" commands from the handoff, once, at the end. While iterating use targeted `--tests` runs; the full suite takes five minutes and burns turns. All must exit 0.
 5. Update the handoff frontmatter: `status: completed`, `files_changed`, `tests_added`.
 6. Commit with a conventional message `feat(backend): <story title> (#<issue>)` and push the branch. Do not open the PR; the orchestrator does.
 
