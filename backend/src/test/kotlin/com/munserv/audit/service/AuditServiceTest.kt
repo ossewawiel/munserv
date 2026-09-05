@@ -295,6 +295,31 @@ class AuditServiceTest {
     }
 
     @Nested
+    inner class LogSupportAccessExpired {
+        private val testGrantId = UUID.fromString("550e8400-e29b-41d4-a716-446655440005")
+
+        @Test
+        fun `should log support access expired with SYSTEM actor`() {
+            // Arrange
+            val slot = slot<AuditLog>()
+            every { repository.save(capture(slot)) } answers { slot.captured }
+
+            // Act
+            service.logSupportAccessExpired(
+                grantId = testGrantId,
+                podId = testPodId,
+            )
+
+            // Assert
+            slot.captured.action shouldBe AuditAction.SUPPORT_ACCESS_EXPIRED
+            slot.captured.actorEmail shouldBe "system"
+            slot.captured.actorType shouldBe AuditActorType.SYSTEM
+            slot.captured.targetType shouldBe "SUPPORT_GRANT"
+            slot.captured.targetId shouldBe testGrantId
+        }
+    }
+
+    @Nested
     inner class LogSupportAccessLogin {
         private val testGrantId = UUID.fromString("550e8400-e29b-41d4-a716-446655440004")
 

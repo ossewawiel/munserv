@@ -29,12 +29,12 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 
 ### Backend (4 stories)
 
-| ID | Title | Issue |
-|----|-------|-------|
-| B5 | Super user configuration via environment | [#46](https://github.com/ossewawiel/munserv/issues/46) |
-| B6 | Bootstrap eligibility check | [#47](https://github.com/ossewawiel/munserv/issues/47) |
-| B7 | Bootstrap audit logging | [#48](https://github.com/ossewawiel/munserv/issues/48) |
-| B8 | Temporary super user grant tracking | [#49](https://github.com/ossewawiel/munserv/issues/49) |
+| ID | Title | Issue | Handoff |
+|----|-------|-------|---------|
+| B5 | Super user configuration via environment | [#46](https://github.com/ossewawiel/munserv/issues/46) | |
+| B6 | Bootstrap eligibility check | [#47](https://github.com/ossewawiel/munserv/issues/47) | |
+| B7 | Bootstrap audit logging | [#48](https://github.com/ossewawiel/munserv/issues/48) | |
+| B8 | Temporary super user grant tracking | [#49](https://github.com/ossewawiel/munserv/issues/49) | [Handoff](049-B8-support-grants-backend.md) |
 
 ## Dependencies
 
@@ -72,10 +72,10 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 
 ## Database Changes
 
-### New Table: `super_user_grants`
+### New Table: `support_grants`
 
 ```sql
-CREATE TABLE super_user_grants (
+CREATE TABLE support_grants (
     id UUID PRIMARY KEY,
     pod_id UUID NOT NULL REFERENCES pods(id),
     granted_role VARCHAR(50) NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE super_user_grants (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_super_user_grants_pod_status ON super_user_grants(pod_id, status);
+CREATE INDEX idx_support_grants_pod_status ON support_grants(pod_id, status);
 ```
 
 ### Index for Pod Chief Queries

@@ -224,3 +224,27 @@ concepts:
     values:
       audit_action: [SUPER_USER_LOGIN_SUCCESS, SUPER_USER_LOGIN_FAILURE, POD_CHIEF_CREATED, SUPPORT_ACCESS_GRANTED, SUPPORT_ACCESS_REVOKED, SUPPORT_ACCESS_EXPIRED, SUPPORT_ACCESS_LOGIN, SUPPORT_ACCESS_ACTIVITY]
     synonyms_avoid: ["log (application logs are not the audit log)", "history (issue state history is a different record)"]
+
+  support-grant:
+    definition: A time-boxed permission, issued by the pod chief, that lets the super user log in to a live pod under a named role for a stated purpose, ending on logout, on revocation, or after an hour without activity.
+    file: support-grant.md
+    code:
+      kotlin:
+        [
+          com.munserv.support.domain.SupportGrant,
+          com.munserv.support.domain.SupportGrantId,
+          com.munserv.support.domain.SupportGrantStatus,
+          com.munserv.support.service.SupportAccessService,
+          com.munserv.support.service.SupportAccessResult,
+          com.munserv.support.service.SupportGrantExpiryJob,
+          com.munserv.support.repository.SupportGrantRepository,
+          com.munserv.support.api.SupportAccessController,
+          com.munserv.support.api.SupportGrantActivityFilter,
+        ]
+      db: { tables: [support_grants] }
+      typescript: []
+      dart: []
+    values:
+      support_grant_status: [active, expired, revoked]
+    relationships: { belongs_to: [pod], granted_by: [admin-role] }
+    synonyms_avoid: ["session (a grant outlives one login)", "impersonation", "backdoor", "elevation"]

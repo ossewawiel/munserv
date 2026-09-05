@@ -29,6 +29,7 @@ Read in this order the first time; each file is short.
 | [message](message.md) | A system notification that may require an action |
 | [bootstrap](bootstrap.md) | How a fresh pod gets its first pod chief |
 | [audit](audit.md) | The security log of super user actions |
+| [support-grant](support-grant.md) | Temporary, pod-chief-issued super user access to a live pod |
 
 ## How a concept file is laid out
 

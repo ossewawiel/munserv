@@ -1,8 +1,10 @@
 package com.munserv.shared.config
 
 import com.munserv.shared.security.JwtAuthenticationFilter
+import com.munserv.support.api.SupportGrantActivityFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -15,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    @Lazy private val supportGrantActivityFilter: SupportGrantActivityFilter,
 ) {
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
@@ -73,9 +76,13 @@ class SecurityConfig(
                     // Bootstrap endpoints require super user role
                     .requestMatchers("/api/v1/bootstrap/**")
                     .hasRole("SUPER_USER")
+                    // Support access endpoints require an authenticated admin (pod chief only, enforced by @RequireRole)
+                    .requestMatchers("/api/v1/support-access/**")
+                    .authenticated()
                     // Default: allow all for now (remaining endpoints)
                     .anyRequest()
                     .permitAll()
             }.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterAfter(supportGrantActivityFilter, JwtAuthenticationFilter::class.java)
             .build()
 }

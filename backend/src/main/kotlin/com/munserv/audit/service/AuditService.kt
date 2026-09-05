@@ -176,6 +176,34 @@ class AuditService(
     }
 
     /**
+     * Log support access expiry (for B8).
+     *
+     * @param grantId ID of the support access grant that expired
+     * @param podId The pod where the grant expired
+     */
+    fun logSupportAccessExpired(
+        grantId: UUID,
+        podId: PodId,
+    ) {
+        val log =
+            AuditLog(
+                id = UUID.randomUUID(),
+                podId = podId,
+                action = AuditAction.SUPPORT_ACCESS_EXPIRED,
+                actorEmail = "system",
+                actorType = AuditActorType.SYSTEM,
+                targetType = "SUPPORT_GRANT",
+                targetId = grantId,
+                details = null,
+                ipAddress = null,
+                userAgent = null,
+                createdAt = Instant.now(clock),
+            )
+
+        repository.save(log)
+    }
+
+    /**
      * Log support access login (for B8).
      *
      * @param superUserEmail Email of the super user logging in via support access
