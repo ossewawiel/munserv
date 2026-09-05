@@ -156,12 +156,12 @@ The backend determines authentication type based on credentials:
 
 ### Backend Tasks
 
-- [ ] Create database migration `V035__super_user_grants.sql`
-- [ ] Create `support/domain/SuperUserGrant.kt` - Domain entity
-- [ ] Create `support/domain/GrantStatus.kt` - Enum
-- [ ] Create `support/repository/SuperUserGrantRepository.kt` - Interface
-- [ ] Create `support/repository/SuperUserGrantEntity.kt` - JPA entity
-- [ ] Create `support/repository/JpaSuperUserGrantRepository.kt` - Implementation
+- [ ] Create database migration `V035__create_support_grants.sql`
+- [ ] Create `support/domain/SupportGrant.kt` - Domain entity
+- [ ] Create `support/domain/SupportGrantStatus.kt` - Enum
+- [ ] Create `support/repository/SupportGrantRepository.kt` - Interface
+- [ ] Create `support/repository/SupportGrantEntity.kt` - JPA entity
+- [ ] Create `support/repository/JpaSupportGrantRepository.kt` - Implementation
 - [ ] Create `support/service/SupportAccessResult.kt` - Sealed result type
 - [ ] Create `support/service/SupportAccessService.kt` - Service logic
 - [ ] Create `support/api/SupportAccessDto.kt` - DTOs
@@ -199,8 +199,8 @@ The backend determines authentication type based on credentials:
 ### Database Changes
 
 ```sql
--- V035__super_user_grants.sql
-CREATE TABLE super_user_grants (
+-- V035__create_support_grants.sql
+CREATE TABLE support_grants (
     id UUID PRIMARY KEY,
     pod_id UUID NOT NULL REFERENCES pods(id),
     granted_role VARCHAR(50) NOT NULL,
@@ -215,8 +215,8 @@ CREATE TABLE super_user_grants (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_super_user_grants_pod_status ON super_user_grants(pod_id, status);
-CREATE INDEX idx_super_user_grants_expires ON super_user_grants(expires_at) WHERE status = 'active';
+CREATE INDEX idx_support_grants_pod_status ON support_grants(pod_id, status);
+CREATE INDEX idx_support_grants_expires ON support_grants(expires_at) WHERE status = 'active';
 ```
 
 ---

@@ -99,6 +99,33 @@
 | actionedAt | DateTime? | When action performed |
 | expiresAt | DateTime? | Optional expiration |
 
+## SupportGrant
+
+Temporary super user access to a pod. See [`domain/support-grant.md`](../../domain/support-grant.md).
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | SupportGrantId | UUID |
+| grantedRole | AdminRole | Strictly below pod_chief |
+| purpose | string | 10-500 chars, required |
+| status | SupportGrantStatus | enum |
+| grantedBy | AdminId | Pod chief who issued it |
+| grantedByName | string | Display name of the pod chief |
+| grantedAt | DateTime | ISO 8601 |
+| expiresAt | DateTime | grantedAt or lastActivity + 1 hour |
+| lastActivity | DateTime? | Null until the super user acts |
+| revokedAt | DateTime? | Set when status is revoked |
+| expiredAt | DateTime? | Set when status is expired |
+
+### SupportGrantStatus
+@enum @serialization(snake_case)
+
+| Value | Description |
+|-------|-------------|
+| active | Super user may log in |
+| expired | Idle for an hour; terminal |
+| revoked | Ended by the pod chief or by logout; terminal |
+
 ---
 
 ## Enums
@@ -200,3 +227,4 @@ All IDs are UUID v4 wrapped in type-safe wrappers:
 - `IssueTypeId` - Issue type identifier
 - `PhotoId` - Photo identifier
 - `MessageId` - Message identifier
+- `SupportGrantId` - Support grant identifier
