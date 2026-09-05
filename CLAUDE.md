@@ -40,10 +40,12 @@ Delivery runs through agents defined in `.claude/agents/` and orchestrated by `/
 | `feature-planner` | Opus | Paragraph → stories (you approve) → issues, milestone, spec, one handoff per story per platform |
 | `investigator` | Opus | Bug → root cause → investigation record + fix handoffs |
 | `backend-implementer`, `web-implementer`, `mobile-implementer` | Sonnet | One handoff → branch in an isolated worktree, tests first, cannot finish while the platform gate is red |
+| `designer` | Opus | UI story → canvas from tokens and registry, one artboard per screen and state; you approve it before implementation |
+| `design-reviewer` | Opus | Screenshots and goldens of the build against the approved canvas and the registry |
 | `reviewer` | Opus | PR against handoff and domain: verdict per acceptance criterion |
 | `syncer` | Sonnet | After merge: specs status, issue labels, handoff archive |
 
-Handoffs are written from `specs/features/_template/story-handoff.md` and live under `specs/features/<feature>/`. Human gates: story approval and PR merge. `/factory status` shows the queue; `/factory run` dispatches up to three stories.
+Handoffs are written from `specs/features/_template/story-handoff.md` and live under `specs/features/<feature>/`. Human gates: story approval, canvas approval for UI stories, and PR merge. `/factory status` shows the queue; `/factory run` dispatches up to three stories.
 
 ## Working with GitHub
 `gh` is the tool. Labels: `type:*`, `platform:*`, `status:*` (`ready` → `in-progress` → `review` → `done`, or `blocked`), `priority:*`, `story:<id>`. Stories are `M*` (mobile), `W*` (web), `B*` (backend). Legacy workflow commands stay in `.claude/commands/`. `.claude/hooks/guard-git.sh` blocks force pushes, pushes to master and history rewrites in every session.

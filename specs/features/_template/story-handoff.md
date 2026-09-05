@@ -6,6 +6,10 @@ platform: backend | web | mobile
 status: pending
 depends_on: []          # other story ids or issue numbers that must be merged first
 touches: []             # feature folders this story edits; the orchestrator serialises overlaps
+ui: false               # true when the story adds or changes a screen; then a canvas is required before dispatch
+design_canvas: ""       # set by the designer: canvas URL
+design_artboards: []    # set by the designer: artboard files under design/canvases/<feature>/
+design_approved: false  # set by the user (through the orchestrator) after reviewing the canvas
 created_by: feature-planner
 created_at: ""
 files_changed: []
@@ -22,6 +26,9 @@ One sentence: what a user or caller can do after this story that they could not 
 ## Acceptance criteria
 - [ ] AC1 (copied verbatim from the GitHub issue)
 - [ ] AC2
+
+## Visual (ui stories only)
+Which artboard each screen and state must match, by file name. "None" for non-UI stories.
 
 ## Contract
 API or type changes this story depends on, quoted from `specs/contracts/api.md` / `types.md`. "None" if none.
