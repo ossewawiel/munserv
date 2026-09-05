@@ -11,8 +11,15 @@ touches:
   - web/src/test/mocks
   - web/src/locales
 ui: true
-design_canvas: ""
-design_artboards: []
+design_canvas: "https://claude.ai/code/artifact/1f658255-0e88-48ac-ab86-1be239115d50"
+design_artboards:
+  - Main.dc.html
+  - IdentityNoLogo.dc.html
+  - IdentitySaving.dc.html
+  - IdentityInvalidName.dc.html
+  - IdentityServerError.dc.html
+  - IdentitySaved.dc.html
+  - HeaderStates.dc.html
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-05"
@@ -41,13 +48,26 @@ needs a backend story and a separate web story; #29 should be split. Do not buil
 uploader, a base64 field or a client-side file picker that posts anywhere.
 
 ## Visual (ui stories only)
-Two screens change. Match artboards: to be produced by the designer under
-`design/canvases/pod-chief-mvp/` — one for the Pod Settings identity card (empty, filled and
-validation-error states) and one for the header (with and without a pod logo). The artboards outrank
-the words here. Until they exist, use `MainCard` for the card and theme tokens only for the mark's
-colour (`secondary.main` is the terracotta the AC calls orange); never a literal colour, never an
-inline `style`. `PodIdentitySection` is a **new feature component**, not a registry component: it
-lives under `features/pod-settings/components/` and needs no `design/registry/web.md` row.
+Two screens change. **Match the approved artboards**, working files under
+`design/canvases/pod-chief-mvp/pod-settings/`: `Main` (identity card, logo set), `IdentityNoLogo`,
+`IdentitySaving`, `IdentityInvalidName`, `IdentityServerError`, `IdentitySaved` and `HeaderStates`
+(the three header branches). **The artboards outrank the words here**, including where they depart
+from this handoff — read the canvas notes `header-lockup`, `form-controls` and `assets` before
+building. Three things they settle:
+
+- The Munserv mark is an image, not a tinted icon: cut the left 93x93 square of
+  `web/public/assets/app-logo.png` and commit it as `web/public/assets/app-mark.png`. Its orange is
+  the artwork's own `#D9613F`, already the `brand.secondary` token, so no colour is hardcoded and
+  none is invented. Do not recolour it with `secondary.main`.
+- The `displayName` preview inside the card is bound to `usePodSettings`, so it shows the SAVED
+  value and only changes after a successful save. That is what keeps the client from composing
+  `"Munserv Pod " + name`.
+- Do not use `Button` `isLoading` for the save: the atom swallows the label into a hardcoded English
+  `'Loading...'`. Use `disabled` plus `startIcon={<CircularProgress size={16} />}` and keep the
+  label, as `IdentitySaving` draws it.
+
+`PodIdentitySection` is a **new feature component**, not a registry component: it lives under
+`features/pod-settings/components/` and needs no `design/registry/web.md` row.
 
 ## Contract
 `specs/contracts/api.md` § Pod. Both endpoints require role `pod_chief`.
@@ -107,8 +127,10 @@ upload"**: `POST /pod/logo`, `multipart/form-data`, returns `{ "logoUrl": string
    `http.get('*/pod/settings', …)` and `http.patch('*/pod/settings', …)`, the patch echoing the body
    with `displayName` recomputed, in the style of the neighbouring handlers.
 8. `web/src/locales/{en,af,zu}/translation.json`: extend the existing `podSettings` block with an
-   `identity` group (`title`, `nameLabel`, `nameHelper`, `displayNamePreview`, `logoUrlLabel`,
-   `logoUrlHelper`, `save`, `saved`, `nameTooShort`, `nameTooLong`). Real Afrikaans and isiZulu.
+   `identity` group (`title`, `nameLabel`, `nameHelper`, `displayNamePreview`, `previewHint`,
+   `logoUrlLabel`, `logoUrlHelper`, `save`, `saved`, `nameTooShort`, `nameTooLong`). `saved`
+   interpolates `{{displayName}}`. The canvas note `copy` has every string verbatim. Real Afrikaans
+   and isiZulu.
 
 ## Do not
 - Do not call `GET /pod/settings` for an admin below `pod_chief`. The endpoint answers `403` and

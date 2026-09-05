@@ -69,6 +69,20 @@ The MVP menu for a Pod Chief should consist of Dashboard, Pod Administrators, Re
 | W20 | Reports menu structure | [#31](https://github.com/ossewawiel/munserv/issues/31) | - |
 | W21 | Generic data table component | [#32](https://github.com/ossewawiel/munserv/issues/32) | - |
 
+## Design
+
+| Canvas | Covers | Working files | Approved |
+|---|---|---|---|
+| [Pod Settings](https://claude.ai/code/artifact/1f658255-0e88-48ac-ab86-1be239115d50) | W18 (#29) pod name and header branding, W19 (#30) boundary placeholders | `design/canvases/pod-chief-mvp/pod-settings/` | No |
+| [Reports and tables](https://claude.ai/code/artifact/0a434154-e4b2-44cc-ad3d-216e11e949e0) | W20 (#31) reports menu structure, W21 (#32) data table sort, search and filter | `design/canvases/pod-chief-mvp/` | No |
+
+Pod Settings is eight artboards at 1440x900, light scheme — `Main`, `IdentityNoLogo`,
+`IdentitySaving`, `IdentityInvalidName`, `IdentityServerError`, `IdentitySaved`,
+`BoundariesSector`, `HeaderStates`. Its page shell matches the approved
+`design/canvases/support-access/` artboards byte for byte. No new registry component; it asks for
+one new asset, `web/public/assets/app-mark.png`, cut from the left square of the existing
+`app-logo.png`.
+
 ## Dependencies
 
 - Role hierarchy must support Pod Chief role

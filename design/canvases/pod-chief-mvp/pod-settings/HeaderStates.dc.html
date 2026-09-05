@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Source Sans 3', Roboto, Helvetica, Arial, sans-serif; }
+    a { color: #A2391A; }
+    a:hover { color: #0C2721; }
+  </style>
+</helmet>
+<div style="position:relative;width:1440px;height:664px;overflow:hidden;background:#F7F5F0;font-family:'Source Sans 3', Roboto, Helvetica, Arial, sans-serif;color:#1A1C1B;-webkit-font-smoothing:antialiased;">
+  <div style="padding:40px 48px 0;">
+    <h1 style="margin:0;font-size:24px;line-height:1.334;font-weight:600;color:#0C2721;">Portal header &mdash; the three branches of W18 step 6</h1>
+    <p style="margin:6px 0 0;max-width:980px;font-size:14px;line-height:1.43;letter-spacing:0.25px;color:#424846;">The Munserv mark keeps the 32px slot the wordmark had, so the hamburger stays on the drawer edge. The pod&rsquo;s own logo and the server-derived <b>displayName</b> sit 40px further right (<b>ml: 5</b>), which lines them up with the content column at x&nbsp;=&nbsp;285 and with the page title beneath.</p>
+  </div>
+  <div style="margin-top:28px;">
+    <div style="padding:0 48px;">
+      <div style="display:flex;align-items:baseline;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:11px;background:#0C2721;color:#FFFFFF;font-size:12px;font-weight:600;line-height:1;">1</span>
+        <span style="font-size:16px;line-height:1.5;font-weight:600;letter-spacing:0.15px;color:#1A1C1B;">Pod chief, logoUrl set</span>
+      </div>
+      <div style="margin:6px 0 12px 32px;max-width:1180px;font-size:14px;line-height:1.43;letter-spacing:0.25px;color:#424846;">Mark, then the pod&rsquo;s logo at 32px, then displayName at 16px / 600 / 0.15px in primary. The logo is a Box component=&ldquo;img&rdquo; from logoUrl; nothing fetches it if logoUrl is null.</div>
+    </div>
+    <div style="position:relative;height:72px;background:#FAF9F7;border-top:1px solid #C1C8C4;border-bottom:1px solid #C1C8C4;display:flex;align-items:center;padding:16px;box-sizing:border-box;">
+      <div style="display:flex;align-items:center;width:228px;">
+        <span style="flex:1 1 auto;display:flex;align-items:center;"><img src="app-mark.png" alt="Munserv" style="height:32px;width:32px;display:block;border-radius:2px;"></span>
+        <span style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#FFDDD4;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#A2391A" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:40px;"><svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" style="display:block;flex:0 0 auto;"><rect x="0" y="0" width="32" height="32" rx="8" fill="#233D36"></rect><text x="16" y="21.5" text-anchor="middle" fill="#FFFFFF" font-family="'Source Sans 3', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="-0.2">W42</text></svg><span style="font-size:16px;line-height:1.5;font-weight:600;letter-spacing:0.15px;color:#0C2721;white-space:nowrap;">Munserv Pod Ward42</span></div>
+      <div style="flex:1 1 auto;"></div>
+      <div style="display:flex;align-items:center;">
+        <span style="position:relative;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#FFDDD4;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#A2391A" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path></svg>
+          <span style="position:absolute;top:-4px;right:-4px;display:flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#BA1A1A;color:#FFFFFF;font-size:10.4px;font-weight:500;line-height:1;">3</span>
+        </span>
+        <span style="display:flex;align-items:center;height:34px;margin-left:8px;border-radius:27px;border:1px solid #D0E0DA;background:#D0E0DA;">
+          <span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;margin-left:4px;border-radius:50%;background:#0C2721;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#FFFFFF" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+          </span>
+          <span style="display:flex;margin:0 6px;"><svg viewBox="0 0 24 24" width="20" height="20" fill="#0C2721" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg></span>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:28px;">
+    <div style="padding:0 48px;">
+      <div style="display:flex;align-items:baseline;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:11px;background:#0C2721;color:#FFFFFF;font-size:12px;font-weight:600;line-height:1;">2</span>
+        <span style="font-size:16px;line-height:1.5;font-weight:600;letter-spacing:0.15px;color:#1A1C1B;">Pod chief, logoUrl null</span>
+      </div>
+      <div style="margin:6px 0 12px 32px;max-width:1180px;font-size:14px;line-height:1.43;letter-spacing:0.25px;color:#424846;">Same lockup without the pod logo. The 8px gap collapses; displayName keeps its 40px offset so the header does not shift between the two.</div>
+    </div>
+    <div style="position:relative;height:72px;background:#FAF9F7;border-top:1px solid #C1C8C4;border-bottom:1px solid #C1C8C4;display:flex;align-items:center;padding:16px;box-sizing:border-box;">
+      <div style="display:flex;align-items:center;width:228px;">
+        <span style="flex:1 1 auto;display:flex;align-items:center;"><img src="app-mark.png" alt="Munserv" style="height:32px;width:32px;display:block;border-radius:2px;"></span>
+        <span style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#FFDDD4;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#A2391A" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;margin-left:40px;"><span style="font-size:16px;line-height:1.5;font-weight:600;letter-spacing:0.15px;color:#0C2721;white-space:nowrap;">Munserv Pod Ward42</span></div>
+      <div style="flex:1 1 auto;"></div>
+      <div style="display:flex;align-items:center;">
+        <span style="position:relative;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#FFDDD4;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#A2391A" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path></svg>
+          <span style="position:absolute;top:-4px;right:-4px;display:flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#BA1A1A;color:#FFFFFF;font-size:10.4px;font-weight:500;line-height:1;">3</span>
+        </span>
+        <span style="display:flex;align-items:center;height:34px;margin-left:8px;border-radius:27px;border:1px solid #D0E0DA;background:#D0E0DA;">
+          <span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;margin-left:4px;border-radius:50%;background:#0C2721;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#FFFFFF" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+          </span>
+          <span style="display:flex;margin:0 6px;"><svg viewBox="0 0 24 24" width="20" height="20" fill="#0C2721" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg></span>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:28px;">
+    <div style="padding:0 48px;">
+      <div style="display:flex;align-items:baseline;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:11px;background:#0C2721;color:#FFFFFF;font-size:12px;font-weight:600;line-height:1;">3</span>
+        <span style="font-size:16px;line-height:1.5;font-weight:600;letter-spacing:0.15px;color:#1A1C1B;">Every other role, and while the query is in flight</span>
+      </div>
+      <div style="margin:6px 0 12px 32px;max-width:1180px;font-size:14px;line-height:1.43;letter-spacing:0.25px;color:#424846;">app-logo.png unchanged. usePodSettings is called with enabled: hasPermission(&lsquo;pod_chief&rsquo;), so a sector admin never issues the request and never sees a 403.</div>
+    </div>
+    <div style="position:relative;height:72px;background:#FAF9F7;border-top:1px solid #C1C8C4;border-bottom:1px solid #C1C8C4;display:flex;align-items:center;padding:16px;box-sizing:border-box;">
+      <div style="display:flex;align-items:center;width:228px;">
+        <span style="flex:1 1 auto;display:flex;align-items:center;"><img src="app-logo.png" alt="MunServ Admin" style="height:32px;width:auto;display:block;"></span>
+        <span style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#FFDDD4;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#A2391A" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+        </span>
+      </div>
+      
+      <div style="flex:1 1 auto;"></div>
+      <div style="display:flex;align-items:center;">
+        <span style="position:relative;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#FFDDD4;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#A2391A" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path></svg>
+          <span style="position:absolute;top:-4px;right:-4px;display:flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#BA1A1A;color:#FFFFFF;font-size:10.4px;font-weight:500;line-height:1;">3</span>
+        </span>
+        <span style="display:flex;align-items:center;height:34px;margin-left:8px;border-radius:27px;border:1px solid #D0E0DA;background:#D0E0DA;">
+          <span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;margin-left:4px;border-radius:50%;background:#0C2721;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#FFFFFF" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+          </span>
+          <span style="display:flex;margin:0 6px;"><svg viewBox="0 0 24 24" width="20" height="20" fill="#0C2721" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg></span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

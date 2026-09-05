@@ -1,0 +1,115 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod Settings — identity, logo set"
+    },
+    {
+      "file": "IdentityNoLogo.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod identity — no logo set"
+    },
+    {
+      "file": "IdentitySaving.dc.html",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod identity — saving"
+    },
+    {
+      "file": "IdentityInvalidName.dc.html",
+      "x": 0,
+      "y": 1160,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod identity — name too short"
+    },
+    {
+      "file": "IdentityServerError.dc.html",
+      "x": 1560,
+      "y": 1160,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod identity — server rejected the change (400)"
+    },
+    {
+      "file": "IdentitySaved.dc.html",
+      "x": 3120,
+      "y": 1160,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod identity — saved"
+    },
+    {
+      "file": "BoundariesSector.dc.html",
+      "x": 0,
+      "y": 2320,
+      "w": 1440,
+      "h": 900,
+      "title": "Boundaries — pod without wards, tooltip open"
+    },
+    {
+      "file": "HeaderStates.dc.html",
+      "x": 1560,
+      "y": 2320,
+      "w": 1440,
+      "h": 664,
+      "title": "Portal header — three branches"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -460,
+      "w": 1440,
+      "text": "Pod Settings — W18 (#29) pod name and header branding, W19 (#30) boundary placeholders.\nWeb admin portal, 1440x900, light scheme. Both stories land on one page, so every artboard is that page.\n\nThe page shell — sidebar, header, Breadcrumbs, the Support access card at the fold — is lifted byte for byte from the approved design/canvases/support-access artboards. Colours are scheme.light from design/tokens/color.tokens.json, sizes from size.tokens.json and MUI's own metrics, type is Source Sans 3 as web/src/theme/defaultTheme.ts loads it.\n\nNO NEW REGISTRY COMPONENT. Everything drawn is in design/registry/web.md — DashboardLayout, Breadcrumbs, MainCard, Input, Button — plus MUI Chip, Tooltip and Alert as the portal already uses them. PodIdentitySection and BoundaryPlaceholderCard are feature components under features/pod-settings/components/, so they need no registry row and no Storybook story, exactly as both handoffs say.\n\nRead the artboards in this order: row 1 is the resting form, row 2 its three outcomes, row 3 the W19 copy variant and the header anatomy."
+    },
+    {
+      "id": "assets",
+      "x": 1560,
+      "y": -460,
+      "w": 1440,
+      "text": "ONE NEW ASSET, and it is the only thing this canvas asks for that does not exist yet.\n\napp-mark.png — the orange square with the white roadworks figure, which is the left 93x93 of the existing web/public/assets/app-logo.png. Cut it out and commit it as web/public/assets/app-mark.png. That is AC4's \"Munserv icon shows in orange on background\": the orange is the artwork's own #D9613F, which is already the brand.secondary token in web/src/theme/generated/tokens.ts, so no colour is hardcoded and no colour is invented.\n\nThis is why the mark is an <img> and not a tinted SVG. The handoff offers secondary.main (#A2391A) as a fallback, but a recoloured mark would no longer match the app-logo.png that every other role still sees in the same slot. One mark, one orange, both headers.\n\nDark mode: app-logo-dark.png shares the same left square, so one app-mark.png serves both schemes. Do not add a second file.\n\nThe forest-green \"W42\" tile beside the pod name is NOT an asset to build. It stands in for whatever remote image sits at logoUrl, drawn so the layout can be judged with a real logo in it."
+    },
+    {
+      "id": "copy",
+      "x": 3120,
+      "y": -460,
+      "w": 1440,
+      "text": "Copy, verbatim. English here; af and zu need real translations, not English copies.\n\npodSettings.identity —\ntitle: Pod identity\nnameLabel: Pod name\nnameHelper: Between 2 and 100 characters. Administrators and members see this name.\nlogoUrlLabel: Logo URL\nlogoUrlHelper: Direct link to a PNG or SVG image, up to 500 characters. Leave it empty to show the Munserv mark on its own.\ndisplayNamePreview: Header preview\npreviewHint: Everyone in this pod sees this in the portal header. It updates once the change is saved.\nsave: Save changes\nsaved: Saved. The header now reads \"{{displayName}}\".\nnameTooShort: Pod name must be at least 2 characters.\nnameTooLong: Pod name must be 100 characters or fewer.\n\ncommon.comingSoon: Coming soon\n\npodSettings.boundaries —\nconfigure: Configure boundaries\ncomingSoonHint: Boundary editing is not available yet.\npod.title: Pod boundaries\npod.description: Draw the outline of the whole pod. Reports from outside it are refused, and every map opens on it.\nward.title: Ward boundaries\nward.description: Draw each ward's outline so a ward chief sees exactly the ground they are responsible for.\nsector.title: Sector boundaries\nsector.description: Draw each sector's outline so an issue reaches the right sector from the GPS point it was reported at.\n\nTwo keys go beyond the lists in the handoffs: identity.previewHint and boundaries.comingSoonHint. Both are drawn above; neither is optional.\n\nThe sector wording is the invariant from domain/sector.md — an issue's sector is determined from its GPS location. Do not reword it to say boundaries route reports to a ward; wards do not receive reports."
+    },
+    {
+      "id": "header-lockup",
+      "x": 0,
+      "y": 3320,
+      "w": 1440,
+      "text": "The header — see the anatomy sheet on this row.\n\nThe Munserv mark keeps the 32px slot app-logo.png had, inside the width-228 Box, so the hamburger stays on the drawer edge and nothing in the existing header moves. The pod's own logo and displayName sit in a NEW Box after that one with ml: 5 (40px), which puts them at x = 285 — the left edge of the content column and of every card below. That alignment is the whole reason the name is not crammed into the 228 box: \"Munserv Pod Ward42\" does not fit there beside the mark and the hamburger.\n\ndisplayName is Typography at 16px / 600 / 0.15px letter-spacing in primary (#0C2721) — subtitle-weight, not h6, so it reads as chrome rather than as a page title competing with the Pod Settings heading 56px below it.\n\nThe pod logo renders at 32px square with an 8px gap before the name. With logoUrl null the logo and its gap both disappear and the name keeps its 40px offset, so the header does not shift between the two states. Compare frames 1 and 2 on the sheet.\n\nEvery other role, and the whole time the query is in flight, keeps app-logo.png untouched. usePodSettings is called with enabled: hasPermission('pod_chief'); a sector admin never issues the request, so it never turns into a 403 and never logs anyone out."
+    },
+    {
+      "id": "form-controls",
+      "x": 1560,
+      "y": 3320,
+      "w": 1440,
+      "text": "Three things about the form the artboards settle, two of them defects worth an issue.\n\n1. THE PREVIEW SHOWS THE SAVED VALUE, NOT THE DRAFT. On the saving artboard the field reads \"Ward 42\" while the preview still reads \"Munserv Pod Ward42\"; only on the saved artboard do both, and the real header, read \"Munserv Pod Ward 42\". The preview is bound to displayName off usePodSettings, so it cannot update before the server answers — which is exactly what enforces the domain/pod.md rule that the client never composes \"Munserv Pod \" + name. A preview that tracked the input would require building that string client-side. It must not.\n\n2. DO NOT USE Button isLoading HERE. web/src/components/atoms/Button.tsx replaces children with the hardcoded English 'Loading...' whenever isLoading is set, which would put untranslated English on a screen that ships in en, af and zu. The saving artboard draws what is correct: the label stays \"Save changes\" and a 16px CircularProgress rides in as startIcon, with the button disabled. Build it as disabled + startIcon, not isLoading, and open a separate issue for the atom — it is used across the portal and is out of scope for W18.\n\n3. THE ERROR ALERT IS DRAWN AS THE THEME ACTUALLY RENDERS IT, AND IT IS TOO WEAK. MUI derives a standard Alert from palette[severity].light; createPodTheme.ts binds error.light to errorContainer (#FFDAD6), so severity=\"error\" resolves to #665756 text on #FFFBFB — brown-grey on near-white, with the red icon as the only signal. Compare it to the field-level error on the invalid-name artboard (#BA1A1A border and helper), which is the portal's real error voice. Build the Alert as drawn so the screenshot gate passes, and raise the token binding separately: it changes every Alert in the portal, so it is not W18's to fix.\n\nField anatomy is the approved one from the support-access dialog: outlined, size small, 40px high, 8px radius, 14px label floated on a #FAF9F7 chip, helper at 12px / 1.66 / 0.4px, 3px 14px 0. In error the border goes to 2px #BA1A1A and label and helper follow it. Save is disabled while the trimmed name is outside 2..100."
+    },
+    {
+      "id": "boundary-cards",
+      "x": 3120,
+      "y": 3320,
+      "w": 1440,
+      "text": "W19 — the two placeholders, and three deliberate departures from the words in handoff 071.\n\n1. SIDE BY SIDE, NOT STACKED. The handoff says to put both cards in the page's vertical Stack. Two full-width cards that do nothing would push Support access — the one thing on this page that acts — below the fold. They are peers and both inert, so they share a row: a flex row with gap: 3 (24px), each card flex: 1, align-items stretch so the two \"Configure boundaries\" buttons line up. Everything else on the page stays in the Stack.\n\n2. NO opacity: 0.6. The handoff prescribes it; the acceptance criteria say the sections must be VISIBLE. Dimming the whole card takes the title, the chip and the description down with it. Instead the card carries bgcolor: 'action.hover' (#E9E8E6, surfaceContainerHigh) against its #FAF9F7 siblings, which reads as recessed while every word stays at full contrast. Keep aria-disabled=\"true\" on the card root — that part of the handoff stands, and it is the only thing announcing the state to a screen reader.\n\n3. THE CHIP IS OUTLINED. Chip size=\"small\" color=\"default\" variant=\"outlined\": a filled default chip resolves to rgba(0,0,0,.08), which over the #E9E8E6 card is #D6D5D4 and effectively invisible. Outlined keeps the label at full onSurface contrast on a 1px divider-toned border. Height 24, radius 8 from the MuiChip override, 13px at weight 500.\n\nThe Configure button is a disabled Button atom, default (contained) variant — MUI's disabled fill, no override. It sits inside an MUI Tooltip wrapped in a span, since a disabled button fires no events. The tooltip is drawn open on the sector artboard: default bottom placement, centred, 14px below, rgba(97,97,97,0.92) at 11px/500, 4px 8px, radius 8.\n\nThe area card's wording comes from usePodSetup: ward keys when status.wards.length > 0, sector keys otherwise. The mock in usePodSetup.ts currently returns one ward, so the ward variant is what a developer sees — that is the variant on every other artboard here, and the sector variant is on this row. Neither card fetches anything and neither reads pod_boundaries off GET /pod/status."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

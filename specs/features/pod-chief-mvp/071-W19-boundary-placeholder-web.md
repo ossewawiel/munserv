@@ -9,8 +9,10 @@ touches:
   - web/src/features/pod-settings
   - web/src/locales
 ui: true
-design_canvas: ""
-design_artboards: []
+design_canvas: "https://claude.ai/code/artifact/1f658255-0e88-48ac-ab86-1be239115d50"
+design_artboards:
+  - Main.dc.html
+  - BoundariesSector.dc.html
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-05"
@@ -34,11 +36,22 @@ product, marked "coming soon" and not yet operable, instead of wondering where t
 - [ ] "Coming soon" indicator
 
 ## Visual (ui stories only)
-Match artboard: to be produced by the designer under `design/canvases/pod-chief-mvp/` — one artboard
-covering both disabled boundary cards on the Pod Settings page. The artboard outranks the words
-here. `BoundaryPlaceholderCard` is a **new feature component** under
-`features/pod-settings/components/`, not a registry component, so it needs no
-`design/registry/web.md` row and no Storybook story.
+**Match the approved artboards**, working files under `design/canvases/pod-chief-mvp/pod-settings/`:
+`Main` (both cards in their ward wording, in page context) and `BoundariesSector` (the sector
+wording, with the tooltip open). **The artboards outrank the words here**, and they depart from step
+1 below in three ways — read the canvas note `boundary-cards` before building:
+
+- The two cards sit **side by side** in a flex row (`gap: 3`, each `flex: 1`, `align-items:
+  stretch`), not stacked in the page's vertical `Stack`. Two full-width inert cards would push
+  Support access below the fold.
+- **No `opacity: 0.6`.** The acceptance criteria say the sections must be visible; dimming takes the
+  title, chip and description with it. The card carries `bgcolor: 'action.hover'` instead, which
+  reads as recessed while every word stays at full contrast. Keep `aria-disabled="true"`.
+- The Chip is **`variant="outlined"`**. A filled default chip resolves to `rgba(0,0,0,.08)`, which
+  over the tinted card is invisible.
+
+`BoundaryPlaceholderCard` is a **new feature component** under `features/pod-settings/components/`,
+not a registry component, so it needs no `design/registry/web.md` row and no Storybook story.
 
 ## Contract
 None. This story calls no API and adds no type to `specs/contracts/`. Boundary geometry is
@@ -69,9 +82,11 @@ it.
    `should label the area placeholder Ward Boundaries when the pod has wards`,
    `should label the area placeholder Sector Boundaries when the pod has no wards`.
 3. `web/src/locales/{en,af,zu}/translation.json`: add `common.comingSoon` if it is absent, and a
-   `podSettings.boundaries` block with `configure`, `pod.title`, `pod.description`,
-   `ward.title`, `ward.description`, `sector.title`, `sector.description`. Real Afrikaans and
-   isiZulu translations, not English copies.
+   `podSettings.boundaries` block with `configure`, `comingSoonHint`, `pod.title`,
+   `pod.description`, `ward.title`, `ward.description`, `sector.title`, `sector.description`.
+   `comingSoonHint` is the tooltip copy and is drawn on the `BoundariesSector` artboard; the canvas
+   note `copy` has every string verbatim. Real Afrikaans and isiZulu translations, not English
+   copies.
 
 ## Do not
 - Do not add a map, Leaflet import, geometry type or draw control. This is a placeholder; the whole
