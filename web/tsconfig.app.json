@@ -5,7 +5,7 @@
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite/client"],
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom/vitest"],
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -27,8 +27,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    /* Path alias */
-    "baseUrl": ".",
+    /* Path alias (resolved relative to this file; baseUrl is removed in TypeScript 7) */
     "paths": {
       "@/*": ["./src/*"]
     }

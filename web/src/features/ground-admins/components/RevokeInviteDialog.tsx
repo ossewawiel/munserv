@@ -58,12 +58,19 @@ export const RevokeInviteDialog: FC<RevokeInviteDialogProps> = ({
       </Box>
 
       {/* Confirmation message */}
-      <Typography variant="body1" color="text.secondary">
+      <Typography variant="body1" sx={{
+        color: "text.secondary"
+      }}>
         {t('members.revokeInviteConfirm', { name: member.name })}
       </Typography>
 
       {/* Warning note */}
-      <Typography variant="body2" color="warning.main" sx={{ mt: 2 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "warning.main",
+          mt: 2
+        }}>
         {t('members.revokeInviteWarning', 'This action cannot be undone. You can send a new invitation later.')}
       </Typography>
     </ConfirmDialog>

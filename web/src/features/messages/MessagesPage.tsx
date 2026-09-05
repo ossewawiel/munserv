@@ -245,7 +245,9 @@ export const MessagesPage: FC = () => {
                   height: '100%',
                 }}
               >
-                <Typography color="text.secondary">
+                <Typography sx={{
+                  color: "text.secondary"
+                }}>
                   {t('common.loading', 'Loading...')}
                 </Typography>
               </Box>
@@ -258,7 +260,9 @@ export const MessagesPage: FC = () => {
                   height: '100%',
                 }}
               >
-                <Typography color="text.secondary">
+                <Typography sx={{
+                  color: "text.secondary"
+                }}>
                   {t('messages.selectMessage', 'Select a message to view')}
                 </Typography>
               </Box>

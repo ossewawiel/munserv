@@ -98,7 +98,7 @@ function mockGeolocation(options: { success?: boolean; coords?: { latitude: numb
 
 // Mock fetch for Nominatim geocoding
 function mockNominatimFetch(address: string = '123 Test Street, Johannesburg, South Africa') {
-  global.fetch = vi.fn().mockResolvedValue({
+  globalThis.fetch = vi.fn().mockResolvedValue({
     ok: true,
     json: () => Promise.resolve({ display_name: address }),
   });
@@ -216,7 +216,7 @@ describe('LocationPickerDialog', () => {
       await userEvent.click(screen.getByRole('button', { name: /current location/i }));
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(
+        expect(globalThis.fetch).toHaveBeenCalledWith(
           expect.stringContaining('nominatim.openstreetmap.org/reverse'),
           expect.any(Object)
         );

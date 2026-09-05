@@ -75,7 +75,13 @@ export const StateChangeModal: FC<StateChangeModalProps> = ({
           onChange={handleNoteChange}
           placeholder={t('issues.notePlaceholder')}
         />
-        <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ pt: 2 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            justifyContent: "flex-end",
+            pt: 2
+          }}>
           <Button
             type="button"
             variant="secondary"

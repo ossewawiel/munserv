@@ -43,11 +43,18 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = ({ title, subtitle, items }) =>
     >
       {/* Left side: Title and optional subtitle */}
       <Box>
-        <Typography variant="h5" component="h1" fontWeight={600} color="primary">
+        <Typography variant="h5" component="h1" color="primary" sx={{
+          fontWeight: 600
+        }}>
           {title}
         </Typography>
         {subtitle && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mt: 0.5
+            }}>
             {subtitle}
           </Typography>
         )}
@@ -71,9 +78,11 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = ({ title, subtitle, items }) =>
             return (
               <Typography
                 key={item.label}
-                color="text.secondary"
                 variant="subtitle2"
                 aria-current={isLast ? 'page' : undefined}
+                sx={{
+                  color: "text.secondary"
+                }}
               >
                 {item.label}
               </Typography>

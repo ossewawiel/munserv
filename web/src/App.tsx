@@ -32,7 +32,9 @@ const PlaceholderPage: FC<{ title: string }> = ({ title }) => (
       <Typography variant="h4" gutterBottom>
         {title}
       </Typography>
-      <Typography variant="body1" color="text.secondary">
+      <Typography variant="body1" sx={{
+        color: "text.secondary"
+      }}>
         This feature is coming soon.
       </Typography>
     </Box>

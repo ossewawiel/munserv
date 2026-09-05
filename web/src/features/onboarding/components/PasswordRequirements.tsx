@@ -47,7 +47,13 @@ export const PasswordRequirements: FC<PasswordRequirementsProps> = ({ validation
 
   return (
     <Box sx={{ mt: 1 }}>
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          mb: 1,
+          display: 'block'
+        }}>
         {t('onboarding.passwordRequirements')}
       </Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>

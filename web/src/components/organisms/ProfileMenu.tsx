@@ -279,9 +279,10 @@ export const ProfileMenu: FC = () => {
                       <Stack spacing={0.5}>
                         <Typography
                           variant="h6"
-                          color="text.secondary"
-                          sx={{ fontWeight: 400 }}
-                        >
+                          sx={{
+                            color: "text.secondary",
+                            fontWeight: 400
+                          }}>
                           {t(`profile.greeting.${greetingKey}`)},
                         </Typography>
                         <Typography variant="h5" sx={{ fontWeight: 600 }}>
@@ -479,7 +480,9 @@ export const ProfileMenu: FC = () => {
                       >
                         <ListItemText
                           primary={
-                            <Grid container alignItems="center">
+                            <Grid container sx={{
+                              alignItems: "center"
+                            }}>
                               <Typography color="textPrimary">
                                 {LANGUAGE_NATIVE_NAMES[lng]}
                               </Typography>

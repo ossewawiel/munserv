@@ -155,7 +155,9 @@ export const GroundAdminsPage: FC = () => {
         key: 'name',
         header: t('groundAdmin.columns.name', 'Name'),
         render: (admin: GroundAdmin) => (
-          <Typography variant="body2" fontWeight={500}>
+          <Typography variant="body2" sx={{
+            fontWeight: 500
+          }}>
             {admin.name}
           </Typography>
         ),
@@ -213,7 +215,9 @@ export const GroundAdminsPage: FC = () => {
         key: 'since',
         header: t('groundAdmin.columns.since', 'Since'),
         render: (admin: GroundAdmin) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {formatDate(admin.since)}
           </Typography>
         ),
@@ -289,7 +293,9 @@ export const GroundAdminsPage: FC = () => {
         }}
         emptyMessage={
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Typography color="text.secondary">
+            <Typography sx={{
+              color: "text.secondary"
+            }}>
               {statusFilter === 'all'
                 ? t('groundAdmin.empty', 'No Ground Admins in this sector yet')
                 : t('groundAdmin.emptyFiltered', 'No Ground Admins with this status')}

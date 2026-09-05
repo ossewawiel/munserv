@@ -2,7 +2,7 @@ import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlined';
 
 import { Button } from '@/components/atoms/Button';
 
@@ -31,11 +31,19 @@ export const ErrorState: FC<ErrorStateProps> = ({
       }}
     >
       <ErrorOutlineIcon sx={{ fontSize: 48, mb: 2, color: 'error.main' }} />
-      <Typography variant="h6" fontWeight={500}>
+      <Typography variant="h6" sx={{
+        fontWeight: 500
+      }}>
         {title || t('common.error')}
       </Typography>
       {description && (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 400 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mt: 1,
+            maxWidth: 400
+          }}>
           {description}
         </Typography>
       )}

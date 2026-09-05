@@ -119,7 +119,13 @@ export const IssueMapCard: FC<IssueMapCardProps> = ({ issues }) => {
                   <IssueStateBadge state={issue.state} />
                   <HeatBadge heat={issue.heat} />
                 </Box>
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    mt: 1,
+                    display: 'block'
+                  }}>
                   {new Date(issue.createdAt).toLocaleDateString()}
                 </Typography>
               </Box>

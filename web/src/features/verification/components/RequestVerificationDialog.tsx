@@ -134,9 +134,13 @@ export const RequestVerificationDialog: FC<RequestVerificationDialogProps> = ({
 
         <Typography
           variant="body2"
-          color="text.secondary"
-          sx={{ mb: 3, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}
-        >
+          sx={{
+            color: "text.secondary",
+            mb: 3,
+            p: 1.5,
+            bgcolor: 'action.hover',
+            borderRadius: 1
+          }}>
           {getModeDescription()}
         </Typography>
 

@@ -104,14 +104,14 @@ describe('ConfirmDialog', () => {
       renderConfirmDialog();
 
       const confirmButton = screen.getByRole('button', { name: /confirm/i });
-      expect(confirmButton).toHaveClass('MuiButton-containedPrimary');
+      expect(confirmButton).toHaveClass('MuiButton-contained', 'MuiButton-colorPrimary');
     });
 
     it('should render cancel button as outlined secondary', () => {
       renderConfirmDialog();
 
       const cancelButton = screen.getByRole('button', { name: /cancel/i });
-      expect(cancelButton).toHaveClass('MuiButton-outlinedSecondary');
+      expect(cancelButton).toHaveClass('MuiButton-outlined', 'MuiButton-colorSecondary');
     });
   });
 

@@ -95,7 +95,9 @@ export const IssueTypeBadge: FC<IssueTypeBadgeProps> = ({
           />
         </SvgIcon>
       )}
-      <Typography variant={variant} color="text.primary">
+      <Typography variant={variant} sx={{
+        color: "text.primary"
+      }}>
         {t(`issues.types.${type}`)}
       </Typography>
     </Box>

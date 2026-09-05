@@ -77,13 +77,17 @@ export const ApproveDialog: FC<ApproveDialogProps> = ({
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <PersonIcon color="action" fontSize="small" />
-                <Typography variant="subtitle1" fontWeight={600}>
+                <Typography variant="subtitle1" sx={{
+                  fontWeight: 600
+                }}>
                   {application.memberName}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CalendarTodayIcon color="action" fontSize="small" />
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   {t('groundAdmin.appliedOn', 'Applied on {{date}}', {
                     date: formatDate(application.createdAt),
                   })}
@@ -93,7 +97,9 @@ export const ApproveDialog: FC<ApproveDialogProps> = ({
 
             <Divider sx={{ my: 2 }} />
 
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {application.type === 'application'
                 ? t(
                     'groundAdmin.applicationDescription',
@@ -107,7 +113,12 @@ export const ApproveDialog: FC<ApproveDialogProps> = ({
           </>
         ) : (
           <>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mb: 2
+              }}>
               {t(
                 'groundAdmin.declineDescription',
                 'Please provide a reason for declining this application. The member will be notified.'

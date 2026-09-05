@@ -92,7 +92,9 @@ export const PhotoCarousel: FC<PhotoCarouselProps> = ({
           bgcolor: 'background.paper',
         }}
       >
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           {t('common.noResults')}
         </Typography>
       </Box>
@@ -212,12 +214,14 @@ export const PhotoCarousel: FC<PhotoCarouselProps> = ({
         onClose={handleCloseLightbox}
         maxWidth="lg"
         fullWidth
-        PaperProps={{
-          sx: {
-            bgcolor: 'transparent',
-            boxShadow: 'none',
-            maxHeight: '90vh',
-          },
+        slotProps={{
+          paper: {
+            sx: {
+              bgcolor: 'transparent',
+              boxShadow: 'none',
+              maxHeight: '90vh',
+            },
+          }
         }}
       >
         <DialogContent

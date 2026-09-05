@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Grid from '@mui/material/Grid';
 import Skeleton from '@mui/material/Skeleton';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import PersonPinCircleOutlinedIcon from '@mui/icons-material/PersonPinCircleOutlined';
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';

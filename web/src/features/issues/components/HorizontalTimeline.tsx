@@ -96,10 +96,17 @@ export const HorizontalTimeline: FC<HorizontalTimelineProps> = ({ history }) => 
           borderRadius: 2,
         }}
       >
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 600,
+            mb: 2
+          }}>
           {t('issues.stateHistory')}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           {t('common.noResults')}
         </Typography>
       </Paper>
@@ -116,7 +123,12 @@ export const HorizontalTimeline: FC<HorizontalTimelineProps> = ({ history }) => 
         borderRadius: 2,
       }}
     >
-      <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 3 }}>
+      <Typography
+        variant="subtitle1"
+        sx={{
+          fontWeight: 600,
+          mb: 3
+        }}>
         {t('issues.stateHistory')}
       </Typography>
 
@@ -171,9 +183,11 @@ export const HorizontalTimeline: FC<HorizontalTimelineProps> = ({ history }) => 
               <IssueStateBadge state={entry.state} />
               <Typography
                 variant="caption"
-                color="text.secondary"
-                sx={{ fontWeight: 500, whiteSpace: 'nowrap' }}
-              >
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 500,
+                  whiteSpace: 'nowrap'
+                }}>
                 {formatDate(entry.changedAt)}
               </Typography>
             </Box>

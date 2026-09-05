@@ -32,10 +32,14 @@ export const MemberNameCell: FC<MemberNameCellProps> = ({ member }) => {
         {member.surname.charAt(0)}
       </Avatar>
       <Box>
-        <Typography variant="body2" fontWeight={500}>
+        <Typography variant="body2" sx={{
+          fontWeight: 500
+        }}>
           {member.firstName} {member.surname}
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           {member.email}
         </Typography>
       </Box>

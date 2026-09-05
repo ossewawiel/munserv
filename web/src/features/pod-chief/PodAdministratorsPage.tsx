@@ -152,7 +152,9 @@ export const PodAdministratorsPage: FC = () => {
         key: 'displayName',
         header: t('podAdministrators.table.name'),
         render: (admin: PodAdministrator) => (
-          <Typography variant="body2" fontWeight={500}>
+          <Typography variant="body2" sx={{
+            fontWeight: 500
+          }}>
             {admin.displayName}
           </Typography>
         ),
@@ -161,7 +163,9 @@ export const PodAdministratorsPage: FC = () => {
         key: 'email',
         header: t('podAdministrators.table.email'),
         render: (admin: PodAdministrator) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {admin.email}
           </Typography>
         ),
@@ -181,7 +185,9 @@ export const PodAdministratorsPage: FC = () => {
         key: 'assignedTo',
         header: t('podAdministrators.table.assignedTo'),
         render: (admin: PodAdministrator) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {getAssignmentLabel(admin, t)}
           </Typography>
         ),
@@ -190,7 +196,9 @@ export const PodAdministratorsPage: FC = () => {
         key: 'createdAt',
         header: t('podAdministrators.table.createdAt'),
         render: (admin: PodAdministrator) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {formatDate(admin.createdAt)}
           </Typography>
         ),
@@ -275,7 +283,9 @@ export const PodAdministratorsPage: FC = () => {
           }
           emptyMessage={
             <Box sx={{ py: 4, textAlign: 'center' }}>
-              <Typography color="text.secondary">
+              <Typography sx={{
+                color: "text.secondary"
+              }}>
                 {t('podAdministrators.empty')}
               </Typography>
             </Box>

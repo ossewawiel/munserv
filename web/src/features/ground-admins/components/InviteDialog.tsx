@@ -74,7 +74,12 @@ export const InviteDialog: FC<InviteDialogProps> = ({
       </Box>
 
       {/* Confirmation message */}
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "text.secondary",
+          mb: 2
+        }}>
         {t(
           'groundAdmin.inviteConfirm',
           'Are you sure you want to invite {{name}} to become a Ground Admin?',
@@ -83,7 +88,12 @@ export const InviteDialog: FC<InviteDialogProps> = ({
       </Typography>
 
       {/* Description note */}
-      <Typography variant="body2" color="info.main" sx={{ mb: 2 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "info.main",
+          mb: 2
+        }}>
         {t(
           'groundAdmin.inviteDescription',
           'This will send an invitation message to the member. They can accept or decline the invitation.'

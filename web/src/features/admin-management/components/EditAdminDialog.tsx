@@ -104,7 +104,9 @@ const EditAdminDialogContent: FC<EditAdminDialogContentProps> = ({
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
         <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.main' }}>{initials}</Avatar>
         <Box>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {admin.email}
           </Typography>
         </Box>

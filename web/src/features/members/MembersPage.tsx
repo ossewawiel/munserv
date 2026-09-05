@@ -319,7 +319,9 @@ export const MembersPage: FC = () => {
         header: t('members.phone'),
         width: '140px',
         render: (member) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {member.phoneNumber}
           </Typography>
         ),
@@ -330,15 +332,14 @@ export const MembersPage: FC = () => {
         render: (member) => (
           <Typography
             variant="body2"
-            color="text.secondary"
+            title={member.address}
             sx={{
+              color: "text.secondary",
               maxWidth: 200,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-            title={member.address}
-          >
+              whiteSpace: 'nowrap'
+            }}>
             {member.address}
           </Typography>
         ),
@@ -374,7 +375,9 @@ export const MembersPage: FC = () => {
         header: t('members.joinedAt'),
         width: '130px',
         render: (member) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {formatDate(member.joinedAt)}
           </Typography>
         ),

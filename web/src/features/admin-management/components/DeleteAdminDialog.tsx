@@ -54,14 +54,21 @@ export const DeleteAdminDialog: FC<DeleteAdminDialogProps> = ({
         <Avatar sx={{ width: 56, height: 56, bgcolor: 'error.main' }}>{initials}</Avatar>
         <Box>
           <Typography variant="h6">{admin.displayName}</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {admin.email}
           </Typography>
         </Box>
       </Box>
 
       {/* Confirmation message */}
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "text.secondary",
+          mb: 2
+        }}>
         {t(
           'adminManagement.confirmDelete',
           'Are you sure you want to delete this admin?'

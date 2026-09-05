@@ -175,7 +175,9 @@ export const NotificationDropdown: FC = () => {
                         color: 'primary.contrastText',
                       }}
                     >
-                      <Typography variant="subtitle1" fontWeight={600}>
+                      <Typography variant="subtitle1" sx={{
+                        fontWeight: 600
+                      }}>
                         {t('messages.title', 'Messages')}
                       </Typography>
                       {unreadCount > 0 && (
@@ -208,8 +210,10 @@ export const NotificationDropdown: FC = () => {
                               primary={
                                 <Typography
                                   variant="body2"
-                                  fontWeight={message.status === 'unread' ? 600 : 400}
                                   noWrap
+                                  sx={{
+                                    fontWeight: message.status === 'unread' ? 600 : 400
+                                  }}
                                 >
                                   {message.title}
                                 </Typography>
@@ -226,13 +230,16 @@ export const NotificationDropdown: FC = () => {
                                 >
                                   <Typography
                                     variant="caption"
-                                    color="text.secondary"
                                     noWrap
-                                    sx={{ maxWidth: '60%' }}
-                                  >
+                                    sx={{
+                                      color: "text.secondary",
+                                      maxWidth: '60%'
+                                    }}>
                                     {message.body}
                                   </Typography>
-                                  <Typography variant="caption" color="text.disabled">
+                                  <Typography variant="caption" sx={{
+                                    color: "text.disabled"
+                                  }}>
                                     {formatRelativeTime(message.createdAt)}
                                   </Typography>
                                 </Box>
@@ -246,7 +253,9 @@ export const NotificationDropdown: FC = () => {
                         <MarkEmailReadIcon
                           sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }}
                         />
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{
+                          color: "text.secondary"
+                        }}>
                           {t('messages.empty', 'No messages')}
                         </Typography>
                       </Box>
