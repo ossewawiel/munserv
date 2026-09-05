@@ -27,7 +27,10 @@ check() {
         deny "force push is not allowed; use --force-with-lease on a feature branch only"
       fi
       if printf '%s' "$g" | grep -Eq '(^|[[:space:]]|:)master([[:space:]]|$)'; then deny "pushing to master is not allowed; open a pull request"; fi
-      if [ "$branch" = "master" ]; then deny "you are on master; create a branch before pushing"; fi
+      # On master, a bare push would target master; a push naming another branch (worktrees do this) is fine.
+      if [ "$branch" = "master" ] && ! printf '%s' "$g" | grep -Eq 'git push([[:space:]]+-[^[:space:]]+)*[[:space:]]+[^-[:space:]]+[[:space:]]+[^-[:space:]]+'; then
+        deny "you are on master; create a branch before pushing"
+      fi
       if printf '%s' "$g" | grep -Eq -- '--delete|(^|[[:space:]])-d([[:space:]]|$)'; then deny "deleting remote branches is the user's job"; fi
       ;;
   esac

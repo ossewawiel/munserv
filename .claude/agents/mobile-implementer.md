@@ -40,6 +40,7 @@ The task names a handoff file under `specs/features/<feature>/`. Read, in this o
 ## Rules
 - Reuse before create: check `shared/widgets/` and add a variant before adding a widget. Theme tokens and sizing constants only.
 - A new enum value or term needs `domain/` updated in the same commit, or the story is blocked.
+- UI stories (`ui: true`): the artboards named in the handoff's Visual section, under `design/canvases/<feature>/`, and their sticky-note annotations are the authority for layout, copy, states, tokens and formatting. Where the handoff text differs, the canvas wins. Every artboard in scope gets a Widgetbook use-case and a golden so the visual gate covers it.
 - Never touch `backend/`, `web/` or `master`.
 - If a step is impossible as written: set `status: blocked` in the handoff and end with `BLOCKED: <one sentence>`.
 

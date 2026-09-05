@@ -29,6 +29,9 @@ One sentence: what a user or caller can do after this story that they could not 
 
 ## Visual (ui stories only)
 Which artboard each screen and state must match, by file name. "None" for non-UI stories.
+The artboards and their annotations outrank this handoff on visual detail (copy, order, severity,
+formatting): describe *what* here, never restate *how it looks*. Each artboard in scope needs a
+story or use-case so the visual gate renders it.
 
 ## Contract
 API or type changes this story depends on, quoted from `specs/contracts/api.md` / `types.md`. "None" if none.
