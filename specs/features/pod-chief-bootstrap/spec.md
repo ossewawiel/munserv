@@ -23,11 +23,11 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 | W25 | Pod Chief welcome email with temp password | [#40](https://github.com/ossewawiel/munserv/issues/40) | |
 | W26 | Pod Chief must change password on first login | [#41](https://github.com/ossewawiel/munserv/issues/41) | [Handoff](041-change-password-handoff.md) |
 | W27 | Pod Chief completes optional profile info | [#42](https://github.com/ossewawiel/munserv/issues/42) | |
-| W28 | Pod Chief grants super user temporary access | [#43](https://github.com/ossewawiel/munserv/issues/43) | |
+| W28 | Pod Chief grants super user temporary access | [#43](https://github.com/ossewawiel/munserv/issues/43) | [Handoff](043-W28-grant-support-access-web.md) |
 | W29 | Super user uses temporary access for debugging | [#44](https://github.com/ossewawiel/munserv/issues/44) | |
-| W30 | Pod Chief views/revokes super user sessions | [#45](https://github.com/ossewawiel/munserv/issues/45) | |
+| W30 | Pod Chief views/revokes super user sessions | [#45](https://github.com/ossewawiel/munserv/issues/45) | [Handoff](045-W30-support-sessions-web.md) |
 
-### Backend (4 stories)
+### Backend (5 stories)
 
 | ID | Title | Issue | Handoff |
 |----|-------|-------|---------|
@@ -35,6 +35,7 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 | B6 | Bootstrap eligibility check | [#47](https://github.com/ossewawiel/munserv/issues/47) | |
 | B7 | Bootstrap audit logging | [#48](https://github.com/ossewawiel/munserv/issues/48) | |
 | B8 | Temporary super user grant tracking | [#49](https://github.com/ossewawiel/munserv/issues/49) | [Handoff](completed/049-B8-support-grants-backend.md) |
+| B9 | Super user login with a support grant | [#68](https://github.com/ossewawiel/munserv/issues/68) | [Handoff](068-B9-support-grant-login-backend.md) |
 
 ## Dependencies
 
@@ -67,8 +68,10 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 | GET | `/api/v1/support-access/grants` | Pod Chief | List active and past grants |
 | POST | `/api/v1/support-access/grants` | Pod Chief | Create temporary grant |
 | DELETE | `/api/v1/support-access/grants/{id}` | Pod Chief | Revoke grant |
+| GET | `/api/v1/support-access/grants/current` | Support grant | Read the caller's own grant (B9) |
+| POST | `/api/v1/auth/logout` | Authenticated | Revokes a grant-scoped login, no-op otherwise (B9) |
 
-**Note:** Super user with active grant also uses `/api/v1/auth/admin/login` - backend checks for active grant and returns appropriate role.
+**Note:** Super user with active grant also uses `/api/v1/auth/admin/login` - backend checks for active grant and returns the granted role (B9, #68).
 
 ## Database Changes
 
@@ -100,11 +103,30 @@ CREATE INDEX IF NOT EXISTS idx_admins_role_pod_id
 ON admins(role, pod_id) WHERE deleted_at IS NULL;
 ```
 
+## Design
+
+Support access UI (W28, W30) — design canvas, awaiting approval:
+<https://claude.ai/code/artifact/e74d590c-6be1-40e5-8864-88e5e85d52c9>
+
+Working files in `design/canvases/support-access/`, 1440x900 web frames:
+
+| Artboard | State |
+|---|---|
+| `Main.dc.html` | Pod Settings, Support access section with no grants at all |
+| `SupportAccessActive.dc.html` | Active grant: warning callout, Active tab, revoke action, Grant button disabled |
+| `SupportGrantsHistory.dc.html` | History tab, four past grants with status badges and ended-at |
+| `GrantDialog.dc.html` | Grant access dialog, default state (role select, purpose, one-hour expiry notice) |
+| `GrantDialogError.dc.html` | Grant access dialog with the purpose-too-short validation error |
+| `RevokeConfirm.dc.html` | ConfirmDialog (warning) over the active grant |
+
+Components are all from `design/registry/web.md`; the canvas introduces none.
+`design_approved` stays `false` in both handoffs until the pod owner signs off.
+
 ## Security Considerations
 
 1. **Credentials**: Environment variables only, never in code/database
 2. **Access revocation**: Automatic when Pod Chief onboarding completes
-3. **JWT differentiation**: Super user gets `role: "super_user"` claim
+3. **JWT differentiation**: bootstrap gives `role: "super_user"`; a support grant login (B9) gives the granted role only, with the grant id as JWT subject
 4. **Rate limiting**: Apply to bootstrap login endpoint
 5. **Audit logging**: Log all bootstrap and support access actions
 6. **Temporary access**: Auto-expires after logout or 1 hour inactivity

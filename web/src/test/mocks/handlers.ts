@@ -4,6 +4,7 @@ import type { GroundAdmin, GroundAdminStatus } from '@/shared/types/groundAdmin'
 import type { IssueVerification, VerificationStatus } from '@/shared/types/verification';
 import type { SectorSettings, VerificationMode } from '@/shared/types/sectorSettings';
 import type { Admin, AdminCreatedResponse } from '@/features/admin-management/types';
+import type { SupportGrant } from '@/features/support-access/types';
 
 // Default mock data
 const mockIssues = [
@@ -331,6 +332,25 @@ export const mockAdmins: Admin[] = [
     sectorId: 'sector-1',
     createdAt: '2025-08-20T14:30:00Z',
     deletedAt: null,
+  },
+];
+
+// =============================================
+// SUPPORT ACCESS MOCK DATA
+// =============================================
+export const mockSupportGrants: SupportGrant[] = [
+  {
+    id: 'grant-1',
+    grantedRole: 'pod_admin',
+    purpose: 'Investigate duplicate issue reports in sector 3',
+    status: 'expired',
+    grantedBy: 'admin-1',
+    grantedByName: 'Thandi Mokoena',
+    grantedAt: '2026-08-20T09:41:00Z',
+    expiresAt: '2026-08-20T10:41:00Z',
+    lastActivity: '2026-08-20T10:10:00Z',
+    revokedAt: null,
+    expiredAt: '2026-08-20T10:41:00Z',
   },
 ];
 
@@ -883,5 +903,51 @@ export const handlers = [
     }
 
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  // =============================================
+  // SUPPORT ACCESS HANDLERS
+  // =============================================
+
+  // GET /support-access/grants - List support grants, optionally filtered by status
+  http.get('*/support-access/grants', ({ request }) => {
+    const url = new URL(request.url);
+    const status = url.searchParams.get('status');
+    const items = status
+      ? mockSupportGrants.filter((grant) => grant.status === status)
+      : mockSupportGrants;
+
+    return HttpResponse.json({
+      items,
+      total: items.length,
+    });
+  }),
+
+  // POST /support-access/grants - Grant support access to the super user
+  http.post('*/support-access/grants', async ({ request }) => {
+    const body = (await request.json()) as { grantedRole: string; purpose: string };
+
+    if (mockSupportGrants.some((grant) => grant.status === 'active')) {
+      return HttpResponse.json(
+        { code: 'active_grant_exists', message: 'An active grant already exists' },
+        { status: 409 }
+      );
+    }
+
+    const newGrant: SupportGrant = {
+      id: `grant-${Date.now()}`,
+      grantedRole: body.grantedRole as SupportGrant['grantedRole'],
+      purpose: body.purpose,
+      status: 'active',
+      grantedBy: 'admin-1',
+      grantedByName: 'Test Admin',
+      grantedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      lastActivity: null,
+      revokedAt: null,
+      expiredAt: null,
+    };
+
+    return HttpResponse.json(newGrant, { status: 201 });
   }),
 ];

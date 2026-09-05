@@ -21,6 +21,7 @@ import { WardDashboardPage } from '@/features/pod-chief/WardDashboardPage';
 import { SectorDashboardPage } from '@/features/pod-chief/SectorDashboardPage';
 import { PodAdministratorsPage } from '@/features/pod-chief/PodAdministratorsPage';
 import { SectorSettingsPage } from '@/features/sector-settings/SectorSettingsPage';
+import { PodSettingsPage } from '@/features/pod-settings/PodSettingsPage';
 import { CreatePodChiefPage } from '@/features/bootstrap/CreatePodChiefPage';
 import { ChangePasswordPage } from '@/features/onboarding/ChangePasswordPage';
 import { CompleteProfilePage } from '@/features/onboarding/CompleteProfilePage';
@@ -163,7 +164,7 @@ function App() {
         element={
           <ProtectedRoute>
             <RoleGuard requiredRole="pod_chief">
-              <PlaceholderPage title="Pod Settings" />
+              <PodSettingsPage />
             </RoleGuard>
           </ProtectedRoute>
         }

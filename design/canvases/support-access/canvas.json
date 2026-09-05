@@ -1,0 +1,130 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod Settings — no grants"
+    },
+    {
+      "file": "SupportAccessActive.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod Settings — active grant"
+    },
+    {
+      "file": "SupportGrantsHistory.dc.html",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Support grants — history tab"
+    },
+    {
+      "file": "GrantDialog.dc.html",
+      "x": 0,
+      "y": 1160,
+      "w": 1440,
+      "h": 900,
+      "title": "Grant access dialog"
+    },
+    {
+      "file": "GrantDialogError.dc.html",
+      "x": 1560,
+      "y": 1160,
+      "w": 1440,
+      "h": 900,
+      "title": "Grant access dialog — invalid purpose"
+    },
+    {
+      "file": "RevokeConfirm.dc.html",
+      "x": 3120,
+      "y": 1160,
+      "w": 1440,
+      "h": 900,
+      "title": "Revoke confirmation"
+    },
+    {
+      "file": "SupportGrantBannerActive.dc.html",
+      "x": 0,
+      "y": 2320,
+      "w": 1440,
+      "h": 900,
+      "title": "Support grant banner — active"
+    },
+    {
+      "file": "SupportGrantBannerExpiring.dc.html",
+      "x": 1560,
+      "y": 2320,
+      "w": 1440,
+      "h": 900,
+      "title": "Support grant banner — last minutes"
+    },
+    {
+      "file": "SupportGrantBannerExpired.dc.html",
+      "x": 3120,
+      "y": 2320,
+      "w": 1440,
+      "h": 900,
+      "title": "Support grant banner — expired, logging out"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -300,
+      "w": 1440,
+      "text": "Support Access — W28 (#43) grant, W30 (#45) view and revoke.\nWeb admin portal, 1440x900, light scheme.\n\nEverything drawn exists in design/registry/web.md: DashboardLayout, Breadcrumbs, MainCard, DataTableCard (tabs + pagination), DataTable, EmptyState, Button, ActionIconButton, ConfirmDialog, plus MUI Alert / Dialog / Chip as the portal already uses them. No new component.\n\nColours are scheme.light from design/tokens/color.tokens.json only; sizes from size.tokens.json and MUI's own metrics; type is Source Sans 3 as web/src/theme/defaultTheme.ts loads it."
+    },
+    {
+      "id": "w28-interim",
+      "x": 3120,
+      "y": -300,
+      "w": 1440,
+      "text": "Two composition decisions worth knowing before you build.\n\n1. SupportAccessSection renders TWO sibling cards, not a table nested inside a card: the MainCard (title + Grant button + status callout) and the DataTableCard below it. Return a fragment from SupportAccessSection.\n\n2. W28 ships before W30, so at W28 there is no table yet. Until W30 lands, put the EmptyState (the one drawn in the table here) inside the MainCard content; when W30 adds the table, the MainCard keeps the one-line Alert shown on the first artboard and the EmptyState moves into the table's emptyMessage. That avoids two empty states on one screen."
+    },
+    {
+      "id": "conflict-alert",
+      "x": 1560,
+      "y": 960,
+      "w": 1440,
+      "text": "Not drawn as its own artboard: the 409 active_grant_exists state.\n\nThe Grant button is disabled while an active grant exists, so the conflict is only a race. Render it as an Alert severity=\"warning\" at the top of the dialog content, above the expiry notice, with supportAccess.errors.activeGrantExists:\n\n\"This pod already has an active support grant. Revoke it before granting another.\"\n\nThe purpose counter and the inline messages (purposeRequired, purposeTooShort, purposeTooLong) all live in the TextField helper row drawn to the right."
+    },
+    {
+      "id": "timestamps",
+      "x": 0,
+      "y": 960,
+      "w": 1440,
+      "text": "Timestamps are drawn with formatDateTime from web/src/shared/utils/formatters.ts (\"Sep 5, 2026, 09:41 AM\"), not a raw toLocaleString() — that is what every other admin table in the portal uses. Role is plain body2 at weight 500, not a Chip, so the only chips in the table are the status badges: Active = success, Revoked = warning, Expired = default.\n\nThe DataTableCard passes hideToolbarWhenEmpty, since neither tab has a filter or an action in the toolbar."
+    },
+    {
+      "id": "w29-banner",
+      "x": 0,
+      "y": 3280,
+      "w": 1440,
+      "text": "W29 (#44) — SupportGrantBanner in the DashboardLayout toolbar. The three frames above are the whole story.\n\nEach frame reuses the approved “Pod Settings — active grant” body byte for byte; the only difference is the toolbar. The banner lives in the DashboardLayout Toolbar, immediately before NotificationDropdown, so it renders the same on every authenticated page — the page behind it is here only so the banner is judged in its real surroundings. The story's landing page is the dashboard at /.\n\nThe countdown counts the same grant the W28 and W30 frames already show: Pod Admin, granted by Thandi Mokoena at 09:41 AM, last activity 09:58 AM, server expiry 10:58 AM. So 47:12 left is 10:10:48, 04:38 left is 10:53:22, and 00:00 is 10:58:00. The clock is the server's expiresAt, refreshed on route change — never a client-side hour counted from login.\n\nREGISTRY GAP: SupportGrantBanner is a new organism. design/registry/web.md has no row for it and nothing existing fits — the header holds only NotificationDropdown and ProfileMenu, and neither is a status readout. It needs a registry row under Organisms and a Storybook story carrying these three states."
+    },
+    {
+      "id": "w29-anatomy",
+      "x": 1560,
+      "y": 3280,
+      "w": 1440,
+      "text": "Anatomy — an MUI Chip, medium, exactly as the theme already renders one.\n\n32px high, 8px radius (the MuiChip override in createPodTheme.ts), 13px at weight 500, no letter-spacing. Icon 18px with margin-left 5px and margin-right -6px, label padding 0 12px, then 16px of space before NotificationDropdown. It sits 1px shy of the 34px avatars beside it, which is what a real Chip does — do not pad it to 34.\n\nThe icon is the same shield the support-access empty state uses on the first frame of this canvas, so the two surfaces of one feature share one mark.\n\nActive: primaryLight #D0E0DA on primary #0C2721 — the same pair as the ProfileMenu pill next to it, so a live grant reads as chrome the user is wearing, not as an alarm.\n\nUnder five minutes, and at zero: MUI color=\"warning\" filled — warning.main #FF9800 on #FFFFFF. There is no third colour and no error state on the chip; the snackbar carries the event.\n\nThe mm:ss digits are tabular (font-variant-numeric: tabular-nums) so the chip does not twitch on every tick."
+    },
+    {
+      "id": "w29-copy",
+      "x": 3120,
+      "y": 3280,
+      "w": 1440,
+      "text": "Copy — a new supportGrant block in locales/{en,af,zu}/translation.json, taking the role name from the existing roles.* keys:\n\nbanner: “Support access as {{role}} · {{remaining}} left”\nexpired: “Support access expired”\nremainingLabel: “Time remaining on this support grant” — the chip's accessible name, not drawn.\n\nThe separator is a middle dot with a space either side, as the active-grant callout on the W28 frames already uses. The word is support access, never session, impersonation or elevation.\n\nAt zero the chip switches to the expired copy and the existing SessionExpiredHandler snackbar appears on top of the header — top centre, 40px down (Snackbar's 24px plus its mt: 2), MUI Alert severity=\"warning\" variant=\"filled\", 28px icon, drawn here unchanged from SessionExpiredHandler.tsx — and routes to /login after 2s.\n\nThat is why there is no fourth artboard for the login page: nothing on it changes, and the snackbar is already closed by the time it renders."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}
