@@ -151,4 +151,65 @@ describe('SupportGrantBanner', () => {
       expect(bannerText()).toContain('60:00 left');
     });
   });
+
+  it('should render the expired label and fetch the current grant exactly once at countdown zero, none before it while idle', async () => {
+    const fixedNow = new Date('2026-09-05T10:00:00Z').getTime();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(fixedNow);
+
+    const grantExpiresAt = new Date(fixedNow + 3 * 1000).toISOString();
+    mockUseAuth.mockReturnValue({
+      supportGrant: {
+        grantId: 'grant-1',
+        grantedRole: 'pod_admin',
+        expiresAt: grantExpiresAt,
+      },
+    });
+
+    let requestCount = 0;
+    server.use(
+      http.get('*/support-access/grants/current', async () => {
+        requestCount += 1;
+        await delay(5);
+        return HttpResponse.json({ expiresAt: grantExpiresAt });
+      })
+    );
+
+    render(<Harness />);
+
+    // The initial mount is a real route arrival: exactly one fetch, settling to
+    // the same (unchanged) expiry.
+    await waitFor(() => {
+      expect(requestCount).toBe(1);
+    });
+
+    // Idle, well before expiry: no further requests (no polling).
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(bannerText()).toContain('00:02 left');
+    expect(requestCount).toBe(1);
+
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(bannerText()).toContain('00:01 left');
+    expect(requestCount).toBe(1);
+
+    // Countdown reaches zero: exactly one more request, and the expired label.
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    await waitFor(() => {
+      expect(bannerText()).toBe('Support access expired');
+    });
+    expect(requestCount).toBe(2);
+
+    // Stays idle at zero: no further requests.
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(requestCount).toBe(2);
+  });
 });

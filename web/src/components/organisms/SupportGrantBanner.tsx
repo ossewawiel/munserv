@@ -30,29 +30,33 @@ export const SupportGrantBanner: FC = () => {
   const location = useLocation();
   const { supportGrant } = useAuth();
   const [now, setNow] = useState(() => Date.now());
+  // The single source of truth for the countdown and for the `expired` flag sent
+  // to useCurrentSupportGrant: the login-time expiry until the first refresh
+  // replaces it with the server's slid value. Never derive these two from
+  // different sources - see the story's "Do not poll" note.
+  const [knownExpiresAt, setKnownExpiresAt] = useState<string | null>(supportGrant?.expiresAt ?? null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), TICK_MS);
     return () => clearInterval(interval);
   }, []);
 
-  const fallbackExpiresAt = supportGrant?.expiresAt ?? null;
-  const fallbackRemainingMs = fallbackExpiresAt
-    ? Math.max(0, Date.parse(fallbackExpiresAt) - now)
-    : 0;
+  const remainingMs = knownExpiresAt ? Math.max(0, Date.parse(knownExpiresAt) - now) : 0;
 
   const { data } = useCurrentSupportGrant({
     pathname: location.pathname,
-    expired: fallbackRemainingMs === 0,
+    expired: remainingMs === 0,
     enabled: !!supportGrant,
   });
+
+  if (data && data.expiresAt !== knownExpiresAt) {
+    setKnownExpiresAt(data.expiresAt);
+  }
 
   if (!supportGrant) {
     return null;
   }
 
-  const expiresAt = data?.expiresAt ?? supportGrant.expiresAt;
-  const remainingMs = Math.max(0, Date.parse(expiresAt) - now);
   const isWarning = remainingMs <= WARNING_THRESHOLD_MS;
   const roleLabel = t(`roles.${supportGrant.grantedRole}`, ADMIN_ROLE_LABELS[supportGrant.grantedRole]);
 
