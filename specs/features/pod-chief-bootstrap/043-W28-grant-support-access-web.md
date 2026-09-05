@@ -3,7 +3,7 @@ issue: 43
 story: W28
 title: "Pod Chief grants super user temporary access"
 platform: web
-status: pending
+status: completed
 depends_on: [49]        # B8 backend support grants, merged (PR #65)
 touches:
   - web/src/features/support-access
@@ -16,8 +16,32 @@ design_artboards: [Main.dc.html, SupportAccessActive.dc.html, SupportGrantsHisto
 design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/features/support-access/types.ts
+  - web/src/features/support-access/api.ts
+  - web/src/features/support-access/hooks.ts
+  - web/src/features/support-access/hooks.test.tsx
+  - web/src/features/support-access/SupportAccessSection.tsx
+  - web/src/features/support-access/SupportAccessSection.test.tsx
+  - web/src/features/support-access/components/GrantAccessDialog.tsx
+  - web/src/features/support-access/components/GrantAccessDialog.test.tsx
+  - web/src/features/support-access/components/GrantAccessDialog.stories.tsx
+  - web/src/features/pod-settings/PodSettingsPage.tsx
+  - web/src/test/mocks/handlers.ts
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+  - web/src/App.tsx
+tests_added:
+  - web/src/features/support-access/hooks.test.tsx
+  - web/src/features/support-access/components/GrantAccessDialog.test.tsx
+  - web/src/features/support-access/SupportAccessSection.test.tsx
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--default--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--default--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--loading--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--loading--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--active-grant-conflict--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--active-grant-conflict--dark.png
 ---
 
 # W28 · Pod Chief grants super user temporary access (Web)
