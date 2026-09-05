@@ -87,3 +87,6 @@ docker-compose.override.yml
 
 # Claude Code agent worktrees
 .claude/worktrees/
+
+# design token generator
+design/node_modules/

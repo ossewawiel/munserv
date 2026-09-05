@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'generated/tokens.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'colors.dart';
@@ -130,21 +132,21 @@ class AppTypography {
 
 /// Common spacing values for consistent layout
 class Spacing {
-  static const double xs = 4;
-  static const double sm = 8;
-  static const double md = 16;
-  static const double lg = 24;
-  static const double xl = 32;
-  static const double xxl = 48;
+  static const double xs = TokensSpacing.xs;
+  static const double sm = TokensSpacing.sm;
+  static const double md = TokensSpacing.md;
+  static const double lg = TokensSpacing.lg;
+  static const double xl = TokensSpacing.xl;
+  static const double xxl = TokensSpacing.xxl;
 }
 
 /// Common border radius values
 class Radii {
-  static const double sm = 4;
-  static const double md = 8;
-  static const double lg = 12;
-  static const double xl = 16;
-  static const double full = 999;
+  static const double sm = TokensRadius.sm;
+  static const double md = TokensRadius.md;
+  static const double lg = TokensRadius.lg;
+  static const double xl = TokensRadius.xl;
+  static const double full = TokensRadius.full;
 
   static BorderRadius get smRadius => BorderRadius.circular(sm);
   static BorderRadius get mdRadius => BorderRadius.circular(md);
@@ -155,38 +157,38 @@ class Radii {
 /// Standard icon sizes following M3 specifications.
 abstract class IconSizes {
   /// Extra small icons (12dp) - Inline indicators
-  static const double xs = 12;
+  static const double xs = TokensIconSize.xs;
 
   /// Small icons (16dp) - Dense UI elements
-  static const double sm = 16;
+  static const double sm = TokensIconSize.sm;
 
   /// Medium icons (24dp) - Default Material icon size
-  static const double md = 24;
+  static const double md = TokensIconSize.md;
 
   /// Large icons (32dp) - Prominent actions
-  static const double lg = 32;
+  static const double lg = TokensIconSize.lg;
 
   /// Extra large icons (48dp) - Feature icons, map markers
-  static const double xl = 48;
+  static const double xl = TokensIconSize.xl;
 
   /// Double extra large icons (64dp) - Card leading icons
-  static const double xxl = 64;
+  static const double xxl = TokensIconSize.xxl;
 
   /// Display icons (80dp) - Empty state illustrations
-  static const double display = 80;
+  static const double display = TokensIconSize.display;
 }
 
 /// Standard thumbnail/image sizes.
 abstract class ThumbnailSizes {
   /// Small thumbnails (48dp) - Compact avatars
-  static const double sm = 48;
+  static const double sm = TokensThumbnailSize.sm;
 
   /// Medium thumbnails (64dp) - Card thumbnails, standard avatars
-  static const double md = 64;
+  static const double md = TokensThumbnailSize.md;
 
   /// Large thumbnails (100dp) - Photo picker tiles
-  static const double lg = 100;
+  static const double lg = TokensThumbnailSize.lg;
 
   /// Extra large thumbnails (120dp) - Preview images
-  static const double xl = 120;
+  static const double xl = TokensThumbnailSize.xl;
 }

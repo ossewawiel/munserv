@@ -51,6 +51,19 @@ flutter run                    # 10.0.2.2:8080 reaches the backend on the host
 | `dart run build_runner build` | Generate Freezed/Riverpod code |
 | `dart format .` | Format code |
 
+## Widgetbook
+
+A catalogue of every shared widget and `IssueCard` variant, rendered with the
+real `AppTheme` in light and dark mode. Registry: `design/registry/mobile.md`.
+
+```bash
+flutter run -t widgetbook/main.dart          # Run the catalogue
+flutter build web -t widgetbook/main.dart    # Build for the web (output gitignored)
+```
+
+A new shared widget is not done until it has a use-case in `widgetbook/use_cases/`
+and a row in `design/registry/mobile.md`.
+
 ## Tech Stack
 
 - **Flutter 3.x** with Dart

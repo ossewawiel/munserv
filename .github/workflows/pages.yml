@@ -1,0 +1,86 @@
+name: Pages
+
+# Publishes the design catalogues (and later the progress dashboard) to GitHub Pages:
+#   https://ossewawiel.github.io/munserv/            landing page (site/index.html)
+#   https://ossewawiel.github.io/munserv/storybook/  web components (Storybook)
+#   https://ossewawiel.github.io/munserv/widgetbook/ mobile widgets (Widgetbook, Flutter web)
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'web/**'
+      - 'mobile/**'
+      - 'design/**'
+      - 'site/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build catalogues
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - name: Build Storybook
+        working-directory: web
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build-storybook
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.2'
+          cache: true
+      - name: Build Widgetbook (Flutter web)
+        working-directory: mobile
+        run: |
+          flutter pub get
+          flutter build web -t widgetbook/main.dart --base-href /munserv/widgetbook/ --release
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site/storybook _site/widgetbook
+          cp -r site/. _site/
+          cp -r web/storybook-static/. _site/storybook/
+          cp -r mobile/build/web/. _site/widgetbook/
+          cp domain/language.yaml _site/domain-language.yaml
+          echo "$(git rev-parse --short HEAD) $(date -u +%Y-%m-%dT%H:%MZ)" > _site/build.txt
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

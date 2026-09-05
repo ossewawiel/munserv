@@ -10,7 +10,7 @@ Read `domain/README.md` first. Load `mobile-design-system` before touching any w
 2. **Models are Freezed** with a private constructor for behaviour and `fromJson`; enums carry `displayName` and, for lifecycles, `allowedTransitions`. Wire values are snake_case strings matching `domain/language.yaml`.
 3. **Errors are `Result<T>`** (`Success` / `Failure(AppError)`) from repositories; providers turn `Failure` into `AsyncError`.
 4. **Theme tokens only**: `Theme.of(context).colorScheme.*`; sizes from `Spacing`, `IconSizes`, `ThumbnailSizes`, `Radii` in `shared/theme/typography.dart`. No literal colours, no magic numbers, no `.withOpacity` on theme colours.
-5. **Reuse before create**: `shared/widgets/` (`EmptyState` factories, `LoadingSpinner`, `ErrorDisplay`, `BrandedScaffold`, `QuickActionCard`, `StepIndicator`, `IssueCard` with `list` / `mapPreview` / `compact` variants) is the design system. Same data, same widget; add a variant rather than a new widget; extract at the second use; private single-use widgets are `_Prefixed` in the same file.
+5. **Reuse before create**: `shared/widgets/` (`EmptyState` factories, `LoadingSpinner`, `ErrorDisplay`, `BrandedScaffold`, `QuickActionCard`, `StepIndicator`, `IssueCard` with `list` / `mapPreview` / `compact` variants) is the design system. Same data, same widget; add a variant rather than a new widget; extract at the second use; private single-use widgets are `_Prefixed` in the same file. A new shared widget is not done until it has a row in `design/registry/mobile.md` and a use-case in `mobile/widgetbook/use_cases/`.
 6. **Cards**: `elevation: 0`, `color: colors.surface`, `Radii.md` corners, `colors.outlineVariant` border, full width in lists.
 
 ## Configuration

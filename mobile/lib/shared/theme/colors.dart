@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'generated/tokens.dart';
+
 /// Brand colors that can be configured per pod
 class BrandColors {
   final Color primary;
@@ -46,62 +48,62 @@ class BrandColors {
 /// Surface and background colors for the app
 class SurfaceColors {
   /// White/very light background for main scaffold
-  static const Color background = Color(0xFFFFFFFF);
+  static const Color background = TokensSemanticSurface.background;
 
   /// Pure white for app bar and navigation
-  static const Color white = Color(0xFFFFFFFF);
+  static const Color white = TokensSemanticSurface.white;
 
   /// Cream for card backgrounds (stands out from white)
-  static const Color cream = Color(0xFFF3EDDA);
+  static const Color cream = TokensSemanticSurface.cream;
 
   /// Warm beige for secondary surfaces
-  static const Color beige = Color(0xFFF3EDDA);
+  static const Color beige = TokensSemanticSurface.beige;
 
   /// Dark background for dark theme
-  static const Color backgroundDark = Color(0xFF1A1A1A);
+  static const Color backgroundDark = TokensSemanticSurface.backgroundDark;
 
   /// Dark surface for dark theme cards
-  static const Color surfaceDark = Color(0xFF2D2D2D);
+  static const Color surfaceDark = TokensSemanticSurface.surfaceDark;
 }
 
 /// Text colors
 class TextColors {
   /// Primary text color - forest green for light theme
-  static const Color primary = Color(0xFF2D4A47);
+  static const Color primary = TokensSemanticText.primary;
 
   /// Secondary text color - slightly lighter
-  static const Color secondary = Color(0xFF4A6360);
+  static const Color secondary = TokensSemanticText.secondary;
 
   /// Muted text color
-  static const Color muted = Color(0xFF6B7B78);
+  static const Color muted = TokensSemanticText.muted;
 
   /// White text for dark backgrounds
-  static const Color onDark = Color(0xFFFFFFFF);
+  static const Color onDark = TokensSemanticText.onDark;
 
   /// Dark text for light colored backgrounds
-  static const Color onLight = Color(0xFF2D4A47);
+  static const Color onLight = TokensSemanticText.onLight;
 }
 
 /// Semantic colors for consistent UI across the app
 class SemanticColors {
-  static const Color success = Color(0xFF4CAF50);
-  static const Color successLight = Color(0xFFE8F5E9);
-  static const Color warning = Color(0xFFFF9800);
-  static const Color warningLight = Color(0xFFFFF3E0);
-  static const Color error = Color(0xFFD32F2F);
-  static const Color errorLight = Color(0xFFFFEBEE);
-  static const Color info = Color(0xFF2196F3);
-  static const Color infoLight = Color(0xFFE3F2FD);
+  static const Color success = TokensSemanticStatus.success;
+  static const Color successLight = TokensSemanticStatus.successLight;
+  static const Color warning = TokensSemanticStatus.warning;
+  static const Color warningLight = TokensSemanticStatus.warningLight;
+  static const Color error = TokensSemanticStatus.error;
+  static const Color errorLight = TokensSemanticStatus.errorLight;
+  static const Color info = TokensSemanticStatus.info;
+  static const Color infoLight = TokensSemanticStatus.infoLight;
 }
 
 /// Issue state colors for visual consistency
 class IssueStateColors {
-  static const Color reported = Color(0xFFFF9800);
-  static const Color confirmed = Color(0xFF2196F3);
-  static const Color inProgress = Color(0xFF9C27B0);
-  static const Color fixed = Color(0xFF4CAF50);
-  static const Color rejected = Color(0xFF9E9E9E);
-  static const Color reopened = Color(0xFFF44336);
+  static const Color reported = TokensSemanticIssueState.reported;
+  static const Color confirmed = TokensSemanticIssueState.confirmed;
+  static const Color inProgress = TokensSemanticIssueState.inProgress;
+  static const Color fixed = TokensSemanticIssueState.fixed;
+  static const Color rejected = TokensSemanticIssueState.rejected;
+  static const Color reopened = TokensSemanticIssueState.reopened;
 
   static Color fromState(String state) {
     return switch (state) {
@@ -119,16 +121,16 @@ class IssueStateColors {
 /// Heat indicator colors (priority visualization)
 class HeatColors {
   // Vibrant colors for full indicators
-  static const Color low = Color(0xFF4CAF50);
-  static const Color medium = Color(0xFFFF9800);
-  static const Color high = Color(0xFFF44336);
-  static const Color critical = Color(0xFF9C27B0);
+  static const Color low = TokensSemanticHeat.low;
+  static const Color medium = TokensSemanticHeat.medium;
+  static const Color high = TokensSemanticHeat.high;
+  static const Color critical = TokensSemanticHeat.critical;
 
   // Muted variants (~60% saturation) for subtle displays
-  static const Color lowMuted = Color(0xFF7CB081);
-  static const Color mediumMuted = Color(0xFFCCAA66);
-  static const Color highMuted = Color(0xFFCC7A73);
-  static const Color criticalMuted = Color(0xFFA07BA8);
+  static const Color lowMuted = TokensSemanticHeat.mutedLow;
+  static const Color mediumMuted = TokensSemanticHeat.mutedMedium;
+  static const Color highMuted = TokensSemanticHeat.mutedHigh;
+  static const Color criticalMuted = TokensSemanticHeat.mutedCritical;
 
   static Color fromHeat(int heat) {
     if (heat >= 80) return critical;
