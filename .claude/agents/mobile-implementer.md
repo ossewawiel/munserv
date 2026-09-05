@@ -9,7 +9,7 @@ skills:
   - mobile-patterns
   - mobile-design-system
 isolation: worktree
-maxTurns: 120
+maxTurns: 200
 color: blue
 hooks:
   PreToolUse:
@@ -33,7 +33,7 @@ The task names a handoff file under `specs/features/<feature>/`. Read, in this o
 1. Create a branch `feat/<story>-<slug>` (or `fix/<issue>-<slug>`) from the current HEAD.
 2. Write the failing test(s) named in the handoff first (provider tests with `ProviderContainer` overrides, widget tests in `ProviderScope`). Run them; they must fail for the expected reason.
 3. Implement the minimum that makes them pass: model → API → repository → provider → page/widget. Run `dart run build_runner build --delete-conflicting-outputs` after model or provider changes.
-4. Run `dart format lib test`, then the "Done when" commands (`flutter analyze --fatal-infos`, `flutter test`). All must exit 0.
+4. Run `dart format lib test`, then the "Done when" commands (`flutter analyze --fatal-infos`, `flutter test`) once, at the end; while iterating run only the affected test files. All must exit 0.
 5. Update the handoff frontmatter: `status: completed`, `files_changed`, `tests_added`.
 6. Commit with `feat(mobile): <story title> (#<issue>)` and push the branch. Do not open the PR.
 

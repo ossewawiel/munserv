@@ -37,7 +37,7 @@ Numbered, imperative, one file per step where possible. Each step names the file
 
 ## Done when
 ```bash
-# every command must exit 0 before you finish
+# every command must exit 0 before you finish; run this block once at the end, not after every step
 cd backend && ./gradlew ktlintCheck test
 ```
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a summary of changes. If you cannot finish, set `status: blocked` and end your message with `BLOCKED: <reason>`.

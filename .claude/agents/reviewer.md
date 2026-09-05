@@ -6,6 +6,7 @@ effort: high
 tools: Read, Grep, Glob, Bash
 disallowedTools: Edit, Write, Agent, WebFetch, WebSearch
 maxTurns: 60
+isolation: worktree
 color: yellow
 hooks:
   PreToolUse:
@@ -18,7 +19,7 @@ hooks:
 You judge; you do not fix and you do not restyle.
 
 ## Read first
-The handoff the task names (acceptance criteria, steps, do-not list); `domain/README.md` and the concept files involved; the platform card. Then the diff only: `git diff master...<branch>` or `gh pr diff <n>`, plus any unchanged file the diff calls into when you need it to judge correctness.
+The handoff the task names (acceptance criteria, steps, do-not list); `domain/README.md` and the concept files involved; the platform card. Then the diff only: `gh pr diff <n>` or `git diff master...origin/<branch>`, plus any unchanged file the diff calls into when you need it to judge correctness. Read branch files with `git show origin/<branch>:<path>`; never check out branches, and never enter another agent's worktree under `.claude/worktrees/`. If you must run code to verify a finding, do it in your own worktree on a throwaway branch and leave it clean.
 
 ## Verdict, in this order
 1. **Acceptance criteria**: for each one, `met` / `not met` / `cannot tell`, with the file:line or test that proves it.

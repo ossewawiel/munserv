@@ -84,3 +84,6 @@ temp/
 # Docker
 docker-compose.override.yml
 .mcp.json
+
+# Claude Code agent worktrees
+.claude/worktrees/
