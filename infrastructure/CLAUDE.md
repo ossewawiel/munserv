@@ -66,7 +66,7 @@ cd infrastructure/docker && docker-compose up -d
 # 2. Add PostgreSQL MCP
 claude mcp add --transport stdio postgres \
   -- npx -y @modelcontextprotocol/server-postgres \
-  "postgresql://munserv:munserv_dev@localhost:5432/munserv_dev"
+  "postgresql://munserv:munserv_dev@localhost:5435/munserv_dev"
 ```
 
 ### MCP Servers for MunServ
@@ -121,7 +121,7 @@ docker compose ps
 docker compose logs -f postgres
 
 # Connect to database
-psql postgresql://munserv:munserv_dev@localhost:5432/munserv_dev
+psql postgresql://munserv:munserv_dev@localhost:5435/munserv_dev
 
 # Stop services
 docker compose down
@@ -134,14 +134,14 @@ docker compose down -v && docker compose up -d
 
 | Service | Image | Port |
 |---------|-------|------|
-| PostgreSQL + PostGIS | postgis/postgis:15-3.3 | 5432 |
-| Redis | redis:7-alpine | 6379 |
+| PostgreSQL + PostGIS | postgis/postgis:15-3.3 | 5435 (host) → 5432 |
+| Redis | redis:7-alpine | 6380 (host) → 6379 |
 
 ### Connection Strings
 
 ```
-PostgreSQL: postgresql://munserv:munserv_dev@localhost:5432/munserv_dev
-Redis: redis://localhost:6379
+PostgreSQL: postgresql://munserv:munserv_dev@localhost:5435/munserv_dev
+Redis: redis://localhost:6380
 ```
 
 ---
@@ -150,8 +150,8 @@ Redis: redis://localhost:6379
 
 | Service | Port |
 |---------|------|
-| PostgreSQL | 5432 |
-| Redis | 6379 |
+| PostgreSQL | 5435 |
+| Redis | 6380 |
 | Backend API | 8080 |
 | Mock API | 3001 |
 | Web Dev Server | 3000 |

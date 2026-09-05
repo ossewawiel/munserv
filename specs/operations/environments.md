@@ -6,7 +6,7 @@
 |---------|-----|------|
 | Backend | http://localhost:8080 | 8080 |
 | Web | http://localhost:3000 | 3000 |
-| Database | localhost:5432 | 5432 |
+| Database | localhost:5435 | 5435 |
 | Mock API | http://localhost:3001 | 3001 |
 
 **Backend:**
@@ -42,7 +42,7 @@ cd mobile && flutter run
 
 ### Backend
 ```
-DATABASE_URL=jdbc:postgresql://localhost:5432/munserv
+DATABASE_URL=jdbc:postgresql://localhost:5435/munserv_dev
 JWT_SECRET=your-secret-key
 OTP_EXPIRY_MINUTES=5
 ```

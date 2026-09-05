@@ -17,7 +17,7 @@
     },
     "postgres": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://munserv:munserv_dev@localhost:5433/munserv_dev"]
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://munserv:munserv_dev@localhost:5435/munserv_dev"]
     },
     "playwright": {
       "command": "npx",
