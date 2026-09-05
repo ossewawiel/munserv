@@ -528,7 +528,6 @@ Skills are located in `.claude/commands/`. Use `/skill-name` to invoke.
 | `/integration-test` | Generate integration test (TestContainers) |
 | `/contract-test` | Generate API contract test (MockMvc) |
 | `/review` | Code review for Kotlin/Spring patterns |
-| `/sonar` | SonarQube analysis via MCP |
 | `/ci-fix` | Debug CI/CD failures |
 
 ### Workflow
@@ -545,7 +544,7 @@ When adding functionality, follow this workflow:
 2. TEST       → Write failing tests FIRST (Red) - STRICT for domain/service
 3. CODE       → Implement to pass tests (Green)
 4. REFACTOR   → Clean up, fix review issues
-5. QUALITY    → Run ktlint, tests, sonar
+5. QUALITY    → Run ktlint, tests
 6. INTEGRATION→ Add contract + integration tests
 7. PRE-COMMIT → Full build verification
 ```
@@ -559,6 +558,5 @@ Use `/dev-cycle "your task description"` to orchestrate this workflow.
 ./gradlew bootRun        # Start dev server (port 8080)
 ./gradlew ktlintCheck    # Lint check
 ./gradlew ktlintFormat   # Auto-format
-./gradlew sonar          # SonarQube analysis
 ./gradlew jacocoTestReport  # Coverage report
 ```

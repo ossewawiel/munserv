@@ -197,12 +197,7 @@ Pass all automated quality checks.
    ```
    All tests must pass.
 
-4. **Run SonarQube Analysis** (if available)
-   ```
-   Use sonar.md skill with scope=changed
-   ```
-
-5. **If Any Fail**
+4. **If Any Fail**
    - Use `ci-fix.md` skill to debug
    - Fix issues and re-run
 
@@ -210,7 +205,6 @@ Pass all automated quality checks.
 - [ ] `pnpm lint` passes
 - [ ] `pnpm typecheck` passes
 - [ ] `pnpm test:run` passes
-- [ ] SonarQube quality gate passes (if available)
 
 ---
 
@@ -310,7 +304,7 @@ Final verification before commit.
 └────────┬──────────┘
          ↓
 ┌───────────────────┐
-│  5. QUALITY GATE  │ → lint, typecheck, test, sonar
+│  5. QUALITY GATE  │ → lint, typecheck, test
 └────────┬──────────┘
          ↓
 ┌───────────────────┐
@@ -330,7 +324,7 @@ Final verification before commit.
 | TEST | test.md, e2e.md |
 | CODE | component.md, hook.md, api.md, feature.md, form.md, page.md |
 | REFACTOR | review.md |
-| QUALITY | sonar.md, ci-fix.md |
+| QUALITY | ci-fix.md |
 | DOCUMENT | i18n.md |
 | PRE-COMMIT | ci-fix.md (if needed) |
 

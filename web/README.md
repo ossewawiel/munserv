@@ -105,7 +105,6 @@ src/
 | `/test` | Generate Vitest test |
 | `/e2e` | Generate Playwright E2E test |
 | `/review` | Code review for patterns |
-| `/sonar` | SonarQube analysis |
 | `/ci-fix` | Debug CI/CD failures |
 
 ### TDD Workflow

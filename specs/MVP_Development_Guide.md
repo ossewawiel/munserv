@@ -68,7 +68,7 @@ MVP is complete when:
 | W8 | Register as member | (Public) Fill form with name, email, phone, address, location → submit → pending status | 🔄 Pending |
 | W9 | Approve/reject member | Review pending registration → approve (sends email) or reject (deletes) | 🔄 Pending |
 
-**Implemented:** January 2026 | **Stack:** React 19 + TypeScript 5.9 + Vite 7 + Tailwind CSS 4 + React Query
+**Implemented:** January 2026 | **Stack:** React 19 + TypeScript 5.9 + Vite 7 + MUI v7 + React Query
 
 ### 2.3 Explicitly Deferred
 
@@ -1130,7 +1130,7 @@ These are **comments for future reference**, not current requirements.
 - [x] Error states handled gracefully (web + mobile)
 - [x] Loading states shown appropriately (web + mobile)
 - [x] Both apps use same mock API
-- [x] Basic styling/theming applied (web: CSS + Tailwind, mobile: M3)
+- [x] Basic styling/theming applied (web: MUI theme, mobile: M3)
 - [x] Code follows project standards
 - [x] Mobile: M3 theming with tonal palettes ✅ **COMPLETE**
 - [ ] Mobile: M1 registration flow (OTP + profile creation)

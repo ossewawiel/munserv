@@ -26,10 +26,10 @@ Aggregate changes from all platform handoff documents, create a unified commit, 
 
 ### Step 1: Find All Platform Handoffs
 
+All handoffs live centrally under `specs/features/{feature}/`:
+
 ```bash
-ls backend/docs/issues/{{number}}-*.md 2>/dev/null
-ls web/docs/issues/{{number}}-*.md 2>/dev/null
-ls mobile/docs/issues/{{number}}-*.md 2>/dev/null
+find specs/features -name "{{number}}-*-backend.md" -o -name "{{number}}-*-web.md" -o -name "{{number}}-*-mobile.md" -o -name "{{number}}-*-database.md" | grep -v /completed/
 ```
 
 ### Step 2: Parse and Verify All Handoffs
@@ -56,8 +56,8 @@ The following platforms are not complete:
 Please complete all platform fixes before closing.
 
 **To check status:**
-- Backend: `cat backend/docs/issues/{{number}}-*.md`
-- Web: `cat web/docs/issues/{{number}}-*.md`
+- Backend: `cat specs/features/*/{{number}}-*-backend.md`
+- Web: `cat specs/features/*/{{number}}-*-web.md`
 ```
 
 ### Step 3: Aggregate Changes
@@ -103,7 +103,7 @@ fix(#{{number}}): {{title}}
 
 Closes #{{number}}
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )"
 ```
@@ -197,13 +197,9 @@ EOF
 Move all handoff docs to completed directories:
 
 ```bash
-# Archive each platform's handoff
-mv backend/docs/issues/{{number}}-*.md backend/docs/issues/completed/ 2>/dev/null || true
-mv web/docs/issues/{{number}}-*.md web/docs/issues/completed/ 2>/dev/null || true
-mv mobile/docs/issues/{{number}}-*.md mobile/docs/issues/completed/ 2>/dev/null || true
-
-# Archive central investigation
-mv specs/features/{{feature}}/*-investigation.md specs/features/{{feature}}/completed/ 2>/dev/null || true
+# Archive platform handoffs and the investigation together
+mkdir -p specs/features/{{feature}}/completed
+mv specs/features/{{feature}}/{{number}}-*.md specs/features/{{feature}}/completed/ 2>/dev/null || true
 ```
 
 ### Step 9: Clean Up
@@ -235,9 +231,7 @@ git push
 | Mobile | {{count}} | {{count}} |
 
 ### Handoffs Archived
-- `backend/docs/issues/completed/{{number}}-*.md`
-- `web/docs/issues/completed/{{number}}-*.md`
-- `specs/features/{{feature}}/completed/*-investigation.md`
+- `specs/features/{{feature}}/completed/{{number}}-*.md` (handoffs and investigation)
 
 ### GitHub Issue
 #{{number}} - Comment added with implementation summary
@@ -264,9 +258,7 @@ git push
 Error: No platform handoffs found for issue #{{number}}
 
 Searched:
-- backend/docs/issues/{{number}}-*.md
-- web/docs/issues/{{number}}-*.md
-- mobile/docs/issues/{{number}}-*.md
+- specs/features/*/{{number}}-*-{backend,web,mobile,database}.md
 
 Run `/work-issue {{number}}` first to create handoffs.
 ```
@@ -326,8 +318,8 @@ https://github.com/ossewawiel/munserv/pull/9
 | Mobile | 0 | 0 |
 
 ### Handoffs Archived
-- `backend/docs/issues/completed/008-ground-admin-acceptance.md`
-- `specs/features/ground-admin/completed/acceptance-investigation.md`
+- `specs/features/ground-admin/completed/008-ground-admin-acceptance-backend.md`
+- `specs/features/ground-admin/completed/008-acceptance-investigation.md`
 
 ### GitHub Issue
 #8 - Comment added with implementation summary

@@ -26,7 +26,6 @@ docs(api): update endpoint documentation
 **On PR:**
 1. All of above
 2. Integration tests
-3. SonarQube analysis
 
 **On Merge to main:**
 1. All of above
@@ -45,6 +44,5 @@ docs(api): update endpoint documentation
 ## Quality Gates
 
 - Test coverage: ≥70%
-- No critical SonarQube issues
 - All tests passing
 - No lint errors

@@ -130,7 +130,7 @@ If spec files modified:
 git add specs/requirements/*.md
 git commit -m "chore(specs): sync story status from GitHub
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
 ## Output Format
