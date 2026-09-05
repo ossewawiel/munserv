@@ -90,18 +90,21 @@ export const GrantAccessDialog: FC<GrantAccessDialogProps> = ({
       </DialogTitle>
       <DialogContent sx={{ pt: 3 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+          {errorCode === 'active_grant_exists' && (
+            <Alert severity="warning">
+              {t(
+                'supportAccess.errors.activeGrantExists',
+                'This pod already has an active support grant. Revoke it before granting another.'
+              )}
+            </Alert>
+          )}
+
           <Alert severity="info">
             {t(
               'supportAccess.dialog.expiryNotice',
               'The grant ends when support signs out, and after one hour without activity. You can revoke it at any time.'
             )}
           </Alert>
-
-          {errorCode === 'active_grant_exists' && (
-            <Alert severity="warning">
-              {t('supportAccess.errors.activeGrantExists', 'An active grant already exists')}
-            </Alert>
-          )}
 
           <FormControl fullWidth disabled={isLoading}>
             <InputLabel id="grant-access-role-label">

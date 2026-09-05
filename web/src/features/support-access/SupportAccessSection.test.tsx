@@ -1,9 +1,11 @@
+import '@/lib/i18n';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { server } from '@/test/mocks/server';
 import { SupportAccessSection } from './SupportAccessSection';
+import { formatDateTime } from '@/shared/utils/formatters';
 import type { SupportGrant } from './types';
 import type { ReactNode } from 'react';
 
@@ -60,7 +62,7 @@ describe('SupportAccessSection', () => {
 
     renderWithClient(<SupportAccessSection />);
 
-    const expected = new Date(activeGrant.expiresAt).toLocaleString();
+    const expected = formatDateTime(activeGrant.expiresAt);
     await waitFor(() => {
       expect(within(screen.getByRole('alert')).getByText(expected, { exact: false })).toBeInTheDocument();
     });

@@ -562,8 +562,7 @@
     "title": "Support access",
     "subtitle": "Grant Central Authority temporary access to help with a problem on this pod.",
     "grantButton": "Grant support access",
-    "activeGrant": "Active grant",
-    "noActiveGrant": "No support access is active. Nobody outside this pod can sign in right now.",
+    "activeGrant": "Support access is active",
     "expiresAt": "Expires",
     "grantedBy": "Granted by",
     "purpose": "Purpose",
@@ -580,9 +579,13 @@
       "purposeRequired": "Purpose is required",
       "purposeTooShort": "Purpose must be at least 10 characters",
       "purposeTooLong": "Purpose must be 500 characters or fewer",
-      "activeGrantExists": "An active grant already exists",
+      "activeGrantExists": "This pod already has an active support grant. Revoke it before granting another.",
       "loadFailed": "Failed to load support access"
-    }
+    },
+    "grantedOn": "on {{date}}",
+    "expiresUntilIdle": "{{date}}, or one hour after the last activity, whichever comes first.",
+    "emptyTitle": "No support grants yet",
+    "emptyDescription": "When you grant support access, the grant appears here with its role, purpose and expiry until it is revoked or expires."
   },
   "podSettings": {
     "title": "Pod Settings",
