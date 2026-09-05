@@ -44,7 +44,17 @@ const stories = readStorybookIndex();
 for (const story of stories) {
   const skipReason = SKIPPED_STORY_IDS[story.id];
 
-  test.describe(`${story.title} / ${story.name}`, () => {
+  type StoryRenderPhase = { phase?: string };
+type StorybookPreviewWindow = Window & { __STORYBOOK_PREVIEW__?: { storyRenders?: readonly StoryRenderPhase[] } };
+
+/** True once every story render, including its `play` function, has finished. Runs in the browser, so it is self-contained. */
+const storyRenderSettled = (): boolean => {
+  const settledPhases = ['finished', 'errored', 'aborted'];
+  const renders = (window as StorybookPreviewWindow).__STORYBOOK_PREVIEW__?.storyRenders ?? [];
+  return renders.every((render) => render.phase === undefined || settledPhases.includes(render.phase));
+};
+
+test.describe(`${story.title} / ${story.name}`, () => {
     for (const theme of THEMES) {
       test(`${story.id} [${theme}]`, async ({ page }) => {
         test.skip(Boolean(skipReason), skipReason);
@@ -52,6 +62,7 @@ for (const story of stories) {
         await page.goto(`/iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}`);
         await page.evaluate(() => document.fonts.ready);
         await page.waitForLoadState('networkidle');
+        await page.waitForFunction(storyRenderSettled);
 
         await expect(page).toHaveScreenshot(storyScreenshotName(story.id, theme));
       });

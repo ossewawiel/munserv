@@ -3,7 +3,7 @@ issue: 43
 story: W28
 title: "Pod Chief grants super user temporary access"
 platform: web
-status: completed
+status: done
 depends_on: [49]        # B8 backend support grants, merged (PR #65)
 touches:
   - web/src/features/support-access
@@ -32,6 +32,7 @@ files_changed:
   - web/src/locales/af/translation.json
   - web/src/locales/zu/translation.json
   - web/src/App.tsx
+  - web/src/features/support-access/SupportAccessSection.stories.tsx
 tests_added:
   - web/src/features/support-access/hooks.test.tsx
   - web/src/features/support-access/components/GrantAccessDialog.test.tsx
@@ -42,6 +43,12 @@ tests_added:
   - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--loading--dark.png
   - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--active-grant-conflict--light.png
   - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--active-grant-conflict--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--invalid-purpose--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-grantaccessdialog--invalid-purpose--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-supportaccesssection--empty--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-supportaccesssection--empty--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-supportaccesssection--active-grant--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-supportaccesssection--active-grant--dark.png
 ---
 
 # W28 · Pod Chief grants super user temporary access (Web)

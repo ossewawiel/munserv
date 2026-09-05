@@ -48,6 +48,6 @@ describe('GrantAccessDialog', () => {
       />
     );
 
-    expect(screen.getByText(/active grant already exists/i)).toBeInTheDocument();
+    expect(screen.getByText(/already has an active support grant/i)).toBeInTheDocument();
   });
 });
