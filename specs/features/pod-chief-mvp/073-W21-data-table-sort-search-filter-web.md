@@ -90,7 +90,8 @@ None. This is a presentational component; it calls no API and adds no type to `s
    `size="small"`, a `SearchIcon` through `slotProps.input.startAdornment` (MUI 9: `slotProps`, not
    `InputProps`), and `disabled={!search.onChange}`; `filterSlot` keeps its place after it. When
    `filterPanel` is set, render an `ActionButton` with `icon={<FilterListIcon />}` at the head of the
-   toolbar's right box, `disabled={!filterPanel.onClear}`, wrapped in an MUI `Badge` showing
+   toolbar's right box, enabled whenever `filterPanel` is set (only the clear button is gated on
+   `filterPanel.onClear`, so the panel and its placeholder copy stay reachable), wrapped in an MUI `Badge` showing
    `activeCount` when it is above zero; clicking it opens an MUI `Drawer` with `anchor="right"`,
    `slotProps={{ paper: { sx: { width: { xs: '100%', sm: 360 } } } }}`, a header with the title and a
    close `IconButton`, `filterPanel.content` as the body, and a clear button calling
