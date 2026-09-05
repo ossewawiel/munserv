@@ -60,7 +60,7 @@ class OnboardingService(
             )
 
         // Save with new password hash
-        val passwordHash = passwordEncoder.encode(newPassword)
+        val passwordHash = requireNotNull(passwordEncoder.encode(newPassword))
         val saved = adminRepository.updateWithPassword(updatedAdmin, passwordHash)
 
         return OnboardingResult.Success(saved)
@@ -166,22 +166,30 @@ sealed interface OnboardingResult {
     /**
      * Operation succeeded.
      */
-    data class Success(val admin: Admin) : OnboardingResult
+    data class Success(
+        val admin: Admin,
+    ) : OnboardingResult
 
     /**
      * Onboarding completed successfully.
      */
-    data class Completed(val admin: Admin) : OnboardingResult
+    data class Completed(
+        val admin: Admin,
+    ) : OnboardingResult
 
     /**
      * Administrator not found.
      */
-    data class AdminNotFound(val id: AdminId) : OnboardingResult
+    data class AdminNotFound(
+        val id: AdminId,
+    ) : OnboardingResult
 
     /**
      * Validation errors occurred.
      */
-    data class ValidationError(val errors: List<String>) : OnboardingResult
+    data class ValidationError(
+        val errors: List<String>,
+    ) : OnboardingResult
 
     /**
      * Invalid onboarding step - admin is not at the expected status.

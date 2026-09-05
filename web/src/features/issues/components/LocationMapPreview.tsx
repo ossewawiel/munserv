@@ -129,13 +129,20 @@ export const LocationMapPreview: FC<LocationMapPreviewProps> = ({
         onClose={handleCloseDialog}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: { maxHeight: '90vh' },
+        slotProps={{
+          paper: {
+            sx: { maxHeight: '90vh' },
+          }
         }}
       >
         <DialogTitle>{t('issues.location')}</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2
+            }}>
             {displayAddress}
           </Typography>
 

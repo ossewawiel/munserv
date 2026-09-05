@@ -78,10 +78,12 @@ class BootstrapController(
         val podId = PodId(pod.id.value)
 
         return when (val result = bootstrapService.createPodChief(request.email, request.displayName, podId)) {
-            is BootstrapResult.PodChiefCreated ->
+            is BootstrapResult.PodChiefCreated -> {
                 ResponseEntity.status(201).body(
                     CreatePodChiefResponse(
-                        id = result.admin.id.value.toString(),
+                        id =
+                            result.admin.id.value
+                                .toString(),
                         email = result.admin.email,
                         displayName = result.admin.displayName,
                         role = result.admin.role.toDbValue(),
@@ -89,26 +91,31 @@ class BootstrapController(
                         createdAt = result.admin.createdAt.toString(),
                     ),
                 )
+            }
 
-            is BootstrapResult.EmailAlreadyExists ->
+            is BootstrapResult.EmailAlreadyExists -> {
                 ResponseEntity.status(409).body(
                     BootstrapErrorResponse("email_exists", "Email already in use"),
                 )
+            }
 
-            is BootstrapResult.PodAlreadyBootstrapped ->
+            is BootstrapResult.PodAlreadyBootstrapped -> {
                 ResponseEntity.status(409).body(
                     BootstrapErrorResponse("already_bootstrapped", "Pod Chief already exists"),
                 )
+            }
 
-            is BootstrapResult.ValidationError ->
+            is BootstrapResult.ValidationError -> {
                 ResponseEntity.badRequest().body(
                     BootstrapValidationErrorResponse(messages = result.errors),
                 )
+            }
 
-            is BootstrapResult.NotAuthorized ->
+            is BootstrapResult.NotAuthorized -> {
                 ResponseEntity.status(403).body(
                     BootstrapErrorResponse("not_authorized", "Not authorized to create Pod Chief"),
                 )
+            }
         }
     }
 }

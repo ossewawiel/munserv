@@ -16,9 +16,18 @@ data class UpdatePodSettingsCommand(
 
         name?.let {
             when {
-                it.isBlank() -> errors.add("Pod name cannot be blank")
-                it.length < 2 -> errors.add("Pod name must be at least 2 characters")
-                it.length > 100 -> errors.add("Pod name must be at most 100 characters")
+                it.isBlank() -> {
+                    errors.add("Pod name cannot be blank")
+                }
+
+                it.length < 2 -> {
+                    errors.add("Pod name must be at least 2 characters")
+                }
+
+                it.length > 100 -> {
+                    errors.add("Pod name must be at most 100 characters")
+                }
+
                 else -> { /* valid */ }
             }
         }

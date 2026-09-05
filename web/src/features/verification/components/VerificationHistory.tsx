@@ -103,7 +103,13 @@ export const VerificationHistory: FC<VerificationHistoryProps> = ({
         />
         <Divider />
         <CardContent>
-          <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              textAlign: "center",
+              py: 2
+            }}>
             {t('verification.noHistory', 'No verification requests yet')}
           </Typography>
         </CardContent>
@@ -186,13 +192,17 @@ export const VerificationHistory: FC<VerificationHistoryProps> = ({
                   )}
 
                   {verification.status === 'pending' && verification.assignedToName && (
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       {t('verification.assignedTo', 'Assigned to')} {verification.assignedToName}
                     </Typography>
                   )}
 
                   {verification.reason && (
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       {t('verification.reason', 'Reason')}:{' '}
                       {t(`verification.reasons.${verification.reason}`, verification.reason)}
                     </Typography>
@@ -201,14 +211,22 @@ export const VerificationHistory: FC<VerificationHistoryProps> = ({
                   {verification.note && (
                     <Typography
                       variant="body2"
-                      color="text.secondary"
-                      sx={{ fontStyle: 'italic', mt: 0.5 }}
-                    >
+                      sx={{
+                        color: "text.secondary",
+                        fontStyle: 'italic',
+                        mt: 0.5
+                      }}>
                       "{verification.note}"
                     </Typography>
                   )}
 
-                  <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.disabled",
+                      display: 'block',
+                      mt: 0.5
+                    }}>
                     {formatDateTime(verification.requestedAt)}
                     {verification.respondedAt &&
                       ` → ${formatDateTime(verification.respondedAt)}`}

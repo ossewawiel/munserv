@@ -65,14 +65,12 @@ class OpenApiConfig {
                 }
                 ```
                 """.trimIndent(),
-            )
-            .version("1.0.0")
+            ).version("1.0.0")
             .contact(
                 Contact()
                     .name("MunServ Development Team")
                     .email("dev@munserv.example.com"),
-            )
-            .license(
+            ).license(
                 License()
                     .name("Proprietary")
                     .url("https://munserv.example.com/license"),

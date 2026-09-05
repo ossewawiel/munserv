@@ -166,7 +166,9 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
     return (
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ bgcolor: 'success.main', color: 'common.white' }}>
-          <Typography variant="h6" component="span" fontWeight={600}>
+          <Typography variant="h6" component="span" sx={{
+            fontWeight: 600
+          }}>
             {t('podAdministrators.success.created')}
           </Typography>
         </DialogTitle>
@@ -195,7 +197,9 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
             sx={{ mb: 1 }}
           />
           {passwordCopied && (
-            <Typography variant="caption" color="success.main">
+            <Typography variant="caption" sx={{
+              color: "success.main"
+            }}>
               {t('podAdministrators.passwordCopied')}
             </Typography>
           )}
@@ -212,7 +216,9 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ bgcolor: 'secondary.main', color: 'common.white' }}>
-        <Typography variant="h6" component="span" fontWeight={600}>
+        <Typography variant="h6" component="span" sx={{
+          fontWeight: 600
+        }}>
           {t('podAdministrators.addNew')}
         </Typography>
       </DialogTitle>

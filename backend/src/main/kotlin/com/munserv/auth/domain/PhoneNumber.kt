@@ -7,7 +7,9 @@ import java.security.MessageDigest
  * Phone numbers are normalized to include the + prefix.
  */
 @JvmInline
-value class PhoneNumber private constructor(val value: String) {
+value class PhoneNumber private constructor(
+    val value: String,
+) {
     /**
      * Generate SHA-256 hash of the phone number for storage.
      * The hash is used instead of storing raw phone numbers.

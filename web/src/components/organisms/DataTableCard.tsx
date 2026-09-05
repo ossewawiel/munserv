@@ -159,7 +159,9 @@ function PaginationFooter({
         py: 1.5,
       }}
     >
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" sx={{
+        color: "text.secondary"
+      }}>
         {t('pagination.showing')} <strong>{startItem}</strong>{' '}
         {t('pagination.to')} <strong>{endItem}</strong>{' '}
         {t('pagination.of')} <strong>{totalItems}</strong>{' '}
@@ -168,7 +170,9 @@ function PaginationFooter({
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {t('pagination.rowsPerPage')}
           </Typography>
           <FormControl size="small" variant="outlined">

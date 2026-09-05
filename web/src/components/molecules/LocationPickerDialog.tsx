@@ -224,16 +224,23 @@ export const LocationPickerDialog: FC<LocationPickerDialogProps> = ({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      TransitionProps={{
-        onEnter: handleDialogEnter,
-      }}
-      PaperProps={{
-        sx: { maxHeight: '90vh' },
-      }}
-    >
+      slotProps={{
+        transition: {
+          onEnter: handleDialogEnter,
+        },
+
+        paper: {
+          sx: { maxHeight: '90vh' },
+        }
+      }}>
       <DialogTitle>{t('auth.selectLocation')}</DialogTitle>
       <DialogContent>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 2
+          }}>
           {t('auth.selectLocationHelp')}
         </Typography>
 
@@ -289,13 +296,17 @@ export const LocationPickerDialog: FC<LocationPickerDialogProps> = ({
 
         {(selectedAddress || isGeocoding) && (
           <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: 1 }}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {t('auth.selectedAddress')}
             </Typography>
             {isGeocoding ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CircularProgress size={16} />
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   {t('auth.gettingAddress')}
                 </Typography>
               </Box>

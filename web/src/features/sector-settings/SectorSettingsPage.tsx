@@ -262,8 +262,10 @@ export const SectorSettingsPage: FC = () => {
                           'Issues in FIXED state will automatically move to CLOSED after this many days'
                         )
                       }
-                      inputProps={{ min: 1, max: 90 }}
                       onChange={(e) => field.onChange(Number(e.target.value))}
+                      slotProps={{
+                        htmlInput: { min: 1, max: 90 }
+                      }}
                     />
                   )}
                 />
@@ -284,7 +286,9 @@ export const SectorSettingsPage: FC = () => {
               />
               <Divider />
               <CardContent>
-                <Grid container spacing={3} alignItems="center">
+                <Grid container spacing={3} sx={{
+                  alignItems: "center"
+                }}>
                   <Grid size={{ xs: 12, md: 6 }}>
                     <Controller
                       name="minimumGroundAdmins"
@@ -307,8 +311,10 @@ export const SectorSettingsPage: FC = () => {
                               'You will see a warning if the number of active Ground Admins falls below this threshold'
                             )
                           }
-                          inputProps={{ min: 0, max: 50 }}
                           onChange={(e) => field.onChange(Number(e.target.value))}
+                          slotProps={{
+                            htmlInput: { min: 0, max: 50 }
+                          }}
                         />
                       )}
                     />
@@ -330,12 +336,15 @@ export const SectorSettingsPage: FC = () => {
                           <Box>
                             <Typography
                               variant="body2"
-                              fontWeight={600}
-                              color="warning.dark"
-                            >
+                              sx={{
+                                fontWeight: 600,
+                                color: "warning.dark"
+                              }}>
                               {t('sectorSettings.belowMinimum', 'Below minimum')}
                             </Typography>
-                            <Typography variant="caption" color="warning.dark">
+                            <Typography variant="caption" sx={{
+                              color: "warning.dark"
+                            }}>
                               {t(
                                 'sectorSettings.belowMinimumDescription',
                                 'You have {{current}} active Ground Admins, minimum is {{minimum}}',
@@ -353,12 +362,15 @@ export const SectorSettingsPage: FC = () => {
                           <Box>
                             <Typography
                               variant="body2"
-                              fontWeight={600}
-                              color="success.dark"
-                            >
+                              sx={{
+                                fontWeight: 600,
+                                color: "success.dark"
+                              }}>
                               {t('sectorSettings.atOrAboveMinimum', 'Requirement met')}
                             </Typography>
-                            <Typography variant="caption" color="success.dark">
+                            <Typography variant="caption" sx={{
+                              color: "success.dark"
+                            }}>
                               {t(
                                 'sectorSettings.currentGroundAdmins',
                                 '{{count}} active Ground Admins',

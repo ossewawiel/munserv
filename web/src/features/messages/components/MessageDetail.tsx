@@ -231,7 +231,9 @@ export const MessageDetail: FC<MessageDetailProps> = ({
             size="small"
           />
         </Box>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           {formatDateTime(message.createdAt)}
         </Typography>
       </Box>
@@ -248,7 +250,12 @@ export const MessageDetail: FC<MessageDetailProps> = ({
       {/* Metadata */}
       {message.metadata && Object.keys(message.metadata).length > 0 && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              color: "text.secondary",
+              mb: 1
+            }}>
             {t('messages.additionalInfo', 'Additional Information')}
           </Typography>
           <Box
@@ -262,7 +269,9 @@ export const MessageDetail: FC<MessageDetailProps> = ({
           >
             {Object.entries(message.metadata).map(([key, value]) => (
               <Box key={key} sx={{ mb: 1 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   {key}:
                 </Typography>{' '}
                 <Typography variant="body2" component="span">

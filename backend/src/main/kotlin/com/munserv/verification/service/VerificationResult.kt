@@ -8,25 +8,35 @@ sealed interface VerificationResult {
     /**
      * Operation completed successfully.
      */
-    data class Success(val data: Any? = null) : VerificationResult
+    data class Success(
+        val data: Any? = null,
+    ) : VerificationResult
 
     /**
      * Resource was not found.
      */
-    data class NotFound(val message: String) : VerificationResult
+    data class NotFound(
+        val message: String,
+    ) : VerificationResult
 
     /**
      * Operation conflicts with current state.
      */
-    data class Conflict(val message: String) : VerificationResult
+    data class Conflict(
+        val message: String,
+    ) : VerificationResult
 
     /**
      * Operation not authorized.
      */
-    data class Forbidden(val message: String) : VerificationResult
+    data class Forbidden(
+        val message: String,
+    ) : VerificationResult
 
     /**
      * Validation errors occurred.
      */
-    data class ValidationError(val errors: List<String>) : VerificationResult
+    data class ValidationError(
+        val errors: List<String>,
+    ) : VerificationResult
 }

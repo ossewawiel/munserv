@@ -74,13 +74,21 @@ export const AuthLayout: FC<AuthLayoutProps> = ({ children, header, subtitle }) 
               alt={t('common.appName')}
               sx={{ width: '65%', maxWidth: 280, height: 'auto', mb: 1 }}
             />
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               Municipal Service Admin Portal
             </Typography>
           </Box>
 
           {/* Welcome message (Berry Login3 pattern) */}
-          <Stack alignItems="center" justifyContent="center" spacing={0.5} sx={{ mb: 3 }}>
+          <Stack
+            spacing={0.5}
+            sx={{
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 3
+            }}>
             <Typography
               color="secondary"
               variant={matchDownSM ? 'h6' : 'h5'}
@@ -90,9 +98,10 @@ export const AuthLayout: FC<AuthLayoutProps> = ({ children, header, subtitle }) 
             </Typography>
             <Typography
               variant="body2"
-              color="text.secondary"
-              textAlign="center"
-            >
+              sx={{
+                color: "text.secondary",
+                textAlign: "center"
+              }}>
               {subtitleText}
             </Typography>
           </Stack>

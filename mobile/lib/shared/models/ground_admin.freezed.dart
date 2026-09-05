@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'ground_admin.dart';
@@ -9,6 +9,7 @@ part of 'ground_admin.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $GroundAdminInfoCopyWith<GroundAdminInfo> get copyWith => _$GroundAdminInfoCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroundAdminInfo&&(identical(other.status, status) || other.status == status)&&(identical(other.since, since) || other.since == since)&&(identical(other.responseRate, responseRate) || other.responseRate == responseRate)&&(identical(other.pendingVerifications, pendingVerifications) || other.pendingVerifications == pendingVerifications)&&(identical(other.totalVerifications, totalVerifications) || other.totalVerifications == totalVerifications));
+  final _this = this as GroundAdminInfo;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroundAdminInfo&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.since, _this.since) || other.since == _this.since)&&(identical(other.responseRate, _this.responseRate) || other.responseRate == _this.responseRate)&&(identical(other.pendingVerifications, _this.pendingVerifications) || other.pendingVerifications == _this.pendingVerifications)&&(identical(other.totalVerifications, _this.totalVerifications) || other.totalVerifications == _this.totalVerifications));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,status,since,responseRate,pendingVerifications,totalVerifications);
+int get hashCode {
+  final _this = this as GroundAdminInfo;
+  return Object.hash(runtimeType,_this.status,_this.since,_this.responseRate,_this.pendingVerifications,_this.totalVerifications);
+}
 
 @override
 String toString() {
-  return 'GroundAdminInfo(status: $status, since: $since, responseRate: $responseRate, pendingVerifications: $pendingVerifications, totalVerifications: $totalVerifications)';
+  final _this = this as GroundAdminInfo;
+  return 'GroundAdminInfo(status: ${_this.status}, since: ${_this.since}, responseRate: ${_this.responseRate}, pendingVerifications: ${_this.pendingVerifications}, totalVerifications: ${_this.totalVerifications})';
 }
 
 
@@ -66,7 +72,7 @@ class _$GroundAdminInfoCopyWithImpl<$Res>
 /// Create a copy of GroundAdminInfo
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? since = null,Object? responseRate = null,Object? pendingVerifications = null,Object? totalVerifications = null,}) {
-  return _then(_self.copyWith(
+  return _then(GroundAdminInfo(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as GroundAdminStatus,since: null == since ? _self.since : since // ignore: cast_nullable_to_non_nullable
 as DateTime,responseRate: null == responseRate ? _self.responseRate : responseRate // ignore: cast_nullable_to_non_nullable
@@ -235,16 +241,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroundAdminInfo&&(identical(other.status, status) || other.status == status)&&(identical(other.since, since) || other.since == since)&&(identical(other.responseRate, responseRate) || other.responseRate == responseRate)&&(identical(other.pendingVerifications, pendingVerifications) || other.pendingVerifications == pendingVerifications)&&(identical(other.totalVerifications, totalVerifications) || other.totalVerifications == totalVerifications));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroundAdminInfo&&(identical(other.status, status) || other.status == status)&&(identical(other.since, since) || other.since == since)&&(identical(other.responseRate, responseRate) || other.responseRate == responseRate)&&(identical(other.pendingVerifications, pendingVerifications) || other.pendingVerifications == pendingVerifications)&&(identical(other.totalVerifications, totalVerifications) || other.totalVerifications == totalVerifications));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,status,since,responseRate,pendingVerifications,totalVerifications);
+int get hashCode {
+    return Object.hash(runtimeType,status,since,responseRate,pendingVerifications,totalVerifications);
+}
 
 @override
 String toString() {
-  return 'GroundAdminInfo(status: $status, since: $since, responseRate: $responseRate, pendingVerifications: $pendingVerifications, totalVerifications: $totalVerifications)';
+    return 'GroundAdminInfo(status: $status, since: $since, responseRate: $responseRate, pendingVerifications: $pendingVerifications, totalVerifications: $totalVerifications)';
 }
 
 
@@ -303,16 +311,21 @@ $GroundAdminApplicationCopyWith<GroundAdminApplication> get copyWith => _$Ground
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroundAdminApplication&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status));
+  final _this = this as GroundAdminApplication;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroundAdminApplication&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.status, _this.status) || other.status == _this.status));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,status);
+int get hashCode {
+  final _this = this as GroundAdminApplication;
+  return Object.hash(runtimeType,_this.id,_this.status);
+}
 
 @override
 String toString() {
-  return 'GroundAdminApplication(id: $id, status: $status)';
+  final _this = this as GroundAdminApplication;
+  return 'GroundAdminApplication(id: ${_this.id}, status: ${_this.status})';
 }
 
 
@@ -341,7 +354,7 @@ class _$GroundAdminApplicationCopyWithImpl<$Res>
 /// Create a copy of GroundAdminApplication
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? status = null,}) {
-  return _then(_self.copyWith(
+  return _then(GroundAdminApplication(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,
@@ -504,16 +517,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroundAdminApplication&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroundAdminApplication&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,status);
+int get hashCode {
+    return Object.hash(runtimeType,id,status);
+}
 
 @override
 String toString() {
-  return 'GroundAdminApplication(id: $id, status: $status)';
+    return 'GroundAdminApplication(id: $id, status: $status)';
 }
 
 
@@ -569,16 +584,21 @@ $GroundAdminActionResponseCopyWith<GroundAdminActionResponse> get copyWith => _$
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroundAdminActionResponse&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.member, member));
+  final _this = this as GroundAdminActionResponse;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroundAdminActionResponse&&(identical(other.status, _this.status) || other.status == _this.status)&&const DeepCollectionEquality().equals(other.member, _this.member));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(member));
+int get hashCode {
+  final _this = this as GroundAdminActionResponse;
+  return Object.hash(runtimeType,_this.status,const DeepCollectionEquality().hash(_this.member));
+}
 
 @override
 String toString() {
-  return 'GroundAdminActionResponse(status: $status, member: $member)';
+  final _this = this as GroundAdminActionResponse;
+  return 'GroundAdminActionResponse(status: ${_this.status}, member: ${_this.member})';
 }
 
 
@@ -607,7 +627,7 @@ class _$GroundAdminActionResponseCopyWithImpl<$Res>
 /// Create a copy of GroundAdminActionResponse
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? member = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(GroundAdminActionResponse(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,member: freezed == member ? _self.member : member // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,
@@ -751,7 +771,7 @@ return $default(_that.status,_that.member);case _:
 @JsonSerializable()
 
 class _GroundAdminActionResponse implements GroundAdminActionResponse {
-  const _GroundAdminActionResponse({required this.status, final  Map<String, dynamic>? member}): _member = member;
+  const _GroundAdminActionResponse({required this.status,  Map<String, dynamic>? member}): _member = member;
   factory _GroundAdminActionResponse.fromJson(Map<String, dynamic> json) => _$GroundAdminActionResponseFromJson(json);
 
 @override final  String status;
@@ -778,16 +798,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroundAdminActionResponse&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._member, _member));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroundAdminActionResponse&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.member, _member));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_member));
+int get hashCode {
+    return Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_member));
+}
 
 @override
 String toString() {
-  return 'GroundAdminActionResponse(status: $status, member: $member)';
+    return 'GroundAdminActionResponse(status: $status, member: $member)';
 }
 
 

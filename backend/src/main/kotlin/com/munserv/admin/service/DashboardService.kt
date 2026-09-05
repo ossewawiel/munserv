@@ -33,7 +33,7 @@ class DashboardService(
         val byType = issues.groupingBy { it.type }.eachCount()
         val reportedThisWeek = issues.count { it.createdAt.isAfter(oneWeekAgo) }
 
-        // TODO: avgResolutionDays - implement when state history is available
+        // Tracked in #55: compute avgResolutionDays from issue state history
         return DashboardStats(
             sectorId = sector.id,
             sectorName = sector.name,

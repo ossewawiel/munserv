@@ -111,7 +111,8 @@ class IssueVerificationTest {
         @Test
         fun `isPending should be false when completed`() {
             val verification =
-                IssueVerification.createExistenceVerification(issueId)
+                IssueVerification
+                    .createExistenceVerification(issueId)
                     .complete(memberId, VerificationOutcome.CONFIRMED)
 
             verification.isPending shouldBe false

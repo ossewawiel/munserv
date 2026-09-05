@@ -85,13 +85,17 @@ export const LoginPage: FC = () => {
       />
 
       <Divider sx={{ my: 3 }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           {t('auth.or')}
         </Typography>
       </Divider>
 
       <Box sx={{ textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body2" gutterBottom sx={{
+          color: "text.secondary"
+        }}>
           {t('auth.newMember')}
         </Typography>
         <Button

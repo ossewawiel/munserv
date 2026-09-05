@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'message.dart';
@@ -9,6 +9,7 @@ part of 'message.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $MessageCopyWith<Message> get copyWith => _$MessageCopyWithImpl<Message>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Message&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.recipientId, recipientId) || other.recipientId == recipientId)&&(identical(other.recipientType, recipientType) || other.recipientType == recipientType)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.senderType, senderType) || other.senderType == senderType)&&(identical(other.status, status) || other.status == status)&&(identical(other.actionType, actionType) || other.actionType == actionType)&&(identical(other.relatedEntityId, relatedEntityId) || other.relatedEntityId == relatedEntityId)&&(identical(other.relatedEntityType, relatedEntityType) || other.relatedEntityType == relatedEntityType)&&(identical(other.actionResult, actionResult) || other.actionResult == actionResult)&&const DeepCollectionEquality().equals(other.metadata, metadata)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&(identical(other.actionedAt, actionedAt) || other.actionedAt == actionedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
+  final _this = this as Message;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Message&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.body, _this.body) || other.body == _this.body)&&(identical(other.recipientId, _this.recipientId) || other.recipientId == _this.recipientId)&&(identical(other.recipientType, _this.recipientType) || other.recipientType == _this.recipientType)&&(identical(other.senderId, _this.senderId) || other.senderId == _this.senderId)&&(identical(other.senderType, _this.senderType) || other.senderType == _this.senderType)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.actionType, _this.actionType) || other.actionType == _this.actionType)&&(identical(other.relatedEntityId, _this.relatedEntityId) || other.relatedEntityId == _this.relatedEntityId)&&(identical(other.relatedEntityType, _this.relatedEntityType) || other.relatedEntityType == _this.relatedEntityType)&&(identical(other.actionResult, _this.actionResult) || other.actionResult == _this.actionResult)&&const DeepCollectionEquality().equals(other.metadata, _this.metadata)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.readAt, _this.readAt) || other.readAt == _this.readAt)&&(identical(other.actionedAt, _this.actionedAt) || other.actionedAt == _this.actionedAt)&&(identical(other.expiresAt, _this.expiresAt) || other.expiresAt == _this.expiresAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,title,body,recipientId,recipientType,senderId,senderType,status,actionType,relatedEntityId,relatedEntityType,actionResult,const DeepCollectionEquality().hash(metadata),createdAt,readAt,actionedAt,expiresAt);
+int get hashCode {
+  final _this = this as Message;
+  return Object.hash(runtimeType,_this.id,_this.type,_this.title,_this.body,_this.recipientId,_this.recipientType,_this.senderId,_this.senderType,_this.status,_this.actionType,_this.relatedEntityId,_this.relatedEntityType,_this.actionResult,const DeepCollectionEquality().hash(_this.metadata),_this.createdAt,_this.readAt,_this.actionedAt,_this.expiresAt);
+}
 
 @override
 String toString() {
-  return 'Message(id: $id, type: $type, title: $title, body: $body, recipientId: $recipientId, recipientType: $recipientType, senderId: $senderId, senderType: $senderType, status: $status, actionType: $actionType, relatedEntityId: $relatedEntityId, relatedEntityType: $relatedEntityType, actionResult: $actionResult, metadata: $metadata, createdAt: $createdAt, readAt: $readAt, actionedAt: $actionedAt, expiresAt: $expiresAt)';
+  final _this = this as Message;
+  return 'Message(id: ${_this.id}, type: ${_this.type}, title: ${_this.title}, body: ${_this.body}, recipientId: ${_this.recipientId}, recipientType: ${_this.recipientType}, senderId: ${_this.senderId}, senderType: ${_this.senderType}, status: ${_this.status}, actionType: ${_this.actionType}, relatedEntityId: ${_this.relatedEntityId}, relatedEntityType: ${_this.relatedEntityType}, actionResult: ${_this.actionResult}, metadata: ${_this.metadata}, createdAt: ${_this.createdAt}, readAt: ${_this.readAt}, actionedAt: ${_this.actionedAt}, expiresAt: ${_this.expiresAt})';
 }
 
 
@@ -66,7 +72,7 @@ class _$MessageCopyWithImpl<$Res>
 /// Create a copy of Message
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? title = null,Object? body = null,Object? recipientId = null,Object? recipientType = null,Object? senderId = freezed,Object? senderType = freezed,Object? status = null,Object? actionType = freezed,Object? relatedEntityId = freezed,Object? relatedEntityType = freezed,Object? actionResult = freezed,Object? metadata = freezed,Object? createdAt = null,Object? readAt = freezed,Object? actionedAt = freezed,Object? expiresAt = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(Message(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as MessageType,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -226,7 +232,7 @@ return $default(_that.id,_that.type,_that.title,_that.body,_that.recipientId,_th
 @JsonSerializable()
 
 class _Message extends Message {
-  const _Message({required this.id, required this.type, required this.title, required this.body, required this.recipientId, required this.recipientType, this.senderId, this.senderType, required this.status, this.actionType, this.relatedEntityId, this.relatedEntityType, this.actionResult, final  Map<String, dynamic>? metadata, required this.createdAt, this.readAt, this.actionedAt, this.expiresAt}): _metadata = metadata,super._();
+  const _Message({required this.id, required this.type, required this.title, required this.body, required this.recipientId, required this.recipientType, this.senderId, this.senderType, required this.status, this.actionType, this.relatedEntityId, this.relatedEntityType, this.actionResult,  Map<String, dynamic>? metadata, required this.createdAt, this.readAt, this.actionedAt, this.expiresAt}): _metadata = metadata,super._();
   factory _Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
 
 @override final  String id;
@@ -269,16 +275,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Message&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.recipientId, recipientId) || other.recipientId == recipientId)&&(identical(other.recipientType, recipientType) || other.recipientType == recipientType)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.senderType, senderType) || other.senderType == senderType)&&(identical(other.status, status) || other.status == status)&&(identical(other.actionType, actionType) || other.actionType == actionType)&&(identical(other.relatedEntityId, relatedEntityId) || other.relatedEntityId == relatedEntityId)&&(identical(other.relatedEntityType, relatedEntityType) || other.relatedEntityType == relatedEntityType)&&(identical(other.actionResult, actionResult) || other.actionResult == actionResult)&&const DeepCollectionEquality().equals(other._metadata, _metadata)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&(identical(other.actionedAt, actionedAt) || other.actionedAt == actionedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Message&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.recipientId, recipientId) || other.recipientId == recipientId)&&(identical(other.recipientType, recipientType) || other.recipientType == recipientType)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.senderType, senderType) || other.senderType == senderType)&&(identical(other.status, status) || other.status == status)&&(identical(other.actionType, actionType) || other.actionType == actionType)&&(identical(other.relatedEntityId, relatedEntityId) || other.relatedEntityId == relatedEntityId)&&(identical(other.relatedEntityType, relatedEntityType) || other.relatedEntityType == relatedEntityType)&&(identical(other.actionResult, actionResult) || other.actionResult == actionResult)&&const DeepCollectionEquality().equals(other.metadata, _metadata)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&(identical(other.actionedAt, actionedAt) || other.actionedAt == actionedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,title,body,recipientId,recipientType,senderId,senderType,status,actionType,relatedEntityId,relatedEntityType,actionResult,const DeepCollectionEquality().hash(_metadata),createdAt,readAt,actionedAt,expiresAt);
+int get hashCode {
+    return Object.hash(runtimeType,id,type,title,body,recipientId,recipientType,senderId,senderType,status,actionType,relatedEntityId,relatedEntityType,actionResult,const DeepCollectionEquality().hash(_metadata),createdAt,readAt,actionedAt,expiresAt);
+}
 
 @override
 String toString() {
-  return 'Message(id: $id, type: $type, title: $title, body: $body, recipientId: $recipientId, recipientType: $recipientType, senderId: $senderId, senderType: $senderType, status: $status, actionType: $actionType, relatedEntityId: $relatedEntityId, relatedEntityType: $relatedEntityType, actionResult: $actionResult, metadata: $metadata, createdAt: $createdAt, readAt: $readAt, actionedAt: $actionedAt, expiresAt: $expiresAt)';
+    return 'Message(id: $id, type: $type, title: $title, body: $body, recipientId: $recipientId, recipientType: $recipientType, senderId: $senderId, senderType: $senderType, status: $status, actionType: $actionType, relatedEntityId: $relatedEntityId, relatedEntityType: $relatedEntityType, actionResult: $actionResult, metadata: $metadata, createdAt: $createdAt, readAt: $readAt, actionedAt: $actionedAt, expiresAt: $expiresAt)';
 }
 
 
@@ -350,16 +358,21 @@ $MessageListResponseCopyWith<MessageListResponse> get copyWith => _$MessageListR
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessageListResponse&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
+  final _this = this as MessageListResponse;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessageListResponse&&const DeepCollectionEquality().equals(other.items, _this.items)&&(identical(other.total, _this.total) || other.total == _this.total)&&(identical(other.page, _this.page) || other.page == _this.page)&&(identical(other.unreadCount, _this.unreadCount) || other.unreadCount == _this.unreadCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items),total,page,unreadCount);
+int get hashCode {
+  final _this = this as MessageListResponse;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.items),_this.total,_this.page,_this.unreadCount);
+}
 
 @override
 String toString() {
-  return 'MessageListResponse(items: $items, total: $total, page: $page, unreadCount: $unreadCount)';
+  final _this = this as MessageListResponse;
+  return 'MessageListResponse(items: ${_this.items}, total: ${_this.total}, page: ${_this.page}, unreadCount: ${_this.unreadCount})';
 }
 
 
@@ -388,7 +401,7 @@ class _$MessageListResponseCopyWithImpl<$Res>
 /// Create a copy of MessageListResponse
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? total = null,Object? page = null,Object? unreadCount = null,}) {
-  return _then(_self.copyWith(
+  return _then(MessageListResponse(
 items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<Message>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
@@ -534,7 +547,7 @@ return $default(_that.items,_that.total,_that.page,_that.unreadCount);case _:
 @JsonSerializable()
 
 class _MessageListResponse implements MessageListResponse {
-  const _MessageListResponse({required final  List<Message> items, required this.total, required this.page, required this.unreadCount}): _items = items;
+  const _MessageListResponse({required  List<Message> items, required this.total, required this.page, required this.unreadCount}): _items = items;
   factory _MessageListResponse.fromJson(Map<String, dynamic> json) => _$MessageListResponseFromJson(json);
 
  final  List<Message> _items;
@@ -561,16 +574,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessageListResponse&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessageListResponse&&const DeepCollectionEquality().equals(other.items, _items)&&(identical(other.total, total) || other.total == total)&&(identical(other.page, page) || other.page == page)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),total,page,unreadCount);
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),total,page,unreadCount);
+}
 
 @override
 String toString() {
-  return 'MessageListResponse(items: $items, total: $total, page: $page, unreadCount: $unreadCount)';
+    return 'MessageListResponse(items: $items, total: $total, page: $page, unreadCount: $unreadCount)';
 }
 
 
@@ -628,16 +643,21 @@ $MessageActionRequestCopyWith<MessageActionRequest> get copyWith => _$MessageAct
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessageActionRequest&&(identical(other.action, action) || other.action == action)&&(identical(other.note, note) || other.note == note));
+  final _this = this as MessageActionRequest;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessageActionRequest&&(identical(other.action, _this.action) || other.action == _this.action)&&(identical(other.note, _this.note) || other.note == _this.note));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,action,note);
+int get hashCode {
+  final _this = this as MessageActionRequest;
+  return Object.hash(runtimeType,_this.action,_this.note);
+}
 
 @override
 String toString() {
-  return 'MessageActionRequest(action: $action, note: $note)';
+  final _this = this as MessageActionRequest;
+  return 'MessageActionRequest(action: ${_this.action}, note: ${_this.note})';
 }
 
 
@@ -666,7 +686,7 @@ class _$MessageActionRequestCopyWithImpl<$Res>
 /// Create a copy of MessageActionRequest
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? action = null,Object? note = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(MessageActionRequest(
 action: null == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -829,16 +849,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessageActionRequest&&(identical(other.action, action) || other.action == action)&&(identical(other.note, note) || other.note == note));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessageActionRequest&&(identical(other.action, action) || other.action == action)&&(identical(other.note, note) || other.note == note));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,action,note);
+int get hashCode {
+    return Object.hash(runtimeType,action,note);
+}
 
 @override
 String toString() {
-  return 'MessageActionRequest(action: $action, note: $note)';
+    return 'MessageActionRequest(action: $action, note: $note)';
 }
 
 

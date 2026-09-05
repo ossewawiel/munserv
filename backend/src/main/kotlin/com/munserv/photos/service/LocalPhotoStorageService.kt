@@ -40,8 +40,8 @@ class LocalPhotoStorageService(
     override fun store(
         file: MultipartFile,
         photoId: PhotoId,
-    ): UploadResult {
-        return try {
+    ): UploadResult =
+        try {
             val extension = getExtension(file)
             val filename = "${photoId.value}.$extension"
             val targetPath = Paths.get(uploadDir, filename)
@@ -61,14 +61,14 @@ class LocalPhotoStorageService(
             logger.error("Failed to store photo: ${e.message}", e)
             UploadResult.StorageError("Failed to store photo: ${e.message}")
         }
-    }
 
     override fun delete(photoId: PhotoId): Boolean {
         return try {
             // Find the file matching this photoId
             val uploadPath = Paths.get(uploadDir)
             val matchingFiles =
-                Files.walk(uploadPath, 1)
+                Files
+                    .walk(uploadPath, 1)
                     .filter { Files.isRegularFile(it) }
                     .filter { it.fileName.toString().startsWith(photoId.value.toString()) }
                     .toList()

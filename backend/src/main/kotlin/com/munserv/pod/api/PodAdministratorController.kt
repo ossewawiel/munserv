@@ -77,23 +77,30 @@ class PodAdministratorController(
                 )
 
         return when (val result = adminService.listAdminsByPod(podId, actorId)) {
-            is AdminResult.ListSuccess ->
+            is AdminResult.ListSuccess -> {
                 ResponseEntity.ok(
                     AdminListResponse(
                         items = result.admins.map { AdminResponse.from(it) },
                         total = result.total,
                     ),
                 )
-            is AdminResult.Unauthorized ->
+            }
+
+            is AdminResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorResponse("unauthorized", result.reason),
                 )
-            is AdminResult.OutOfScope ->
+            }
+
+            is AdminResult.OutOfScope -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse("out_of_scope", result.reason),
                 )
-            else ->
+            }
+
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 
@@ -125,24 +132,35 @@ class PodAdministratorController(
                 )
 
         return when (val result = adminService.getAdmin(AdminId(id), actorId)) {
-            is AdminResult.Success ->
+            is AdminResult.Success -> {
                 ResponseEntity.ok(AdminResponse.from(result.admin))
-            is AdminResult.NotFound ->
+            }
+
+            is AdminResult.NotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is AdminResult.CrossPodOperation ->
+            }
+
+            is AdminResult.CrossPodOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse("cross_pod", "Cannot access administrator in a different pod"),
                 )
-            is AdminResult.OutOfScope ->
+            }
+
+            is AdminResult.OutOfScope -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse("out_of_scope", result.reason),
                 )
-            is AdminResult.Unauthorized ->
+            }
+
+            is AdminResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorResponse("unauthorized", result.reason),
                 )
-            else ->
+            }
+
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 
@@ -190,39 +208,54 @@ class PodAdministratorController(
             }
 
         return when (val result = adminService.createAdmin(command, actorId)) {
-            is AdminResult.Created ->
+            is AdminResult.Created -> {
                 ResponseEntity.status(HttpStatus.CREATED).body(
                     AdminCreatedResponse.from(result.admin, result.temporaryPassword),
                 )
-            is AdminResult.EmailAlreadyExists ->
+            }
+
+            is AdminResult.EmailAlreadyExists -> {
                 ResponseEntity.status(HttpStatus.CONFLICT).body(
                     ErrorResponse("email_exists", "Email ${result.email} is already registered"),
                 )
-            is AdminResult.ValidationError ->
+            }
+
+            is AdminResult.ValidationError -> {
                 ResponseEntity.badRequest().body(
                     ErrorResponse("validation_error", result.errors.joinToString("; ")),
                 )
-            is AdminResult.InsufficientRoleToManage ->
+            }
+
+            is AdminResult.InsufficientRoleToManage -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse(
                         "insufficient_permissions",
                         "Cannot create administrator with role ${result.targetRole.toDbValue()}",
                     ),
                 )
-            is AdminResult.CrossPodOperation ->
+            }
+
+            is AdminResult.CrossPodOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse("cross_pod", "Cannot create administrator in a different pod"),
                 )
-            is AdminResult.OutOfScope ->
+            }
+
+            is AdminResult.OutOfScope -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse("out_of_scope", result.reason),
                 )
-            is AdminResult.Unauthorized ->
+            }
+
+            is AdminResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorResponse("unauthorized", result.reason),
                 )
-            else ->
+            }
+
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 
@@ -256,35 +289,50 @@ class PodAdministratorController(
                 )
 
         return when (val result = adminService.updateAdmin(AdminId(id), request.toCommand(), actorId)) {
-            is AdminResult.Success ->
+            is AdminResult.Success -> {
                 ResponseEntity.ok(AdminResponse.from(result.admin))
-            is AdminResult.NotFound ->
+            }
+
+            is AdminResult.NotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is AdminResult.ValidationError ->
+            }
+
+            is AdminResult.ValidationError -> {
                 ResponseEntity.badRequest().body(
                     ErrorResponse("validation_error", result.errors.joinToString("; ")),
                 )
-            is AdminResult.InsufficientRoleToManage ->
+            }
+
+            is AdminResult.InsufficientRoleToManage -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse(
                         "insufficient_permissions",
                         "Cannot modify administrator with role ${result.targetRole.toDbValue()}",
                     ),
                 )
-            is AdminResult.CrossPodOperation ->
+            }
+
+            is AdminResult.CrossPodOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse("cross_pod", "Cannot modify administrator in a different pod"),
                 )
-            is AdminResult.OutOfScope ->
+            }
+
+            is AdminResult.OutOfScope -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse("out_of_scope", result.reason),
                 )
-            is AdminResult.Unauthorized ->
+            }
+
+            is AdminResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorResponse("unauthorized", result.reason),
                 )
-            else ->
+            }
+
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 
@@ -312,35 +360,50 @@ class PodAdministratorController(
                 )
 
         return when (val result = adminService.deleteAdmin(AdminId(id), actorId)) {
-            is AdminResult.Deleted ->
+            is AdminResult.Deleted -> {
                 ResponseEntity.noContent().build<Any>()
-            is AdminResult.NotFound ->
+            }
+
+            is AdminResult.NotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is AdminResult.CannotDeleteSelf ->
+            }
+
+            is AdminResult.CannotDeleteSelf -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse("cannot_delete_self", "Cannot delete your own account"),
                 )
-            is AdminResult.InsufficientRoleToManage ->
+            }
+
+            is AdminResult.InsufficientRoleToManage -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse(
                         "insufficient_permissions",
                         "Cannot delete administrator with role ${result.targetRole.toDbValue()}",
                     ),
                 )
-            is AdminResult.CrossPodOperation ->
+            }
+
+            is AdminResult.CrossPodOperation -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse("cross_pod", "Cannot delete administrator in a different pod"),
                 )
-            is AdminResult.OutOfScope ->
+            }
+
+            is AdminResult.OutOfScope -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     ErrorResponse("out_of_scope", result.reason),
                 )
-            is AdminResult.Unauthorized ->
+            }
+
+            is AdminResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorResponse("unauthorized", result.reason),
                 )
-            else ->
+            }
+
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 

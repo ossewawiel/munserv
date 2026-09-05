@@ -94,7 +94,9 @@ export const CreateAdminDialog: FC<CreateAdminDialogProps> = ({
     return (
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ bgcolor: 'success.main', color: 'common.white' }}>
-          <Typography variant="h6" component="span" fontWeight={600}>
+          <Typography variant="h6" component="span" sx={{
+            fontWeight: 600
+          }}>
             {t('adminManagement.success.created', 'Admin created successfully')}
           </Typography>
         </DialogTitle>
@@ -126,7 +128,9 @@ export const CreateAdminDialog: FC<CreateAdminDialogProps> = ({
             sx={{ mb: 1 }}
           />
           {passwordCopied && (
-            <Typography variant="caption" color="success.main">
+            <Typography variant="caption" sx={{
+              color: "success.main"
+            }}>
               {t('adminManagement.passwordCopied', 'Password copied to clipboard')}
             </Typography>
           )}
@@ -143,7 +147,9 @@ export const CreateAdminDialog: FC<CreateAdminDialogProps> = ({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ bgcolor: 'secondary.main', color: 'common.white' }}>
-        <Typography variant="h6" component="span" fontWeight={600}>
+        <Typography variant="h6" component="span" sx={{
+          fontWeight: 600
+        }}>
           {t('adminManagement.createAdmin', 'Create Admin')}
         </Typography>
       </DialogTitle>

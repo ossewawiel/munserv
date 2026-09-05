@@ -66,14 +66,21 @@ class PodDashboardController(
                 )
 
         return when (val result = dashboardService.getPodStats(podId)) {
-            is PodResult.Success ->
+            is PodResult.Success -> {
                 ResponseEntity.ok(PodDashboardStatsResponse.from(result.data))
-            is PodResult.NotFound ->
+            }
+
+            is PodResult.NotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is PodResult.ValidationError ->
+            }
+
+            is PodResult.ValidationError -> {
                 ResponseEntity.badRequest().body(ErrorResponse("validation_error", result.errors.joinToString("; ")))
-            is PodResult.Unauthorized ->
+            }
+
+            is PodResult.Unauthorized -> {
                 ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse("forbidden", result.reason))
+            }
         }
     }
 
@@ -105,12 +112,17 @@ class PodDashboardController(
             )
 
         return when (val result = dashboardService.getWardStats(WardId(wardId))) {
-            is DashboardResult.Success ->
+            is DashboardResult.Success -> {
                 ResponseEntity.ok(WardDashboardStatsResponse.from(result.data))
-            is DashboardResult.WardNotFound ->
+            }
+
+            is DashboardResult.WardNotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is DashboardResult.SectorNotFound ->
+            }
+
+            is DashboardResult.SectorNotFound -> {
                 ResponseEntity.notFound().build<Any>()
+            }
         }
     }
 
@@ -142,12 +154,17 @@ class PodDashboardController(
             )
 
         return when (val result = dashboardService.getSectorStats(SectorId(sectorId))) {
-            is DashboardResult.Success ->
+            is DashboardResult.Success -> {
                 ResponseEntity.ok(SectorDashboardStatsResponse.from(result.data))
-            is DashboardResult.WardNotFound ->
+            }
+
+            is DashboardResult.WardNotFound -> {
                 ResponseEntity.notFound().build<Any>()
-            is DashboardResult.SectorNotFound ->
+            }
+
+            is DashboardResult.SectorNotFound -> {
                 ResponseEntity.notFound().build<Any>()
+            }
         }
     }
 

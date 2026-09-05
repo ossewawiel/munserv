@@ -76,9 +76,10 @@ class SectorEntity(
             val boundaryPolygon =
                 sector.boundary?.let { points ->
                     val coordinates =
-                        points.map { point ->
-                            Coordinate(point.longitude, point.latitude)
-                        }.toTypedArray()
+                        points
+                            .map { point ->
+                                Coordinate(point.longitude, point.latitude)
+                            }.toTypedArray()
                     geometryFactory.createPolygon(coordinates)
                 }
 

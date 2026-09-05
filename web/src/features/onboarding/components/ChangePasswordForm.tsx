@@ -80,19 +80,21 @@ export const ChangePasswordForm: FC<ChangePasswordFormProps> = ({
           placeholder="••••••••"
           autoComplete="new-password"
           disabled={isLoading}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="toggle password visibility"
-                  onClick={handleTogglePassword}
-                  edge="end"
-                  size="small"
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleTogglePassword}
+                    edge="end"
+                    size="small"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
           }}
         />
         <PasswordRequirements validation={passwordValidation} />
@@ -108,19 +110,21 @@ export const ChangePasswordForm: FC<ChangePasswordFormProps> = ({
         placeholder="••••••••"
         autoComplete="new-password"
         disabled={isLoading}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle confirm password visibility"
-                onClick={handleToggleConfirmPassword}
-                edge="end"
-                size="small"
-              >
-                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle confirm password visibility"
+                  onClick={handleToggleConfirmPassword}
+                  edge="end"
+                  size="small"
+                >
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
         }}
       />
 

@@ -203,7 +203,8 @@ describe('AuthLayout', () => {
 
       const wrapper = container.firstChild as HTMLElement;
       const computedStyle = window.getComputedStyle(wrapper);
-      expect(computedStyle.minHeight).toBe('100vh');
+      // jsdom 30 resolves viewport units to pixels; older versions return the raw value
+      expect(['100vh', `${window.innerHeight}px`]).toContain(computedStyle.minHeight);
     });
   });
 });

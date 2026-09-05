@@ -31,7 +31,8 @@ class HeatReportService(
     ): List<HeatReportItem> {
         val now = clock.instant()
 
-        return issueRepository.findBySectorId(sectorId)
+        return issueRepository
+            .findBySectorId(sectorId)
             .filter { it.isOpen }
             .sortedByDescending { it.heat }
             .take(limit)

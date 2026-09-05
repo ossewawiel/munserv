@@ -44,7 +44,9 @@ export const PhotoGallery: FC<PhotoGalleryProps> = ({
           bgcolor: 'var(--munserv-palette-background-paper)',
         }}
       >
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           {t('common.noResults')}
         </Typography>
       </Box>

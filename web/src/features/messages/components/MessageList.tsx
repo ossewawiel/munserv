@@ -89,7 +89,9 @@ export const MessageList: FC<MessageListProps> = ({
         }}
       >
         <MarkEmailReadIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{
+          color: "text.secondary"
+        }}>
           {t('messages.empty', 'No messages')}
         </Typography>
       </Box>
@@ -131,10 +133,11 @@ export const MessageList: FC<MessageListProps> = ({
                 )}
                 <Typography
                   variant="body2"
-                  fontWeight={message.status === 'unread' ? 600 : 400}
                   noWrap
-                  sx={{ flex: 1 }}
-                >
+                  sx={{
+                    fontWeight: message.status === 'unread' ? 600 : 400,
+                    flex: 1
+                  }}>
                   {message.title}
                 </Typography>
               </Box>
@@ -143,23 +146,24 @@ export const MessageList: FC<MessageListProps> = ({
               <Box component="span" sx={{ display: 'block', mt: 0.5 }}>
                 <Typography
                   variant="caption"
-                  color="text.secondary"
                   component="span"
                   sx={{
+                    color: "text.secondary",
                     display: 'block',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
+                    whiteSpace: 'nowrap'
+                  }}>
                   {message.body}
                 </Typography>
                 <Typography
                   variant="caption"
-                  color="text.disabled"
                   component="span"
-                  sx={{ display: 'block', mt: 0.5 }}
-                >
+                  sx={{
+                    color: "text.disabled",
+                    display: 'block',
+                    mt: 0.5
+                  }}>
                   {formatRelativeTime(message.createdAt)}
                 </Typography>
               </Box>

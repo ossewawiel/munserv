@@ -109,7 +109,7 @@ class BootstrapService(
 
         // Generate temporary password
         val temporaryPassword = generateTemporaryPassword()
-        val passwordHash = passwordEncoder.encode(temporaryPassword)
+        val passwordHash = requireNotNull(passwordEncoder.encode(temporaryPassword))
 
         // Create Pod Chief
         val now = Instant.now(clock)

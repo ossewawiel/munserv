@@ -3,7 +3,9 @@ package com.munserv.verification.domain
 /**
  * Enum representing the status of a verification request.
  */
-enum class VerificationStatus(private val dbValue: String) {
+enum class VerificationStatus(
+    private val dbValue: String,
+) {
     /**
      * Verification is waiting for a Ground Admin to respond.
      */

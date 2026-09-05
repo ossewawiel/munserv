@@ -33,8 +33,9 @@ class JwtAuthenticationFilter(
         if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
             val token = authHeader.substring(BEARER_PREFIX.length)
             val validation = jwtService.validateToken(token)
+            val subject = validation.subject
 
-            if (validation.isValid && validation.tokenType == TokenType.ACCESS) {
+            if (validation.isValid && validation.tokenType == TokenType.ACCESS && subject != null) {
                 val authorities =
                     validation.role?.let {
                         listOf(SimpleGrantedAuthority("ROLE_${it.uppercase()}"))
@@ -42,7 +43,7 @@ class JwtAuthenticationFilter(
 
                 val authentication =
                     UsernamePasswordAuthenticationToken(
-                        validation.subject,
+                        subject,
                         null,
                         authorities,
                     )

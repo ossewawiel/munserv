@@ -15,7 +15,9 @@ sealed interface AdminResult {
     /**
      * Operation completed successfully with an admin.
      */
-    data class Success(val admin: Admin) : AdminResult
+    data class Success(
+        val admin: Admin,
+    ) : AdminResult
 
     /**
      * Admin creation succeeded, includes temporary password.
@@ -41,22 +43,30 @@ sealed interface AdminResult {
     /**
      * Admin was not found.
      */
-    data class NotFound(val id: AdminId) : AdminResult
+    data class NotFound(
+        val id: AdminId,
+    ) : AdminResult
 
     /**
      * Email is already registered to another admin.
      */
-    data class EmailAlreadyExists(val email: String) : AdminResult
+    data class EmailAlreadyExists(
+        val email: String,
+    ) : AdminResult
 
     /**
      * Validation errors occurred.
      */
-    data class ValidationError(val errors: List<String>) : AdminResult
+    data class ValidationError(
+        val errors: List<String>,
+    ) : AdminResult
 
     /**
      * Operation not authorized - insufficient permissions.
      */
-    data class Unauthorized(val reason: String) : AdminResult
+    data class Unauthorized(
+        val reason: String,
+    ) : AdminResult
 
     /**
      * Cannot manage admin in a different sector (for sector-level admins).
@@ -98,5 +108,7 @@ sealed interface AdminResult {
     /**
      * Target admin is outside the actor's scope.
      */
-    data class OutOfScope(val reason: String) : AdminResult
+    data class OutOfScope(
+        val reason: String,
+    ) : AdminResult
 }

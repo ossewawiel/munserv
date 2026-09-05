@@ -437,27 +437,25 @@ class IssueServiceTest {
 }
 ```
 
-### Integration Test Pattern (TestContainers)
+### Integration Test Pattern (Testcontainers)
+Every Spring context test imports the shared `TestContainersConfig`, which
+exposes a PostGIS `PostgreSQLContainer` bean with `@ServiceConnection`. No
+`@DynamicPropertySource` and no datasource URL in `application-test.yml`.
 ```kotlin
-@DataJpaTest
-@Testcontainers
+@SpringBootTest
+@Import(TestContainersConfig::class)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class IssueRepositoryTest {
-    companion object {
-        @Container
-        val postgres = PostgreSQLContainer(
-            DockerImageName.parse("postgis/postgis:15-3.3-alpine")
-        )
+class IssueApiContractTest { ... }
 
-        @JvmStatic
-        @DynamicPropertySource
-        fun configureProperties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.datasource.url") { postgres.jdbcUrl }
-        }
-    }
-}
+@DataJpaTest
+@Import(TestContainersConfig::class, JpaIssueRepository::class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class IssueRepositoryTest { ... }
 ```
+Boot 4 packages: `org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc`,
+`org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest`,
+`org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase`.
 
 ### API Contract Test Pattern
 ```kotlin

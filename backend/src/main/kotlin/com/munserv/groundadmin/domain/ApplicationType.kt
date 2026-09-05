@@ -3,7 +3,9 @@ package com.munserv.groundadmin.domain
 /**
  * Type of Ground Admin application/invitation.
  */
-enum class ApplicationType(private val dbValue: String) {
+enum class ApplicationType(
+    private val dbValue: String,
+) {
     APPLICATION("application"),
     INVITATION("invitation"),
     ;

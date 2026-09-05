@@ -19,7 +19,8 @@ class MemberService(
      */
     @Transactional(readOnly = true)
     fun findById(id: MemberId): MemberResult =
-        memberRepository.findById(id)
+        memberRepository
+            .findById(id)
             ?.let { MemberResult.Success(it) }
             ?: MemberResult.NotFound(id)
 }
@@ -31,10 +32,14 @@ sealed interface MemberResult {
     /**
      * Operation completed successfully.
      */
-    data class Success(val member: Member) : MemberResult
+    data class Success(
+        val member: Member,
+    ) : MemberResult
 
     /**
      * Member was not found.
      */
-    data class NotFound(val id: MemberId) : MemberResult
+    data class NotFound(
+        val id: MemberId,
+    ) : MemberResult
 }

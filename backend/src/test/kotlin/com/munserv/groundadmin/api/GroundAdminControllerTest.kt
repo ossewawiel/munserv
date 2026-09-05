@@ -1,6 +1,5 @@
 package com.munserv.groundadmin.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.TestContainersConfig
 import com.munserv.auth.service.JwtService
 import com.munserv.groundadmin.domain.GroundAdminApplicationId
@@ -16,8 +15,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -25,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.ObjectMapper
 import java.time.Instant
 import java.util.UUID
 
@@ -65,12 +65,13 @@ class GroundAdminControllerTest {
             every { groundAdminService.apply(testMemberId) } returns
                 GroundAdminResult.Success(mapOf("applicationId" to applicationId.toString(), "status" to "pending"))
 
-            mockMvc.post("/api/v1/members/me/ground-admin/apply") {
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-            }
+            mockMvc
+                .post("/api/v1/members/me/ground-admin/apply") {
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                }
 
             verify { groundAdminService.apply(testMemberId) }
         }
@@ -81,11 +82,12 @@ class GroundAdminControllerTest {
             every { groundAdminService.apply(testMemberId) } returns
                 GroundAdminResult.NotFound("Member not found")
 
-            mockMvc.post("/api/v1/members/me/ground-admin/apply") {
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mockMvc
+                .post("/api/v1/members/me/ground-admin/apply") {
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
 
         @Test
@@ -94,17 +96,19 @@ class GroundAdminControllerTest {
             every { groundAdminService.apply(testMemberId) } returns
                 GroundAdminResult.Conflict("Already a Ground Admin")
 
-            mockMvc.post("/api/v1/members/me/ground-admin/apply") {
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isConflict() }
-            }
+            mockMvc
+                .post("/api/v1/members/me/ground-admin/apply") {
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isConflict() }
+                }
         }
 
         @Test
         fun `POST apply returns 403 when not authenticated`() {
             // Spring Security returns 403 for missing authentication token on POST
-            mockMvc.post("/api/v1/members/me/ground-admin/apply")
+            mockMvc
+                .post("/api/v1/members/me/ground-admin/apply")
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -130,13 +134,14 @@ class GroundAdminControllerTest {
 
             val request = AcceptInvitationRequest(applicationId = testAppId.toString())
 
-            mockMvc.post("/api/v1/members/me/ground-admin/accept") {
-                header("Authorization", "Bearer $memberToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isOk() }
-            }
+            mockMvc
+                .post("/api/v1/members/me/ground-admin/accept") {
+                    header("Authorization", "Bearer $memberToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isOk() }
+                }
         }
 
         @Test
@@ -150,13 +155,14 @@ class GroundAdminControllerTest {
 
             val request = AcceptInvitationRequest(applicationId = testAppId.toString())
 
-            mockMvc.post("/api/v1/members/me/ground-admin/accept") {
-                header("Authorization", "Bearer $memberToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mockMvc
+                .post("/api/v1/members/me/ground-admin/accept") {
+                    header("Authorization", "Bearer $memberToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
     }
 
@@ -177,12 +183,13 @@ class GroundAdminControllerTest {
             every { groundAdminService.getMyGroundAdminInfo(testMemberId) } returns
                 GroundAdminResult.Success(info)
 
-            mockMvc.get("/api/v1/members/me/ground-admin") {
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-            }
+            mockMvc
+                .get("/api/v1/members/me/ground-admin") {
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                }
         }
 
         @Test
@@ -192,11 +199,12 @@ class GroundAdminControllerTest {
             every { groundAdminService.getMyGroundAdminInfo(testMemberId) } returns
                 GroundAdminResult.Success(null)
 
-            mockMvc.get("/api/v1/members/me/ground-admin") {
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isOk() }
-            }
+            mockMvc
+                .get("/api/v1/members/me/ground-admin") {
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isOk() }
+                }
         }
     }
 
@@ -219,13 +227,14 @@ class GroundAdminControllerTest {
 
             val request = InviteGroundAdminRequest(message = "Welcome to the team!")
 
-            mockMvc.post("/api/v1/members/${targetMemberId.value}/ground-admin/invite") {
-                header("Authorization", "Bearer $memberToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isOk() }
-            }
+            mockMvc
+                .post("/api/v1/members/${targetMemberId.value}/ground-admin/invite") {
+                    header("Authorization", "Bearer $memberToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isOk() }
+                }
         }
 
         @Test
@@ -239,13 +248,14 @@ class GroundAdminControllerTest {
 
             val request = InviteGroundAdminRequest()
 
-            mockMvc.post("/api/v1/members/${targetMemberId.value}/ground-admin/invite") {
-                header("Authorization", "Bearer $memberToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isForbidden() }
-            }
+            mockMvc
+                .post("/api/v1/members/${targetMemberId.value}/ground-admin/invite") {
+                    header("Authorization", "Bearer $memberToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isForbidden() }
+                }
         }
     }
 
@@ -269,13 +279,14 @@ class GroundAdminControllerTest {
 
             val request = ApproveApplicationRequest(applicationId = appId.toString())
 
-            mockMvc.post("/api/v1/members/${targetMemberId.value}/ground-admin/approve") {
-                header("Authorization", "Bearer $memberToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isOk() }
-            }
+            mockMvc
+                .post("/api/v1/members/${targetMemberId.value}/ground-admin/approve") {
+                    header("Authorization", "Bearer $memberToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isOk() }
+                }
         }
     }
 
@@ -292,13 +303,14 @@ class GroundAdminControllerTest {
 
             val request = RevokeGroundAdminRequest(reason = "Inactive for 6 months")
 
-            mockMvc.post("/api/v1/members/${targetMemberId.value}/ground-admin/revoke") {
-                header("Authorization", "Bearer $memberToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isOk() }
-            }
+            mockMvc
+                .post("/api/v1/members/${targetMemberId.value}/ground-admin/revoke") {
+                    header("Authorization", "Bearer $memberToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isOk() }
+                }
         }
 
         @Test
@@ -312,13 +324,14 @@ class GroundAdminControllerTest {
 
             val request = RevokeGroundAdminRequest(reason = "Inactive")
 
-            mockMvc.post("/api/v1/members/${targetMemberId.value}/ground-admin/revoke") {
-                header("Authorization", "Bearer $memberToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isConflict() }
-            }
+            mockMvc
+                .post("/api/v1/members/${targetMemberId.value}/ground-admin/revoke") {
+                    header("Authorization", "Bearer $memberToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isConflict() }
+                }
         }
     }
 
@@ -335,13 +348,14 @@ class GroundAdminControllerTest {
 
             val request = UpdateGroundAdminStatusRequest(status = GroundAdminStatus.ON_HOLD)
 
-            mockMvc.patch("/api/v1/members/${targetMemberId.value}/ground-admin/status") {
-                header("Authorization", "Bearer $memberToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isOk() }
-            }
+            mockMvc
+                .patch("/api/v1/members/${targetMemberId.value}/ground-admin/status") {
+                    header("Authorization", "Bearer $memberToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isOk() }
+                }
         }
     }
 
@@ -370,12 +384,13 @@ class GroundAdminControllerTest {
 
             every { groundAdminService.listGroundAdmins(testSectorId, null) } returns response
 
-            mockMvc.get("/api/v1/sectors/$sectorId/ground-admins") {
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-            }
+            mockMvc
+                .get("/api/v1/sectors/$sectorId/ground-admins") {
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                }
         }
 
         @Test
@@ -387,17 +402,19 @@ class GroundAdminControllerTest {
                 groundAdminService.listGroundAdmins(testSectorId, GroundAdminStatus.ACTIVE)
             } returns response
 
-            mockMvc.get("/api/v1/sectors/$sectorId/ground-admins") {
-                header("Authorization", "Bearer $memberToken")
-                param("status", "ACTIVE")
-            }.andExpect {
-                status { isOk() }
-            }
+            mockMvc
+                .get("/api/v1/sectors/$sectorId/ground-admins") {
+                    header("Authorization", "Bearer $memberToken")
+                    param("status", "ACTIVE")
+                }.andExpect {
+                    status { isOk() }
+                }
         }
 
         @Test
         fun `GET ground-admins returns 401 when not authenticated`() {
-            mockMvc.get("/api/v1/sectors/$sectorId/ground-admins")
+            mockMvc
+                .get("/api/v1/sectors/$sectorId/ground-admins")
                 .andExpect {
                     status { isUnauthorized() }
                 }

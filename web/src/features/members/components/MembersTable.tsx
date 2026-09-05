@@ -66,10 +66,14 @@ export const MembersTable: FC<MembersTableProps> = ({
               {member.surname.charAt(0)}
             </Avatar>
             <Box>
-              <Typography variant="body2" fontWeight={500}>
+              <Typography variant="body2" sx={{
+                fontWeight: 500
+              }}>
                 {member.firstName} {member.surname}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {member.email}
               </Typography>
             </Box>
@@ -81,7 +85,9 @@ export const MembersTable: FC<MembersTableProps> = ({
         header: t('members.phone'),
         width: '140px',
         render: (member) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {member.phoneNumber}
           </Typography>
         ),
@@ -92,15 +98,14 @@ export const MembersTable: FC<MembersTableProps> = ({
         render: (member) => (
           <Typography
             variant="body2"
-            color="text.secondary"
+            title={member.address}
             sx={{
+              color: "text.secondary",
               maxWidth: 200,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-            title={member.address}
-          >
+              whiteSpace: 'nowrap'
+            }}>
             {member.address}
           </Typography>
         ),
@@ -136,7 +141,9 @@ export const MembersTable: FC<MembersTableProps> = ({
         header: t('members.joinedAt'),
         width: '130px',
         render: (member) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {formatDate(member.joinedAt)}
           </Typography>
         ),

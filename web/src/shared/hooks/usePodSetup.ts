@@ -45,7 +45,7 @@ export interface PodSetupState {
  * Only returns data for users with pod_admin or higher permissions.
  *
  * For MVP: Returns mock data indicating setup is complete.
- * TODO: Connect to actual backend endpoint when available (GET /api/v1/pod/status).
+ * Tracked in #59: wire to GET /api/v1/pod/status once it returns wards and sectors.
  */
 export function usePodSetup(): PodSetupState {
   const { admin } = useAuth();
@@ -57,7 +57,7 @@ export function usePodSetup(): PodSetupState {
   );
 
   // For MVP, use static mock data with real UUIDs from database
-  // TODO: Replace with React Query hook when backend endpoint is available
+  // Tracked in #59: replace with a React Query hook
   const mockStatus: PodSetupStatus = useMemo(
     () => ({
       isComplete: true,

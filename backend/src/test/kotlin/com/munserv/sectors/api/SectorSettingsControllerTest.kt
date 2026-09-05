@@ -22,8 +22,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -103,19 +103,20 @@ class SectorSettingsControllerTest {
             val settings = createTestSettings()
             every { settingsService.getSettings(any()) } returns SectorSettingsResult.Success(settings)
 
-            mockMvc.get("/api/v1/sectors/$testSectorId/settings") {
-                header("Authorization", "Bearer $sectorChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.id") { value(testSettingsId.toString()) }
-                jsonPath("$.sectorId") { value(testSectorId.toString()) }
-                jsonPath("$.newIssueVerificationMode") { value("all_notified") }
-                jsonPath("$.fixVerificationMode") { value("all_notified") }
-                jsonPath("$.daysFixedBeforeClosed") { value(7) }
-                jsonPath("$.minimumGroundAdmins") { value(2) }
-            }
+            mockMvc
+                .get("/api/v1/sectors/$testSectorId/settings") {
+                    header("Authorization", "Bearer $sectorChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.id") { value(testSettingsId.toString()) }
+                    jsonPath("$.sectorId") { value(testSectorId.toString()) }
+                    jsonPath("$.newIssueVerificationMode") { value("all_notified") }
+                    jsonPath("$.fixVerificationMode") { value("all_notified") }
+                    jsonPath("$.daysFixedBeforeClosed") { value(7) }
+                    jsonPath("$.minimumGroundAdmins") { value(2) }
+                }
 
             verify { settingsService.getSettings(SectorId(testSectorId)) }
         }
@@ -125,12 +126,13 @@ class SectorSettingsControllerTest {
             every { settingsService.getSettings(any()) } returns
                 SectorSettingsResult.SectorNotFound(SectorId(testSectorId))
 
-            mockMvc.get("/api/v1/sectors/$testSectorId/settings") {
-                header("Authorization", "Bearer $sectorChiefToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mockMvc
+                .get("/api/v1/sectors/$testSectorId/settings") {
+                    header("Authorization", "Bearer $sectorChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
     }
 
@@ -152,22 +154,23 @@ class SectorSettingsControllerTest {
                 )
             } returns SectorSettingsResult.Success(updatedSettings)
 
-            mockMvc.patch("/api/v1/sectors/$testSectorId/settings") {
-                header("Authorization", "Bearer $sectorChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    """
-                    {
-                        "newIssueVerificationMode": "ADMIN_ASSIGNS",
-                        "daysFixedBeforeClosed": 14
-                    }
-                    """.trimIndent()
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.newIssueVerificationMode") { value("admin_assigns") }
-                jsonPath("$.daysFixedBeforeClosed") { value(14) }
-            }
+            mockMvc
+                .patch("/api/v1/sectors/$testSectorId/settings") {
+                    header("Authorization", "Bearer $sectorChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content =
+                        """
+                        {
+                            "newIssueVerificationMode": "ADMIN_ASSIGNS",
+                            "daysFixedBeforeClosed": 14
+                        }
+                        """.trimIndent()
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.newIssueVerificationMode") { value("admin_assigns") }
+                    jsonPath("$.daysFixedBeforeClosed") { value(14) }
+                }
 
             verify { settingsService.updateSettings(SectorId(testSectorId), any()) }
         }
@@ -181,20 +184,21 @@ class SectorSettingsControllerTest {
                     ),
                 )
 
-            mockMvc.patch("/api/v1/sectors/$testSectorId/settings") {
-                header("Authorization", "Bearer $sectorChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    """
-                    {
-                        "daysFixedBeforeClosed": 0
-                    }
-                    """.trimIndent()
-            }.andExpect {
-                status { isBadRequest() }
-                jsonPath("$.errors") { isArray() }
-                jsonPath("$.errors[0]") { value("daysFixedBeforeClosed must be at least 1") }
-            }
+            mockMvc
+                .patch("/api/v1/sectors/$testSectorId/settings") {
+                    header("Authorization", "Bearer $sectorChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content =
+                        """
+                        {
+                            "daysFixedBeforeClosed": 0
+                        }
+                        """.trimIndent()
+                }.andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.errors") { isArray() }
+                    jsonPath("$.errors[0]") { value("daysFixedBeforeClosed must be at least 1") }
+                }
         }
 
         @Test
@@ -202,18 +206,19 @@ class SectorSettingsControllerTest {
             every { settingsService.updateSettings(any(), any()) } returns
                 SectorSettingsResult.SectorNotFound(SectorId(testSectorId))
 
-            mockMvc.patch("/api/v1/sectors/$testSectorId/settings") {
-                header("Authorization", "Bearer $sectorChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    """
-                    {
-                        "daysFixedBeforeClosed": 14
-                    }
-                    """.trimIndent()
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mockMvc
+                .patch("/api/v1/sectors/$testSectorId/settings") {
+                    header("Authorization", "Bearer $sectorChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content =
+                        """
+                        {
+                            "daysFixedBeforeClosed": 14
+                        }
+                        """.trimIndent()
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
 
         @Test
@@ -228,19 +233,20 @@ class SectorSettingsControllerTest {
                 )
             } returns SectorSettingsResult.Success(updatedSettings)
 
-            mockMvc.patch("/api/v1/sectors/$testSectorId/settings") {
-                header("Authorization", "Bearer $sectorChiefToken")
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    """
-                    {
-                        "minimumGroundAdmins": 5
-                    }
-                    """.trimIndent()
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$.minimumGroundAdmins") { value(5) }
-            }
+            mockMvc
+                .patch("/api/v1/sectors/$testSectorId/settings") {
+                    header("Authorization", "Bearer $sectorChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content =
+                        """
+                        {
+                            "minimumGroundAdmins": 5
+                        }
+                        """.trimIndent()
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$.minimumGroundAdmins") { value(5) }
+                }
         }
 
         @Test
@@ -250,19 +256,20 @@ class SectorSettingsControllerTest {
                 every { settingsService.updateSettings(any(), any()) } returns
                     SectorSettingsResult.Success(updatedSettings)
 
-                mockMvc.patch("/api/v1/sectors/$testSectorId/settings") {
-                    header("Authorization", "Bearer $sectorChiefToken")
-                    contentType = MediaType.APPLICATION_JSON
-                    content =
-                        """
-                        {
-                            "newIssueVerificationMode": "${mode.toApiString()}"
-                        }
-                        """.trimIndent()
-                }.andExpect {
-                    status { isOk() }
-                    jsonPath("$.newIssueVerificationMode") { value(mode.toApiString()) }
-                }
+                mockMvc
+                    .patch("/api/v1/sectors/$testSectorId/settings") {
+                        header("Authorization", "Bearer $sectorChiefToken")
+                        contentType = MediaType.APPLICATION_JSON
+                        content =
+                            """
+                            {
+                                "newIssueVerificationMode": "${mode.toApiString()}"
+                            }
+                            """.trimIndent()
+                    }.andExpect {
+                        status { isOk() }
+                        jsonPath("$.newIssueVerificationMode") { value(mode.toApiString()) }
+                    }
             }
         }
     }

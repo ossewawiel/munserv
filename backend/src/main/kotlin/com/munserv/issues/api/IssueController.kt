@@ -101,7 +101,8 @@ class IssueController(
 
         // Filter, sort, and paginate using immutable chain
         val filteredAndSortedIssues =
-            issueService.findAll()
+            issueService
+                .findAll()
                 .let { issues -> sectorFilter?.let { filter -> issues.filter { it.sectorId == filter } } ?: issues }
                 .let { issues -> stateFilter?.let { filter -> issues.filter { it.state == filter } } ?: issues }
                 .let { issues -> typeFilter?.let { filter -> issues.filter { it.type == filter } } ?: issues }
@@ -158,7 +159,8 @@ class IssueController(
         limit: Int,
     ): ResponseEntity<*> {
         if (memberIdStr == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Authentication required")))
         }
 
@@ -166,12 +168,14 @@ class IssueController(
             try {
                 MemberId(UUID.fromString(memberIdStr))
             } catch (e: IllegalArgumentException) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Invalid authentication")))
             }
 
         val issues =
-            issueService.findByReporter(reporterId)
+            issueService
+                .findByReporter(reporterId)
                 .sortedByDescending { it.createdAt }
 
         // Paginate using shared utility
@@ -217,14 +221,20 @@ class IssueController(
                 val stateHistory = issueService.getStateHistory(issueId).map { it.toResponse() }
                 ResponseEntity.ok(result.issue.toDetailResponse(photoUrls, stateHistory))
             }
-            is IssueResult.NotFound ->
-                ResponseEntity.status(HttpStatus.NOT_FOUND)
+
+            is IssueResult.NotFound -> {
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Issue not found")))
+            }
+
             // Exhaustive handling - these should never occur for findById()
             is IssueResult.InvalidTransition,
             is IssueResult.ValidationError,
             is IssueResult.Unauthorized,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
     }
 
@@ -259,7 +269,8 @@ class IssueController(
         @AuthenticationPrincipal memberIdStr: String?,
     ): ResponseEntity<*> {
         if (memberIdStr == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Authentication required")))
         }
 
@@ -267,7 +278,8 @@ class IssueController(
             try {
                 MemberId(UUID.fromString(memberIdStr))
             } catch (e: IllegalArgumentException) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, "Invalid authentication")))
             }
 
@@ -275,7 +287,8 @@ class IssueController(
             try {
                 SectorId(UUID.fromString(request.sectorId))
             } catch (e: IllegalArgumentException) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.VALIDATION_ERROR, "Invalid sector ID format")))
             }
 
@@ -292,17 +305,24 @@ class IssueController(
         return when (val result = issueService.create(command)) {
             is IssueResult.Success -> {
                 // New issues have no photos yet
-                ResponseEntity.status(HttpStatus.CREATED)
+                ResponseEntity
+                    .status(HttpStatus.CREATED)
                     .body(result.issue.toDetailResponse(emptyList()))
             }
-            is IssueResult.ValidationError ->
-                ResponseEntity.status(HttpStatus.BAD_REQUEST)
+
+            is IssueResult.ValidationError -> {
+                ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.VALIDATION_ERROR, result.errors.joinToString(", "))))
+            }
+
             // Exhaustive handling - these should never occur for create()
             is IssueResult.NotFound,
             is IssueResult.InvalidTransition,
             is IssueResult.Unauthorized,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
     }
 
@@ -350,11 +370,16 @@ class IssueController(
                 val stateHistory = issueService.getStateHistory(issueId).map { it.toResponse() }
                 ResponseEntity.ok(result.issue.toDetailResponse(photoUrls, stateHistory))
             }
-            is IssueResult.NotFound ->
-                ResponseEntity.status(HttpStatus.NOT_FOUND)
+
+            is IssueResult.NotFound -> {
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Issue not found")))
-            is IssueResult.InvalidTransition ->
-                ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+            }
+
+            is IssueResult.InvalidTransition -> {
+                ResponseEntity
+                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(
                         ErrorResponse(
                             ErrorBody(
@@ -363,10 +388,14 @@ class IssueController(
                             ),
                         ),
                     )
+            }
+
             // Exhaustive handling - these should never occur for updateState()
             is IssueResult.ValidationError,
             is IssueResult.Unauthorized,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
     }
 }

@@ -58,17 +58,23 @@ export const MemberApprovalDialog: FC<MemberApprovalDialogProps> = ({
           <Typography variant="h6">
             {member.firstName} {member.surname}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {member.email}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {member.phoneNumber}
           </Typography>
         </Box>
       </Box>
 
       {/* Confirmation message */}
-      <Typography variant="body1" color="text.secondary">
+      <Typography variant="body1" sx={{
+        color: "text.secondary"
+      }}>
         {isApprove
           ? t('members.approveConfirmation')
           : t('members.rejectConfirmation')}
@@ -76,13 +82,23 @@ export const MemberApprovalDialog: FC<MemberApprovalDialogProps> = ({
 
       {/* Additional notes */}
       {isApprove && (
-        <Typography variant="body2" color="info.main" sx={{ mt: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "info.main",
+            mt: 2
+          }}>
           {t('members.approveEmailNote')}
         </Typography>
       )}
 
       {!isApprove && (
-        <Typography variant="body2" color="warning.main" sx={{ mt: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "warning.main",
+            mt: 2
+          }}>
           {t('members.rejectWarning')}
         </Typography>
       )}

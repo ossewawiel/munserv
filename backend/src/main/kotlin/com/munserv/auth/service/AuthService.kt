@@ -2,7 +2,6 @@ package com.munserv.auth.service
 
 import com.munserv.admin.repository.AdminRepository
 import com.munserv.audit.service.AuditService
-import com.munserv.auth.config.AdminConfig
 import com.munserv.auth.domain.Email
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
@@ -31,7 +30,6 @@ class AuthService(
     private val memberRepository: MemberRepository,
     private val otpService: OtpService,
     private val jwtService: JwtService,
-    private val adminConfig: AdminConfig,
     private val adminRepository: AdminRepository,
     private val sectorRepository: SectorRepository,
     private val bootstrapConfig: BootstrapConfig,
@@ -116,7 +114,8 @@ class AuthService(
         val memberId = MemberId.generate()
         val placeholderEmail = "legacy-${memberId.value}@pending-migration.local"
         val emailHash =
-            java.security.MessageDigest.getInstance("SHA-256")
+            java.security.MessageDigest
+                .getInstance("SHA-256")
                 .digest(placeholderEmail.lowercase().toByteArray())
                 .joinToString("") { "%02x".format(it) }
 
@@ -260,6 +259,7 @@ class AuthService(
                 )
                 AuthResult.InvalidCredentials
             }
+
             is BootstrapStatus.Eligible,
             is BootstrapStatus.PodChiefOnboarding,
             -> {
@@ -350,9 +350,18 @@ class AuthService(
 
         // Check member status
         when (member.status) {
-            MemberStatus.PendingApproval -> return AuthResult.PendingApproval
-            MemberStatus.Suspended -> return AuthResult.AccountSuspended
-            MemberStatus.Deleted -> return AuthResult.InvalidCredentials
+            MemberStatus.PendingApproval -> {
+                return AuthResult.PendingApproval
+            }
+
+            MemberStatus.Suspended -> {
+                return AuthResult.AccountSuspended
+            }
+
+            MemberStatus.Deleted -> {
+                return AuthResult.InvalidCredentials
+            }
+
             MemberStatus.Active -> { /* OK */ }
         }
 

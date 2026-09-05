@@ -78,11 +78,13 @@ export const ConfirmDialog: FC<ConfirmDialogProps> = ({
       maxWidth={sizeMap[size]}
       fullWidth
       aria-labelledby={titleId}
-      PaperProps={{
-        sx: {
-          borderRadius: 1, // 8px - matches buttons, inputs, cards
-          overflow: 'hidden',
-        },
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 1, // 8px - matches buttons, inputs, cards
+            overflow: 'hidden',
+          },
+        }
       }}
     >
       {/* Header */}
@@ -96,7 +98,9 @@ export const ConfirmDialog: FC<ConfirmDialogProps> = ({
           px: 2.5,
         }}
       >
-        <Typography variant="h6" component="span" fontWeight={600}>
+        <Typography variant="h6" component="span" sx={{
+          fontWeight: 600
+        }}>
           {title}
         </Typography>
       </DialogTitle>

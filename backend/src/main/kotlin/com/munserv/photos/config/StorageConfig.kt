@@ -43,6 +43,7 @@ class StorageConfig(
                     baseUrl = baseUrl,
                 )
             }
+
             "r2" -> {
                 logger.warn("R2 storage not yet implemented, falling back to local")
                 LocalPhotoStorageService(
@@ -50,6 +51,7 @@ class StorageConfig(
                     baseUrl = baseUrl,
                 )
             }
+
             else -> {
                 logger.warn("Unknown storage type '$storageType', using local")
                 LocalPhotoStorageService(

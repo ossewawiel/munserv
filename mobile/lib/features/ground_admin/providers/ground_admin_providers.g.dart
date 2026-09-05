@@ -11,7 +11,7 @@ part of 'ground_admin_providers.dart';
 /// Provides GroundAdminApi
 
 @ProviderFor(groundAdminApi)
-const groundAdminApiProvider = GroundAdminApiProvider._();
+final groundAdminApiProvider = GroundAdminApiProvider._();
 
 /// Provides GroundAdminApi
 
@@ -19,7 +19,7 @@ final class GroundAdminApiProvider
     extends $FunctionalProvider<GroundAdminApi, GroundAdminApi, GroundAdminApi>
     with $Provider<GroundAdminApi> {
   /// Provides GroundAdminApi
-  const GroundAdminApiProvider._()
+  GroundAdminApiProvider._()
     : super(
         from: null,
         argument: null,
@@ -57,7 +57,7 @@ String _$groundAdminApiHash() => r'cd7e9aba5d5f7f8fd85154e1580b5d19db0ddb7b';
 /// Provides GroundAdminRepository
 
 @ProviderFor(groundAdminRepository)
-const groundAdminRepositoryProvider = GroundAdminRepositoryProvider._();
+final groundAdminRepositoryProvider = GroundAdminRepositoryProvider._();
 
 /// Provides GroundAdminRepository
 
@@ -70,7 +70,7 @@ final class GroundAdminRepositoryProvider
         >
     with $Provider<GroundAdminRepository> {
   /// Provides GroundAdminRepository
-  const GroundAdminRepositoryProvider._()
+  GroundAdminRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -110,14 +110,14 @@ String _$groundAdminRepositoryHash() =>
 /// Current user's Ground Admin info (null if not a Ground Admin)
 
 @ProviderFor(MyGroundAdminInfoNotifier)
-const myGroundAdminInfoProvider = MyGroundAdminInfoNotifierProvider._();
+final myGroundAdminInfoProvider = MyGroundAdminInfoNotifierProvider._();
 
 /// Current user's Ground Admin info (null if not a Ground Admin)
 final class MyGroundAdminInfoNotifierProvider
     extends
         $AsyncNotifierProvider<MyGroundAdminInfoNotifier, GroundAdminInfo?> {
   /// Current user's Ground Admin info (null if not a Ground Admin)
-  const MyGroundAdminInfoNotifierProvider._()
+  MyGroundAdminInfoNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -146,8 +146,7 @@ abstract class _$MyGroundAdminInfoNotifier
   FutureOr<GroundAdminInfo?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<GroundAdminInfo?>, GroundAdminInfo?>;
     final element =
@@ -158,21 +157,21 @@ abstract class _$MyGroundAdminInfoNotifier
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 /// Whether current user is a Ground Admin
 
 @ProviderFor(isGroundAdmin)
-const isGroundAdminProvider = IsGroundAdminProvider._();
+final isGroundAdminProvider = IsGroundAdminProvider._();
 
 /// Whether current user is a Ground Admin
 
 final class IsGroundAdminProvider extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
   /// Whether current user is a Ground Admin
-  const IsGroundAdminProvider._()
+  IsGroundAdminProvider._()
     : super(
         from: null,
         argument: null,
@@ -205,19 +204,19 @@ final class IsGroundAdminProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$isGroundAdminHash() => r'f648e2520152b43f496a13ac5b81cdcdecc3c107';
+String _$isGroundAdminHash() => r'332c1818d11fb62b9f01294f59ae27df13c338bf';
 
 /// Manages Ground Admin application and invitation actions
 
 @ProviderFor(GroundAdminActionNotifier)
-const groundAdminActionProvider = GroundAdminActionNotifierProvider._();
+final groundAdminActionProvider = GroundAdminActionNotifierProvider._();
 
 /// Manages Ground Admin application and invitation actions
 final class GroundAdminActionNotifierProvider
     extends
         $NotifierProvider<GroundAdminActionNotifier, GroundAdminActionState> {
   /// Manages Ground Admin application and invitation actions
-  const GroundAdminActionNotifierProvider._()
+  GroundAdminActionNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -245,7 +244,7 @@ final class GroundAdminActionNotifierProvider
 }
 
 String _$groundAdminActionNotifierHash() =>
-    r'b873d1605ec1e2b0fc4d158d44b02d34fa4c99b0';
+    r'73d69d87359b26dee4e4a146ff3e82304cdc1949';
 
 /// Manages Ground Admin application and invitation actions
 
@@ -254,8 +253,7 @@ abstract class _$GroundAdminActionNotifier
   GroundAdminActionState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<GroundAdminActionState, GroundAdminActionState>;
     final element =
@@ -266,6 +264,6 @@ abstract class _$GroundAdminActionNotifier
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

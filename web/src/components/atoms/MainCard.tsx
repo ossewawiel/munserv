@@ -59,7 +59,9 @@ export const MainCard: FC<MainCardProps> = forwardRef<HTMLDivElement, MainCardPr
               sx={{ p: 2.5 }}
               title={
                 typeof title === 'string' ? (
-                  <Typography variant="h6" fontWeight={600}>
+                  <Typography variant="h6" sx={{
+                    fontWeight: 600
+                  }}>
                     {title}
                   </Typography>
                 ) : (

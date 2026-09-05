@@ -1,6 +1,5 @@
 package com.munserv.auth.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.TestContainersConfig
 import com.munserv.auth.domain.Email
 import com.munserv.auth.domain.Member
@@ -16,14 +15,15 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.ObjectMapper
 import java.time.Instant
 
 /**
@@ -70,8 +70,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/register/web") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isCreated() }
                     jsonPath("$.memberId") { isNotEmpty() }
                     jsonPath("$.message") { value("Registration submitted. You will be notified once approved.") }
@@ -96,8 +95,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/register/web") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isBadRequest() }
                 }
         }
@@ -123,8 +121,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/register/web") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isCreated() }
                 }
 
@@ -133,8 +130,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/register/web") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isConflict() }
                     jsonPath("$.error") { value("email_registered") }
                 }
@@ -159,8 +155,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/register/web") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isBadRequest() }
                     jsonPath("$.error") { value("invalid_sector") }
                 }
@@ -186,8 +181,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/member/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.memberId") { value(member.id.value.toString()) }
                     jsonPath("$.accessToken") { isNotEmpty() }
@@ -213,8 +207,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/member/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isUnauthorized() }
                     jsonPath("$.error") { value("invalid_credentials") }
                 }
@@ -235,8 +228,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/member/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isForbidden() }
                     jsonPath("$.error") { value("pending_approval") }
                 }
@@ -258,8 +250,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/member/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isForbidden() }
                     jsonPath("$.error") { value("account_suspended") }
                 }
@@ -289,8 +280,7 @@ class WebRegistrationApiContractTest {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                     header("Authorization", "Bearer $token")
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.message") { value("Password changed successfully") }
                 }
@@ -315,8 +305,7 @@ class WebRegistrationApiContractTest {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                     header("Authorization", "Bearer $token")
-                }
-                .andExpect {
+                }.andExpect {
                     status { isUnauthorized() }
                     jsonPath("$.error") { value("invalid_password") }
                 }
@@ -342,8 +331,7 @@ class WebRegistrationApiContractTest {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                     header("Authorization", "Bearer $token")
-                }
-                .andExpect {
+                }.andExpect {
                     status { isBadRequest() }
                     // Global exception handler returns nested error format
                     jsonPath("$.error.code") { value("VALIDATION_ERROR") }
@@ -362,8 +350,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/change-password") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     // Spring Security returns 403 Forbidden for unauthenticated requests to authenticated() endpoints
                     status { isForbidden() }
                 }
@@ -383,8 +370,7 @@ class WebRegistrationApiContractTest {
             mockMvc
                 .post("/api/v1/admin/members/${member.id.value}/approve") {
                     header("Authorization", "Bearer $adminToken")
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.memberId") { value(member.id.value.toString()) }
                     jsonPath("$.email") { value(email) }
@@ -402,8 +388,7 @@ class WebRegistrationApiContractTest {
             mockMvc
                 .post("/api/v1/admin/members/${member.id.value}/approve") {
                     header("Authorization", "Bearer $adminToken")
-                }
-                .andExpect {
+                }.andExpect {
                     status { isBadRequest() }
                     jsonPath("$.error") { value("invalid_status") }
                 }
@@ -417,8 +402,7 @@ class WebRegistrationApiContractTest {
             mockMvc
                 .post("/api/v1/admin/members/$nonExistentId/approve") {
                     header("Authorization", "Bearer $adminToken")
-                }
-                .andExpect {
+                }.andExpect {
                     status { isNotFound() }
                     jsonPath("$.error") { value("not_found") }
                 }
@@ -435,8 +419,7 @@ class WebRegistrationApiContractTest {
             mockMvc
                 .post("/api/v1/admin/members/${member.id.value}/approve") {
                     header("Authorization", "Bearer $memberToken")
-                }
-                .andExpect {
+                }.andExpect {
                     status { isForbidden() }
                 }
         }
@@ -454,8 +437,7 @@ class WebRegistrationApiContractTest {
             mockMvc
                 .delete("/api/v1/admin/members/${member.id.value}") {
                     header("Authorization", "Bearer $adminToken")
-                }
-                .andExpect {
+                }.andExpect {
                     status { isNoContent() }
                 }
 
@@ -473,8 +455,7 @@ class WebRegistrationApiContractTest {
             mockMvc
                 .delete("/api/v1/admin/members/${member.id.value}") {
                     header("Authorization", "Bearer $adminToken")
-                }
-                .andExpect {
+                }.andExpect {
                     status { isBadRequest() }
                     jsonPath("$.error") { value("invalid_status") }
                 }
@@ -575,8 +556,7 @@ class WebRegistrationApiContractTest {
                 .post("/api/v1/auth/admin/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(loginRequest)
-                }
-                .andReturn()
+                }.andReturn()
 
         val response = objectMapper.readTree(result.response.contentAsString)
         return response.get("tokens").get("accessToken").asText()

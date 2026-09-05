@@ -10,20 +10,28 @@ sealed interface MessageResult {
     /**
      * Operation completed successfully.
      */
-    data class Success(val message: MessageResponse) : MessageResult
+    data class Success(
+        val message: MessageResponse,
+    ) : MessageResult
 
     /**
      * Message was not found or recipient doesn't have access.
      */
-    data class NotFound(val reason: String) : MessageResult
+    data class NotFound(
+        val reason: String,
+    ) : MessageResult
 
     /**
      * Action conflicts with current message state (e.g., already actioned).
      */
-    data class Conflict(val reason: String) : MessageResult
+    data class Conflict(
+        val reason: String,
+    ) : MessageResult
 
     /**
      * Validation errors occurred (e.g., invalid action for message type).
      */
-    data class ValidationError(val errors: List<String>) : MessageResult
+    data class ValidationError(
+        val errors: List<String>,
+    ) : MessageResult
 }

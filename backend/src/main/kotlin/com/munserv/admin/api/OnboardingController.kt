@@ -57,16 +57,23 @@ class OnboardingController(
                 )
 
         return when (val result = onboardingService.getOnboardingStatus(adminId)) {
-            is OnboardingResult.Success ->
+            is OnboardingResult.Success -> {
                 ResponseEntity.ok(OnboardingStatusResponse.from(result.admin))
-            is OnboardingResult.Completed ->
+            }
+
+            is OnboardingResult.Completed -> {
                 ResponseEntity.ok(OnboardingStatusResponse.from(result.admin))
-            is OnboardingResult.AdminNotFound ->
+            }
+
+            is OnboardingResult.AdminNotFound -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", "Admin not found"),
                 )
-            else ->
+            }
+
+            else -> {
                 ResponseEntity.internalServerError().build<Any>()
+            }
         }
     }
 
@@ -96,25 +103,34 @@ class OnboardingController(
                 )
 
         return when (val result = onboardingService.changePassword(adminId, request.newPassword)) {
-            is OnboardingResult.Success ->
+            is OnboardingResult.Success -> {
                 ResponseEntity.ok(OnboardingStatusResponse.from(result.admin))
-            is OnboardingResult.Completed ->
+            }
+
+            is OnboardingResult.Completed -> {
                 ResponseEntity.ok(OnboardingStatusResponse.from(result.admin))
-            is OnboardingResult.AdminNotFound ->
+            }
+
+            is OnboardingResult.AdminNotFound -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", "Admin not found"),
                 )
-            is OnboardingResult.ValidationError ->
+            }
+
+            is OnboardingResult.ValidationError -> {
                 ResponseEntity.badRequest().body(
                     ErrorBody("validation_error", result.errors.joinToString("; ")),
                 )
-            is OnboardingResult.InvalidStep ->
+            }
+
+            is OnboardingResult.InvalidStep -> {
                 ResponseEntity.badRequest().body(
                     ErrorBody(
                         "invalid_step",
                         "Password change not required. Current status: ${result.current.toDbValue()}",
                     ),
                 )
+            }
         }
     }
 
@@ -153,25 +169,34 @@ class OnboardingController(
                     request.address,
                 )
         ) {
-            is OnboardingResult.Success ->
+            is OnboardingResult.Success -> {
                 ResponseEntity.ok(OnboardingStatusResponse.from(result.admin))
-            is OnboardingResult.Completed ->
+            }
+
+            is OnboardingResult.Completed -> {
                 ResponseEntity.ok(OnboardingStatusResponse.from(result.admin))
-            is OnboardingResult.AdminNotFound ->
+            }
+
+            is OnboardingResult.AdminNotFound -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ErrorBody("unauthorized", "Admin not found"),
                 )
-            is OnboardingResult.ValidationError ->
+            }
+
+            is OnboardingResult.ValidationError -> {
                 ResponseEntity.badRequest().body(
                     ErrorBody("validation_error", result.errors.joinToString("; ")),
                 )
-            is OnboardingResult.InvalidStep ->
+            }
+
+            is OnboardingResult.InvalidStep -> {
                 ResponseEntity.badRequest().body(
                     ErrorBody(
                         "invalid_step",
                         "Profile completion not required. Current status: ${result.current.toDbValue()}",
                     ),
                 )
+            }
         }
     }
 

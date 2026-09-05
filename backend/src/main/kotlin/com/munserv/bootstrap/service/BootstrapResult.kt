@@ -28,10 +28,14 @@ sealed interface BootstrapResult {
     /**
      * Input validation failed.
      */
-    data class ValidationError(val errors: List<String>) : BootstrapResult
+    data class ValidationError(
+        val errors: List<String>,
+    ) : BootstrapResult
 
     /**
      * Email is already in use by another admin.
      */
-    data class EmailAlreadyExists(val email: String) : BootstrapResult
+    data class EmailAlreadyExists(
+        val email: String,
+    ) : BootstrapResult
 }

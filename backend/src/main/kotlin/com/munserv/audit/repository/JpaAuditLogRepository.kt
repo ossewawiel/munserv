@@ -43,7 +43,8 @@ class JpaAuditLogRepositoryImpl(
         podId: PodId,
         limit: Int,
     ): List<AuditLog> =
-        jpa.findByPodIdOrderByCreatedAtDesc(podId.value)
+        jpa
+            .findByPodIdOrderByCreatedAtDesc(podId.value)
             .take(limit)
             .map { it.toDomain() }
 
@@ -51,7 +52,8 @@ class JpaAuditLogRepositoryImpl(
         podId: PodId,
         action: AuditAction,
     ): List<AuditLog> =
-        jpa.findByPodIdAndAction(podId.value, action.dbValue)
+        jpa
+            .findByPodIdAndAction(podId.value, action.dbValue)
             .map { it.toDomain() }
 
     override fun findByPodIdAndDateRange(
@@ -59,6 +61,7 @@ class JpaAuditLogRepositoryImpl(
         from: Instant,
         to: Instant,
     ): List<AuditLog> =
-        jpa.findByPodIdAndCreatedAtBetween(podId.value, from, to)
+        jpa
+            .findByPodIdAndCreatedAtBetween(podId.value, from, to)
             .map { it.toDomain() }
 }

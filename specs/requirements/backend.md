@@ -24,4 +24,4 @@
 - 🔴 Pending
 
 ## Stack
-Kotlin 1.9 + Spring Boot 3 + PostgreSQL + PostGIS
+Kotlin 2.3 + Spring Boot 4 + PostgreSQL 18 + PostGIS

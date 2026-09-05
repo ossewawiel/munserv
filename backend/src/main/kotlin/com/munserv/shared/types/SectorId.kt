@@ -7,7 +7,9 @@ import java.util.UUID
  * Prevents accidentally passing pod/member IDs where sector IDs are expected.
  */
 @JvmInline
-value class SectorId(val value: UUID) {
+value class SectorId(
+    val value: UUID,
+) {
     override fun toString(): String = value.toString()
 
     companion object {

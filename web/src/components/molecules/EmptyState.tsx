@@ -33,11 +33,19 @@ export const EmptyState: FC<EmptyStateProps> = ({
       <Box sx={{ mb: 2, color: 'text.secondary' }}>
         {icon || <InboxIcon sx={{ fontSize: 48 }} />}
       </Box>
-      <Typography variant="h6" fontWeight={500}>
+      <Typography variant="h6" sx={{
+        fontWeight: 500
+      }}>
         {title || t('common.noResults')}
       </Typography>
       {description && (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 400 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mt: 1,
+            maxWidth: 400
+          }}>
           {description}
         </Typography>
       )}

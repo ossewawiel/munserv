@@ -7,7 +7,9 @@ import java.util.UUID
  * Prevents accidentally passing sector/pod/member IDs where ward IDs are expected.
  */
 @JvmInline
-value class WardId(val value: UUID) {
+value class WardId(
+    val value: UUID,
+) {
     override fun toString(): String = value.toString()
 
     companion object {

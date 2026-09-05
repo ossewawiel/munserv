@@ -43,7 +43,9 @@ export const Pagination: FC<PaginationProps> = ({
         gap: 2,
       }}
     >
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" sx={{
+        color: "text.secondary"
+      }}>
         {t('pagination.showing')} <strong>{startItem}</strong>{' '}
         {t('pagination.to')} <strong>{endItem}</strong>{' '}
         {t('pagination.of')} <strong>{totalItems}</strong>{' '}

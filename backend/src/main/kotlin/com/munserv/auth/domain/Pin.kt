@@ -7,7 +7,9 @@ import java.security.MessageDigest
  * PINs are stored as SHA-256 hashes, never in plain text.
  */
 @JvmInline
-value class Pin private constructor(private val value: String) {
+value class Pin private constructor(
+    private val value: String,
+) {
     /**
      * Generate SHA-256 hash of the PIN for storage.
      */
@@ -47,13 +49,12 @@ value class Pin private constructor(private val value: String) {
         fun verify(
             rawPin: String,
             storedHash: String,
-        ): Boolean {
-            return try {
+        ): Boolean =
+            try {
                 val pin = fromString(rawPin)
                 pin.hash() == storedHash
             } catch (e: IllegalArgumentException) {
                 false
             }
-        }
     }
 }

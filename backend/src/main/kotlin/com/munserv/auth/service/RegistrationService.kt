@@ -154,11 +154,18 @@ data class WebRegistrationCommand(
  * Sealed interface for registration operation results.
  */
 sealed interface RegistrationResult {
-    data class Success(val member: Member) : RegistrationResult
+    data class Success(
+        val member: Member,
+    ) : RegistrationResult
 
-    data class Approved(val member: Member, val temporaryPassword: String) : RegistrationResult
+    data class Approved(
+        val member: Member,
+        val temporaryPassword: String,
+    ) : RegistrationResult
 
-    data class Rejected(val memberId: MemberId) : RegistrationResult
+    data class Rejected(
+        val memberId: MemberId,
+    ) : RegistrationResult
 
     data object EmailAlreadyRegistered : RegistrationResult
 
@@ -166,7 +173,12 @@ sealed interface RegistrationResult {
 
     data object InvalidSector : RegistrationResult
 
-    data class InvalidStatus(val current: String, val expected: String) : RegistrationResult
+    data class InvalidStatus(
+        val current: String,
+        val expected: String,
+    ) : RegistrationResult
 
-    data class ValidationError(val errors: List<String>) : RegistrationResult
+    data class ValidationError(
+        val errors: List<String>,
+    ) : RegistrationResult
 }

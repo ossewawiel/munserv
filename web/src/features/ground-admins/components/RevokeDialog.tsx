@@ -86,7 +86,9 @@ export const RevokeDialog: FC<RevokeDialogProps> = ({
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <PersonIcon color="action" fontSize="small" />
-                <Typography variant="subtitle1" fontWeight={600}>
+                <Typography variant="subtitle1" sx={{
+                  fontWeight: 600
+                }}>
                   {groundAdmin.name}
                 </Typography>
                 <Chip
@@ -110,13 +112,17 @@ export const RevokeDialog: FC<RevokeDialogProps> = ({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <SpeedIcon color="action" fontSize="small" />
                   <Box>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{
+                      color: "text.secondary"
+                    }}>
                       {t('groundAdmin.responseRate', 'Response Rate')}
                     </Typography>
                     <Typography
                       variant="body2"
-                      fontWeight={600}
                       color={`${responseRateColor}.main`}
+                      sx={{
+                        fontWeight: 600
+                      }}
                     >
                       {groundAdmin.responseRate}%
                     </Typography>
@@ -125,10 +131,14 @@ export const RevokeDialog: FC<RevokeDialogProps> = ({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <AssignmentIcon color="action" fontSize="small" />
                   <Box>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{
+                      color: "text.secondary"
+                    }}>
                       {t('groundAdmin.pendingVerifications', 'Pending')}
                     </Typography>
-                    <Typography variant="body2" fontWeight={600}>
+                    <Typography variant="body2" sx={{
+                      fontWeight: 600
+                    }}>
                       {groundAdmin.pendingVerifications}
                     </Typography>
                   </Box>
@@ -140,7 +150,9 @@ export const RevokeDialog: FC<RevokeDialogProps> = ({
 
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
               <WarningIcon color="warning" fontSize="small" sx={{ mt: 0.5 }} />
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 {t(
                   'groundAdmin.manageDescription',
                   'You can temporarily put this Ground Admin on hold if they need a break, or revoke their status completely if needed.'
@@ -152,7 +164,9 @@ export const RevokeDialog: FC<RevokeDialogProps> = ({
           <>
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
               <WarningIcon color="error" fontSize="small" sx={{ mt: 0.5 }} />
-              <Typography variant="body2" color="error.main">
+              <Typography variant="body2" sx={{
+                color: "error.main"
+              }}>
                 {t(
                   'groundAdmin.revokeWarning',
                   'This action cannot be undone. The member will be notified and will lose their Ground Admin privileges.'

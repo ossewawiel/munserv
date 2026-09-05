@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'report_issue_request.dart';
@@ -9,6 +9,7 @@ part of 'report_issue_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $ReportIssueRequestCopyWith<ReportIssueRequest> get copyWith => _$ReportIssueReq
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportIssueRequest&&(identical(other.type, type) || other.type == type)&&(identical(other.location, location) || other.location == location)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.description, description) || other.description == description));
+  final _this = this as ReportIssueRequest;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportIssueRequest&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.location, _this.location) || other.location == _this.location)&&(identical(other.sectorId, _this.sectorId) || other.sectorId == _this.sectorId)&&(identical(other.description, _this.description) || other.description == _this.description));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,location,sectorId,description);
+int get hashCode {
+  final _this = this as ReportIssueRequest;
+  return Object.hash(runtimeType,_this.type,_this.location,_this.sectorId,_this.description);
+}
 
 @override
 String toString() {
-  return 'ReportIssueRequest(type: $type, location: $location, sectorId: $sectorId, description: $description)';
+  final _this = this as ReportIssueRequest;
+  return 'ReportIssueRequest(type: ${_this.type}, location: ${_this.location}, sectorId: ${_this.sectorId}, description: ${_this.description})';
 }
 
 
@@ -66,7 +72,7 @@ class _$ReportIssueRequestCopyWithImpl<$Res>
 /// Create a copy of ReportIssueRequest
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? location = null,Object? sectorId = null,Object? description = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(ReportIssueRequest(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as IssueType,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as GeoPoint,sectorId: null == sectorId ? _self.sectorId : sectorId // ignore: cast_nullable_to_non_nullable
@@ -242,16 +248,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReportIssueRequest&&(identical(other.type, type) || other.type == type)&&(identical(other.location, location) || other.location == location)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.description, description) || other.description == description));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReportIssueRequest&&(identical(other.type, type) || other.type == type)&&(identical(other.location, location) || other.location == location)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.description, description) || other.description == description));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,location,sectorId,description);
+int get hashCode {
+    return Object.hash(runtimeType,type,location,sectorId,description);
+}
 
 @override
 String toString() {
-  return 'ReportIssueRequest(type: $type, location: $location, sectorId: $sectorId, description: $description)';
+    return 'ReportIssueRequest(type: $type, location: $location, sectorId: $sectorId, description: $description)';
 }
 
 
@@ -318,16 +326,21 @@ $ReportIssueResponseCopyWith<ReportIssueResponse> get copyWith => _$ReportIssueR
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportIssueResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.state, state) || other.state == state)&&(identical(other.location, location) || other.location == location)&&(identical(other.heat, heat) || other.heat == heat)&&const DeepCollectionEquality().equals(other.photoUrls, photoUrls)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  final _this = this as ReportIssueResponse;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportIssueResponse&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.location, _this.location) || other.location == _this.location)&&(identical(other.heat, _this.heat) || other.heat == _this.heat)&&const DeepCollectionEquality().equals(other.photoUrls, _this.photoUrls)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,state,location,heat,const DeepCollectionEquality().hash(photoUrls),createdAt);
+int get hashCode {
+  final _this = this as ReportIssueResponse;
+  return Object.hash(runtimeType,_this.id,_this.type,_this.state,_this.location,_this.heat,const DeepCollectionEquality().hash(_this.photoUrls),_this.createdAt);
+}
 
 @override
 String toString() {
-  return 'ReportIssueResponse(id: $id, type: $type, state: $state, location: $location, heat: $heat, photoUrls: $photoUrls, createdAt: $createdAt)';
+  final _this = this as ReportIssueResponse;
+  return 'ReportIssueResponse(id: ${_this.id}, type: ${_this.type}, state: ${_this.state}, location: ${_this.location}, heat: ${_this.heat}, photoUrls: ${_this.photoUrls}, createdAt: ${_this.createdAt})';
 }
 
 
@@ -356,7 +369,7 @@ class _$ReportIssueResponseCopyWithImpl<$Res>
 /// Create a copy of ReportIssueResponse
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? state = null,Object? location = null,Object? heat = null,Object? photoUrls = null,Object? createdAt = null,}) {
-  return _then(_self.copyWith(
+  return _then(ReportIssueResponse(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as IssueType,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
@@ -514,7 +527,7 @@ return $default(_that.id,_that.type,_that.state,_that.location,_that.heat,_that.
 @JsonSerializable()
 
 class _ReportIssueResponse implements ReportIssueResponse {
-  const _ReportIssueResponse({required this.id, required this.type, required this.state, required this.location, required this.heat, required final  List<String> photoUrls, required this.createdAt}): _photoUrls = photoUrls;
+  const _ReportIssueResponse({required this.id, required this.type, required this.state, required this.location, required this.heat, required  List<String> photoUrls, required this.createdAt}): _photoUrls = photoUrls;
   factory _ReportIssueResponse.fromJson(Map<String, dynamic> json) => _$ReportIssueResponseFromJson(json);
 
 @override final  String id;
@@ -544,16 +557,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReportIssueResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.state, state) || other.state == state)&&(identical(other.location, location) || other.location == location)&&(identical(other.heat, heat) || other.heat == heat)&&const DeepCollectionEquality().equals(other._photoUrls, _photoUrls)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReportIssueResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.state, state) || other.state == state)&&(identical(other.location, location) || other.location == location)&&(identical(other.heat, heat) || other.heat == heat)&&const DeepCollectionEquality().equals(other.photoUrls, _photoUrls)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,state,location,heat,const DeepCollectionEquality().hash(_photoUrls),createdAt);
+int get hashCode {
+    return Object.hash(runtimeType,id,type,state,location,heat,const DeepCollectionEquality().hash(_photoUrls),createdAt);
+}
 
 @override
 String toString() {
-  return 'ReportIssueResponse(id: $id, type: $type, state: $state, location: $location, heat: $heat, photoUrls: $photoUrls, createdAt: $createdAt)';
+    return 'ReportIssueResponse(id: $id, type: $type, state: $state, location: $location, heat: $heat, photoUrls: $photoUrls, createdAt: $createdAt)';
 }
 
 

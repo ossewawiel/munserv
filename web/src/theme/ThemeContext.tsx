@@ -22,7 +22,11 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: FC<ThemeProviderProps> = ({ children }) => {
   const [podConfig, setPodConfig] = useState<PodThemeConfig>(defaultPodConfig);
-  const [colorMode, setColorMode] = useState<ColorMode>('system');
+  const [colorMode, setColorMode] = useState<ColorMode>(() => {
+    // Read the persisted preference once, at mount, instead of in an effect
+    const stored = localStorage.getItem('munserv-color-mode') as ColorMode | null;
+    return stored && ['light', 'dark', 'system'].includes(stored) ? stored : 'system';
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [theme, setTheme] = useState<Theme>(() => createPodTheme(defaultPodConfig));
 
@@ -78,14 +82,6 @@ export const ThemeProvider: FC<ThemeProviderProps> = ({ children }) => {
     };
 
     loadPodTheme();
-  }, []);
-
-  // Load persisted color mode preference
-  useEffect(() => {
-    const stored = localStorage.getItem('munserv-color-mode') as ColorMode | null;
-    if (stored && ['light', 'dark', 'system'].includes(stored)) {
-      setColorMode(stored);
-    }
   }, []);
 
   // Persist color mode preference

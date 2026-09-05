@@ -46,10 +46,7 @@ class GroundAdminApi {
   Future<void> declineInvitation(String applicationId, {String? reason}) async {
     await _dio.post(
       '/members/me/ground-admin/decline',
-      data: {
-        'applicationId': applicationId,
-        if (reason != null) 'reason': reason,
-      },
+      data: {'applicationId': applicationId, 'reason': ?reason},
     );
   }
 
@@ -58,7 +55,7 @@ class GroundAdminApi {
   Future<void> stepDown({String? reason}) async {
     await _dio.post(
       '/members/me/ground-admin/stepdown',
-      data: {if (reason != null) 'reason': reason},
+      data: {'reason': ?reason},
     );
   }
 }

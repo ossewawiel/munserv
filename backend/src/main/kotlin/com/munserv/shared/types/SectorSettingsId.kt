@@ -7,7 +7,9 @@ import java.util.UUID
  * Prevents accidentally passing other ID types where settings IDs are expected.
  */
 @JvmInline
-value class SectorSettingsId(val value: UUID) {
+value class SectorSettingsId(
+    val value: UUID,
+) {
     override fun toString(): String = value.toString()
 
     companion object {

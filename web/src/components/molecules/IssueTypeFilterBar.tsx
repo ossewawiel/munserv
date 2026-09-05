@@ -49,9 +49,12 @@ export const IssueTypeFilterBar: FC<IssueTypeFilterBarProps> = ({
     >
       <Typography
         variant="caption"
-        color="text.secondary"
-        sx={{ mb: 0.5, writingMode: 'vertical-rl', textOrientation: 'mixed' }}
-      >
+        sx={{
+          color: "text.secondary",
+          mb: 0.5,
+          writingMode: 'vertical-rl',
+          textOrientation: 'mixed'
+        }}>
         {t('issues.map.filterByType')}
       </Typography>
       <Stack direction="column" spacing={1}>

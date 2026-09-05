@@ -2,7 +2,6 @@ package com.munserv.auth.service
 
 import com.munserv.admin.repository.AdminRepository
 import com.munserv.audit.service.AuditService
-import com.munserv.auth.config.AdminConfig
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
 import com.munserv.auth.domain.PhoneNumber
@@ -33,7 +32,6 @@ class AuthServiceTest {
     private lateinit var memberRepository: MemberRepository
     private lateinit var otpService: OtpService
     private lateinit var jwtService: JwtService
-    private lateinit var adminConfig: AdminConfig
     private lateinit var adminRepository: AdminRepository
     private lateinit var sectorRepository: SectorRepository
     private lateinit var bootstrapConfig: BootstrapConfig
@@ -64,18 +62,6 @@ class AuthServiceTest {
                 refreshTokenTtl = Duration.ofDays(7),
                 clock = clock,
             )
-        adminConfig =
-            AdminConfig(
-                email = "admin@test.example.com",
-                password = "testpass123",
-                id = "550e8400-e29b-41d4-a716-446655440020",
-                displayName = "Test Admin",
-                sectorId = "550e8400-e29b-41d4-a716-446655440001",
-                role = "SECTOR_ADMIN",
-                sectorName = "Test Sector",
-                sectorCenterLat = -26.2041,
-                sectorCenterLng = 28.0473,
-            )
         // Default: no pod found (MVP single-pod not set up yet)
         every { podRepository.findFirst() } returns null
         auditService = mockk(relaxed = true)
@@ -84,7 +70,6 @@ class AuthServiceTest {
                 memberRepository,
                 otpService,
                 jwtService,
-                adminConfig,
                 adminRepository,
                 sectorRepository,
                 bootstrapConfig,

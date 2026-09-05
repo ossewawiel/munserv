@@ -55,18 +55,21 @@ class AuthController(
         @Valid @RequestBody request: RegisterRequest,
     ): ResponseEntity<*> =
         when (val result = authService.register(request.phone)) {
-            is AuthResult.OtpSent ->
+            is AuthResult.OtpSent -> {
                 ResponseEntity.ok(OtpResponse(message = "OTP sent successfully"))
+            }
 
-            is AuthResult.PhoneAlreadyRegistered ->
+            is AuthResult.PhoneAlreadyRegistered -> {
                 ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(ErrorResponse("phone_registered", "Phone number is already registered"))
+            }
 
-            is AuthResult.InvalidPhoneNumber ->
+            is AuthResult.InvalidPhoneNumber -> {
                 ResponseEntity
                     .badRequest()
                     .body(ErrorResponse("invalid_phone", ERROR_INVALID_PHONE))
+            }
 
             // Exhaustive handling of all AuthResult cases - these should never occur for register()
             is AuthResult.OtpVerified,
@@ -87,7 +90,9 @@ class AuthController(
             is AuthResult.MemberNotFound,
             is AuthResult.PendingApproval,
             is AuthResult.ValidationError,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
 
     @Operation(summary = "Verify OTP", description = "Verify the one-time password sent to phone")
@@ -103,18 +108,21 @@ class AuthController(
         @Valid @RequestBody request: VerifyOtpRequest,
     ): ResponseEntity<*> =
         when (val result = authService.verifyOtp(request.phone, request.code)) {
-            is AuthResult.OtpVerified ->
+            is AuthResult.OtpVerified -> {
                 ResponseEntity.ok(OtpResponse(message = "OTP verified successfully"))
+            }
 
-            is AuthResult.InvalidOtp ->
+            is AuthResult.InvalidOtp -> {
                 ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("invalid_otp", "Invalid or expired OTP"))
+            }
 
-            is AuthResult.InvalidPhoneNumber ->
+            is AuthResult.InvalidPhoneNumber -> {
                 ResponseEntity
                     .badRequest()
                     .body(ErrorResponse("invalid_phone", ERROR_INVALID_PHONE))
+            }
 
             // Exhaustive handling - these should never occur for verifyOtp()
             is AuthResult.OtpSent,
@@ -135,7 +143,9 @@ class AuthController(
             is AuthResult.MemberNotFound,
             is AuthResult.PendingApproval,
             is AuthResult.ValidationError,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
 
     @Operation(summary = "Complete registration", description = "Complete member registration with profile details and PIN")
@@ -163,7 +173,7 @@ class AuthController(
                     ),
                 )
         ) {
-            is AuthResult.RegistrationComplete ->
+            is AuthResult.RegistrationComplete -> {
                 ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(
@@ -174,21 +184,25 @@ class AuthController(
                             expiresIn = result.tokens.expiresIn,
                         ),
                     )
+            }
 
-            is AuthResult.InvalidPhoneNumber ->
+            is AuthResult.InvalidPhoneNumber -> {
                 ResponseEntity
                     .badRequest()
                     .body(ErrorResponse("invalid_phone", ERROR_INVALID_PHONE))
+            }
 
-            is AuthResult.InvalidPin ->
+            is AuthResult.InvalidPin -> {
                 ResponseEntity
                     .badRequest()
                     .body(ErrorResponse("invalid_pin", "PIN must be exactly 4 digits"))
+            }
 
-            is AuthResult.InvalidSectorId ->
+            is AuthResult.InvalidSectorId -> {
                 ResponseEntity
                     .badRequest()
                     .body(ErrorResponse("invalid_sector", "Invalid sector ID format"))
+            }
 
             // Exhaustive handling - these should never occur for completeRegistration()
             is AuthResult.OtpSent,
@@ -208,7 +222,9 @@ class AuthController(
             is AuthResult.MemberNotFound,
             is AuthResult.PendingApproval,
             is AuthResult.ValidationError,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
 
     @Operation(summary = "Member login", description = "Authenticate member with phone number and PIN")
@@ -224,7 +240,7 @@ class AuthController(
         @Valid @RequestBody request: LoginRequest,
     ): ResponseEntity<*> =
         when (val result = authService.login(request.phone, request.pin)) {
-            is AuthResult.LoginSuccess ->
+            is AuthResult.LoginSuccess -> {
                 ResponseEntity.ok(
                     LoginResponse(
                         memberId = result.memberId.value.toString(),
@@ -233,16 +249,19 @@ class AuthController(
                         expiresIn = result.tokens.expiresIn,
                     ),
                 )
+            }
 
-            is AuthResult.InvalidCredentials ->
+            is AuthResult.InvalidCredentials -> {
                 ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("invalid_credentials", "Invalid phone number or PIN"))
+            }
 
-            is AuthResult.AccountSuspended ->
+            is AuthResult.AccountSuspended -> {
                 ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
                     .body(ErrorResponse("account_suspended", "Account is suspended or deleted"))
+            }
 
             // Exhaustive handling - these should never occur for login()
             is AuthResult.OtpSent,
@@ -263,7 +282,9 @@ class AuthController(
             is AuthResult.MemberNotFound,
             is AuthResult.PendingApproval,
             is AuthResult.ValidationError,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
 
     @Operation(summary = "Admin login", description = "Authenticate administrator with email and password")
@@ -367,10 +388,11 @@ class AuthController(
                 )
             }
 
-            is AuthResult.InvalidCredentials ->
+            is AuthResult.InvalidCredentials -> {
                 ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("invalid_credentials", "Invalid email or password"))
+            }
 
             // Exhaustive handling - these should never occur for adminLogin()
             is AuthResult.OtpSent,
@@ -391,7 +413,9 @@ class AuthController(
             is AuthResult.MemberNotFound,
             is AuthResult.PendingApproval,
             is AuthResult.ValidationError,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
 
     @Operation(summary = "Refresh token", description = "Exchange a valid refresh token for new access and refresh tokens")
@@ -406,13 +430,15 @@ class AuthController(
         @Valid @RequestBody request: RefreshTokenRequest,
     ): ResponseEntity<*> =
         when (val result = authService.refreshToken(request.refreshToken)) {
-            is AuthResult.TokenRefreshed ->
+            is AuthResult.TokenRefreshed -> {
                 ResponseEntity.ok(result.tokens.toResponse())
+            }
 
-            is AuthResult.InvalidToken ->
+            is AuthResult.InvalidToken -> {
                 ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("invalid_token", "Invalid or expired refresh token"))
+            }
 
             // Exhaustive handling - these should never occur for refreshToken()
             is AuthResult.OtpSent,
@@ -434,7 +460,9 @@ class AuthController(
             is AuthResult.MemberNotFound,
             is AuthResult.PendingApproval,
             is AuthResult.ValidationError,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
 
     @Operation(summary = "Check phone registration", description = "Check if a phone number is already registered")
@@ -449,13 +477,15 @@ class AuthController(
         @RequestParam phone: String,
     ): ResponseEntity<*> =
         when (val result = authService.checkPhone(phone)) {
-            is AuthResult.PhoneCheckResult ->
+            is AuthResult.PhoneCheckResult -> {
                 ResponseEntity.ok(CheckPhoneResponse(isRegistered = result.isRegistered))
+            }
 
-            is AuthResult.InvalidPhoneNumber ->
+            is AuthResult.InvalidPhoneNumber -> {
                 ResponseEntity
                     .badRequest()
                     .body(ErrorResponse("invalid_phone", ERROR_INVALID_PHONE))
+            }
 
             // Exhaustive handling - these should never occur for checkPhone()
             is AuthResult.OtpSent,
@@ -477,7 +507,9 @@ class AuthController(
             is AuthResult.MemberNotFound,
             is AuthResult.PendingApproval,
             is AuthResult.ValidationError,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
 
     /**
@@ -508,36 +540,44 @@ class AuthController(
             )
 
         return when (val result = registrationService.registerMember(command)) {
-            is RegistrationResult.Success ->
+            is RegistrationResult.Success -> {
                 ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(
                         WebRegisterResponse(
                             message = "Registration submitted. You will be notified once approved.",
-                            memberId = result.member.id.value.toString(),
+                            memberId =
+                                result.member.id.value
+                                    .toString(),
                         ),
                     )
+            }
 
-            is RegistrationResult.EmailAlreadyRegistered ->
+            is RegistrationResult.EmailAlreadyRegistered -> {
                 ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(ErrorResponse("email_registered", "Email address already registered"))
+            }
 
-            is RegistrationResult.InvalidSector ->
+            is RegistrationResult.InvalidSector -> {
                 ResponseEntity
                     .badRequest()
                     .body(ErrorResponse("invalid_sector", "Invalid sector ID"))
+            }
 
-            is RegistrationResult.ValidationError ->
+            is RegistrationResult.ValidationError -> {
                 ResponseEntity
                     .badRequest()
                     .body(ErrorResponse("validation_error", result.errors.joinToString(", ")))
+            }
 
             is RegistrationResult.Approved,
             is RegistrationResult.Rejected,
             is RegistrationResult.MemberNotFound,
             is RegistrationResult.InvalidStatus,
-            -> ResponseEntity.internalServerError().build<Unit>()
+            -> {
+                ResponseEntity.internalServerError().build<Unit>()
+            }
         }
     }
 
@@ -558,7 +598,7 @@ class AuthController(
         @Valid @RequestBody request: MemberLoginRequest,
     ): ResponseEntity<*> =
         when (val result = authService.loginWithEmail(request.email, request.password)) {
-            is AuthResult.MemberLoginSuccess ->
+            is AuthResult.MemberLoginSuccess -> {
                 ResponseEntity.ok(
                     MemberLoginResponse(
                         memberId = result.memberId.value.toString(),
@@ -568,21 +608,25 @@ class AuthController(
                         mustChangePassword = result.mustChangePassword,
                     ),
                 )
+            }
 
-            is AuthResult.InvalidCredentials ->
+            is AuthResult.InvalidCredentials -> {
                 ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("invalid_credentials", "Invalid email or password"))
+            }
 
-            is AuthResult.PendingApproval ->
+            is AuthResult.PendingApproval -> {
                 ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
                     .body(ErrorResponse("pending_approval", "Your registration is pending admin approval"))
+            }
 
-            is AuthResult.AccountSuspended ->
+            is AuthResult.AccountSuspended -> {
                 ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
                     .body(ErrorResponse("account_suspended", "Your account has been suspended"))
+            }
 
             // Exhaustive handling - these should never occur for memberLogin()
             is AuthResult.OtpSent,
@@ -602,7 +646,9 @@ class AuthController(
             is AuthResult.PasswordChanged,
             is AuthResult.MemberNotFound,
             is AuthResult.ValidationError,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
 
     /**
@@ -636,25 +682,29 @@ class AuthController(
                     request.newPassword,
                 )
         ) {
-            is AuthResult.PasswordChanged ->
+            is AuthResult.PasswordChanged -> {
                 ResponseEntity.ok(
                     MessageResponse("Password changed successfully"),
                 )
+            }
 
-            is AuthResult.InvalidCredentials ->
+            is AuthResult.InvalidCredentials -> {
                 ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("invalid_password", "Current password is incorrect"))
+            }
 
-            is AuthResult.ValidationError ->
+            is AuthResult.ValidationError -> {
                 ResponseEntity
                     .badRequest()
                     .body(ErrorResponse("validation_error", result.errors.joinToString(", ")))
+            }
 
-            is AuthResult.MemberNotFound ->
+            is AuthResult.MemberNotFound -> {
                 ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("not_found", "Member not found"))
+            }
 
             // Exhaustive handling - these should never occur for changePassword()
             is AuthResult.OtpSent,
@@ -674,7 +724,9 @@ class AuthController(
             is AuthResult.InvalidToken,
             is AuthResult.MemberLoginSuccess,
             is AuthResult.PendingApproval,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
     }
 }

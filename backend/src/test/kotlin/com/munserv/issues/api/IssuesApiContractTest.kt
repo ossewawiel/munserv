@@ -1,6 +1,5 @@
 package com.munserv.issues.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.TestContainersConfig
 import com.munserv.auth.service.JwtService
 import com.munserv.shared.types.MemberId
@@ -9,8 +8,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -18,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.ObjectMapper
 
 /**
  * API contract tests for Issues endpoints.
@@ -60,8 +60,7 @@ class IssuesApiContractTest {
                     header("Authorization", "Bearer $memberToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
                     jsonPath("$.items") { isArray() }
@@ -80,8 +79,7 @@ class IssuesApiContractTest {
                     param("sectorId", testSectorId)
                     param("state", "reported")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.items") { isArray() }
                 }
@@ -95,8 +93,7 @@ class IssuesApiContractTest {
                     param("sectorId", testSectorId)
                     param("type", "pothole")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.items") { isArray() }
                 }
@@ -111,8 +108,7 @@ class IssuesApiContractTest {
                     param("page", "1")
                     param("limit", "5")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.pagination.page") { value(1) }
                     jsonPath("$.pagination.limit") { value(5) }
@@ -126,8 +122,7 @@ class IssuesApiContractTest {
                     header("Authorization", "Bearer $memberToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                 }
         }
@@ -140,8 +135,7 @@ class IssuesApiContractTest {
                     param("sectorId", testSectorId)
                     param("sortBy", "createdAt")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                 }
         }
@@ -154,11 +148,9 @@ class IssuesApiContractTest {
                         header("Authorization", "Bearer $memberToken")
                         param("sectorId", testSectorId)
                         accept = MediaType.APPLICATION_JSON
-                    }
-                    .andExpect {
+                    }.andExpect {
                         status { isOk() }
-                    }
-                    .andReturn()
+                    }.andReturn()
 
             val content = result.response.contentAsString
             content.contains("\"items\"") shouldBe true
@@ -176,8 +168,7 @@ class IssuesApiContractTest {
                     header("Authorization", "Bearer $memberToken")
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.items[0].id") { isNotEmpty() }
                     jsonPath("$.items[0].type") { isNotEmpty() }
@@ -198,8 +189,7 @@ class IssuesApiContractTest {
                 .get("/api/v1/issues/mine") {
                     header("Authorization", "Bearer $memberToken")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.items") { isArray() }
                     jsonPath("$.pagination") { isMap() }
@@ -214,8 +204,7 @@ class IssuesApiContractTest {
                     param("page", "1")
                     param("limit", "10")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.pagination.page") { value(1) }
                     jsonPath("$.pagination.limit") { value(10) }
@@ -231,8 +220,7 @@ class IssuesApiContractTest {
                 .get("/api/v1/issues/$testIssueId") {
                     header("Authorization", "Bearer $memberToken")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
                     jsonPath("$.id") { value(testIssueId) }
@@ -255,8 +243,7 @@ class IssuesApiContractTest {
                 .get("/api/v1/issues/00000000-0000-0000-0000-000000000000") {
                     header("Authorization", "Bearer $memberToken")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isNotFound() }
                     jsonPath("$.error.code") { value("NOT_FOUND") }
                 }
@@ -269,11 +256,9 @@ class IssuesApiContractTest {
                     .get("/api/v1/issues/$testIssueId") {
                         header("Authorization", "Bearer $memberToken")
                         accept = MediaType.APPLICATION_JSON
-                    }
-                    .andExpect {
+                    }.andExpect {
                         status { isOk() }
-                    }
-                    .andReturn()
+                    }.andReturn()
 
             val content = result.response.contentAsString
             content.contains("\"id\"") shouldBe true
@@ -298,8 +283,7 @@ class IssuesApiContractTest {
                 .get("/api/v1/issues/$testIssueId") {
                     header("Authorization", "Bearer $memberToken")
                     accept = MediaType.APPLICATION_JSON
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.stateHistory") { isArray() }
                     jsonPath("$.stateHistory[0].state") { isNotEmpty() }
@@ -326,8 +310,7 @@ class IssuesApiContractTest {
                     header("Authorization", "Bearer $memberToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isCreated() }
                     jsonPath("$.id") { isNotEmpty() }
                     jsonPath("$.type") { value("pothole") }
@@ -351,8 +334,7 @@ class IssuesApiContractTest {
                     header("Authorization", "Bearer $memberToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isBadRequest() }
                 }
         }
@@ -374,11 +356,9 @@ class IssuesApiContractTest {
                         header("Authorization", "Bearer $memberToken")
                         contentType = MediaType.APPLICATION_JSON
                         content = objectMapper.writeValueAsString(request)
-                    }
-                    .andExpect {
+                    }.andExpect {
                         status { isCreated() }
-                    }
-                    .andReturn()
+                    }.andReturn()
 
             val content = result.response.contentAsString
             content.contains("\"id\"") shouldBe true
@@ -408,8 +388,7 @@ class IssuesApiContractTest {
                         header("Authorization", "Bearer $memberToken")
                         contentType = MediaType.APPLICATION_JSON
                         content = objectMapper.writeValueAsString(createRequest)
-                    }
-                    .andExpect { status { isCreated() } }
+                    }.andExpect { status { isCreated() } }
                     .andReturn()
 
             val response = objectMapper.readTree(result.response.contentAsString)
@@ -432,8 +411,7 @@ class IssuesApiContractTest {
                     header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.id") { value(issueId) }
                     jsonPath("$.state") { value("confirmed") }
@@ -456,8 +434,7 @@ class IssuesApiContractTest {
                     header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.stateHistory") { isArray() }
                     // Should have 2 entries: initial "reported" + "confirmed"
@@ -479,8 +456,7 @@ class IssuesApiContractTest {
                     header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(confirmRequest)
-                }
-                .andExpect { status { isOk() } }
+                }.andExpect { status { isOk() } }
 
             // Try to go directly to fixed (invalid from confirmed)
             val invalidRequest = UpdateIssueStateRequest(state = "fixed", note = null)
@@ -490,8 +466,7 @@ class IssuesApiContractTest {
                     header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(invalidRequest)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isUnprocessableEntity() }
                     jsonPath("$.error.code") { value("INVALID_STATE_TRANSITION") }
                 }
@@ -506,8 +481,7 @@ class IssuesApiContractTest {
                     header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isNotFound() }
                     jsonPath("$.error.code") { value("NOT_FOUND") }
                 }
@@ -523,11 +497,9 @@ class IssuesApiContractTest {
                     .get("/api/v1/issues/00000000-0000-0000-0000-000000000000") {
                         header("Authorization", "Bearer $memberToken")
                         accept = MediaType.APPLICATION_JSON
-                    }
-                    .andExpect {
+                    }.andExpect {
                         status { isNotFound() }
-                    }
-                    .andReturn()
+                    }.andReturn()
 
             val content = result.response.contentAsString
             content.contains("\"error\"") shouldBe true

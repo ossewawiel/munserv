@@ -11,15 +11,21 @@ sealed interface SectorSettingsResult {
     /**
      * Operation completed successfully.
      */
-    data class Success(val settings: SectorSettings) : SectorSettingsResult
+    data class Success(
+        val settings: SectorSettings,
+    ) : SectorSettingsResult
 
     /**
      * Sector was not found.
      */
-    data class SectorNotFound(val sectorId: SectorId) : SectorSettingsResult
+    data class SectorNotFound(
+        val sectorId: SectorId,
+    ) : SectorSettingsResult
 
     /**
      * Validation errors occurred.
      */
-    data class ValidationError(val errors: List<String>) : SectorSettingsResult
+    data class ValidationError(
+        val errors: List<String>,
+    ) : SectorSettingsResult
 }

@@ -35,7 +35,8 @@ class IssueService(
      */
     @Transactional(readOnly = true)
     fun findById(id: IssueId): IssueResult =
-        repository.findById(id)
+        repository
+            .findById(id)
             ?.let { IssueResult.Success(it) }
             ?: IssueResult.NotFound(id)
 

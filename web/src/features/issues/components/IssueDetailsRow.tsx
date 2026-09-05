@@ -23,12 +23,17 @@ const DetailItem: FC<DetailItemProps> = ({ label, value }) => (
   <Box>
     <Typography
       variant="caption"
-      color="text.secondary"
-      sx={{ display: 'block', mb: 0.5, fontWeight: 500 }}
-    >
+      sx={{
+        color: "text.secondary",
+        display: 'block',
+        mb: 0.5,
+        fontWeight: 500
+      }}>
       {label}
     </Typography>
-    <Typography variant="body2" color="text.primary">
+    <Typography variant="body2" sx={{
+      color: "text.primary"
+    }}>
       {value}
     </Typography>
   </Box>
@@ -98,12 +103,17 @@ export const IssueDetailsRow: FC<IssueDetailsRowProps> = ({
           <Box>
             <Typography
               variant="caption"
-              color="text.secondary"
-              sx={{ display: 'block', mb: 0.5, fontWeight: 500 }}
-            >
+              sx={{
+                color: "text.secondary",
+                display: 'block',
+                mb: 0.5,
+                fontWeight: 500
+              }}>
               {t('issues.description')}
             </Typography>
-            <Typography variant="body2" color="text.primary">
+            <Typography variant="body2" sx={{
+              color: "text.primary"
+            }}>
               {description}
             </Typography>
           </Box>

@@ -122,10 +122,11 @@ class JpaAdminRepository(
     }
 
     override fun findPodChief(podId: PodId): Admin? =
-        jpa.findByPodIdAndRoleAndDeletedAtIsNull(
-            podId.value,
-            AdminRole.POD_CHIEF.toDbValue(),
-        )?.toDomain()
+        jpa
+            .findByPodIdAndRoleAndDeletedAtIsNull(
+                podId.value,
+                AdminRole.POD_CHIEF.toDbValue(),
+            )?.toDomain()
 
     override fun existsPodChiefOnboarded(podId: PodId): Boolean =
         jpa.existsByPodIdAndRoleAndOnboardingStatusAndDeletedAtIsNull(

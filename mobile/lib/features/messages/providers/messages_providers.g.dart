@@ -12,7 +12,7 @@ part of 'messages_providers.dart';
 /// keepAlive: true to prevent disposal/recreation cycles
 
 @ProviderFor(messagesApi)
-const messagesApiProvider = MessagesApiProvider._();
+final messagesApiProvider = MessagesApiProvider._();
 
 /// Provides MessagesApi
 /// keepAlive: true to prevent disposal/recreation cycles
@@ -22,7 +22,7 @@ final class MessagesApiProvider
     with $Provider<MessagesApi> {
   /// Provides MessagesApi
   /// keepAlive: true to prevent disposal/recreation cycles
-  const MessagesApiProvider._()
+  MessagesApiProvider._()
     : super(
         from: null,
         argument: null,
@@ -61,7 +61,7 @@ String _$messagesApiHash() => r'993eb1cfd288303e878d991f98e64480f914bf41';
 /// keepAlive: true to prevent disposal/recreation cycles
 
 @ProviderFor(messagesRepository)
-const messagesRepositoryProvider = MessagesRepositoryProvider._();
+final messagesRepositoryProvider = MessagesRepositoryProvider._();
 
 /// Provides MessagesRepository
 /// keepAlive: true to prevent disposal/recreation cycles
@@ -76,7 +76,7 @@ final class MessagesRepositoryProvider
     with $Provider<MessagesRepository> {
   /// Provides MessagesRepository
   /// keepAlive: true to prevent disposal/recreation cycles
-  const MessagesRepositoryProvider._()
+  MessagesRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -116,13 +116,13 @@ String _$messagesRepositoryHash() =>
 /// Current messages filter state
 
 @ProviderFor(MessagesFilterState)
-const messagesFilterStateProvider = MessagesFilterStateProvider._();
+final messagesFilterStateProvider = MessagesFilterStateProvider._();
 
 /// Current messages filter state
 final class MessagesFilterStateProvider
     extends $NotifierProvider<MessagesFilterState, MessagesFilter> {
   /// Current messages filter state
-  const MessagesFilterStateProvider._()
+  MessagesFilterStateProvider._()
     : super(
         from: null,
         argument: null,
@@ -158,8 +158,7 @@ abstract class _$MessagesFilterState extends $Notifier<MessagesFilter> {
   MessagesFilter build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<MessagesFilter, MessagesFilter>;
     final element =
         ref.element
@@ -169,20 +168,20 @@ abstract class _$MessagesFilterState extends $Notifier<MessagesFilter> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 /// Manages messages list data
 
 @ProviderFor(MessagesNotifier)
-const messagesProvider = MessagesNotifierProvider._();
+final messagesProvider = MessagesNotifierProvider._();
 
 /// Manages messages list data
 final class MessagesNotifierProvider
     extends $AsyncNotifierProvider<MessagesNotifier, MessageListResponse> {
   /// Manages messages list data
-  const MessagesNotifierProvider._()
+  MessagesNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -209,8 +208,7 @@ abstract class _$MessagesNotifier extends $AsyncNotifier<MessageListResponse> {
   FutureOr<MessageListResponse> build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<MessageListResponse>, MessageListResponse>;
     final element =
@@ -221,14 +219,14 @@ abstract class _$MessagesNotifier extends $AsyncNotifier<MessageListResponse> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 /// Fetches a single message by ID
 
 @ProviderFor(messageDetail)
-const messageDetailProvider = MessageDetailFamily._();
+final messageDetailProvider = MessageDetailFamily._();
 
 /// Fetches a single message by ID
 
@@ -236,7 +234,7 @@ final class MessageDetailProvider
     extends $FunctionalProvider<AsyncValue<Message>, Message, FutureOr<Message>>
     with $FutureModifier<Message>, $FutureProvider<Message> {
   /// Fetches a single message by ID
-  const MessageDetailProvider._({
+  MessageDetailProvider._({
     required MessageDetailFamily super.from,
     required String super.argument,
   }) : super(
@@ -285,7 +283,7 @@ String _$messageDetailHash() => r'69447946ea16dca2ccf7188058b3d4349e3370d6';
 
 final class MessageDetailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Message>, String> {
-  const MessageDetailFamily._()
+  MessageDetailFamily._()
     : super(
         retry: null,
         name: r'messageDetailProvider',
@@ -306,13 +304,13 @@ final class MessageDetailFamily extends $Family
 /// Provides unread message count for badge display
 
 @ProviderFor(UnreadCountNotifier)
-const unreadCountProvider = UnreadCountNotifierProvider._();
+final unreadCountProvider = UnreadCountNotifierProvider._();
 
 /// Provides unread message count for badge display
 final class UnreadCountNotifierProvider
     extends $AsyncNotifierProvider<UnreadCountNotifier, int> {
   /// Provides unread message count for badge display
-  const UnreadCountNotifierProvider._()
+  UnreadCountNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -340,8 +338,7 @@ abstract class _$UnreadCountNotifier extends $AsyncNotifier<int> {
   FutureOr<int> build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<int>, int>;
     final element =
         ref.element
@@ -351,20 +348,20 @@ abstract class _$UnreadCountNotifier extends $AsyncNotifier<int> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 /// Manages message actions (mark as read, perform action)
 
 @ProviderFor(MessageActionNotifier)
-const messageActionProvider = MessageActionNotifierProvider._();
+final messageActionProvider = MessageActionNotifierProvider._();
 
 /// Manages message actions (mark as read, perform action)
 final class MessageActionNotifierProvider
     extends $NotifierProvider<MessageActionNotifier, MessageActionState> {
   /// Manages message actions (mark as read, perform action)
-  const MessageActionNotifierProvider._()
+  MessageActionNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -392,7 +389,7 @@ final class MessageActionNotifierProvider
 }
 
 String _$messageActionNotifierHash() =>
-    r'd7c38de9c3f88f464583a42a9c493b2161fd2256';
+    r'9974b5be7988b478d99c2ab742192ce32542eb28';
 
 /// Manages message actions (mark as read, perform action)
 
@@ -400,8 +397,7 @@ abstract class _$MessageActionNotifier extends $Notifier<MessageActionState> {
   MessageActionState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<MessageActionState, MessageActionState>;
     final element =
         ref.element
@@ -411,6 +407,6 @@ abstract class _$MessageActionNotifier extends $Notifier<MessageActionState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

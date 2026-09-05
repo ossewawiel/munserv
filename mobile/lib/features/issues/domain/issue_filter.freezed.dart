@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'issue_filter.dart';
@@ -9,6 +9,7 @@ part of 'issue_filter.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $IssueFilterCopyWith<IssueFilter> get copyWith => _$IssueFilterCopyWithImpl<Issu
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IssueFilter&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.state, state) || other.state == state)&&(identical(other.type, type) || other.type == type)&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.sortBy, sortBy) || other.sortBy == sortBy));
+  final _this = this as IssueFilter;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is IssueFilter&&(identical(other.sectorId, _this.sectorId) || other.sectorId == _this.sectorId)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.page, _this.page) || other.page == _this.page)&&(identical(other.limit, _this.limit) || other.limit == _this.limit)&&(identical(other.sortBy, _this.sortBy) || other.sortBy == _this.sortBy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,sectorId,state,type,page,limit,sortBy);
+int get hashCode {
+  final _this = this as IssueFilter;
+  return Object.hash(runtimeType,_this.sectorId,_this.state,_this.type,_this.page,_this.limit,_this.sortBy);
+}
 
 @override
 String toString() {
-  return 'IssueFilter(sectorId: $sectorId, state: $state, type: $type, page: $page, limit: $limit, sortBy: $sortBy)';
+  final _this = this as IssueFilter;
+  return 'IssueFilter(sectorId: ${_this.sectorId}, state: ${_this.state}, type: ${_this.type}, page: ${_this.page}, limit: ${_this.limit}, sortBy: ${_this.sortBy})';
 }
 
 
@@ -66,7 +72,7 @@ class _$IssueFilterCopyWithImpl<$Res>
 /// Create a copy of IssueFilter
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? sectorId = null,Object? state = freezed,Object? type = freezed,Object? page = null,Object? limit = null,Object? sortBy = null,}) {
-  return _then(_self.copyWith(
+  return _then(IssueFilter(
 sectorId: null == sectorId ? _self.sectorId : sectorId // ignore: cast_nullable_to_non_nullable
 as String,state: freezed == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as IssueState?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -237,16 +243,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _IssueFilter&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.state, state) || other.state == state)&&(identical(other.type, type) || other.type == type)&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.sortBy, sortBy) || other.sortBy == sortBy));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IssueFilter&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.state, state) || other.state == state)&&(identical(other.type, type) || other.type == type)&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.sortBy, sortBy) || other.sortBy == sortBy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,sectorId,state,type,page,limit,sortBy);
+int get hashCode {
+    return Object.hash(runtimeType,sectorId,state,type,page,limit,sortBy);
+}
 
 @override
 String toString() {
-  return 'IssueFilter(sectorId: $sectorId, state: $state, type: $type, page: $page, limit: $limit, sortBy: $sortBy)';
+    return 'IssueFilter(sectorId: $sectorId, state: $state, type: $type, page: $page, limit: $limit, sortBy: $sortBy)';
 }
 
 

@@ -505,8 +505,10 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
               primary={getLabel(item.labelKey)}
               slotProps={{
                 primary: {
-                  fontWeight: selected ? 600 : 400,
-                  fontSize: isChild ? '0.8125rem' : '0.875rem',
+                  sx: {
+                    fontWeight: selected ? 600 : 400,
+                    fontSize: isChild ? '0.8125rem' : '0.875rem',
+                  },
                 },
               }}
             />

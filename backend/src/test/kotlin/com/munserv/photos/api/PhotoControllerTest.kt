@@ -16,8 +16,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
@@ -81,17 +81,18 @@ class PhotoControllerTest {
 
             every { photoService.uploadPhoto(any(), any()) } returns PhotoResult.Success(testPhoto)
 
-            mockMvc.multipart("/api/v1/issues/${testIssueId.value}/photos") {
-                file(file)
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isCreated() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.id") { value(testPhotoId.value.toString()) }
-                jsonPath("$.url") { value(testPhoto.url) }
-                jsonPath("$.thumbnailUrl") { value(testPhoto.thumbnailUrl) }
-                jsonPath("$.sortOrder") { value(1) }
-            }
+            mockMvc
+                .multipart("/api/v1/issues/${testIssueId.value}/photos") {
+                    file(file)
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isCreated() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.id") { value(testPhotoId.value.toString()) }
+                    jsonPath("$.url") { value(testPhoto.url) }
+                    jsonPath("$.thumbnailUrl") { value(testPhoto.thumbnailUrl) }
+                    jsonPath("$.sortOrder") { value(1) }
+                }
 
             verify { photoService.uploadPhoto(testIssueId, any()) }
         }
@@ -109,14 +110,15 @@ class PhotoControllerTest {
             every { photoService.uploadPhoto(any(), any()) } returns
                 PhotoResult.ValidationError(listOf("Invalid file type", "File too large"))
 
-            mockMvc.multipart("/api/v1/issues/${testIssueId.value}/photos") {
-                file(file)
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isBadRequest() }
-                jsonPath("$.error.code") { value("VALIDATION_ERROR") }
-                jsonPath("$.error.message") { value("Invalid file type, File too large") }
-            }
+            mockMvc
+                .multipart("/api/v1/issues/${testIssueId.value}/photos") {
+                    file(file)
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.error.code") { value("VALIDATION_ERROR") }
+                    jsonPath("$.error.message") { value("Invalid file type, File too large") }
+                }
         }
 
         @Test
@@ -132,14 +134,15 @@ class PhotoControllerTest {
             every { photoService.uploadPhoto(any(), any()) } returns
                 PhotoResult.StorageError("Disk full")
 
-            mockMvc.multipart("/api/v1/issues/${testIssueId.value}/photos") {
-                file(file)
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isInternalServerError() }
-                jsonPath("$.error.code") { value("INTERNAL_ERROR") }
-                jsonPath("$.error.message") { value("Disk full") }
-            }
+            mockMvc
+                .multipart("/api/v1/issues/${testIssueId.value}/photos") {
+                    file(file)
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isInternalServerError() }
+                    jsonPath("$.error.code") { value("INTERNAL_ERROR") }
+                    jsonPath("$.error.message") { value("Disk full") }
+                }
         }
 
         @Test
@@ -152,11 +155,12 @@ class PhotoControllerTest {
                     "test image content".toByteArray(),
                 )
 
-            mockMvc.multipart("/api/v1/issues/${testIssueId.value}/photos") {
-                file(file)
-            }.andExpect {
-                status { isForbidden() }
-            }
+            mockMvc
+                .multipart("/api/v1/issues/${testIssueId.value}/photos") {
+                    file(file)
+                }.andExpect {
+                    status { isForbidden() }
+                }
         }
     }
 
@@ -176,18 +180,19 @@ class PhotoControllerTest {
 
             every { photoService.getPhotosForIssue(testIssueId) } returns photos
 
-            mockMvc.get("/api/v1/issues/${testIssueId.value}/photos") {
-                header("Authorization", "Bearer $memberToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$") { isArray() }
-                jsonPath("$.length()") { value(2) }
-                jsonPath("$[0].id") { value(testPhotoId.value.toString()) }
-                jsonPath("$[0].sortOrder") { value(1) }
-                jsonPath("$[1].sortOrder") { value(2) }
-            }
+            mockMvc
+                .get("/api/v1/issues/${testIssueId.value}/photos") {
+                    header("Authorization", "Bearer $memberToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$") { isArray() }
+                    jsonPath("$.length()") { value(2) }
+                    jsonPath("$[0].id") { value(testPhotoId.value.toString()) }
+                    jsonPath("$[0].sortOrder") { value(1) }
+                    jsonPath("$[1].sortOrder") { value(2) }
+                }
 
             verify { photoService.getPhotosForIssue(testIssueId) }
         }
@@ -196,23 +201,25 @@ class PhotoControllerTest {
         fun `GET issues-issueId-photos should return empty array when no photos`() {
             every { photoService.getPhotosForIssue(testIssueId) } returns emptyList()
 
-            mockMvc.get("/api/v1/issues/${testIssueId.value}/photos") {
-                header("Authorization", "Bearer $memberToken")
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$") { isArray() }
-                jsonPath("$.length()") { value(0) }
-            }
+            mockMvc
+                .get("/api/v1/issues/${testIssueId.value}/photos") {
+                    header("Authorization", "Bearer $memberToken")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$") { isArray() }
+                    jsonPath("$.length()") { value(0) }
+                }
         }
 
         @Test
         fun `GET issues-issueId-photos should return 403 without token`() {
-            mockMvc.get("/api/v1/issues/${testIssueId.value}/photos") {
-                accept = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status { isForbidden() }
-            }
+            mockMvc
+                .get("/api/v1/issues/${testIssueId.value}/photos") {
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isForbidden() }
+                }
         }
     }
 
@@ -222,11 +229,12 @@ class PhotoControllerTest {
         fun `DELETE photos-photoId should return 204 on successful delete`() {
             every { photoService.deletePhoto(testPhotoId) } returns true
 
-            mockMvc.delete("/api/v1/photos/${testPhotoId.value}") {
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isNoContent() }
-            }
+            mockMvc
+                .delete("/api/v1/photos/${testPhotoId.value}") {
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isNoContent() }
+                }
 
             verify { photoService.deletePhoto(testPhotoId) }
         }
@@ -235,13 +243,14 @@ class PhotoControllerTest {
         fun `DELETE photos-photoId should return 404 when photo not found`() {
             every { photoService.deletePhoto(testPhotoId) } returns false
 
-            mockMvc.delete("/api/v1/photos/${testPhotoId.value}") {
-                header("Authorization", "Bearer $memberToken")
-            }.andExpect {
-                status { isNotFound() }
-                jsonPath("$.error.code") { value("NOT_FOUND") }
-                jsonPath("$.error.message") { value("Photo not found") }
-            }
+            mockMvc
+                .delete("/api/v1/photos/${testPhotoId.value}") {
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isNotFound() }
+                    jsonPath("$.error.code") { value("NOT_FOUND") }
+                    jsonPath("$.error.message") { value("Photo not found") }
+                }
         }
     }
 

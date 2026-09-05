@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'state_history.dart';
@@ -9,6 +9,7 @@ part of 'state_history.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $StateHistoryEntryCopyWith<StateHistoryEntry> get copyWith => _$StateHistoryEntr
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StateHistoryEntry&&(identical(other.state, state) || other.state == state)&&(identical(other.changedAt, changedAt) || other.changedAt == changedAt)&&(identical(other.changedBy, changedBy) || other.changedBy == changedBy)&&(identical(other.note, note) || other.note == note));
+  final _this = this as StateHistoryEntry;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StateHistoryEntry&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.changedAt, _this.changedAt) || other.changedAt == _this.changedAt)&&(identical(other.changedBy, _this.changedBy) || other.changedBy == _this.changedBy)&&(identical(other.note, _this.note) || other.note == _this.note));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,state,changedAt,changedBy,note);
+int get hashCode {
+  final _this = this as StateHistoryEntry;
+  return Object.hash(runtimeType,_this.state,_this.changedAt,_this.changedBy,_this.note);
+}
 
 @override
 String toString() {
-  return 'StateHistoryEntry(state: $state, changedAt: $changedAt, changedBy: $changedBy, note: $note)';
+  final _this = this as StateHistoryEntry;
+  return 'StateHistoryEntry(state: ${_this.state}, changedAt: ${_this.changedAt}, changedBy: ${_this.changedBy}, note: ${_this.note})';
 }
 
 
@@ -66,7 +72,7 @@ class _$StateHistoryEntryCopyWithImpl<$Res>
 /// Create a copy of StateHistoryEntry
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? state = null,Object? changedAt = null,Object? changedBy = freezed,Object? note = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(StateHistoryEntry(
 state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as IssueState,changedAt: null == changedAt ? _self.changedAt : changedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,changedBy: freezed == changedBy ? _self.changedBy : changedBy // ignore: cast_nullable_to_non_nullable
@@ -233,16 +239,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StateHistoryEntry&&(identical(other.state, state) || other.state == state)&&(identical(other.changedAt, changedAt) || other.changedAt == changedAt)&&(identical(other.changedBy, changedBy) || other.changedBy == changedBy)&&(identical(other.note, note) || other.note == note));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StateHistoryEntry&&(identical(other.state, state) || other.state == state)&&(identical(other.changedAt, changedAt) || other.changedAt == changedAt)&&(identical(other.changedBy, changedBy) || other.changedBy == changedBy)&&(identical(other.note, note) || other.note == note));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,state,changedAt,changedBy,note);
+int get hashCode {
+    return Object.hash(runtimeType,state,changedAt,changedBy,note);
+}
 
 @override
 String toString() {
-  return 'StateHistoryEntry(state: $state, changedAt: $changedAt, changedBy: $changedBy, note: $note)';
+    return 'StateHistoryEntry(state: $state, changedAt: $changedAt, changedBy: $changedBy, note: $note)';
 }
 
 
@@ -300,16 +308,21 @@ $IssueDetailCopyWith<IssueDetail> get copyWith => _$IssueDetailCopyWithImpl<Issu
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IssueDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.state, state) || other.state == state)&&(identical(other.location, location) || other.location == location)&&(identical(other.address, address) || other.address == address)&&(identical(other.description, description) || other.description == description)&&(identical(other.heat, heat) || other.heat == heat)&&const DeepCollectionEquality().equals(other.photoUrls, photoUrls)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.reporterId, reporterId) || other.reporterId == reporterId)&&(identical(other.reportCount, reportCount) || other.reportCount == reportCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.stateHistory, stateHistory));
+  final _this = this as IssueDetail;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is IssueDetail&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.location, _this.location) || other.location == _this.location)&&(identical(other.address, _this.address) || other.address == _this.address)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.heat, _this.heat) || other.heat == _this.heat)&&const DeepCollectionEquality().equals(other.photoUrls, _this.photoUrls)&&(identical(other.sectorId, _this.sectorId) || other.sectorId == _this.sectorId)&&(identical(other.reporterId, _this.reporterId) || other.reporterId == _this.reporterId)&&(identical(other.reportCount, _this.reportCount) || other.reportCount == _this.reportCount)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&const DeepCollectionEquality().equals(other.stateHistory, _this.stateHistory));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,state,location,address,description,heat,const DeepCollectionEquality().hash(photoUrls),sectorId,reporterId,reportCount,createdAt,updatedAt,const DeepCollectionEquality().hash(stateHistory));
+int get hashCode {
+  final _this = this as IssueDetail;
+  return Object.hash(runtimeType,_this.id,_this.type,_this.state,_this.location,_this.address,_this.description,_this.heat,const DeepCollectionEquality().hash(_this.photoUrls),_this.sectorId,_this.reporterId,_this.reportCount,_this.createdAt,_this.updatedAt,const DeepCollectionEquality().hash(_this.stateHistory));
+}
 
 @override
 String toString() {
-  return 'IssueDetail(id: $id, type: $type, state: $state, location: $location, address: $address, description: $description, heat: $heat, photoUrls: $photoUrls, sectorId: $sectorId, reporterId: $reporterId, reportCount: $reportCount, createdAt: $createdAt, updatedAt: $updatedAt, stateHistory: $stateHistory)';
+  final _this = this as IssueDetail;
+  return 'IssueDetail(id: ${_this.id}, type: ${_this.type}, state: ${_this.state}, location: ${_this.location}, address: ${_this.address}, description: ${_this.description}, heat: ${_this.heat}, photoUrls: ${_this.photoUrls}, sectorId: ${_this.sectorId}, reporterId: ${_this.reporterId}, reportCount: ${_this.reportCount}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, stateHistory: ${_this.stateHistory})';
 }
 
 
@@ -338,7 +351,7 @@ class _$IssueDetailCopyWithImpl<$Res>
 /// Create a copy of IssueDetail
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? state = null,Object? location = null,Object? address = freezed,Object? description = freezed,Object? heat = null,Object? photoUrls = null,Object? sectorId = null,Object? reporterId = null,Object? reportCount = null,Object? createdAt = null,Object? updatedAt = null,Object? stateHistory = null,}) {
-  return _then(_self.copyWith(
+  return _then(IssueDetail(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as String,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
@@ -503,7 +516,7 @@ return $default(_that.id,_that.type,_that.state,_that.location,_that.address,_th
 @JsonSerializable()
 
 class _IssueDetail extends IssueDetail {
-  const _IssueDetail({required this.id, required this.type, required this.state, required this.location, this.address, this.description, required this.heat, required final  List<String> photoUrls, required this.sectorId, required this.reporterId, required this.reportCount, required this.createdAt, required this.updatedAt, final  List<StateHistoryEntry> stateHistory = const []}): _photoUrls = photoUrls,_stateHistory = stateHistory,super._();
+  const _IssueDetail({required this.id, required this.type, required this.state, required this.location, this.address, this.description, required this.heat, required  List<String> photoUrls, required this.sectorId, required this.reporterId, required this.reportCount, required this.createdAt, required this.updatedAt,  List<StateHistoryEntry> stateHistory = const []}): _photoUrls = photoUrls,_stateHistory = stateHistory,super._();
   factory _IssueDetail.fromJson(Map<String, dynamic> json) => _$IssueDetailFromJson(json);
 
 @override final  String id;
@@ -546,16 +559,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _IssueDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.state, state) || other.state == state)&&(identical(other.location, location) || other.location == location)&&(identical(other.address, address) || other.address == address)&&(identical(other.description, description) || other.description == description)&&(identical(other.heat, heat) || other.heat == heat)&&const DeepCollectionEquality().equals(other._photoUrls, _photoUrls)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.reporterId, reporterId) || other.reporterId == reporterId)&&(identical(other.reportCount, reportCount) || other.reportCount == reportCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._stateHistory, _stateHistory));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IssueDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.state, state) || other.state == state)&&(identical(other.location, location) || other.location == location)&&(identical(other.address, address) || other.address == address)&&(identical(other.description, description) || other.description == description)&&(identical(other.heat, heat) || other.heat == heat)&&const DeepCollectionEquality().equals(other.photoUrls, _photoUrls)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.reporterId, reporterId) || other.reporterId == reporterId)&&(identical(other.reportCount, reportCount) || other.reportCount == reportCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.stateHistory, _stateHistory));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,state,location,address,description,heat,const DeepCollectionEquality().hash(_photoUrls),sectorId,reporterId,reportCount,createdAt,updatedAt,const DeepCollectionEquality().hash(_stateHistory));
+int get hashCode {
+    return Object.hash(runtimeType,id,type,state,location,address,description,heat,const DeepCollectionEquality().hash(_photoUrls),sectorId,reporterId,reportCount,createdAt,updatedAt,const DeepCollectionEquality().hash(_stateHistory));
+}
 
 @override
 String toString() {
-  return 'IssueDetail(id: $id, type: $type, state: $state, location: $location, address: $address, description: $description, heat: $heat, photoUrls: $photoUrls, sectorId: $sectorId, reporterId: $reporterId, reportCount: $reportCount, createdAt: $createdAt, updatedAt: $updatedAt, stateHistory: $stateHistory)';
+    return 'IssueDetail(id: $id, type: $type, state: $state, location: $location, address: $address, description: $description, heat: $heat, photoUrls: $photoUrls, sectorId: $sectorId, reporterId: $reporterId, reportCount: $reportCount, createdAt: $createdAt, updatedAt: $updatedAt, stateHistory: $stateHistory)';
 }
 
 

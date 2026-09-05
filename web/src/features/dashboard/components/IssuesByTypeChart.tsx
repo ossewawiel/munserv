@@ -43,10 +43,17 @@ export const IssuesByTypeChart: FC<IssuesByTypeChartProps> = ({ byType }) => {
         {items.map(({ type, count, percentage }) => (
           <Box key={type}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-              <Typography variant="body2" color="text.primary">
+              <Typography variant="body2" sx={{
+                color: "text.primary"
+              }}>
                 {t(`issues.types.${type}`)}
               </Typography>
-              <Typography variant="body2" fontWeight={500} color="text.primary">
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 500,
+                  color: "text.primary"
+                }}>
                 {count}
               </Typography>
             </Box>
@@ -67,7 +74,13 @@ export const IssuesByTypeChart: FC<IssuesByTypeChartProps> = ({ byType }) => {
         ))}
       </Box>
       {total === 0 && (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mt: 2,
+            textAlign: 'center'
+          }}>
           {t('common.noResults')}
         </Typography>
       )}

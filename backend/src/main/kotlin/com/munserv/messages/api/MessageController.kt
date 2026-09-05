@@ -98,7 +98,8 @@ class MessageController(
         size: Int,
     ): ResponseEntity<*> {
         if (userIdStr == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_AUTH_REQUIRED)))
         }
 
@@ -106,7 +107,8 @@ class MessageController(
             try {
                 UUID.fromString(userIdStr)
             } catch (e: IllegalArgumentException) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
@@ -151,7 +153,8 @@ class MessageController(
         @AuthenticationPrincipal userIdStr: String?,
     ): ResponseEntity<*> {
         if (userIdStr == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_AUTH_REQUIRED)))
         }
 
@@ -159,20 +162,29 @@ class MessageController(
             try {
                 UUID.fromString(userIdStr)
             } catch (e: IllegalArgumentException) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
         val recipientType = getRecipientType()
 
         return when (val result = messageService.getMessage(id, userId, recipientType)) {
-            is MessageResult.Success -> ResponseEntity.ok(result.message)
-            is MessageResult.NotFound ->
-                ResponseEntity.status(HttpStatus.NOT_FOUND)
+            is MessageResult.Success -> {
+                ResponseEntity.ok(result.message)
+            }
+
+            is MessageResult.NotFound -> {
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, result.reason)))
+            }
+
             is MessageResult.Conflict,
             is MessageResult.ValidationError,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
     }
 
@@ -202,7 +214,8 @@ class MessageController(
         @AuthenticationPrincipal userIdStr: String?,
     ): ResponseEntity<*> {
         if (userIdStr == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_AUTH_REQUIRED)))
         }
 
@@ -210,20 +223,29 @@ class MessageController(
             try {
                 UUID.fromString(userIdStr)
             } catch (e: IllegalArgumentException) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
         val recipientType = getRecipientType()
 
         return when (val result = messageService.markAsRead(id, userId, recipientType)) {
-            is MessageResult.Success -> ResponseEntity.ok(result.message)
-            is MessageResult.NotFound ->
-                ResponseEntity.status(HttpStatus.NOT_FOUND)
+            is MessageResult.Success -> {
+                ResponseEntity.ok(result.message)
+            }
+
+            is MessageResult.NotFound -> {
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, result.reason)))
+            }
+
             is MessageResult.Conflict,
             is MessageResult.ValidationError,
-            -> throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            -> {
+                throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
         }
     }
 
@@ -262,7 +284,8 @@ class MessageController(
         @AuthenticationPrincipal userIdStr: String?,
     ): ResponseEntity<*> {
         if (userIdStr == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_AUTH_REQUIRED)))
         }
 
@@ -270,23 +293,35 @@ class MessageController(
             try {
                 UUID.fromString(userIdStr)
             } catch (e: IllegalArgumentException) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.UNAUTHORIZED, ERROR_INVALID_AUTH)))
             }
 
         val recipientType = getRecipientType()
 
         return when (val result = messageService.performAction(id, userId, recipientType, request)) {
-            is MessageResult.Success -> ResponseEntity.ok(result.message)
-            is MessageResult.NotFound ->
-                ResponseEntity.status(HttpStatus.NOT_FOUND)
+            is MessageResult.Success -> {
+                ResponseEntity.ok(result.message)
+            }
+
+            is MessageResult.NotFound -> {
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, result.reason)))
-            is MessageResult.Conflict ->
-                ResponseEntity.status(HttpStatus.CONFLICT)
+            }
+
+            is MessageResult.Conflict -> {
+                ResponseEntity
+                    .status(HttpStatus.CONFLICT)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.CONFLICT, result.reason)))
-            is MessageResult.ValidationError ->
-                ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            }
+
+            is MessageResult.ValidationError -> {
+                ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.VALIDATION_ERROR, result.errors.joinToString(", "))))
+            }
         }
     }
 }

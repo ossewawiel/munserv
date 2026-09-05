@@ -1,6 +1,5 @@
 package com.munserv.integration.scenarios
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.TestContainersConfig
 import com.munserv.auth.api.LoginRequest
 import com.munserv.auth.api.RefreshTokenRequest
@@ -12,13 +11,14 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.ObjectMapper
 
 /**
  * Scenario test: Complete member registration flow.
@@ -62,8 +62,7 @@ class MemberRegistrationScenarioTest {
             .post("/api/v1/auth/register") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 // Existing phone returns 409 Conflict
                 status { isConflict() }
             }
@@ -79,15 +78,13 @@ class MemberRegistrationScenarioTest {
                 .post("/api/v1/auth/login") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.accessToken") { isNotEmpty() }
                     jsonPath("$.refreshToken") { isNotEmpty() }
                     jsonPath("$.tokenType") { value("Bearer") }
                     jsonPath("$.memberId") { isNotEmpty() }
-                }
-                .andReturn()
+                }.andReturn()
 
         // Extract tokens for next steps
         val response = objectMapper.readTree(result.response.contentAsString)
@@ -111,13 +108,11 @@ class MemberRegistrationScenarioTest {
                 .post("/api/v1/auth/refresh") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk() }
                     jsonPath("$.accessToken") { isNotEmpty() }
                     jsonPath("$.refreshToken") { isNotEmpty() }
-                }
-                .andReturn()
+                }.andReturn()
 
         // Verify response matches contract
         val content = result.response.contentAsString
@@ -135,8 +130,7 @@ class MemberRegistrationScenarioTest {
             .post("/api/v1/auth/login") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isUnauthorized() }
                 jsonPath("$.error") { value("invalid_credentials") }
             }
@@ -151,8 +145,7 @@ class MemberRegistrationScenarioTest {
             .post("/api/v1/auth/login") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isUnauthorized() }
                 jsonPath("$.error") { value("invalid_credentials") }
             }
@@ -167,8 +160,7 @@ class MemberRegistrationScenarioTest {
             .post("/api/v1/auth/refresh") {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(request)
-            }
-            .andExpect {
+            }.andExpect {
                 status { isUnauthorized() }
                 jsonPath("$.error") { value("invalid_token") }
             }

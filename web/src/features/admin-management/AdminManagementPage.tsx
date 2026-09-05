@@ -125,7 +125,9 @@ export const AdminManagementPage: FC = () => {
         key: 'displayName',
         header: t('adminManagement.table.name', 'Name'),
         render: (admin: Admin) => (
-          <Typography variant="body2" fontWeight={500}>
+          <Typography variant="body2" sx={{
+            fontWeight: 500
+          }}>
             {admin.displayName}
           </Typography>
         ),
@@ -134,7 +136,9 @@ export const AdminManagementPage: FC = () => {
         key: 'email',
         header: t('adminManagement.table.email', 'Email'),
         render: (admin: Admin) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {admin.email}
           </Typography>
         ),
@@ -154,7 +158,9 @@ export const AdminManagementPage: FC = () => {
         key: 'createdAt',
         header: t('adminManagement.table.createdAt', 'Created'),
         render: (admin: Admin) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {formatDate(admin.createdAt)}
           </Typography>
         ),
@@ -244,7 +250,9 @@ export const AdminManagementPage: FC = () => {
           }
           emptyMessage={
             <Box sx={{ py: 4, textAlign: 'center' }}>
-              <Typography color="text.secondary">
+              <Typography sx={{
+                color: "text.secondary"
+              }}>
                 {t('adminManagement.empty', 'No admins found')}
               </Typography>
             </Box>

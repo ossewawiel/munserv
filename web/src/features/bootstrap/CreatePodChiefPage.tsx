@@ -132,7 +132,9 @@ export const CreatePodChiefPage: FC = () => {
     return (
       <Dialog open onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ bgcolor: 'success.main', color: 'common.white' }}>
-          <Typography variant="h6" component="span" fontWeight={600}>
+          <Typography variant="h6" component="span" sx={{
+            fontWeight: 600
+          }}>
             {t('bootstrap.podChiefCreated')}
           </Typography>
         </DialogTitle>
@@ -164,7 +166,9 @@ export const CreatePodChiefPage: FC = () => {
             sx={{ mb: 1 }}
           />
           {passwordCopied && (
-            <Typography variant="caption" color="success.main">
+            <Typography variant="caption" sx={{
+              color: "success.main"
+            }}>
               {t('bootstrap.passwordCopied')}
             </Typography>
           )}

@@ -3,7 +3,9 @@ package com.munserv.audit.domain
 /**
  * Types of actors that can perform audited actions.
  */
-enum class AuditActorType(val dbValue: String) {
+enum class AuditActorType(
+    val dbValue: String,
+) {
     SUPER_USER("SUPER_USER"),
     POD_CHIEF("POD_CHIEF"),
     SYSTEM("SYSTEM"),

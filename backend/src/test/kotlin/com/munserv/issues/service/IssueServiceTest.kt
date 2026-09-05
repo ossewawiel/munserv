@@ -347,7 +347,9 @@ class IssueServiceTest {
             val historyEntries =
                 listOf(
                     IssueStateHistoryEntry(
-                        id = com.munserv.issues.domain.IssueStateHistoryId.generate(),
+                        id =
+                            com.munserv.issues.domain.IssueStateHistoryId
+                                .generate(),
                         issueId = testIssueId,
                         state = IssueState.Reported,
                         changedAt = fixedInstant.minusSeconds(3600),
@@ -355,7 +357,9 @@ class IssueServiceTest {
                         note = null,
                     ),
                     IssueStateHistoryEntry(
-                        id = com.munserv.issues.domain.IssueStateHistoryId.generate(),
+                        id =
+                            com.munserv.issues.domain.IssueStateHistoryId
+                                .generate(),
                         issueId = testIssueId,
                         state = IssueState.Confirmed,
                         changedAt = fixedInstant,

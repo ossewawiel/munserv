@@ -134,14 +134,12 @@ docker compose down -v && docker compose up -d
 
 | Service | Image | Port |
 |---------|-------|------|
-| PostgreSQL + PostGIS | postgis/postgis:15-3.3 | 5435 (host) → 5432 |
-| Redis | redis:7-alpine | 6380 (host) → 6379 |
+| PostgreSQL + PostGIS | postgis/postgis:18-3.6 | 5435 (host) → 5432 |
 
 ### Connection Strings
 
 ```
 PostgreSQL: postgresql://munserv:munserv_dev@localhost:5435/munserv_dev
-Redis: redis://localhost:6380
 ```
 
 ---
@@ -151,7 +149,6 @@ Redis: redis://localhost:6380
 | Service | Port |
 |---------|------|
 | PostgreSQL | 5435 |
-| Redis | 6380 |
 | Backend API | 8080 |
 | Mock API | 3001 |
 | Web Dev Server | 3000 |

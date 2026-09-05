@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'member.dart';
@@ -9,6 +9,7 @@ part of 'member.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $MemberCopyWith<Member> get copyWith => _$MemberCopyWithImpl<Member>(this as Mem
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Member&&(identical(other.id, id) || other.id == id)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.surname, surname) || other.surname == surname)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.address, address) || other.address == address)&&(identical(other.registrationLocation, registrationLocation) || other.registrationLocation == registrationLocation)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  final _this = this as Member;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Member&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.firstName, _this.firstName) || other.firstName == _this.firstName)&&(identical(other.surname, _this.surname) || other.surname == _this.surname)&&(identical(other.phoneNumber, _this.phoneNumber) || other.phoneNumber == _this.phoneNumber)&&(identical(other.address, _this.address) || other.address == _this.address)&&(identical(other.registrationLocation, _this.registrationLocation) || other.registrationLocation == _this.registrationLocation)&&(identical(other.sectorId, _this.sectorId) || other.sectorId == _this.sectorId)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,firstName,surname,phoneNumber,address,registrationLocation,sectorId,status,createdAt);
+int get hashCode {
+  final _this = this as Member;
+  return Object.hash(runtimeType,_this.id,_this.firstName,_this.surname,_this.phoneNumber,_this.address,_this.registrationLocation,_this.sectorId,_this.status,_this.createdAt);
+}
 
 @override
 String toString() {
-  return 'Member(id: $id, firstName: $firstName, surname: $surname, phoneNumber: $phoneNumber, address: $address, registrationLocation: $registrationLocation, sectorId: $sectorId, status: $status, createdAt: $createdAt)';
+  final _this = this as Member;
+  return 'Member(id: ${_this.id}, firstName: ${_this.firstName}, surname: ${_this.surname}, phoneNumber: ${_this.phoneNumber}, address: ${_this.address}, registrationLocation: ${_this.registrationLocation}, sectorId: ${_this.sectorId}, status: ${_this.status}, createdAt: ${_this.createdAt})';
 }
 
 
@@ -66,7 +72,7 @@ class _$MemberCopyWithImpl<$Res>
 /// Create a copy of Member
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? firstName = null,Object? surname = null,Object? phoneNumber = null,Object? address = null,Object? registrationLocation = null,Object? sectorId = null,Object? status = null,Object? createdAt = null,}) {
-  return _then(_self.copyWith(
+  return _then(Member(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
 as String,surname: null == surname ? _self.surname : surname // ignore: cast_nullable_to_non_nullable
@@ -252,16 +258,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Member&&(identical(other.id, id) || other.id == id)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.surname, surname) || other.surname == surname)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.address, address) || other.address == address)&&(identical(other.registrationLocation, registrationLocation) || other.registrationLocation == registrationLocation)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Member&&(identical(other.id, id) || other.id == id)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.surname, surname) || other.surname == surname)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.address, address) || other.address == address)&&(identical(other.registrationLocation, registrationLocation) || other.registrationLocation == registrationLocation)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,firstName,surname,phoneNumber,address,registrationLocation,sectorId,status,createdAt);
+int get hashCode {
+    return Object.hash(runtimeType,id,firstName,surname,phoneNumber,address,registrationLocation,sectorId,status,createdAt);
+}
 
 @override
 String toString() {
-  return 'Member(id: $id, firstName: $firstName, surname: $surname, phoneNumber: $phoneNumber, address: $address, registrationLocation: $registrationLocation, sectorId: $sectorId, status: $status, createdAt: $createdAt)';
+    return 'Member(id: $id, firstName: $firstName, surname: $surname, phoneNumber: $phoneNumber, address: $address, registrationLocation: $registrationLocation, sectorId: $sectorId, status: $status, createdAt: $createdAt)';
 }
 
 

@@ -74,10 +74,14 @@ export const EditPodAdminDialog: FC<EditPodAdminDialogProps> = ({
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
-      TransitionProps={{ onEnter: handleEnter }}
+      slotProps={{
+        transition: { onEnter: handleEnter }
+      }}
     >
       <DialogTitle sx={{ bgcolor: 'secondary.main', color: 'common.white' }}>
-        <Typography variant="h6" component="span" fontWeight={600}>
+        <Typography variant="h6" component="span" sx={{
+          fontWeight: 600
+        }}>
           {t('podAdministrators.editAdmin')}
         </Typography>
       </DialogTitle>

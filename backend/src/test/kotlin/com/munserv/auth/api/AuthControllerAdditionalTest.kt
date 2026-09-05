@@ -1,6 +1,5 @@
 package com.munserv.auth.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.munserv.TestContainersConfig
 import com.munserv.auth.service.JwtService
 import com.munserv.shared.types.MemberId
@@ -9,14 +8,15 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.ObjectMapper
 
 /**
  * Additional tests for AuthController endpoints not covered by AuthControllerTest.
@@ -51,26 +51,28 @@ class AuthControllerAdditionalTest {
         fun `POST api-v1-auth-verify-otp should return 401 for invalid OTP`() {
             val request = VerifyOtpRequest(phone = "+27821234567", code = "999999")
 
-            mockMvc.post("/api/v1/auth/verify-otp") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isUnauthorized() }
-                jsonPath("$.error") { value("invalid_otp") }
-            }
+            mockMvc
+                .post("/api/v1/auth/verify-otp") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isUnauthorized() }
+                    jsonPath("$.error") { value("invalid_otp") }
+                }
         }
 
         @Test
         fun `POST api-v1-auth-verify-otp should return 400 for invalid phone`() {
             val request = VerifyOtpRequest(phone = "invalid", code = "123456")
 
-            mockMvc.post("/api/v1/auth/verify-otp") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isBadRequest() }
-                jsonPath("$.error") { value("invalid_phone") }
-            }
+            mockMvc
+                .post("/api/v1/auth/verify-otp") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.error") { value("invalid_phone") }
+                }
         }
     }
 
@@ -84,18 +86,19 @@ class AuthControllerAdditionalTest {
                     password = "admin123",
                 )
 
-            mockMvc.post("/api/v1/auth/admin/login") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$.tokens.accessToken") { isNotEmpty() }
-                jsonPath("$.tokens.refreshToken") { isNotEmpty() }
-                jsonPath("$.tokens.expiresAt") { isNotEmpty() }
-                jsonPath("$.profile.admin.email") { value("admin@ward42.example.com") }
-                jsonPath("$.profile.admin.sectorId") { value(testSectorId) }
-                jsonPath("$.profile.sector.id") { value(testSectorId) }
-            }
+            mockMvc
+                .post("/api/v1/auth/admin/login") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$.tokens.accessToken") { isNotEmpty() }
+                    jsonPath("$.tokens.refreshToken") { isNotEmpty() }
+                    jsonPath("$.tokens.expiresAt") { isNotEmpty() }
+                    jsonPath("$.profile.admin.email") { value("admin@ward42.example.com") }
+                    jsonPath("$.profile.admin.sectorId") { value(testSectorId) }
+                    jsonPath("$.profile.sector.id") { value(testSectorId) }
+                }
         }
 
         @Test
@@ -106,13 +109,14 @@ class AuthControllerAdditionalTest {
                     password = "wrongpassword",
                 )
 
-            mockMvc.post("/api/v1/auth/admin/login") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isUnauthorized() }
-                jsonPath("$.error") { value("invalid_credentials") }
-            }
+            mockMvc
+                .post("/api/v1/auth/admin/login") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isUnauthorized() }
+                    jsonPath("$.error") { value("invalid_credentials") }
+                }
         }
 
         @Test
@@ -123,13 +127,14 @@ class AuthControllerAdditionalTest {
                     password = "admin123",
                 )
 
-            mockMvc.post("/api/v1/auth/admin/login") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isUnauthorized() }
-                jsonPath("$.error") { value("invalid_credentials") }
-            }
+            mockMvc
+                .post("/api/v1/auth/admin/login") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isUnauthorized() }
+                    jsonPath("$.error") { value("invalid_credentials") }
+                }
         }
     }
 
@@ -137,32 +142,35 @@ class AuthControllerAdditionalTest {
     inner class CheckPhone {
         @Test
         fun `GET api-v1-auth-check-phone should return isRegistered true for existing phone`() {
-            mockMvc.get("/api/v1/auth/check-phone") {
-                param("phone", "+27821234567")
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$.isRegistered") { value(true) }
-            }
+            mockMvc
+                .get("/api/v1/auth/check-phone") {
+                    param("phone", "+27821234567")
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$.isRegistered") { value(true) }
+                }
         }
 
         @Test
         fun `GET api-v1-auth-check-phone should return isRegistered false for new phone`() {
-            mockMvc.get("/api/v1/auth/check-phone") {
-                param("phone", "+27829999999")
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$.isRegistered") { value(false) }
-            }
+            mockMvc
+                .get("/api/v1/auth/check-phone") {
+                    param("phone", "+27829999999")
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$.isRegistered") { value(false) }
+                }
         }
 
         @Test
         fun `GET api-v1-auth-check-phone should return 400 for invalid phone`() {
-            mockMvc.get("/api/v1/auth/check-phone") {
-                param("phone", "invalid")
-            }.andExpect {
-                status { isBadRequest() }
-                jsonPath("$.error") { value("invalid_phone") }
-            }
+            mockMvc
+                .get("/api/v1/auth/check-phone") {
+                    param("phone", "invalid")
+                }.andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.error") { value("invalid_phone") }
+                }
         }
     }
 
@@ -183,14 +191,15 @@ class AuthControllerAdditionalTest {
                     sectorId = testSectorId,
                 )
 
-            mockMvc.post("/api/v1/auth/register/web") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isCreated() }
-                jsonPath("$.message") { isNotEmpty() }
-                jsonPath("$.memberId") { isNotEmpty() }
-            }
+            mockMvc
+                .post("/api/v1/auth/register/web") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isCreated() }
+                    jsonPath("$.message") { isNotEmpty() }
+                    jsonPath("$.memberId") { isNotEmpty() }
+                }
         }
 
         @Test
@@ -209,21 +218,23 @@ class AuthControllerAdditionalTest {
                 )
 
             // First registration
-            mockMvc.post("/api/v1/auth/register/web") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isCreated() }
-            }
+            mockMvc
+                .post("/api/v1/auth/register/web") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isCreated() }
+                }
 
             // Second registration with same email
-            mockMvc.post("/api/v1/auth/register/web") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isConflict() }
-                jsonPath("$.error") { value("email_registered") }
-            }
+            mockMvc
+                .post("/api/v1/auth/register/web") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isConflict() }
+                    jsonPath("$.error") { value("email_registered") }
+                }
         }
 
         @Test
@@ -240,13 +251,14 @@ class AuthControllerAdditionalTest {
                     sectorId = "00000000-0000-0000-0000-000000000000",
                 )
 
-            mockMvc.post("/api/v1/auth/register/web") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isBadRequest() }
-                jsonPath("$.error") { value("invalid_sector") }
-            }
+            mockMvc
+                .post("/api/v1/auth/register/web") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.error") { value("invalid_sector") }
+                }
         }
     }
 
@@ -260,13 +272,14 @@ class AuthControllerAdditionalTest {
                     password = "wrongpassword",
                 )
 
-            mockMvc.post("/api/v1/auth/member/login") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isUnauthorized() }
-                jsonPath("$.error") { value("invalid_credentials") }
-            }
+            mockMvc
+                .post("/api/v1/auth/member/login") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isUnauthorized() }
+                    jsonPath("$.error") { value("invalid_credentials") }
+                }
         }
     }
 
@@ -280,12 +293,13 @@ class AuthControllerAdditionalTest {
                     newPassword = "newpassword123",
                 )
 
-            mockMvc.post("/api/v1/auth/change-password") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isForbidden() }
-            }
+            mockMvc
+                .post("/api/v1/auth/change-password") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isForbidden() }
+                }
         }
 
         @Test
@@ -296,14 +310,15 @@ class AuthControllerAdditionalTest {
                     newPassword = "newpassword123",
                 )
 
-            mockMvc.post("/api/v1/auth/change-password") {
-                header("Authorization", "Bearer $memberToken")
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(request)
-            }.andExpect {
-                status { isUnauthorized() }
-                jsonPath("$.error") { value("invalid_password") }
-            }
+            mockMvc
+                .post("/api/v1/auth/change-password") {
+                    header("Authorization", "Bearer $memberToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isUnauthorized() }
+                    jsonPath("$.error") { value("invalid_password") }
+                }
         }
     }
 

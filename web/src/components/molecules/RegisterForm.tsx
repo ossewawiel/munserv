@@ -104,7 +104,9 @@ export const RegisterForm: FC<RegisterFormProps> = ({
         )}
 
         {/* Personal Information Section */}
-        <Typography variant="subtitle2" color="text.secondary">
+        <Typography variant="subtitle2" sx={{
+          color: "text.secondary"
+        }}>
           {t('auth.personalInfo')}
         </Typography>
 
@@ -150,7 +152,12 @@ export const RegisterForm: FC<RegisterFormProps> = ({
         </Box>
 
         {/* Contact Information Section */}
-        <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: "text.secondary",
+            mt: 1
+          }}>
           {t('auth.contactInfo')}
         </Typography>
 
@@ -204,7 +211,12 @@ export const RegisterForm: FC<RegisterFormProps> = ({
         />
 
         {/* Location Section */}
-        <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: "text.secondary",
+            mt: 1
+          }}>
           {t('auth.locationInfo')}
         </Typography>
 
@@ -247,7 +259,9 @@ export const RegisterForm: FC<RegisterFormProps> = ({
           >
             {getLocationButtonText()}
           </Button>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {t('auth.locationOptional')}
           </Typography>
         </Box>

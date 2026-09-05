@@ -7,7 +7,9 @@ import java.util.UUID
  * Prevents accidentally mixing photo IDs with other UUID types.
  */
 @JvmInline
-value class PhotoId(val value: UUID) {
+value class PhotoId(
+    val value: UUID,
+) {
     override fun toString(): String = value.toString()
 
     companion object {

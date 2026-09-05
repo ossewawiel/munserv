@@ -77,7 +77,7 @@ class AdminManagementService(
 
         // Generate temporary password
         val temporaryPassword = generateTemporaryPassword()
-        val passwordHash = passwordEncoder.encode(temporaryPassword)
+        val passwordHash = requireNotNull(passwordEncoder.encode(temporaryPassword))
 
         // Create the admin with PENDING onboarding status
         val now = Instant.now(clock)
@@ -107,8 +107,8 @@ class AdminManagementService(
     private fun checkCreationScope(
         actor: Admin,
         command: CreateAdminCommand,
-    ): AdminResult? {
-        return when (actor.level) {
+    ): AdminResult? =
+        when (actor.level) {
             AdminLevel.SECTOR -> {
                 // Sector admins can only create within their sector
                 if (command.sectorId != null && command.sectorId != actor.sectorId) {
@@ -117,6 +117,7 @@ class AdminManagementService(
                     null
                 }
             }
+
             AdminLevel.WARD -> {
                 // Ward admins can create sector admins in their ward, but not ward/pod admins
                 // The role check already handles that; just check ward scope
@@ -126,6 +127,7 @@ class AdminManagementService(
                     null
                 }
             }
+
             AdminLevel.POD -> {
                 // Pod admins can create ward/sector admins in their pod
                 if (command.podId != null && command.podId != actor.podId) {
@@ -135,7 +137,6 @@ class AdminManagementService(
                 }
             }
         }
-    }
 
     /**
      * List admins in a sector.
@@ -227,8 +228,8 @@ class AdminManagementService(
         podId: PodId? = null,
         wardId: WardId? = null,
         sectorId: SectorId? = null,
-    ): AdminResult? {
-        return when (actor.level) {
+    ): AdminResult? =
+        when (actor.level) {
             AdminLevel.SECTOR -> {
                 // Sector admins can only view within their sector
                 if (sectorId != null && sectorId != actor.sectorId) {
@@ -239,6 +240,7 @@ class AdminManagementService(
                     null
                 }
             }
+
             AdminLevel.WARD -> {
                 // Ward admins can view within their ward
                 if (wardId != null && wardId != actor.wardId) {
@@ -250,6 +252,7 @@ class AdminManagementService(
                     null
                 }
             }
+
             AdminLevel.POD -> {
                 // Pod admins can view within their pod
                 if (podId != null && podId != actor.podId) {
@@ -259,7 +262,6 @@ class AdminManagementService(
                 }
             }
         }
-    }
 
     /**
      * Get a single admin by ID.
@@ -297,8 +299,8 @@ class AdminManagementService(
     private fun checkAdminInScope(
         actor: Admin,
         target: Admin,
-    ): AdminResult? {
-        return when (actor.level) {
+    ): AdminResult? =
+        when (actor.level) {
             AdminLevel.SECTOR -> {
                 // Sector admins can only access admins in their sector
                 if (target.sectorId != null && target.sectorId != actor.sectorId) {
@@ -309,10 +311,15 @@ class AdminManagementService(
                     null
                 }
             }
+
             AdminLevel.WARD -> {
                 // Ward admins can access admins in their ward or sectors within their ward
                 when (target.level) {
-                    AdminLevel.SECTOR -> null // TODO: verify sector belongs to ward
+                    AdminLevel.SECTOR -> {
+                        null
+                    }
+
+                    // Tracked in #56: verify the sector belongs to the actor's ward
                     AdminLevel.WARD -> {
                         if (target.wardId != actor.wardId) {
                             AdminResult.CrossWardOperation(actor.wardId!!, target.wardId)
@@ -320,14 +327,26 @@ class AdminManagementService(
                             null
                         }
                     }
-                    AdminLevel.POD -> AdminResult.OutOfScope("Ward-level admin cannot access pod-level admins")
+
+                    AdminLevel.POD -> {
+                        AdminResult.OutOfScope("Ward-level admin cannot access pod-level admins")
+                    }
                 }
             }
+
             AdminLevel.POD -> {
                 // Pod admins can access all admins in their pod
                 when (target.level) {
-                    AdminLevel.SECTOR -> null // TODO: verify sector belongs to pod
-                    AdminLevel.WARD -> null // TODO: verify ward belongs to pod
+                    AdminLevel.SECTOR -> {
+                        null
+                    }
+
+                    // Tracked in #56: verify the sector belongs to the pod
+                    AdminLevel.WARD -> {
+                        null
+                    }
+
+                    // Tracked in #56: verify the ward belongs to pod
                     AdminLevel.POD -> {
                         if (target.podId != actor.podId) {
                             AdminResult.CrossPodOperation(actor.podId!!, target.podId)
@@ -338,7 +357,6 @@ class AdminManagementService(
                 }
             }
         }
-    }
 
     /**
      * Update an existing admin.

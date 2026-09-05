@@ -78,10 +78,19 @@ export const StatCard: FC<StatCardProps> = ({
       <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <Box>
-            <Typography variant="body2" color={secondaryTextColor} fontWeight={500}>
+            <Typography variant="body2" color={secondaryTextColor} sx={{
+              fontWeight: 500
+            }}>
               {title}
             </Typography>
-            <Typography variant="h4" component="p" fontWeight={700} color={textColor} sx={{ mt: 1 }}>
+            <Typography
+              variant="h4"
+              component="p"
+              color={textColor}
+              sx={{
+                fontWeight: 700,
+                mt: 1
+              }}>
               {value}
             </Typography>
             {subtitle && (
@@ -106,7 +115,9 @@ export const StatCard: FC<StatCardProps> = ({
                 ) : (
                   <TrendingDownIcon sx={{ fontSize: 16, mr: 0.5 }} />
                 )}
-                <Typography variant="body2" fontWeight={500}>
+                <Typography variant="body2" sx={{
+                  fontWeight: 500
+                }}>
                   {Math.abs(trend.value)}%
                 </Typography>
               </Box>

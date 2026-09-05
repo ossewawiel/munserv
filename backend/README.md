@@ -57,7 +57,7 @@ cp src/main/resources/application-local.yml.example src/main/resources/applicati
 ## Tech Stack
 
 - **Kotlin 2.x** with JDK 21
-- **Spring Boot 3.x** for framework
+- **Spring Boot 4.x** for framework
 - **Spring Data JPA** for persistence
 - **PostgreSQL + PostGIS** for database
 - **JUnit 5** for testing

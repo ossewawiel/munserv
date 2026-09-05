@@ -81,10 +81,20 @@ export const SessionExpiredHandler: FC = () => {
           },
         }}
       >
-        <Typography variant="body1" fontWeight="bold" color="warning.contrastText">
+        <Typography
+          variant="body1"
+          sx={{
+            fontWeight: "bold",
+            color: "warning.contrastText"
+          }}>
           {t('auth.sessionExpired')}
         </Typography>
-        <Typography variant="body2" fontWeight="medium" color="warning.contrastText">
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: "medium",
+            color: "warning.contrastText"
+          }}>
           {t('auth.redirectingToLogin')}
         </Typography>
       </Alert>
