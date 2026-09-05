@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import type { AdminUser } from '@/features/auth/types';
+import type { AdminUser, SupportGrantInfo } from '@/features/auth/types';
 import {
   hasPermission as checkPermission,
   normalizeRole,
@@ -12,6 +12,7 @@ import {
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const ADMIN_KEY = 'admin';
+const SUPPORT_GRANT_KEY = 'supportGrant';
 
 export function useAuth() {
   const getStoredAdmin = useCallback((): AdminUser | null => {
@@ -32,11 +33,23 @@ export function useAuth() {
     }
   }, []);
 
+  const getStoredSupportGrant = useCallback((): SupportGrantInfo | null => {
+    const stored = localStorage.getItem(SUPPORT_GRANT_KEY);
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored) as SupportGrantInfo;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const isAuthenticated = useMemo(() => {
     return !!localStorage.getItem(ACCESS_TOKEN_KEY);
   }, []);
 
   const admin = useMemo(() => getStoredAdmin(), [getStoredAdmin]);
+
+  const supportGrant = useMemo(() => getStoredSupportGrant(), [getStoredSupportGrant]);
 
   const login = useCallback((tokens: { accessToken: string; refreshToken: string }, adminData: AdminUser) => {
     localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
@@ -48,6 +61,7 @@ export function useAuth() {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(ADMIN_KEY);
+    localStorage.removeItem(SUPPORT_GRANT_KEY);
   }, []);
 
   /**
@@ -71,6 +85,7 @@ export function useAuth() {
   return {
     isAuthenticated,
     admin,
+    supportGrant,
     login,
     logout,
     hasPermission,

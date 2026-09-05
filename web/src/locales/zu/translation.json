@@ -261,6 +261,11 @@
       "revoked": "Kukhanseliwe"
     }
   },
+  "supportGrant": {
+    "banner": "Ukufinyelela kokusekela njengo-{{role}} · <time>{{remaining}}</time> okusele",
+    "remainingLabel": "Isikhathi esisele",
+    "expired": "Ukufinyelela kokusekela kuphelelwe yisikhathi"
+  },
   "podSettings": {
     "title": "Izilungiselelo ze-Pod",
     "subtitle": "Ukulungiswa kwe-pod jikelele, okuhlanganisa ukufinyelela kokusekela kweGunya Eliyisikhulu."

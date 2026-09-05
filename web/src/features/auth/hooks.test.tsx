@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { server } from '@/test/mocks/server';
-import { useSectors, useRegisterMember } from './hooks';
+import { useSectors, useRegisterMember, useLogin, useLogout, useCurrentSupportGrant } from './hooks';
 import type { ReactNode } from 'react';
 
 function createTestQueryClient() {
@@ -33,6 +33,7 @@ describe('auth hooks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     server.resetHandlers();
+    localStorage.clear();
   });
 
   describe('useSectors', () => {
@@ -209,6 +210,85 @@ describe('auth hooks', () => {
       });
 
       expect(result.current.data).toBeUndefined();
+    });
+  });
+
+  describe('useLogin', () => {
+    it('should store the support grant when the login response carries one', async () => {
+      server.use(
+        http.post('*/auth/admin/login', () => {
+          return HttpResponse.json({
+            tokens: {
+              accessToken: 'mock-access-token',
+              refreshToken: 'mock-refresh-token',
+              expiresAt: '2026-09-05T10:15:00Z',
+            },
+            profile: {
+              admin: {
+                id: 'grant-1',
+                email: 'support@central-authority.example.com',
+                displayName: 'Support User',
+                role: 'POD_ADMIN',
+                level: 'pod',
+                podId: 'pod-1',
+                wardId: null,
+                sectorId: null,
+                onboardingStatus: null,
+              },
+              sector: null,
+              bootstrapStatus: null,
+              supportGrant: {
+                grantId: 'grant-1',
+                grantedRole: 'pod_admin',
+                expiresAt: '2026-09-05T11:00:00Z',
+              },
+            },
+          });
+        })
+      );
+
+      const { result } = renderHook(() => useLogin(), { wrapper: createWrapper() });
+
+      result.current.mutate({ email: 'support@central-authority.example.com', password: 'irrelevant' });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(JSON.parse(localStorage.getItem('supportGrant') ?? 'null')).toEqual({
+        grantId: 'grant-1',
+        grantedRole: 'pod_admin',
+        expiresAt: '2026-09-05T11:00:00Z',
+      });
+    });
+
+    it('should not request the current grant when there is no support grant', async () => {
+      const { result } = renderHook(
+        () => useCurrentSupportGrant({ pathname: '/', expired: false, enabled: false }),
+        { wrapper: createWrapper() }
+      );
+
+      expect(result.current.fetchStatus).toBe('idle');
+      expect(result.current.data).toBeUndefined();
+    });
+  });
+
+  describe('useLogout', () => {
+    it('should clear the stored support grant on logout', async () => {
+      localStorage.setItem(
+        'supportGrant',
+        JSON.stringify({ grantId: 'grant-1', grantedRole: 'pod_admin', expiresAt: '2026-09-05T11:00:00Z' })
+      );
+
+      const { result } = renderHook(() => useLogout(), { wrapper: createWrapper() });
+
+      result.current.mutate();
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(localStorage.getItem('supportGrant')).toBeNull();
     });
   });
 });

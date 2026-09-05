@@ -1,5 +1,12 @@
 import { apiClient } from '@/lib/api-client';
-import type { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, Sector } from './types';
+import type {
+  CurrentSupportGrantResponse,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  Sector,
+} from './types';
 
 export const authApi = {
   login: (data: LoginRequest) =>
@@ -15,4 +22,13 @@ export const authApi = {
    */
   registerMember: (data: RegisterRequest) =>
     apiClient.post<RegisterResponse>('/auth/register/web', data).then((r) => r.data),
+
+  /**
+   * The caller's own support grant, with its server-slid `expiresAt`.
+   * Grant-scoped tokens only; call this only when a support grant is stored.
+   */
+  getCurrentSupportGrant: () =>
+    apiClient
+      .get<CurrentSupportGrantResponse>('/support-access/grants/current')
+      .then((r) => r.data),
 };

@@ -261,6 +261,11 @@
       "revoked": "Herroep"
     }
   },
+  "supportGrant": {
+    "banner": "Ondersteuningstoegang as {{role}} · <time>{{remaining}}</time> oor",
+    "remainingLabel": "Oorblywende tyd",
+    "expired": "Ondersteuningstoegang het verval"
+  },
   "podSettings": {
     "title": "Pod-instellings",
     "subtitle": "Pod-wye konfigurasie, insluitend ondersteuningstoegang vir die Sentrale Owerheid."

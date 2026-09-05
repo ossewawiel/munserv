@@ -126,4 +126,31 @@ describe('authApi', () => {
       });
     });
   });
+
+  describe('getCurrentSupportGrant', () => {
+    it('should return the slid expiry from the current grant endpoint', async () => {
+      const expiresAt = '2026-09-05T11:15:00Z';
+      server.use(
+        http.get('*/support-access/grants/current', () => {
+          return HttpResponse.json({
+            id: 'grant-1',
+            grantedRole: 'pod_admin',
+            purpose: 'Investigate duplicate issue reports in sector 3',
+            status: 'active',
+            grantedBy: 'admin-1',
+            grantedByName: 'Thandi Mokoena',
+            grantedAt: '2026-09-05T09:41:00Z',
+            expiresAt,
+            lastActivity: '2026-09-05T10:15:00Z',
+            revokedAt: null,
+            expiredAt: null,
+          });
+        })
+      );
+
+      const response = await authApi.getCurrentSupportGrant();
+
+      expect(response.expiresAt).toBe(expiresAt);
+    });
+  });
 });
