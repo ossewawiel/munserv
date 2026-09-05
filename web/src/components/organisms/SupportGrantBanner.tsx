@@ -83,7 +83,9 @@ export const SupportGrantBanner: FC = () => {
       sx={{
         mr: 2,
         '& .MuiChip-label': { padding: '0 12px' },
-        ...(isWarning ? {} : { bgcolor: 'primary.light', color: 'primary.dark' }),
+        ...(isWarning
+          ? {}
+          : { bgcolor: 'primary.light', color: 'primary.dark', '& .MuiChip-icon': { color: 'inherit' } }),
       }}
     />
   );
