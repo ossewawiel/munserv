@@ -1,0 +1,94 @@
+{
+  "artboards": [
+    {
+      "file": "ReportsMenuGeneral.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "W20 · Reports menu expanded — pod reports"
+    },
+    {
+      "file": "ReportsWardScope.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "W20 · Ward-scoped report, Issues tab"
+    },
+    {
+      "file": "TableToolbarInert.dc.html",
+      "x": 0,
+      "y": 1160,
+      "w": 1440,
+      "h": 900,
+      "title": "W21 · Toolbar as the MVP ships it (all inert)"
+    },
+    {
+      "file": "TableSortAscending.dc.html",
+      "x": 1560,
+      "y": 1160,
+      "w": 1440,
+      "h": 900,
+      "title": "W21 · Name sorted ascending"
+    },
+    {
+      "file": "TableSortDescending.dc.html",
+      "x": 3120,
+      "y": 1160,
+      "w": 1440,
+      "h": 900,
+      "title": "W21 · Created sorted descending"
+    },
+    {
+      "file": "TableSearchActive.dc.html",
+      "x": 0,
+      "y": 2320,
+      "w": 1440,
+      "h": 900,
+      "title": "W21 · Search active"
+    },
+    {
+      "file": "TableFilterPanelDefault.dc.html",
+      "x": 1560,
+      "y": 2320,
+      "w": 1440,
+      "h": 900,
+      "title": "W21 · Filter panel open — default"
+    },
+    {
+      "file": "TableFilterPanelApplied.dc.html",
+      "x": 3120,
+      "y": 2320,
+      "w": 1440,
+      "h": 900,
+      "title": "W21 · Filter panel open — two filters applied"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "w20-reports",
+      "x": -760,
+      "y": 0,
+      "w": 680,
+      "text": "W20 · Reports menu structure (issue #31)\n\nThe Reports item in podChiefNavItems is expanded: General first, then one entry per ward, then one per sector. The parent and the open child are both selected, because isSelected() matches on pathname.startsWith('/reports').\n\nReportsPage renders Breadcrumbs (title = the resolved scope, trail Dashboard > Reports > scope) and one DataTableCard with three tabs, columns=[], data=[] and the EmptyState as emptyMessage.\n\nPass hideToolbarWhenEmpty on the card: without it DataTableCard still renders an empty 32px toolbar strip and a Divider above the empty state."
+    },
+    {
+      "id": "w21-table",
+      "x": -760,
+      "y": 1160,
+      "w": 680,
+      "text": "W21 · Sorting and search (issue #32)\n\nPodAdministratorsPage is the caller. Sortable headers are every column except actions; the TableSortLabel arrow is 18px with 4px margins and opacity 0 while inactive, so a sortable-but-unsorted header looks exactly like today's header plus that reserved space.\n\nSearch is the Input atom, 280px wide, size small (40px), SearchIcon fontSize=\"small\" as the start adornment, placeholder \"Search\". Disabled = MUI's own disabled outline, no custom colour.\n\nThe component never reorders or filters the rows it is given; these artboards show what the server would return."
+    },
+    {
+      "id": "w21-filters",
+      "x": -760,
+      "y": 2320,
+      "w": 680,
+      "text": "W21 · Filter slide-out panel\n\nDrawer anchor=\"right\", 360px, scrim rgba(0,0,0,0.5). Header holds the title and a close IconButton, then a Divider, the caller's content, a Divider and the Clear filters button.\n\nDefault: nothing to clear, so Clear filters is disabled and the body carries the caller's placeholder copy. Applied: two role filters checked, the Filters button badged with 2, Clear filters live, the table showing the rows the server returned.\n\nThe filter body belongs to the caller. W21 ships the drawer shell only; the role checkboxes and the assignment select in the applied artboard are what the slot is for, not MVP scope."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

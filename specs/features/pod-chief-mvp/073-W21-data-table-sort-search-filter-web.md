@@ -11,8 +11,14 @@ touches:
   - web/src/locales
   - design/registry
 ui: true
-design_canvas: ""
-design_artboards: []
+design_canvas: "https://claude.ai/code/artifact/0a434154-e4b2-44cc-ad3d-216e11e949e0"
+design_artboards:
+  - design/canvases/pod-chief-mvp/TableToolbarInert.dc.html
+  - design/canvases/pod-chief-mvp/TableSortAscending.dc.html
+  - design/canvases/pod-chief-mvp/TableSortDescending.dc.html
+  - design/canvases/pod-chief-mvp/TableSearchActive.dc.html
+  - design/canvases/pod-chief-mvp/TableFilterPanelDefault.dc.html
+  - design/canvases/pod-chief-mvp/TableFilterPanelApplied.dc.html
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-05"
