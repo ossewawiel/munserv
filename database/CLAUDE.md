@@ -126,7 +126,7 @@ CREATE TYPE member_role AS ENUM (
 ./gradlew bootRun
 
 # Or run standalone
-flyway -url=jdbc:postgresql://localhost:5432/munserv_dev migrate
+flyway -url=jdbc:postgresql://localhost:5435/munserv_dev migrate
 ```
 
 **Rules:**

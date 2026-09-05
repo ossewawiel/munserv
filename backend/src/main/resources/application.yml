@@ -24,7 +24,7 @@ spring:
       max-request-size: 10MB
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5433/munserv_dev}
+    url: ${DB_URL:jdbc:postgresql://localhost:5435/munserv_dev}
     username: ${DB_USER:munserv}
     password: ${DB_PASSWORD:munserv_dev}
     driver-class-name: org.postgresql.Driver
@@ -47,7 +47,7 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      port: ${REDIS_PORT:6380}
 
   jackson:
     default-property-inclusion: non_null
