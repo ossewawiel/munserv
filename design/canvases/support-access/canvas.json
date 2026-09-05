@@ -1,0 +1,41 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Pod Settings — no grants" },
+    { "file": "SupportAccessActive.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 900, "title": "Pod Settings — active grant" },
+    { "file": "SupportGrantsHistory.dc.html", "x": 3120, "y": 0, "w": 1440, "h": 900, "title": "Support grants — history tab" },
+    { "file": "GrantDialog.dc.html", "x": 0, "y": 1160, "w": 1440, "h": 900, "title": "Grant access dialog" },
+    { "file": "GrantDialogError.dc.html", "x": 1560, "y": 1160, "w": 1440, "h": 900, "title": "Grant access dialog — invalid purpose" },
+    { "file": "RevokeConfirm.dc.html", "x": 3120, "y": 1160, "w": 1440, "h": 900, "title": "Revoke confirmation" }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -300,
+      "w": 1440,
+      "text": "Support Access — W28 (#43) grant, W30 (#45) view and revoke.\nWeb admin portal, 1440x900, light scheme.\n\nEverything drawn exists in design/registry/web.md: DashboardLayout, Breadcrumbs, MainCard, DataTableCard (tabs + pagination), DataTable, EmptyState, Button, ActionIconButton, ConfirmDialog, plus MUI Alert / Dialog / Chip as the portal already uses them. No new component.\n\nColours are scheme.light from design/tokens/color.tokens.json only; sizes from size.tokens.json and MUI's own metrics; type is Source Sans 3 as web/src/theme/defaultTheme.ts loads it."
+    },
+    {
+      "id": "w28-interim",
+      "x": 3120,
+      "y": -300,
+      "w": 1440,
+      "text": "Two composition decisions worth knowing before you build.\n\n1. SupportAccessSection renders TWO sibling cards, not a table nested inside a card: the MainCard (title + Grant button + status callout) and the DataTableCard below it. Return a fragment from SupportAccessSection.\n\n2. W28 ships before W30, so at W28 there is no table yet. Until W30 lands, put the EmptyState (the one drawn in the table here) inside the MainCard content; when W30 adds the table, the MainCard keeps the one-line Alert shown on the first artboard and the EmptyState moves into the table's emptyMessage. That avoids two empty states on one screen."
+    },
+    {
+      "id": "conflict-alert",
+      "x": 1560,
+      "y": 960,
+      "w": 1440,
+      "text": "Not drawn as its own artboard: the 409 active_grant_exists state.\n\nThe Grant button is disabled while an active grant exists, so the conflict is only a race. Render it as an Alert severity=\"warning\" at the top of the dialog content, above the expiry notice, with supportAccess.errors.activeGrantExists:\n\n\"This pod already has an active support grant. Revoke it before granting another.\"\n\nThe purpose counter and the inline messages (purposeRequired, purposeTooShort, purposeTooLong) all live in the TextField helper row drawn to the right."
+    },
+    {
+      "id": "timestamps",
+      "x": 0,
+      "y": 960,
+      "w": 1440,
+      "text": "Timestamps are drawn with formatDateTime from web/src/shared/utils/formatters.ts (\"Sep 5, 2026, 09:41 AM\"), not a raw toLocaleString() — that is what every other admin table in the portal uses. Role is plain body2 at weight 500, not a Chip, so the only chips in the table are the status badges: Active = success, Revoked = warning, Expired = default.\n\nThe DataTableCard passes hideToolbarWhenEmpty, since neither tab has a filter or an action in the toolbar."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

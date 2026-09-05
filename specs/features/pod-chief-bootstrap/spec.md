@@ -23,9 +23,9 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 | W25 | Pod Chief welcome email with temp password | [#40](https://github.com/ossewawiel/munserv/issues/40) | |
 | W26 | Pod Chief must change password on first login | [#41](https://github.com/ossewawiel/munserv/issues/41) | [Handoff](041-change-password-handoff.md) |
 | W27 | Pod Chief completes optional profile info | [#42](https://github.com/ossewawiel/munserv/issues/42) | |
-| W28 | Pod Chief grants super user temporary access | [#43](https://github.com/ossewawiel/munserv/issues/43) | |
+| W28 | Pod Chief grants super user temporary access | [#43](https://github.com/ossewawiel/munserv/issues/43) | [Handoff](043-W28-grant-support-access-web.md) |
 | W29 | Super user uses temporary access for debugging | [#44](https://github.com/ossewawiel/munserv/issues/44) | |
-| W30 | Pod Chief views/revokes super user sessions | [#45](https://github.com/ossewawiel/munserv/issues/45) | |
+| W30 | Pod Chief views/revokes super user sessions | [#45](https://github.com/ossewawiel/munserv/issues/45) | [Handoff](045-W30-support-sessions-web.md) |
 
 ### Backend (5 stories)
 
@@ -102,6 +102,25 @@ CREATE INDEX idx_support_grants_pod_status ON support_grants(pod_id, status);
 CREATE INDEX IF NOT EXISTS idx_admins_role_pod_id
 ON admins(role, pod_id) WHERE deleted_at IS NULL;
 ```
+
+## Design
+
+Support access UI (W28, W30) — design canvas, awaiting approval:
+<https://claude.ai/code/artifact/e74d590c-6be1-40e5-8864-88e5e85d52c9>
+
+Working files in `design/canvases/support-access/`, 1440x900 web frames:
+
+| Artboard | State |
+|---|---|
+| `Main.dc.html` | Pod Settings, Support access section with no grants at all |
+| `SupportAccessActive.dc.html` | Active grant: warning callout, Active tab, revoke action, Grant button disabled |
+| `SupportGrantsHistory.dc.html` | History tab, four past grants with status badges and ended-at |
+| `GrantDialog.dc.html` | Grant access dialog, default state (role select, purpose, one-hour expiry notice) |
+| `GrantDialogError.dc.html` | Grant access dialog with the purpose-too-short validation error |
+| `RevokeConfirm.dc.html` | ConfirmDialog (warning) over the active grant |
+
+Components are all from `design/registry/web.md`; the canvas introduces none.
+`design_approved` stays `false` in both handoffs until the pod owner signs off.
 
 ## Security Considerations
 
