@@ -229,15 +229,19 @@ concepts:
     definition: A time-boxed permission, issued by the pod chief, that lets the super user log in to a live pod under a named role for a stated purpose, ending on logout, on revocation, or after an hour without activity.
     file: support-grant.md
     code:
-      # Filled in by story B8 (issue #49) as its final step; the validator rejects
-      # names that do not exist yet. Prescribed names:
-      #   kotlin: com.munserv.support.domain.SupportGrant, SupportGrantId, SupportGrantStatus,
-      #           com.munserv.support.service.SupportAccessService, SupportAccessResult,
-      #           SupportGrantExpiryJob, com.munserv.support.repository.SupportGrantRepository,
-      #           com.munserv.support.api.SupportAccessController, SupportGrantActivityFilter
-      #   db tables: support_grants
-      kotlin: []
-      db: { tables: [] }
+      kotlin:
+        [
+          com.munserv.support.domain.SupportGrant,
+          com.munserv.support.domain.SupportGrantId,
+          com.munserv.support.domain.SupportGrantStatus,
+          com.munserv.support.service.SupportAccessService,
+          com.munserv.support.service.SupportAccessResult,
+          com.munserv.support.service.SupportGrantExpiryJob,
+          com.munserv.support.repository.SupportGrantRepository,
+          com.munserv.support.api.SupportAccessController,
+          com.munserv.support.api.SupportGrantActivityFilter,
+        ]
+      db: { tables: [support_grants] }
       typescript: []
       dart: []
     values:
