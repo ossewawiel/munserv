@@ -1,6 +1,6 @@
 import '@/lib/i18n';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
@@ -31,6 +31,20 @@ const activeGrant: SupportGrant = {
   expiresAt: '2026-09-05T10:41:00Z',
   lastActivity: null,
   revokedAt: null,
+  expiredAt: null,
+};
+
+const historyGrant: SupportGrant = {
+  id: 'grant-past',
+  grantedRole: 'ward_admin',
+  purpose: 'Ward 4 heat scores stuck after the bulk import',
+  status: 'revoked',
+  grantedBy: 'admin-1',
+  grantedByName: 'Thandi Mokoena',
+  grantedAt: '2026-08-28T14:02:00Z',
+  expiresAt: '2026-08-28T15:02:00Z',
+  lastActivity: '2026-08-28T14:20:00Z',
+  revokedAt: '2026-08-28T14:35:00Z',
   expiredAt: null,
 };
 
@@ -87,5 +101,115 @@ describe('SupportAccessSection', () => {
     await user.click(screen.getByRole('button', { name: /grant support access/i }));
 
     expect(screen.getByRole('textbox')).toHaveValue('');
+  });
+
+  it('should open the confirmation dialog before revoking', async () => {
+    server.use(
+      http.get('*/support-access/grants', () =>
+        HttpResponse.json({ items: [activeGrant], total: 1 })
+      )
+    );
+
+    renderWithClient(<SupportAccessSection />);
+
+    const revokeButton = await screen.findByRole('button', { name: /revoke/i });
+    fireEvent.click(revokeButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/revoke support access/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should show the past grants in the history tab', async () => {
+    server.use(
+      http.get('*/support-access/grants', () =>
+        HttpResponse.json({ items: [activeGrant, historyGrant], total: 2 })
+      )
+    );
+
+    renderWithClient(<SupportAccessSection />);
+
+    const historyTab = await screen.findByRole('tab', { name: /history/i });
+    fireEvent.click(historyTab);
+
+    await waitFor(() => {
+      expect(screen.getByText(historyGrant.purpose)).toBeInTheDocument();
+    });
+  });
+
+  it('should show the no active grant notice when there is no active grant', async () => {
+    server.use(
+      http.get('*/support-access/grants', () =>
+        HttpResponse.json({ items: [historyGrant], total: 1 })
+      )
+    );
+
+    renderWithClient(<SupportAccessSection />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/no support access is active/i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('should still render the grants tabs when there are no support grants at all', async () => {
+    server.use(
+      http.get('*/support-access/grants', () => HttpResponse.json({ items: [], total: 0 }))
+    );
+
+    renderWithClient(<SupportAccessSection />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: /active/i })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /history/i })).toBeInTheDocument();
+    });
+  });
+
+  it('should close the dialog and show the grant_not_active alert when the revoke conflicts', async () => {
+    server.use(
+      http.get('*/support-access/grants', () =>
+        HttpResponse.json({ items: [activeGrant], total: 1 })
+      ),
+      http.delete('*/support-access/grants/:id', () =>
+        HttpResponse.json(
+          { code: 'grant_not_active', message: 'The grant is no longer active' },
+          { status: 409 }
+        )
+      )
+    );
+    const user = userEvent.setup();
+
+    renderWithClient(<SupportAccessSection />);
+
+    await user.click(await screen.findByRole('button', { name: /revoke/i }));
+    await user.click(await screen.findByRole('button', { name: /revoke access/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(screen.getByText(/no longer active/i)).toBeInTheDocument();
+  });
+
+  it('should close the dialog and show a generic error when the revoke fails', async () => {
+    server.use(
+      http.get('*/support-access/grants', () =>
+        HttpResponse.json({ items: [activeGrant], total: 1 })
+      ),
+      http.delete('*/support-access/grants/:id', () =>
+        HttpResponse.json({ message: 'Internal server error' }, { status: 500 })
+      )
+    );
+    const user = userEvent.setup();
+
+    renderWithClient(<SupportAccessSection />);
+
+    await user.click(await screen.findByRole('button', { name: /revoke/i }));
+    await user.click(await screen.findByRole('button', { name: /revoke access/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(screen.getByText(/failed to revoke support access/i)).toBeInTheDocument();
   });
 });

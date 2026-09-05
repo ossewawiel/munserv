@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { AxiosError } from 'axios';
 import { server } from '@/test/mocks/server';
-import { useSupportGrants, useGrantSupportAccess } from './hooks';
+import { useSupportGrants, useGrantSupportAccess, useRevokeSupportGrant } from './hooks';
 import { mockSupportGrants } from '@/test/mocks/handlers';
 import type { ReactNode } from 'react';
 
@@ -74,6 +74,57 @@ describe('support-access hooks', () => {
       expect(error).toBeInstanceOf(AxiosError);
       if (error instanceof AxiosError) {
         expect(error.response?.data.code).toBe('active_grant_exists');
+      }
+    });
+  });
+
+  describe('useRevokeSupportGrant', () => {
+    it('should invalidate the grants list after a revoke', async () => {
+      const queryClient = createTestQueryClient();
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      );
+
+      server.use(
+        http.delete('*/support-access/grants/:id', () => new HttpResponse(null, { status: 204 }))
+      );
+
+      const { result } = renderHook(() => useRevokeSupportGrant(), { wrapper });
+
+      result.current.mutate('grant-1');
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['support-grants'] });
+    });
+
+    it('should surface grant_not_active when the revoke conflicts', async () => {
+      server.use(
+        http.delete('*/support-access/grants/:id', () =>
+          HttpResponse.json(
+            { code: 'grant_not_active', message: 'The grant is no longer active' },
+            { status: 409 }
+          )
+        )
+      );
+
+      const { result } = renderHook(() => useRevokeSupportGrant(), {
+        wrapper: createWrapper(),
+      });
+
+      result.current.mutate('grant-1');
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
+      const error = result.current.error;
+      expect(error).toBeInstanceOf(AxiosError);
+      if (error instanceof AxiosError) {
+        expect(error.response?.data.code).toBe('grant_not_active');
       }
     });
   });

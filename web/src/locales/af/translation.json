@@ -220,12 +220,46 @@
       "purposeTooShort": "Doel moet ten minste 10 karakters wees",
       "purposeTooLong": "Doel moet 500 karakters of minder wees",
       "activeGrantExists": "Hierdie pod het reeds 'n aktiewe ondersteuningstoekenning. Herroep dit voordat jy 'n ander toeken.",
-      "loadFailed": "Kon nie ondersteuningstoegang laai nie"
+      "loadFailed": "Kon nie ondersteuningstoegang laai nie",
+      "grantNotActive": "Hierdie toekenning is nie meer aktief nie. Herlaai om die huidige status te sien.",
+      "revokeFailed": "Kon nie ondersteuningstoegang herroep nie"
     },
     "grantedOn": "op {{date}}",
     "expiresUntilIdle": "{{date}}, of een uur na die laaste aktiwiteit, wat ook al eerste kom.",
-    "emptyTitle": "Nog geen ondersteuningstoekennings nie",
-    "emptyDescription": "Wanneer jy ondersteuningstoegang verleen, verskyn die toekenning hier met sy rol, doel en vervaldatum totdat dit herroep word of verval."
+    "emptyDescription": "Wanneer jy ondersteuningstoegang verleen, verskyn die toekenning hier met sy rol, doel en vervaldatum totdat dit herroep word of verval.",
+    "tabsLabel": "Ondersteuningstoekennings",
+    "revoke": "Herroep",
+    "tabs": {
+      "active": "Aktief",
+      "history": "Geskiedenis"
+    },
+    "table": {
+      "role": "Rol",
+      "purpose": "Doel",
+      "grantedBy": "Toegestaan deur",
+      "grantedAt": "Toegestaan",
+      "lastActivity": "Laaste aktiwiteit",
+      "expiresAt": "Verval",
+      "status": "Status",
+      "endedAt": "Beëindig",
+      "actions": "Aksies",
+      "never": "Nooit",
+      "emptyActive": "Nog geen ondersteuningstoekennings nie",
+      "emptyHistory": "Nog geen vorige toekennings nie. Herroepte en vervalde toekennings verskyn hier."
+    },
+    "noActiveGrant": "Geen ondersteuningstoegang is tans aktief nie. Niemand buite hierdie pod kan nou aanmeld nie.",
+    "revokeDialog": {
+      "title": "Herroep ondersteuningstoegang",
+      "body": "Ondersteuning verloor onmiddellik toegang tot hierdie pod as <strong>{{role}}</strong>, en enige aangemelde ondersteuningsgebruiker word afgemeld.",
+      "grantedBy": "Toegestaan deur {{name}} op {{date}}.",
+      "warning": "Dit kan nie ongedaan gemaak word nie. Verleen weer ondersteuningstoegang as dit steeds nodig is.",
+      "confirm": "Herroep toegang"
+    },
+    "status": {
+      "active": "Aktief",
+      "expired": "Verval",
+      "revoked": "Herroep"
+    }
   },
   "podSettings": {
     "title": "Pod-instellings",

@@ -25,3 +25,17 @@ export function useGrantSupportAccess() {
     },
   });
 }
+
+/**
+ * Mutation hook for revoking a support grant
+ */
+export function useRevokeSupportGrant() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => supportAccessApi.revoke(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['support-grants'] });
+    },
+  });
+}
