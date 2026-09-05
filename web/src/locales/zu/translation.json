@@ -202,8 +202,7 @@
     "title": "Ukufinyelela kokusekela",
     "subtitle": "Nika iGunya Eliyisikhulu ukufinyelela okwesikhashana ukusiza ngenkinga kule pod.",
     "grantButton": "Nika ukufinyelela kokusekela",
-    "activeGrant": "Isabelo esisebenzayo",
-    "noActiveGrant": "Akukho kufinyelela kokusekela okusebenzayo njengamanje. Akekho ongaphandle kwale pod ongangena manje.",
+    "activeGrant": "Ukufinyelela kokusekela kuyasebenza",
     "expiresAt": "Iphelelwa yisikhathi",
     "grantedBy": "Kunikwe ngu",
     "purpose": "Injongo",
@@ -220,9 +219,13 @@
       "purposeRequired": "Injongo iyadingeka",
       "purposeTooShort": "Injongo kufanele ibe okungenani izinhlamvu ezingu-10",
       "purposeTooLong": "Injongo kufanele ibe izinhlamvu ezingu-500 noma ngaphansi",
-      "activeGrantExists": "Isabelo esisebenzayo sesikhona",
+      "activeGrantExists": "Le pod isivele inesabelo sokusekela esisebenzayo. Sikhansele ngaphambi kokunika esinye.",
       "loadFailed": "Yehlulekile ukulayisha ukufinyelela kokusekela"
-    }
+    },
+    "grantedOn": "ngo-{{date}}",
+    "expiresUntilIdle": "{{date}}, noma ihora elilodwa ngemva komsebenzi wokugcina, noma yikuphi okufika kuqala.",
+    "emptyTitle": "Azikho izabelo zokusekela okwamanje",
+    "emptyDescription": "Lapho unika ukufinyelela kokusekela, isabelo sivela lapha ngendima yaso, injongo kanye nesikhathi sokuphelelwa kuze kube sikhansela noma siphele."
   },
   "podSettings": {
     "title": "Izilungiselelo ze-Pod",

@@ -24,6 +24,9 @@ export default defineConfig({
   ],
   use: {
     baseURL: 'http://localhost:6007',
+    // Baselines render formatted timestamps; pin the clock so local and CI runs agree.
+    timezoneId: 'Africa/Johannesburg',
+    locale: 'en-US',
     viewport: { width: 1280, height: 800 },
     deviceScaleFactor: 1,
     trace: 'off',
