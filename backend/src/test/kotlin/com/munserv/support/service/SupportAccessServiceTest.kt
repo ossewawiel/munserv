@@ -348,6 +348,19 @@ class SupportAccessServiceTest {
             result shouldBe true
             slot.captured.lastActivity shouldBe fixedInstant
         }
+
+        @Test
+        fun `activity after expires_at does not extend the grant`() {
+            // Status is still ACTIVE (the expiry job has not swept it yet), but expiresAt is
+            // already in the past relative to `now`; recordActivity must not revive it.
+            val grant = testGrant().copy(expiresAt = fixedInstant.minus(Duration.ofMinutes(1)))
+            every { supportGrantRepository.findById(grant.id) } returns grant
+
+            val result = service.recordActivity(grant.id, fixedInstant)
+
+            result shouldBe false
+            verify(exactly = 0) { supportGrantRepository.save(any()) }
+        }
     }
 
     @Nested

@@ -178,7 +178,7 @@ class SupportAccessService(
         now: Instant,
     ): Boolean {
         val grant = supportGrantRepository.findById(id) ?: return false
-        if (grant.status != SupportGrantStatus.ACTIVE) {
+        if (!grant.isActiveAt(now)) {
             return false
         }
 

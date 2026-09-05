@@ -128,8 +128,6 @@ Temporary super user access to a pod. See [`domain/support-grant.md`](../../doma
 
 ---
 
----
-
 ## Enums
 
 > **Type Generation:** Enums with `@generate` annotations can be auto-generated using `/generate-types` or `./scripts/generate-types.sh`.
