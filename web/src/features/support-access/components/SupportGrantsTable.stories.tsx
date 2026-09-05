@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { userEvent, within } from 'storybook/test';
 
 import { SupportGrantsTable } from './SupportGrantsTable';
 import type { SupportGrant } from '../types';
@@ -49,6 +50,9 @@ const historyGrants: SupportGrant[] = [
 const meta = {
   title: 'Features/SupportAccess/SupportGrantsTable',
   component: SupportGrantsTable,
+  args: {
+    onRevoke: () => {},
+  },
 } satisfies Meta<typeof SupportGrantsTable>;
 
 export default meta;
@@ -56,30 +60,26 @@ type Story = StoryObj<typeof meta>;
 
 export const Active: Story = {
   args: {
-    variant: 'active',
-    grants: [activeGrant],
-    onRevoke: () => {},
-  },
-};
-
-export const ActiveEmpty: Story = {
-  args: {
-    variant: 'active',
-    grants: [],
-    onRevoke: () => {},
+    activeGrants: [activeGrant],
+    historyGrants: historyGrants,
   },
 };
 
 export const History: Story = {
   args: {
-    variant: 'history',
-    grants: historyGrants,
+    activeGrants: [activeGrant],
+    historyGrants: historyGrants,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement.ownerDocument.body);
+    await userEvent.click(canvas.getByRole('tab', { name: /history/i }));
+    (canvasElement.ownerDocument.activeElement as HTMLElement | null)?.blur();
   },
 };
 
-export const HistoryEmpty: Story = {
+export const Empty: Story = {
   args: {
-    variant: 'history',
-    grants: [],
+    activeGrants: [],
+    historyGrants: [],
   },
 };

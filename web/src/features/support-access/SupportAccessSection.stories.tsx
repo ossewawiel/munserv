@@ -88,5 +88,6 @@ export const GrantsHistory: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement.ownerDocument.body);
     await userEvent.click(canvas.getByRole('tab', { name: /history/i }));
+    (canvasElement.ownerDocument.activeElement as HTMLElement | null)?.blur();
   },
 };

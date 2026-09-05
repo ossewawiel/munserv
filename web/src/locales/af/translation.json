@@ -244,13 +244,13 @@
       "status": "Status",
       "endedAt": "Beëindig",
       "actions": "Aksies",
-      "never": "Nooit",
-      "emptyActive": "Geen aktiewe ondersteuningstoekenning nie",
-      "emptyHistory": "Geen vorige ondersteuningstoekennings nie"
+      "never": "Nooit"
     },
+    "noActiveGrant": "Geen ondersteuningstoegang is tans aktief nie. Niemand buite hierdie pod kan nou aanmeld nie.",
     "revokeDialog": {
       "title": "Herroep ondersteuningstoegang",
-      "body": "Ondersteuning verloor onmiddellik toegang tot hierdie pod as {{role}}, en enige aangemelde ondersteuningsessie eindig.",
+      "body": "Ondersteuning verloor onmiddellik toegang tot hierdie pod as <strong>{{role}}</strong>, en enige aangemelde ondersteuningsessie eindig.",
+      "grantedBy": "Toegestaan deur {{name}} op {{date}}.",
       "warning": "Dit kan nie ongedaan gemaak word nie. Verleen weer ondersteuningstoegang as dit steeds nodig is.",
       "confirm": "Herroep toegang"
     },

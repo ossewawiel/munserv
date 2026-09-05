@@ -33,6 +33,36 @@ describe('RevokeGrantDialog', () => {
     expect(screen.getByText(/Pod Admin/)).toBeInTheDocument();
   });
 
+  it('should bold the granted role', () => {
+    render(
+      <RevokeGrantDialog
+        open
+        grant={grant}
+        onClose={vi.fn()}
+        onConfirm={vi.fn()}
+        isLoading={false}
+      />
+    );
+
+    const roleNode = screen.getByText('Pod Admin');
+    expect(roleNode.tagName).toBe('STRONG');
+  });
+
+  it('should end the granted-by line with a full stop', () => {
+    render(
+      <RevokeGrantDialog
+        open
+        grant={grant}
+        onClose={vi.fn()}
+        onConfirm={vi.fn()}
+        isLoading={false}
+      />
+    );
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.textContent).toMatch(/Thandi Mokoena on[^.]+\./);
+  });
+
   it('should call onConfirm when the pod chief confirms', () => {
     const onConfirm = vi.fn();
     render(

@@ -34,20 +34,40 @@ const historyGrant: SupportGrant = {
 
 describe('SupportGrantsTable', () => {
   it('should render the last activity placeholder when the grant has no activity yet', () => {
-    render(<SupportGrantsTable variant="active" grants={[activeGrant]} onRevoke={vi.fn()} />);
+    render(
+      <SupportGrantsTable
+        activeGrants={[activeGrant]}
+        historyGrants={[]}
+        onRevoke={vi.fn()}
+      />
+    );
 
     expect(screen.getByText('Never')).toBeInTheDocument();
   });
 
-  it('should not render a revoke action in the history variant', () => {
-    render(<SupportGrantsTable variant="history" grants={[historyGrant]} />);
+  it('should not render a revoke action in the history tab', () => {
+    render(
+      <SupportGrantsTable
+        activeGrants={[]}
+        historyGrants={[historyGrant]}
+        onRevoke={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: /history/i }));
 
     expect(screen.queryByRole('button', { name: /revoke/i })).not.toBeInTheDocument();
   });
 
   it('should call onRevoke with the grant when the revoke action is pressed', () => {
     const onRevoke = vi.fn();
-    render(<SupportGrantsTable variant="active" grants={[activeGrant]} onRevoke={onRevoke} />);
+    render(
+      <SupportGrantsTable
+        activeGrants={[activeGrant]}
+        historyGrants={[]}
+        onRevoke={onRevoke}
+      />
+    );
 
     fireEvent.click(screen.getByRole('button', { name: /revoke/i }));
 

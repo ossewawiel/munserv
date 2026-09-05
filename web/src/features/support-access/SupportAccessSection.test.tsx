@@ -136,4 +136,33 @@ describe('SupportAccessSection', () => {
       expect(screen.getByText(historyGrant.purpose)).toBeInTheDocument();
     });
   });
+
+  it('should show the no active grant notice when there is no active grant', async () => {
+    server.use(
+      http.get('*/support-access/grants', () =>
+        HttpResponse.json({ items: [historyGrant], total: 1 })
+      )
+    );
+
+    renderWithClient(<SupportAccessSection />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/no support access is active/i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('should still render the grants tabs when there are no support grants at all', async () => {
+    server.use(
+      http.get('*/support-access/grants', () => HttpResponse.json({ items: [], total: 0 }))
+    );
+
+    renderWithClient(<SupportAccessSection />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: /active/i })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /history/i })).toBeInTheDocument();
+    });
+  });
 });

@@ -1,8 +1,9 @@
 import { type FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import BlockIcon from '@mui/icons-material/Block';
+import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 
-import { DataTableCard } from '@/components/organisms/DataTableCard';
+import { DataTableCard, type DataTableTab } from '@/components/organisms/DataTableCard';
 import type { Column } from '@/components/organisms/DataTable';
 import { ActionIconButton } from '@/components/atoms/ActionIconButton';
 import { Badge } from '@/components/atoms/Badge';
@@ -13,15 +14,15 @@ import type { SupportGrant, SupportGrantStatus } from '../types';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20] as const;
 
-type SupportGrantsTableVariant = 'active' | 'history';
+type SupportGrantsTableTab = 'active' | 'history';
 
 interface SupportGrantsTableProps {
-  /** Whether this table shows the active grant or the history of past grants */
-  variant: SupportGrantsTableVariant;
-  /** Grants to display, already filtered by status */
-  grants: readonly SupportGrant[];
-  /** Called with the grant when the pod chief presses the revoke action (active variant only) */
-  onRevoke?: (grant: SupportGrant) => void;
+  /** The currently active grant, if any */
+  activeGrants: readonly SupportGrant[];
+  /** Past grants (expired or revoked), newest first */
+  historyGrants: readonly SupportGrant[];
+  /** Called with the grant when the pod chief presses the revoke action */
+  onRevoke: (grant: SupportGrant) => void;
   /** Loading state for the underlying data */
   isLoading?: boolean;
 }
@@ -33,19 +34,27 @@ const STATUS_BADGE_VARIANTS: Record<SupportGrantStatus, 'success' | 'default' | 
 };
 
 /**
- * Table of support grants in Pod Settings > Support Access. Driven by `variant`:
- * `active` shows the currently active grant with a revoke action, `history` shows
- * past grants (expired or revoked) with no actions.
+ * Tabbed table of support grants in Pod Settings > Support Access. `DataTableCard`
+ * owns the tabs: `active` shows the currently active grant with a revoke action,
+ * `history` shows past grants (expired or revoked) with no actions.
  */
 export const SupportGrantsTable: FC<SupportGrantsTableProps> = ({
-  variant,
-  grants,
+  activeGrants,
+  historyGrants,
   onRevoke,
   isLoading = false,
 }) => {
   const { t } = useTranslation();
+  const [tab, setTab] = useState<SupportGrantsTableTab>('active');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE_OPTIONS[1]);
+
+  const grants = tab === 'active' ? activeGrants : historyGrants;
+
+  const handleTabChange = useCallback((newTab: SupportGrantsTableTab) => {
+    setTab(newTab);
+    setPage(1);
+  }, []);
 
   const handlePageChange = useCallback((newPage: number) => setPage(newPage), []);
   const handlePageSizeChange = useCallback((newSize: number) => {
@@ -82,7 +91,7 @@ export const SupportGrantsTable: FC<SupportGrantsTableProps> = ({
       },
     ];
 
-    if (variant === 'active') {
+    if (tab === 'active') {
       return [
         ...shared,
         {
@@ -107,7 +116,7 @@ export const SupportGrantsTable: FC<SupportGrantsTableProps> = ({
               color="secondary"
               tooltip={t('supportAccess.revoke', 'Revoke')}
               aria-label={t('supportAccess.revoke', 'Revoke')}
-              onClick={() => onRevoke?.(grant)}
+              onClick={() => onRevoke(grant)}
             >
               <BlockIcon fontSize="small" />
             </ActionIconButton>
@@ -136,15 +145,32 @@ export const SupportGrantsTable: FC<SupportGrantsTableProps> = ({
         },
       },
     ];
-  }, [variant, t, onRevoke]);
+  }, [tab, t, onRevoke]);
+
+  const tabs = useMemo<DataTableTab<SupportGrantsTableTab>[]>(
+    () => [
+      {
+        value: 'active',
+        label: t('supportAccess.tabs.active', 'Active'),
+        badge: activeGrants.length,
+      },
+      {
+        value: 'history',
+        label: t('supportAccess.tabs.history', 'History'),
+        badge: historyGrants.length,
+      },
+    ],
+    [t, activeGrants.length, historyGrants.length]
+  );
 
   const emptyMessage = (
     <EmptyState
-      title={
-        variant === 'active'
-          ? t('supportAccess.table.emptyActive', 'No active support grant')
-          : t('supportAccess.table.emptyHistory', 'No past support grants')
-      }
+      title={t('supportAccess.emptyTitle', 'No support grants yet')}
+      icon={<ShieldOutlinedIcon sx={{ fontSize: 48 }} />}
+      description={t(
+        'supportAccess.emptyDescription',
+        'When you grant support access, the grant appears here with its role, purpose and expiry until it is revoked or expires.'
+      )}
     />
   );
 
@@ -160,6 +186,13 @@ export const SupportGrantsTable: FC<SupportGrantsTableProps> = ({
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}
       isLoading={isLoading}
+      hideToolbarWhenEmpty
+      tabs={{
+        tabs,
+        value: tab,
+        onChange: handleTabChange,
+        ariaLabel: t('supportAccess.tabsLabel', 'Support grants'),
+      }}
       emptyMessage={emptyMessage}
     />
   );

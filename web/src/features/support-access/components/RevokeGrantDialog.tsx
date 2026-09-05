@@ -1,5 +1,5 @@
 import { type FC } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
@@ -46,17 +46,20 @@ export const RevokeGrantDialog: FC<RevokeGrantDialogProps> = ({
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         <Typography variant="body1">
-          {t(
-            'supportAccess.revokeDialog.body',
-            'Support loses access to this pod as {{role}} straight away, and any signed-in support session ends.',
-            { role: roleLabel }
-          )}
+          <Trans
+            i18nKey="supportAccess.revokeDialog.body"
+            defaults="Support loses access to this pod as <strong>{{role}}</strong> straight away, and any signed-in support session ends."
+            values={{ role: roleLabel }}
+            components={{ strong: <strong /> }}
+          />
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           {t('supportAccess.purpose', 'Purpose')}: &ldquo;{grant.purpose}&rdquo;
           <br />
-          {t('supportAccess.grantedBy', 'Granted by')} {grant.grantedByName}{' '}
-          {t('supportAccess.grantedOn', 'on {{date}}', { date: formatDateTime(grant.grantedAt) })}
+          {t('supportAccess.revokeDialog.grantedBy', 'Granted by {{name}} on {{date}}.', {
+            name: grant.grantedByName,
+            date: formatDateTime(grant.grantedAt),
+          })}
         </Typography>
         <Typography variant="body2">
           {t(

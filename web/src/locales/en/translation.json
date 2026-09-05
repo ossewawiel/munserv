@@ -604,13 +604,13 @@
       "status": "Status",
       "endedAt": "Ended",
       "actions": "Actions",
-      "never": "Never",
-      "emptyActive": "No active support grant",
-      "emptyHistory": "No past support grants"
+      "never": "Never"
     },
+    "noActiveGrant": "No support access is active. Nobody outside this pod can sign in right now.",
     "revokeDialog": {
       "title": "Revoke support access",
-      "body": "Support loses access to this pod as {{role}} straight away, and any signed-in support session ends.",
+      "body": "Support loses access to this pod as <strong>{{role}}</strong> straight away, and any signed-in support session ends.",
+      "grantedBy": "Granted by {{name}} on {{date}}.",
       "warning": "This cannot be undone. Grant support access again if it is still needed.",
       "confirm": "Revoke access"
     },
