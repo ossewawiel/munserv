@@ -3,13 +3,39 @@ issue: 49
 story: B8
 title: "Temporary super user grant tracking"
 platform: backend
-status: pending
+status: completed
 depends_on: [48]        # B7 audit logging (AuditService, audit_logs, V034) must be merged
 touches: [pod-chief-bootstrap]
 created_by: feature-planner
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - backend/src/main/resources/db/migration/V035__create_support_grants.sql
+  - backend/src/main/kotlin/com/munserv/support/domain/SupportGrantStatus.kt
+  - backend/src/main/kotlin/com/munserv/support/domain/SupportGrantId.kt
+  - backend/src/main/kotlin/com/munserv/support/domain/SupportGrant.kt
+  - backend/src/main/kotlin/com/munserv/support/repository/SupportGrantEntity.kt
+  - backend/src/main/kotlin/com/munserv/support/repository/SupportGrantRepository.kt
+  - backend/src/main/kotlin/com/munserv/support/repository/JpaSupportGrantRepository.kt
+  - backend/src/main/kotlin/com/munserv/support/service/SupportAccessResult.kt
+  - backend/src/main/kotlin/com/munserv/support/service/SupportAccessService.kt
+  - backend/src/main/kotlin/com/munserv/support/service/SupportGrantExpiryJob.kt
+  - backend/src/main/kotlin/com/munserv/support/api/SupportAccessDto.kt
+  - backend/src/main/kotlin/com/munserv/support/api/SupportAccessController.kt
+  - backend/src/main/kotlin/com/munserv/support/api/SupportGrantActivityFilter.kt
+  - backend/src/main/kotlin/com/munserv/audit/service/AuditService.kt
+  - backend/src/main/kotlin/com/munserv/shared/config/AppConfig.kt
+  - backend/src/main/kotlin/com/munserv/shared/config/SecurityConfig.kt
+  - domain/language.yaml
+  - specs/requirements/backend.md
+tests_added:
+  - backend/src/test/kotlin/com/munserv/support/domain/SupportGrantStatusTest.kt
+  - backend/src/test/kotlin/com/munserv/support/domain/SupportGrantTest.kt
+  - backend/src/test/kotlin/com/munserv/support/repository/JpaSupportGrantRepositoryTest.kt
+  - backend/src/test/kotlin/com/munserv/support/service/SupportAccessServiceTest.kt
+  - backend/src/test/kotlin/com/munserv/support/service/SupportGrantExpiryJobTest.kt
+  - backend/src/test/kotlin/com/munserv/support/api/SupportAccessControllerTest.kt
+  - backend/src/test/kotlin/com/munserv/support/api/SupportGrantActivityFilterTest.kt
+  - backend/src/test/kotlin/com/munserv/audit/service/AuditServiceTest.kt
 ---
 
 # B8 · Temporary super user grant tracking (Backend)
