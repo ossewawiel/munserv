@@ -16,7 +16,8 @@ stripped=$(printf '%s\n' "$cmd" \
              tag=substr($0, RSTART, RLENGTH); sub(/^<<-?[\047"]?/, "", tag); print; skip=1; next }
            print }' \
   | sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g")
-branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+# GUARD_GIT_BRANCH lets the test runner pin the branch context (CI checks out master).
+branch="${GUARD_GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null)}"
 
 check() {
   local g="$1"

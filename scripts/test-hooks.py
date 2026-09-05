@@ -8,6 +8,7 @@ Exit 1 if any case returns a different exit code.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -30,7 +31,8 @@ def parse(text: str) -> list[tuple[int, str]]:
 def main() -> int:
     failures = 0
     for want, cmd in parse(CASES.read_text()):
-        r = subprocess.run([str(HOOK)], input=json.dumps({"tool_input": {"command": cmd}}), capture_output=True, text=True, cwd=ROOT)
+        env = {**os.environ, "GUARD_GIT_BRANCH": "feat/hook-test"}  # cases assume a feature branch, whatever CI checked out
+        r = subprocess.run([str(HOOK)], input=json.dumps({"tool_input": {"command": cmd}}), capture_output=True, text=True, cwd=ROOT, env=env)
         ok = r.returncode == want
         failures += not ok
         print(("ok  " if ok else "FAIL"), f"want={want} got={r.returncode}", cmd.splitlines()[0][:70])
