@@ -28,6 +28,9 @@ playwright-report/
 screenshots/
 coverage/
 
+# Storybook static build
+storybook-static/
+
 # SonarQube
 .scannerwork/
 

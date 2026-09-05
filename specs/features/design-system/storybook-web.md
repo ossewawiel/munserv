@@ -3,12 +3,48 @@ issue: 0
 story: DS1
 title: "Storybook catalogue for the web design system"
 platform: web
-status: pending
+status: completed
 depends_on: []
 touches: [design-system, web-components]
 created_by: orchestrator
 created_at: "2026-09-05"
-files_changed: []
+files_changed:
+  - web/package.json
+  - web/pnpm-lock.yaml
+  - web/eslint.config.js
+  - web/.gitignore
+  - web/.storybook/main.ts
+  - web/.storybook/preview.tsx
+  - web/src/components/atoms/Button.stories.tsx
+  - web/src/components/atoms/ActionButton.stories.tsx
+  - web/src/components/atoms/ActionIconButton.stories.tsx
+  - web/src/components/atoms/IconAvatar.stories.tsx
+  - web/src/components/atoms/Badge.stories.tsx
+  - web/src/components/atoms/Input.stories.tsx
+  - web/src/components/atoms/Select.stories.tsx
+  - web/src/components/atoms/Modal.stories.tsx
+  - web/src/components/atoms/MainCard.stories.tsx
+  - web/src/components/atoms/Spinner.stories.tsx
+  - web/src/components/atoms/ThemeToggle.stories.tsx
+  - web/src/components/atoms/IssueTypeFilterButton.stories.tsx
+  - web/src/components/molecules/PageHeader.stories.tsx
+  - web/src/components/molecules/Breadcrumbs.stories.tsx
+  - web/src/components/molecules/StatCard.stories.tsx
+  - web/src/components/molecules/IssueStateBadge.stories.tsx
+  - web/src/components/molecules/IssueTypeBadge.stories.tsx
+  - web/src/components/molecules/MemberStatusBadge.stories.tsx
+  - web/src/components/molecules/HeatIndicator.stories.tsx
+  - web/src/components/molecules/EmptyState.stories.tsx
+  - web/src/components/molecules/ErrorState.stories.tsx
+  - web/src/components/molecules/LoadingSkeleton.stories.tsx
+  - web/src/components/molecules/ConfirmDialog.stories.tsx
+  - web/src/components/molecules/Pagination.stories.tsx
+  - web/src/components/molecules/PhotoGallery.stories.tsx
+  - web/src/components/molecules/IssueTypeFilterBar.stories.tsx
+  - web/src/components/molecules/LoginForm.stories.tsx
+  - web/src/components/molecules/RegisterForm.stories.tsx
+  - web/src/components/organisms/DataTableCard.stories.tsx
+  - web/src/theme/generated/tokens.stories.tsx
 tests_added: []
 ---
 
