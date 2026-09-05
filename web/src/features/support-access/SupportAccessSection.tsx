@@ -125,13 +125,15 @@ export const SupportAccessSection: FC = () => {
         />
       )}
 
-      <GrantAccessDialog
-        open={dialogOpen}
-        onClose={handleCloseDialog}
-        onSubmit={handleSubmit}
-        isLoading={grantMutation.isPending}
-        errorCode={errorCode}
-      />
+      {dialogOpen && (
+        <GrantAccessDialog
+          open
+          onClose={handleCloseDialog}
+          onSubmit={handleSubmit}
+          isLoading={grantMutation.isPending}
+          errorCode={errorCode}
+        />
+      )}
     </MainCard>
   );
 };

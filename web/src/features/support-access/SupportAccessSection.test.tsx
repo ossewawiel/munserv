@@ -1,6 +1,7 @@
 import '@/lib/i18n';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { server } from '@/test/mocks/server';
@@ -66,5 +67,25 @@ describe('SupportAccessSection', () => {
     await waitFor(() => {
       expect(within(screen.getByRole('alert')).getByText(expected, { exact: false })).toBeInTheDocument();
     });
+  });
+
+  it('should open a fresh dialog each time so a cancelled purpose is not kept', async () => {
+    server.use(
+      http.get('*/support-access/grants', () => HttpResponse.json({ items: [], total: 0 }))
+    );
+    const user = userEvent.setup();
+
+    renderWithClient(<SupportAccessSection />);
+
+    await user.click(await screen.findByRole('button', { name: /grant support access/i }));
+    await user.type(screen.getByRole('textbox'), 'Abandoned purpose');
+    await user.click(screen.getByRole('button', { name: /cancel/i }));
+    await waitFor(() => {
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: /grant support access/i }));
+
+    expect(screen.getByRole('textbox')).toHaveValue('');
   });
 });
