@@ -1,5 +1,6 @@
 package com.munserv.sectors.repository
 
+import com.munserv.TestContainersConfig
 import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
 import io.kotest.matchers.collections.shouldHaveSize
@@ -8,9 +9,11 @@ import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
+@Import(TestContainersConfig::class)
 @ActiveProfiles("test")
 class SectorRepositoryTest {
     @Autowired

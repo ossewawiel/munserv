@@ -83,19 +83,21 @@ class PodServiceTest {
         @Test
         fun `should return Incomplete with specific missing steps`() {
             every { podRepository.existsById(testPodId) } returns true
-            every { setupStepRepository.findCompletedSteps(testPodId) } returns setOf(
-                SetupStep.POD_NAME,
-                SetupStep.FIRST_ADMIN,
-            )
+            every { setupStepRepository.findCompletedSteps(testPodId) } returns
+                setOf(
+                    SetupStep.POD_NAME,
+                    SetupStep.FIRST_ADMIN,
+                )
 
             val result = service.getSetupStatus(testPodId)
 
             val success = result.shouldBeInstanceOf<PodResult.Success<PodSetupStatus>>()
             val status = success.data.shouldBeInstanceOf<PodSetupStatus.Incomplete>()
-            status.missingSteps shouldContainExactlyInAnyOrder listOf(
-                SetupStep.POD_BOUNDARIES,
-                SetupStep.WARDS_SECTORS,
-            )
+            status.missingSteps shouldContainExactlyInAnyOrder
+                listOf(
+                    SetupStep.POD_BOUNDARIES,
+                    SetupStep.WARDS_SECTORS,
+                )
         }
 
         @Test
@@ -242,10 +244,11 @@ class PodServiceTest {
         fun `should update both name and logo`() {
             val pod = createTestPod()
             val savedSlot = slot<Pod>()
-            val command = UpdatePodSettingsCommand(
-                name = "UpdatedPod",
-                logoUrl = "https://example.com/logo.png",
-            )
+            val command =
+                UpdatePodSettingsCommand(
+                    name = "UpdatedPod",
+                    logoUrl = "https://example.com/logo.png",
+                )
 
             every { podRepository.findById(testPodId) } returns pod
             every { podRepository.save(capture(savedSlot)) } answers { savedSlot.captured }
@@ -296,19 +299,21 @@ class PodServiceTest {
             every { podRepository.existsById(testPodId) } returns true
             every { setupStepRepository.markComplete(testPodId, SetupStep.POD_BOUNDARIES) } returns Unit
             every { setupStepRepository.isSetupComplete(testPodId) } returns false
-            every { setupStepRepository.findCompletedSteps(testPodId) } returns setOf(
-                SetupStep.POD_NAME,
-                SetupStep.POD_BOUNDARIES,
-            )
+            every { setupStepRepository.findCompletedSteps(testPodId) } returns
+                setOf(
+                    SetupStep.POD_NAME,
+                    SetupStep.POD_BOUNDARIES,
+                )
 
             val result = service.completeSetupStep(testPodId, SetupStep.POD_BOUNDARIES)
 
             val success = result.shouldBeInstanceOf<PodResult.Success<PodSetupStatus>>()
             val status = success.data.shouldBeInstanceOf<PodSetupStatus.Incomplete>()
-            status.missingSteps shouldContainExactlyInAnyOrder listOf(
-                SetupStep.WARDS_SECTORS,
-                SetupStep.FIRST_ADMIN,
-            )
+            status.missingSteps shouldContainExactlyInAnyOrder
+                listOf(
+                    SetupStep.WARDS_SECTORS,
+                    SetupStep.FIRST_ADMIN,
+                )
             verify { setupStepRepository.markComplete(testPodId, SetupStep.POD_BOUNDARIES) }
         }
 

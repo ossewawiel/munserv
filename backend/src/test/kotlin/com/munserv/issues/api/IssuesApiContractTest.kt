@@ -1,6 +1,7 @@
 package com.munserv.issues.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.munserv.TestContainersConfig
 import com.munserv.auth.service.JwtService
 import com.munserv.shared.types.MemberId
 import io.kotest.matchers.shouldBe
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
@@ -22,6 +24,7 @@ import org.springframework.test.web.servlet.post
  * Verifies that responses match the mock API contract exactly.
  */
 @SpringBootTest
+@Import(TestContainersConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class IssuesApiContractTest {

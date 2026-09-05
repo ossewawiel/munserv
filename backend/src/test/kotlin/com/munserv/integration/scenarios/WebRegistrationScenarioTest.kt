@@ -1,6 +1,7 @@
 package com.munserv.integration.scenarios
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.munserv.TestContainersConfig
 import com.munserv.auth.api.ChangePasswordRequest
 import com.munserv.auth.api.MemberLoginRequest
 import com.munserv.auth.api.WebRegisterRequest
@@ -40,7 +41,7 @@ import org.springframework.test.web.servlet.post
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TestEmailConfig::class)
+@Import(TestContainersConfig::class, TestEmailConfig::class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class WebRegistrationScenarioTest {
     @Autowired

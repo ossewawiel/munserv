@@ -1,6 +1,7 @@
 package com.munserv.auth.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.munserv.TestContainersConfig
 import com.munserv.auth.domain.Email
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
@@ -32,7 +33,7 @@ import java.time.Instant
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TestEmailConfig::class)
+@Import(TestContainersConfig::class, TestEmailConfig::class)
 class WebRegistrationApiContractTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
