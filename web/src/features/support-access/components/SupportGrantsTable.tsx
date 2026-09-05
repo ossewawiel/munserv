@@ -163,16 +163,25 @@ export const SupportGrantsTable: FC<SupportGrantsTableProps> = ({
     [t, activeGrants.length, historyGrants.length]
   );
 
-  const emptyMessage = (
-    <EmptyState
-      title={t('supportAccess.emptyTitle', 'No support grants yet')}
-      icon={<ShieldOutlinedIcon sx={{ fontSize: 48 }} />}
-      description={t(
-        'supportAccess.emptyDescription',
-        'When you grant support access, the grant appears here with its role, purpose and expiry until it is revoked or expires.'
-      )}
-    />
-  );
+  const emptyMessage =
+    tab === 'active' ? (
+      <EmptyState
+        title={t('supportAccess.table.emptyActive', 'No support grants yet')}
+        icon={<ShieldOutlinedIcon sx={{ fontSize: 48 }} />}
+        description={t(
+          'supportAccess.emptyDescription',
+          'When you grant support access, the grant appears here with its role, purpose and expiry until it is revoked or expires.'
+        )}
+      />
+    ) : (
+      <EmptyState
+        title={t(
+          'supportAccess.table.emptyHistory',
+          'No past grants yet. Revoked and expired grants appear here.'
+        )}
+        icon={<ShieldOutlinedIcon sx={{ fontSize: 48 }} />}
+      />
+    );
 
   return (
     <DataTableCard

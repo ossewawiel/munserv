@@ -48,7 +48,7 @@ export const RevokeGrantDialog: FC<RevokeGrantDialogProps> = ({
         <Typography variant="body1">
           <Trans
             i18nKey="supportAccess.revokeDialog.body"
-            defaults="Support loses access to this pod as <strong>{{role}}</strong> straight away, and any signed-in support session ends."
+            defaults="Support loses access to this pod as <strong>{{role}}</strong> straight away, and any signed-in support user is logged out."
             values={{ role: roleLabel }}
             components={{ strong: <strong /> }}
           />

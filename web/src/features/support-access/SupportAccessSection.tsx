@@ -87,7 +87,7 @@ export const SupportAccessSection: FC = () => {
   const handleConfirmRevoke = useCallback(() => {
     if (!grantToRevoke) return;
     revokeMutation.mutate(grantToRevoke.id, {
-      onSuccess: () => setGrantToRevoke(null),
+      onSettled: () => setGrantToRevoke(null),
     });
   }, [grantToRevoke, revokeMutation]);
 

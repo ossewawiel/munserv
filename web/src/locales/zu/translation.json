@@ -244,12 +244,14 @@
       "status": "Isimo",
       "endedAt": "Kuphelile",
       "actions": "Izenzo",
-      "never": "Awukaze"
+      "never": "Awukaze",
+      "emptyActive": "Azikho izabelo zokusekela okwamanje",
+      "emptyHistory": "Azikho izabelo zangaphambilini okwamanje. Izabelo ezikhanseliwe nezaphelelwa yisikhathi zibonakala lapha."
     },
     "noActiveGrant": "Akukho kufinyelela kokusekela okusebenzayo. Akekho ongaphandle kwale pod ongangena manje.",
     "revokeDialog": {
       "title": "Khansela ukufinyelela kokusekela",
-      "body": "Ukusekelwa kulahlekelwa ukufinyelela kule pod ngokushesha njengo-<strong>{{role}}</strong>, futhi noma iyiphi iseshini yokusekela engenile iyaphela.",
+      "body": "Ukusekelwa kulahlekelwa ukufinyelela kule pod ngokushesha njengo-<strong>{{role}}</strong>, futhi noma yimuphi umsebenzisi wokusekela ongenile uyakhishwa.",
       "grantedBy": "Kunikwe ngu-{{name}} ngo-{{date}}.",
       "warning": "Lokhu akwenzeki nakabili. Nika kabusha ukufinyelela kokusekela uma kusadingeka.",
       "confirm": "Khansela ukufinyelela"

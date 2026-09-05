@@ -165,4 +165,51 @@ describe('SupportAccessSection', () => {
       expect(screen.getByRole('tab', { name: /history/i })).toBeInTheDocument();
     });
   });
+
+  it('should close the dialog and show the grant_not_active alert when the revoke conflicts', async () => {
+    server.use(
+      http.get('*/support-access/grants', () =>
+        HttpResponse.json({ items: [activeGrant], total: 1 })
+      ),
+      http.delete('*/support-access/grants/:id', () =>
+        HttpResponse.json(
+          { code: 'grant_not_active', message: 'The grant is no longer active' },
+          { status: 409 }
+        )
+      )
+    );
+    const user = userEvent.setup();
+
+    renderWithClient(<SupportAccessSection />);
+
+    await user.click(await screen.findByRole('button', { name: /revoke/i }));
+    await user.click(await screen.findByRole('button', { name: /revoke access/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(screen.getByText(/no longer active/i)).toBeInTheDocument();
+  });
+
+  it('should close the dialog and show a generic error when the revoke fails', async () => {
+    server.use(
+      http.get('*/support-access/grants', () =>
+        HttpResponse.json({ items: [activeGrant], total: 1 })
+      ),
+      http.delete('*/support-access/grants/:id', () =>
+        HttpResponse.json({ message: 'Internal server error' }, { status: 500 })
+      )
+    );
+    const user = userEvent.setup();
+
+    renderWithClient(<SupportAccessSection />);
+
+    await user.click(await screen.findByRole('button', { name: /revoke/i }));
+    await user.click(await screen.findByRole('button', { name: /revoke access/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(screen.getByText(/failed to revoke support access/i)).toBeInTheDocument();
+  });
 });
