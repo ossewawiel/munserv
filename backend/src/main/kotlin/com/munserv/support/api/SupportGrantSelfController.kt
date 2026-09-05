@@ -45,9 +45,7 @@ class SupportGrantSelfController(
                 content = [Content(schema = Schema(implementation = SupportGrantResponse::class))],
             ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
-            ApiResponse(responseCode = "403", description = "Not a support grant token"),
-            ApiResponse(responseCode = "404", description = "Grant not found"),
-            ApiResponse(responseCode = "409", description = "Grant is not active"),
+            ApiResponse(responseCode = "403", description = "Not a support grant token, or the grant is revoked or expired"),
         ],
     )
     @GetMapping("/grants/current")
