@@ -3,7 +3,7 @@ issue: 68
 story: B9
 title: "Super user login with a support grant"
 platform: backend
-status: completed
+status: done
 depends_on: [49]
 touches: [pod-chief-bootstrap]
 created_by: feature-planner
