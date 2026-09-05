@@ -43,7 +43,7 @@
 | W27 | As a Pod Chief, I can complete optional profile info | Display name editable ǀ Known-as, contact, address fields optional ǀ Can skip to dashboard ǀ Status changes to ACTIVE when complete | 🟢 Done | [#42](https://github.com/ossewawiel/munserv/issues/42) |
 | W28 | As a Pod Chief, I can grant super user temporary access | Located in Pod Settings > Support Access section ǀ Grant button opens dialog ǀ Select role (from manageable roles) ǀ Set purpose/reason ǀ Access auto-revokes after logout OR 1 hour inactivity ǀ Audit logged | 🟢 Done | [#43](https://github.com/ossewawiel/munserv/issues/43) |
 | W29 | As a super user, I can use temporary access for debugging | Login with temp grant ǀ Role-limited access ǀ Session shows expiry timer ǀ Auto-logout on expiry ǀ All actions audit logged | 🔴 Pending | [#44](https://github.com/ossewawiel/munserv/issues/44) |
-| W30 | As a Pod Chief, I can view/revoke active super user sessions | Located in Pod Settings > Support Access section ǀ See active sessions with role, granted time, last activity ǀ Manual revoke button ǀ Session history log | 🔴 Pending | [#45](https://github.com/ossewawiel/munserv/issues/45) |
+| W30 | As a Pod Chief, I can view/revoke active super user sessions | Located in Pod Settings > Support Access section ǀ See active sessions with role, granted time, last activity ǀ Manual revoke button ǀ Session history log | 🟢 Done | [#45](https://github.com/ossewawiel/munserv/issues/45) |
 
 ## Status Legend
 - 🟢 Done
