@@ -59,7 +59,7 @@ final class FlutterSecureStorageProvider
 }
 
 String _$flutterSecureStorageHash() =>
-    r'e185811e78dc96d64925adeaa0b81a3ca8883fcc';
+    r'8dfe9fa69b5b576aa2a15ee6863f36086ea0391d';
 
 /// Provides SecureStorageService
 

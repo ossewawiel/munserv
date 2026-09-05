@@ -10,9 +10,9 @@
 | ID | Title | Handoff | Status |
 |---|---|---|---|
 | DS0 | Design tokens (DTCG) and Style Dictionary generator, registry, CI drift check | done in PR 5a directly | 🟢 Done |
-| DS1 | Storybook catalogue for web | [storybook-web.md](storybook-web.md) | 🔴 Pending |
-| DS2 | Widgetbook catalogue for mobile, theme showcase removed | [widgetbook-mobile.md](widgetbook-mobile.md) | 🔴 Pending |
-| DS3 | GitHub Pages workflow publishing both catalogues | `.github/workflows/pages.yml`, `site/index.html` | 🟡 In Progress (first deploy after DS1 and DS2 merge) |
+| DS1 | Storybook catalogue for web | [storybook-web.md](storybook-web.md) | 🟢 Done |
+| DS2 | Widgetbook catalogue for mobile, theme showcase removed | [widgetbook-mobile.md](widgetbook-mobile.md) | 🟢 Done |
+| DS3 | GitHub Pages workflow publishing both catalogues | PR 5a | 🔴 Pending |
 | DS4 | Playwright screenshot tests and Flutter golden tests with committed baselines | PR 5b | 🔴 Pending |
 | DS5 | `designer` and `design-reviewer` agents; Design stage in `/factory` | PR 5b | 🔴 Pending |
 

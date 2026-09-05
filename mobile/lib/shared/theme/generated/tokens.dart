@@ -192,4 +192,3 @@ abstract class TokensLayout {
   static const double drawerWidthMini = 72;
   static const double headerHeight = 88;
 }
-

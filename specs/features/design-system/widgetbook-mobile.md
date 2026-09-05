@@ -3,12 +3,46 @@ issue: 0
 story: DS2
 title: "Widgetbook catalogue for the mobile design system"
 platform: mobile
-status: pending
+status: completed
 depends_on: []
 touches: [design-system, mobile-shared-widgets]
 created_by: orchestrator
 created_at: "2026-09-05"
-files_changed: []
+files_changed:
+  - mobile/pubspec.yaml
+  - mobile/pubspec.lock
+  - mobile/build.yaml
+  - mobile/analysis_options.yaml
+  - mobile/README.md
+  - mobile/CLAUDE.md
+  - mobile/web/** (flutter create . --platforms web)
+  - mobile/widgetbook/main.dart
+  - mobile/widgetbook/main.directories.g.dart
+  - mobile/widgetbook/fixtures.dart
+  - mobile/widgetbook/use_cases/app_logo.dart
+  - mobile/widgetbook/use_cases/branded_scaffold.dart
+  - mobile/widgetbook/use_cases/branding_header.dart
+  - mobile/widgetbook/use_cases/design_tokens.dart
+  - mobile/widgetbook/use_cases/empty_state.dart
+  - mobile/widgetbook/use_cases/error_display.dart
+  - mobile/widgetbook/use_cases/form_error_banner.dart
+  - mobile/widgetbook/use_cases/heat_indicator.dart
+  - mobile/widgetbook/use_cases/issue_card.dart
+  - mobile/widgetbook/use_cases/issue_location_map.dart
+  - mobile/widgetbook/use_cases/issue_type_icon.dart
+  - mobile/widgetbook/use_cases/loading_spinner.dart
+  - mobile/widgetbook/use_cases/map_background.dart
+  - mobile/widgetbook/use_cases/munserv_app_bar.dart
+  - mobile/widgetbook/use_cases/photo_thumbnail_carousel.dart
+  - mobile/widgetbook/use_cases/quick_action_card.dart
+  - mobile/widgetbook/use_cases/step_indicator.dart
+  - mobile/lib/features/dev/presentation/pages/theme_showcase_page.dart (removed)
+  - mobile/lib/features/profile/presentation/pages/profile_page.dart
+  - mobile/lib/routing/app_router.dart
+  - mobile/lib/routing/app_router.g.dart (regenerated hash)
+  - mobile/lib/features/auth/providers/auth_providers.g.dart (regenerated hash)
+  - mobile/lib/shared/providers/dio_provider.g.dart (regenerated hash)
+  - mobile/lib/shared/theme/generated/tokens.dart (trailing newline only)
 tests_added: []
 ---
 
