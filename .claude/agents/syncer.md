@@ -27,6 +27,7 @@ A merged PR number or a story id. Resolve both with `gh pr view <n> --json numbe
 4. If every story of the milestone is closed, set the feature spec status to `🟢 Complete`.
 5. Comment on the issue with the PR link and the files changed, add `status:done`, remove `status:in-progress` / `status:review`. Close the issue if the merge did not close it.
 6. Commit `chore(specs): sync <story> after #<pr>`, push, open a PR titled the same. Do not merge.
+7. `python3 scripts/sync-board.py` so the board moves the story to Done.
 
 ## Output
 Story id, issue and PR numbers, milestone progress as `closed/total`, and the sync PR URL.

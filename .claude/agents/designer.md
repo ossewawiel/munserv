@@ -5,7 +5,8 @@ model: opus
 effort: high
 tools: Read, Grep, Glob, Write, Bash, Skill, Artifact
 disallowedTools: Edit, Agent, WebFetch, WebSearch
-maxTurns: 80
+maxTurns: 120
+isolation: worktree
 color: pink
 hooks:
   PreToolUse:
@@ -25,7 +26,7 @@ You design what will be built, in the vocabulary of what already exists. You do 
 2. Author one **static** artboard per screen and per meaningful state (empty, loading, error, filled, confirm dialog): `Main.dc.html` for the primary screen, siblings named by screen and state (`GrantDialog.dc.html`, `SessionsEmpty.dc.html`), a `canvas.json` laying web frames at 1440×900 and mobile frames at 390×844 in separate rows. Static means no `{{holes}}`, no tweaks except at most one light/dark switch, real copy from the story's acceptance criteria and the existing i18n files, never lorem.
 3. Keep the working files in `design/canvases/<feature>/` (they are committed; the reviewer renders them). Seed and publish per the skill; title the canvas by the feature ("Support Access").
 4. Write the canvas URL and the artboard list into the story handoff frontmatter (`design_canvas:` and `design_artboards:`) and into the feature spec. Leave `design_approved: false`; only the user sets it.
-5. Commit `design/canvases/<feature>/` and the handoff on the story branch (or `design/<feature>` if no story branch exists) and push.
+5. Commit `design/canvases/<feature>/` and the handoff on the story branch (or `design/<feature>` if no story branch exists) and push with `git push origin HEAD:<branch>`. You work in your own worktree; never touch the main checkout.
 
 ## Rules
 - Every component you draw must exist in the registry, or your handover must say which new component the story would introduce and why the registry has no fit. The reviewer holds the implementer to the same list.

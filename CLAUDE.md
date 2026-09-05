@@ -45,7 +45,7 @@ Delivery runs through agents defined in `.claude/agents/` and orchestrated by `/
 | `reviewer` | Opus | PR against handoff and domain: verdict per acceptance criterion |
 | `syncer` | Sonnet | After merge: specs status, issue labels, handoff archive |
 
-Handoffs are written from `specs/features/_template/story-handoff.md` and live under `specs/features/<feature>/`. Human gates: story approval, canvas approval for UI stories, and PR merge. `/factory status` shows the queue; `/factory run` dispatches up to three stories.
+Handoffs are written from `specs/features/_template/story-handoff.md` and live under `specs/features/<feature>/`. Human gates: story approval, canvas approval for UI stories, and PR merge. `/factory status` shows the queue; `/factory run` dispatches up to three stories. Progress is public at https://ossewawiel.github.io/munserv/dashboard/ and on the board https://github.com/users/ossewawiel/projects/5 (`scripts/sync-board.py` mirrors labels onto it).
 
 ## Working with GitHub
 `gh` is the tool. Labels: `type:*`, `platform:*`, `status:*` (`ready` → `in-progress` → `review` → `done`, or `blocked`), `priority:*`, `story:<id>`. Stories are `M*` (mobile), `W*` (web), `B*` (backend). Legacy workflow commands stay in `.claude/commands/`. `.claude/hooks/guard-git.sh` blocks force pushes, pushes to master and history rewrites in every session.
