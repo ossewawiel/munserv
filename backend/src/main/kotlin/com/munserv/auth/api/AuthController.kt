@@ -6,6 +6,7 @@ import com.munserv.auth.service.CompleteRegistrationCommand
 import com.munserv.auth.service.RegistrationResult
 import com.munserv.auth.service.RegistrationService
 import com.munserv.auth.service.WebRegistrationCommand
+import com.munserv.shared.security.JwtAuthenticationFilter
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
@@ -18,6 +19,7 @@ import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -81,6 +83,8 @@ class AuthController(
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
             is AuthResult.SuperUserLoginSuccess,
+            is AuthResult.SupportGrantLoginSuccess,
+            is AuthResult.LoggedOut,
             is AuthResult.InvalidCredentials,
             is AuthResult.AccountSuspended,
             is AuthResult.TokenRefreshed,
@@ -134,6 +138,8 @@ class AuthController(
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
             is AuthResult.SuperUserLoginSuccess,
+            is AuthResult.SupportGrantLoginSuccess,
+            is AuthResult.LoggedOut,
             is AuthResult.InvalidCredentials,
             is AuthResult.AccountSuspended,
             is AuthResult.TokenRefreshed,
@@ -213,6 +219,8 @@ class AuthController(
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
             is AuthResult.SuperUserLoginSuccess,
+            is AuthResult.SupportGrantLoginSuccess,
+            is AuthResult.LoggedOut,
             is AuthResult.InvalidCredentials,
             is AuthResult.AccountSuspended,
             is AuthResult.TokenRefreshed,
@@ -275,6 +283,8 @@ class AuthController(
             is AuthResult.PhoneCheckResult,
             is AuthResult.AdminLoginSuccess,
             is AuthResult.SuperUserLoginSuccess,
+            is AuthResult.SupportGrantLoginSuccess,
+            is AuthResult.LoggedOut,
             is AuthResult.TokenRefreshed,
             is AuthResult.InvalidToken,
             is AuthResult.MemberLoginSuccess,
@@ -388,6 +398,48 @@ class AuthController(
                 )
             }
 
+            is AuthResult.SupportGrantLoginSuccess -> {
+                val expiresAt =
+                    java.time.Instant
+                        .now()
+                        .plusSeconds(result.tokens.expiresIn)
+                        .toString()
+
+                ResponseEntity.ok(
+                    AdminLoginResponse(
+                        tokens =
+                            AdminTokens(
+                                accessToken = result.tokens.accessToken,
+                                refreshToken = result.tokens.refreshToken,
+                                expiresAt = expiresAt,
+                            ),
+                        profile =
+                            AdminProfile(
+                                admin =
+                                    AdminUser(
+                                        id = result.grantId,
+                                        email = result.superUserEmail,
+                                        displayName = "Support User",
+                                        role = result.grantedRole.uppercase(),
+                                        level = result.grantedLevel,
+                                        podId = result.podId,
+                                        wardId = null,
+                                        sectorId = null,
+                                        onboardingStatus = null,
+                                    ),
+                                sector = null,
+                                bootstrapStatus = null,
+                                supportGrant =
+                                    SupportGrantInfo(
+                                        grantId = result.grantId,
+                                        grantedRole = result.grantedRole,
+                                        expiresAt = result.grantExpiresAt,
+                                    ),
+                            ),
+                    ),
+                )
+            }
+
             is AuthResult.InvalidCredentials -> {
                 ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
@@ -413,6 +465,7 @@ class AuthController(
             is AuthResult.MemberNotFound,
             is AuthResult.PendingApproval,
             is AuthResult.ValidationError,
+            is AuthResult.LoggedOut,
             -> {
                 throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
             }
@@ -453,6 +506,8 @@ class AuthController(
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
             is AuthResult.SuperUserLoginSuccess,
+            is AuthResult.SupportGrantLoginSuccess,
+            is AuthResult.LoggedOut,
             is AuthResult.InvalidCredentials,
             is AuthResult.AccountSuspended,
             is AuthResult.MemberLoginSuccess,
@@ -498,6 +553,8 @@ class AuthController(
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
             is AuthResult.SuperUserLoginSuccess,
+            is AuthResult.SupportGrantLoginSuccess,
+            is AuthResult.LoggedOut,
             is AuthResult.InvalidCredentials,
             is AuthResult.AccountSuspended,
             is AuthResult.TokenRefreshed,
@@ -641,6 +698,8 @@ class AuthController(
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
             is AuthResult.SuperUserLoginSuccess,
+            is AuthResult.SupportGrantLoginSuccess,
+            is AuthResult.LoggedOut,
             is AuthResult.TokenRefreshed,
             is AuthResult.InvalidToken,
             is AuthResult.PasswordChanged,
@@ -719,6 +778,8 @@ class AuthController(
             is AuthResult.LoginSuccess,
             is AuthResult.AdminLoginSuccess,
             is AuthResult.SuperUserLoginSuccess,
+            is AuthResult.SupportGrantLoginSuccess,
+            is AuthResult.LoggedOut,
             is AuthResult.AccountSuspended,
             is AuthResult.TokenRefreshed,
             is AuthResult.InvalidToken,
@@ -726,6 +787,66 @@ class AuthController(
             is AuthResult.PendingApproval,
             -> {
                 throw IllegalStateException("Unexpected result type: ${result::class.simpleName}")
+            }
+        }
+    }
+
+    /**
+     * Log out the current caller. Revokes the underlying support grant for a grant-scoped
+     * token; a no-op for any other authenticated token. Always returns 204.
+     */
+    @Operation(summary = "Logout", description = "Log out the current caller, revoking a support grant if scoped to one")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "204", description = "Logged out"),
+            ApiResponse(responseCode = "401", description = "Not authenticated"),
+        ],
+    )
+    @PostMapping("/logout")
+    fun logout(): ResponseEntity<*> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val subject = authentication?.principal as? String
+
+        if (authentication == null || subject == null) {
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponse("unauthorized", "Authentication required"))
+        }
+
+        val isGrantScoped =
+            authentication.authorities.any { it.authority == JwtAuthenticationFilter.SUPPORT_GRANT_AUTHORITY }
+
+        return when (authService.logout(subject, isGrantScoped)) {
+            is AuthResult.LoggedOut -> {
+                ResponseEntity.noContent().build<Unit>()
+            }
+
+            // Exhaustive handling - these should never occur for logout()
+            is AuthResult.OtpSent,
+            is AuthResult.OtpVerified,
+            is AuthResult.RegistrationComplete,
+            is AuthResult.PhoneAlreadyRegistered,
+            is AuthResult.InvalidPhoneNumber,
+            is AuthResult.InvalidOtp,
+            is AuthResult.InvalidPin,
+            is AuthResult.InvalidSectorId,
+            is AuthResult.PhoneCheckResult,
+            is AuthResult.LoginSuccess,
+            is AuthResult.AdminLoginSuccess,
+            is AuthResult.SuperUserLoginSuccess,
+            is AuthResult.SupportGrantLoginSuccess,
+            is AuthResult.InvalidCredentials,
+            is AuthResult.AccountSuspended,
+            is AuthResult.TokenRefreshed,
+            is AuthResult.InvalidToken,
+            is AuthResult.MemberLoginSuccess,
+            is AuthResult.PasswordChanged,
+            is AuthResult.MemberNotFound,
+            is AuthResult.PendingApproval,
+            is AuthResult.ValidationError,
+            -> {
+                throw IllegalStateException("Unexpected result type for logout")
             }
         }
     }

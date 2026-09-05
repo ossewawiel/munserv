@@ -19,7 +19,9 @@ A fresh deployment has no administrators. Something has to create the first one 
 2. The super user logs in through the ordinary admin login; the response carries role `super_user` and a bootstrap status.
 3. The super user creates the pod chief; a welcome email with a temporary password goes out.
 4. Once the pod chief has completed onboarding (see [admin-role](admin-role.md)), the pod is no longer eligible and super user login is refused.
-5. Later support access is a separate, temporary grant by the pod chief (stories W28 to W30, B8).
+5. Later support access is a separate, temporary grant by the pod chief (stories W28 to W30, B8,
+   B9); the super user logs in through the same `POST /auth/admin/login` while the grant is active,
+   and gets a token scoped to the granted role, not `super_user`.
 
 ## Invariants
 - Super user credentials exist only in the environment.

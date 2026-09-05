@@ -65,6 +65,20 @@ sealed interface AuthResult {
         val bootstrapStatus: String,
     ) : AuthResult
 
+    // Super user login result when the pod is not bootstrap-eligible but a support grant is active
+    data class SupportGrantLoginSuccess(
+        val tokens: TokenPair,
+        val podId: String,
+        val grantId: String,
+        val grantedRole: String,
+        val grantedLevel: String,
+        val superUserEmail: String,
+        val grantExpiresAt: String,
+    ) : AuthResult
+
+    // Logout result, for both plain admin tokens and grant-scoped tokens
+    data object LoggedOut : AuthResult
+
     data object InvalidCredentials : AuthResult
 
     data object AccountSuspended : AuthResult

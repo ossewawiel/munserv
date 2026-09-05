@@ -17,6 +17,9 @@ import com.munserv.sectors.repository.SectorRepository
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.support.domain.SupportGrantId
+import com.munserv.support.service.SupportAccessResult
+import com.munserv.support.service.SupportAccessService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -36,6 +39,7 @@ class AuthService(
     private val bootstrapService: BootstrapService,
     private val podRepository: PodRepository,
     private val auditService: AuditService,
+    private val supportAccessService: SupportAccessService,
 ) {
     companion object {
         private const val MEMBER_ROLE = "member"
@@ -188,7 +192,7 @@ class AuthService(
      *
      * Checks super user credentials first, then falls back to database admin.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     fun adminLogin(
         email: String,
         password: String,
@@ -251,13 +255,40 @@ class AuthService(
 
         return when (status) {
             is BootstrapStatus.NotEligible -> {
-                // Pod already bootstrapped - super user cannot log in
-                auditService.logSuperUserLoginAttempt(
-                    email = superUserEmail,
-                    success = false,
-                    podId = podId,
-                )
-                AuthResult.InvalidCredentials
+                // Pod already bootstrapped - super user may still log in under a support grant
+                when (val grantResult = supportAccessService.loginUnderGrant(podId, superUserEmail)) {
+                    is SupportAccessResult.Granted -> {
+                        val grant = grantResult.view.grant
+                        val tokens =
+                            jwtService.generateTokenPair(
+                                MemberId(grant.id.value),
+                                grant.grantedRole.toDbValue(),
+                                JwtService.SCOPE_SUPPORT_GRANT,
+                            )
+
+                        AuthResult.SupportGrantLoginSuccess(
+                            tokens = tokens,
+                            podId = podId.value.toString(),
+                            grantId = grant.id.value.toString(),
+                            grantedRole = grant.grantedRole.toDbValue(),
+                            grantedLevel =
+                                grant.grantedRole.level.name
+                                    .lowercase(),
+                            superUserEmail = superUserEmail,
+                            grantExpiresAt = grant.expiresAt.toString(),
+                        )
+                    }
+
+                    else -> {
+                        // No active grant - super user cannot log in
+                        auditService.logSuperUserLoginAttempt(
+                            email = superUserEmail,
+                            success = false,
+                            podId = podId,
+                        )
+                        AuthResult.InvalidCredentials
+                    }
+                }
             }
 
             is BootstrapStatus.Eligible,
@@ -287,6 +318,28 @@ class AuthService(
                 )
             }
         }
+    }
+
+    /**
+     * Log out the caller. Revokes the underlying support grant when [isGrantScoped] is true
+     * and [subject] is a valid grant id; otherwise this is a no-op.
+     */
+    @Transactional
+    fun logout(
+        subject: String,
+        isGrantScoped: Boolean,
+    ): AuthResult {
+        if (isGrantScoped) {
+            val grantId =
+                try {
+                    SupportGrantId(UUID.fromString(subject))
+                } catch (e: IllegalArgumentException) {
+                    null
+                }
+            grantId?.let { supportAccessService.revokeOnLogout(it) }
+        }
+
+        return AuthResult.LoggedOut
     }
 
     /**

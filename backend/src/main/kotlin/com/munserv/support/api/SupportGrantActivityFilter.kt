@@ -13,10 +13,10 @@ import java.time.Instant
 import java.util.UUID
 
 /**
- * Records support grant activity for requests authenticated as the super user.
+ * Records support grant activity for requests authenticated with a grant-scoped token.
  *
  * The grant id arrives as the JWT subject when the super user logs in under a support grant
- * (W29). Until then this filter is effectively a no-op, since no such token is ever minted.
+ * (B9); such a token carries the `ROLE_SUPPORT_GRANT` authority alongside the granted role.
  */
 @Component
 class SupportGrantActivityFilter(
@@ -24,7 +24,7 @@ class SupportGrantActivityFilter(
     private val clock: Clock = Clock.systemUTC(),
 ) : OncePerRequestFilter() {
     companion object {
-        private const val SUPER_USER_AUTHORITY = "ROLE_SUPER_USER"
+        private const val SUPPORT_GRANT_AUTHORITY = "ROLE_SUPPORT_GRANT"
     }
 
     override fun doFilterInternal(
@@ -34,7 +34,7 @@ class SupportGrantActivityFilter(
     ) {
         val authentication = SecurityContextHolder.getContext().authentication
 
-        if (authentication != null && authentication.authorities.any { it.authority == SUPER_USER_AUTHORITY }) {
+        if (authentication != null && authentication.authorities.any { it.authority == SUPPORT_GRANT_AUTHORITY }) {
             val subject = authentication.principal as? String
             val grantId =
                 subject?.let {

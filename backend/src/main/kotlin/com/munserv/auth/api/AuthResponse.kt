@@ -60,6 +60,17 @@ data class AdminProfile(
     val admin: AdminUser,
     val sector: AdminSector? = null,
     val bootstrapStatus: String? = null,
+    val supportGrant: SupportGrantInfo? = null,
+)
+
+/**
+ * Support grant carried on an admin login response when the super user logged in
+ * under a pod chief's support grant, instead of via bootstrap.
+ */
+data class SupportGrantInfo(
+    val grantId: String,
+    val grantedRole: String,
+    val expiresAt: String,
 )
 
 data class AdminUser(

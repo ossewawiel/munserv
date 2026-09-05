@@ -48,7 +48,7 @@ class SupportGrantActivityFilterTest {
             UsernamePasswordAuthenticationToken(
                 grantId.value.toString(),
                 null,
-                listOf(SimpleGrantedAuthority("ROLE_SUPER_USER")),
+                listOf(SimpleGrantedAuthority("ROLE_SUPPORT_GRANT")),
             )
         every { supportAccessService.recordActivity(grantId, fixedInstant) } returns true
 

@@ -3,13 +3,59 @@ issue: 68
 story: B9
 title: "Super user login with a support grant"
 platform: backend
-status: pending
+status: completed
 depends_on: [49]
 touches: [pod-chief-bootstrap]
 created_by: feature-planner
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - backend/src/main/kotlin/com/munserv/auth/service/JwtService.kt
+  - backend/src/main/kotlin/com/munserv/auth/service/AuthResult.kt
+  - backend/src/main/kotlin/com/munserv/auth/service/AuthService.kt
+  - backend/src/main/kotlin/com/munserv/auth/api/AuthResponse.kt
+  - backend/src/main/kotlin/com/munserv/auth/api/AuthController.kt
+  - backend/src/main/kotlin/com/munserv/shared/config/SecurityConfig.kt
+  - backend/src/main/kotlin/com/munserv/shared/security/JwtAuthenticationFilter.kt
+  - backend/src/main/kotlin/com/munserv/shared/security/RoleAuthorizationAspect.kt
+  - backend/src/main/kotlin/com/munserv/support/api/SupportGrantActivityFilter.kt
+  - backend/src/main/kotlin/com/munserv/support/api/SupportGrantSelfController.kt
+  - backend/src/main/kotlin/com/munserv/support/service/SupportAccessService.kt
+  - backend/src/test/kotlin/com/munserv/auth/service/JwtServiceTest.kt
+  - backend/src/test/kotlin/com/munserv/auth/service/AuthServiceTest.kt
+  - backend/src/test/kotlin/com/munserv/auth/api/AuthControllerTest.kt
+  - backend/src/test/kotlin/com/munserv/support/service/SupportAccessServiceTest.kt
+  - backend/src/test/kotlin/com/munserv/support/api/SupportGrantActivityFilterTest.kt
+  - backend/src/test/kotlin/com/munserv/support/api/SupportAccessRoleAuthorizationTest.kt
+  - backend/src/test/kotlin/com/munserv/support/api/SupportGrantSelfControllerTest.kt
+  - backend/src/test/kotlin/com/munserv/shared/security/JwtAuthenticationFilterTest.kt
+  - specs/contracts/api.md
+  - specs/contracts/types.md
+  - specs/features/pod-chief-bootstrap/implementation-plan.md
+  - specs/requirements/backend.md
+  - domain/support-grant.md
+  - domain/bootstrap.md
+  - domain/language.yaml
+tests_added:
+  - "JwtServiceTest: should round-trip the support grant scope claim when generating a scoped access token"
+  - "JwtServiceTest: should not carry a scope claim for an ordinary access token"
+  - "SupportAccessServiceTest.LoginUnderGrant: should return Granted and audit the login when an active grant exists"
+  - "SupportAccessServiceTest.LoginUnderGrant: should return NotFound when the pod has no active grant"
+  - "SupportAccessServiceTest.LoginUnderGrant: should return GrantNotActive when the grant is revoked"
+  - "SupportAccessServiceTest.CurrentGrant: should return Granted when the grant is active"
+  - "SupportAccessServiceTest.CurrentGrant: should return GrantNotActive when the grant is revoked"
+  - "SupportAccessServiceTest.CurrentGrant: should return NotFound when the grant does not exist"
+  - "AuthServiceTest: should return SupportGrantLoginSuccess when the pod is not eligible and an active grant exists"
+  - "AuthServiceTest: should return InvalidCredentials when the pod is not eligible and no grant exists"
+  - "AuthServiceTest: should mint a token whose subject is the grant id and whose role is the granted role"
+  - "AuthServiceTest: should revoke the grant when a grant-scoped token logs out"
+  - "AuthServiceTest: should not revoke anything when a plain admin token logs out"
+  - "AuthControllerTest: POST api-v1-auth-logout should return 204 for an authenticated admin token"
+  - "JwtAuthenticationFilterTest: should add ROLE_SUPPORT_GRANT when the token carries the support grant scope"
+  - "JwtAuthenticationFilterTest: should not add ROLE_SUPPORT_GRANT for an ordinary admin token"
+  - "SupportGrantActivityFilterTest: updated to ROLE_SUPPORT_GRANT authority"
+  - "SupportAccessRoleAuthorizationTest: should return 403 on the pod chief grant endpoints for a grant-scoped token"
+  - "SupportGrantSelfControllerTest: should return the caller's own grant for a grant-scoped token"
+  - "SupportGrantSelfControllerTest: should return 403 for a pod chief token"
 ---
 
 # B9 · Super user login with a support grant (Backend)
@@ -22,13 +68,13 @@ The super user can log in to a bootstrapped pod while the pod chief has an activ
 gets a token that carries the granted role only, the grant id as subject, and a server-owned expiry.
 
 ## Acceptance criteria
-- [ ] Super user login on a pod that is not bootstrap-eligible succeeds when an active support grant exists for that pod, and is still refused when there is none
-- [ ] The minted JWT has the grant id as subject and carries the granted role only, never `super_user`; the granted role is enforced server-side on `@RequireRole` endpoints
-- [ ] The admin login response for that path carries `grantId`, `grantedRole` and the grant's `expiresAt`; `AuthResult` gains the matching case and `AuthController` maps it
-- [ ] `GET /api/v1/support-access/grants/current` returns the caller's own grant so the client can refresh a slid expiry (grant-scoped callers only)
-- [ ] `POST /api/v1/auth/logout` revokes a grant-scoped login through `SupportAccessService.revokeOnLogout`, and is a no-op `204` for any other token
-- [ ] A `SUPPORT_ACCESS_LOGIN` audit entry is written on a grant login
-- [ ] `specs/contracts/api.md` and `types.md` document the new endpoints and response shape; the stale `POST /api/v1/support-access/login` line is removed from the feature implementation plan; `domain/support-grant.md` and `domain/bootstrap.md` match the shipped login path
+- [x] Super user login on a pod that is not bootstrap-eligible succeeds when an active support grant exists for that pod, and is still refused when there is none
+- [x] The minted JWT has the grant id as subject and carries the granted role only, never `super_user`; the granted role is enforced server-side on `@RequireRole` endpoints
+- [x] The admin login response for that path carries `grantId`, `grantedRole` and the grant's `expiresAt`; `AuthResult` gains the matching case and `AuthController` maps it
+- [x] `GET /api/v1/support-access/grants/current` returns the caller's own grant so the client can refresh a slid expiry (grant-scoped callers only)
+- [x] `POST /api/v1/auth/logout` revokes a grant-scoped login through `SupportAccessService.revokeOnLogout`, and is a no-op `204` for any other token
+- [x] A `SUPPORT_ACCESS_LOGIN` audit entry is written on a grant login
+- [x] `specs/contracts/api.md` and `types.md` document the new endpoints and response shape; the stale `POST /api/v1/support-access/login` line is removed from the feature implementation plan; `domain/support-grant.md` and `domain/bootstrap.md` match the shipped login path
 
 ## Contract
 You are writing the contract in step 12; these are the exact shapes to implement and to document.

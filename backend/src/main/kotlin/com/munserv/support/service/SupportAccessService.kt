@@ -5,6 +5,7 @@ import com.munserv.admin.repository.AdminRepository
 import com.munserv.audit.domain.AuditActorType
 import com.munserv.audit.service.AuditService
 import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.PodId
 import com.munserv.support.domain.SupportGrant
 import com.munserv.support.domain.SupportGrantId
 import com.munserv.support.domain.SupportGrantStatus
@@ -163,6 +164,43 @@ class SupportAccessService(
         )
 
         return SupportAccessResult.Revoked
+    }
+
+    /**
+     * Log the super user in under the pod's active support grant.
+     *
+     * Called by the auth flow (B9) when the pod is not bootstrap-eligible. Writes a
+     * `SUPPORT_ACCESS_LOGIN` audit entry on success.
+     */
+    @Transactional
+    fun loginUnderGrant(
+        podId: PodId,
+        superUserEmail: String,
+    ): SupportAccessResult {
+        val grant =
+            supportGrantRepository.findActiveByPodId(podId)
+                ?: return SupportAccessResult.NotFound
+        if (!grant.isActiveAt(Instant.now(clock))) {
+            return SupportAccessResult.GrantNotActive
+        }
+
+        auditService.logSupportAccessLogin(superUserEmail, grant.id.value, podId)
+
+        val grantedByAdmin = adminRepository.findById(grant.grantedBy)
+        return SupportAccessResult.Granted(SupportGrantView(grant, grantedByAdmin?.displayName ?: "Unknown"))
+    }
+
+    /**
+     * Return the caller's own grant, for a grant-scoped token to check its status.
+     */
+    fun currentGrant(id: SupportGrantId): SupportAccessResult {
+        val grant = supportGrantRepository.findById(id) ?: return SupportAccessResult.NotFound
+        if (!grant.isActiveAt(Instant.now(clock))) {
+            return SupportAccessResult.GrantNotActive
+        }
+
+        val grantedByAdmin = adminRepository.findById(grant.grantedBy)
+        return SupportAccessResult.Granted(SupportGrantView(grant, grantedByAdmin?.displayName ?: "Unknown"))
     }
 
     /**

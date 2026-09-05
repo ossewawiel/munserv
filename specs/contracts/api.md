@@ -34,6 +34,41 @@ Refresh access token.
 **Response:** `{ accessToken: string, refreshToken: string }`
 **Errors:** 401 Invalid token
 
+### POST /auth/admin/login
+Public. Administrator login, including the super user during [bootstrap](../../domain/bootstrap.md)
+and the super user logging in under a pod chief's active [support grant](../../domain/support-grant.md).
+
+**Request:** `{ email: string, password: string }`
+
+**Response:** `200` `AdminLoginResponse`. When the credentials are the super user's and the pod has
+an active grant, `profile.admin.role` is the **granted** role (never `super_user`) and
+`profile.supportGrant` carries the grant:
+```json
+{
+  "tokens": { "accessToken": "…", "refreshToken": "…", "expiresAt": "2026-09-05T10:15:00Z" },
+  "profile": {
+    "admin": { "id": "<grantId>", "email": "<super user email>", "displayName": "Support User",
+               "role": "POD_ADMIN", "level": "pod", "podId": "<uuid>", "wardId": null,
+               "sectorId": null, "onboardingStatus": null },
+    "sector": null,
+    "bootstrapStatus": null,
+    "supportGrant": { "grantId": "<uuid>", "grantedRole": "pod_admin", "expiresAt": "2026-09-05T11:00:00Z" }
+  }
+}
+```
+`tokens.expiresAt` is the access token expiry; `supportGrant.expiresAt` is the grant's own,
+server-owned, sliding expiry. `supportGrant` is `null` for every other login.
+**Errors:** 401 Invalid credentials (also when the pod is not bootstrap-eligible and no active
+grant exists)
+
+### POST /auth/logout
+Log out the current caller. Revokes the underlying support grant when the token is grant-scoped
+(minted by `/auth/admin/login` under a support grant); a no-op for any other authenticated token.
+
+**Request:** none
+**Response:** `204` No Content, always
+**Errors:** 401 Not authenticated
+
 ---
 
 ## Issues
@@ -399,3 +434,10 @@ Revoke an active grant immediately.
 
 **Response:** `204` No Content
 **Errors:** 401 Unauthorized | 403 Not pod chief or grant belongs to another pod | 404 Not found | 409 Grant is not active (`{ code: "grant_not_active", message: string }`)
+
+### GET /support-access/grants/current
+Grant-scoped tokens only (minted by `/auth/admin/login` under a support grant). Returns the
+caller's own grant, so the client can refresh a slid `expiresAt`.
+
+**Response:** `200` `SupportGrant` (same shape as above)
+**Errors:** 401 Not authenticated | 403 Not a support grant token (`{ code: "not_support_grant", message: string }`) | 404 Not found | 409 Grant is not active (`{ code: "grant_not_active", message: string }`)

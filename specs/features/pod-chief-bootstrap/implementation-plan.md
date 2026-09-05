@@ -194,7 +194,7 @@ The backend determines authentication type based on credentials:
 | GET | `/api/v1/support-access/grants` | Pod Chief | List active and past grants |
 | POST | `/api/v1/support-access/grants` | Pod Chief | Create temporary grant |
 | DELETE | `/api/v1/support-access/grants/{id}` | Pod Chief | Revoke grant |
-| POST | `/api/v1/support-access/login` | Public | Super user login with grant |
+| GET | `/api/v1/support-access/grants/current` | Grant-scoped | Caller's own grant (B9) |
 
 ### Database Changes
 

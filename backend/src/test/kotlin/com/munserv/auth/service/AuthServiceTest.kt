@@ -13,7 +13,12 @@ import com.munserv.pod.repository.PodRepository
 import com.munserv.sectors.repository.SectorRepository
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
+import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.support.domain.SupportGrantId
+import com.munserv.support.service.SupportAccessResult
+import com.munserv.support.service.SupportAccessService
+import com.munserv.support.service.SupportGrantView
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
@@ -38,6 +43,7 @@ class AuthServiceTest {
     private lateinit var bootstrapService: BootstrapService
     private lateinit var podRepository: PodRepository
     private lateinit var auditService: AuditService
+    private lateinit var supportAccessService: SupportAccessService
     private lateinit var clock: Clock
 
     private val testPhone = "+27821234567"
@@ -65,6 +71,7 @@ class AuthServiceTest {
         // Default: no pod found (MVP single-pod not set up yet)
         every { podRepository.findFirst() } returns null
         auditService = mockk(relaxed = true)
+        supportAccessService = mockk()
         authService =
             AuthService(
                 memberRepository,
@@ -76,6 +83,7 @@ class AuthServiceTest {
                 bootstrapService,
                 podRepository,
                 auditService,
+                supportAccessService,
             )
     }
 
@@ -287,6 +295,118 @@ class AuthServiceTest {
         val result = authService.refreshToken(refreshToken)
 
         result.shouldBeInstanceOf<AuthResult.InvalidToken>()
+    }
+
+    // Super user login under a support grant tests (B9)
+
+    private val testPodId = PodId.generate()
+
+    private fun testGrant() =
+        com.munserv.support.domain.SupportGrant.create(
+            id = SupportGrantId.generate(),
+            podId = testPodId,
+            grantedRole = com.munserv.admin.domain.AdminRole.POD_ADMIN,
+            purpose = "Investigate duplicate issue reports",
+            grantedBy =
+                com.munserv.shared.types.AdminId
+                    .generate(),
+            grantedAt = clock.instant(),
+        )
+
+    private fun mockNotEligiblePod() {
+        val pod =
+            com.munserv.pod.domain.Pod(
+                id = testPodId,
+                name = "ward42",
+                displayName = "Munserv Pod ward42",
+                logoUrl = null,
+                config = emptyMap(),
+                setupCompletedAt = clock.instant(),
+                createdAt = clock.instant(),
+                updatedAt = clock.instant(),
+            )
+        every { podRepository.findFirst() } returns pod
+        bootstrapConfig = BootstrapConfig(enabled = true, email = "super@example.com", password = "super-secret")
+        every { bootstrapService.getStatus(testPodId) } returns com.munserv.bootstrap.domain.BootstrapStatus.NotEligible
+        authService =
+            AuthService(
+                memberRepository,
+                otpService,
+                jwtService,
+                adminRepository,
+                sectorRepository,
+                bootstrapConfig,
+                bootstrapService,
+                podRepository,
+                auditService,
+                supportAccessService,
+            )
+    }
+
+    @Test
+    fun `should return SupportGrantLoginSuccess when the pod is not eligible and an active grant exists`() {
+        mockNotEligiblePod()
+        val grant = testGrant()
+        every { supportAccessService.loginUnderGrant(testPodId, "super@example.com") } returns
+            SupportAccessResult.Granted(SupportGrantView(grant, "Thandi Mokoena"))
+
+        val result = authService.adminLogin("super@example.com", "super-secret")
+
+        result.shouldBeInstanceOf<AuthResult.SupportGrantLoginSuccess>()
+        val success = result as AuthResult.SupportGrantLoginSuccess
+        success.grantId shouldBe grant.id.value.toString()
+        success.grantedRole shouldBe "pod_admin"
+        success.grantedLevel shouldBe "pod"
+    }
+
+    @Test
+    fun `should return InvalidCredentials when the pod is not eligible and no grant exists`() {
+        mockNotEligiblePod()
+        every { supportAccessService.loginUnderGrant(testPodId, "super@example.com") } returns
+            SupportAccessResult.NotFound
+
+        val result = authService.adminLogin("super@example.com", "super-secret")
+
+        result.shouldBeInstanceOf<AuthResult.InvalidCredentials>()
+        verify { auditService.logSuperUserLoginAttempt("super@example.com", false, testPodId) }
+    }
+
+    @Test
+    fun `should mint a token whose subject is the grant id and whose role is the granted role`() {
+        mockNotEligiblePod()
+        val grant = testGrant()
+        every { supportAccessService.loginUnderGrant(testPodId, "super@example.com") } returns
+            SupportAccessResult.Granted(SupportGrantView(grant, "Thandi Mokoena"))
+
+        val result = authService.adminLogin("super@example.com", "super-secret") as AuthResult.SupportGrantLoginSuccess
+
+        val validation = jwtService.validateToken(result.tokens.accessToken)
+        validation.subject shouldBe grant.id.value.toString()
+        validation.role shouldBe "pod_admin"
+        validation.scope shouldBe JwtService.SCOPE_SUPPORT_GRANT
+    }
+
+    @Test
+    fun `should revoke the grant when a grant-scoped token logs out`() {
+        val grantId = SupportGrantId.generate()
+        every { supportAccessService.revokeOnLogout(grantId) } returns SupportAccessResult.Revoked
+
+        val result = authService.logout(grantId.value.toString(), isGrantScoped = true)
+
+        result.shouldBeInstanceOf<AuthResult.LoggedOut>()
+        verify { supportAccessService.revokeOnLogout(grantId) }
+    }
+
+    @Test
+    fun `should not revoke anything when a plain admin token logs out`() {
+        val adminId =
+            com.munserv.shared.types.AdminId
+                .generate()
+
+        val result = authService.logout(adminId.value.toString(), isGrantScoped = false)
+
+        result.shouldBeInstanceOf<AuthResult.LoggedOut>()
+        verify(exactly = 0) { supportAccessService.revokeOnLogout(any()) }
     }
 
     private fun createTestMember(

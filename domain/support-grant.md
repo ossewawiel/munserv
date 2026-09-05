@@ -14,7 +14,7 @@ chief decides when support may look, under which role, and for how long, and eve
 ## Code names
 | Platform | Identifier |
 |---|---|
-| Kotlin | `com.munserv.support.domain.SupportGrant`, `SupportGrantId`, `SupportGrantStatus`, `com.munserv.support.service.SupportAccessService`, `SupportAccessResult`, `SupportGrantExpiryJob`, `com.munserv.support.repository.SupportGrantRepository`, `com.munserv.support.api.SupportAccessController`, `SupportGrantActivityFilter` |
+| Kotlin | `com.munserv.support.domain.SupportGrant`, `SupportGrantId`, `SupportGrantStatus`, `com.munserv.support.service.SupportAccessService`, `SupportAccessResult`, `SupportGrantExpiryJob`, `com.munserv.support.repository.SupportGrantRepository`, `com.munserv.support.api.SupportAccessController`, `SupportGrantSelfController`, `SupportGrantActivityFilter` |
 | Database | `support_grants` |
 | TypeScript | `SupportGrant`, `SupportGrantStatus`, `GrantSupportAccessRequest` (stories W28 to W30) |
 | Dart | none (support access is web-only) |
@@ -39,7 +39,10 @@ chief decides when support may look, under which role, and for how long, and eve
 
 ## Relationships
 - Belongs to a [pod](pod.md); granted by the pod chief of that pod ([admin-role](admin-role.md)).
-- Grants the `super_user` JWT role, the same role [bootstrap](bootstrap.md) issues.
+- The super user logs in through the ordinary `POST /auth/admin/login` while the grant is active
+  (there is no separate support-access login endpoint). The minted JWT carries the grant id as
+  subject and the **granted role** only — never `super_user` — so `@RequireRole` endpoints enforce
+  the role the pod chief chose, not a blanket super user role.
 - Produces `SUPPORT_ACCESS_GRANTED`, `SUPPORT_ACCESS_REVOKED`, `SUPPORT_ACCESS_EXPIRED`,
   `SUPPORT_ACCESS_LOGIN` [audit](audit.md) entries.
 
@@ -50,4 +53,4 @@ chief decides when support may look, under which role, and for how long, and eve
 - Say **status** for a grant, never "state"; state belongs to issues.
 
 ## Decided by
-Story B8, issue #49; specs/features/pod-chief-bootstrap; migration V035.
+Story B8, issue #49; story B9, issue #68; specs/features/pod-chief-bootstrap; migration V035.

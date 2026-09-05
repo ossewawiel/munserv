@@ -21,6 +21,7 @@ class JwtAuthenticationFilter(
     companion object {
         private const val AUTHORIZATION_HEADER = "Authorization"
         private const val BEARER_PREFIX = "Bearer "
+        const val SUPPORT_GRANT_AUTHORITY = "ROLE_SUPPORT_GRANT"
     }
 
     override fun doFilterInternal(
@@ -37,9 +38,12 @@ class JwtAuthenticationFilter(
 
             if (validation.isValid && validation.tokenType == TokenType.ACCESS && subject != null) {
                 val authorities =
-                    validation.role?.let {
-                        listOf(SimpleGrantedAuthority("ROLE_${it.uppercase()}"))
-                    } ?: emptyList()
+                    buildList {
+                        validation.role?.let { add(SimpleGrantedAuthority("ROLE_${it.uppercase()}")) }
+                        if (validation.scope == JwtService.SCOPE_SUPPORT_GRANT) {
+                            add(SimpleGrantedAuthority(SUPPORT_GRANT_AUTHORITY))
+                        }
+                    }
 
                 val authentication =
                     UsernamePasswordAuthenticationToken(
