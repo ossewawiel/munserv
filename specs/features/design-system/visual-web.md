@@ -3,13 +3,23 @@ issue: 0
 story: DS4a
 title: "Playwright visual regression for the web catalogue"
 platform: web
-status: pending
+status: completed
 depends_on: []
 touches: [design-system, web-e2e]
 created_by: orchestrator
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/package.json
+  - web/pnpm-lock.yaml
+  - web/.gitignore
+  - web/playwright.visual.config.ts
+  - web/e2e/visual/stories.spec.ts
+  - web/e2e/visual/__screenshots__/stories.spec/*.png (228 baselines)
+  - .github/workflows/ci.yml
+  - design/README.md
+  - web/CLAUDE.md
+tests_added:
+  - web/e2e/visual/stories.spec.ts (228 generated tests: 114 stories x light/dark)
 ---
 
 # DS4a · Visual regression (Web)
