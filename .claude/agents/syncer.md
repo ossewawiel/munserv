@@ -6,6 +6,7 @@ effort: low
 tools: Read, Edit, Grep, Glob, Bash
 disallowedTools: Write, Agent, WebFetch, WebSearch
 maxTurns: 40
+isolation: worktree
 color: cyan
 hooks:
   PreToolUse:
@@ -21,7 +22,7 @@ You bring the bookkeeping in line with what merged. You change no code.
 A merged PR number or a story id. Resolve both with `gh pr view <n> --json number,title,mergedAt,mergeCommit,body` and `gh issue view <n> --json number,title,milestone,labels,state`.
 
 ## Steps
-1. `git checkout master && git pull --ff-only` on a fresh branch `chore/sync-<story>`.
+1. In your worktree: `git fetch origin && git checkout -B chore/sync-<story> origin/master` (never switch branches in the shared checkout).
 2. In `specs/requirements/<platform>.md` change the story's status cell to `🟢 Done` and add the issue link if missing.
 3. Move the story's handoffs and investigation from `specs/features/<feature>/` to `specs/features/<feature>/completed/`.
 4. If every story of the milestone is closed, set the feature spec status to `🟢 Complete`.
