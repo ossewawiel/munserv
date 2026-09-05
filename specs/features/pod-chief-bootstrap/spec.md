@@ -34,7 +34,7 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 | B5 | Super user configuration via environment | [#46](https://github.com/ossewawiel/munserv/issues/46) | |
 | B6 | Bootstrap eligibility check | [#47](https://github.com/ossewawiel/munserv/issues/47) | |
 | B7 | Bootstrap audit logging | [#48](https://github.com/ossewawiel/munserv/issues/48) | |
-| B8 | Temporary super user grant tracking | [#49](https://github.com/ossewawiel/munserv/issues/49) | [Handoff](049-B8-support-grants-backend.md) |
+| B8 | Temporary super user grant tracking | [#49](https://github.com/ossewawiel/munserv/issues/49) | [Handoff](completed/049-B8-support-grants-backend.md) |
 
 ## Dependencies
 
