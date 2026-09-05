@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:munserv_mobile/features/auth/data/auth_api.dart';
 // ignore: implementation_imports
-import 'package:riverpod/src/framework.dart' show Override;
 import 'package:munserv_mobile/features/auth/data/auth_repository.dart';
 import 'package:munserv_mobile/features/auth/data/secure_storage.dart';
 import 'package:munserv_mobile/features/auth/presentation/pages/pin_login_page.dart';
@@ -34,14 +33,13 @@ void main() {
     mockBiometricService = MockBiometricService();
   });
 
-  Widget createTestWidget({List<Override> overrides = const []}) {
+  Widget createTestWidget() {
     return ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(mockRepository),
         secureStorageProvider.overrideWithValue(mockStorage),
         authApiProvider.overrideWithValue(mockAuthApi),
         biometricServiceProvider.overrideWithValue(mockBiometricService),
-        ...overrides,
       ],
       child: MaterialApp(
         localizationsDelegates: S.localizationsDelegates,

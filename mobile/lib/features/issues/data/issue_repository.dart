@@ -32,7 +32,7 @@ class IssueRepository {
   final Map<String, Future<Result<Issue>>> _inFlightIssueFullRequests = {};
 
   IssueRepository(this._api)
-      : _urlTransformer = UrlTransformer(apiHost: _apiHost, apiPort: _apiPort);
+    : _urlTransformer = UrlTransformer(apiHost: _apiHost, apiPort: _apiPort);
 
   /// Get paginated list of issues with filters.
   Future<Result<PaginatedIssueSummaries>> getIssues(IssueFilter filter) async {

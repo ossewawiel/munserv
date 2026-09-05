@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:munserv_mobile/features/auth/data/auth_api.dart';
 // ignore: implementation_imports
-import 'package:riverpod/src/framework.dart' show Override;
 import 'package:munserv_mobile/features/auth/data/auth_repository.dart';
 import 'package:munserv_mobile/features/auth/data/secure_storage.dart';
 import 'package:munserv_mobile/features/auth/domain/auth_state.dart';
@@ -78,10 +77,7 @@ void main() {
     );
   });
 
-  Widget createTestWidget({
-    List<Override> overrides = const [],
-    AuthState? initialState,
-  }) {
+  Widget createTestWidget({AuthState? initialState}) {
     return ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(mockRepository),
@@ -99,7 +95,6 @@ void main() {
                 ),
           ),
         ),
-        ...overrides,
       ],
       child: MaterialApp(
         localizationsDelegates: S.localizationsDelegates,

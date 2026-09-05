@@ -361,15 +361,22 @@ class _VerifyIssuePageState extends ConsumerState<VerifyIssuePage> {
               children: [
                 Text(l10n.selectReason),
                 const SizedBox(height: Spacing.sm),
-                ...VerificationReason.values.map(
-                  (reason) => RadioListTile<VerificationReason>(
-                    value: reason,
-                    groupValue: _selectedReason,
-                    title: Text(reason.displayName),
-                    onChanged: (value) {
-                      setDialogState(() => _selectedReason = value);
-                      setState(() {});
-                    },
+                RadioGroup<VerificationReason>(
+                  groupValue: _selectedReason,
+                  onChanged: (value) {
+                    setDialogState(() => _selectedReason = value);
+                    setState(() {});
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: VerificationReason.values
+                        .map(
+                          (reason) => RadioListTile<VerificationReason>(
+                            value: reason,
+                            title: Text(reason.displayName),
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
               ],

@@ -350,4 +350,3 @@ class _IssueMarkerIcon extends StatelessWidget {
     };
   }
 }
-

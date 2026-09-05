@@ -7,11 +7,9 @@ class UrlTransformer {
   final String _apiHost;
   final String _apiPort;
 
-  UrlTransformer({
-    required String apiHost,
-    required String apiPort,
-  })  : _apiHost = apiHost,
-        _apiPort = apiPort;
+  UrlTransformer({required String apiHost, required String apiPort})
+    : _apiHost = apiHost,
+      _apiPort = apiPort;
 
   /// Transform a single URL from localhost to the API host.
   ///

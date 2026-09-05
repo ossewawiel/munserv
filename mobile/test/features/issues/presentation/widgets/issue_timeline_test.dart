@@ -23,9 +23,7 @@ void main() {
     testWidgets('renders nothing when history is empty', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: IssueTimeline(history: []),
-          ),
+          home: Scaffold(body: IssueTimeline(history: [])),
         ),
       );
 
@@ -36,9 +34,7 @@ void main() {
     testWidgets('renders correct number of timeline entries', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: IssueTimeline(history: testHistory),
-          ),
+          home: Scaffold(body: IssueTimeline(history: testHistory)),
         ),
       );
 
@@ -50,9 +46,7 @@ void main() {
     testWidgets('displays timestamps in correct format', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: IssueTimeline(history: testHistory),
-          ),
+          home: Scaffold(body: IssueTimeline(history: testHistory)),
         ),
       );
 
@@ -64,9 +58,7 @@ void main() {
     testWidgets('displays notes when provided', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: IssueTimeline(history: testHistory),
-          ),
+          home: Scaffold(body: IssueTimeline(history: testHistory)),
         ),
       );
 
@@ -84,9 +76,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: IssueTimeline(history: historyWithChanger),
-          ),
+          home: Scaffold(body: IssueTimeline(history: historyWithChanger)),
         ),
       );
 
@@ -96,18 +86,18 @@ void main() {
     testWidgets('renders colored dot for each state', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: IssueTimeline(history: testHistory),
-          ),
+          home: Scaffold(body: IssueTimeline(history: testHistory)),
         ),
       );
 
       // Should have 2 circular containers (timeline dots)
       final containers = tester
           .widgetList<Container>(find.byType(Container))
-          .where((c) =>
-              c.decoration is BoxDecoration &&
-              (c.decoration as BoxDecoration).shape == BoxShape.circle)
+          .where(
+            (c) =>
+                c.decoration is BoxDecoration &&
+                (c.decoration as BoxDecoration).shape == BoxShape.circle,
+          )
           .toList();
 
       expect(containers.length, greaterThanOrEqualTo(2));
@@ -123,19 +113,19 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: IssueTimeline(history: singleEntryHistory),
-          ),
+          home: Scaffold(body: IssueTimeline(history: singleEntryHistory)),
         ),
       );
 
       // Find the circular container (timeline dot)
       final containers = tester
           .widgetList<Container>(find.byType(Container))
-          .where((c) =>
-              c.decoration is BoxDecoration &&
-              (c.decoration as BoxDecoration).shape == BoxShape.circle &&
-              c.constraints?.maxWidth == 12)
+          .where(
+            (c) =>
+                c.decoration is BoxDecoration &&
+                (c.decoration as BoxDecoration).shape == BoxShape.circle &&
+                c.constraints?.maxWidth == 12,
+          )
           .toList();
 
       expect(containers.isNotEmpty, isTrue);
@@ -147,9 +137,7 @@ void main() {
     testWidgets('renders connecting line between entries', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: IssueTimeline(history: testHistory),
-          ),
+          home: Scaffold(body: IssueTimeline(history: testHistory)),
         ),
       );
 
@@ -174,14 +162,14 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: IssueTimeline(history: singleEntry),
-          ),
+          home: Scaffold(body: IssueTimeline(history: singleEntry)),
         ),
       );
 
       // With only one entry, there should be no connecting line
-      final expandedWidgets = tester.widgetList<Expanded>(find.byType(Expanded));
+      final expandedWidgets = tester.widgetList<Expanded>(
+        find.byType(Expanded),
+      );
       // The Expanded for the line should not exist for single entry
       expect(expandedWidgets.length, equals(1)); // Only content Expanded
     });

@@ -10,10 +10,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: IssueLocationMap(
-              latitude: -26.2041,
-              longitude: 28.0473,
-            ),
+            body: IssueLocationMap(latitude: -26.2041, longitude: 28.0473),
           ),
         ),
       );
@@ -25,10 +22,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: IssueLocationMap(
-              latitude: -26.2041,
-              longitude: 28.0473,
-            ),
+            body: IssueLocationMap(latitude: -26.2041, longitude: 28.0473),
           ),
         ),
       );
@@ -79,10 +73,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: IssueLocationMap(
-              latitude: -26.2041,
-              longitude: 28.0473,
-            ),
+            body: IssueLocationMap(latitude: -26.2041, longitude: 28.0473),
           ),
         ),
       );
@@ -94,10 +85,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: IssueLocationMap(
-              latitude: -26.2041,
-              longitude: 28.0473,
-            ),
+            body: IssueLocationMap(latitude: -26.2041, longitude: 28.0473),
           ),
         ),
       );
@@ -110,10 +98,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: IssueLocationMap(
-              latitude: -26.2041,
-              longitude: 28.0473,
-            ),
+            body: IssueLocationMap(latitude: -26.2041, longitude: 28.0473),
           ),
         ),
       );

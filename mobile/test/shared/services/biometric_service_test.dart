@@ -255,7 +255,9 @@ void main() {
             authMessages: any(named: 'authMessages'),
             biometricOnly: any(named: 'biometricOnly'),
             sensitiveTransaction: any(named: 'sensitiveTransaction'),
-            persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+            persistAcrossBackgrounding: any(
+              named: 'persistAcrossBackgrounding',
+            ),
           ),
         ).thenThrow(Exception('Auth error'));
 
@@ -283,7 +285,9 @@ void main() {
             authMessages: any(named: 'authMessages'),
             biometricOnly: any(named: 'biometricOnly'),
             sensitiveTransaction: any(named: 'sensitiveTransaction'),
-            persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+            persistAcrossBackgrounding: any(
+              named: 'persistAcrossBackgrounding',
+            ),
           ),
         ).thenAnswer((_) async => true);
 
@@ -308,12 +312,16 @@ void main() {
             authMessages: any(named: 'authMessages'),
             biometricOnly: any(named: 'biometricOnly'),
             sensitiveTransaction: any(named: 'sensitiveTransaction'),
-            persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+            persistAcrossBackgrounding: any(
+              named: 'persistAcrossBackgrounding',
+            ),
           ),
-        ).thenThrow(const LocalAuthException(
-          code: LocalAuthExceptionCode.authInProgress,
-          description: 'Authentication already in progress',
-        ));
+        ).thenThrow(
+          const LocalAuthException(
+            code: LocalAuthExceptionCode.authInProgress,
+            description: 'Authentication already in progress',
+          ),
+        );
 
         // Act
         final result = await service.authenticate(
@@ -339,12 +347,16 @@ void main() {
             authMessages: any(named: 'authMessages'),
             biometricOnly: any(named: 'biometricOnly'),
             sensitiveTransaction: any(named: 'sensitiveTransaction'),
-            persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+            persistAcrossBackgrounding: any(
+              named: 'persistAcrossBackgrounding',
+            ),
           ),
-        ).thenThrow(const LocalAuthException(
-          code: LocalAuthExceptionCode.userCanceled,
-          description: 'User canceled',
-        ));
+        ).thenThrow(
+          const LocalAuthException(
+            code: LocalAuthExceptionCode.userCanceled,
+            description: 'User canceled',
+          ),
+        );
 
         // Act
         final result = await service.authenticate(
@@ -355,80 +367,97 @@ void main() {
         expect(result.isFailed, isTrue);
       });
 
-      test('should handle noBiometricsEnrolled exception as notAvailable',
-          () async {
-        // Arrange
-        when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-        when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-        when(
-          () => mockAuth.getAvailableBiometrics(),
-        ).thenAnswer((_) async => [BiometricType.fingerprint]);
-        when(() => mockAuth.stopAuthentication()).thenAnswer((_) async => true);
-        when(
-          () => mockAuth.authenticate(
-            localizedReason: any(named: 'localizedReason'),
-            authMessages: any(named: 'authMessages'),
-            biometricOnly: any(named: 'biometricOnly'),
-            sensitiveTransaction: any(named: 'sensitiveTransaction'),
-            persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
-          ),
-        ).thenThrow(const LocalAuthException(
-          code: LocalAuthExceptionCode.noBiometricsEnrolled,
-          description: 'No biometrics enrolled',
-        ));
+      test(
+        'should handle noBiometricsEnrolled exception as notAvailable',
+        () async {
+          // Arrange
+          when(
+            () => mockAuth.isDeviceSupported(),
+          ).thenAnswer((_) async => true);
+          when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
+          when(
+            () => mockAuth.getAvailableBiometrics(),
+          ).thenAnswer((_) async => [BiometricType.fingerprint]);
+          when(
+            () => mockAuth.stopAuthentication(),
+          ).thenAnswer((_) async => true);
+          when(
+            () => mockAuth.authenticate(
+              localizedReason: any(named: 'localizedReason'),
+              authMessages: any(named: 'authMessages'),
+              biometricOnly: any(named: 'biometricOnly'),
+              sensitiveTransaction: any(named: 'sensitiveTransaction'),
+              persistAcrossBackgrounding: any(
+                named: 'persistAcrossBackgrounding',
+              ),
+            ),
+          ).thenThrow(
+            const LocalAuthException(
+              code: LocalAuthExceptionCode.noBiometricsEnrolled,
+              description: 'No biometrics enrolled',
+            ),
+          );
 
-        // Act
-        final result = await service.authenticate(
-          localizedReason: 'Test reason',
-        );
+          // Act
+          final result = await service.authenticate(
+            localizedReason: 'Test reason',
+          );
 
-        // Assert
-        expect(result.isNotAvailable, isTrue);
-      });
+          // Assert
+          expect(result.isNotAvailable, isTrue);
+        },
+      );
 
       test(
-          'concurrent auth calls should return same future instead of throwing',
-          () async {
-        // Arrange
-        final completer = Completer<bool>();
-        var authCallCount = 0;
+        'concurrent auth calls should return same future instead of throwing',
+        () async {
+          // Arrange
+          final completer = Completer<bool>();
+          var authCallCount = 0;
 
-        when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-        when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-        when(
-          () => mockAuth.getAvailableBiometrics(),
-        ).thenAnswer((_) async => [BiometricType.fingerprint]);
-        when(() => mockAuth.stopAuthentication()).thenAnswer((_) async => true);
-        when(
-          () => mockAuth.authenticate(
-            localizedReason: any(named: 'localizedReason'),
-            authMessages: any(named: 'authMessages'),
-            biometricOnly: any(named: 'biometricOnly'),
-            sensitiveTransaction: any(named: 'sensitiveTransaction'),
-            persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
-          ),
-        ).thenAnswer((_) {
-          authCallCount++;
-          return completer.future;
-        });
+          when(
+            () => mockAuth.isDeviceSupported(),
+          ).thenAnswer((_) async => true);
+          when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
+          when(
+            () => mockAuth.getAvailableBiometrics(),
+          ).thenAnswer((_) async => [BiometricType.fingerprint]);
+          when(
+            () => mockAuth.stopAuthentication(),
+          ).thenAnswer((_) async => true);
+          when(
+            () => mockAuth.authenticate(
+              localizedReason: any(named: 'localizedReason'),
+              authMessages: any(named: 'authMessages'),
+              biometricOnly: any(named: 'biometricOnly'),
+              sensitiveTransaction: any(named: 'sensitiveTransaction'),
+              persistAcrossBackgrounding: any(
+                named: 'persistAcrossBackgrounding',
+              ),
+            ),
+          ).thenAnswer((_) {
+            authCallCount++;
+            return completer.future;
+          });
 
-        // Act - Start two auth calls concurrently
-        final future1 = service.authenticate(localizedReason: 'Test 1');
-        final future2 = service.authenticate(localizedReason: 'Test 2');
+          // Act - Start two auth calls concurrently
+          final future1 = service.authenticate(localizedReason: 'Test 1');
+          final future2 = service.authenticate(localizedReason: 'Test 2');
 
-        // Complete the authentication
-        completer.complete(true);
+          // Complete the authentication
+          completer.complete(true);
 
-        final result1 = await future1;
-        final result2 = await future2;
+          final result1 = await future1;
+          final result2 = await future2;
 
-        // Assert - Both should succeed
-        expect(result1.isSuccess, isTrue);
-        expect(result2.isSuccess, isTrue);
+          // Assert - Both should succeed
+          expect(result1.isSuccess, isTrue);
+          expect(result2.isSuccess, isTrue);
 
-        // But authenticate should only be called once
-        expect(authCallCount, equals(1));
-      });
+          // But authenticate should only be called once
+          expect(authCallCount, equals(1));
+        },
+      );
     });
 
     group('stopAuthentication', () {

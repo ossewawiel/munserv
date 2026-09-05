@@ -278,7 +278,11 @@ class IssueCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              IssueTypeIcon(type: issue.type, size: IconSizes.lg, monochrome: true),
+              IssueTypeIcon(
+                type: issue.type,
+                size: IconSizes.lg,
+                monochrome: true,
+              ),
               const SizedBox(width: Spacing.sm),
               Expanded(
                 child: Text(
