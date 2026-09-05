@@ -3,7 +3,7 @@ issue: 45
 story: W30
 title: "Pod Chief views and revokes support grants"
 platform: web
-status: completed
+status: done
 depends_on: [43]        # W28 creates features/support-access (types, api, hooks, section)
 touches:
   - web/src/features/support-access
