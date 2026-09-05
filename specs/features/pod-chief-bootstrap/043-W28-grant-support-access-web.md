@@ -10,6 +10,10 @@ touches:
   - web/src/features/pod-settings
   - web/src/locales
   - web/src/App.tsx
+ui: true
+design_canvas: ""
+design_artboards: []
+design_approved: false
 created_by: feature-planner
 created_at: "2026-09-05"
 files_changed: []

@@ -8,6 +8,10 @@ depends_on: [43]        # W28 creates features/support-access (types, api, hooks
 touches:
   - web/src/features/support-access
   - web/src/locales
+ui: true
+design_canvas: ""
+design_artboards: []
+design_approved: false
 created_by: feature-planner
 created_at: "2026-09-05"
 files_changed: []
