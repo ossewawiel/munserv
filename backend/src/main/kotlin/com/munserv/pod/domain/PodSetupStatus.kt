@@ -28,10 +28,11 @@ sealed class PodSetupStatus {
      * Get the list of missing steps, or empty list if complete.
      */
     val missingStepsList: List<SetupStep>
-        get() = when (this) {
-            is Incomplete -> missingSteps
-            is Complete -> emptyList()
-        }
+        get() =
+            when (this) {
+                is Incomplete -> missingSteps
+                is Complete -> emptyList()
+            }
 
     companion object {
         /**

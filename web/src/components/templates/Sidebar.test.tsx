@@ -1,22 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { MemoryRouter, useLocation } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import i18n from 'i18next';
 
 import { Sidebar } from './Sidebar';
-
-// Track location changes for testing navigation
-let _testLocation: { pathname: string } = { pathname: '/' };
-function LocationTracker() {
-  const location = useLocation();
-  _testLocation = location;
-  return null;
-}
-// Use the location tracker variable to silence TS
-void _testLocation;
 
 // Mock useAuth
 const mockAdmin = { role: 'pod_chief' as const, displayName: 'Test User' };
@@ -54,6 +44,8 @@ vi.mock('@/features/messages/hooks', () => ({
 
 // Mock admin types
 vi.mock('@/shared/types/admin', () => ({
+  SUPER_USER_ROLE: 'SUPER_USER',
+  isAdminRole: (role: string) => role !== 'SUPER_USER',
   hasPermission: (role: string, required: string) => {
     const hierarchy = ['sector_admin', 'sector_chief', 'ward_admin', 'ward_chief', 'pod_admin', 'pod_chief'];
     return hierarchy.indexOf(role) >= hierarchy.indexOf(required);
@@ -100,7 +92,6 @@ function renderSidebar({ initialPath = '/' }: RenderOptions = {}) {
       <ThemeProvider theme={theme}>
         <I18nextProvider i18n={i18n}>
           <MemoryRouter initialEntries={[initialPath]}>
-            <LocationTracker />
             <Sidebar open={true} onClose={vi.fn()} variant="permanent" />
           </MemoryRouter>
         </I18nextProvider>
@@ -110,10 +101,6 @@ function renderSidebar({ initialPath = '/' }: RenderOptions = {}) {
 }
 
 describe('Sidebar', () => {
-  beforeEach(() => {
-    _testLocation = { pathname: '/' };
-  });
-
   describe('submenu behavior', () => {
     it('should expand submenu when clicking on parent item', () => {
       renderSidebar();

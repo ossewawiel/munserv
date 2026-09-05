@@ -51,17 +51,18 @@ class PodDashboardServiceTest {
 
         @Test
         fun `should return Success with aggregated statistics`() {
-            val statsRow = PodStatsRow(
-                totalIssues = 150,
-                openIssues = 45,
-                resolvedThisMonth = 23,
-                pendingIssues = 12,
-                activeAdministrators = 5,
-                totalMembers = 1250,
-                activeGroundAdmins = 8,
-                wardCount = 4,
-                sectorCount = 16,
-            )
+            val statsRow =
+                PodStatsRow(
+                    totalIssues = 150,
+                    openIssues = 45,
+                    resolvedThisMonth = 23,
+                    pendingIssues = 12,
+                    activeAdministrators = 5,
+                    totalMembers = 1250,
+                    activeGroundAdmins = 8,
+                    wardCount = 4,
+                    sectorCount = 16,
+                )
 
             every { podRepository.existsById(testPodId) } returns true
             every { dashboardRepository.getPodStats(testPodId) } returns statsRow
@@ -84,17 +85,18 @@ class PodDashboardServiceTest {
 
         @Test
         fun `should return zero counts when pod has no data`() {
-            val emptyStatsRow = PodStatsRow(
-                totalIssues = 0,
-                openIssues = 0,
-                resolvedThisMonth = 0,
-                pendingIssues = 0,
-                activeAdministrators = 0,
-                totalMembers = 0,
-                activeGroundAdmins = 0,
-                wardCount = 0,
-                sectorCount = 0,
-            )
+            val emptyStatsRow =
+                PodStatsRow(
+                    totalIssues = 0,
+                    openIssues = 0,
+                    resolvedThisMonth = 0,
+                    pendingIssues = 0,
+                    activeAdministrators = 0,
+                    totalMembers = 0,
+                    activeGroundAdmins = 0,
+                    wardCount = 0,
+                    sectorCount = 0,
+                )
 
             every { podRepository.existsById(testPodId) } returns true
             every { dashboardRepository.getPodStats(testPodId) } returns emptyStatsRow
@@ -121,13 +123,14 @@ class PodDashboardServiceTest {
 
         @Test
         fun `should return Success with ward statistics`() {
-            val statsRow = WardStatsRow(
-                totalIssues = 45,
-                openIssues = 15,
-                resolvedThisMonth = 8,
-                sectorCount = 4,
-                activeGroundAdmins = 3,
-            )
+            val statsRow =
+                WardStatsRow(
+                    totalIssues = 45,
+                    openIssues = 15,
+                    resolvedThisMonth = 8,
+                    sectorCount = 4,
+                    activeGroundAdmins = 3,
+                )
 
             every { dashboardRepository.getWardName(testWardId) } returns "Ward 42"
             every { dashboardRepository.getWardStats(testWardId) } returns statsRow
@@ -169,13 +172,14 @@ class PodDashboardServiceTest {
 
         @Test
         fun `should return Success with sector statistics`() {
-            val statsRow = SectorStatsRow(
-                totalIssues = 25,
-                openIssues = 8,
-                resolvedThisMonth = 5,
-                activeGroundAdmins = 2,
-                totalMembers = 320,
-            )
+            val statsRow =
+                SectorStatsRow(
+                    totalIssues = 25,
+                    openIssues = 8,
+                    resolvedThisMonth = 5,
+                    activeGroundAdmins = 2,
+                    totalMembers = 320,
+                )
 
             every { dashboardRepository.getSectorName(testSectorId) } returns "Sector A"
             every { dashboardRepository.getSectorStats(testSectorId) } returns statsRow

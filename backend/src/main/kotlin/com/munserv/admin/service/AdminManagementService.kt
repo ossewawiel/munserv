@@ -2,7 +2,6 @@ package com.munserv.admin.service
 
 import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminLevel
-import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.domain.CreateAdminCommand
 import com.munserv.admin.domain.OnboardingStatus
 import com.munserv.admin.domain.UpdateAdminCommand

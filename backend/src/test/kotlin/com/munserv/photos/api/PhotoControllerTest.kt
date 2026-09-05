@@ -1,5 +1,6 @@
 package com.munserv.photos.api
 
+import com.munserv.TestContainersConfig
 import com.munserv.auth.service.JwtService
 import com.munserv.issues.domain.IssueId
 import com.munserv.photos.domain.IssuePhoto
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.context.ActiveProfiles
@@ -28,6 +30,7 @@ import java.time.Instant
 import java.util.UUID
 
 @SpringBootTest
+@Import(TestContainersConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class PhotoControllerTest {

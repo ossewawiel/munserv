@@ -1,5 +1,6 @@
 package com.munserv.members.api
 
+import com.munserv.TestContainersConfig
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
 import com.munserv.auth.service.JwtService
@@ -15,12 +16,14 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import java.time.Instant
 
 @SpringBootTest
+@Import(TestContainersConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class MemberControllerTest {

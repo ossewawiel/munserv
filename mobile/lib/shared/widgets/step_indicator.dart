@@ -66,17 +66,11 @@ class StepIndicator extends StatelessWidget {
           height: 32,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isActive
-                ? colors.primary
-                : colors.surfaceContainerHighest,
+            color: isActive ? colors.primary : colors.surfaceContainerHighest,
           ),
           child: Center(
             child: isCompleted
-                ? Icon(
-                    Icons.check,
-                    size: IconSizes.sm,
-                    color: colors.onPrimary,
-                  )
+                ? Icon(Icons.check, size: IconSizes.sm, color: colors.onPrimary)
                 : Text(
                     '${stepIndex + 1}',
                     style: textTheme.labelMedium?.copyWith(

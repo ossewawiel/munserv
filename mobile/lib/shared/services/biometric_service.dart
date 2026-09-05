@@ -83,15 +83,17 @@ class BiometricService {
         persistAcrossBackgrounding: true,
       );
 
-      final result =
-          didAuthenticate ? BiometricResult.success() : BiometricResult.failed();
+      final result = didAuthenticate
+          ? BiometricResult.success()
+          : BiometricResult.failed();
       _authCompleter!.complete(result);
       return result;
     } on LocalAuthException catch (e) {
       // Handle specific LocalAuth exceptions
       final result = switch (e.code) {
-        LocalAuthExceptionCode.authInProgress =>
-          BiometricResult.error('Authentication already in progress'),
+        LocalAuthExceptionCode.authInProgress => BiometricResult.error(
+          'Authentication already in progress',
+        ),
         LocalAuthExceptionCode.noBiometricsEnrolled ||
         LocalAuthExceptionCode.noBiometricHardware ||
         LocalAuthExceptionCode.noCredentialsSet ||

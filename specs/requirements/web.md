@@ -51,4 +51,4 @@
 - 🔴 Pending
 
 ## Stack
-React 19 + TypeScript 5.9 + Vite 7 + Tailwind CSS 4 + React Query
+React 19 + TypeScript 5.9 + Vite 7 + MUI v7 + React Query

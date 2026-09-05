@@ -37,6 +37,9 @@ backend/bin/
 backend/out/
 backend/*.log
 backend/uploads/
+# ...except the seed photos referenced by migration V009 (dev fixtures, not user uploads)
+!backend/uploads/*-[0-9].jpg
+!backend/uploads/*-[0-9]-thumb.jpg
 
 # IDE
 .idea/

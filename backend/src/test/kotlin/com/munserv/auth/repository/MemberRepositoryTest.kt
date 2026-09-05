@@ -1,5 +1,6 @@
 package com.munserv.auth.repository
 
+import com.munserv.TestContainersConfig
 import com.munserv.auth.domain.Email
 import com.munserv.auth.domain.Member
 import com.munserv.auth.domain.MemberStatus
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -23,6 +25,7 @@ import java.time.Instant
  * Tests the new methods required for web registration with email authentication.
  */
 @SpringBootTest
+@Import(TestContainersConfig::class)
 @ActiveProfiles("test")
 @Transactional
 class MemberRepositoryTest {

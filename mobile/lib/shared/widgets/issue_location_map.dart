@@ -54,7 +54,9 @@ class IssueLocationMap extends StatelessWidget {
               border: Border.all(color: colors.outlineVariant),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(Radii.md - 1), // Slightly smaller to fit inside border
+              borderRadius: BorderRadius.circular(
+                Radii.md - 1,
+              ), // Slightly smaller to fit inside border
               child: Stack(
                 children: [
                   FlutterMap(
@@ -113,9 +115,8 @@ class IssueLocationMap extends StatelessWidget {
                             const SizedBox(width: Spacing.sm),
                             Text(
                               'Tap to expand',
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    color: colors.primary,
-                                  ),
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(color: colors.primary),
                             ),
                           ],
                         ),

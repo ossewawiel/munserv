@@ -18,12 +18,13 @@ data class PodSettings(
         /**
          * Create PodSettings from a Pod domain entity.
          */
-        fun fromPod(pod: Pod): PodSettings = PodSettings(
-            podId = pod.id,
-            name = pod.name,
-            displayName = pod.displayName,
-            logoUrl = pod.logoUrl,
-            updatedAt = pod.updatedAt,
-        )
+        fun fromPod(pod: Pod): PodSettings =
+            PodSettings(
+                podId = pod.id,
+                name = pod.name,
+                displayName = pod.displayName,
+                logoUrl = pod.logoUrl,
+                updatedAt = pod.updatedAt,
+            )
     }
 }

@@ -78,7 +78,10 @@ void main() {
 
       expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
       expect(find.text('No Issues'), findsOneWidget);
-      expect(find.textContaining('No issues have been reported'), findsOneWidget);
+      expect(
+        find.textContaining('No issues have been reported'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('displays refresh button when onRefresh provided', (

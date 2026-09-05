@@ -1,5 +1,6 @@
 package com.munserv.pod.api
 
+import com.munserv.TestContainersConfig
 import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.repository.AdminRepository
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
@@ -32,6 +34,7 @@ import java.time.Instant
 import java.util.UUID
 
 @SpringBootTest
+@Import(TestContainersConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class PodDashboardControllerTest {
@@ -60,24 +63,26 @@ class PodDashboardControllerTest {
     @BeforeEach
     fun setup() {
         // Generate a JWT token for the pod chief
-        podChiefToken = jwtService.generateAccessToken(
-            MemberId(testAdminId.value),
-            "admin",
-        )
+        podChiefToken =
+            jwtService.generateAccessToken(
+                MemberId(testAdminId.value),
+                "admin",
+            )
 
         // Mock the pod ID resolver to return the test pod ID
         every { podIdResolver.resolvePodId(testAdminId) } returns testPodId
 
         // Mock the admin repository to return a pod chief (for role authorization)
-        val podChief = Admin(
-            id = testAdminId,
-            podId = testPodId,
-            email = "chief@example.com",
-            displayName = "Test Pod Chief",
-            role = AdminRole.POD_CHIEF,
-            createdAt = fixedInstant,
-            updatedAt = fixedInstant,
-        )
+        val podChief =
+            Admin(
+                id = testAdminId,
+                podId = testPodId,
+                email = "chief@example.com",
+                displayName = "Test Pod Chief",
+                role = AdminRole.POD_CHIEF,
+                createdAt = fixedInstant,
+                updatedAt = fixedInstant,
+            )
         every { adminRepository.findById(testAdminId) } returns podChief
     }
 
@@ -85,17 +90,18 @@ class PodDashboardControllerTest {
     inner class GetPodDashboard {
         @Test
         fun `should return 200 with dashboard statistics`() {
-            val stats = PodDashboardStats(
-                totalIssues = 150,
-                openIssues = 45,
-                resolvedThisMonth = 23,
-                pendingIssues = 12,
-                activeAdministrators = 5,
-                totalMembers = 1250,
-                activeGroundAdmins = 8,
-                wardCount = 4,
-                sectorCount = 16,
-            )
+            val stats =
+                PodDashboardStats(
+                    totalIssues = 150,
+                    openIssues = 45,
+                    resolvedThisMonth = 23,
+                    pendingIssues = 12,
+                    activeAdministrators = 5,
+                    totalMembers = 1250,
+                    activeGroundAdmins = 8,
+                    wardCount = 4,
+                    sectorCount = 16,
+                )
             every { dashboardService.getPodStats(testPodId) } returns PodResult.Success(stats)
 
             mockMvc.get("/api/v1/pod/dashboard") {
@@ -120,17 +126,18 @@ class PodDashboardControllerTest {
 
         @Test
         fun `should return 200 with zero counts for empty pod`() {
-            val stats = PodDashboardStats(
-                totalIssues = 0,
-                openIssues = 0,
-                resolvedThisMonth = 0,
-                pendingIssues = 0,
-                activeAdministrators = 0,
-                totalMembers = 0,
-                activeGroundAdmins = 0,
-                wardCount = 0,
-                sectorCount = 0,
-            )
+            val stats =
+                PodDashboardStats(
+                    totalIssues = 0,
+                    openIssues = 0,
+                    resolvedThisMonth = 0,
+                    pendingIssues = 0,
+                    activeAdministrators = 0,
+                    totalMembers = 0,
+                    activeGroundAdmins = 0,
+                    wardCount = 0,
+                    sectorCount = 0,
+                )
             every { dashboardService.getPodStats(testPodId) } returns PodResult.Success(stats)
 
             mockMvc.get("/api/v1/pod/dashboard") {
@@ -154,22 +161,22 @@ class PodDashboardControllerTest {
                 status { isNotFound() }
             }
         }
-
     }
 
     @Nested
     inner class GetWardDashboard {
         @Test
         fun `should return 200 with ward statistics`() {
-            val stats = WardDashboardStats(
-                wardId = testWardId,
-                wardName = "Ward 42",
-                totalIssues = 45,
-                openIssues = 15,
-                resolvedThisMonth = 8,
-                sectorCount = 4,
-                activeGroundAdmins = 3,
-            )
+            val stats =
+                WardDashboardStats(
+                    wardId = testWardId,
+                    wardName = "Ward 42",
+                    totalIssues = 45,
+                    openIssues = 15,
+                    resolvedThisMonth = 8,
+                    sectorCount = 4,
+                    activeGroundAdmins = 3,
+                )
             every { dashboardService.getWardStats(testWardId) } returns DashboardResult.Success(stats)
 
             mockMvc.get("/api/v1/pod/dashboard/wards/${testWardId.value}") {
@@ -217,15 +224,16 @@ class PodDashboardControllerTest {
     inner class GetSectorDashboard {
         @Test
         fun `should return 200 with sector statistics`() {
-            val stats = SectorDashboardStats(
-                sectorId = testSectorId,
-                sectorName = "Sector A",
-                totalIssues = 25,
-                openIssues = 8,
-                resolvedThisMonth = 5,
-                activeGroundAdmins = 2,
-                totalMembers = 320,
-            )
+            val stats =
+                SectorDashboardStats(
+                    sectorId = testSectorId,
+                    sectorName = "Sector A",
+                    totalIssues = 25,
+                    openIssues = 8,
+                    resolvedThisMonth = 5,
+                    activeGroundAdmins = 2,
+                    totalMembers = 320,
+                )
             every { dashboardService.getSectorStats(testSectorId) } returns DashboardResult.Success(stats)
 
             mockMvc.get("/api/v1/pod/dashboard/sectors/${testSectorId.value}") {

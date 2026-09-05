@@ -100,7 +100,6 @@ src/main/kotlin/com/munserv/
 | `/contract-test` | Generate API contract test |
 | `/integration-test` | Generate integration test |
 | `/review` | Code review for patterns |
-| `/sonar` | SonarQube analysis |
 | `/ci-fix` | Debug CI/CD failures |
 
 ### TDD Workflow

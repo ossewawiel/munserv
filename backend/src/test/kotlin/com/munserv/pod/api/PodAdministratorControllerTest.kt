@@ -1,6 +1,7 @@
 package com.munserv.pod.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.munserv.TestContainersConfig
 import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.repository.AdminRepository
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
@@ -30,6 +32,7 @@ import java.time.Instant
 import java.util.UUID
 
 @SpringBootTest
+@Import(TestContainersConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class PodAdministratorControllerTest {

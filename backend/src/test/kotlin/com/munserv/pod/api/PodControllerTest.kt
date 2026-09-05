@@ -1,11 +1,12 @@
 package com.munserv.pod.api
 
+import com.munserv.TestContainersConfig
 import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.repository.AdminRepository
 import com.munserv.auth.service.JwtService
-import com.munserv.pod.domain.PodSetupStatus
 import com.munserv.pod.domain.PodSettings
+import com.munserv.pod.domain.PodSetupStatus
 import com.munserv.pod.domain.SetupStep
 import com.munserv.pod.service.PodResult
 import com.munserv.pod.service.PodService
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
@@ -32,6 +34,7 @@ import java.time.Instant
 import java.util.UUID
 
 @SpringBootTest
+@Import(TestContainersConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class PodControllerTest {
@@ -58,24 +61,26 @@ class PodControllerTest {
     @BeforeEach
     fun setup() {
         // Generate a JWT token for the pod chief
-        podChiefToken = jwtService.generateAccessToken(
-            MemberId(testAdminId.value),
-            "admin",
-        )
+        podChiefToken =
+            jwtService.generateAccessToken(
+                MemberId(testAdminId.value),
+                "admin",
+            )
 
         // Mock the pod ID resolver to return the test pod ID
         every { podIdResolver.resolvePodId(testAdminId) } returns testPodId
 
         // Mock the admin repository to return a pod chief (for role authorization)
-        val podChief = Admin(
-            id = testAdminId,
-            podId = testPodId,
-            email = "chief@example.com",
-            displayName = "Test Pod Chief",
-            role = AdminRole.POD_CHIEF,
-            createdAt = fixedInstant,
-            updatedAt = fixedInstant,
-        )
+        val podChief =
+            Admin(
+                id = testAdminId,
+                podId = testPodId,
+                email = "chief@example.com",
+                displayName = "Test Pod Chief",
+                role = AdminRole.POD_CHIEF,
+                createdAt = fixedInstant,
+                updatedAt = fixedInstant,
+            )
         every { adminRepository.findById(testAdminId) } returns podChief
     }
 
@@ -145,7 +150,6 @@ class PodControllerTest {
                 status { isNotFound() }
             }
         }
-
     }
 
     @Nested
@@ -200,10 +204,11 @@ class PodControllerTest {
     inner class UpdateSettings {
         @Test
         fun `should return 200 with updated settings`() {
-            val updatedSettings = createTestSettings(
-                name = "NewPodName",
-                displayName = "Munserv Pod NewPodName",
-            )
+            val updatedSettings =
+                createTestSettings(
+                    name = "NewPodName",
+                    displayName = "Munserv Pod NewPodName",
+                )
             val commandSlot = slot<UpdatePodSettingsCommand>()
 
             every {
@@ -213,11 +218,12 @@ class PodControllerTest {
             mockMvc.patch("/api/v1/pod/settings") {
                 header("Authorization", "Bearer $podChiefToken")
                 contentType = MediaType.APPLICATION_JSON
-                content = """
+                content =
+                    """
                     {
                         "name": "NewPodName"
                     }
-                """.trimIndent()
+                    """.trimIndent()
             }.andExpect {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
@@ -231,9 +237,10 @@ class PodControllerTest {
 
         @Test
         fun `should return 200 when updating logo`() {
-            val updatedSettings = createTestSettings(
-                logoUrl = "https://example.com/new-logo.png",
-            )
+            val updatedSettings =
+                createTestSettings(
+                    logoUrl = "https://example.com/new-logo.png",
+                )
 
             every {
                 podService.updateSettings(testPodId, any())
@@ -242,11 +249,12 @@ class PodControllerTest {
             mockMvc.patch("/api/v1/pod/settings") {
                 header("Authorization", "Bearer $podChiefToken")
                 contentType = MediaType.APPLICATION_JSON
-                content = """
+                content =
+                    """
                     {
                         "logoUrl": "https://example.com/new-logo.png"
                     }
-                """.trimIndent()
+                    """.trimIndent()
             }.andExpect {
                 status { isOk() }
                 jsonPath("$.logoUrl") { value("https://example.com/new-logo.png") }
@@ -263,11 +271,12 @@ class PodControllerTest {
             mockMvc.patch("/api/v1/pod/settings") {
                 header("Authorization", "Bearer $podChiefToken")
                 contentType = MediaType.APPLICATION_JSON
-                content = """
+                content =
+                    """
                     {
                         "name": "AA"
                     }
-                """.trimIndent()
+                    """.trimIndent()
             }.andExpect {
                 status { isBadRequest() }
                 jsonPath("$.code") { value("validation_error") }
@@ -281,11 +290,12 @@ class PodControllerTest {
             mockMvc.patch("/api/v1/pod/settings") {
                 header("Authorization", "Bearer $podChiefToken")
                 contentType = MediaType.APPLICATION_JSON
-                content = """
+                content =
+                    """
                     {
                         "name": ""
                     }
-                """.trimIndent()
+                    """.trimIndent()
             }.andExpect {
                 status { isBadRequest() }
             }
@@ -300,11 +310,12 @@ class PodControllerTest {
             mockMvc.patch("/api/v1/pod/settings") {
                 header("Authorization", "Bearer $podChiefToken")
                 contentType = MediaType.APPLICATION_JSON
-                content = """
+                content =
+                    """
                     {
                         "name": "ValidName"
                     }
-                """.trimIndent()
+                    """.trimIndent()
             }.andExpect {
                 status { isNotFound() }
             }
@@ -312,11 +323,12 @@ class PodControllerTest {
 
         @Test
         fun `should accept partial update with both fields`() {
-            val updatedSettings = createTestSettings(
-                name = "UpdatedPod",
-                displayName = "Munserv Pod UpdatedPod",
-                logoUrl = "https://example.com/logo.png",
-            )
+            val updatedSettings =
+                createTestSettings(
+                    name = "UpdatedPod",
+                    displayName = "Munserv Pod UpdatedPod",
+                    logoUrl = "https://example.com/logo.png",
+                )
             val commandSlot = slot<UpdatePodSettingsCommand>()
 
             every {
@@ -326,12 +338,13 @@ class PodControllerTest {
             mockMvc.patch("/api/v1/pod/settings") {
                 header("Authorization", "Bearer $podChiefToken")
                 contentType = MediaType.APPLICATION_JSON
-                content = """
+                content =
+                    """
                     {
                         "name": "UpdatedPod",
                         "logoUrl": "https://example.com/logo.png"
                     }
-                """.trimIndent()
+                    """.trimIndent()
             }.andExpect {
                 status { isOk() }
                 jsonPath("$.name") { value("UpdatedPod") }

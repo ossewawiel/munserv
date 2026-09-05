@@ -1,7 +1,7 @@
 package com.munserv.pod.service
 
-import com.munserv.pod.domain.PodSetupStatus
 import com.munserv.pod.domain.PodSettings
+import com.munserv.pod.domain.PodSetupStatus
 import com.munserv.pod.domain.SetupStep
 import com.munserv.pod.repository.PodRepository
 import com.munserv.pod.repository.PodSetupStepRepository
@@ -42,8 +42,9 @@ class PodService(
      */
     @Transactional(readOnly = true)
     fun getSettings(podId: PodId): PodResult<PodSettings> {
-        val pod = podRepository.findById(podId)
-            ?: return PodResult.NotFound(podId)
+        val pod =
+            podRepository.findById(podId)
+                ?: return PodResult.NotFound(podId)
 
         return PodResult.Success(PodSettings.fromPod(pod))
     }
@@ -54,7 +55,10 @@ class PodService(
      * If the name is updated, the POD_NAME setup step is marked complete.
      */
     @Transactional
-    fun updateSettings(podId: PodId, command: UpdatePodSettingsCommand): PodResult<PodSettings> {
+    fun updateSettings(
+        podId: PodId,
+        command: UpdatePodSettingsCommand,
+    ): PodResult<PodSettings> {
         // Validate command first
         val errors = command.validate()
         if (errors.isNotEmpty()) {
@@ -62,8 +66,9 @@ class PodService(
         }
 
         // Check pod exists
-        val pod = podRepository.findById(podId)
-            ?: return PodResult.NotFound(podId)
+        val pod =
+            podRepository.findById(podId)
+                ?: return PodResult.NotFound(podId)
 
         // Apply updates if any
         if (!command.hasChanges) {
@@ -97,7 +102,10 @@ class PodService(
      * Mark a specific setup step as complete.
      */
     @Transactional
-    fun completeSetupStep(podId: PodId, step: SetupStep): PodResult<PodSetupStatus> {
+    fun completeSetupStep(
+        podId: PodId,
+        step: SetupStep,
+    ): PodResult<PodSetupStatus> {
         if (!podRepository.existsById(podId)) {
             return PodResult.NotFound(podId)
         }
@@ -112,7 +120,10 @@ class PodService(
     /**
      * Check if all setup steps are complete and mark the pod accordingly.
      */
-    private fun checkAndMarkSetupComplete(podId: PodId, now: Instant) {
+    private fun checkAndMarkSetupComplete(
+        podId: PodId,
+        now: Instant,
+    ) {
         if (setupStepRepository.isSetupComplete(podId)) {
             val pod = podRepository.findById(podId)
             if (pod != null && !pod.isSetupComplete) {

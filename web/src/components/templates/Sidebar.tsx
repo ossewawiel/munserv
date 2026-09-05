@@ -324,7 +324,7 @@ export const Sidebar: FC<SidebarProps> = ({ open, onClose, variant }) => {
     };
 
     return flattenItems(filterByRole(sectorNavItems));
-  }, [userRole, isPodLevel, podSetup]);
+  }, [checkPermission, isPodLevel, podSetup]);
 
   // Find which parent menu should be expanded based on current path
   const activeParentHref = useMemo(() => {

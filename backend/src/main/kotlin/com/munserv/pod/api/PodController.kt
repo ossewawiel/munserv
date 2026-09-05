@@ -57,10 +57,11 @@ class PodController(
     )
     @GetMapping("/status")
     fun getSetupStatus(): ResponseEntity<*> {
-        val podId = getCurrentPodId()
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                ErrorResponse("unauthorized", "Could not determine pod for current user"),
-            )
+        val podId =
+            getCurrentPodId()
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ErrorResponse("unauthorized", "Could not determine pod for current user"),
+                )
 
         return when (val result = podService.getSetupStatus(podId)) {
             is PodResult.Success ->
@@ -92,10 +93,11 @@ class PodController(
     )
     @GetMapping("/settings")
     fun getSettings(): ResponseEntity<*> {
-        val podId = getCurrentPodId()
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                ErrorResponse("unauthorized", "Could not determine pod for current user"),
-            )
+        val podId =
+            getCurrentPodId()
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ErrorResponse("unauthorized", "Could not determine pod for current user"),
+                )
 
         return when (val result = podService.getSettings(podId)) {
             is PodResult.Success ->
@@ -130,10 +132,11 @@ class PodController(
     fun updateSettings(
         @Valid @RequestBody request: UpdatePodSettingsRequest,
     ): ResponseEntity<*> {
-        val podId = getCurrentPodId()
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                ErrorResponse("unauthorized", "Could not determine pod for current user"),
-            )
+        val podId =
+            getCurrentPodId()
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ErrorResponse("unauthorized", "Could not determine pod for current user"),
+                )
 
         return when (val result = podService.updateSettings(podId, request.toCommand())) {
             is PodResult.Success ->
@@ -153,10 +156,12 @@ class PodController(
     }
 
     private fun getCurrentAdminId(): AdminId? {
-        val authentication = SecurityContextHolder.getContext().authentication
-            ?: return null
-        val subject = authentication.principal as? String
-            ?: return null
+        val authentication =
+            SecurityContextHolder.getContext().authentication
+                ?: return null
+        val subject =
+            authentication.principal as? String
+                ?: return null
         return try {
             AdminId(UUID.fromString(subject))
         } catch (e: IllegalArgumentException) {

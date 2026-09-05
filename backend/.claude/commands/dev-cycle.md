@@ -199,19 +199,13 @@ Pass all automated quality checks.
    ```
    All tests must pass.
 
-3. **Run SonarQube Analysis** (if available)
-   ```
-   Use sonar.md skill with scope=changed
-   ```
-
-4. **If Any Fail**
+3. **If Any Fail**
    - Use `ci-fix.md` skill to debug
    - Fix issues and re-run
 
 ### Exit Condition
 - [ ] `./gradlew ktlintCheck` passes
 - [ ] `./gradlew test` passes
-- [ ] SonarQube quality gate passes (if available)
 
 ---
 
@@ -306,7 +300,7 @@ Final verification before commit.
 └────────┬──────────┘
          ↓
 ┌───────────────────┐
-│  5. QUALITY GATE  │ → ktlint, tests, sonar
+│  5. QUALITY GATE  │ → ktlint, tests
 └────────┬──────────┘
          ↓
 ┌───────────────────┐
@@ -326,7 +320,7 @@ Final verification before commit.
 | TEST | test.md |
 | CODE | entity.md, service.md, repository.md, controller.md |
 | REFACTOR | review.md |
-| QUALITY | sonar.md, ci-fix.md |
+| QUALITY | ci-fix.md |
 | INTEGRATION | contract-test.md, integration-test.md |
 | PRE-COMMIT | ci-fix.md (if needed) |
 

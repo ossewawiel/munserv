@@ -1,7 +1,7 @@
 package com.munserv.pod.api
 
-import com.munserv.pod.domain.PodSetupStatus
 import com.munserv.pod.domain.PodSettings
+import com.munserv.pod.domain.PodSetupStatus
 import com.munserv.pod.service.UpdatePodSettingsCommand
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
@@ -17,10 +17,11 @@ data class PodSetupStatusResponse(
     val missingSteps: List<String>,
 ) {
     companion object {
-        fun from(status: PodSetupStatus): PodSetupStatusResponse = PodSetupStatusResponse(
-            isComplete = status.isComplete,
-            missingSteps = status.missingStepsList.map { it.toDbValue() },
-        )
+        fun from(status: PodSetupStatus): PodSetupStatusResponse =
+            PodSetupStatusResponse(
+                isComplete = status.isComplete,
+                missingSteps = status.missingStepsList.map { it.toDbValue() },
+            )
     }
 }
 
@@ -37,11 +38,12 @@ data class PodSettingsResponse(
     val logoUrl: String?,
 ) {
     companion object {
-        fun from(settings: PodSettings): PodSettingsResponse = PodSettingsResponse(
-            name = settings.name,
-            displayName = settings.displayName,
-            logoUrl = settings.logoUrl,
-        )
+        fun from(settings: PodSettings): PodSettingsResponse =
+            PodSettingsResponse(
+                name = settings.name,
+                displayName = settings.displayName,
+                logoUrl = settings.logoUrl,
+            )
     }
 }
 
@@ -60,8 +62,9 @@ data class UpdatePodSettingsRequest(
     /**
      * Convert to service command.
      */
-    fun toCommand(): UpdatePodSettingsCommand = UpdatePodSettingsCommand(
-        name = name,
-        logoUrl = logoUrl,
-    )
+    fun toCommand(): UpdatePodSettingsCommand =
+        UpdatePodSettingsCommand(
+            name = name,
+            logoUrl = logoUrl,
+        )
 }

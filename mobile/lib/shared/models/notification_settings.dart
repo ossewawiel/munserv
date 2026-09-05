@@ -16,10 +16,10 @@ abstract class NotificationSettings with _$NotificationSettings {
 
   /// Default notification settings for new users
   factory NotificationSettings.defaults() => const NotificationSettings(
-        pushEnabled: true,
-        verificationAlerts: true,
-        monthlyReports: true,
-      );
+    pushEnabled: true,
+    verificationAlerts: true,
+    monthlyReports: true,
+  );
 
   factory NotificationSettings.fromJson(Map<String, dynamic> json) =>
       _$NotificationSettingsFromJson(json);

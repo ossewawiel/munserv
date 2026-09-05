@@ -42,9 +42,7 @@ class EmptyState extends StatelessWidget {
   });
 
   /// No issues to display.
-  factory EmptyState.noIssues({
-    VoidCallback? onRefresh,
-  }) {
+  factory EmptyState.noIssues({VoidCallback? onRefresh}) {
     return EmptyState(
       icon: Icons.check_circle_outline,
       title: 'No Issues',
@@ -60,9 +58,7 @@ class EmptyState extends StatelessWidget {
   }
 
   /// User has no reports.
-  factory EmptyState.noReports({
-    VoidCallback? onReport,
-  }) {
+  factory EmptyState.noReports({VoidCallback? onReport}) {
     return EmptyState(
       icon: Icons.assignment_outlined,
       title: 'No Reports Yet',
@@ -79,10 +75,7 @@ class EmptyState extends StatelessWidget {
   }
 
   /// Search returned no results.
-  factory EmptyState.noResults({
-    String? query,
-    VoidCallback? onClear,
-  }) {
+  factory EmptyState.noResults({String? query, VoidCallback? onClear}) {
     return EmptyState(
       icon: Icons.search_off,
       title: 'No Results',
@@ -99,9 +92,7 @@ class EmptyState extends StatelessWidget {
   }
 
   /// Network or connection error.
-  factory EmptyState.networkError({
-    VoidCallback? onRetry,
-  }) {
+  factory EmptyState.networkError({VoidCallback? onRetry}) {
     return EmptyState(
       icon: Icons.cloud_off,
       title: 'Connection Error',
@@ -118,9 +109,7 @@ class EmptyState extends StatelessWidget {
   }
 
   /// Location permission or service error.
-  factory EmptyState.locationError({
-    VoidCallback? onRetry,
-  }) {
+  factory EmptyState.locationError({VoidCallback? onRetry}) {
     return EmptyState(
       icon: Icons.location_off,
       title: 'Location Unavailable',
@@ -147,10 +136,7 @@ class EmptyState extends StatelessWidget {
       title: title,
       subtitle: subtitle,
       action: onAction != null && actionLabel != null
-          ? FilledButton(
-              onPressed: onAction,
-              child: Text(actionLabel),
-            )
+          ? FilledButton(onPressed: onAction, child: Text(actionLabel))
           : null,
     );
   }
@@ -166,11 +152,7 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: IconSizes.display,
-              color: colors.onSurfaceVariant,
-            ),
+            Icon(icon, size: IconSizes.display, color: colors.onSurfaceVariant),
             SizedBox(height: Spacing.lg),
             Text(
               title,
@@ -189,10 +171,7 @@ class EmptyState extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ],
-            if (action != null) ...[
-              SizedBox(height: Spacing.lg),
-              action!,
-            ],
+            if (action != null) ...[SizedBox(height: Spacing.lg), action!],
           ],
         ),
       ),

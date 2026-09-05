@@ -17,12 +17,12 @@ enum VerificationReason {
   notAnIssue;
 
   String get displayName => switch (this) {
-        busy => 'I am busy right now',
-        away => 'I am away from the area',
-        cannotFind => 'Cannot find the issue',
-        wrongLocation => 'Location seems incorrect',
-        notAnIssue => 'This is not actually an issue',
-      };
+    busy => 'I am busy right now',
+    away => 'I am away from the area',
+    cannotFind => 'Cannot find the issue',
+    wrongLocation => 'Location seems incorrect',
+    notAnIssue => 'This is not actually an issue',
+  };
 }
 
 /// Verification result types
@@ -36,11 +36,11 @@ enum VerificationResult {
   cannotVerify;
 
   String get displayName => switch (this) {
-        confirmed => 'Confirmed',
-        notFound => 'Not Found',
-        notFixed => 'Not Fixed',
-        cannotVerify => 'Cannot Verify',
-      };
+    confirmed => 'Confirmed',
+    notFound => 'Not Found',
+    notFixed => 'Not Fixed',
+    cannotVerify => 'Cannot Verify',
+  };
 }
 
 /// Verification type
@@ -49,9 +49,9 @@ enum VerificationType {
   fix;
 
   String get displayName => switch (this) {
-        existence => 'Existence Verification',
-        fix => 'Fix Verification',
-      };
+    existence => 'Existence Verification',
+    fix => 'Fix Verification',
+  };
 }
 
 /// A pending verification request for a Ground Admin
@@ -127,7 +127,8 @@ abstract class IssueVerification with _$IssueVerification {
 
 /// List of pending verifications response
 @freezed
-abstract class PendingVerificationsResponse with _$PendingVerificationsResponse {
+abstract class PendingVerificationsResponse
+    with _$PendingVerificationsResponse {
   const factory PendingVerificationsResponse({
     required List<PendingVerification> items,
   }) = _PendingVerificationsResponse;

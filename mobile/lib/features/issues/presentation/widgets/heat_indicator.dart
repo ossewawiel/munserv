@@ -73,7 +73,9 @@ class HeatBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = muted ? HeatColors.fromHeatMuted(heat) : HeatColors.fromHeat(heat);
+    final color = muted
+        ? HeatColors.fromHeatMuted(heat)
+        : HeatColors.fromHeat(heat);
 
     // Use slightly lower alpha values for muted mode
     final bgAlpha = muted ? 0.08 : 0.1;

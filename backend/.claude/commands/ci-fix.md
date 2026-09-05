@@ -25,7 +25,6 @@ Debug and fix `{{error_type}}` failure(s) in the backend CI/CD pipeline.
 ./gradlew compileKotlin    # Compilation
 ./gradlew test             # Unit + integration tests
 ./gradlew build            # Full build (includes all above)
-./gradlew sonar            # SonarQube analysis
 ```
 
 ## Debugging by Error Type

@@ -45,7 +45,11 @@ class PodSetupStepEntity(
         /**
          * Create entity from domain values.
          */
-        fun create(podId: PodId, step: SetupStep, now: Instant): PodSetupStepEntity =
+        fun create(
+            podId: PodId,
+            step: SetupStep,
+            now: Instant,
+        ): PodSetupStepEntity =
             PodSetupStepEntity(
                 podId = podId.value,
                 step = step.toDbValue(),

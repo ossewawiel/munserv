@@ -744,7 +744,6 @@ Skills are located in `.claude/commands/`. Use `/skill-name` to invoke.
 | `/test` | Generate Vitest test |
 | `/e2e` | Generate Playwright E2E test |
 | `/review` | Code review for patterns |
-| `/sonar` | SonarQube analysis |
 | `/ci-fix` | Debug CI/CD failures |
 
 ### Workflow
@@ -761,7 +760,7 @@ When adding functionality, follow this workflow:
 2. TEST       → Write failing tests first (Red)
 3. CODE       → Implement to pass tests (Green)
 4. REFACTOR   → Clean up, fix review issues
-5. QUALITY    → Run lint, typecheck, tests, sonar
+5. QUALITY    → Run lint, typecheck, tests
 6. DOCUMENT   → Add i18n keys, JSDoc
 7. PRE-COMMIT → Full CI verification
 ```

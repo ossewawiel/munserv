@@ -8,9 +8,7 @@ void main() {
     testWidgets('renders nothing when photoUrls is empty', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PhotoThumbnailCarousel(photoUrls: []),
-          ),
+          home: Scaffold(body: PhotoThumbnailCarousel(photoUrls: [])),
         ),
       );
 
@@ -59,8 +57,9 @@ void main() {
       expect(find.byType(GestureDetector), findsNWidgets(3));
     });
 
-    testWidgets('calls onPhotoTap with correct index when tapped',
-        (tester) async {
+    testWidgets('calls onPhotoTap with correct index when tapped', (
+      tester,
+    ) async {
       int? tappedIndex;
 
       await tester.pumpWidget(
@@ -86,8 +85,9 @@ void main() {
       expect(tappedIndex, equals(1));
     });
 
-    testWidgets('uses default thumbnail height of ThumbnailSizes.xl',
-        (tester) async {
+    testWidgets('uses default thumbnail height of ThumbnailSizes.xl', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -118,8 +118,9 @@ void main() {
       expect(sizedBox.height, equals(100.0));
     });
 
-    testWidgets('renders square thumbnails with 1:1 aspect ratio',
-        (tester) async {
+    testWidgets('renders square thumbnails with 1:1 aspect ratio', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

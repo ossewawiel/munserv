@@ -11,10 +11,10 @@ enum GroundAdminStatus {
   inactive;
 
   String get displayName => switch (this) {
-        active => 'Active',
-        onHold => 'On Hold',
-        inactive => 'Inactive',
-      };
+    active => 'Active',
+    onHold => 'On Hold',
+    inactive => 'Inactive',
+  };
 
   /// Whether this status allows receiving verification requests
   bool get canReceiveRequests => this == GroundAdminStatus.active;

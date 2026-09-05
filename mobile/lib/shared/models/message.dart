@@ -29,18 +29,18 @@ enum MessageType {
   monthlyReport;
 
   String get displayName => switch (this) {
-        groundAdminInvitation => 'Ground Admin Invitation',
-        groundAdminApplication => 'Ground Admin Application',
-        groundAdminApproved => 'Application Approved',
-        groundAdminDeclined => 'Application Declined',
-        groundAdminInvitationDeclined => 'Invitation Declined',
-        groundAdminRevocation => 'Status Revoked',
-        groundAdminStepdownRequest => 'Step Down Request',
-        verifyNewIssue => 'Verify Issue',
-        verifyFix => 'Verify Fix',
-        memberRegistration => 'Member Registration',
-        monthlyReport => 'Monthly Report',
-      };
+    groundAdminInvitation => 'Ground Admin Invitation',
+    groundAdminApplication => 'Ground Admin Application',
+    groundAdminApproved => 'Application Approved',
+    groundAdminDeclined => 'Application Declined',
+    groundAdminInvitationDeclined => 'Invitation Declined',
+    groundAdminRevocation => 'Status Revoked',
+    groundAdminStepdownRequest => 'Step Down Request',
+    verifyNewIssue => 'Verify Issue',
+    verifyFix => 'Verify Fix',
+    memberRegistration => 'Member Registration',
+    monthlyReport => 'Monthly Report',
+  };
 }
 
 /// Message status
@@ -51,11 +51,11 @@ enum MessageStatus {
   dismissed;
 
   String get displayName => switch (this) {
-        unread => 'Unread',
-        read => 'Read',
-        actioned => 'Actioned',
-        dismissed => 'Dismissed',
-      };
+    unread => 'Unread',
+    read => 'Read',
+    actioned => 'Actioned',
+    dismissed => 'Dismissed',
+  };
 }
 
 /// A message in the user's inbox
@@ -104,7 +104,8 @@ abstract class Message with _$Message {
       type == MessageType.groundAdminRevocation ||
       type == MessageType.groundAdminStepdownRequest;
 
-  factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
+  factory Message.fromJson(Map<String, dynamic> json) =>
+      _$MessageFromJson(json);
 }
 
 /// Paginated response for messages
@@ -124,10 +125,8 @@ abstract class MessageListResponse with _$MessageListResponse {
 /// Request to perform an action on a message
 @freezed
 abstract class MessageActionRequest with _$MessageActionRequest {
-  const factory MessageActionRequest({
-    required String action,
-    String? note,
-  }) = _MessageActionRequest;
+  const factory MessageActionRequest({required String action, String? note}) =
+      _MessageActionRequest;
 
   factory MessageActionRequest.fromJson(Map<String, dynamic> json) =>
       _$MessageActionRequestFromJson(json);

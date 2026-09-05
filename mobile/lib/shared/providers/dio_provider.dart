@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -29,7 +31,7 @@ const bool _debugApi = true;
 @Riverpod(keepAlive: true)
 Dio dio(Ref ref) {
   if (_debugApi) {
-    print('🔧 API Base URL: $_baseUrl');
+    developer.log('🔧 API Base URL: $_baseUrl', name: 'api');
   }
 
   // Create secure storage directly to avoid circular dependency
@@ -70,29 +72,35 @@ Dio dio(Ref ref) {
         }
 
         if (_debugApi) {
-          print(
+          developer.log(
             '🌐 API REQUEST: ${options.method} ${options.baseUrl}${options.path}',
+            name: 'api',
           );
-          print('📦 Data: ${options.data}');
+          developer.log('📦 Data: ${options.data}', name: 'api');
         }
 
         handler.next(options);
       },
       onResponse: (response, handler) {
         if (_debugApi) {
-          print(
+          developer.log(
             '✅ API RESPONSE: ${response.statusCode} ${response.requestOptions.path}',
+            name: 'api',
           );
-          print('📦 Data: ${response.data}');
+          developer.log('📦 Data: ${response.data}', name: 'api');
         }
         handler.next(response);
       },
       onError: (error, handler) async {
         if (_debugApi) {
-          print(
+          developer.log(
             '❌ API ERROR: ${error.response?.statusCode} ${error.requestOptions.path}',
+            name: 'api',
           );
-          print('📦 Error: ${error.response?.data ?? error.message}');
+          developer.log(
+            '📦 Error: ${error.response?.data ?? error.message}',
+            name: 'api',
+          );
         }
 
         // Handle 401 errors - token expired

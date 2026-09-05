@@ -15,7 +15,7 @@ Read the backend-specific handoff document for an issue and implement the fix fo
 
 ## Prerequisites
 
-- Handoff document exists at `backend/docs/issues/{number}-*.md`
+- Handoff document exists (see Step 1 for location)
 - Central agent has completed investigation and created this handoff
 - You have read `backend/CLAUDE.md` for coding standards
 
@@ -23,8 +23,19 @@ Read the backend-specific handoff document for an issue and implement the fix fo
 
 ### Step 1: Locate and Parse Handoff Document
 
+**IMPORTANT:** Always look in the central specs directory first, NOT in platform-specific directories.
+
+**Primary location (from project root):** `specs/features/{feature}/{number}-*-backend.md`
+**When running from backend directory:** `../specs/features/{feature}/{number}-*-backend.md`
+
 ```bash
-ls backend/docs/issues/{{number}}-*.md
+# First, search in the central specs directory (parent of current dir)
+find ../specs/features -name "{{number}}-*-backend.md" 2>/dev/null || find specs/features -name "{{number}}-*-backend.md" 2>/dev/null
+```
+
+If not found in specs, check legacy location as fallback:
+```bash
+ls docs/issues/{{number}}-*.md 2>/dev/null
 ```
 
 Read the handoff document and extract:
@@ -126,7 +137,8 @@ Add implementation notes section:
 
 ```bash
 git add backend/
-git add backend/docs/issues/{{number}}-*.md
+# Stage the handoff document (in central specs directory)
+git add ../specs/features/**/{{number}}-*-backend.md 2>/dev/null || git add specs/features/**/{{number}}-*-backend.md 2>/dev/null
 ```
 
 Do NOT commit - the central agent will handle the final commit after all platforms complete.
@@ -151,7 +163,7 @@ Do NOT commit - the central agent will handle the final commit after all platfor
 - ✅ Build successful
 
 ### Handoff Updated
-`backend/docs/issues/{{number}}-*.md` → status: completed
+`specs/features/{feature}/{{number}}-*-backend.md` → status: completed
 
 ### Next Steps
 1. If other platforms need changes, run their `/fix-issue` commands
@@ -162,7 +174,11 @@ Do NOT commit - the central agent will handle the final commit after all platfor
 
 **Handoff not found:**
 ```
-Error: No handoff document found at backend/docs/issues/{{number}}-*.md
+Error: No handoff document found.
+
+Searched locations:
+1. ../specs/features/**/{{number}}-*-backend.md (primary - central specs directory)
+2. docs/issues/{{number}}-*.md (legacy fallback)
 
 This issue may not have backend changes, or the central agent hasn't distributed yet.
 Run `/work-issue {{number}}` from the project root first.
@@ -180,7 +196,7 @@ Run: ./gradlew test --info
 ```
 Blocked: This task depends on {{platform}} completing first.
 
-Check: {{platform}}/docs/issues/{{number}}-*.md
+Check: specs/features/**/{{number}}-*-{{platform}}.md
 Current status: {{status}}
 
 Wait for that task to complete, then re-run this command.
