@@ -32,6 +32,7 @@ Copy `specs/features/_template/story-handoff.md` to `specs/features/<name>/<issu
 - Contract: quote the exact request/response shapes; add missing endpoints to `specs/contracts/api.md` first.
 - Steps: one file per step with its test. Name real paths that follow the platform card's layout; check with Grep that referenced classes exist.
 - `touches`: the feature folders edited, so the orchestrator can serialise overlapping stories.
+- `ui: true` for any story that adds or changes a screen, dialog or visible component; the orchestrator then requires an approved canvas before dispatch. In Steps, name the artboard each screen must match (`design/canvases/<feature>/<Artboard>.dc.html`) once the designer has produced it; if planning before the canvas exists, write "match artboard: to be produced by designer" and the designer fills the names in.
 - Do not: list the tempting mistakes for this story.
 - Done when: the platform's exact gate commands.
 A handoff longer than about 120 lines means the story is too big: split it and say so.

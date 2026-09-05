@@ -17,7 +17,7 @@ Read `domain/README.md` first. Load `mobile-design-system` before touching any w
 API host and port via `--dart-define=API_HOST=... --dart-define=API_PORT=...` (defaults `10.0.2.2:8080`, the Android emulator's route to the host). Secure storage holds session and PIN; biometric login is optional after PIN setup.
 
 ## Tests
-flutter_test + Mocktail; `ProviderContainer` with overrides for provider tests; widget tests wrap in `ProviderScope`. Test files mirror `lib/` under `test/`. No integration_test yet; golden tests arrive with the design-system PR.
+flutter_test + Mocktail; `ProviderContainer` with overrides for provider tests; widget tests wrap in `ProviderScope`. Test files mirror `lib/` under `test/`. No integration_test yet. Golden tests live in `test/goldens/` (`golden_test_helper.dart` for the pump helper, `fixtures.dart` shared with Widgetbook); run with `flutter test test/goldens`, refresh with `flutter test test/goldens --update-goldens`; CI blocks a PR that changes a golden PNG without the `design-approved` label.
 
 ## Commands
 ```bash

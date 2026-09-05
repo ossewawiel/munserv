@@ -212,6 +212,14 @@ Each deployment is a **pod** — an independent instance with its own database a
 | [Architecture](specs/architecture/overview.md) | System architecture |
 | [Patterns](specs/architecture/patterns.md) | Code patterns |
 
+### Design system
+| Where | What |
+|---|---|
+| https://ossewawiel.github.io/munserv/ | Landing page for the published design catalogues (rebuilt on every merge to `master`) |
+| https://ossewawiel.github.io/munserv/storybook/ | Web components (Storybook), light and dark, with the token swatches |
+| https://ossewawiel.github.io/munserv/widgetbook/ | Mobile widgets (Widgetbook) on device frames |
+| [`design/`](design/README.md) | Tokens (the single source of colour and size), the component registries agents read, and the per-feature design canvases |
+
 ### Domain language
 [`domain/`](domain/README.md) defines every term MunServ uses, with its states and its code names on each platform. `scripts/validate-domain-language.py` checks it against the code in CI.
 

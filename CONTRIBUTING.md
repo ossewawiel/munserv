@@ -35,7 +35,9 @@ This guide explains how to contribute features, fix bugs, and maintain code qual
 
 3. **Read the domain language** - `domain/README.md` defines every term. A story, PR or UI string that introduces a term not in `domain/` is not ready; add the concept file and the `language.yaml` entry first. CI runs `scripts/validate-domain-language.py`.
 
-4. **Read Platform Guide** - Before working on any platform:
+4. **Check the design system** - Before adding or changing UI, look at the live catalogues (https://ossewawiel.github.io/munserv/) and `design/registry/`; a new component needs a registry row and a story or use-case, and a UI story needs an approved design canvas.
+
+5. **Read Platform Guide** - Before working on any platform:
    - Backend: `backend/CLAUDE.md`
    - Web: `web/CLAUDE.md`
    - Mobile: `mobile/CLAUDE.md`

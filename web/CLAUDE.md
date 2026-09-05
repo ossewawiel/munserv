@@ -14,7 +14,7 @@ Read `domain/README.md` first. Load the `web-patterns` skill for worked examples
 6. **Types**: `interface` for shapes, `type` for unions; explicit return types on exports; enums as `as const` arrays plus a union; `unknown` with a guard instead of `any`. Wire values are snake_case strings matching `domain/language.yaml`.
 
 ## Tests
-Vitest 5 + Testing Library + MSW 2 + jest-dom 7 (`@testing-library/jest-dom/vitest`), jsdom 30. Co-located `*.test.tsx`. Query priority: `getByRole` > `getByLabelText` > `getByText` > `getByTestId`. Playwright for E2E in `e2e/`.
+Vitest 5 + Testing Library + MSW 2 + jest-dom 7 (`@testing-library/jest-dom/vitest`), jsdom 30. Co-located `*.test.tsx`. Query priority: `getByRole` > `getByLabelText` > `getByText` > `getByTestId`. Playwright for E2E in `e2e/`. `pnpm test:visual` (`pnpm test:visual:update` to refresh) screenshots every Storybook story in light and dark against `e2e/visual/__screenshots__/`.
 
 ## Commands
 ```bash

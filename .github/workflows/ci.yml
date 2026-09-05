@@ -134,12 +134,69 @@ jobs:
       - name: Build
         run: pnpm build
 
+  visual-web:
+    name: Visual regression (Storybook)
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build Storybook
+        run: pnpm build-storybook
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Visual regression
+        run: pnpm test:visual
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-web-report
+          path: web/playwright-report-visual
+          if-no-files-found: ignore
+      - name: Baseline change requires design-approved label
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: ${{ github.workspace }}
+        run: |
+          git fetch origin master --depth=1
+          if git diff --name-only origin/master...HEAD | grep -q '^web/e2e/visual/__screenshots__/'; then
+            labels=$(gh pr view ${{ github.event.pull_request.number }} --json labels --jq '.labels[].name')
+            if ! echo "$labels" | grep -qx 'design-approved'; then
+              echo "This PR changes visual baselines under web/e2e/visual/__screenshots__/ but is missing the design-approved label."
+              exit 1
+            fi
+          fi
+
   mobile:
     name: Mobile (Flutter)
     needs: changes
     if: needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: read
     defaults:
       run:
         working-directory: mobile
@@ -162,6 +219,24 @@ jobs:
         run: flutter analyze --fatal-infos
       - name: Test
         run: flutter test
+      - name: Golden baseline guard
+        if: github.event_name == 'pull_request'
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git fetch --unshallow origin master 2>/dev/null || git fetch origin master
+          changed=$(git diff --name-only origin/master...HEAD -- 'mobile/test/goldens/**/*.png')
+          if [ -n "$changed" ]; then
+            echo "Golden PNGs changed:"
+            echo "$changed"
+            labels=$(gh pr view "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --json labels --jq '.labels[].name')
+            if ! printf '%s\n' "$labels" | grep -qx 'design-approved'; then
+              echo "::error::mobile/test/goldens PNGs changed without the design-approved label."
+              exit 1
+            fi
+          fi
       - name: Build debug APK
         run: flutter build apk --debug
 
@@ -169,14 +244,14 @@ jobs:
   # triggered platform job passed and none failed.
   ci-status:
     name: CI status
-    needs: [changes, domain, design, backend, web, mobile]
+    needs: [changes, domain, design, backend, web, visual-web, mobile]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate
         run: |
-          echo "domain=${{ needs.domain.result }} design=${{ needs.design.result }} backend=${{ needs.backend.result }} web=${{ needs.web.result }} mobile=${{ needs.mobile.result }}"
-          for r in "${{ needs.domain.result }}" "${{ needs.design.result }}" "${{ needs.backend.result }}" "${{ needs.web.result }}" "${{ needs.mobile.result }}"; do
+          echo "domain=${{ needs.domain.result }} design=${{ needs.design.result }} backend=${{ needs.backend.result }} web=${{ needs.web.result }} visual-web=${{ needs.visual-web.result }} mobile=${{ needs.mobile.result }}"
+          for r in "${{ needs.domain.result }}" "${{ needs.design.result }}" "${{ needs.backend.result }}" "${{ needs.web.result }}" "${{ needs.visual-web.result }}" "${{ needs.mobile.result }}"; do
             case "$r" in
               success|skipped) ;;
               *) echo "A platform job did not pass: $r"; exit 1 ;;
