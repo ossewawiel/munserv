@@ -33,7 +33,9 @@ This guide explains how to contribute features, fix bugs, and maintain code qual
    ./scripts/setup-github-labels.sh
    ```
 
-3. **Read Platform Guide** - Before working on any platform:
+3. **Read the domain language** - `domain/README.md` defines every term. A story, PR or UI string that introduces a term not in `domain/` is not ready; add the concept file and the `language.yaml` entry first. CI runs `scripts/validate-domain-language.py`.
+
+4. **Read Platform Guide** - Before working on any platform:
    - Backend: `backend/CLAUDE.md`
    - Web: `web/CLAUDE.md`
    - Mobile: `mobile/CLAUDE.md`

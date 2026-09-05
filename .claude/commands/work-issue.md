@@ -22,6 +22,10 @@ The user can provide:
 
 Extract the issue number from whatever format is provided.
 
+## Context
+
+Read `domain/README.md` first: every term in the story, handoff and code must be defined there.
+
 ## Process
 
 ### Step 1: Fetch Issue Details

@@ -19,6 +19,7 @@ Generate cross-platform implementation plan for "{{feature}}".
 ## Context
 
 Read first:
+0. `domain/README.md` - The vocabulary; do not introduce a term that is not defined there
 1. `specs/features/{{feature}}/spec.md` - Feature specification
 2. `specs/contracts/api.md` - API contract
 3. `specs/requirements/` - User stories

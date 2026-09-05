@@ -1,6 +1,6 @@
 # Shared Types
 
-> **Full code**: See [MVP_Development_Guide.md §3](../MVP_Development_Guide.md) for TypeScript interfaces and Dart/Freezed classes.
+> **Full code**: See [archive/MVP_Development_Guide.md §3](../archive/MVP_Development_Guide.md) for TypeScript interfaces and Dart/Freezed classes.
 
 ## Member
 

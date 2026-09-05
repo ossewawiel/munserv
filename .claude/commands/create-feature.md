@@ -19,6 +19,7 @@ Analyze feature requirements, decompose into user stories, and create GitHub iss
 ## Context
 
 Read first:
+0. `domain/README.md` - The vocabulary; do not introduce a term that is not defined there
 1. `specs/requirements/mobile.md` - Existing mobile stories (for ID sequencing)
 2. `specs/requirements/web.md` - Existing web stories (for ID sequencing)
 3. `specs/contracts/api.md` - Existing API endpoints

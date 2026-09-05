@@ -2,7 +2,7 @@
 
 **Project:** MunServ | **Version:** 1.0 | **Status:** Approved
 
-*Companion to Architecture_and_Design_Patterns.md and Coding_Standards.md. Include all three as LLM context.*
+*Companion to archive/Architecture_and_Design_Patterns.md and archive/Coding_Standards.md. Include all three as LLM context.*
 
 ---
 
@@ -418,4 +418,4 @@ class IssueFixtures {
 
 ---
 
-*Document optimized for LLM context. Include with Architecture_and_Design_Patterns.md and Coding_Standards.md when generating code.*
+*Document optimized for LLM context. Include with archive/Architecture_and_Design_Patterns.md and archive/Coding_Standards.md when generating code.*

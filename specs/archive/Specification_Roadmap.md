@@ -44,18 +44,18 @@
 
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
-| 1 | [Domain & Data Modeling](Domain_and_Data_Modeling.md) | ✅ Complete | Conceptual model, roles, workflows |
-| 2 | [Tech Stack Selection](Tech_Stack_Selection.md) | ✅ Complete | Languages, frameworks, infrastructure |
-| 3 | [Architecture & Design Patterns](Architecture_and_Design_Patterns.md) | ✅ Complete | Code structure, patterns, layers |
-| 4 | [Coding Standards](Coding_Standards.md) | ✅ Complete | Naming, formatting, idioms |
-| 5 | [Testing Strategy](Testing_Strategy.md) | ✅ Complete | TDD approach, coverage, tools |
-| 6 | [DevOps Strategy](DevOps_Strategy.md) | ✅ Complete | Git workflow, CI/CD, environments |
+| 1 | [Domain & Data Modeling](archive/Domain_and_Data_Modeling.md) | ✅ Complete | Conceptual model, roles, workflows |
+| 2 | [Tech Stack Selection](archive/Tech_Stack_Selection.md) | ✅ Complete | Languages, frameworks, infrastructure |
+| 3 | [Architecture & Design Patterns](archive/Architecture_and_Design_Patterns.md) | ✅ Complete | Code structure, patterns, layers |
+| 4 | [Coding Standards](archive/Coding_Standards.md) | ✅ Complete | Naming, formatting, idioms |
+| 5 | [Testing Strategy](archive/Testing_Strategy.md) | ✅ Complete | TDD approach, coverage, tools |
+| 6 | [DevOps Strategy](archive/DevOps_Strategy.md) | ✅ Complete | Git workflow, CI/CD, environments |
 
 ### Phase 2: MVP Development (CURRENT 🔄)
 
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
-| 7 | [MVP Development Guide](MVP_Development_Guide.md) | ✅ Complete | Scope, API contract, mock data |
+| 7 | [MVP Development Guide](archive/MVP_Development_Guide.md) | ✅ Complete | Scope, API contract, mock data |
 | 8 | Mobile App Implementation | ✅ **Near Complete** | M2-M7 done, M1 partial |
 | 9 | Web Admin Implementation | ✅ **Complete** | All W1-W7 features implemented |
 | 10 | [Mobile Theming Guide](Mobile_Theming_Guide.md) | ✅ **Complete** | M3 color system, components |
@@ -65,7 +65,7 @@
 
 | # | Document | Status | Purpose |
 |---|----------|--------|---------|
-| 12 | [Backend Development Guide](Backend_Development_Guide.md) | ✅ Complete | Phased TDD implementation plan |
+| 12 | [Backend Development Guide](archive/Backend_Development_Guide.md) | ✅ Complete | Phased TDD implementation plan |
 | 13 | Database Migrations | ✅ Complete | PostgreSQL + PostGIS schema (V001-V010) |
 | 14 | Backend Implementation | ✅ Complete | Kotlin/Spring Boot API (all phases) |
 | 15 | Web Integration | ✅ Complete | Web admin connected to real backend |
@@ -111,7 +111,7 @@
 
 ### Start Here
 
-1. **Read:** [MVP Development Guide](MVP_Development_Guide.md)
+1. **Read:** [MVP Development Guide](archive/MVP_Development_Guide.md)
 2. **Set up:** Mock API server
 3. **Build:** Mobile and Web apps in parallel
 4. **Iterate:** Update mock data/endpoints as needed
@@ -138,7 +138,7 @@
 - ✅ Members list with pagination
 - ✅ Logout + responsive mobile navigation
 
-**See [MVP_Development_Guide.md](MVP_Development_Guide.md) for full details, API contracts, and mock data.**
+**See [archive/MVP_Development_Guide.md](archive/MVP_Development_Guide.md) for full details, API contracts, and mock data.**
 
 ---
 
@@ -148,39 +148,39 @@
 
 | Need | Document |
 |------|----------|
-| What features to build | [MVP Development Guide](MVP_Development_Guide.md) §2.1 |
-| API endpoints to call | [MVP Development Guide](MVP_Development_Guide.md) §4 |
-| Data models (Dart) | [MVP Development Guide](MVP_Development_Guide.md) §3.2 |
-| Code patterns | [Architecture & Design Patterns](Architecture_and_Design_Patterns.md) §3 |
-| Naming conventions | [Coding Standards](Coding_Standards.md) §3 |
-| Testing approach | [Testing Strategy](Testing_Strategy.md) §7 |
+| What features to build | [MVP Development Guide](archive/MVP_Development_Guide.md) §2.1 |
+| API endpoints to call | [MVP Development Guide](archive/MVP_Development_Guide.md) §4 |
+| Data models (Dart) | [MVP Development Guide](archive/MVP_Development_Guide.md) §3.2 |
+| Code patterns | [Architecture & Design Patterns](archive/Architecture_and_Design_Patterns.md) §3 |
+| Naming conventions | [Coding Standards](archive/Coding_Standards.md) §3 |
+| Testing approach | [Testing Strategy](archive/Testing_Strategy.md) §7 |
 
 ### For Web Development
 
 | Need | Document |
 |------|----------|
-| What features to build | [MVP Development Guide](MVP_Development_Guide.md) §2.2 |
-| API endpoints to call | [MVP Development Guide](MVP_Development_Guide.md) §4 |
-| Data models (TypeScript) | [MVP Development Guide](MVP_Development_Guide.md) §3.1 |
-| Code patterns | [Architecture & Design Patterns](Architecture_and_Design_Patterns.md) §4 |
-| MUI theming patterns | [Architecture & Design Patterns](Architecture_and_Design_Patterns.md) §4.4 |
+| What features to build | [MVP Development Guide](archive/MVP_Development_Guide.md) §2.2 |
+| API endpoints to call | [MVP Development Guide](archive/MVP_Development_Guide.md) §4 |
+| Data models (TypeScript) | [MVP Development Guide](archive/MVP_Development_Guide.md) §3.1 |
+| Code patterns | [Architecture & Design Patterns](archive/Architecture_and_Design_Patterns.md) §4 |
+| MUI theming patterns | [Architecture & Design Patterns](archive/Architecture_and_Design_Patterns.md) §4.4 |
 | Theming & colors | [Web Theming Guide](Web_Theming_Guide.md) |
-| Naming conventions | [Coding Standards](Coding_Standards.md) §4 |
-| Testing approach | [Testing Strategy](Testing_Strategy.md) §8 |
+| Naming conventions | [Coding Standards](archive/Coding_Standards.md) §4 |
+| Testing approach | [Testing Strategy](archive/Testing_Strategy.md) §8 |
 
 ### For Backend Development (READY)
 
 | Need | Document |
 |------|----------|
-| **START HERE** | [Backend Development Guide](Backend_Development_Guide.md) |
-| Implementation phases | [Backend Development Guide](Backend_Development_Guide.md) §7 |
-| Database migrations | [Backend Development Guide](Backend_Development_Guide.md) §4 |
-| API contract | [Backend Development Guide](Backend_Development_Guide.md) §5 |
-| Kotlin data shapes | [Backend Development Guide](Backend_Development_Guide.md) §6 |
-| Testing patterns | [Backend Development Guide](Backend_Development_Guide.md) §8 |
-| Code patterns | [Architecture & Design Patterns](Architecture_and_Design_Patterns.md) §2 |
-| Naming conventions | [Coding Standards](Coding_Standards.md) §2 |
-| Domain concepts | [Domain & Data Modeling](Domain_and_Data_Modeling.md) |
+| **START HERE** | [Backend Development Guide](archive/Backend_Development_Guide.md) |
+| Implementation phases | [Backend Development Guide](archive/Backend_Development_Guide.md) §7 |
+| Database migrations | [Backend Development Guide](archive/Backend_Development_Guide.md) §4 |
+| API contract | [Backend Development Guide](archive/Backend_Development_Guide.md) §5 |
+| Kotlin data shapes | [Backend Development Guide](archive/Backend_Development_Guide.md) §6 |
+| Testing patterns | [Backend Development Guide](archive/Backend_Development_Guide.md) §8 |
+| Code patterns | [Architecture & Design Patterns](archive/Architecture_and_Design_Patterns.md) §2 |
+| Naming conventions | [Coding Standards](archive/Coding_Standards.md) §2 |
+| Domain concepts | [Domain & Data Modeling](archive/Domain_and_Data_Modeling.md) |
 
 ---
 
@@ -205,7 +205,7 @@ cd web && pnpm dev
 
 1. Add to mock data in `infrastructure/mock-api/`
 2. Add endpoint if needed
-3. Update [MVP Development Guide](MVP_Development_Guide.md) §4-5
+3. Update [MVP Development Guide](archive/MVP_Development_Guide.md) §4-5
 4. Continue building
 
 ### When MVP UI is Complete
@@ -225,29 +225,29 @@ When using AI to generate code, include these documents:
 
 ```
 Include in prompt:
-1. MVP_Development_Guide.md (relevant sections)
-2. Architecture_and_Design_Patterns.md §3 (Flutter patterns)
-3. Coding_Standards.md §3 (Dart standards)
+1. archive/MVP_Development_Guide.md (relevant sections)
+2. archive/Architecture_and_Design_Patterns.md §3 (Flutter patterns)
+3. archive/Coding_Standards.md §3 (Dart standards)
 ```
 
 ### For Web Feature
 
 ```
 Include in prompt:
-1. MVP_Development_Guide.md (relevant sections)
-2. Architecture_and_Design_Patterns.md §4 (React + MUI patterns)
+1. archive/MVP_Development_Guide.md (relevant sections)
+2. archive/Architecture_and_Design_Patterns.md §4 (React + MUI patterns)
 3. Web_Theming_Guide.md (colors, styling)
-4. Coding_Standards.md §4 (TypeScript standards)
+4. archive/Coding_Standards.md §4 (TypeScript standards)
 ```
 
 ### For Backend Feature
 
 ```
 Include in prompt:
-1. MVP_Development_Guide.md §4 (API contract)
-2. Architecture_and_Design_Patterns.md §2 (Kotlin patterns)
-3. Coding_Standards.md §2 (Kotlin standards)
-4. Domain_and_Data_Modeling.md (relevant sections)
+1. archive/MVP_Development_Guide.md §4 (API contract)
+2. archive/Architecture_and_Design_Patterns.md §2 (Kotlin patterns)
+3. archive/Coding_Standards.md §2 (Kotlin standards)
+4. archive/Domain_and_Data_Modeling.md (relevant sections)
 ```
 
 ---

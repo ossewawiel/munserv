@@ -2,7 +2,7 @@
 
 Base URL: `/api/v1`
 
-> **Full examples**: See [MVP_Development_Guide.md §4](../MVP_Development_Guide.md) for complete JSON request/response examples.
+> **Full examples**: See [archive/MVP_Development_Guide.md §4](../archive/MVP_Development_Guide.md) for complete JSON request/response examples.
 
 ## Auth
 

@@ -22,6 +22,7 @@ Add user story "{{story}}" to `specs/requirements/{{platform}}.md`.
 ## Context
 
 Read first:
+0. `domain/README.md` - The vocabulary; do not introduce a term that is not defined there
 1. `specs/requirements/{{platform}}.md` - Current stories
 2. `CLAUDE.md` - Domain glossary
 

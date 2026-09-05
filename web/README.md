@@ -203,4 +203,4 @@ npx playwright show-report    # View report
 
 - [CLAUDE.md](CLAUDE.md) — Architecture patterns, styling rules, coding conventions
 - [Web Theming Guide](../specs/Web_Theming_Guide.md) — MUI v7 theming, colors
-- [Testing Strategy](../specs/Testing_Strategy.md) — Test patterns
+- [Testing Strategy](../specs/archive/Testing_Strategy.md) — Test patterns

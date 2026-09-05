@@ -2,7 +2,7 @@
 
 **Project:** MunServ | **Version:** 1.0 | **Status:** Approved
 
-*Companion to Architecture_and_Design_Patterns.md. Include both as LLM context.*
+*Companion to archive/Architecture_and_Design_Patterns.md. Include both as LLM context.*
 
 ---
 
@@ -496,4 +496,4 @@ export const {Name}: FC<{Name}Props> = ({ ...props }) => {
 
 ---
 
-*Document optimized for LLM context. Include with Architecture_and_Design_Patterns.md when generating code.*
+*Document optimized for LLM context. Include with archive/Architecture_and_Design_Patterns.md when generating code.*

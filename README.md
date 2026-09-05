@@ -62,6 +62,7 @@ munserv/
 ├── mobile/          # Flutter app (iOS & Android)
 ├── database/        # PostgreSQL migrations
 ├── infrastructure/  # Docker, mock API, deployment
+├── domain/          # Ubiquitous language (source of truth for terms)
 ├── specs/           # Technical specifications
 │   ├── requirements/    # User stories by platform
 │   ├── contracts/       # API contract, shared types
@@ -211,14 +212,11 @@ Each deployment is a **pod** — an independent instance with its own database a
 | [Architecture](specs/architecture/overview.md) | System architecture |
 | [Patterns](specs/architecture/patterns.md) | Code patterns |
 
-### Detailed Guides
-| Document | Description |
-|----------|-------------|
-| [MVP Development Guide](specs/MVP_Development_Guide.md) | Full context, mock data |
-| [Architecture & Patterns](specs/Architecture_and_Design_Patterns.md) | Detailed patterns |
-| [Domain & Data Modeling](specs/Domain_and_Data_Modeling.md) | Entity definitions |
-| [Coding Standards](specs/Coding_Standards.md) | Naming conventions |
-| [Testing Strategy](specs/Testing_Strategy.md) | Test patterns |
+### Domain language
+[`domain/`](domain/README.md) defines every term MunServ uses, with its states and its code names on each platform. `scripts/validate-domain-language.py` checks it against the code in CI.
+
+### Archived guides
+The discovery and MVP-era guides live in [`specs/archive/`](specs/archive/README.md). They explain history and are not maintained.
 
 ### Platform Guides
 | Platform | CLAUDE.md | README |
