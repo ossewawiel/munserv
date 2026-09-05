@@ -3,7 +3,7 @@ issue: 45
 story: W30
 title: "Pod Chief views and revokes support grants"
 platform: web
-status: pending
+status: completed
 depends_on: [43]        # W28 creates features/support-access (types, api, hooks, section)
 touches:
   - web/src/features/support-access
@@ -14,8 +14,34 @@ design_artboards: [Main.dc.html, SupportAccessActive.dc.html, SupportGrantsHisto
 design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/features/support-access/api.ts
+  - web/src/features/support-access/hooks.ts
+  - web/src/features/support-access/hooks.test.tsx
+  - web/src/features/support-access/SupportAccessSection.tsx
+  - web/src/features/support-access/SupportAccessSection.test.tsx
+  - web/src/features/support-access/SupportAccessSection.stories.tsx
+  - web/src/features/support-access/components/RevokeGrantDialog.tsx
+  - web/src/features/support-access/components/RevokeGrantDialog.test.tsx
+  - web/src/features/support-access/components/RevokeGrantDialog.stories.tsx
+  - web/src/features/support-access/components/SupportGrantsTable.tsx
+  - web/src/features/support-access/components/SupportGrantsTable.test.tsx
+  - web/src/features/support-access/components/SupportGrantsTable.stories.tsx
+  - web/src/test/mocks/handlers.ts
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+  - web/e2e/visual/__screenshots__/stories.spec/features-supportaccess-*.png
+tests_added:
+  - "hooks.test.tsx: should invalidate the grants list after a revoke"
+  - "hooks.test.tsx: should surface grant_not_active when the revoke conflicts"
+  - "RevokeGrantDialog.test.tsx: should name the granted role in the confirmation"
+  - "RevokeGrantDialog.test.tsx: should call onConfirm when the pod chief confirms"
+  - "SupportGrantsTable.test.tsx: should render the last activity placeholder when the grant has no activity yet"
+  - "SupportGrantsTable.test.tsx: should not render a revoke action in the history variant"
+  - "SupportGrantsTable.test.tsx: should call onRevoke with the grant when the revoke action is pressed"
+  - "SupportAccessSection.test.tsx: should open the confirmation dialog before revoking"
+  - "SupportAccessSection.test.tsx: should show the past grants in the history tab"
 ---
 
 # W30 · Pod Chief views and revokes support grants (Web)
