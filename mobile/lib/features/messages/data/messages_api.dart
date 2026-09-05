@@ -20,8 +20,8 @@ class MessagesApi {
     final response = await _dio.get(
       '/messages',
       queryParameters: {
-        if (status != null) 'status': status,
-        if (type != null) 'type': type,
+        'status': ?status,
+        'type': ?type,
         'page': page,
         'size': size,
       },

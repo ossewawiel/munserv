@@ -12,7 +12,7 @@ part of 'locale_provider.dart';
 /// Persists preference to SharedPreferences
 
 @ProviderFor(LocaleNotifier)
-const localeProvider = LocaleNotifierProvider._();
+final localeProvider = LocaleNotifierProvider._();
 
 /// Manages the app's locale (language)
 /// Persists preference to SharedPreferences
@@ -20,7 +20,7 @@ final class LocaleNotifierProvider
     extends $NotifierProvider<LocaleNotifier, Locale?> {
   /// Manages the app's locale (language)
   /// Persists preference to SharedPreferences
-  const LocaleNotifierProvider._()
+  LocaleNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -56,8 +56,7 @@ abstract class _$LocaleNotifier extends $Notifier<Locale?> {
   Locale? build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Locale?, Locale?>;
     final element =
         ref.element
@@ -67,6 +66,6 @@ abstract class _$LocaleNotifier extends $Notifier<Locale?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

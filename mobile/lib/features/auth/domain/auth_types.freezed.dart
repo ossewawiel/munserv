@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'auth_types.dart';
@@ -9,6 +9,7 @@ part of 'auth_types.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $AuthTokensCopyWith<AuthTokens> get copyWith => _$AuthTokensCopyWithImpl<AuthTok
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthTokens&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
+  final _this = this as AuthTokens;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthTokens&&(identical(other.accessToken, _this.accessToken) || other.accessToken == _this.accessToken)&&(identical(other.refreshToken, _this.refreshToken) || other.refreshToken == _this.refreshToken)&&(identical(other.expiresAt, _this.expiresAt) || other.expiresAt == _this.expiresAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,accessToken,refreshToken,expiresAt);
+int get hashCode {
+  final _this = this as AuthTokens;
+  return Object.hash(runtimeType,_this.accessToken,_this.refreshToken,_this.expiresAt);
+}
 
 @override
 String toString() {
-  return 'AuthTokens(accessToken: $accessToken, refreshToken: $refreshToken, expiresAt: $expiresAt)';
+  final _this = this as AuthTokens;
+  return 'AuthTokens(accessToken: ${_this.accessToken}, refreshToken: ${_this.refreshToken}, expiresAt: ${_this.expiresAt})';
 }
 
 
@@ -66,7 +72,7 @@ class _$AuthTokensCopyWithImpl<$Res>
 /// Create a copy of AuthTokens
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? accessToken = null,Object? refreshToken = null,Object? expiresAt = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(AuthTokens(
 accessToken: null == accessToken ? _self.accessToken : accessToken // ignore: cast_nullable_to_non_nullable
 as String,refreshToken: null == refreshToken ? _self.refreshToken : refreshToken // ignore: cast_nullable_to_non_nullable
 as String,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
@@ -231,16 +237,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthTokens&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthTokens&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,accessToken,refreshToken,expiresAt);
+int get hashCode {
+    return Object.hash(runtimeType,accessToken,refreshToken,expiresAt);
+}
 
 @override
 String toString() {
-  return 'AuthTokens(accessToken: $accessToken, refreshToken: $refreshToken, expiresAt: $expiresAt)';
+    return 'AuthTokens(accessToken: $accessToken, refreshToken: $refreshToken, expiresAt: $expiresAt)';
 }
 
 
@@ -297,16 +305,21 @@ $MemberProfileCopyWith<MemberProfile> get copyWith => _$MemberProfileCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MemberProfile&&(identical(other.id, id) || other.id == id)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.surname, surname) || other.surname == surname)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.address, address) || other.address == address)&&(identical(other.registrationLocation, registrationLocation) || other.registrationLocation == registrationLocation)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  final _this = this as MemberProfile;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MemberProfile&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.firstName, _this.firstName) || other.firstName == _this.firstName)&&(identical(other.surname, _this.surname) || other.surname == _this.surname)&&(identical(other.phoneNumber, _this.phoneNumber) || other.phoneNumber == _this.phoneNumber)&&(identical(other.address, _this.address) || other.address == _this.address)&&(identical(other.registrationLocation, _this.registrationLocation) || other.registrationLocation == _this.registrationLocation)&&(identical(other.sectorId, _this.sectorId) || other.sectorId == _this.sectorId)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,firstName,surname,phoneNumber,address,registrationLocation,sectorId,status,createdAt);
+int get hashCode {
+  final _this = this as MemberProfile;
+  return Object.hash(runtimeType,_this.id,_this.firstName,_this.surname,_this.phoneNumber,_this.address,_this.registrationLocation,_this.sectorId,_this.status,_this.createdAt);
+}
 
 @override
 String toString() {
-  return 'MemberProfile(id: $id, firstName: $firstName, surname: $surname, phoneNumber: $phoneNumber, address: $address, registrationLocation: $registrationLocation, sectorId: $sectorId, status: $status, createdAt: $createdAt)';
+  final _this = this as MemberProfile;
+  return 'MemberProfile(id: ${_this.id}, firstName: ${_this.firstName}, surname: ${_this.surname}, phoneNumber: ${_this.phoneNumber}, address: ${_this.address}, registrationLocation: ${_this.registrationLocation}, sectorId: ${_this.sectorId}, status: ${_this.status}, createdAt: ${_this.createdAt})';
 }
 
 
@@ -335,7 +348,7 @@ class _$MemberProfileCopyWithImpl<$Res>
 /// Create a copy of MemberProfile
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? firstName = null,Object? surname = null,Object? phoneNumber = null,Object? address = null,Object? registrationLocation = null,Object? sectorId = null,Object? status = null,Object? createdAt = null,}) {
-  return _then(_self.copyWith(
+  return _then(MemberProfile(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
 as String,surname: null == surname ? _self.surname : surname // ignore: cast_nullable_to_non_nullable
@@ -521,16 +534,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MemberProfile&&(identical(other.id, id) || other.id == id)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.surname, surname) || other.surname == surname)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.address, address) || other.address == address)&&(identical(other.registrationLocation, registrationLocation) || other.registrationLocation == registrationLocation)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MemberProfile&&(identical(other.id, id) || other.id == id)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.surname, surname) || other.surname == surname)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.address, address) || other.address == address)&&(identical(other.registrationLocation, registrationLocation) || other.registrationLocation == registrationLocation)&&(identical(other.sectorId, sectorId) || other.sectorId == sectorId)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,firstName,surname,phoneNumber,address,registrationLocation,sectorId,status,createdAt);
+int get hashCode {
+    return Object.hash(runtimeType,id,firstName,surname,phoneNumber,address,registrationLocation,sectorId,status,createdAt);
+}
 
 @override
 String toString() {
-  return 'MemberProfile(id: $id, firstName: $firstName, surname: $surname, phoneNumber: $phoneNumber, address: $address, registrationLocation: $registrationLocation, sectorId: $sectorId, status: $status, createdAt: $createdAt)';
+    return 'MemberProfile(id: $id, firstName: $firstName, surname: $surname, phoneNumber: $phoneNumber, address: $address, registrationLocation: $registrationLocation, sectorId: $sectorId, status: $status, createdAt: $createdAt)';
 }
 
 
@@ -602,16 +617,21 @@ $SectorInfoCopyWith<SectorInfo> get copyWith => _$SectorInfoCopyWithImpl<SectorI
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SectorInfo&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.center, center) || other.center == center));
+  final _this = this as SectorInfo;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SectorInfo&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.center, _this.center) || other.center == _this.center));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,center);
+int get hashCode {
+  final _this = this as SectorInfo;
+  return Object.hash(runtimeType,_this.id,_this.name,_this.center);
+}
 
 @override
 String toString() {
-  return 'SectorInfo(id: $id, name: $name, center: $center)';
+  final _this = this as SectorInfo;
+  return 'SectorInfo(id: ${_this.id}, name: ${_this.name}, center: ${_this.center})';
 }
 
 
@@ -640,7 +660,7 @@ class _$SectorInfoCopyWithImpl<$Res>
 /// Create a copy of SectorInfo
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? center = null,}) {
-  return _then(_self.copyWith(
+  return _then(SectorInfo(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,center: null == center ? _self.center : center // ignore: cast_nullable_to_non_nullable
@@ -814,16 +834,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SectorInfo&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.center, center) || other.center == center));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SectorInfo&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.center, center) || other.center == center));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,center);
+int get hashCode {
+    return Object.hash(runtimeType,id,name,center);
+}
 
 @override
 String toString() {
-  return 'SectorInfo(id: $id, name: $name, center: $center)';
+    return 'SectorInfo(id: $id, name: $name, center: $center)';
 }
 
 
@@ -889,16 +911,21 @@ $AuthProfileCopyWith<AuthProfile> get copyWith => _$AuthProfileCopyWithImpl<Auth
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthProfile&&(identical(other.member, member) || other.member == member)&&(identical(other.sector, sector) || other.sector == sector));
+  final _this = this as AuthProfile;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthProfile&&(identical(other.member, _this.member) || other.member == _this.member)&&(identical(other.sector, _this.sector) || other.sector == _this.sector));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,member,sector);
+int get hashCode {
+  final _this = this as AuthProfile;
+  return Object.hash(runtimeType,_this.member,_this.sector);
+}
 
 @override
 String toString() {
-  return 'AuthProfile(member: $member, sector: $sector)';
+  final _this = this as AuthProfile;
+  return 'AuthProfile(member: ${_this.member}, sector: ${_this.sector})';
 }
 
 
@@ -927,7 +954,7 @@ class _$AuthProfileCopyWithImpl<$Res>
 /// Create a copy of AuthProfile
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? member = null,Object? sector = null,}) {
-  return _then(_self.copyWith(
+  return _then(AuthProfile(
 member: null == member ? _self.member : member // ignore: cast_nullable_to_non_nullable
 as MemberProfile,sector: null == sector ? _self.sector : sector // ignore: cast_nullable_to_non_nullable
 as SectorInfo,
@@ -1108,16 +1135,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthProfile&&(identical(other.member, member) || other.member == member)&&(identical(other.sector, sector) || other.sector == sector));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthProfile&&(identical(other.member, member) || other.member == member)&&(identical(other.sector, sector) || other.sector == sector));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,member,sector);
+int get hashCode {
+    return Object.hash(runtimeType,member,sector);
+}
 
 @override
 String toString() {
-  return 'AuthProfile(member: $member, sector: $sector)';
+    return 'AuthProfile(member: $member, sector: $sector)';
 }
 
 
@@ -1191,16 +1220,21 @@ $AuthResponseCopyWith<AuthResponse> get copyWith => _$AuthResponseCopyWithImpl<A
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthResponse&&(identical(other.tokens, tokens) || other.tokens == tokens)&&(identical(other.profile, profile) || other.profile == profile));
+  final _this = this as AuthResponse;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthResponse&&(identical(other.tokens, _this.tokens) || other.tokens == _this.tokens)&&(identical(other.profile, _this.profile) || other.profile == _this.profile));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,tokens,profile);
+int get hashCode {
+  final _this = this as AuthResponse;
+  return Object.hash(runtimeType,_this.tokens,_this.profile);
+}
 
 @override
 String toString() {
-  return 'AuthResponse(tokens: $tokens, profile: $profile)';
+  final _this = this as AuthResponse;
+  return 'AuthResponse(tokens: ${_this.tokens}, profile: ${_this.profile})';
 }
 
 
@@ -1229,7 +1263,7 @@ class _$AuthResponseCopyWithImpl<$Res>
 /// Create a copy of AuthResponse
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? tokens = null,Object? profile = null,}) {
-  return _then(_self.copyWith(
+  return _then(AuthResponse(
 tokens: null == tokens ? _self.tokens : tokens // ignore: cast_nullable_to_non_nullable
 as AuthTokens,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as AuthProfile,
@@ -1410,16 +1444,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthResponse&&(identical(other.tokens, tokens) || other.tokens == tokens)&&(identical(other.profile, profile) || other.profile == profile));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthResponse&&(identical(other.tokens, tokens) || other.tokens == tokens)&&(identical(other.profile, profile) || other.profile == profile));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,tokens,profile);
+int get hashCode {
+    return Object.hash(runtimeType,tokens,profile);
+}
 
 @override
 String toString() {
-  return 'AuthResponse(tokens: $tokens, profile: $profile)';
+    return 'AuthResponse(tokens: $tokens, profile: $profile)';
 }
 
 

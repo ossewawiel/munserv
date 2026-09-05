@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'paginated_issues.dart';
@@ -9,6 +9,7 @@ part of 'paginated_issues.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $PaginationCopyWith<Pagination> get copyWith => _$PaginationCopyWithImpl<Paginat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Pagination&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.totalPages, totalPages) || other.totalPages == totalPages));
+  final _this = this as Pagination;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Pagination&&(identical(other.page, _this.page) || other.page == _this.page)&&(identical(other.limit, _this.limit) || other.limit == _this.limit)&&(identical(other.totalItems, _this.totalItems) || other.totalItems == _this.totalItems)&&(identical(other.totalPages, _this.totalPages) || other.totalPages == _this.totalPages));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,page,limit,totalItems,totalPages);
+int get hashCode {
+  final _this = this as Pagination;
+  return Object.hash(runtimeType,_this.page,_this.limit,_this.totalItems,_this.totalPages);
+}
 
 @override
 String toString() {
-  return 'Pagination(page: $page, limit: $limit, totalItems: $totalItems, totalPages: $totalPages)';
+  final _this = this as Pagination;
+  return 'Pagination(page: ${_this.page}, limit: ${_this.limit}, totalItems: ${_this.totalItems}, totalPages: ${_this.totalPages})';
 }
 
 
@@ -66,7 +72,7 @@ class _$PaginationCopyWithImpl<$Res>
 /// Create a copy of Pagination
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? page = null,Object? limit = null,Object? totalItems = null,Object? totalPages = null,}) {
-  return _then(_self.copyWith(
+  return _then(Pagination(
 page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
 as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
 as int,totalItems: null == totalItems ? _self.totalItems : totalItems // ignore: cast_nullable_to_non_nullable
@@ -233,16 +239,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Pagination&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.totalPages, totalPages) || other.totalPages == totalPages));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Pagination&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.totalPages, totalPages) || other.totalPages == totalPages));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,page,limit,totalItems,totalPages);
+int get hashCode {
+    return Object.hash(runtimeType,page,limit,totalItems,totalPages);
+}
 
 @override
 String toString() {
-  return 'Pagination(page: $page, limit: $limit, totalItems: $totalItems, totalPages: $totalPages)';
+    return 'Pagination(page: $page, limit: $limit, totalItems: $totalItems, totalPages: $totalPages)';
 }
 
 
@@ -300,16 +308,21 @@ $PaginatedIssueSummariesCopyWith<PaginatedIssueSummaries> get copyWith => _$Pagi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginatedIssueSummaries&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.pagination, pagination) || other.pagination == pagination));
+  final _this = this as PaginatedIssueSummaries;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginatedIssueSummaries&&const DeepCollectionEquality().equals(other.items, _this.items)&&(identical(other.pagination, _this.pagination) || other.pagination == _this.pagination));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items),pagination);
+int get hashCode {
+  final _this = this as PaginatedIssueSummaries;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.items),_this.pagination);
+}
 
 @override
 String toString() {
-  return 'PaginatedIssueSummaries(items: $items, pagination: $pagination)';
+  final _this = this as PaginatedIssueSummaries;
+  return 'PaginatedIssueSummaries(items: ${_this.items}, pagination: ${_this.pagination})';
 }
 
 
@@ -338,7 +351,7 @@ class _$PaginatedIssueSummariesCopyWithImpl<$Res>
 /// Create a copy of PaginatedIssueSummaries
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? pagination = null,}) {
-  return _then(_self.copyWith(
+  return _then(PaginatedIssueSummaries(
 items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<IssueSummary>,pagination: null == pagination ? _self.pagination : pagination // ignore: cast_nullable_to_non_nullable
 as Pagination,
@@ -491,7 +504,7 @@ return $default(_that.items,_that.pagination);case _:
 @JsonSerializable()
 
 class _PaginatedIssueSummaries implements PaginatedIssueSummaries {
-  const _PaginatedIssueSummaries({required final  List<IssueSummary> items, required this.pagination}): _items = items;
+  const _PaginatedIssueSummaries({required  List<IssueSummary> items, required this.pagination}): _items = items;
   factory _PaginatedIssueSummaries.fromJson(Map<String, dynamic> json) => _$PaginatedIssueSummariesFromJson(json);
 
  final  List<IssueSummary> _items;
@@ -516,16 +529,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PaginatedIssueSummaries&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.pagination, pagination) || other.pagination == pagination));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PaginatedIssueSummaries&&const DeepCollectionEquality().equals(other.items, _items)&&(identical(other.pagination, pagination) || other.pagination == pagination));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),pagination);
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),pagination);
+}
 
 @override
 String toString() {
-  return 'PaginatedIssueSummaries(items: $items, pagination: $pagination)';
+    return 'PaginatedIssueSummaries(items: $items, pagination: $pagination)';
 }
 
 
@@ -590,16 +605,21 @@ $PaginatedIssuesCopyWith<PaginatedIssues> get copyWith => _$PaginatedIssuesCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginatedIssues&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.pagination, pagination) || other.pagination == pagination));
+  final _this = this as PaginatedIssues;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginatedIssues&&const DeepCollectionEquality().equals(other.items, _this.items)&&(identical(other.pagination, _this.pagination) || other.pagination == _this.pagination));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items),pagination);
+int get hashCode {
+  final _this = this as PaginatedIssues;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.items),_this.pagination);
+}
 
 @override
 String toString() {
-  return 'PaginatedIssues(items: $items, pagination: $pagination)';
+  final _this = this as PaginatedIssues;
+  return 'PaginatedIssues(items: ${_this.items}, pagination: ${_this.pagination})';
 }
 
 
@@ -628,7 +648,7 @@ class _$PaginatedIssuesCopyWithImpl<$Res>
 /// Create a copy of PaginatedIssues
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? pagination = null,}) {
-  return _then(_self.copyWith(
+  return _then(PaginatedIssues(
 items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<Issue>,pagination: null == pagination ? _self.pagination : pagination // ignore: cast_nullable_to_non_nullable
 as Pagination,
@@ -781,7 +801,7 @@ return $default(_that.items,_that.pagination);case _:
 @JsonSerializable()
 
 class _PaginatedIssues implements PaginatedIssues {
-  const _PaginatedIssues({required final  List<Issue> items, required this.pagination}): _items = items;
+  const _PaginatedIssues({required  List<Issue> items, required this.pagination}): _items = items;
   factory _PaginatedIssues.fromJson(Map<String, dynamic> json) => _$PaginatedIssuesFromJson(json);
 
  final  List<Issue> _items;
@@ -806,16 +826,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PaginatedIssues&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.pagination, pagination) || other.pagination == pagination));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PaginatedIssues&&const DeepCollectionEquality().equals(other.items, _items)&&(identical(other.pagination, pagination) || other.pagination == pagination));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),pagination);
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),pagination);
+}
 
 @override
 String toString() {
-  return 'PaginatedIssues(items: $items, pagination: $pagination)';
+    return 'PaginatedIssues(items: $items, pagination: $pagination)';
 }
 
 

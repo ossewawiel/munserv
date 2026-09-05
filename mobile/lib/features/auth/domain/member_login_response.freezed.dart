@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'member_login_response.dart';
@@ -9,6 +9,7 @@ part of 'member_login_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $MemberLoginResponseCopyWith<MemberLoginResponse> get copyWith => _$MemberLoginR
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MemberLoginResponse&&(identical(other.memberId, memberId) || other.memberId == memberId)&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.expiresIn, expiresIn) || other.expiresIn == expiresIn)&&(identical(other.mustChangePassword, mustChangePassword) || other.mustChangePassword == mustChangePassword));
+  final _this = this as MemberLoginResponse;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MemberLoginResponse&&(identical(other.memberId, _this.memberId) || other.memberId == _this.memberId)&&(identical(other.accessToken, _this.accessToken) || other.accessToken == _this.accessToken)&&(identical(other.refreshToken, _this.refreshToken) || other.refreshToken == _this.refreshToken)&&(identical(other.expiresIn, _this.expiresIn) || other.expiresIn == _this.expiresIn)&&(identical(other.mustChangePassword, _this.mustChangePassword) || other.mustChangePassword == _this.mustChangePassword));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,memberId,accessToken,refreshToken,expiresIn,mustChangePassword);
+int get hashCode {
+  final _this = this as MemberLoginResponse;
+  return Object.hash(runtimeType,_this.memberId,_this.accessToken,_this.refreshToken,_this.expiresIn,_this.mustChangePassword);
+}
 
 @override
 String toString() {
-  return 'MemberLoginResponse(memberId: $memberId, accessToken: $accessToken, refreshToken: $refreshToken, expiresIn: $expiresIn, mustChangePassword: $mustChangePassword)';
+  final _this = this as MemberLoginResponse;
+  return 'MemberLoginResponse(memberId: ${_this.memberId}, accessToken: ${_this.accessToken}, refreshToken: ${_this.refreshToken}, expiresIn: ${_this.expiresIn}, mustChangePassword: ${_this.mustChangePassword})';
 }
 
 
@@ -66,7 +72,7 @@ class _$MemberLoginResponseCopyWithImpl<$Res>
 /// Create a copy of MemberLoginResponse
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? memberId = null,Object? accessToken = null,Object? refreshToken = null,Object? expiresIn = null,Object? mustChangePassword = null,}) {
-  return _then(_self.copyWith(
+  return _then(MemberLoginResponse(
 memberId: null == memberId ? _self.memberId : memberId // ignore: cast_nullable_to_non_nullable
 as String,accessToken: null == accessToken ? _self.accessToken : accessToken // ignore: cast_nullable_to_non_nullable
 as String,refreshToken: null == refreshToken ? _self.refreshToken : refreshToken // ignore: cast_nullable_to_non_nullable
@@ -235,16 +241,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MemberLoginResponse&&(identical(other.memberId, memberId) || other.memberId == memberId)&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.expiresIn, expiresIn) || other.expiresIn == expiresIn)&&(identical(other.mustChangePassword, mustChangePassword) || other.mustChangePassword == mustChangePassword));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MemberLoginResponse&&(identical(other.memberId, memberId) || other.memberId == memberId)&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.expiresIn, expiresIn) || other.expiresIn == expiresIn)&&(identical(other.mustChangePassword, mustChangePassword) || other.mustChangePassword == mustChangePassword));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,memberId,accessToken,refreshToken,expiresIn,mustChangePassword);
+int get hashCode {
+    return Object.hash(runtimeType,memberId,accessToken,refreshToken,expiresIn,mustChangePassword);
+}
 
 @override
 String toString() {
-  return 'MemberLoginResponse(memberId: $memberId, accessToken: $accessToken, refreshToken: $refreshToken, expiresIn: $expiresIn, mustChangePassword: $mustChangePassword)';
+    return 'MemberLoginResponse(memberId: $memberId, accessToken: $accessToken, refreshToken: $refreshToken, expiresIn: $expiresIn, mustChangePassword: $mustChangePassword)';
 }
 
 

@@ -23,7 +23,6 @@ part 'auth_providers.g.dart';
 @riverpod
 FlutterSecureStorage flutterSecureStorage(Ref ref) {
   return const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 }

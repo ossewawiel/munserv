@@ -11,7 +11,7 @@ part of 'biometric_service.dart';
 /// Provider for BiometricService
 
 @ProviderFor(biometricService)
-const biometricServiceProvider = BiometricServiceProvider._();
+final biometricServiceProvider = BiometricServiceProvider._();
 
 /// Provider for BiometricService
 
@@ -24,7 +24,7 @@ final class BiometricServiceProvider
         >
     with $Provider<BiometricService> {
   /// Provider for BiometricService
-  const BiometricServiceProvider._()
+  BiometricServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -62,7 +62,7 @@ String _$biometricServiceHash() => r'd13b3194e57bb984c452857712b3300be3bc3346';
 /// Provider for checking if biometrics are available
 
 @ProviderFor(isBiometricAvailable)
-const isBiometricAvailableProvider = IsBiometricAvailableProvider._();
+final isBiometricAvailableProvider = IsBiometricAvailableProvider._();
 
 /// Provider for checking if biometrics are available
 
@@ -70,7 +70,7 @@ final class IsBiometricAvailableProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
     with $FutureModifier<bool>, $FutureProvider<bool> {
   /// Provider for checking if biometrics are available
-  const IsBiometricAvailableProvider._()
+  IsBiometricAvailableProvider._()
     : super(
         from: null,
         argument: null,

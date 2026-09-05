@@ -12,7 +12,7 @@ part of 'issue_providers.dart';
 /// keepAlive: true to prevent disposal/recreation cycles
 
 @ProviderFor(issueApi)
-const issueApiProvider = IssueApiProvider._();
+final issueApiProvider = IssueApiProvider._();
 
 /// Provides IssueApi
 /// keepAlive: true to prevent disposal/recreation cycles
@@ -22,7 +22,7 @@ final class IssueApiProvider
     with $Provider<IssueApi> {
   /// Provides IssueApi
   /// keepAlive: true to prevent disposal/recreation cycles
-  const IssueApiProvider._()
+  IssueApiProvider._()
     : super(
         from: null,
         argument: null,
@@ -61,7 +61,7 @@ String _$issueApiHash() => r'5a369a3e67089e2efc45633aafcde6db6cda5f3b';
 /// keepAlive: true to prevent disposal/recreation cycles
 
 @ProviderFor(issueRepository)
-const issueRepositoryProvider = IssueRepositoryProvider._();
+final issueRepositoryProvider = IssueRepositoryProvider._();
 
 /// Provides IssueRepository
 /// keepAlive: true to prevent disposal/recreation cycles
@@ -72,7 +72,7 @@ final class IssueRepositoryProvider
     with $Provider<IssueRepository> {
   /// Provides IssueRepository
   /// keepAlive: true to prevent disposal/recreation cycles
-  const IssueRepositoryProvider._()
+  IssueRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -111,7 +111,7 @@ String _$issueRepositoryHash() => r'3f9c733584e68535569139a978dd7462de47e842';
 /// keepAlive prevents disposal/recreation cycles that cause infinite fetch loops
 
 @ProviderFor(IssueFilterState)
-const issueFilterStateProvider = IssueFilterStateProvider._();
+final issueFilterStateProvider = IssueFilterStateProvider._();
 
 /// Current issue filter state - can be modified by UI
 /// keepAlive prevents disposal/recreation cycles that cause infinite fetch loops
@@ -119,7 +119,7 @@ final class IssueFilterStateProvider
     extends $NotifierProvider<IssueFilterState, IssueFilter> {
   /// Current issue filter state - can be modified by UI
   /// keepAlive prevents disposal/recreation cycles that cause infinite fetch loops
-  const IssueFilterStateProvider._()
+  IssueFilterStateProvider._()
     : super(
         from: null,
         argument: null,
@@ -155,8 +155,7 @@ abstract class _$IssueFilterState extends $Notifier<IssueFilter> {
   IssueFilter build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<IssueFilter, IssueFilter>;
     final element =
         ref.element
@@ -166,7 +165,7 @@ abstract class _$IssueFilterState extends $Notifier<IssueFilter> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -174,7 +173,7 @@ abstract class _$IssueFilterState extends $Notifier<IssueFilter> {
 /// Uses AsyncNotifier pattern for better control over state transitions
 
 @ProviderFor(IssuesNotifier)
-const issuesProvider = IssuesNotifierProvider._();
+final issuesProvider = IssuesNotifierProvider._();
 
 /// Manages issue list data with explicit state control
 /// Uses AsyncNotifier pattern for better control over state transitions
@@ -182,7 +181,7 @@ final class IssuesNotifierProvider
     extends $AsyncNotifierProvider<IssuesNotifier, PaginatedIssueSummaries> {
   /// Manages issue list data with explicit state control
   /// Uses AsyncNotifier pattern for better control over state transitions
-  const IssuesNotifierProvider._()
+  IssuesNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -211,8 +210,7 @@ abstract class _$IssuesNotifier
   FutureOr<PaginatedIssueSummaries> build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<
@@ -230,7 +228,7 @@ abstract class _$IssuesNotifier
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -238,7 +236,7 @@ abstract class _$IssuesNotifier
 /// keepAlive: true prevents refetch when navigating between detail sub-pages
 
 @ProviderFor(issueDetail)
-const issueDetailProvider = IssueDetailFamily._();
+final issueDetailProvider = IssueDetailFamily._();
 
 /// Fetches a single issue detail by ID
 /// keepAlive: true prevents refetch when navigating between detail sub-pages
@@ -253,7 +251,7 @@ final class IssueDetailProvider
     with $FutureModifier<IssueDetail>, $FutureProvider<IssueDetail> {
   /// Fetches a single issue detail by ID
   /// keepAlive: true prevents refetch when navigating between detail sub-pages
-  const IssueDetailProvider._({
+  IssueDetailProvider._({
     required IssueDetailFamily super.from,
     required String super.argument,
   }) : super(
@@ -304,7 +302,7 @@ String _$issueDetailHash() => r'6247872d2e627e35473af2c04f3231b0f7a56d4a';
 
 final class IssueDetailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<IssueDetail>, String> {
-  const IssueDetailFamily._()
+  IssueDetailFamily._()
     : super(
         retry: null,
         name: r'issueDetailProvider',
@@ -326,7 +324,7 @@ final class IssueDetailFamily extends $Family
 /// Fetches full Issue model by ID (for map markers)
 
 @ProviderFor(issueFull)
-const issueFullProvider = IssueFullFamily._();
+final issueFullProvider = IssueFullFamily._();
 
 /// Fetches full Issue model by ID (for map markers)
 
@@ -334,7 +332,7 @@ final class IssueFullProvider
     extends $FunctionalProvider<AsyncValue<Issue>, Issue, FutureOr<Issue>>
     with $FutureModifier<Issue>, $FutureProvider<Issue> {
   /// Fetches full Issue model by ID (for map markers)
-  const IssueFullProvider._({
+  IssueFullProvider._({
     required IssueFullFamily super.from,
     required String super.argument,
   }) : super(
@@ -383,7 +381,7 @@ String _$issueFullHash() => r'a00fd3dad32d6069c76816ff4b6767938315e582';
 
 final class IssueFullFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Issue>, String> {
-  const IssueFullFamily._()
+  IssueFullFamily._()
     : super(
         retry: null,
         name: r'issueFullProvider',
@@ -404,7 +402,7 @@ final class IssueFullFamily extends $Family
 /// Fetches issues reported by the current user
 
 @ProviderFor(myIssues)
-const myIssuesProvider = MyIssuesFamily._();
+final myIssuesProvider = MyIssuesFamily._();
 
 /// Fetches issues reported by the current user
 
@@ -419,7 +417,7 @@ final class MyIssuesProvider
         $FutureModifier<PaginatedIssueSummaries>,
         $FutureProvider<PaginatedIssueSummaries> {
   /// Fetches issues reported by the current user
-  const MyIssuesProvider._({
+  MyIssuesProvider._({
     required MyIssuesFamily super.from,
     required int super.argument,
   }) : super(
@@ -469,7 +467,7 @@ String _$myIssuesHash() => r'73e56ed328149339ae5aa89d41d1ab8f20705e97';
 
 final class MyIssuesFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<PaginatedIssueSummaries>, int> {
-  const MyIssuesFamily._()
+  MyIssuesFamily._()
     : super(
         retry: null,
         name: r'myIssuesProvider',
@@ -490,7 +488,7 @@ final class MyIssuesFamily extends $Family
 /// Provides all issues as a flat list (for map display)
 
 @ProviderFor(allIssuesList)
-const allIssuesListProvider = AllIssuesListProvider._();
+final allIssuesListProvider = AllIssuesListProvider._();
 
 /// Provides all issues as a flat list (for map display)
 
@@ -505,7 +503,7 @@ final class AllIssuesListProvider
         $FutureModifier<List<IssueSummary>>,
         $FutureProvider<List<IssueSummary>> {
   /// Provides all issues as a flat list (for map display)
-  const AllIssuesListProvider._()
+  AllIssuesListProvider._()
     : super(
         from: null,
         argument: null,
@@ -537,7 +535,7 @@ String _$allIssuesListHash() => r'9f393c1a00c1e754be58d6086a0d603f06861034';
 /// keepAlive to prevent disposal during async operations
 
 @ProviderFor(ReportIssueNotifier)
-const reportIssueProvider = ReportIssueNotifierProvider._();
+final reportIssueProvider = ReportIssueNotifierProvider._();
 
 /// Manages issue reporting
 /// keepAlive to prevent disposal during async operations
@@ -545,7 +543,7 @@ final class ReportIssueNotifierProvider
     extends $NotifierProvider<ReportIssueNotifier, ReportIssueState> {
   /// Manages issue reporting
   /// keepAlive to prevent disposal during async operations
-  const ReportIssueNotifierProvider._()
+  ReportIssueNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -582,8 +580,7 @@ abstract class _$ReportIssueNotifier extends $Notifier<ReportIssueState> {
   ReportIssueState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<ReportIssueState, ReportIssueState>;
     final element =
         ref.element
@@ -593,21 +590,21 @@ abstract class _$ReportIssueNotifier extends $Notifier<ReportIssueState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 /// Whether we have any issues loaded
 
 @ProviderFor(hasIssues)
-const hasIssuesProvider = HasIssuesProvider._();
+final hasIssuesProvider = HasIssuesProvider._();
 
 /// Whether we have any issues loaded
 
 final class HasIssuesProvider extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
   /// Whether we have any issues loaded
-  const HasIssuesProvider._()
+  HasIssuesProvider._()
     : super(
         from: null,
         argument: null,
@@ -645,7 +642,7 @@ String _$hasIssuesHash() => r'3b5db1bc112e4bb31efbaa371c134289c017b24c';
 /// Total issue count from pagination
 
 @ProviderFor(totalIssueCount)
-const totalIssueCountProvider = TotalIssueCountProvider._();
+final totalIssueCountProvider = TotalIssueCountProvider._();
 
 /// Total issue count from pagination
 
@@ -653,7 +650,7 @@ final class TotalIssueCountProvider
     extends $FunctionalProvider<int?, int?, int?>
     with $Provider<int?> {
   /// Total issue count from pagination
-  const TotalIssueCountProvider._()
+  TotalIssueCountProvider._()
     : super(
         from: null,
         argument: null,
@@ -691,7 +688,7 @@ String _$totalIssueCountHash() => r'b2f000c1694422d270cdea3edddcfa6b95ff3e2b';
 /// Current page info
 
 @ProviderFor(currentPagination)
-const currentPaginationProvider = CurrentPaginationProvider._();
+final currentPaginationProvider = CurrentPaginationProvider._();
 
 /// Current page info
 
@@ -699,7 +696,7 @@ final class CurrentPaginationProvider
     extends $FunctionalProvider<Pagination?, Pagination?, Pagination?>
     with $Provider<Pagination?> {
   /// Current page info
-  const CurrentPaginationProvider._()
+  CurrentPaginationProvider._()
     : super(
         from: null,
         argument: null,

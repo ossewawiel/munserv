@@ -11,7 +11,7 @@ part of 'location_service.dart';
 /// Provider for LocationService
 
 @ProviderFor(locationService)
-const locationServiceProvider = LocationServiceProvider._();
+final locationServiceProvider = LocationServiceProvider._();
 
 /// Provider for LocationService
 
@@ -20,7 +20,7 @@ final class LocationServiceProvider
         $FunctionalProvider<LocationService, LocationService, LocationService>
     with $Provider<LocationService> {
   /// Provider for LocationService
-  const LocationServiceProvider._()
+  LocationServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -58,7 +58,7 @@ String _$locationServiceHash() => r'38d15292e1d1d4553c8f07a36b00411aa0a8d30e';
 /// Provider for getting current location (one-time fetch)
 
 @ProviderFor(currentLocation)
-const currentLocationProvider = CurrentLocationProvider._();
+final currentLocationProvider = CurrentLocationProvider._();
 
 /// Provider for getting current location (one-time fetch)
 
@@ -71,7 +71,7 @@ final class CurrentLocationProvider
         >
     with $FutureModifier<GeoPoint?>, $FutureProvider<GeoPoint?> {
   /// Provider for getting current location (one-time fetch)
-  const CurrentLocationProvider._()
+  CurrentLocationProvider._()
     : super(
         from: null,
         argument: null,

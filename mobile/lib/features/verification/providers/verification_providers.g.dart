@@ -11,7 +11,7 @@ part of 'verification_providers.dart';
 /// Provides VerificationApi
 
 @ProviderFor(verificationApi)
-const verificationApiProvider = VerificationApiProvider._();
+final verificationApiProvider = VerificationApiProvider._();
 
 /// Provides VerificationApi
 
@@ -20,7 +20,7 @@ final class VerificationApiProvider
         $FunctionalProvider<VerificationApi, VerificationApi, VerificationApi>
     with $Provider<VerificationApi> {
   /// Provides VerificationApi
-  const VerificationApiProvider._()
+  VerificationApiProvider._()
     : super(
         from: null,
         argument: null,
@@ -58,7 +58,7 @@ String _$verificationApiHash() => r'cfd692c6a5d1bb46cc7d92377dc806e8db9a03e3';
 /// Provides VerificationRepository
 
 @ProviderFor(verificationRepository)
-const verificationRepositoryProvider = VerificationRepositoryProvider._();
+final verificationRepositoryProvider = VerificationRepositoryProvider._();
 
 /// Provides VerificationRepository
 
@@ -71,7 +71,7 @@ final class VerificationRepositoryProvider
         >
     with $Provider<VerificationRepository> {
   /// Provides VerificationRepository
-  const VerificationRepositoryProvider._()
+  VerificationRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -111,7 +111,7 @@ String _$verificationRepositoryHash() =>
 /// Pending verifications for current Ground Admin
 
 @ProviderFor(PendingVerificationsNotifier)
-const pendingVerificationsProvider = PendingVerificationsNotifierProvider._();
+final pendingVerificationsProvider = PendingVerificationsNotifierProvider._();
 
 /// Pending verifications for current Ground Admin
 final class PendingVerificationsNotifierProvider
@@ -121,7 +121,7 @@ final class PendingVerificationsNotifierProvider
           List<PendingVerification>
         > {
   /// Pending verifications for current Ground Admin
-  const PendingVerificationsNotifierProvider._()
+  PendingVerificationsNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -150,8 +150,7 @@ abstract class _$PendingVerificationsNotifier
   FutureOr<List<PendingVerification>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<
@@ -169,14 +168,14 @@ abstract class _$PendingVerificationsNotifier
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 /// Count of pending verifications
 
 @ProviderFor(pendingVerificationCount)
-const pendingVerificationCountProvider = PendingVerificationCountProvider._();
+final pendingVerificationCountProvider = PendingVerificationCountProvider._();
 
 /// Count of pending verifications
 
@@ -184,7 +183,7 @@ final class PendingVerificationCountProvider
     extends $FunctionalProvider<int, int, int>
     with $Provider<int> {
   /// Count of pending verifications
-  const PendingVerificationCountProvider._()
+  PendingVerificationCountProvider._()
     : super(
         from: null,
         argument: null,
@@ -218,19 +217,19 @@ final class PendingVerificationCountProvider
 }
 
 String _$pendingVerificationCountHash() =>
-    r'6b7bfef72df78754692e2555c5e2356ba7bb5583';
+    r'f932f4f5003c67f3a3ba4a39154643ab6af37a40';
 
 /// Manages verification submission
 
 @ProviderFor(VerificationSubmitNotifier)
-const verificationSubmitProvider = VerificationSubmitNotifierProvider._();
+final verificationSubmitProvider = VerificationSubmitNotifierProvider._();
 
 /// Manages verification submission
 final class VerificationSubmitNotifierProvider
     extends
         $NotifierProvider<VerificationSubmitNotifier, VerificationSubmitState> {
   /// Manages verification submission
-  const VerificationSubmitNotifierProvider._()
+  VerificationSubmitNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -258,7 +257,7 @@ final class VerificationSubmitNotifierProvider
 }
 
 String _$verificationSubmitNotifierHash() =>
-    r'43ae4ea3acccc988a2fe4c8098393786f16ea884';
+    r'3c60e1acd59450a114328d6cc3880bb6a1276be3';
 
 /// Manages verification submission
 
@@ -267,8 +266,7 @@ abstract class _$VerificationSubmitNotifier
   VerificationSubmitState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<VerificationSubmitState, VerificationSubmitState>;
     final element =
@@ -279,14 +277,14 @@ abstract class _$VerificationSubmitNotifier
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 /// Verification history for a specific issue
 
 @ProviderFor(verificationHistory)
-const verificationHistoryProvider = VerificationHistoryFamily._();
+final verificationHistoryProvider = VerificationHistoryFamily._();
 
 /// Verification history for a specific issue
 
@@ -301,7 +299,7 @@ final class VerificationHistoryProvider
         $FutureModifier<List<IssueVerification>>,
         $FutureProvider<List<IssueVerification>> {
   /// Verification history for a specific issue
-  const VerificationHistoryProvider._({
+  VerificationHistoryProvider._({
     required VerificationHistoryFamily super.from,
     required String super.argument,
   }) : super(
@@ -352,7 +350,7 @@ String _$verificationHistoryHash() =>
 
 final class VerificationHistoryFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<IssueVerification>>, String> {
-  const VerificationHistoryFamily._()
+  VerificationHistoryFamily._()
     : super(
         retry: null,
         name: r'verificationHistoryProvider',
@@ -373,7 +371,7 @@ final class VerificationHistoryFamily extends $Family
 /// User's notification settings
 
 @ProviderFor(NotificationSettingsNotifier)
-const notificationSettingsProvider = NotificationSettingsNotifierProvider._();
+final notificationSettingsProvider = NotificationSettingsNotifierProvider._();
 
 /// User's notification settings
 final class NotificationSettingsNotifierProvider
@@ -383,7 +381,7 @@ final class NotificationSettingsNotifierProvider
           NotificationSettings
         > {
   /// User's notification settings
-  const NotificationSettingsNotifierProvider._()
+  NotificationSettingsNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -403,7 +401,7 @@ final class NotificationSettingsNotifierProvider
 }
 
 String _$notificationSettingsNotifierHash() =>
-    r'64eb7f582a1758e5664e31e27b17c878b8846536';
+    r'859e8900cc1c6a8ece86c583357f626bb56f04aa';
 
 /// User's notification settings
 
@@ -412,8 +410,7 @@ abstract class _$NotificationSettingsNotifier
   FutureOr<NotificationSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<NotificationSettings>, NotificationSettings>;
@@ -428,6 +425,6 @@ abstract class _$NotificationSettingsNotifier
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }

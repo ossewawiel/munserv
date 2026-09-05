@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'verification.dart';
@@ -9,6 +9,7 @@ part of 'verification.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $PendingVerificationCopyWith<PendingVerification> get copyWith => _$PendingVerif
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PendingVerification&&(identical(other.verificationId, verificationId) || other.verificationId == verificationId)&&(identical(other.issueId, issueId) || other.issueId == issueId)&&(identical(other.issueType, issueType) || other.issueType == issueType)&&(identical(other.verificationType, verificationType) || other.verificationType == verificationType)&&(identical(other.location, location) || other.location == location)&&(identical(other.requestedAt, requestedAt) || other.requestedAt == requestedAt)&&(identical(other.distance, distance) || other.distance == distance));
+  final _this = this as PendingVerification;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PendingVerification&&(identical(other.verificationId, _this.verificationId) || other.verificationId == _this.verificationId)&&(identical(other.issueId, _this.issueId) || other.issueId == _this.issueId)&&(identical(other.issueType, _this.issueType) || other.issueType == _this.issueType)&&(identical(other.verificationType, _this.verificationType) || other.verificationType == _this.verificationType)&&(identical(other.location, _this.location) || other.location == _this.location)&&(identical(other.requestedAt, _this.requestedAt) || other.requestedAt == _this.requestedAt)&&(identical(other.distance, _this.distance) || other.distance == _this.distance));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,verificationId,issueId,issueType,verificationType,location,requestedAt,distance);
+int get hashCode {
+  final _this = this as PendingVerification;
+  return Object.hash(runtimeType,_this.verificationId,_this.issueId,_this.issueType,_this.verificationType,_this.location,_this.requestedAt,_this.distance);
+}
 
 @override
 String toString() {
-  return 'PendingVerification(verificationId: $verificationId, issueId: $issueId, issueType: $issueType, verificationType: $verificationType, location: $location, requestedAt: $requestedAt, distance: $distance)';
+  final _this = this as PendingVerification;
+  return 'PendingVerification(verificationId: ${_this.verificationId}, issueId: ${_this.issueId}, issueType: ${_this.issueType}, verificationType: ${_this.verificationType}, location: ${_this.location}, requestedAt: ${_this.requestedAt}, distance: ${_this.distance})';
 }
 
 
@@ -66,7 +72,7 @@ class _$PendingVerificationCopyWithImpl<$Res>
 /// Create a copy of PendingVerification
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? verificationId = null,Object? issueId = null,Object? issueType = null,Object? verificationType = null,Object? location = null,Object? requestedAt = null,Object? distance = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(PendingVerification(
 verificationId: null == verificationId ? _self.verificationId : verificationId // ignore: cast_nullable_to_non_nullable
 as String,issueId: null == issueId ? _self.issueId : issueId // ignore: cast_nullable_to_non_nullable
 as String,issueType: null == issueType ? _self.issueType : issueType // ignore: cast_nullable_to_non_nullable
@@ -248,16 +254,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PendingVerification&&(identical(other.verificationId, verificationId) || other.verificationId == verificationId)&&(identical(other.issueId, issueId) || other.issueId == issueId)&&(identical(other.issueType, issueType) || other.issueType == issueType)&&(identical(other.verificationType, verificationType) || other.verificationType == verificationType)&&(identical(other.location, location) || other.location == location)&&(identical(other.requestedAt, requestedAt) || other.requestedAt == requestedAt)&&(identical(other.distance, distance) || other.distance == distance));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PendingVerification&&(identical(other.verificationId, verificationId) || other.verificationId == verificationId)&&(identical(other.issueId, issueId) || other.issueId == issueId)&&(identical(other.issueType, issueType) || other.issueType == issueType)&&(identical(other.verificationType, verificationType) || other.verificationType == verificationType)&&(identical(other.location, location) || other.location == location)&&(identical(other.requestedAt, requestedAt) || other.requestedAt == requestedAt)&&(identical(other.distance, distance) || other.distance == distance));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,verificationId,issueId,issueType,verificationType,location,requestedAt,distance);
+int get hashCode {
+    return Object.hash(runtimeType,verificationId,issueId,issueType,verificationType,location,requestedAt,distance);
+}
 
 @override
 String toString() {
-  return 'PendingVerification(verificationId: $verificationId, issueId: $issueId, issueType: $issueType, verificationType: $verificationType, location: $location, requestedAt: $requestedAt, distance: $distance)';
+    return 'PendingVerification(verificationId: $verificationId, issueId: $issueId, issueType: $issueType, verificationType: $verificationType, location: $location, requestedAt: $requestedAt, distance: $distance)';
 }
 
 
@@ -327,16 +335,21 @@ $VerificationSubmitRequestCopyWith<VerificationSubmitRequest> get copyWith => _$
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VerificationSubmitRequest&&(identical(other.verificationId, verificationId) || other.verificationId == verificationId)&&(identical(other.result, result) || other.result == result)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.note, note) || other.note == note)&&(identical(other.photoId, photoId) || other.photoId == photoId));
+  final _this = this as VerificationSubmitRequest;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VerificationSubmitRequest&&(identical(other.verificationId, _this.verificationId) || other.verificationId == _this.verificationId)&&(identical(other.result, _this.result) || other.result == _this.result)&&(identical(other.reason, _this.reason) || other.reason == _this.reason)&&(identical(other.note, _this.note) || other.note == _this.note)&&(identical(other.photoId, _this.photoId) || other.photoId == _this.photoId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,verificationId,result,reason,note,photoId);
+int get hashCode {
+  final _this = this as VerificationSubmitRequest;
+  return Object.hash(runtimeType,_this.verificationId,_this.result,_this.reason,_this.note,_this.photoId);
+}
 
 @override
 String toString() {
-  return 'VerificationSubmitRequest(verificationId: $verificationId, result: $result, reason: $reason, note: $note, photoId: $photoId)';
+  final _this = this as VerificationSubmitRequest;
+  return 'VerificationSubmitRequest(verificationId: ${_this.verificationId}, result: ${_this.result}, reason: ${_this.reason}, note: ${_this.note}, photoId: ${_this.photoId})';
 }
 
 
@@ -365,7 +378,7 @@ class _$VerificationSubmitRequestCopyWithImpl<$Res>
 /// Create a copy of VerificationSubmitRequest
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? verificationId = null,Object? result = null,Object? reason = freezed,Object? note = freezed,Object? photoId = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(VerificationSubmitRequest(
 verificationId: null == verificationId ? _self.verificationId : verificationId // ignore: cast_nullable_to_non_nullable
 as String,result: null == result ? _self.result : result // ignore: cast_nullable_to_non_nullable
 as String,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
@@ -534,16 +547,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VerificationSubmitRequest&&(identical(other.verificationId, verificationId) || other.verificationId == verificationId)&&(identical(other.result, result) || other.result == result)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.note, note) || other.note == note)&&(identical(other.photoId, photoId) || other.photoId == photoId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VerificationSubmitRequest&&(identical(other.verificationId, verificationId) || other.verificationId == verificationId)&&(identical(other.result, result) || other.result == result)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.note, note) || other.note == note)&&(identical(other.photoId, photoId) || other.photoId == photoId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,verificationId,result,reason,note,photoId);
+int get hashCode {
+    return Object.hash(runtimeType,verificationId,result,reason,note,photoId);
+}
 
 @override
 String toString() {
-  return 'VerificationSubmitRequest(verificationId: $verificationId, result: $result, reason: $reason, note: $note, photoId: $photoId)';
+    return 'VerificationSubmitRequest(verificationId: $verificationId, result: $result, reason: $reason, note: $note, photoId: $photoId)';
 }
 
 
@@ -602,16 +617,21 @@ $IssueVerificationCopyWith<IssueVerification> get copyWith => _$IssueVerificatio
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IssueVerification&&(identical(other.id, id) || other.id == id)&&(identical(other.issueId, issueId) || other.issueId == issueId)&&(identical(other.verificationType, verificationType) || other.verificationType == verificationType)&&(identical(other.assignedTo, assignedTo) || other.assignedTo == assignedTo)&&(identical(other.verifiedBy, verifiedBy) || other.verifiedBy == verifiedBy)&&(identical(other.result, result) || other.result == result)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.note, note) || other.note == note)&&(identical(other.photoId, photoId) || other.photoId == photoId)&&(identical(other.requestedAt, requestedAt) || other.requestedAt == requestedAt)&&(identical(other.respondedAt, respondedAt) || other.respondedAt == respondedAt)&&(identical(other.status, status) || other.status == status));
+  final _this = this as IssueVerification;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is IssueVerification&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.issueId, _this.issueId) || other.issueId == _this.issueId)&&(identical(other.verificationType, _this.verificationType) || other.verificationType == _this.verificationType)&&(identical(other.assignedTo, _this.assignedTo) || other.assignedTo == _this.assignedTo)&&(identical(other.verifiedBy, _this.verifiedBy) || other.verifiedBy == _this.verifiedBy)&&(identical(other.result, _this.result) || other.result == _this.result)&&(identical(other.reason, _this.reason) || other.reason == _this.reason)&&(identical(other.note, _this.note) || other.note == _this.note)&&(identical(other.photoId, _this.photoId) || other.photoId == _this.photoId)&&(identical(other.requestedAt, _this.requestedAt) || other.requestedAt == _this.requestedAt)&&(identical(other.respondedAt, _this.respondedAt) || other.respondedAt == _this.respondedAt)&&(identical(other.status, _this.status) || other.status == _this.status));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,issueId,verificationType,assignedTo,verifiedBy,result,reason,note,photoId,requestedAt,respondedAt,status);
+int get hashCode {
+  final _this = this as IssueVerification;
+  return Object.hash(runtimeType,_this.id,_this.issueId,_this.verificationType,_this.assignedTo,_this.verifiedBy,_this.result,_this.reason,_this.note,_this.photoId,_this.requestedAt,_this.respondedAt,_this.status);
+}
 
 @override
 String toString() {
-  return 'IssueVerification(id: $id, issueId: $issueId, verificationType: $verificationType, assignedTo: $assignedTo, verifiedBy: $verifiedBy, result: $result, reason: $reason, note: $note, photoId: $photoId, requestedAt: $requestedAt, respondedAt: $respondedAt, status: $status)';
+  final _this = this as IssueVerification;
+  return 'IssueVerification(id: ${_this.id}, issueId: ${_this.issueId}, verificationType: ${_this.verificationType}, assignedTo: ${_this.assignedTo}, verifiedBy: ${_this.verifiedBy}, result: ${_this.result}, reason: ${_this.reason}, note: ${_this.note}, photoId: ${_this.photoId}, requestedAt: ${_this.requestedAt}, respondedAt: ${_this.respondedAt}, status: ${_this.status})';
 }
 
 
@@ -640,7 +660,7 @@ class _$IssueVerificationCopyWithImpl<$Res>
 /// Create a copy of IssueVerification
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? issueId = null,Object? verificationType = null,Object? assignedTo = freezed,Object? verifiedBy = freezed,Object? result = freezed,Object? reason = freezed,Object? note = freezed,Object? photoId = freezed,Object? requestedAt = null,Object? respondedAt = freezed,Object? status = null,}) {
-  return _then(_self.copyWith(
+  return _then(IssueVerification(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,issueId: null == issueId ? _self.issueId : issueId // ignore: cast_nullable_to_non_nullable
 as String,verificationType: null == verificationType ? _self.verificationType : verificationType // ignore: cast_nullable_to_non_nullable
@@ -823,16 +843,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _IssueVerification&&(identical(other.id, id) || other.id == id)&&(identical(other.issueId, issueId) || other.issueId == issueId)&&(identical(other.verificationType, verificationType) || other.verificationType == verificationType)&&(identical(other.assignedTo, assignedTo) || other.assignedTo == assignedTo)&&(identical(other.verifiedBy, verifiedBy) || other.verifiedBy == verifiedBy)&&(identical(other.result, result) || other.result == result)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.note, note) || other.note == note)&&(identical(other.photoId, photoId) || other.photoId == photoId)&&(identical(other.requestedAt, requestedAt) || other.requestedAt == requestedAt)&&(identical(other.respondedAt, respondedAt) || other.respondedAt == respondedAt)&&(identical(other.status, status) || other.status == status));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IssueVerification&&(identical(other.id, id) || other.id == id)&&(identical(other.issueId, issueId) || other.issueId == issueId)&&(identical(other.verificationType, verificationType) || other.verificationType == verificationType)&&(identical(other.assignedTo, assignedTo) || other.assignedTo == assignedTo)&&(identical(other.verifiedBy, verifiedBy) || other.verifiedBy == verifiedBy)&&(identical(other.result, result) || other.result == result)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.note, note) || other.note == note)&&(identical(other.photoId, photoId) || other.photoId == photoId)&&(identical(other.requestedAt, requestedAt) || other.requestedAt == requestedAt)&&(identical(other.respondedAt, respondedAt) || other.respondedAt == respondedAt)&&(identical(other.status, status) || other.status == status));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,issueId,verificationType,assignedTo,verifiedBy,result,reason,note,photoId,requestedAt,respondedAt,status);
+int get hashCode {
+    return Object.hash(runtimeType,id,issueId,verificationType,assignedTo,verifiedBy,result,reason,note,photoId,requestedAt,respondedAt,status);
+}
 
 @override
 String toString() {
-  return 'IssueVerification(id: $id, issueId: $issueId, verificationType: $verificationType, assignedTo: $assignedTo, verifiedBy: $verifiedBy, result: $result, reason: $reason, note: $note, photoId: $photoId, requestedAt: $requestedAt, respondedAt: $respondedAt, status: $status)';
+    return 'IssueVerification(id: $id, issueId: $issueId, verificationType: $verificationType, assignedTo: $assignedTo, verifiedBy: $verifiedBy, result: $result, reason: $reason, note: $note, photoId: $photoId, requestedAt: $requestedAt, respondedAt: $respondedAt, status: $status)';
 }
 
 
@@ -898,16 +920,21 @@ $PendingVerificationsResponseCopyWith<PendingVerificationsResponse> get copyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PendingVerificationsResponse&&const DeepCollectionEquality().equals(other.items, items));
+  final _this = this as PendingVerificationsResponse;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PendingVerificationsResponse&&const DeepCollectionEquality().equals(other.items, _this.items));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items));
+int get hashCode {
+  final _this = this as PendingVerificationsResponse;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.items));
+}
 
 @override
 String toString() {
-  return 'PendingVerificationsResponse(items: $items)';
+  final _this = this as PendingVerificationsResponse;
+  return 'PendingVerificationsResponse(items: ${_this.items})';
 }
 
 
@@ -936,7 +963,7 @@ class _$PendingVerificationsResponseCopyWithImpl<$Res>
 /// Create a copy of PendingVerificationsResponse
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? items = null,}) {
-  return _then(_self.copyWith(
+  return _then(PendingVerificationsResponse(
 items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<PendingVerification>,
   ));
@@ -1079,7 +1106,7 @@ return $default(_that.items);case _:
 @JsonSerializable()
 
 class _PendingVerificationsResponse implements PendingVerificationsResponse {
-  const _PendingVerificationsResponse({required final  List<PendingVerification> items}): _items = items;
+  const _PendingVerificationsResponse({required  List<PendingVerification> items}): _items = items;
   factory _PendingVerificationsResponse.fromJson(Map<String, dynamic> json) => _$PendingVerificationsResponseFromJson(json);
 
  final  List<PendingVerification> _items;
@@ -1103,16 +1130,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PendingVerificationsResponse&&const DeepCollectionEquality().equals(other._items, _items));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PendingVerificationsResponse&&const DeepCollectionEquality().equals(other.items, _items));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_items));
+}
 
 @override
 String toString() {
-  return 'PendingVerificationsResponse(items: $items)';
+    return 'PendingVerificationsResponse(items: $items)';
 }
 
 

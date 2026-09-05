@@ -37,7 +37,6 @@ Dio dio(Ref ref) {
   // Create secure storage directly to avoid circular dependency
   // (authNotifier -> authRepository -> authApi -> dio -> authNotifier)
   const storage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 

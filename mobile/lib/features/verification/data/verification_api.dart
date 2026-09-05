@@ -45,9 +45,9 @@ class VerificationApi {
       data: {
         'verificationId': verificationId,
         'result': result,
-        if (reason != null) 'reason': reason,
-        if (note != null) 'note': note,
-        if (photoId != null) 'photoId': photoId,
+        'reason': ?reason,
+        'note': ?note,
+        'photoId': ?photoId,
       },
     );
     return IssueVerification.fromJson(response.data as Map<String, dynamic>);

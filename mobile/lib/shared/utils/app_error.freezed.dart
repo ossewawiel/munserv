@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'app_error.dart';
@@ -9,6 +9,7 @@ part of 'app_error.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
@@ -25,16 +26,21 @@ $AppErrorCopyWith<AppError> get copyWith => _$AppErrorCopyWithImpl<AppError>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppError&&(identical(other.message, message) || other.message == message));
+  final _this = this as AppError;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppError&&(identical(other.message, _this.message) || other.message == _this.message));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message);
+int get hashCode {
+  final _this = this as AppError;
+  return Object.hash(runtimeType,_this.message);
+}
 
 @override
 String toString() {
-  return 'AppError(message: $message)';
+  final _this = this as AppError;
+  return 'AppError(message: ${_this.message})';
 }
 
 
@@ -252,16 +258,18 @@ $NetworkErrorCopyWith<NetworkError> get copyWith => _$NetworkErrorCopyWithImpl<N
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NetworkError&&(identical(other.message, message) || other.message == message)&&(identical(other.statusCode, statusCode) || other.statusCode == statusCode));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NetworkError&&(identical(other.message, message) || other.message == message)&&(identical(other.statusCode, statusCode) || other.statusCode == statusCode));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message,statusCode);
+int get hashCode {
+    return Object.hash(runtimeType,message,statusCode);
+}
 
 @override
 String toString() {
-  return 'AppError.network(message: $message, statusCode: $statusCode)';
+    return 'AppError.network(message: $message, statusCode: $statusCode)';
 }
 
 
@@ -320,16 +328,18 @@ $ValidationErrorCopyWith<ValidationError> get copyWith => _$ValidationErrorCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ValidationError&&(identical(other.message, message) || other.message == message)&&(identical(other.field, field) || other.field == field));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ValidationError&&(identical(other.message, message) || other.message == message)&&(identical(other.field, field) || other.field == field));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message,field);
+int get hashCode {
+    return Object.hash(runtimeType,message,field);
+}
 
 @override
 String toString() {
-  return 'AppError.validation(message: $message, field: $field)';
+    return 'AppError.validation(message: $message, field: $field)';
 }
 
 
@@ -387,16 +397,18 @@ $UnauthorizedErrorCopyWith<UnauthorizedError> get copyWith => _$UnauthorizedErro
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UnauthorizedError&&(identical(other.message, message) || other.message == message));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is UnauthorizedError&&(identical(other.message, message) || other.message == message));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message);
+int get hashCode {
+    return Object.hash(runtimeType,message);
+}
 
 @override
 String toString() {
-  return 'AppError.unauthorized(message: $message)';
+    return 'AppError.unauthorized(message: $message)';
 }
 
 
@@ -453,16 +465,18 @@ $NotFoundErrorCopyWith<NotFoundError> get copyWith => _$NotFoundErrorCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotFoundError&&(identical(other.message, message) || other.message == message));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NotFoundError&&(identical(other.message, message) || other.message == message));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message);
+int get hashCode {
+    return Object.hash(runtimeType,message);
+}
 
 @override
 String toString() {
-  return 'AppError.notFound(message: $message)';
+    return 'AppError.notFound(message: $message)';
 }
 
 
@@ -519,16 +533,18 @@ $ServerErrorCopyWith<ServerError> get copyWith => _$ServerErrorCopyWithImpl<Serv
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServerError&&(identical(other.message, message) || other.message == message));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ServerError&&(identical(other.message, message) || other.message == message));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message);
+int get hashCode {
+    return Object.hash(runtimeType,message);
+}
 
 @override
 String toString() {
-  return 'AppError.server(message: $message)';
+    return 'AppError.server(message: $message)';
 }
 
 
@@ -586,16 +602,18 @@ $ConflictErrorCopyWith<ConflictError> get copyWith => _$ConflictErrorCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConflictError&&(identical(other.message, message) || other.message == message)&&(identical(other.errorCode, errorCode) || other.errorCode == errorCode));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ConflictError&&(identical(other.message, message) || other.message == message)&&(identical(other.errorCode, errorCode) || other.errorCode == errorCode));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message,errorCode);
+int get hashCode {
+    return Object.hash(runtimeType,message,errorCode);
+}
 
 @override
 String toString() {
-  return 'AppError.conflict(message: $message, errorCode: $errorCode)';
+    return 'AppError.conflict(message: $message, errorCode: $errorCode)';
 }
 
 
@@ -653,16 +671,18 @@ $UnknownErrorCopyWith<UnknownError> get copyWith => _$UnknownErrorCopyWithImpl<U
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UnknownError&&(identical(other.message, message) || other.message == message));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is UnknownError&&(identical(other.message, message) || other.message == message));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message);
+int get hashCode {
+    return Object.hash(runtimeType,message);
+}
 
 @override
 String toString() {
-  return 'AppError.unknown(message: $message)';
+    return 'AppError.unknown(message: $message)';
 }
 
 

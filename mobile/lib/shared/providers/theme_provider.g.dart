@@ -11,7 +11,7 @@ part of 'theme_provider.dart';
 /// Provides SharedPreferences instance
 
 @ProviderFor(sharedPreferences)
-const sharedPreferencesProvider = SharedPreferencesProvider._();
+final sharedPreferencesProvider = SharedPreferencesProvider._();
 
 /// Provides SharedPreferences instance
 
@@ -26,7 +26,7 @@ final class SharedPreferencesProvider
         $FutureModifier<SharedPreferences>,
         $FutureProvider<SharedPreferences> {
   /// Provides SharedPreferences instance
-  const SharedPreferencesProvider._()
+  SharedPreferencesProvider._()
     : super(
         from: null,
         argument: null,
@@ -58,7 +58,7 @@ String _$sharedPreferencesHash() => r'50d46e3f8d9f32715d0f3efabdce724e4b2593b4';
 /// Persists preference to SharedPreferences
 
 @ProviderFor(ThemeModeNotifier)
-const themeModeProvider = ThemeModeNotifierProvider._();
+final themeModeProvider = ThemeModeNotifierProvider._();
 
 /// Manages the app's theme mode (light/dark/system)
 /// Persists preference to SharedPreferences
@@ -66,7 +66,7 @@ final class ThemeModeNotifierProvider
     extends $NotifierProvider<ThemeModeNotifier, ThemeMode> {
   /// Manages the app's theme mode (light/dark/system)
   /// Persists preference to SharedPreferences
-  const ThemeModeNotifierProvider._()
+  ThemeModeNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -102,8 +102,7 @@ abstract class _$ThemeModeNotifier extends $Notifier<ThemeMode> {
   ThemeMode build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<ThemeMode, ThemeMode>;
     final element =
         ref.element
@@ -113,7 +112,7 @@ abstract class _$ThemeModeNotifier extends $Notifier<ThemeMode> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -121,7 +120,7 @@ abstract class _$ThemeModeNotifier extends $Notifier<ThemeMode> {
 /// In production, this would fetch from API
 
 @ProviderFor(podConfig)
-const podConfigProvider = PodConfigProvider._();
+final podConfigProvider = PodConfigProvider._();
 
 /// Provides the current pod configuration
 /// In production, this would fetch from API
@@ -131,7 +130,7 @@ final class PodConfigProvider
     with $Provider<PodConfig> {
   /// Provides the current pod configuration
   /// In production, this would fetch from API
-  const PodConfigProvider._()
+  PodConfigProvider._()
     : super(
         from: null,
         argument: null,

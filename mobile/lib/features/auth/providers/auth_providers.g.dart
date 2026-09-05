@@ -11,7 +11,7 @@ part of 'auth_providers.dart';
 /// Provides FlutterSecureStorage instance
 
 @ProviderFor(flutterSecureStorage)
-const flutterSecureStorageProvider = FlutterSecureStorageProvider._();
+final flutterSecureStorageProvider = FlutterSecureStorageProvider._();
 
 /// Provides FlutterSecureStorage instance
 
@@ -24,7 +24,7 @@ final class FlutterSecureStorageProvider
         >
     with $Provider<FlutterSecureStorage> {
   /// Provides FlutterSecureStorage instance
-  const FlutterSecureStorageProvider._()
+  FlutterSecureStorageProvider._()
     : super(
         from: null,
         argument: null,
@@ -64,7 +64,7 @@ String _$flutterSecureStorageHash() =>
 /// Provides SecureStorageService
 
 @ProviderFor(secureStorage)
-const secureStorageProvider = SecureStorageProvider._();
+final secureStorageProvider = SecureStorageProvider._();
 
 /// Provides SecureStorageService
 
@@ -77,7 +77,7 @@ final class SecureStorageProvider
         >
     with $Provider<SecureStorageService> {
   /// Provides SecureStorageService
-  const SecureStorageProvider._()
+  SecureStorageProvider._()
     : super(
         from: null,
         argument: null,
@@ -116,7 +116,7 @@ String _$secureStorageHash() => r'0a0dbbdab35d34cfd77089513684538299f16d9f';
 /// Provides AuthApi
 
 @ProviderFor(authApi)
-const authApiProvider = AuthApiProvider._();
+final authApiProvider = AuthApiProvider._();
 
 /// Provides AuthApi
 
@@ -124,7 +124,7 @@ final class AuthApiProvider
     extends $FunctionalProvider<AuthApi, AuthApi, AuthApi>
     with $Provider<AuthApi> {
   /// Provides AuthApi
-  const AuthApiProvider._()
+  AuthApiProvider._()
     : super(
         from: null,
         argument: null,
@@ -162,7 +162,7 @@ String _$authApiHash() => r'ac66c1c9810f43bc53db0d8c94d4bfaa679a0734';
 /// Provides AuthRepository
 
 @ProviderFor(authRepository)
-const authRepositoryProvider = AuthRepositoryProvider._();
+final authRepositoryProvider = AuthRepositoryProvider._();
 
 /// Provides AuthRepository
 
@@ -170,7 +170,7 @@ final class AuthRepositoryProvider
     extends $FunctionalProvider<AuthRepository, AuthRepository, AuthRepository>
     with $Provider<AuthRepository> {
   /// Provides AuthRepository
-  const AuthRepositoryProvider._()
+  AuthRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -209,7 +209,7 @@ String _$authRepositoryHash() => r'2775d29e1d12d27bc8a6b1ba462dc9f8d37f4203';
 /// Updated for email + password authentication (Web Registration Flow)
 
 @ProviderFor(AuthNotifier)
-const authProvider = AuthNotifierProvider._();
+final authProvider = AuthNotifierProvider._();
 
 /// Manages authentication state throughout the app
 /// Updated for email + password authentication (Web Registration Flow)
@@ -217,7 +217,7 @@ final class AuthNotifierProvider
     extends $NotifierProvider<AuthNotifier, AuthState> {
   /// Manages authentication state throughout the app
   /// Updated for email + password authentication (Web Registration Flow)
-  const AuthNotifierProvider._()
+  AuthNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -253,8 +253,7 @@ abstract class _$AuthNotifier extends $Notifier<AuthState> {
   AuthState build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AuthState, AuthState>;
     final element =
         ref.element
@@ -264,14 +263,14 @@ abstract class _$AuthNotifier extends $Notifier<AuthState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 /// Provides the current authentication status
 
 @ProviderFor(isAuthenticated)
-const isAuthenticatedProvider = IsAuthenticatedProvider._();
+final isAuthenticatedProvider = IsAuthenticatedProvider._();
 
 /// Provides the current authentication status
 
@@ -279,7 +278,7 @@ final class IsAuthenticatedProvider
     extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
   /// Provides the current authentication status
-  const IsAuthenticatedProvider._()
+  IsAuthenticatedProvider._()
     : super(
         from: null,
         argument: null,
@@ -317,7 +316,7 @@ String _$isAuthenticatedHash() => r'003f7e85bfa5ae774792659ce771b5b59ebf04f8';
 /// Provides the current user profile if authenticated
 
 @ProviderFor(currentProfile)
-const currentProfileProvider = CurrentProfileProvider._();
+final currentProfileProvider = CurrentProfileProvider._();
 
 /// Provides the current user profile if authenticated
 
@@ -325,7 +324,7 @@ final class CurrentProfileProvider
     extends $FunctionalProvider<MemberProfile?, MemberProfile?, MemberProfile?>
     with $Provider<MemberProfile?> {
   /// Provides the current user profile if authenticated
-  const CurrentProfileProvider._()
+  CurrentProfileProvider._()
     : super(
         from: null,
         argument: null,
@@ -363,7 +362,7 @@ String _$currentProfileHash() => r'fff7b658f93674dcfe44ec35273b2dc3f1ee3407';
 /// Provides the current access token if authenticated
 
 @ProviderFor(accessToken)
-const accessTokenProvider = AccessTokenProvider._();
+final accessTokenProvider = AccessTokenProvider._();
 
 /// Provides the current access token if authenticated
 
@@ -371,7 +370,7 @@ final class AccessTokenProvider
     extends $FunctionalProvider<String?, String?, String?>
     with $Provider<String?> {
   /// Provides the current access token if authenticated
-  const AccessTokenProvider._()
+  AccessTokenProvider._()
     : super(
         from: null,
         argument: null,
@@ -409,7 +408,7 @@ String _$accessTokenHash() => r'3371e484bbd4a5577c005f4adc96d39b2e0b29c6';
 /// Provides the stored email for login convenience (web registration flow)
 
 @ProviderFor(storedEmail)
-const storedEmailProvider = StoredEmailProvider._();
+final storedEmailProvider = StoredEmailProvider._();
 
 /// Provides the stored email for login convenience (web registration flow)
 
@@ -417,7 +416,7 @@ final class StoredEmailProvider
     extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
     with $FutureModifier<String?>, $FutureProvider<String?> {
   /// Provides the stored email for login convenience (web registration flow)
-  const StoredEmailProvider._()
+  StoredEmailProvider._()
     : super(
         from: null,
         argument: null,
@@ -448,7 +447,7 @@ String _$storedEmailHash() => r'a02cfd1519bede421c538833dcc974830431830d';
 /// Returns true if email, password, and PIN are all stored
 
 @ProviderFor(canUseQuickLogin)
-const canUseQuickLoginProvider = CanUseQuickLoginProvider._();
+final canUseQuickLoginProvider = CanUseQuickLoginProvider._();
 
 /// Check if user can use quick login (PIN/biometric) instead of email/password
 /// Returns true if email, password, and PIN are all stored
@@ -458,7 +457,7 @@ final class CanUseQuickLoginProvider
     with $FutureModifier<bool>, $FutureProvider<bool> {
   /// Check if user can use quick login (PIN/biometric) instead of email/password
   /// Returns true if email, password, and PIN are all stored
-  const CanUseQuickLoginProvider._()
+  CanUseQuickLoginProvider._()
     : super(
         from: null,
         argument: null,
@@ -489,7 +488,7 @@ String _$canUseQuickLoginHash() => r'4629fe59159d0ffdf7d43f4c30aa24c631464d0c';
 /// This is initialized at app startup and updated when auth state changes
 
 @ProviderFor(QuickLoginEligibility)
-const quickLoginEligibilityProvider = QuickLoginEligibilityProvider._();
+final quickLoginEligibilityProvider = QuickLoginEligibilityProvider._();
 
 /// Quick login eligibility state - used by router for synchronous redirect decisions
 /// This is initialized at app startup and updated when auth state changes
@@ -497,7 +496,7 @@ final class QuickLoginEligibilityProvider
     extends $NotifierProvider<QuickLoginEligibility, bool?> {
   /// Quick login eligibility state - used by router for synchronous redirect decisions
   /// This is initialized at app startup and updated when auth state changes
-  const QuickLoginEligibilityProvider._()
+  QuickLoginEligibilityProvider._()
     : super(
         from: null,
         argument: null,
@@ -534,8 +533,7 @@ abstract class _$QuickLoginEligibility extends $Notifier<bool?> {
   bool? build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<bool?, bool?>;
     final element =
         ref.element
@@ -545,7 +543,7 @@ abstract class _$QuickLoginEligibility extends $Notifier<bool?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -553,7 +551,7 @@ abstract class _$QuickLoginEligibility extends $Notifier<bool?> {
 /// This is cleared after use or on app restart
 
 @ProviderFor(TempPinForBiometricSetup)
-const tempPinForBiometricSetupProvider = TempPinForBiometricSetupProvider._();
+final tempPinForBiometricSetupProvider = TempPinForBiometricSetupProvider._();
 
 /// Temporary PIN storage for biometric setup after login
 /// This is cleared after use or on app restart
@@ -561,7 +559,7 @@ final class TempPinForBiometricSetupProvider
     extends $NotifierProvider<TempPinForBiometricSetup, String?> {
   /// Temporary PIN storage for biometric setup after login
   /// This is cleared after use or on app restart
-  const TempPinForBiometricSetupProvider._()
+  TempPinForBiometricSetupProvider._()
     : super(
         from: null,
         argument: null,
@@ -598,8 +596,7 @@ abstract class _$TempPinForBiometricSetup extends $Notifier<String?> {
   String? build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<String?, String?>;
     final element =
         ref.element
@@ -609,14 +606,14 @@ abstract class _$TempPinForBiometricSetup extends $Notifier<String?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    return element.handleCreate(ref, build);
   }
 }
 
 /// Check if biometric login is enabled for this user
 
 @ProviderFor(isBiometricLoginEnabled)
-const isBiometricLoginEnabledProvider = IsBiometricLoginEnabledProvider._();
+final isBiometricLoginEnabledProvider = IsBiometricLoginEnabledProvider._();
 
 /// Check if biometric login is enabled for this user
 
@@ -624,7 +621,7 @@ final class IsBiometricLoginEnabledProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
     with $FutureModifier<bool>, $FutureProvider<bool> {
   /// Check if biometric login is enabled for this user
-  const IsBiometricLoginEnabledProvider._()
+  IsBiometricLoginEnabledProvider._()
     : super(
         from: null,
         argument: null,
@@ -655,13 +652,13 @@ String _$isBiometricLoginEnabledHash() =>
 /// Enable biometric login with the user's PIN
 
 @ProviderFor(BiometricLoginNotifier)
-const biometricLoginProvider = BiometricLoginNotifierProvider._();
+final biometricLoginProvider = BiometricLoginNotifierProvider._();
 
 /// Enable biometric login with the user's PIN
 final class BiometricLoginNotifierProvider
     extends $AsyncNotifierProvider<BiometricLoginNotifier, void> {
   /// Enable biometric login with the user's PIN
-  const BiometricLoginNotifierProvider._()
+  BiometricLoginNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -689,8 +686,7 @@ abstract class _$BiometricLoginNotifier extends $AsyncNotifier<void> {
   FutureOr<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
-    build();
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, void>;
     final element =
         ref.element
@@ -700,6 +696,6 @@ abstract class _$BiometricLoginNotifier extends $AsyncNotifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    return element.handleCreate(ref, build);
   }
 }
