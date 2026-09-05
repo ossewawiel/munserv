@@ -13,8 +13,12 @@ on:
       - 'mobile/**'
       - 'design/**'
       - 'site/**'
+      - 'domain/**'
+      - 'scripts/build-dashboard.py'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
+  schedule:
+    - cron: '15 4 * * *'   # nightly, so the dashboard's issue and PR state stays fresh
 
 permissions:
   contents: read
@@ -62,6 +66,15 @@ jobs:
           flutter pub get
           flutter build web -t widgetbook/main.dart --base-href /munserv/widgetbook/ --release
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the progress dashboard
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pip install --quiet pyyaml
+          python3 scripts/build-dashboard.py
       - name: Assemble site
         run: |
           mkdir -p _site/storybook _site/widgetbook

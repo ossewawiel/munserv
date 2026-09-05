@@ -29,7 +29,8 @@ Print one table: story, platform, state, handoff (yes / no), blockers (`depends_
 5. Wait for CI (`gh pr checks <n> --watch`). Red → dispatch the same implementer once more with the failing job's log excerpt appended to the prompt. Red twice → label `status:blocked`, comment, stop.
 6. Green → for `ui: true` stories dispatch `design-reviewer` first with the PR number and handoff path; its `REQUEST CHANGES` goes back to the implementer once like a code review. Then dispatch `reviewer` with the PR number and handoff path. `REQUEST CHANGES` → dispatch the implementer once with the review text; then review again. Second `REQUEST CHANGES` → `status:blocked`.
 7. `APPROVE` → leave the PR for the user. Never merge.
-8. Report: one table (story, PR, CI, review, next action for the user) and the token-heavy step of each story if it stood out.
+8. `python3 scripts/sync-board.py` so the Project board reflects the labels you changed.
+9. Report: one table (story, PR, CI, review, next action for the user) and the token-heavy step of each story if it stood out.
 
 ## `story <id|issue>`
 Same as `run` for exactly that story, ignoring `--max`. If it has no handoff, run `feature-planner` Mode B first, then implement.
@@ -44,5 +45,5 @@ Dispatch `syncer` for a merged PR and print its report.
 - Never run platform builds or tests yourself; that is the implementers' job and their Stop hook enforces it.
 - Never edit code, handoffs or specs yourself, except flipping `design_approved` after the user's word.
 - Three concurrent implementers at most, whatever `--max` says.
-- Every GitHub write you make is one of: add or remove a `status:*` label, an issue comment, `gh pr create`. Nothing else.
+- Every GitHub write you make is one of: add or remove a `status:*` label, an issue comment, `gh pr create`, and the board sync script. Nothing else.
 - If `gh` is not authenticated or master is behind, say so and stop.
