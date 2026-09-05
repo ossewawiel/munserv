@@ -343,3 +343,59 @@ Perform action on message (accept, decline, approve, reject, confirm, etc.).
 **Request:** `{ action: string, note?: string }`
 **Response:** `Message`
 **Errors:** 400 Invalid action | 401 Unauthorized | 404 Not found | 409 Already actioned
+
+---
+
+## Support Access
+
+Temporary super user access to a live pod. See [`domain/support-grant.md`](../../domain/support-grant.md).
+All three endpoints require an authenticated admin with role `pod_chief`.
+
+### GET /support-access/grants
+List support grants for the caller's pod, newest first.
+
+**Query:** `?status={active|expired|revoked}` (optional; omit for all)
+**Response:** `SupportGrantListResponse`
+```json
+{
+  "items": SupportGrant[],
+  "total": number
+}
+```
+**Errors:** 401 Unauthorized | 403 Not pod chief
+
+### POST /support-access/grants
+Grant the super user temporary access.
+
+**Request:**
+```json
+{
+  "grantedRole": "pod_admin",
+  "purpose": "Investigate duplicate issue reports in sector 3"
+}
+```
+`grantedRole` is an `AdminRole` wire value strictly below `pod_chief`. `purpose` is required, 10-500 chars.
+
+**Response:** `201` `SupportGrant`
+```json
+{
+  "id": "uuid",
+  "grantedRole": "pod_admin",
+  "purpose": "Investigate duplicate issue reports in sector 3",
+  "status": "active",
+  "grantedBy": "uuid",
+  "grantedByName": "Thandi Mokoena",
+  "grantedAt": "2026-09-05T10:00:00Z",
+  "expiresAt": "2026-09-05T11:00:00Z",
+  "lastActivity": null,
+  "revokedAt": null,
+  "expiredAt": null
+}
+```
+**Errors:** 400 Validation failed (`{ messages: string[] }`) | 401 Unauthorized | 403 Not pod chief | 409 Active grant already exists (`{ code: "active_grant_exists", message: string }`)
+
+### DELETE /support-access/grants/{id}
+Revoke an active grant immediately.
+
+**Response:** `204` No Content
+**Errors:** 401 Unauthorized | 403 Not pod chief or grant belongs to another pod | 404 Not found | 409 Grant is not active (`{ code: "grant_not_active", message: string }`)
