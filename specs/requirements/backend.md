@@ -17,6 +17,7 @@
 | B6 | As a developer, the system checks bootstrap eligibility | Query: Pod Chief exists AND is onboarded? ǀ Returns bootstrap status ǀ No new DB table needed | 🟢 Done | [#47](https://github.com/ossewawiel/munserv/issues/47) |
 | B7 | As a developer, bootstrap actions are audit logged | All super user actions logged ǀ Includes timestamp, action type, actor ǀ Pod Chief creation logged | 🔴 Pending | [#48](https://github.com/ossewawiel/munserv/issues/48) |
 | B8 | As a developer, the system tracks temporary super user grants | Store grants with: role, purpose, granted_by, granted_at, expires_at, last_activity ǀ Auto-expire logic ǀ Activity tracking updates last_activity | 🟢 Done | [#49](https://github.com/ossewawiel/munserv/issues/49) |
+| B9 | As a super user, I can log in to a bootstrapped pod under an active support grant so that I can help with a live problem under the role the pod chief allowed | Login succeeds when an active grant exists and the pod is not bootstrap-eligible ǀ JWT subject is the grant id and its role is the granted role only ǀ Login response carries grantId, grantedRole, expiresAt ǀ `GET /support-access/grants/current` returns the caller's own grant ǀ `POST /auth/logout` revokes a grant-scoped login ǀ `SUPPORT_ACCESS_LOGIN` audit entry written | 🟢 Done | [#68](https://github.com/ossewawiel/munserv/issues/68) |
 
 ## Status Legend
 - 🟢 Done

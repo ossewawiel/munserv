@@ -166,4 +166,26 @@ class JwtServiceTest {
         result.isValid shouldBe true
         result.role shouldBe "admin"
     }
+
+    @Test
+    fun `should round-trip the support grant scope claim when generating a scoped access token`() {
+        val grantId = MemberId(UUID.fromString("550e8400-e29b-41d4-a716-446655440030"))
+        val token = jwtService.generateAccessToken(grantId, "pod_admin", JwtService.SCOPE_SUPPORT_GRANT)
+
+        val result = jwtService.validateToken(token)
+
+        result.isValid shouldBe true
+        result.subject shouldBe grantId.value.toString()
+        result.role shouldBe "pod_admin"
+        result.scope shouldBe JwtService.SCOPE_SUPPORT_GRANT
+    }
+
+    @Test
+    fun `should not carry a scope claim for an ordinary access token`() {
+        val token = jwtService.generateAccessToken(memberId, "member")
+
+        val result = jwtService.validateToken(token)
+
+        result.scope shouldBe null
+    }
 }

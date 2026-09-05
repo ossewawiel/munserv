@@ -1,6 +1,8 @@
 package com.munserv.support.api
 
+import com.munserv.shared.security.JwtAuthenticationFilter
 import com.munserv.support.domain.SupportGrantId
+import com.munserv.support.service.SupportAccessResult
 import com.munserv.support.service.SupportAccessService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -13,20 +15,21 @@ import java.time.Instant
 import java.util.UUID
 
 /**
- * Records support grant activity for requests authenticated as the super user.
+ * Records support grant activity for requests authenticated with a grant-scoped token, and
+ * clears the security context the moment the underlying grant is no longer active.
  *
  * The grant id arrives as the JWT subject when the super user logs in under a support grant
- * (W29). Until then this filter is effectively a no-op, since no such token is ever minted.
+ * (B9); such a token carries the `ROLE_SUPPORT_GRANT` authority alongside the granted role.
+ * Without this check, a revoked or expired grant would keep serving `.authenticated()`-only
+ * endpoints for the remaining life of the access token, since neither
+ * [com.munserv.shared.security.JwtAuthenticationFilter] nor Spring Security itself re-checks
+ * grant status once the token validates.
  */
 @Component
 class SupportGrantActivityFilter(
     private val supportAccessService: SupportAccessService,
     private val clock: Clock = Clock.systemUTC(),
 ) : OncePerRequestFilter() {
-    companion object {
-        private const val SUPER_USER_AUTHORITY = "ROLE_SUPER_USER"
-    }
-
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -34,7 +37,9 @@ class SupportGrantActivityFilter(
     ) {
         val authentication = SecurityContextHolder.getContext().authentication
 
-        if (authentication != null && authentication.authorities.any { it.authority == SUPER_USER_AUTHORITY }) {
+        if (authentication != null &&
+            authentication.authorities.any { it.authority == JwtAuthenticationFilter.SUPPORT_GRANT_AUTHORITY }
+        ) {
             val subject = authentication.principal as? String
             val grantId =
                 subject?.let {
@@ -45,7 +50,10 @@ class SupportGrantActivityFilter(
                     }
                 }
 
-            grantId?.let { supportAccessService.recordActivity(it, Instant.now(clock)) }
+            when (grantId?.let { supportAccessService.currentGrant(it) }) {
+                is SupportAccessResult.Granted -> supportAccessService.recordActivity(grantId, Instant.now(clock))
+                else -> SecurityContextHolder.clearContext()
+            }
         }
 
         filterChain.doFilter(request, response)

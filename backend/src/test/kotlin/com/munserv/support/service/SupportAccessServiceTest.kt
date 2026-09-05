@@ -364,6 +364,80 @@ class SupportAccessServiceTest {
     }
 
     @Nested
+    inner class LoginUnderGrant {
+        @Test
+        fun `should return Granted and audit the login when an active grant exists`() {
+            val grant = testGrant()
+            every { supportGrantRepository.findActiveByPodId(testPodId) } returns grant
+            every { adminRepository.findById(podChiefId) } returns podChief()
+
+            val result = service.loginUnderGrant(testPodId, "super@example.com")
+
+            result.shouldBeInstanceOf<SupportAccessResult.Granted>()
+            (result as SupportAccessResult.Granted).view.grant shouldBe grant
+            result.view.grantedByName shouldBe "Thandi Mokoena"
+            verify {
+                auditService.logSupportAccessLogin("super@example.com", grant.id.value, testPodId)
+            }
+        }
+
+        @Test
+        fun `should return NotFound when the pod has no active grant`() {
+            every { supportGrantRepository.findActiveByPodId(testPodId) } returns null
+
+            val result = service.loginUnderGrant(testPodId, "super@example.com")
+
+            result.shouldBeInstanceOf<SupportAccessResult.NotFound>()
+            verify(exactly = 0) { auditService.logSupportAccessLogin(any(), any(), any()) }
+        }
+
+        @Test
+        fun `should return GrantNotActive when the grant is revoked`() {
+            val grant = testGrant(SupportGrantStatus.REVOKED)
+            every { supportGrantRepository.findActiveByPodId(testPodId) } returns grant
+
+            val result = service.loginUnderGrant(testPodId, "super@example.com")
+
+            result.shouldBeInstanceOf<SupportAccessResult.GrantNotActive>()
+            verify(exactly = 0) { auditService.logSupportAccessLogin(any(), any(), any()) }
+        }
+    }
+
+    @Nested
+    inner class CurrentGrant {
+        @Test
+        fun `should return Granted when the grant is active`() {
+            val grant = testGrant()
+            every { supportGrantRepository.findById(grant.id) } returns grant
+            every { adminRepository.findById(podChiefId) } returns podChief()
+
+            val result = service.currentGrant(grant.id)
+
+            result.shouldBeInstanceOf<SupportAccessResult.Granted>()
+            (result as SupportAccessResult.Granted).view.grant shouldBe grant
+        }
+
+        @Test
+        fun `should return GrantNotActive when the grant is revoked`() {
+            val grant = testGrant(SupportGrantStatus.REVOKED)
+            every { supportGrantRepository.findById(grant.id) } returns grant
+
+            val result = service.currentGrant(grant.id)
+
+            result.shouldBeInstanceOf<SupportAccessResult.GrantNotActive>()
+        }
+
+        @Test
+        fun `should return NotFound when the grant does not exist`() {
+            every { supportGrantRepository.findById(any()) } returns null
+
+            val result = service.currentGrant(SupportGrantId.generate())
+
+            result.shouldBeInstanceOf<SupportAccessResult.NotFound>()
+        }
+    }
+
+    @Nested
     inner class ExpireStaleGrants {
         @Test
         fun `should expire all stale grants and log each one`() {

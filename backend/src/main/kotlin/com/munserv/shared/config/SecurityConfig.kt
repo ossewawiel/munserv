@@ -55,6 +55,8 @@ class SecurityConfig(
                     // Protected auth endpoints (require authentication)
                     .requestMatchers("/api/v1/auth/change-password")
                     .authenticated()
+                    .requestMatchers("/api/v1/auth/logout")
+                    .authenticated()
                     .requestMatchers("/api/v1/sectors", "/api/v1/sectors/**")
                     .permitAll()
                     .requestMatchers("/uploads/**")

@@ -126,6 +126,18 @@ Temporary super user access to a pod. See [`domain/support-grant.md`](../../doma
 | expired | Idle for an hour; terminal |
 | revoked | Ended by the pod chief or by logout; terminal |
 
+### SupportGrantInfo
+
+Carried as `profile.supportGrant` on the `AdminLoginResponse` returned by `POST /auth/admin/login`
+when the super user logs in under an active grant instead of via bootstrap. See
+[`domain/support-grant.md`](../../domain/support-grant.md).
+
+| Field | Type | Notes |
+|-------|------|-------|
+| grantId | SupportGrantId | UUID; also the JWT subject for this login |
+| grantedRole | AdminRole | The role carried by the minted token, never super_user |
+| expiresAt | DateTime | The grant's own, server-owned, sliding expiry |
+
 ---
 
 ## Enums

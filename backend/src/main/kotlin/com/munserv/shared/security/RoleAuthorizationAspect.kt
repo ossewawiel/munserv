@@ -3,10 +3,14 @@ package com.munserv.shared.security
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.repository.AdminRepository
 import com.munserv.shared.types.AdminId
+import com.munserv.support.domain.SupportGrantId
+import com.munserv.support.service.SupportAccessResult
+import com.munserv.support.service.SupportAccessService
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.reflect.MethodSignature
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -24,6 +28,7 @@ import java.util.UUID
 @Component
 class RoleAuthorizationAspect(
     private val adminRepository: AdminRepository,
+    @Lazy private val supportAccessService: SupportAccessService,
 ) {
     /**
      * Intercepts method calls annotated with @RequireRole and verifies
@@ -79,6 +84,20 @@ class RoleAuthorizationAspect(
         val subject =
             authentication.principal as? String
                 ?: return null
+
+        if (authentication.authorities.any { it.authority == JwtAuthenticationFilter.SUPPORT_GRANT_AUTHORITY }) {
+            val grantId =
+                try {
+                    SupportGrantId(UUID.fromString(subject))
+                } catch (e: IllegalArgumentException) {
+                    return null
+                }
+
+            return when (val result = supportAccessService.currentGrant(grantId)) {
+                is SupportAccessResult.Granted -> result.view.grant.grantedRole
+                else -> null
+            }
+        }
 
         val adminId =
             try {

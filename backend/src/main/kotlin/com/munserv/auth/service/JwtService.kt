@@ -38,6 +38,7 @@ data class TokenValidationResult(
     val role: String? = null,
     val tokenType: TokenType? = null,
     val error: TokenError? = null,
+    val scope: String? = null,
 )
 
 /**
@@ -67,27 +68,38 @@ class JwtService(
     companion object {
         private const val CLAIM_ROLE = "role"
         private const val CLAIM_TOKEN_TYPE = "type"
+        const val CLAIM_SCOPE = "scope"
+        const val SCOPE_SUPPORT_GRANT = "support_grant"
     }
 
     /**
      * Generate an access token for a member.
+     *
+     * [scope] is written as the `scope` claim only when non-null; it carries
+     * [SCOPE_SUPPORT_GRANT] for a login minted under a support grant.
      */
     fun generateAccessToken(
         memberId: MemberId,
         role: String,
+        scope: String? = null,
     ): String {
         val now = Date.from(clock.instant())
         val expiry = Date.from(clock.instant().plus(accessTokenTtl))
 
-        return Jwts
-            .builder()
-            .subject(memberId.value.toString())
-            .claim(CLAIM_ROLE, role)
-            .claim(CLAIM_TOKEN_TYPE, TokenType.ACCESS.name)
-            .issuedAt(now)
-            .expiration(expiry)
-            .signWith(key)
-            .compact()
+        val builder =
+            Jwts
+                .builder()
+                .subject(memberId.value.toString())
+                .claim(CLAIM_ROLE, role)
+                .claim(CLAIM_TOKEN_TYPE, TokenType.ACCESS.name)
+                .issuedAt(now)
+                .expiration(expiry)
+
+        if (scope != null) {
+            builder.claim(CLAIM_SCOPE, scope)
+        }
+
+        return builder.signWith(key).compact()
     }
 
     /**
@@ -113,9 +125,10 @@ class JwtService(
     fun generateTokenPair(
         memberId: MemberId,
         role: String,
+        scope: String? = null,
     ): TokenPair =
         TokenPair(
-            accessToken = generateAccessToken(memberId, role),
+            accessToken = generateAccessToken(memberId, role, scope),
             refreshToken = generateRefreshToken(memberId),
             expiresIn = accessTokenTtl.toSeconds(),
         )
@@ -153,6 +166,7 @@ class JwtService(
                 subject = claims.subject,
                 role = claims[CLAIM_ROLE] as? String,
                 tokenType = tokenType,
+                scope = claims[CLAIM_SCOPE] as? String,
             )
         } catch (e: ExpiredJwtException) {
             TokenValidationResult(isValid = false, error = TokenError.EXPIRED)

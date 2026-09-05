@@ -2,7 +2,10 @@ package com.munserv.auth.api
 
 import com.munserv.TestContainersConfig
 import com.munserv.auth.repository.MemberRepository
+import com.munserv.auth.service.JwtService
 import com.munserv.auth.service.OtpService
+import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.MemberId
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,6 +35,9 @@ class AuthControllerTest {
 
     @Autowired
     private lateinit var otpService: OtpService
+
+    @Autowired
+    private lateinit var jwtService: JwtService
 
     private val testPhone = "+27821234567"
     private val testPin = "1234"
@@ -182,5 +188,19 @@ class AuthControllerTest {
         content.contains("\"expiresIn\"") shouldBe true
         content.contains("\"tokenType\"") shouldBe true
         content.contains("\"memberId\"") shouldBe true
+    }
+
+    @Test
+    fun `POST api-v1-auth-logout should return 204 for an authenticated admin token`() {
+        // Pod Chief test account from V030 migration
+        val adminId = AdminId.fromString("550e8400-e29b-41d4-a716-446655440031")
+        val adminToken = jwtService.generateAccessToken(MemberId(adminId.value), "admin")
+
+        mockMvc
+            .post("/api/v1/auth/logout") {
+                header("Authorization", "Bearer $adminToken")
+            }.andExpect {
+                status { isNoContent() }
+            }
     }
 }

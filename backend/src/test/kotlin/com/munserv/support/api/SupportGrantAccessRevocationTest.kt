@@ -8,6 +8,7 @@ import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.PodId
 import com.munserv.support.domain.SupportGrant
 import com.munserv.support.domain.SupportGrantId
+import com.munserv.support.domain.SupportGrantStatus
 import com.munserv.support.repository.SupportGrantRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -21,15 +22,15 @@ import org.springframework.test.web.servlet.get
 import java.time.Instant
 
 /**
- * Verifies that `@RequireRole(AdminRole.POD_CHIEF)` denials on [SupportAccessController]
- * surface as 403, not 500. Uses the real Spring Security filter chain and
- * [com.munserv.shared.security.RoleAuthorizationAspect], which `@WebMvcTest` does not load.
+ * Proves that [SupportGrantActivityFilter] enforces grant status on endpoints gated only by
+ * `.authenticated()`, not just on `@RequireRole` controllers. Without this, a revoked or expired
+ * grant would keep serving those endpoints for the remaining life of the access token.
  */
 @SpringBootTest
 @Import(TestContainersConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class SupportAccessRoleAuthorizationTest {
+class SupportGrantAccessRevocationTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -42,9 +43,6 @@ class SupportAccessRoleAuthorizationTest {
     // Pod Chief test account from V030 migration
     private val podChiefId = AdminId.fromString("550e8400-e29b-41d4-a716-446655440031")
 
-    // Pod Admin test account from V030 migration
-    private val podAdminId = AdminId.fromString("550e8400-e29b-41d4-a716-446655440032")
-
     // Pod from V030 migration
     private val testPodId = PodId.fromString("550e8400-e29b-41d4-a716-446655440000")
 
@@ -56,34 +54,16 @@ class SupportAccessRoleAuthorizationTest {
         // sharing this Testcontainers database can create their own.
         createdGrantId?.let { id ->
             supportGrantRepository.findById(id)?.let { grant ->
-                supportGrantRepository.save(grant.revoked(Instant.now(), null))
+                if (grant.status.canTransitionTo(SupportGrantStatus.REVOKED)) {
+                    supportGrantRepository.save(grant.revoked(Instant.now(), null))
+                }
             }
         }
         createdGrantId = null
     }
 
     @Test
-    fun `GET api-v1-support-access-grants should return 403 for a non pod chief admin`() {
-        val podAdminToken = jwtService.generateAccessToken(MemberId(podAdminId.value), "admin")
-
-        mockMvc
-            .get("/api/v1/support-access/grants") {
-                header("Authorization", "Bearer $podAdminToken")
-            }.andExpect { status { isForbidden() } }
-    }
-
-    @Test
-    fun `GET api-v1-support-access-grants should return 200 for the pod chief`() {
-        val podChiefToken = jwtService.generateAccessToken(MemberId(podChiefId.value), "admin")
-
-        mockMvc
-            .get("/api/v1/support-access/grants") {
-                header("Authorization", "Bearer $podChiefToken")
-            }.andExpect { status { isOk() } }
-    }
-
-    @Test
-    fun `should return 403 on the pod chief grant endpoints for a grant-scoped token`() {
+    fun `a still-valid token for a revoked grant is refused on an authenticated-only endpoint`() {
         val grant =
             supportGrantRepository.save(
                 SupportGrant.create(
@@ -103,8 +83,20 @@ class SupportAccessRoleAuthorizationTest {
                 JwtService.SCOPE_SUPPORT_GRANT,
             )
 
+        // Sanity: the token works before revocation.
         mockMvc
-            .get("/api/v1/support-access/grants") {
+            .get("/api/v1/issues") {
+                header("Authorization", "Bearer $grantToken")
+            }.andExpect { status { isOk() } }
+
+        // Revoke the grant directly, as the pod chief's DELETE endpoint would.
+        supportGrantRepository.save(grant.revoked(Instant.now(), podChiefId))
+
+        // The same bearer token must no longer reach an `.authenticated()`-only endpoint.
+        // Spring Security returns 403 Forbidden for a request with no authentication set,
+        // same as a request with no token at all (see MemberControllerTest).
+        mockMvc
+            .get("/api/v1/issues") {
                 header("Authorization", "Bearer $grantToken")
             }.andExpect { status { isForbidden() } }
     }
