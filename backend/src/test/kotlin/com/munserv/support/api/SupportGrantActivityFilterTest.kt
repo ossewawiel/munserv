@@ -1,7 +1,14 @@
 package com.munserv.support.api
 
+import com.munserv.admin.domain.AdminRole
+import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.PodId
+import com.munserv.support.domain.SupportGrant
 import com.munserv.support.domain.SupportGrantId
+import com.munserv.support.service.SupportAccessResult
 import com.munserv.support.service.SupportAccessService
+import com.munserv.support.service.SupportGrantView
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -41,8 +48,18 @@ class SupportGrantActivityFilterTest {
         SecurityContextHolder.clearContext()
     }
 
+    private fun activeGrant(id: SupportGrantId): SupportGrant =
+        SupportGrant.create(
+            id = id,
+            podId = PodId.generate(),
+            grantedRole = AdminRole.POD_ADMIN,
+            purpose = "Investigate duplicate issue reports",
+            grantedBy = AdminId.generate(),
+            grantedAt = fixedInstant,
+        )
+
     @Test
-    fun `should record activity when the principal is an active grant id`() {
+    fun `should record activity when the grant is still active`() {
         val grantId = SupportGrantId.generate()
         SecurityContextHolder.getContext().authentication =
             UsernamePasswordAuthenticationToken(
@@ -50,11 +67,48 @@ class SupportGrantActivityFilterTest {
                 null,
                 listOf(SimpleGrantedAuthority("ROLE_SUPPORT_GRANT")),
             )
+        every { supportAccessService.currentGrant(grantId) } returns
+            SupportAccessResult.Granted(SupportGrantView(activeGrant(grantId), "Thandi Mokoena"))
         every { supportAccessService.recordActivity(grantId, fixedInstant) } returns true
 
         filter.doFilter(request, response, chain)
 
         verify { supportAccessService.recordActivity(grantId, fixedInstant) }
+        verify { chain.doFilter(request, response) }
+    }
+
+    @Test
+    fun `should clear the security context when the grant is no longer active`() {
+        val grantId = SupportGrantId.generate()
+        SecurityContextHolder.getContext().authentication =
+            UsernamePasswordAuthenticationToken(
+                grantId.value.toString(),
+                null,
+                listOf(SimpleGrantedAuthority("ROLE_SUPPORT_GRANT")),
+            )
+        every { supportAccessService.currentGrant(grantId) } returns SupportAccessResult.GrantNotActive
+
+        filter.doFilter(request, response, chain)
+
+        SecurityContextHolder.getContext().authentication shouldBe null
+        verify(exactly = 0) { supportAccessService.recordActivity(any(), any()) }
+        verify { chain.doFilter(request, response) }
+    }
+
+    @Test
+    fun `should clear the security context when the grant no longer exists`() {
+        val grantId = SupportGrantId.generate()
+        SecurityContextHolder.getContext().authentication =
+            UsernamePasswordAuthenticationToken(
+                grantId.value.toString(),
+                null,
+                listOf(SimpleGrantedAuthority("ROLE_SUPPORT_GRANT")),
+            )
+        every { supportAccessService.currentGrant(grantId) } returns SupportAccessResult.NotFound
+
+        filter.doFilter(request, response, chain)
+
+        SecurityContextHolder.getContext().authentication shouldBe null
         verify { chain.doFilter(request, response) }
     }
 

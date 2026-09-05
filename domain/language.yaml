@@ -241,6 +241,7 @@ concepts:
           com.munserv.support.api.SupportAccessController,
           com.munserv.support.api.SupportGrantSelfController,
           com.munserv.support.api.SupportGrantActivityFilter,
+          com.munserv.auth.api.SupportGrantInfo,
         ]
       db: { tables: [support_grants] }
       typescript: []

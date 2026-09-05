@@ -1,5 +1,6 @@
 package com.munserv.support.api
 
+import com.munserv.shared.security.JwtAuthenticationFilter
 import com.munserv.support.domain.SupportGrantId
 import com.munserv.support.service.SupportAccessResult
 import com.munserv.support.service.SupportAccessService
@@ -32,10 +33,6 @@ import java.util.UUID
 class SupportGrantSelfController(
     private val supportAccessService: SupportAccessService,
 ) {
-    companion object {
-        private const val SUPPORT_GRANT_AUTHORITY = "ROLE_SUPPORT_GRANT"
-    }
-
     @Operation(
         summary = "Get the caller's own support grant",
         description = "Return the grant carried by the caller's own grant-scoped token, so the client can refresh a slid expiry.",
@@ -61,7 +58,7 @@ class SupportGrantSelfController(
 
         val subject = authentication.principal as? String ?: return unauthorized()
 
-        if (authentication.authorities.none { it.authority == SUPPORT_GRANT_AUTHORITY }) {
+        if (authentication.authorities.none { it.authority == JwtAuthenticationFilter.SUPPORT_GRANT_AUTHORITY }) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                 SupportAccessErrorResponse("not_support_grant", "Not authenticated with a support grant token"),
             )

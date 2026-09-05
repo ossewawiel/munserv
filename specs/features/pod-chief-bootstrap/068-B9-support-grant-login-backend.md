@@ -28,6 +28,7 @@ files_changed:
   - backend/src/test/kotlin/com/munserv/support/api/SupportAccessRoleAuthorizationTest.kt
   - backend/src/test/kotlin/com/munserv/support/api/SupportGrantSelfControllerTest.kt
   - backend/src/test/kotlin/com/munserv/shared/security/JwtAuthenticationFilterTest.kt
+  - backend/src/test/kotlin/com/munserv/support/api/SupportGrantAccessRevocationTest.kt
   - specs/contracts/api.md
   - specs/contracts/types.md
   - specs/features/pod-chief-bootstrap/implementation-plan.md
@@ -53,9 +54,13 @@ tests_added:
   - "JwtAuthenticationFilterTest: should add ROLE_SUPPORT_GRANT when the token carries the support grant scope"
   - "JwtAuthenticationFilterTest: should not add ROLE_SUPPORT_GRANT for an ordinary admin token"
   - "SupportGrantActivityFilterTest: updated to ROLE_SUPPORT_GRANT authority"
+  - "SupportGrantActivityFilterTest: should record activity when the grant is still active"
+  - "SupportGrantActivityFilterTest: should clear the security context when the grant is no longer active"
+  - "SupportGrantActivityFilterTest: should clear the security context when the grant no longer exists"
   - "SupportAccessRoleAuthorizationTest: should return 403 on the pod chief grant endpoints for a grant-scoped token"
   - "SupportGrantSelfControllerTest: should return the caller's own grant for a grant-scoped token"
   - "SupportGrantSelfControllerTest: should return 403 for a pod chief token"
+  - "SupportGrantAccessRevocationTest: a still-valid token for a revoked grant is refused on an authenticated-only endpoint"
 ---
 
 # B9 · Super user login with a support grant (Backend)

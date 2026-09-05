@@ -126,7 +126,7 @@ Temporary super user access to a pod. See [`domain/support-grant.md`](../../doma
 | expired | Idle for an hour; terminal |
 | revoked | Ended by the pod chief or by logout; terminal |
 
-### SupportGrantLogin
+### SupportGrantInfo
 
 Carried as `profile.supportGrant` on the `AdminLoginResponse` returned by `POST /auth/admin/login`
 when the super user logs in under an active grant instead of via bootstrap. See

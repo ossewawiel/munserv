@@ -30,10 +30,6 @@ class RoleAuthorizationAspect(
     private val adminRepository: AdminRepository,
     @Lazy private val supportAccessService: SupportAccessService,
 ) {
-    companion object {
-        private const val SUPPORT_GRANT_AUTHORITY = "ROLE_SUPPORT_GRANT"
-    }
-
     /**
      * Intercepts method calls annotated with @RequireRole and verifies
      * the current user has the required role or higher.
@@ -89,7 +85,7 @@ class RoleAuthorizationAspect(
             authentication.principal as? String
                 ?: return null
 
-        if (authentication.authorities.any { it.authority == SUPPORT_GRANT_AUTHORITY }) {
+        if (authentication.authorities.any { it.authority == JwtAuthenticationFilter.SUPPORT_GRANT_AUTHORITY }) {
             val grantId =
                 try {
                     SupportGrantId(UUID.fromString(subject))

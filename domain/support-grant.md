@@ -14,9 +14,9 @@ chief decides when support may look, under which role, and for how long, and eve
 ## Code names
 | Platform | Identifier |
 |---|---|
-| Kotlin | `com.munserv.support.domain.SupportGrant`, `SupportGrantId`, `SupportGrantStatus`, `com.munserv.support.service.SupportAccessService`, `SupportAccessResult`, `SupportGrantExpiryJob`, `com.munserv.support.repository.SupportGrantRepository`, `com.munserv.support.api.SupportAccessController`, `SupportGrantSelfController`, `SupportGrantActivityFilter` |
+| Kotlin | `com.munserv.support.domain.SupportGrant`, `SupportGrantId`, `SupportGrantStatus`, `com.munserv.support.service.SupportAccessService`, `SupportAccessResult`, `SupportGrantExpiryJob`, `com.munserv.support.repository.SupportGrantRepository`, `com.munserv.support.api.SupportAccessController`, `SupportGrantSelfController`, `SupportGrantActivityFilter`, `com.munserv.auth.api.SupportGrantInfo` |
 | Database | `support_grants` |
-| TypeScript | `SupportGrant`, `SupportGrantStatus`, `GrantSupportAccessRequest` (stories W28 to W30) |
+| TypeScript | `SupportGrant`, `SupportGrantStatus`, `GrantSupportAccessRequest` (stories W28 to W30), `SupportGrantInfo` (story W29) |
 | Dart | none (support access is web-only) |
 
 ## Statuses and transitions
