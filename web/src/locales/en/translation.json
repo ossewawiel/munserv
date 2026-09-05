@@ -557,5 +557,35 @@
     "skipForNow": "Skip for Now",
     "complete": "Complete",
     "profileError": "Failed to update profile"
+  },
+  "supportAccess": {
+    "title": "Support access",
+    "subtitle": "Grant Central Authority temporary access to help with a problem on this pod.",
+    "grantButton": "Grant support access",
+    "activeGrant": "Active grant",
+    "noActiveGrant": "No support access is active. Nobody outside this pod can sign in right now.",
+    "expiresAt": "Expires",
+    "grantedBy": "Granted by",
+    "purpose": "Purpose",
+    "role": "Role",
+    "dialog": {
+      "title": "Grant support access",
+      "roleLabel": "Role to grant",
+      "purposeLabel": "Purpose",
+      "purposeHelp": "Say what support is being asked to do. Between 10 and 500 characters.",
+      "expiryNotice": "The grant ends when support signs out, and after one hour without activity. You can revoke it at any time.",
+      "submit": "Grant access"
+    },
+    "errors": {
+      "purposeRequired": "Purpose is required",
+      "purposeTooShort": "Purpose must be at least 10 characters",
+      "purposeTooLong": "Purpose must be 500 characters or fewer",
+      "activeGrantExists": "An active grant already exists",
+      "loadFailed": "Failed to load support access"
+    }
+  },
+  "podSettings": {
+    "title": "Pod Settings",
+    "subtitle": "Pod-wide configuration, including support access for Central Authority."
   }
 }

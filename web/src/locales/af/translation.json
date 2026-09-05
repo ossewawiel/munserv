@@ -197,5 +197,35 @@
     "maxLength": "Maksimum {{max}} karakters toegelaat",
     "invalidEmail": "Voer asseblief 'n geldige e-posadres in",
     "invalidPhone": "Voer asseblief 'n geldige telefoonnommer in (bv. +27821234567)"
+  },
+  "supportAccess": {
+    "title": "Ondersteuningstoegang",
+    "subtitle": "Verleen die Sentrale Owerheid tydelike toegang om te help met 'n probleem op hierdie pod.",
+    "grantButton": "Verleen ondersteuningstoegang",
+    "activeGrant": "Aktiewe toekenning",
+    "noActiveGrant": "Geen ondersteuningstoegang is tans aktief nie. Niemand buite hierdie pod kan nou aanmeld nie.",
+    "expiresAt": "Verval",
+    "grantedBy": "Toegestaan deur",
+    "purpose": "Doel",
+    "role": "Rol",
+    "dialog": {
+      "title": "Verleen ondersteuningstoegang",
+      "roleLabel": "Rol om toe te ken",
+      "purposeLabel": "Doel",
+      "purposeHelp": "Beskryf wat ondersteuning gevra word om te doen. Tussen 10 en 500 karakters.",
+      "expiryNotice": "Die toekenning eindig wanneer ondersteuning afmeld, en na een uur sonder aktiwiteit. Jy kan dit enige tyd herroep.",
+      "submit": "Verleen toegang"
+    },
+    "errors": {
+      "purposeRequired": "Doel word vereis",
+      "purposeTooShort": "Doel moet ten minste 10 karakters wees",
+      "purposeTooLong": "Doel moet 500 karakters of minder wees",
+      "activeGrantExists": "'n Aktiewe toekenning bestaan reeds",
+      "loadFailed": "Kon nie ondersteuningstoegang laai nie"
+    }
+  },
+  "podSettings": {
+    "title": "Pod-instellings",
+    "subtitle": "Pod-wye konfigurasie, insluitend ondersteuningstoegang vir die Sentrale Owerheid."
   }
 }

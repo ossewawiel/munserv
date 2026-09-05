@@ -197,5 +197,35 @@
     "maxLength": "Ubungako obukhulu {{max}} izinhlamvu zivunyelwe",
     "invalidEmail": "Sicela ufake ikheli le-imeyili elifanele",
     "invalidPhone": "Sicela ufake inombolo yocingo efanele (isib. +27821234567)"
+  },
+  "supportAccess": {
+    "title": "Ukufinyelela kokusekela",
+    "subtitle": "Nika iGunya Eliyisikhulu ukufinyelela okwesikhashana ukusiza ngenkinga kule pod.",
+    "grantButton": "Nika ukufinyelela kokusekela",
+    "activeGrant": "Isabelo esisebenzayo",
+    "noActiveGrant": "Akukho kufinyelela kokusekela okusebenzayo njengamanje. Akekho ongaphandle kwale pod ongangena manje.",
+    "expiresAt": "Iphelelwa yisikhathi",
+    "grantedBy": "Kunikwe ngu",
+    "purpose": "Injongo",
+    "role": "Indima",
+    "dialog": {
+      "title": "Nika ukufinyelela kokusekela",
+      "roleLabel": "Indima okumele inikezwe",
+      "purposeLabel": "Injongo",
+      "purposeHelp": "Chaza ukuthi ukusekelwa kucelwa ukwenzani. Phakathi kwezinhlamvu ezingu-10 no-500.",
+      "expiryNotice": "Isabelo siphela lapho ukusekelwa kuphuma, futhi ngemva kwehora elilodwa ngaphandle komsebenzi. Ungasikhansela noma nini.",
+      "submit": "Nika ukufinyelela"
+    },
+    "errors": {
+      "purposeRequired": "Injongo iyadingeka",
+      "purposeTooShort": "Injongo kufanele ibe okungenani izinhlamvu ezingu-10",
+      "purposeTooLong": "Injongo kufanele ibe izinhlamvu ezingu-500 noma ngaphansi",
+      "activeGrantExists": "Isabelo esisebenzayo sesikhona",
+      "loadFailed": "Yehlulekile ukulayisha ukufinyelela kokusekela"
+    }
+  },
+  "podSettings": {
+    "title": "Izilungiselelo ze-Pod",
+    "subtitle": "Ukulungiswa kwe-pod jikelele, okuhlanganisa ukufinyelela kokusekela kweGunya Eliyisikhulu."
   }
 }
