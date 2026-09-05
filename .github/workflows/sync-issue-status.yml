@@ -10,7 +10,7 @@ on:
 permissions:
   contents: write
   issues: read
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   sync-spec-status:
@@ -51,13 +51,6 @@ jobs:
             fi
           done
 
-          # Also extract story IDs from body (patterns like M1, M2, W5)
-          BODY_STORIES=$(echo "$BODY" | grep -oE '\b(M[0-9]+|W[0-9]+|S[0-9]+)\b' | sort -u || true)
-          for story in $BODY_STORIES; do
-            if [[ ! "$STORY_IDS" =~ "$story" ]]; then
-              STORY_IDS="${STORY_IDS} ${story}"
-            fi
-          done
 
           STORY_IDS=$(echo "$STORY_IDS" | xargs)
           echo "Found story IDs: $STORY_IDS"
@@ -113,8 +106,10 @@ jobs:
 
           echo "changes_made=$CHANGES_MADE" >> $GITHUB_OUTPUT
 
-      - name: Commit changes
+      - name: Open a sync pull request
         if: steps.extract-stories.outputs.story_ids != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -124,11 +119,16 @@ jobs:
             exit 0
           fi
 
+          REF="${{ github.event.issue.number || github.event.pull_request.number }}"
+          BRANCH="chore/sync-specs-${REF}-${{ github.run_id }}"
+          git checkout -b "$BRANCH"
           git add specs/requirements/*.md
-          git commit -m "chore(specs): sync story status from GitHub
+          git commit -m "chore(specs): sync story status from #${REF}
 
-          Updated story status based on issue/PR #${{ github.event.issue.number || github.event.pull_request.number }}
+          Updated story status based on issue/PR #${REF} (labels: ${{ steps.extract-stories.outputs.story_ids }})
 
           Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
-
-          git push
+          git push -u origin "$BRANCH"
+          gh pr create --title "chore(specs): sync story status from #${REF}" \
+            --body "Automated: story status in specs/requirements updated from the \`story:*\` labels on #${REF}. master is protected, so this lands through a pull request." \
+            --label "type:docs,source:automated"
