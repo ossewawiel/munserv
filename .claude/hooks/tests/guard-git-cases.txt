@@ -16,3 +16,7 @@ EOF
 2	git branch -D feat/x
 2	cd backend && git push --delete origin feat/x
 2	git checkout feat/x; git clean -fd
+2	master	git push
+2	master	git push origin
+0	master	git push -q -u origin feat/x
+0	master	cd /tmp/wt && git push origin feat/x

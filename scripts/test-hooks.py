@@ -18,20 +18,23 @@ HOOK = ROOT / ".claude" / "hooks" / "guard-git.sh"
 CASES = ROOT / ".claude" / "hooks" / "tests" / "guard-git-cases.txt"
 
 
-def parse(text: str) -> list[tuple[int, str]]:
+def parse(text: str) -> list[tuple[int, str, str]]:
+    """Each case is `<exit>\t<command>` or `<exit>\t<branch>\t<command>` (branch defaults to a feature branch)."""
     entries: list[list] = []
     for line in text.split("\n"):
         if len(line) > 1 and line[0].isdigit() and line[1] == "\t":
-            entries.append([int(line[0]), line[2:]])
+            parts = line[2:].split("\t", 1)
+            branch, cmd = (parts[0], parts[1]) if len(parts) == 2 else ("feat/hook-test", parts[0])
+            entries.append([int(line[0]), branch, cmd])
         elif entries:
-            entries[-1][1] += "\n" + line
-    return [(e[0], e[1].rstrip("\n")) for e in entries]
+            entries[-1][2] += "\n" + line
+    return [(e[0], e[1], e[2].rstrip("\n")) for e in entries]
 
 
 def main() -> int:
     failures = 0
-    for want, cmd in parse(CASES.read_text()):
-        env = {**os.environ, "GUARD_GIT_BRANCH": "feat/hook-test"}  # cases assume a feature branch, whatever CI checked out
+    for want, branch, cmd in parse(CASES.read_text()):
+        env = {**os.environ, "GUARD_GIT_BRANCH": branch}  # pin the branch context, whatever CI checked out
         r = subprocess.run([str(HOOK)], input=json.dumps({"tool_input": {"command": cmd}}), capture_output=True, text=True, cwd=ROOT, env=env)
         ok = r.returncode == want
         failures += not ok
