@@ -25,27 +25,36 @@ data class Pod(
     /**
      * Update the pod name and auto-generate display name.
      */
-    fun withName(newName: String, now: Instant): Pod = copy(
-        name = newName,
-        displayName = displayNameFor(newName),
-        updatedAt = now,
-    )
+    fun withName(
+        newName: String,
+        now: Instant,
+    ): Pod =
+        copy(
+            name = newName,
+            displayName = displayNameFor(newName),
+            updatedAt = now,
+        )
 
     /**
      * Update the logo URL.
      */
-    fun withLogoUrl(newLogoUrl: String?, now: Instant): Pod = copy(
-        logoUrl = newLogoUrl,
-        updatedAt = now,
-    )
+    fun withLogoUrl(
+        newLogoUrl: String?,
+        now: Instant,
+    ): Pod =
+        copy(
+            logoUrl = newLogoUrl,
+            updatedAt = now,
+        )
 
     /**
      * Mark setup as completed.
      */
-    fun markSetupComplete(now: Instant): Pod = copy(
-        setupCompletedAt = now,
-        updatedAt = now,
-    )
+    fun markSetupComplete(now: Instant): Pod =
+        copy(
+            setupCompletedAt = now,
+            updatedAt = now,
+        )
 
     companion object {
         /**

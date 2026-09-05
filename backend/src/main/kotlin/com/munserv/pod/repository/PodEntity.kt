@@ -38,30 +38,32 @@ class PodEntity(
     /**
      * Convert JPA entity to domain model.
      */
-    fun toDomain(): Pod = Pod(
-        id = PodId(id),
-        name = name,
-        displayName = displayName ?: Pod.displayNameFor(name),
-        logoUrl = logoUrl,
-        config = config,
-        setupCompletedAt = setupCompletedAt,
-        createdAt = createdAt,
-        updatedAt = updatedAt,
-    )
+    fun toDomain(): Pod =
+        Pod(
+            id = PodId(id),
+            name = name,
+            displayName = displayName ?: Pod.displayNameFor(name),
+            logoUrl = logoUrl,
+            config = config,
+            setupCompletedAt = setupCompletedAt,
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+        )
 
     companion object {
         /**
          * Convert domain model to JPA entity.
          */
-        fun fromDomain(pod: Pod): PodEntity = PodEntity(
-            id = pod.id.value,
-            name = pod.name,
-            displayName = pod.displayName,
-            logoUrl = pod.logoUrl,
-            config = pod.config,
-            setupCompletedAt = pod.setupCompletedAt,
-            createdAt = pod.createdAt,
-            updatedAt = pod.updatedAt,
-        )
+        fun fromDomain(pod: Pod): PodEntity =
+            PodEntity(
+                id = pod.id.value,
+                name = pod.name,
+                displayName = pod.displayName,
+                logoUrl = pod.logoUrl,
+                config = pod.config,
+                setupCompletedAt = pod.setupCompletedAt,
+                createdAt = pod.createdAt,
+                updatedAt = pod.updatedAt,
+            )
     }
 }

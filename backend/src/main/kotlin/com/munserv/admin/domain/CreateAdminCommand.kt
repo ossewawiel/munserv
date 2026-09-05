@@ -42,15 +42,18 @@ data class CreateAdminCommand(
 
         // Validate scope based on role
         when (role.level) {
-            AdminLevel.SECTOR -> if (sectorId == null) {
-                errors.add("Sector ID is required for ${role.name} role")
-            }
-            AdminLevel.WARD -> if (wardId == null) {
-                errors.add("Ward ID is required for ${role.name} role")
-            }
-            AdminLevel.POD -> if (podId == null) {
-                errors.add("Pod ID is required for ${role.name} role")
-            }
+            AdminLevel.SECTOR ->
+                if (sectorId == null) {
+                    errors.add("Sector ID is required for ${role.name} role")
+                }
+            AdminLevel.WARD ->
+                if (wardId == null) {
+                    errors.add("Ward ID is required for ${role.name} role")
+                }
+            AdminLevel.POD ->
+                if (podId == null) {
+                    errors.add("Pod ID is required for ${role.name} role")
+                }
         }
 
         return errors
