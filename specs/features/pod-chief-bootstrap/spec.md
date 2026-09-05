@@ -27,7 +27,7 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 | W29 | Super user uses temporary access for debugging | [#44](https://github.com/ossewawiel/munserv/issues/44) | |
 | W30 | Pod Chief views/revokes super user sessions | [#45](https://github.com/ossewawiel/munserv/issues/45) | |
 
-### Backend (4 stories)
+### Backend (5 stories)
 
 | ID | Title | Issue | Handoff |
 |----|-------|-------|---------|
@@ -35,6 +35,7 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 | B6 | Bootstrap eligibility check | [#47](https://github.com/ossewawiel/munserv/issues/47) | |
 | B7 | Bootstrap audit logging | [#48](https://github.com/ossewawiel/munserv/issues/48) | |
 | B8 | Temporary super user grant tracking | [#49](https://github.com/ossewawiel/munserv/issues/49) | [Handoff](completed/049-B8-support-grants-backend.md) |
+| B9 | Super user login with a support grant | [#68](https://github.com/ossewawiel/munserv/issues/68) | [Handoff](068-B9-support-grant-login-backend.md) |
 
 ## Dependencies
 
@@ -67,8 +68,10 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 | GET | `/api/v1/support-access/grants` | Pod Chief | List active and past grants |
 | POST | `/api/v1/support-access/grants` | Pod Chief | Create temporary grant |
 | DELETE | `/api/v1/support-access/grants/{id}` | Pod Chief | Revoke grant |
+| GET | `/api/v1/support-access/grants/current` | Support grant | Read the caller's own grant (B9) |
+| POST | `/api/v1/auth/logout` | Authenticated | Revokes a grant-scoped login, no-op otherwise (B9) |
 
-**Note:** Super user with active grant also uses `/api/v1/auth/admin/login` - backend checks for active grant and returns appropriate role.
+**Note:** Super user with active grant also uses `/api/v1/auth/admin/login` - backend checks for active grant and returns the granted role (B9, #68).
 
 ## Database Changes
 
@@ -104,7 +107,7 @@ ON admins(role, pod_id) WHERE deleted_at IS NULL;
 
 1. **Credentials**: Environment variables only, never in code/database
 2. **Access revocation**: Automatic when Pod Chief onboarding completes
-3. **JWT differentiation**: Super user gets `role: "super_user"` claim
+3. **JWT differentiation**: bootstrap gives `role: "super_user"`; a support grant login (B9) gives the granted role only, with the grant id as JWT subject
 4. **Rate limiting**: Apply to bootstrap login endpoint
 5. **Audit logging**: Log all bootstrap and support access actions
 6. **Temporary access**: Auto-expires after logout or 1 hour inactivity
