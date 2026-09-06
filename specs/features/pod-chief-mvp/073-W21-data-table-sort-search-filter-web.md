@@ -19,7 +19,7 @@ design_artboards:
   - design/canvases/pod-chief-mvp/TableSearchActive.dc.html
   - design/canvases/pod-chief-mvp/TableFilterPanelDefault.dc.html
   - design/canvases/pod-chief-mvp/TableFilterPanelApplied.dc.html
-design_approved: false
+design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
 files_changed: []
