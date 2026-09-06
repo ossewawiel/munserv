@@ -1,12 +1,15 @@
 package com.munserv.pod.api
 
 import com.munserv.admin.domain.AdminRole
+import com.munserv.pod.service.PodLogoResult
+import com.munserv.pod.service.PodLogoService
 import com.munserv.pod.service.PodResult
 import com.munserv.pod.service.PodService
 import com.munserv.shared.security.RequireRole
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.PodId
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -15,13 +18,17 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 import java.util.UUID
 
 /**
@@ -38,6 +45,7 @@ import java.util.UUID
 class PodController(
     private val podService: PodService,
     private val podIdResolver: PodIdResolver,
+    private val podLogoService: PodLogoService,
 ) {
     @Operation(
         summary = "Get pod setup status",
@@ -170,6 +178,46 @@ class PodController(
             }
         }
     }
+
+    @Operation(
+        summary = "Upload pod logo",
+        description =
+            "Upload a pod logo image and return its public URL. Storing the file does not change " +
+                "the pod; persist the returned URL with PATCH /pod/settings.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Logo uploaded successfully",
+                content = [Content(schema = Schema(implementation = PodLogoResponse::class))],
+            ),
+            ApiResponse(responseCode = "400", description = "Validation error"),
+            ApiResponse(responseCode = "401", description = "Not authenticated"),
+            ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            ApiResponse(responseCode = "500", description = "Storage error"),
+        ],
+    )
+    @PostMapping("/logo", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun uploadLogo(
+        @Parameter(description = "Logo file (JPEG, PNG, or WebP, max 5MB)", required = true)
+        @RequestParam("file") file: MultipartFile,
+    ): ResponseEntity<*> =
+        when (val result = podLogoService.uploadLogo(file)) {
+            is PodLogoResult.Success -> {
+                ResponseEntity.ok(PodLogoResponse(result.logoUrl))
+            }
+
+            is PodLogoResult.ValidationError -> {
+                ResponseEntity.badRequest().body(ErrorResponse("validation_error", result.errors.joinToString("; ")))
+            }
+
+            is PodLogoResult.StorageError -> {
+                ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ErrorResponse("internal_error", result.message))
+            }
+        }
 
     private fun getCurrentPodId(): PodId? {
         val adminId = getCurrentAdminId() ?: return null
