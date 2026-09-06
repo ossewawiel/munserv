@@ -17,7 +17,7 @@ design_artboards:
   - "WelcomeMessageList.dc.html — inbox with the welcome message unread and auto-selected at the top, detail pane loading"
   - "Main.dc.html (WelcomeMessageDetail) — welcome body, the initial task list, Additional Information without tasks, Dismiss"
   - "WelcomeMessageDetailNoTasks.dc.html — same message with metadata but no task array: body only, no task list"
-design_approved: false
+design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
 files_changed: []
