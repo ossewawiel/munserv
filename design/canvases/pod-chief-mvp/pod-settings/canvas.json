@@ -71,6 +71,30 @@
       "w": 1440,
       "h": 664,
       "title": "Portal header — three branches"
+    },
+    {
+      "file": "LogoUpload.dc.html",
+      "x": 0,
+      "y": 4600,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod logo — uploaded, preview and header updated"
+    },
+    {
+      "file": "LogoUploadError.dc.html",
+      "x": 1560,
+      "y": 4600,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod logo — file rejected before upload"
+    },
+    {
+      "file": "LogoUploading.dc.html",
+      "x": 3120,
+      "y": 4600,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod logo — upload in flight"
     }
   ],
   "annotations": [
@@ -79,7 +103,7 @@
       "x": 0,
       "y": -460,
       "w": 1440,
-      "text": "Pod Settings — W18 (#29) pod name and header branding, W19 (#30) boundary placeholders.\nWeb admin portal, 1440x900, light scheme. Both stories land on one page, so every artboard is that page.\n\nThe page shell — sidebar, header, Breadcrumbs, the Support access card at the fold — is lifted byte for byte from the approved design/canvases/support-access artboards. Colours are scheme.light from design/tokens/color.tokens.json, sizes from size.tokens.json and MUI's own metrics, type is Source Sans 3 as web/src/theme/defaultTheme.ts loads it.\n\nNO NEW REGISTRY COMPONENT. Everything drawn is in design/registry/web.md — DashboardLayout, Breadcrumbs, MainCard, Input, Button — plus MUI Chip, Tooltip and Alert as the portal already uses them. PodIdentitySection and BoundaryPlaceholderCard are feature components under features/pod-settings/components/, so they need no registry row and no Storybook story, exactly as both handoffs say.\n\nRead the artboards in this order: row 1 is the resting form, row 2 its three outcomes, row 3 the dirty form, the W19 copy variant and the header anatomy.\n\nW18c (#128, #129) revised this canvas: the saved artboard now shows a bottom-centre snackbar instead of an inline success Alert, every identity artboard carries a Reset beside Save, and IdentityDirty is new. See the feedback annotation on the right."
+      "text": "Pod Settings — W18 (#29) pod name and header branding, W19 (#30) boundary placeholders.\nWeb admin portal, 1440x900, light scheme. Both stories land on one page, so every artboard is that page.\n\nThe page shell — sidebar, header, Breadcrumbs, the Support access card at the fold — is lifted byte for byte from the approved design/canvases/support-access artboards. Colours are scheme.light from design/tokens/color.tokens.json, sizes from size.tokens.json and MUI's own metrics, type is Source Sans 3 as web/src/theme/defaultTheme.ts loads it.\n\nNO NEW REGISTRY COMPONENT. Everything drawn is in design/registry/web.md — DashboardLayout, Breadcrumbs, MainCard, Input, Button — plus MUI Chip, Tooltip and Alert as the portal already uses them. PodIdentitySection and BoundaryPlaceholderCard are feature components under features/pod-settings/components/, so they need no registry row and no Storybook story, exactly as both handoffs say.\n\nRead the artboards in this order: row 1 is the resting form, row 2 its three outcomes, row 3 the dirty form, the W19 copy variant and the header anatomy.\n\nW18c (#128, #129) revised this canvas: the saved artboard now shows a bottom-centre snackbar instead of an inline success Alert, every identity artboard carries a Reset beside Save, and IdentityDirty is new. See the feedback annotation on the right.\n\nW18b (#97) adds the bottom row: the Logo URL field is replaced by an upload control, so on that row read the logo block, not the URL field. The six W18/W18c artboards above are left exactly as they shipped — they are the record of what is in master, and the W18b row supersedes their logo row."
     },
     {
       "id": "assets",
@@ -122,6 +146,20 @@
       "y": -460,
       "w": 1440,
       "text": "FEEDBACK CONVENTION — #128 and #129, and it now governs the whole portal, not just this page.\n\nTRANSIENT OUTCOMES ARE SNACKBARS. Saved, revoked, sent, resent, deleted: a bottom-centre MUI Snackbar holding a filled Alert of the matching severity, 4000ms autoHideDuration, one at a time. Look at the saved artboard: the card no longer carries a success Alert, and the row where it used to sit is gone, so nothing on the page reflows when the outcome arrives. The bar is 24px off the bottom edge, centred on the viewport, min-width 288 / max-width 568, padding 6px 16px, radius 8 (shape.borderRadius), success.main #4CAF50 with #FFFFFF text and a 22px check icon at 0.9 opacity, elevation 6. The message is the existing podSettings.identity.saved key, unchanged.\n\nPERSISTENT PROBLEMS STAY INLINE. Compare the server-error artboard, which is untouched: a 400 the user must read and act on stays as an inline Alert at the top of the card, and field validation stays on the field (the invalid-name artboard). Those do not auto-dismiss, because dismissing them would hide the reason the save did not happen.\n\nONE SHARED COMPONENT. Build it once as organisms/FeedbackSnackbar and register it — design/registry/web.md now carries the row. PodIdentitySection must not hand-roll a Snackbar, and SessionExpiredHandler keeps its own top-centre warning bar: that one is a session event with a redirect behind it, not a form outcome, and it is deliberately not a FeedbackSnackbar.\n\nRESET — #129. A Reset button sits to the left of Save with a 12px gap: Button atom, variant=\"secondary\" (outlined, color inherit), medium, padding 7px 15px, border rgba(0,0,0,0.23), label onSurface #1A1C1B. It is ENABLED ONLY WHILE THE FORM IS DIRTY, so it is drawn disabled on the resting, saving and saved artboards (border rgba(0,0,0,0.12), label rgba(0,0,0,0.26)) and live on the dirty and invalid-name artboards. That is the point of the issue: the invalid-name state is exactly where a user needs a way out, and Save is blocked there.\n\nReset restores the LAST SAVED name and logo URL from usePodSettings and clears the field error — it is react-hook-form reset(), not a page reload, and it never touches the header preview, which was already bound to the saved value. During a save both buttons are disabled."
+    },
+    {
+      "id": "logo-upload",
+      "x": 0,
+      "y": 4140,
+      "w": 1440,
+      "text": "W18b — UPLOAD A POD LOGO. Three artboards, one row, and four decisions.\n\n1. THE LOGO URL FIELD IS GONE, NOT JOINED. The story's outcome is \"without ever typing a URL\", so the second Input in the left column is replaced by the logo block, exactly as handoff step 5 says. Two ways to set one value would let a chief type a URL that POST /pod/logo never saw, and the field would have to be reconciled with the uploaded value on every save. The block keeps the field's slot: same left column, same 20px gap under Pod name, so nothing else on the card moves. Anatomy: caption \"Pod logo\" at 12px / 500 / 0.4px onSurfaceVariant (the Header preview caption, reused), then a 16px-gap row of a 56x56 preview (1px outlineVariant #C1C8C4, radius 8, tertiaryLight #F7F5F0 ground) and a column holding the button, the chosen file name and the helper line. Empty state: the same 56x56 tile with no image and the button reading \"Choose an image\".\n\n2. THE BUTTON IS THE SECONDARY BUTTON, NOT A DROP ZONE. Button atom variant=\"secondary\" — outlined, padding 7px 15px, border rgba(0,0,0,0.23), label onSurface #1A1C1B, radius 8 — the same button as Reset, with a 20px upload icon as startIcon at margin-left -4px. It fronts a visually hidden file input; there is no drag-and-drop target, no cropper and no progress bar to draw. In flight (third artboard) it takes the disabled outline (border rgba(0,0,0,0.12), label rgba(0,0,0,0.26)), a 16px CircularProgress as startIcon and the label \"Uploading…\" — built as disabled + startIcon, never Button isLoading, which would put hardcoded English on a screen that ships in en, af and zu.\n\n3. UPLOADING IS SAVING, SO THE OUTCOME IS A SNACKBAR. The mutation uploads and then PATCHes the settings, so a successful pick is a completed, persisted change: bottom-centre FeedbackSnackbar, success.main #4CAF50, 4000ms, per the Feedback convention on the note at the top right. On the first artboard the 56x56 preview, the header preview panel and the real portal header all carry the new logo at once — that is setQueryData on podSettingsKeys.all, not a refetch and not a reload. A rejected file or a failed upload is a problem the chief must act on, so it stays INLINE under the control and does not auto-dismiss. Reset is unaffected: it restores the last saved name, and the logo on screen already IS the last saved logo, so a chief cannot reset away an upload that the server has taken. Reset stays disabled on all three artboards — none of them has a dirty name field — and during the upload Save goes disabled with it, so no PATCH can race the one the mutation will send.\n\n4. THE REJECTED FILE NEVER TOUCHES THE PREVIEW. On the middle and right artboards the tile still shows the pod's current logo. Nothing clears it: not a 5MB rejection, not a wrong type, not a 500. Compare the first artboard, where the tile changes only after the server has answered.\n\nNO NEW REGISTRY COMPONENT. Button, MainCard, Input and FeedbackSnackbar are all in design/registry/web.md; PodLogoUpload is a feature component under features/pod-settings/components/, so it takes no registry row and no Storybook story. The circular \"42\" crest is NOT an asset to build — like the W42 square on the rows above it stands in for whatever image sits at logoUrl, drawn differently only so the before/after is legible across the three artboards."
+    },
+    {
+      "id": "logo-copy",
+      "x": 1560,
+      "y": 4140,
+      "w": 1440,
+      "text": "Copy, verbatim — the podSettings.logo group. English here; af and zu need real translations, not English copies.\n\ntitle: Pod logo\nchoose: Choose an image\nreplace: Replace logo\nnone: No logo yet. The header shows the Munserv mark on its own.\nhint: JPEG, PNG or WebP, up to 5MB.\nuploading: Uploading…\ninvalidType: That file is not an image. Choose a JPEG, PNG or WebP.\ntooLarge: That image is larger than 5MB. Choose a smaller one.\nuploadFailed: The logo could not be uploaded. The current logo is unchanged.\nsaved: Logo updated. Everyone in this pod sees it now.\nalt: Pod logo\n\nTWO KEYS GO BEYOND THE LIST IN HANDOFF 076, and both are drawn above, so neither is optional.\n• hint — the helper line under the control. The rules the server enforces (three types, 5MB) have to be readable BEFORE a chief picks a file; a message that only appears after a rejection is a trap, and the removed logoUrlHelper was carrying that job for the URL field.\n• saved — the snackbar message. podSettings.identity.saved cannot be reused: it names the displayName the header now reads, which a logo upload does not change.\n\ninvalidType and tooLarge render in the same slot, the helper line, in error #BA1A1A at 12px / 1.66 / 0.4px, replacing hint. The middle artboard draws tooLarge; invalidType is the identical line with the other string. uploadFailed — the server case, AC5 — renders in that same slot too, and is replaced by error.response.data.message whenever the 400 carries one; it is not an Alert at the top of the card, because unlike a rejected PATCH it belongs to one control and the chief's next move is to press that control again. The chosen file name sits beside the button at 14px onSurfaceVariant in every state, rejected files included — it is what tells a chief WHICH file was refused.\n\nThe name field reads \"Ward42\" on all three artboards: a logo upload is not a rename, and nothing here touches podSettings.identity."
     }
   ],
   "launch": {
