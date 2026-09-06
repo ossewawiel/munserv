@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import signal
 import socket
 import subprocess
@@ -29,9 +30,40 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent.parent
+def _repo_root() -> Path:
+    """The eyeball script's own repository root -- resolved via git, not a fixed path depth, so
+    the script keeps working if it is copied to another project at a different nesting (see
+    scripts/eyeball/project.yaml). Read-only git for candidates always runs here, never in a
+    checkout directory that may not exist yet."""
+    script_dir = Path(__file__).resolve().parent
+    try:
+        out = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=script_dir, text=True,
+                              capture_output=True)
+        if out.returncode == 0:
+            return Path(out.stdout.strip())
+    except OSError:
+        pass
+    return script_dir.parent
+
+
+ROOT = _repo_root()
 EYEBALL_DIR = ROOT / "scripts" / "eyeball"
-REPO = "ossewawiel/munserv"
+
+
+def load_yaml(path: Path):
+    return yaml.safe_load(path.read_text(encoding="utf-8")) if path.exists() else None
+
+
+# Everything project-specific lives in scripts/eyeball/{accounts,services,smoke}.yaml plus this
+# optional project.yaml; copying the eyeball dashboard to another repo means editing those files,
+# never this script. See scripts/eyeball/README.md.
+PROJECT = load_yaml(EYEBALL_DIR / "project.yaml") or {}
+PROJECT_NAME = PROJECT.get("name") or ROOT.name
+DEFAULT_PORT = int(PROJECT.get("port", 3999))
+HANDOFF_GLOB = PROJECT.get("handoff_glob", "specs/features")
+STORY_LABEL_PREFIX = PROJECT.get("story_label_prefix", "story:")
+CHECKOUT_DIR_NAME = PROJECT.get("checkout_dir", f"{PROJECT_NAME}-eyeball")
+
 PASS_LABEL = ("eyeball:pass", "0e8a16", "Eyeball: every check passed")
 FAIL_LABEL = ("eyeball:fail", "d73a4a", "Eyeball: at least one check failed")
 SOURCE_LABEL = ("source:eyeball", "fbca04", "Filed from a manual eyeball session")
@@ -39,6 +71,7 @@ SOURCE_LABEL = ("source:eyeball", "fbca04", "Filed from a manual eyeball session
 _state_lock = threading.Lock()
 _cache: dict = {"candidates": None, "fetched_at": 0}
 _processes: dict[str, subprocess.Popen] = {}
+_repo_slug: list[str] = []
 _NAME_RE = re.compile(r"^[A-Za-z0-9_.:-]+$")
 
 
@@ -73,16 +106,45 @@ def validate_branch(value: str) -> str:
     return value
 
 
+class CommandError(Exception):
+    """A subprocess exited non-zero; carries its stderr instead of leaking it to the terminal."""
+
+
+def run_captured(args: list[str], cwd: Path = ROOT, check: bool = True) -> subprocess.CompletedProcess:
+    """Run a command with stdout/stderr captured -- never inherited -- so a git/gh failure never
+    reaches the dashboard's own terminal. On failure (when check) raises CommandError carrying the
+    command's stderr (or stdout, if stderr is empty) for the caller to surface in a JSON response."""
+    result = subprocess.run(args, cwd=cwd, text=True, capture_output=True)
+    if check and result.returncode != 0:
+        message = (result.stderr or result.stdout or f"exit {result.returncode}").strip()
+        raise CommandError(f"{' '.join(args)}: {message}")
+    return result
+
+
 def gh(*args: str) -> str:
-    return subprocess.check_output(["gh", *args], text=True, cwd=ROOT)
+    return run_captured(["gh", *args]).stdout
 
 
 def gh_json(*args: str):
     return json.loads(gh(*args))
 
 
-def load_yaml(path: Path):
-    return yaml.safe_load(path.read_text(encoding="utf-8")) if path.exists() else None
+def repo() -> str:
+    """`owner/name` for `gh --repo`: an explicit `project.yaml: repo` wins; otherwise it is
+    detected from the origin remote on first use (never at import, so importing this module for
+    unit tests never shells out to `gh`)."""
+    if not _repo_slug:
+        override = PROJECT.get("repo")
+        if override:
+            _repo_slug.append(override)
+        else:
+            try:
+                _repo_slug.append(run_captured(
+                    ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"],
+                    cwd=ROOT).stdout.strip())
+            except CommandError:
+                _repo_slug.append("")
+    return _repo_slug[0]
 
 
 def frontmatter_and_body(text: str) -> tuple[dict, str]:
@@ -120,14 +182,16 @@ def match_handoff(names: list[str], story: str) -> str | None:
 
 def find_handoff_path(branch: str, story: str) -> str | None:
     try:
-        names = gh_run(["git", "ls-tree", "-r", "--name-only", f"origin/{branch}", "--", "specs/features"])
-    except subprocess.CalledProcessError:
+        names = gh_run(["git", "ls-tree", "-r", "--name-only", f"origin/{branch}", "--", HANDOFF_GLOB])
+    except CommandError:
         return None
     return match_handoff(names.splitlines(), story)
 
 
 def gh_run(args: list[str]) -> str:
-    return subprocess.check_output(args, text=True, cwd=ROOT)
+    """Read-only git (ls-tree, show, fetch) for the candidate list: always runs in ROOT, the main
+    repository, never in a checkout directory that may not exist yet."""
+    return run_captured(args, cwd=ROOT).stdout
 
 
 def build_candidates(force: bool) -> list[dict]:
@@ -136,14 +200,14 @@ def build_candidates(force: bool) -> list[dict]:
             return _cache["candidates"]
         try:
             gh_run(["git", "fetch", "origin"])
-        except subprocess.CalledProcessError:
+        except CommandError:
             pass
-        prs = gh_json("pr", "list", "--repo", REPO, "--state", "open", "--json",
+        prs = gh_json("pr", "list", "--repo", repo(), "--state", "open", "--json",
                       "number,title,headRefName,labels,url,reviewDecision")
         candidates = []
         for pr in prs:
             labels = [l["name"] for l in pr["labels"]]
-            story = next((l.split(":", 1)[1] for l in labels if l.startswith("story:")), None)
+            story = next((l[len(STORY_LABEL_PREFIX):] for l in labels if l.startswith(STORY_LABEL_PREFIX)), None)
             if not story:
                 continue
             platform = next((l.split(":", 1)[1] for l in labels if l.startswith("platform:")), "")
@@ -155,7 +219,7 @@ def build_candidates(force: bool) -> list[dict]:
             if handoff_path:
                 try:
                     handoff_text = gh_run(["git", "show", f"origin/{branch}:{handoff_path}"])
-                except subprocess.CalledProcessError:
+                except CommandError:
                     handoff_text = ""
             if handoff_text:
                 try:
@@ -196,29 +260,97 @@ def build_candidates(force: bool) -> list[dict]:
 # --- checkout ---------------------------------------------------------------
 
 def default_checkout() -> Path:
-    return ROOT.parent / "munserv-eyeball"
+    return ROOT.parent / CHECKOUT_DIR_NAME
+
+
+def branch_state_file(checkout: Path) -> Path:
+    return checkout / ".eyeball" / "branch"
+
+
+def worktree_add_args(checkout: Path, branch: str) -> list[str]:
+    """Add the checkout worktree detached at `origin/<branch>` -- never claims the branch name
+    itself. Claiming it (`git worktree add <dir> <branch>`, or `-B <branch>`) fails outright, or
+    force-resets a local branch, whenever that same branch is already checked out somewhere else
+    -- which happens constantly here, since factory agents hold feature branches checked out in
+    their own worktrees under .claude/worktrees/."""
+    return ["git", "-C", str(ROOT), "worktree", "add", "--detach", str(checkout), f"origin/{branch}"]
+
+
+def worktree_switch_args(checkout: Path, branch: str) -> tuple[list[str], list[str]]:
+    """Move an existing checkout worktree to `origin/<branch>`, still detached."""
+    fetch = ["git", "-C", str(checkout), "fetch", "origin", branch]
+    switch = ["git", "-C", str(checkout), "checkout", "--detach", f"origin/{branch}"]
+    return fetch, switch
+
+
+def _preserve_eyeball_state(checkout: Path) -> Path | None:
+    """`git worktree add` needs its target directory to not exist, or to be completely empty --
+    but `/api/state` (via load_results) may already have written `.eyeball/` (results, logs) into
+    `checkout` before the first-ever checkout runs, since main() pre-creates that directory. Move
+    that state aside so `add` can proceed; `_restore_eyeball_state` puts it back afterwards."""
+    state_dir = checkout / ".eyeball"
+    if not state_dir.exists():
+        return None
+    if any(p.name != ".eyeball" for p in checkout.iterdir()):
+        return None  # something unexpected is already there; let git report on it
+    tmp = checkout.with_name(checkout.name + ".eyeball-tmp")
+    if tmp.exists():
+        shutil.rmtree(tmp)
+    shutil.move(str(state_dir), str(tmp))
+    return tmp
+
+
+def _restore_eyeball_state(checkout: Path, tmp: Path | None) -> None:
+    if tmp is None:
+        return
+    checkout.mkdir(parents=True, exist_ok=True)
+    dest = checkout / ".eyeball"
+    if dest.exists():
+        shutil.rmtree(dest)
+    shutil.move(str(tmp), str(dest))
 
 
 def checkout_branch(checkout: Path, branch: str) -> str:
     checkout.parent.mkdir(parents=True, exist_ok=True)
-    if (checkout / ".git").exists():
-        subprocess.check_call(["git", "-C", str(checkout), "fetch", "origin"])
-        subprocess.check_call(["git", "-C", str(checkout), "checkout", branch])
-        subprocess.check_call(["git", "-C", str(checkout), "pull", "--ff-only"])
+    if is_worktree(checkout):
+        fetch, switch = worktree_switch_args(checkout, branch)
+        run_captured(fetch, cwd=ROOT)
+        run_captured(switch, cwd=ROOT)
     else:
         # Never touch the main checkout's own branches: fetch the branch into origin/<branch>,
-        # then add a worktree for it. No -B: that would force-reset a same-named local branch in
-        # the main repo (or fail if it is checked out there or in another agent's worktree).
-        subprocess.check_call(["git", "-C", str(ROOT), "fetch", "origin", branch])
-        subprocess.check_call(["git", "-C", str(ROOT), "worktree", "add", str(checkout), branch])
+        # then add a *detached* worktree against it (see worktree_add_args).
+        run_captured(["git", "-C", str(ROOT), "fetch", "origin", branch], cwd=ROOT)
+        preserved = _preserve_eyeball_state(checkout) if checkout.exists() else None
+        if checkout.exists() and not any(checkout.iterdir()):
+            checkout.rmdir()
+        run_captured(worktree_add_args(checkout, branch), cwd=ROOT)
+        _restore_eyeball_state(checkout, preserved)
+    branch_state_file(checkout).parent.mkdir(parents=True, exist_ok=True)
+    branch_state_file(checkout).write_text(branch, encoding="utf-8")
     return current_branch(checkout)
 
 
+def is_worktree(checkout: Path) -> bool:
+    """True only once `checkout` is a real git worktree -- never invoke git inside it before
+    then, so a fresh dashboard with nothing checked out yet never shells out to a plain directory
+    (which would fail with "not a git repository")."""
+    return (checkout / ".git").exists()
+
+
 def current_branch(checkout: Path) -> str:
+    """The branch last requested via /api/checkout, read back from its state file: the worktree
+    itself is checked out detached (see checkout_branch), so `git branch --show-current` would
+    always report nothing."""
+    f = branch_state_file(checkout)
+    return f.read_text(encoding="utf-8").strip() if f.exists() else ""
+
+
+def current_sha(checkout: Path) -> str:
+    if not is_worktree(checkout):
+        return ""
     try:
-        return subprocess.check_output(["git", "-C", str(checkout), "branch", "--show-current"], text=True,
-                                        stderr=subprocess.DEVNULL).strip()
-    except subprocess.CalledProcessError:
+        return run_captured(["git", "-C", str(checkout), "rev-parse", "--short", "HEAD"], cwd=ROOT).stdout.strip()
+    except CommandError:
         return ""
 
 
@@ -253,12 +385,19 @@ def start_service(name: str, checkout: Path) -> str:
         return f"{name} must be started manually"
     if name in _processes and _processes[name].poll() is None:
         return f"{name} already running"
-    logf = open(log_dir(checkout) / f"{name}.log", "a", encoding="utf-8")
-    logf.write(f"\n--- eyeball start {time.strftime('%Y-%m-%d %H:%M:%S')} ---\n")
-    logf.flush()
     cwd = checkout / cfg["cwd"]
-    proc = subprocess.Popen(cfg["start"], shell=True, cwd=cwd, stdout=logf, stderr=subprocess.STDOUT,
-                             start_new_session=True)
+    if not cwd.is_dir():
+        # Nothing has been checked out yet (or the checkout is missing this path): a Popen with a
+        # non-existent cwd raises FileNotFoundError, which is not an ApiError and would otherwise
+        # surface as a raw traceback. Ask for a checkout instead of crashing.
+        raise ApiError("Check out a branch first", 409)
+    with open(log_dir(checkout) / f"{name}.log", "a", encoding="utf-8") as logf:
+        logf.write(f"\n--- eyeball start {time.strftime('%Y-%m-%d %H:%M:%S')} ---\n")
+        logf.flush()
+        # The child inherits its own duplicated file descriptor for stdout/stderr, so this file
+        # object can (and must) be closed in the parent as soon as Popen returns.
+        proc = subprocess.Popen(cfg["start"], shell=True, cwd=cwd, stdout=logf, stderr=subprocess.STDOUT,
+                                 start_new_session=True)
     _processes[name] = proc
     return f"{name} starting (pid {proc.pid})"
 
@@ -313,28 +452,42 @@ def save_results(checkout: Path, candidate_id: str, data: dict) -> None:
 
 
 def ensure_labels() -> None:
-    existing = {l["name"] for l in gh_json("label", "list", "--repo", REPO, "--limit", "200", "--json", "name")}
+    existing = {l["name"] for l in gh_json("label", "list", "--repo", repo(), "--limit", "200", "--json", "name")}
     for name, color, desc in (PASS_LABEL, FAIL_LABEL, SOURCE_LABEL):
         if name not in existing:
-            subprocess.run(["gh", "label", "create", name, "--repo", REPO, "--color", color, "--description", desc],
-                            cwd=ROOT, check=False)
+            run_captured(["gh", "label", "create", name, "--repo", repo(), "--color", color,
+                          "--description", desc], cwd=ROOT, check=False)
 
 
-def issue_milestone(pr_number: int | None) -> str | None:
-    # `gh pr view --json closingIssuesReferences` does not carry a milestone field; look it up on
-    # the first closing issue instead.
-    if pr_number is None:
+def issue_milestone(candidate: dict) -> str | None:
+    """The milestone of the story this candidate belongs to: `gh pr view --json
+    closingIssuesReferences` carries no milestone field, so look one up on the first closing
+    issue; if the PR closes nothing, fall back to the issue carrying the same `story:*` label."""
+    issue_number = None
+    pr_number = candidate.get("number")
+    if pr_number is not None:
+        try:
+            refs = gh_json("pr", "view", str(pr_number), "--repo", repo(), "--json", "closingIssuesReferences")
+            refs = refs.get("closingIssuesReferences") or []
+            if refs:
+                issue_number = refs[0]["number"]
+        except (CommandError, KeyError, IndexError):
+            issue_number = None
+    if issue_number is None and candidate.get("story"):
+        try:
+            issues = gh_json("issue", "list", "--repo", repo(), "--state", "all", "--limit", "1",
+                              "--label", f"{STORY_LABEL_PREFIX}{candidate['story']}", "--json", "number")
+            if issues:
+                issue_number = issues[0]["number"]
+        except (CommandError, KeyError, IndexError):
+            issue_number = None
+    if issue_number is None:
         return None
     try:
-        refs = gh_json("pr", "view", str(pr_number), "--repo", REPO, "--json", "closingIssuesReferences")
-        refs = refs.get("closingIssuesReferences") or []
-        if not refs:
-            return None
-        issue_number = refs[0]["number"]
-        issue = gh_json("issue", "view", str(issue_number), "--repo", REPO, "--json", "milestone")
-        ms = issue.get("milestone")
-        return ms.get("title") if ms else None
-    except (subprocess.CalledProcessError, KeyError, IndexError):
+        title = gh("issue", "view", str(issue_number), "--repo", repo(), "--json", "milestone",
+                    "-q", ".milestone.title").strip()
+        return title or None
+    except CommandError:
         return None
 
 
@@ -358,17 +511,17 @@ def file_check_issue(candidate: dict, check: dict, result: dict) -> str:
         lines.append("")
         lines.append(f"PR: {candidate['url']}")
     args = [
-        "issue", "create", "--repo", REPO,
+        "issue", "create", "--repo", repo(),
         "--title", f"[Eyeball] {candidate['story']} {check['id']}: {check['title']}",
         "--body", "\n".join(lines),
         "--label", "type:bug,status:ready,source:eyeball",
     ]
     if candidate.get("platform"):
         args += ["--label", f"platform:{candidate['platform']}"]
-    ms = issue_milestone(candidate.get("number"))
+    ms = issue_milestone(candidate)
     if ms:
         args += ["--milestone", ms]
-    out = subprocess.check_output(["gh", *args], text=True, cwd=ROOT).strip()
+    out = run_captured(["gh", *args], cwd=ROOT).stdout.strip()
     return out.splitlines()[-1]
 
 
@@ -379,15 +532,15 @@ def file_observation_issue(candidate: dict, obs: dict) -> str:
     if candidate.get("url"):
         body += f"\n\nFiled from an eyeball session. PR: {candidate['url']}"
     args = [
-        "issue", "create", "--repo", REPO,
+        "issue", "create", "--repo", repo(),
         "--title", f"[Eyeball] {candidate['story']}: {first_line}",
         "--body", body,
         "--label", f"{kind},status:ready,source:eyeball",
     ]
-    ms = issue_milestone(candidate.get("number"))
+    ms = issue_milestone(candidate)
     if ms:
         args += ["--milestone", ms]
-    out = subprocess.check_output(["gh", *args], text=True, cwd=ROOT).strip()
+    out = run_captured(["gh", *args], cwd=ROOT).stdout.strip()
     return out.splitlines()[-1]
 
 
@@ -427,14 +580,14 @@ def submit(candidate: dict, data: dict, checkout: Path) -> dict:
         body += "\n\n**Observations filed:**\n" + "\n".join(f"- {o['issue_url']}" for o in obs_with_issues)
 
     if candidate["kind"] == "pr":
-        subprocess.run(["gh", "pr", "comment", str(candidate["number"]), "--repo", REPO, "--body", body],
-                        cwd=ROOT, check=False)
+        run_captured(["gh", "pr", "comment", str(candidate["number"]), "--repo", repo(), "--body", body],
+                     cwd=ROOT, check=False)
         # Pass only when every check was ticked Pass and none failed; anything else (including an
         # untouched check) is eyeball:fail.
         want = PASS_LABEL[0] if total and passed == total else FAIL_LABEL[0]
         other = FAIL_LABEL[0] if want == PASS_LABEL[0] else PASS_LABEL[0]
-        subprocess.run(["gh", "pr", "edit", str(candidate["number"]), "--repo", REPO,
-                        "--remove-label", other, "--add-label", want], cwd=ROOT, check=False)
+        run_captured(["gh", "pr", "edit", str(candidate["number"]), "--repo", repo(),
+                     "--remove-label", other, "--add-label", want], cwd=ROOT, check=False)
 
     data["submitted_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     save_results(checkout, candidate["id"], data)
@@ -507,6 +660,11 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == "/api/service/start-required":
                 body = self._read_json()
                 names = [validate_name(n, "service name") for n in body.get("names", [])]
+                branch = body.get("branch")
+                if branch:
+                    branch = validate_branch(branch)
+                    if current_branch(self.checkout) != branch:
+                        checkout_branch(self.checkout, branch)
                 messages = [start_service(n, self.checkout) for n in names]
                 return self._json({"ok": True, "messages": messages})
             if self.path == "/api/save":
@@ -553,24 +711,33 @@ class Handler(BaseHTTPRequestHandler):
             "candidates": candidates,
             "services": services,
             "accounts": load_yaml(EYEBALL_DIR / "accounts.yaml") or {},
-            "checkout": {"path": str(self.checkout), "branch": current_branch(self.checkout)},
+            "checkout": {"path": str(self.checkout), "branch": current_branch(self.checkout),
+                         "sha": current_sha(self.checkout)},
             "otp": latest_otp(self.checkout),
         })
 
 
+def _raise_system_exit(signum, frame):  # noqa: ARG001 - signal handler signature
+    raise SystemExit(0)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", type=int, default=3999)
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--checkout", type=Path, default=None)
     args = parser.parse_args()
     Handler.checkout = args.checkout or default_checkout()
     Handler.checkout.mkdir(parents=True, exist_ok=True)
     server = ThreadingHTTPServer(("localhost", args.port), Handler)
+    # SIGTERM (dashboard.sh's Ctrl-C trap, or any other supervisor) must run the same cleanup as
+    # SIGINT: without a handler, the default disposition kills the process immediately and the
+    # `finally` below -- which stops every service's process group -- never runs.
+    signal.signal(signal.SIGTERM, _raise_system_exit)
     print(f"eyeball dashboard: http://localhost:{args.port}")
     print(f"checkout under test: {Handler.checkout}")
     try:
         server.serve_forever()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         pass
     finally:
         for name in list(_processes):

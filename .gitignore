@@ -96,3 +96,7 @@ site/dashboard/
 
 # eyeball dashboard: per-checkout logs and results, never committed
 .eyeball/
+
+# Python bytecode caches
+__pycache__/
+*.pyc

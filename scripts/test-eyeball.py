@@ -132,5 +132,114 @@ class SubmitGuardTests(unittest.TestCase):
                 eyeball.submit(candidate, data, Path(d))
 
 
+class StartServiceGuardTests(unittest.TestCase):
+    """Starting a service before anything has been checked out must not raise a raw
+    FileNotFoundError from Popen (item 11): it must fail with a 409 ApiError instead."""
+
+    def test_missing_checkout_dir_raises_409_not_a_traceback(self):
+        import tempfile
+
+        original = eyeball.services_config
+        eyeball.services_config = lambda: {
+            "db": {"cwd": "infrastructure/docker", "start": "true", "health": "tcp:1"}
+        }
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                checkout = Path(d) / "not-checked-out-yet"
+                checkout.mkdir()  # exists as a plain dir, like main()'s pre-created checkout
+                with self.assertRaises(eyeball.ApiError) as ctx:
+                    eyeball.start_service("db", checkout)
+                self.assertEqual(ctx.exception.status, 409)
+        finally:
+            eyeball.services_config = original
+
+    def test_existing_cwd_is_not_blocked(self):
+        import tempfile
+
+        original = eyeball.services_config
+        eyeball.services_config = lambda: {
+            "ok": {"cwd": ".", "start": "true", "health": "tcp:1"}
+        }
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                checkout = Path(d)
+                msg = eyeball.start_service("ok", checkout)
+                self.assertIn("starting", msg)
+                eyeball._processes["ok"].wait(timeout=5)
+                eyeball.stop_service("ok")
+        finally:
+            eyeball.services_config = original
+
+
+class DetachedWorktreeTests(unittest.TestCase):
+    """The eyeball checkout must never claim a branch name (item 12): factory agents hold feature
+    branches checked out in their own worktrees, so `git worktree add <dir> <branch>` (or `-B`)
+    fails with "already used by worktree". Adding and switching detached against `origin/<branch>`
+    never touches that ref."""
+
+    def test_worktree_add_is_detached_against_origin_never_claims_the_branch(self):
+        args = eyeball.worktree_add_args(Path("/tmp/checkout"), "feat/eyeball-testing")
+        self.assertIn("--detach", args)
+        self.assertIn("origin/feat/eyeball-testing", args)
+        self.assertNotIn("-B", args)
+        self.assertNotIn("feat/eyeball-testing", args[:-1])  # only as part of "origin/<branch>"
+
+    def test_worktree_switch_is_detached_against_origin(self):
+        fetch, switch = eyeball.worktree_switch_args(Path("/tmp/checkout"), "W29")
+        self.assertEqual(fetch, ["git", "-C", "/tmp/checkout", "fetch", "origin", "W29"])
+        self.assertIn("--detach", switch)
+        self.assertIn("origin/W29", switch)
+        self.assertNotIn("-B", switch)
+
+    def test_branch_state_file_round_trips_the_requested_branch(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d)
+            self.assertEqual(eyeball.current_branch(checkout), "")
+            eyeball.branch_state_file(checkout).parent.mkdir(parents=True, exist_ok=True)
+            eyeball.branch_state_file(checkout).write_text("W29", encoding="utf-8")
+            self.assertEqual(eyeball.current_branch(checkout), "W29")
+
+    def test_current_sha_is_empty_when_not_a_worktree(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(eyeball.current_sha(Path(d)), "")
+
+    def test_preserves_and_restores_eyeball_state_around_worktree_add(self):
+        # `/api/state` writes .eyeball/results and .eyeball/logs into the checkout directory
+        # before any checkout ever runs (main() pre-creates it); `git worktree add` requires an
+        # empty target, so that state must survive being moved out of the way and back.
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d) / "checkout"
+            (checkout / ".eyeball" / "results").mkdir(parents=True)
+            (checkout / ".eyeball" / "results" / "pr-1.json").write_text("{}", encoding="utf-8")
+
+            tmp = eyeball._preserve_eyeball_state(checkout)
+            self.assertIsNotNone(tmp)
+            self.assertFalse((checkout / ".eyeball").exists())
+            self.assertTrue((tmp / "results" / "pr-1.json").exists())
+
+            checkout.rmdir()  # what checkout_branch does once the directory is otherwise empty
+            checkout.mkdir()  # what `git worktree add` would recreate it as
+
+            eyeball._restore_eyeball_state(checkout, tmp)
+            self.assertTrue((checkout / ".eyeball" / "results" / "pr-1.json").exists())
+
+    def test_no_preserved_state_when_directory_has_other_content(self):
+        # If something other than .eyeball is sitting in the checkout directory, leave it alone
+        # and let `git worktree add` report on it rather than silently moving unrelated files.
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d) / "checkout"
+            (checkout / ".eyeball").mkdir(parents=True)
+            (checkout / "something-else.txt").write_text("x", encoding="utf-8")
+            self.assertIsNone(eyeball._preserve_eyeball_state(checkout))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
