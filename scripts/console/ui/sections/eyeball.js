@@ -15,6 +15,20 @@ let autoScroll = true;
 let logTimer = null;
 let sequence = { running: false, step: null, error: null };
 let pendingParam = null;
+let candidatesLoading = true;
+let candidatesLoadError = null;
+let retryTimer = null;
+let preparedSummary = [];
+
+// Human labels for what Prepare actually did, by service name -- the console's own services.yaml
+// controls what "prepare" means for a given service (an npm/pnpm install, `flutter pub get`, a
+// config file copy); this mirrors the MunServ project's own services.yaml so the stepper can say
+// something more useful than "ready".
+function prepareLabel(name) {
+  if (name === 'mobile') return 'mobile pub get';
+  if (name === 'backend') return 'backend config copied';
+  return name + ' deps installed';
+}
 
 function selected() {
   return candidates.find((c) => c.id === selectedId) || null;
@@ -26,6 +40,9 @@ async function loadCandidates(force) {
     candidates = data.candidates;
     accounts = data.accounts || {};
     candidatesFetchedAt = Date.now();
+    candidatesLoading = false;
+    candidatesLoadError = null;
+    clearTimeout(retryTimer);
     if (pendingParam && candidates.some((c) => c.id === pendingParam)) {
       selectCandidate(pendingParam, { silent: true });
       pendingParam = null;
@@ -35,7 +52,18 @@ async function loadCandidates(force) {
     }
     renderAll();
   } catch (e) {
-    ctx.toast('Could not load candidates: ' + e.message, 'error');
+    candidatesLoadError = e.message;
+    // The server may still be coming up (a deep link opened right after launch): keep the
+    // loading state visible and retry on its own rather than leaving "Select a candidate" up
+    // with no indication anything is wrong, or making the deep link wait a full minute for the
+    // background poll.
+    if (candidatesLoading) {
+      clearTimeout(retryTimer);
+      retryTimer = setTimeout(() => loadCandidates(force), 3000);
+    } else {
+      ctx.toast('Could not load candidates: ' + e.message, 'error');
+    }
+    renderAll();
   }
 }
 
@@ -43,6 +71,7 @@ function selectCandidate(id, opts) {
   selectedId = id;
   const c = selected();
   resultsData = c ? c.results : null;
+  preparedSummary = [];
   if (!(opts && opts.silent)) {
     history.replaceState(null, '', '#/eyeball/' + id);
   }
@@ -113,9 +142,15 @@ async function waitForJob(jobId) {
   }
 }
 
+function scrollFirstCheckIntoView() {
+  const first = document.getElementById('first-check');
+  if (first) first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 async function runStepperSequence(candidate) {
   if (sequence.running) return;
   sequence = { running: true, step: 'checkout', error: null };
+  preparedSummary = [];
   renderAll();
   try {
     if (candidate.kind === 'pr') {
@@ -138,6 +173,8 @@ async function runStepperSequence(candidate) {
         if (finished && finished.status === 'failed') {
           throw new Error(name + ' prepare failed: ' + finished.message);
         }
+        preparedSummary.push(prepareLabel(name));
+        renderAll();
       }
     }
     sequence.step = 'start';
@@ -146,6 +183,7 @@ async function runStepperSequence(candidate) {
     await refreshFastState();
     sequence = { running: false, step: null, error: null };
     renderAll();
+    scrollFirstCheckIntoView();
     ctx.toast('Started. Watch the services panel for green.', 'success');
     return;
   } catch (e) {
@@ -168,7 +206,10 @@ function stepStatusText(key, s) {
   if (sequence.running && sequence.step === key) return 'running...';
   if (sequence.error && sequence.step === key) return 'failed: ' + sequence.error;
   if (key === 'checkout') return s.checkedOut ? (fastState.checkout.branch || 'checked out') : 'not checked out';
-  if (key === 'prepare') return s.needsPrepare ? 'needed' : 'ready';
+  if (key === 'prepare') {
+    if (preparedSummary.length) return preparedSummary.join(' · ');
+    return s.needsPrepare ? 'needed' : 'ready';
+  }
   if (key === 'start') return s.needed.length ? s.rows.filter((r) => r.up || r.manual).length + '/' + s.needed.length + ' up' : 'no services';
   if (key === 'test') return s.total ? s.done + '/' + s.total + ' ticked' : 'no checks';
   if (key === 'submit') return s.submitted ? 'submitted' : 'not yet';
@@ -268,10 +309,10 @@ function rightColumn() {
 
 // --- checklist -----------------------------------------------------------
 
-function checkCard(check) {
+function checkCard(check, index) {
   const { el } = ctx;
   const account = check.as ? accounts[check.as] : null;
-  return el('div', { class: 'card' },
+  return el('div', { class: 'card', id: index === 0 ? 'first-check' : null },
     el('div', { style: 'display:flex;justify-content:space-between' }, el('h3', {}, check.title), el('span', {}, check.id)),
     account ? el('div', { style: 'font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center' },
       'Account: ', el('code', {}, account.email || account.phone || check.as),
@@ -325,7 +366,7 @@ function checklistSection(candidate) {
     gated ? el('div', { class: 'empty-state', style: 'margin-bottom:12px' },
       'Check out and start services first (see the stepper above) - the checklist below still works, it just is not backed by a running environment yet.') : null,
     vm.checks.length
-      ? vm.checks.map(checkCard)
+      ? vm.checks.map((c, i) => checkCard(c, i))
       : emptyState('No checks in this candidate', candidate.parse_error || 'Its handoff has no Eyeball block.'),
     observationsCard(),
     el('button', { class: 'primary', onclick: submit }, vm.submitted ? 'Re-submit' : 'Submit'));
@@ -357,17 +398,23 @@ function renderAll() {
   const { el } = ctx;
   try {
     root.innerHTML = '';
+    const staleText = candidatesLoading ? 'loading...' : 'candidates ' + timeAgo(candidatesFetchedAt / 1000);
     root.append(el('div', { class: 'section-title' }, el('h2', {}, 'Eyeball'),
-      el('span', { class: 'stale' }, 'candidates ' + timeAgo(candidatesFetchedAt / 1000)),
+      el('span', { class: 'stale' }, staleText),
       el('button', { onclick: () => loadCandidates(true) }, 'Refresh')));
 
-    const left = el('div', { class: 'eyeball-left' }, candidates.map(candidateRow));
+    const left = el('div', { class: 'eyeball-left' },
+      candidatesLoading && !candidates.length
+        ? ctx.emptyState('Loading candidates...', candidatesLoadError ? 'Retrying: ' + candidatesLoadError : null)
+        : candidates.map(candidateRow));
     const center = el('div', { class: 'eyeball-center' });
     const current = selected();
     if (current) {
       center.append(stepperRow(current));
       center.append(el('h3', {}, 'Checklist'));
       center.append(checklistSection(current));
+    } else if (candidatesLoading) {
+      center.append(ctx.emptyState('Loading candidates...', pendingParam ? 'Selecting ' + pendingParam + ' as soon as it arrives.' : null));
     } else {
       center.append(ctx.emptyState('Select a candidate', 'Pick a PR (or the smoke checklist) on the left.'));
     }
@@ -385,7 +432,9 @@ export const eyeballSection = {
   async mount(rootEl, context) {
     root = rootEl; ctx = context;
     pendingParam = context.param || null;
-    root.append(ctx.el('div', {}, 'Loading...'));
+    candidatesLoading = true;
+    candidatesLoadError = null;
+    renderAll();
     try {
       fastState = await apiGet('/api/state');
     } catch (e) { /* covered by global banner */ }
@@ -395,6 +444,7 @@ export const eyeballSection = {
   unmount() {
     clearInterval(candidatesTimer);
     clearInterval(logTimer);
+    clearTimeout(retryTimer);
   },
   onFastState(data) {
     fastState = data;

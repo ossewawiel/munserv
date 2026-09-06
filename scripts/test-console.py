@@ -457,6 +457,36 @@ class ClassifyPrTests(unittest.TestCase):
         ]
         self.assertEqual(classify_pr(set(), comments), "awaiting_eyeball")
 
+    def test_verdict_named_at_the_end_of_a_heading_line_counts(self):
+        # The real shape from PR #102: the verdict word is the last word of a markdown heading,
+        # not the start of a line, and the body's actual last line ("No findings. Merging remains
+        # the maintainer's call.") names no verdict at all.
+        comments = [{"body": "## Reviewer verdict: APPROVE\n\nRe-reviewed; the one finding is resolved.\n\n"
+                              "No findings. Merging remains the maintainer's call.\n"}]
+        self.assertEqual(classify_pr(set(), comments), "awaiting_eyeball")
+
+    def test_verdict_followed_by_a_dash_aside_counts(self):
+        # The real shape from PR #106: not wrapped in bold, and followed by an em-dash aside.
+        comments = [{"body": "Nothing else moved since the last pass.\n\nAPPROVE — merging is the user's call.\n"}]
+        self.assertEqual(classify_pr(set(), comments), "awaiting_eyeball")
+
+    def test_a_bot_comment_with_no_verdict_line_posted_after_the_review_is_ignored(self):
+        # The real shape from PR #102: a lint bot comments after the reviewer's APPROVE. It must
+        # not be treated as "the latest body, which happens to have no verdict" -- it is not a
+        # verdict source at all, so the reviewer's APPROVE still stands.
+        comments = [
+            {"body": "## Reviewer verdict: APPROVE\n\nAll good.\n"},
+            {"body": "Style nit found by the linter.\n\n*This is a warning only - not blocked.*\n"},
+        ]
+        self.assertEqual(classify_pr(set(), comments), "awaiting_eyeball")
+
+    def test_heading_request_changes_then_bot_comment_stays_in_review(self):
+        comments = [
+            {"body": "## Reviewer verdict: REQUEST CHANGES\n\nOne finding.\n"},
+            {"body": "Style nit found by the linter.\n\n*This is a warning only - not blocked.*\n"},
+        ]
+        self.assertEqual(classify_pr(set(), comments), "in_review")
+
 
 class ChecklistModelTests(unittest.TestCase):
     """The JS checklist view-model builder is pure and DOM-independent (see
