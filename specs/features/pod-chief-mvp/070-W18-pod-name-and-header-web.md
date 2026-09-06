@@ -183,3 +183,40 @@ cd web && pnpm lint && pnpm typecheck && pnpm test:run
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a
 summary of changes. If you cannot finish, set `status: blocked` and end your message with
 `BLOCKED: <reason>`.
+
+## Eyeball
+```yaml
+- id: E1
+  title: Pod chief renames the pod and sees it in the header
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - In the Pod identity section change the pod name to "Ward 42" and press Save.
+  expect: A success message appears, the preview and the real header both read "Munserv Pod Ward 42", and a reload keeps the new name.
+- id: E2
+  title: Invalid name is refused before saving
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - Clear the pod name and type a single letter.
+  expect: The field turns red with a helper message and Save is disabled.
+- id: E3
+  title: Logo URL shows in the header, empty URL shows the mark alone
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - Paste a public image URL into Logo URL, Save, and look at the header.
+    - Clear Logo URL, Save, and look again.
+  expect: With a URL the header shows the logo next to the pod name; without it only the Munserv mark shows.
+- id: E4
+  title: Other roles see the plain header
+  as: ward_admin
+  services: [db, backend, web]
+  url: http://localhost:3000/
+  steps:
+    - Log in and look at the header.
+  expect: The standard Munserv logo shows, no pod identity lockup, and Pod Settings is not in the menu.
+```
