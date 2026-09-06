@@ -3,7 +3,7 @@ issue: 114
 story: FIX114
 title: "A pod admin is logged out right after onboarding because the dashboard call returns 403"
 platform: web
-status: pending
+status: completed
 depends_on: []
 touches:
   - web/src/lib/api-client.ts
@@ -15,8 +15,25 @@ design_artboards: []
 design_approved: false
 created_by: orchestrator
 created_at: "2026-09-06"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/lib/api-client.ts
+  - web/src/lib/api-client.test.ts
+  - web/src/features/pod-chief/hooks.ts
+  - web/src/features/dashboard/DashboardPage.tsx
+  - web/src/features/dashboard/DashboardPage.test.tsx
+  - web/src/features/pod-chief/WardDashboardPage.tsx
+  - web/src/features/pod-chief/SectorDashboardPage.tsx
+  - web/src/components/organisms/SessionExpiredHandler.test.tsx
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+tests_added:
+  - "web/src/lib/api-client.test.ts: should not end the session on a 403 without a support grant"
+  - "web/src/lib/api-client.test.ts: should end the session on a 403 under a support grant"
+  - "web/src/lib/api-client.test.ts: should end the session on a 401"
+  - "web/src/features/dashboard/DashboardPage.test.tsx: should not request the pod dashboard for a pod admin"
+  - "web/src/components/organisms/SessionExpiredHandler.test.tsx: should not display session expired message without a support grant (#114)"
+  - "web/src/components/organisms/SessionExpiredHandler.test.tsx: should display session expired message and redirect under a support grant"
 ---
 
 # FIX114 · Pod admin is logged out right after onboarding (Web)
@@ -27,11 +44,11 @@ Read `domain/README.md` and `domain/admin-role.md` for the role hierarchy. Found
 A pod admin who finishes onboarding lands on a page they may see and stays signed in; a single 403 no longer ends a session unless the user is under a support grant.
 
 ## Acceptance criteria
-- [ ] After "Skip for Now" (or completing the profile) a pod admin lands on `/` and stays logged in; no `session-expired` event fires.
-- [ ] `GET /pod/dashboard` is only requested for users with `pod_chief` permission (`hasPermission('pod_chief')`).
-- [ ] A 403 on any request logs the user out only when a support grant is stored in localStorage (W29 auto-logout keeps working); otherwise the promise rejects and the caller shows its own error.
-- [ ] A 401 still logs the user out as today.
-- [ ] `/messages` opens for the new pod admin and shows the welcome message (B10, #100).
+- [x] After "Skip for Now" (or completing the profile) a pod admin lands on `/` and stays logged in; no `session-expired` event fires.
+- [x] `GET /pod/dashboard` is only requested for users with `pod_chief` permission (`hasPermission('pod_chief')`).
+- [x] A 403 on any request logs the user out only when a support grant is stored in localStorage (W29 auto-logout keeps working); otherwise the promise rejects and the caller shows its own error.
+- [x] A 401 still logs the user out as today.
+- [ ] `/messages` opens for the new pod admin and shows the welcome message (B10, #100) — not verified against the real backend in this session (unit tests pass; step 4 manual/console check was skipped per instructions).
 
 ## Visual
 None.

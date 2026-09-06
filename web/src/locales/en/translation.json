@@ -218,6 +218,7 @@
   "errors": {
     "notFound": "Not Found",
     "unauthorized": "Unauthorized",
+    "forbidden": "You do not have permission to view this page",
     "serverError": "Server Error",
     "networkError": "Network Error"
   },

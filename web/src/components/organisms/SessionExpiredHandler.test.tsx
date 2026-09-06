@@ -232,7 +232,40 @@ describe('SessionExpiredHandler', () => {
   });
 
   describe('when API returns 403 (Forbidden)', () => {
-    it('should display session expired message and redirect', async () => {
+    it('should not display session expired message without a support grant (#114)', async () => {
+      server.use(
+        http.get('*/admin/dashboard', () => {
+          return HttpResponse.json(
+            { error: 'Forbidden', message: 'Access Denied' },
+            { status: 403 }
+          );
+        })
+      );
+
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <SessionExpiredHandler />
+          <TestComponentDashboard />
+        </Wrapper>
+      );
+
+      // Give the rejected request a chance to be handled.
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(500);
+      });
+
+      expect(screen.queryByText(/session has expired/i)).not.toBeInTheDocument();
+
+      // Auth data should be untouched
+      expect(localStorage.getItem('accessToken')).toBe('valid-token');
+    });
+
+    it('should display session expired message and redirect under a support grant', async () => {
+      localStorage.setItem(
+        'supportGrant',
+        JSON.stringify({ grantedRole: 'super_user', expiresAt: '2099-01-01T00:00:00Z' })
+      );
       server.use(
         http.get('*/admin/dashboard', () => {
           return HttpResponse.json(

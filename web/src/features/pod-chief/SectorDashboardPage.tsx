@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { Breadcrumbs } from '@/components/molecules/Breadcrumbs';
 import { ErrorState } from '@/components/molecules/ErrorState';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { useSectorDashboard } from './hooks';
 import { SectorWidgets } from './components/SectorWidgets';
 
@@ -17,7 +18,11 @@ import { SectorWidgets } from './components/SectorWidgets';
 export const SectorDashboardPage: FC = () => {
   const { sectorId } = useParams<{ sectorId: string }>();
   const { t } = useTranslation();
-  const { data: stats, isLoading, error, refetch } = useSectorDashboard(sectorId ?? '');
+  const { hasPermission } = useAuth();
+  const canViewSectorDashboard = hasPermission('pod_chief');
+  const { data: stats, isLoading, error, refetch } = useSectorDashboard(sectorId ?? '', {
+    enabled: canViewSectorDashboard,
+  });
 
   // Redirect if no sectorId provided
   if (!sectorId) {
@@ -38,7 +43,14 @@ export const SectorDashboardPage: FC = () => {
       />
 
       <Box sx={{ mt: 3 }}>
-        {error && (
+        {!canViewSectorDashboard && (
+          <ErrorState
+            title={t('common.error')}
+            description={t('errors.forbidden')}
+          />
+        )}
+
+        {canViewSectorDashboard && error && (
           <ErrorState
             title={t('common.error')}
             description={t('errors.serverError')}
@@ -46,7 +58,7 @@ export const SectorDashboardPage: FC = () => {
           />
         )}
 
-        {!error && <SectorWidgets stats={stats} isLoading={isLoading} />}
+        {canViewSectorDashboard && !error && <SectorWidgets stats={stats} isLoading={isLoading} />}
       </Box>
     </DashboardLayout>
   );

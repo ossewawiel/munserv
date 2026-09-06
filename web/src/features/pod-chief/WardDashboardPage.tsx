@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { Breadcrumbs } from '@/components/molecules/Breadcrumbs';
 import { ErrorState } from '@/components/molecules/ErrorState';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { useWardDashboard } from './hooks';
 import { WardWidgets } from './components/WardWidgets';
 
@@ -17,7 +18,11 @@ import { WardWidgets } from './components/WardWidgets';
 export const WardDashboardPage: FC = () => {
   const { wardId } = useParams<{ wardId: string }>();
   const { t } = useTranslation();
-  const { data: stats, isLoading, error, refetch } = useWardDashboard(wardId ?? '');
+  const { hasPermission } = useAuth();
+  const canViewWardDashboard = hasPermission('pod_chief');
+  const { data: stats, isLoading, error, refetch } = useWardDashboard(wardId ?? '', {
+    enabled: canViewWardDashboard,
+  });
 
   // Redirect if no wardId provided
   if (!wardId) {
@@ -38,7 +43,14 @@ export const WardDashboardPage: FC = () => {
       />
 
       <Box sx={{ mt: 3 }}>
-        {error && (
+        {!canViewWardDashboard && (
+          <ErrorState
+            title={t('common.error')}
+            description={t('errors.forbidden')}
+          />
+        )}
+
+        {canViewWardDashboard && error && (
           <ErrorState
             title={t('common.error')}
             description={t('errors.serverError')}
@@ -46,7 +58,7 @@ export const WardDashboardPage: FC = () => {
           />
         )}
 
-        {!error && <WardWidgets stats={stats} isLoading={isLoading} />}
+        {canViewWardDashboard && !error && <WardWidgets stats={stats} isLoading={isLoading} />}
       </Box>
     </DashboardLayout>
   );

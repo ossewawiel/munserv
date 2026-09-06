@@ -24,22 +24,31 @@ apiClient.interceptors.response.use(
     const requestUrl = error.config?.url ?? '';
 
     // Handle authentication/authorization errors
-    // 401 = Invalid/expired token (session expired)
-    // 403 = No token or access denied (not authenticated)
-    if (status === 401 || status === 403) {
-      // Don't emit session expired for login attempts (401 means wrong credentials)
-      const isLoginRequest = requestUrl.includes('/auth/admin/login');
-      const isRegisterRequest = requestUrl.includes('/auth/register');
+    // 401 = Invalid/expired token: always ends the session.
+    // 403 = Access denied for the current role: this is a normal, expected
+    // response for callers that probe a permission (e.g. a pod dashboard
+    // request from a pod admin) and must not end the session. The one
+    // exception is a support user acting under a support grant (W29): a
+    // 403 there means the grant was revoked or expired, so the session
+    // ends.
+    const isLoginRequest = requestUrl.includes('/auth/admin/login');
+    const isRegisterRequest = requestUrl.includes('/auth/register');
+    const hasSupportGrant = !!localStorage.getItem('supportGrant');
 
-      if (!isLoginRequest && !isRegisterRequest) {
-        // Clear auth data
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('admin');
+    const shouldEndSession =
+      !isLoginRequest &&
+      !isRegisterRequest &&
+      (status === 401 || (status === 403 && hasSupportGrant));
 
-        // Emit event for React components to handle
-        authEvents.emit('session-expired');
-      }
+    if (shouldEndSession) {
+      // Clear auth data
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('admin');
+      localStorage.removeItem('supportGrant');
+
+      // Emit event for React components to handle
+      authEvents.emit('session-expired');
     }
     return Promise.reject(error);
   }
