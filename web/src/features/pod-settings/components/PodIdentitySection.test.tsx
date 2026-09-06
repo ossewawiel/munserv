@@ -236,6 +236,49 @@ describe('PodIdentitySection', () => {
     expect(screen.getByRole('button', { name: /reset/i })).toBeDisabled();
   });
 
+  it('should restore the saved logo URL when reset is pressed', async () => {
+    renderWithProviders(<PodIdentitySection />);
+
+    const logoUrlField = await screen.findByLabelText(/logo url/i);
+    await waitFor(() => expect(logoUrlField).toHaveValue(mockPodSettings.logoUrl));
+
+    fireEvent.change(logoUrlField, {
+      target: { value: 'https://cdn.ward42.org.za/branding/wrong-logo.png' },
+    });
+    expect(screen.getByRole('button', { name: /reset/i })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole('button', { name: /reset/i }));
+
+    await waitFor(() => expect(logoUrlField).toHaveValue(mockPodSettings.logoUrl));
+    expect(screen.getByRole('button', { name: /reset/i })).toBeDisabled();
+  });
+
+  it('should restore the saved values after a rejected save', async () => {
+    server.use(
+      http.patch('*/pod/settings', () =>
+        HttpResponse.json(
+          { code: 'validation_error', message: 'Logo URL must be a valid http or https address.' },
+          { status: 400 }
+        )
+      )
+    );
+
+    renderWithProviders(<PodIdentitySection />);
+
+    const nameField = await screen.findByLabelText(/pod name/i);
+    await waitFor(() => expect(nameField).toHaveValue(mockPodSettings.name));
+
+    fireEvent.change(nameField, { target: { value: 'Something else' } });
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
+
+    await screen.findByText(/Logo URL must be a valid http or https address\./i);
+
+    fireEvent.click(screen.getByRole('button', { name: /reset/i }));
+
+    await waitFor(() => expect(nameField).toHaveValue(mockPodSettings.name));
+    expect(screen.getByRole('button', { name: /reset/i })).toBeDisabled();
+  });
+
   it('should disable both buttons while saving', async () => {
     server.use(http.patch('*/pod/settings', async () => new Promise(() => {})));
 

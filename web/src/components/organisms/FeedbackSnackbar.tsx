@@ -1,5 +1,5 @@
-import { type FC } from 'react';
-import Snackbar from '@mui/material/Snackbar';
+import { type FC, type SyntheticEvent } from 'react';
+import Snackbar, { type SnackbarCloseReason } from '@mui/material/Snackbar';
 import Alert, { type AlertColor } from '@mui/material/Alert';
 
 const AUTO_HIDE_DURATION_MS = 4000;
@@ -26,12 +26,26 @@ export const FeedbackSnackbar: FC<FeedbackSnackbarProps> = ({ feedback, onClose 
     return null;
   }
 
+  // Passing `onClose` gives MUI's Snackbar a ClickAwayListener, so any click
+  // outside the bar - including the very button whose action shows the next
+  // message - would otherwise dismiss it early via a `reason: 'clickaway'`
+  // callback racing the click that just set the new message. The registry
+  // promises a 4s auto-hide, not a dismiss-on-click bar, so only the
+  // `timeout` reason (and FeedbackProvider replacing the message outright)
+  // is allowed to close it.
+  const handleClose = (_event: Event | SyntheticEvent, reason?: SnackbarCloseReason): void => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    onClose();
+  };
+
   return (
     <Snackbar
       open
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       autoHideDuration={AUTO_HIDE_DURATION_MS}
-      onClose={onClose}
+      onClose={handleClose}
     >
       <Alert variant="filled" severity={feedback.severity} elevation={6}>
         {feedback.message}
