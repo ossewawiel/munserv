@@ -2,7 +2,7 @@
 
 **Goal:** Enable super user to bootstrap a fresh pod by creating the first Pod Chief, with automatic access revocation after Pod Chief completes onboarding. Includes temporary support access feature for ongoing maintenance.
 **Platforms:** Backend, Web
-**Status:** 🟡 In Progress
+**Status:** 🟢 Complete
 **Milestone:** [#2 pod-chief-bootstrap](https://github.com/ossewawiel/munserv/milestone/2)
 
 ## Original Requirements

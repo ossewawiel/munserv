@@ -14,7 +14,7 @@ design_canvas: "https://claude.ai/code/artifact/0a434154-e4b2-44cc-ad3d-216e11e9
 design_artboards:
   - design/canvases/pod-chief-mvp/ReportsMenuGeneral.dc.html
   - design/canvases/pod-chief-mvp/ReportsWardScope.dc.html
-design_approved: false
+design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
 files_changed: []
