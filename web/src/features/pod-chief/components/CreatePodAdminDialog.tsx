@@ -1,5 +1,6 @@
-import { type FC, useState } from 'react';
+import { type FC, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AxiosError } from 'axios';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -28,6 +29,15 @@ interface CreatePodAdminDialogProps {
   onSubmit: (data: CreatePodAdministratorRequest) => void;
   isLoading: boolean;
   temporaryPassword?: string;
+  /** The most recent failure from the create-administrator mutation, if any. */
+  error?: unknown;
+}
+
+interface CreateAdministratorErrorBody {
+  error?: {
+    code?: string;
+    message?: string;
+  };
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -43,6 +53,7 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
   onSubmit,
   isLoading,
   temporaryPassword,
+  error,
 }) => {
   const { t } = useTranslation();
   const { status: podSetupStatus } = usePodSetup();
@@ -56,6 +67,24 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
   const [wardError, setWardError] = useState('');
   const [sectorError, setSectorError] = useState('');
   const [passwordCopied, setPasswordCopied] = useState(false);
+  const [emailDirtySinceError, setEmailDirtySinceError] = useState(false);
+
+  const httpStatus = error instanceof AxiosError ? error.response?.status : undefined;
+  const serverErrorBody =
+    error instanceof AxiosError
+      ? (error.response?.data as CreateAdministratorErrorBody | undefined)?.error
+      : undefined;
+
+  const isDuplicateEmail = httpStatus === 409 && !emailDirtySinceError;
+  const duplicateEmailError = isDuplicateEmail
+    ? t('podAdministrators.errors.emailExists')
+    : '';
+
+  const formError = useMemo(() => {
+    if (!httpStatus || httpStatus === 409) return '';
+    if (httpStatus >= 500) return t('podAdministrators.errors.createFailed');
+    return serverErrorBody?.message ?? t('podAdministrators.errors.createFailed');
+  }, [httpStatus, serverErrorBody, t]);
 
   // Pod Chief can manage all roles below their own
   const manageableRoles = getManageableRoles('pod_chief');
@@ -116,6 +145,7 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
     const isSectorValid = validateSectorField();
 
     if (isEmailValid && isNameValid && isWardValid && isSectorValid) {
+      setEmailDirtySinceError(false);
       onSubmit({
         email: email.trim(),
         displayName: displayName.trim(),
@@ -151,6 +181,7 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
     setWardError('');
     setSectorError('');
     setPasswordCopied(false);
+    setEmailDirtySinceError(false);
     onClose();
   };
 
@@ -224,6 +255,7 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
       </DialogTitle>
       <DialogContent sx={{ pt: 3 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+          {formError && <Alert severity="error">{formError}</Alert>}
           <TextField
             autoFocus
             label={t('podAdministrators.form.email')}
@@ -232,11 +264,12 @@ export const CreatePodAdminDialog: FC<CreatePodAdminDialogProps> = ({
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
+              setEmailDirtySinceError(true);
               if (emailError) validateEmailField(e.target.value);
             }}
             onBlur={() => validateEmailField(email)}
-            error={!!emailError}
-            helperText={emailError}
+            error={!!emailError || isDuplicateEmail}
+            helperText={emailError || duplicateEmailError}
             disabled={isLoading}
           />
           <TextField

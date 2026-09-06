@@ -3,7 +3,7 @@ issue: 123
 story: FIX123
 title: "Add Administrator dialog shows no error when the email already exists"
 platform: web
-status: pending
+status: completed
 depends_on: []
 touches:
   - web/src/features/pod-chief/components/CreatePodAdminDialog.tsx
@@ -15,8 +15,19 @@ design_artboards: []
 design_approved: false
 created_by: orchestrator
 created_at: "2026-09-06"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/features/pod-chief/components/CreatePodAdminDialog.tsx
+  - web/src/features/pod-chief/PodAdministratorsPage.tsx
+  - web/src/features/pod-chief/hooks.test.tsx
+  - web/src/features/pod-chief/components/CreatePodAdminDialog.test.tsx
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+tests_added:
+  - "pod-chief hooks > useCreatePodAdministrator > should surface a 409 conflict to the caller"
+  - "CreatePodAdminDialog > should show the duplicate email error and keep the dialog open"
+  - "CreatePodAdminDialog > should show a form-level alert for a non-conflict 4xx error"
+  - "CreatePodAdminDialog > should allow resubmitting after correcting the email"
 ---
 
 # FIX123 · Add Administrator dialog shows no error on a duplicate email (Web)

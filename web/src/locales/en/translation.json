@@ -503,7 +503,8 @@
       "createFailed": "Failed to create administrator",
       "updateFailed": "Failed to update administrator",
       "deleteFailed": "Failed to delete administrator",
-      "loadFailed": "Failed to load administrators"
+      "loadFailed": "Failed to load administrators",
+      "emailExists": "An administrator with this email already exists"
     }
   },
   "roles": {
