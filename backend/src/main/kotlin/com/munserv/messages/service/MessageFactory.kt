@@ -11,6 +11,12 @@ import java.util.UUID
  */
 object MessageFactory {
     private val mapper = jacksonObjectMapper()
+    private val INITIAL_ADMIN_TASKS =
+        listOf(
+            "Change your temporary password.",
+            "Complete your profile (optional, you can skip it).",
+            "Open Messages to see what needs your attention.",
+        )
 
     // ============ Ground Admin Messages ============
 
@@ -270,5 +276,29 @@ object MessageFactory {
         recipientType = "member",
         senderType = "system",
         actionType = "view",
+    )
+
+    /**
+     * Creates a welcome message for a newly created administrator.
+     */
+    fun adminWelcome(
+        recipientId: UUID,
+        displayName: String,
+        role: String,
+    ) = MessageEntity(
+        type = MessageType.ADMIN_WELCOME,
+        title = "Welcome to MunServ",
+        body = "Welcome, $displayName. Your administrator account is ready. Complete the tasks below to get started.",
+        recipientId = recipientId,
+        recipientType = "admin",
+        senderType = "system",
+        actionType = "acknowledge",
+        metadata =
+            mapper.writeValueAsString(
+                mapOf(
+                    "tasks" to INITIAL_ADMIN_TASKS,
+                    "role" to role,
+                ),
+            ),
     )
 }

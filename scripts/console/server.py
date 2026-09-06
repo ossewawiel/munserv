@@ -14,10 +14,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import eyeball, github, knowledge, release, services
+from . import eyeball, github, knowledge, mobile, release, services
 from .config import CONFIG, ROOT
 from .gitops import ApiError, CommandError, checkout_branch, current_branch, current_sha, default_checkout, \
-    ensure_checked_out, is_worktree, resolve_checkout_dir, validate_branch, validate_name
+    ensure_checked_out, is_worktree, local_files_copied, resolve_checkout_dir, validate_branch, validate_name
 
 UI_DIR = Path(__file__).resolve().parent / "ui"
 
@@ -124,6 +124,13 @@ class Handler(BaseHTTPRequestHandler):
             for c in candidates:
                 c["results"] = eyeball.load_results(self.checkout, c["id"])
             return self._json({"candidates": candidates, "accounts": CONFIG.accounts_config})
+        if path == "/api/mobile/devices":
+            return self._json({
+                "devices": mobile.devices(),
+                "lan_ip": mobile.lan_ip(),
+                "api_port": mobile.api_port(),
+                "emulator_host": mobile.emulator_host(),
+            })
         if path == "/api/log":
             name = validate_name((qs.get("name") or [""])[0], "service name")
             kind = (qs.get("kind") or ["start"])[0]
@@ -147,7 +154,8 @@ class Handler(BaseHTTPRequestHandler):
         self._json({
             "checkout": {"path": str(self.checkout), "branch": current_branch(self.checkout),
                          "sha": current_sha(self.checkout), "is_worktree": is_worktree(self.checkout),
-                         "notice": self.checkout_notice},
+                         "notice": self.checkout_notice,
+                         "local_files_copied": local_files_copied(self.checkout)},
             "services": services.state_snapshot(self.checkout),
             "jobs": services.jobs_snapshot(),
             "otp": services.latest_otp(self.checkout),
@@ -201,6 +209,20 @@ class Handler(BaseHTTPRequestHandler):
                 ensure_checked_out(self.checkout, validate_branch(branch))
             messages = [services.start_service(n, self.checkout) for n in names]
             return self._json({"ok": True, "messages": messages})
+        if path == "/api/mobile/install":
+            device_id = mobile.validate_device_id(body.get("device_id", ""))
+            branch = body.get("branch")
+            if branch:
+                ensure_checked_out(self.checkout, validate_branch(branch))
+            job = mobile.start_install(device_id, self.checkout)
+            return self._json({"ok": True, "job": job})
+        if path == "/api/mobile/run":
+            device_id = mobile.validate_device_id(body.get("device_id", ""))
+            branch = body.get("branch")
+            if branch:
+                ensure_checked_out(self.checkout, validate_branch(branch))
+            message = mobile.start_run(device_id, self.checkout)
+            return self._json({"ok": True, "message": message})
         if path == "/api/eyeball/save":
             candidate_id = validate_name(body.get("candidate", ""), "candidate")
             eyeball.save_results(self.checkout, candidate_id, body.get("data", {}))

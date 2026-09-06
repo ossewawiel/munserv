@@ -45,6 +45,7 @@ changelog, master CI, release checklist).
 | `links` | `{}` | Name -> URL quick links shown on Overview. |
 | `sections` | all enabled | `{overview: true, knowledge: true, design: true, eyeball: true, release: true}` -- set any to `false` to hide it. |
 | `repo` | detected via `gh repo view` | `owner/name` passed to every `gh --repo`; set only if detection is wrong. |
+| `local_files` | `[mise.local.toml, .tool-versions, .mise.toml, backend/src/main/resources/application-local.yml, web/.env]` | Paths (relative to the repo root) of untracked, machine-local config copied from the main repo into the checkout -- see "Local-only config" below. |
 
 ### `services.yaml` shape
 
@@ -60,6 +61,36 @@ covering an npm/pnpm install, a Flutter `pub get`, and copying a local config fi
 
 Same shapes the eyeball dashboard used: `accounts.yaml` is free-form, keyed by the `as` field a
 check names; `smoke.yaml` is a list of checks in the same shape as a handoff's `Eyeball` block.
+
+### Local-only config
+
+A fresh checkout is a real `git worktree`, so it has everything git tracks -- but nothing a
+tester's own working copy keeps locally and gitignored: a tool-version pin
+(`mise.local.toml`/`.tool-versions`/`.mise.toml`) or a local override file
+(`application-local.yml`, `web/.env`). Without one of these, a step as ordinary as `flutter pub
+get` can fail with `mise ERROR No version is set for shim: flutter` in a checkout that otherwise
+looks identical to the tester's own. `project.yaml`'s `local_files` lists what to copy in (see the
+key table above); on every checkout create/switch, and again before every Prepare/Start (including
+the mobile install/run jobs below), the console copies each listed file from the repo root into the
+checkout when the repo has it, the checkout doesn't yet, and git does not track it -- never
+overwriting an existing copy, never touching a file git tracks. What has been copied into a given
+checkout is shown under the checkout chip on the Eyeball page ("Copied mise.local.toml,
+application-local.yml from the main checkout").
+
+### Testing on a phone
+
+The Eyeball page's Services panel has a **Phone** card for putting the latest mobile build on a
+connected phone -- the emulator's `10.0.2.2` route to the host does not exist outside the emulator,
+so a phone needs this machine's own LAN address instead. The card shows that address (the first
+non-loopback IPv4 the console can find), the list of `adb`-visible devices (refreshed every 10s, or
+on demand with Refresh), and, per device, **Install latest** (a background job: `flutter pub get`
+if needed, then `flutter build apk --debug` with `--dart-define=API_HOST=<lan ip>
+--dart-define=API_PORT=<mobile.api_port>`, then `adb install -r`) and **Run** (starts `flutter run
+-d <device>` with the same `--dart-define`s as a tracked process, tailable and stoppable exactly
+like any other service's log). No device connected shows the exact USB/wireless-debugging steps to
+connect one, plus a reminder that the emulator still works with no setup at all. `mobile.py`'s
+`emulator_host`/`api_port` come from `services.yaml`'s `mobile` entry, matching
+`mobile/lib/shared/providers/dio_provider.dart`'s `--dart-define=API_HOST`/`API_PORT` contract.
 
 ## Notes
 
