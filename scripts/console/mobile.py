@@ -37,6 +37,10 @@ _IPV4_RE = re.compile(r"^\d{1,3}(?:\.\d{1,3}){3}$")
 
 ADB_TIMEOUT_SECONDS = 10
 IP_COMMAND_TIMEOUT_SECONDS = 5
+REACHABILITY_INTERVAL_SECONDS = 30
+NC_TIMEOUT_SECONDS = 3
+FIREWALL_CHECK_TIMEOUT_SECONDS = 5
+WEB_PORT = 3000
 
 
 def validate_device_id(value: str) -> str:
@@ -225,3 +229,134 @@ def start_run(device_id: str, checkout: Path) -> str:
     command = (f"flutter run -d {shlex.quote(device_id)} "
                f"--dart-define=API_HOST={host} --dart-define=API_PORT={api_port()}")
     return services_mod.start_tracked_process("mobile", checkout, command, mobile_dir)
+
+
+# --- phone reachability ----------------------------------------------------
+#
+# Whether the phone can actually reach this machine's backend (and, once it is up, the web
+# service) matters as much as whether the phone is plugged in: a phone that adb sees fine but
+# whose Wi-Fi network has this machine's firewall blocking the port looks, to a tester, exactly
+# like a backend that is not running. `adb shell toybox nc` runs the reachability probe *from the
+# phone itself* -- ordinary `nc`/`ping` from this machine only proves this machine can route to
+# itself, not that the phone's network path is open. One background thread per (device, port)
+# polls every REACHABILITY_INTERVAL_SECONDS so the Phone panel's 10s poll of /api/mobile/devices
+# never blocks on a live probe.
+
+_reachability_lock = threading.Lock()
+_reachability: dict[str, dict] = {}  # f"{device_id}:{port}" -> {"reachable": bool, "checked_at": float}
+_reachability_threads: dict[str, threading.Thread] = {}
+
+
+def _reachability_key(device_id: str, port: int) -> str:
+    return f"{device_id}:{port}"
+
+
+def probe_reachable(device_id: str, host: str, port: int) -> bool:
+    """True when the phone identified by `device_id` can open a TCP connection to `host:port` --
+    run *from the phone* via `adb shell toybox nc`, with stdin closed (`</dev/null`) so `nc` never
+    blocks waiting for input to relay once the connection succeeds. False (never an exception) on
+    any adb/nc failure, including a timeout: an unreachable phone is exactly what this is checking
+    for, not an error to propagate."""
+    try:
+        result = subprocess.run(
+            ["adb", "-s", device_id, "shell", "toybox", "nc", "-w", str(NC_TIMEOUT_SECONDS), host, str(port)],
+            stdin=subprocess.DEVNULL, capture_output=True, timeout=NC_TIMEOUT_SECONDS + 5)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
+
+
+def _reachability_loop(device_id: str, host: str, port: int) -> None:
+    key = _reachability_key(device_id, port)
+    while True:
+        reachable = probe_reachable(device_id, host, port)
+        with _reachability_lock:
+            _reachability[key] = {"reachable": reachable, "checked_at": time.time()}
+        time.sleep(REACHABILITY_INTERVAL_SECONDS)
+
+
+def ensure_reachability_watch(device_id: str, host: str, port: int) -> None:
+    """Start the background probe loop for (device_id, port) if it is not already running. Safe
+    to call on every poll of /api/mobile/devices -- a live thread is left alone."""
+    key = _reachability_key(device_id, port)
+    with _reachability_lock:
+        existing = _reachability_threads.get(key)
+        if existing and existing.is_alive():
+            return
+        thread = threading.Thread(target=_reachability_loop, args=(device_id, host, port), daemon=True)
+        _reachability_threads[key] = thread
+        thread.start()
+
+
+def reachability_status(device_id: str, port: int) -> dict | None:
+    with _reachability_lock:
+        return _reachability.get(_reachability_key(device_id, port))
+
+
+def lan_subnet(ip: str) -> str:
+    """192.168.1.42 -> 192.168.1.0/24, the /24 a ufw `allow from` rule names. Returns `ip`
+    unchanged when it is not a plain IPv4 address (nothing sensible to derive a subnet from)."""
+    parts = ip.split(".")
+    if len(parts) != 4:
+        return ip
+    return ".".join(parts[:3]) + ".0/24"
+
+
+def detect_active_firewall() -> str | None:
+    """'ufw', 'firewalld', or None -- whichever of the two this machine's systemd reports active,
+    checked in that order. Neither being present or `systemctl` itself being unavailable (a
+    non-systemd machine) both read as None, the "no known firewall" case."""
+    for name in ("ufw", "firewalld"):
+        try:
+            result = subprocess.run(["systemctl", "is-active", name], text=True, capture_output=True,
+                                     timeout=FIREWALL_CHECK_TIMEOUT_SECONDS)
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+        if result.returncode == 0 and result.stdout.strip() == "active":
+            return name
+    return None
+
+
+def firewall_remedy(active_firewall: str | None, port: int, subnet: str) -> str:
+    """The exact command (or, with neither firewall detected, a generic hint) that unblocks
+    `port` for phones on `subnet` -- the command the tester hit today for ufw blocking 8080."""
+    if active_firewall == "ufw":
+        return f"sudo ufw allow from {subnet} to any port {port} proto tcp"
+    if active_firewall == "firewalld":
+        return f"sudo firewall-cmd --add-port={port}/tcp"
+    return f"Check this machine's firewall for a rule blocking port {port}."
+
+
+def _device_reachability(device_id: str, port: int) -> dict:
+    status = reachability_status(device_id, port)
+    if status is None:
+        return {"reachable": None, "checked_at": None, "remedy": None}
+    remedy = None
+    if not status["reachable"]:
+        remedy = firewall_remedy(detect_active_firewall(), port, lan_subnet(lan_ip() or ""))
+    return {"reachable": status["reachable"], "checked_at": status["checked_at"], "remedy": remedy}
+
+
+def reachability_snapshot(devices: list[dict], host: str | None, backend_port: int, web_up: bool) -> dict:
+    """{device_id: {"backend": {...}, "web": {...} | None}} for every authorized device -- starts
+    (or leaves running) the background probe for each, and reports whatever the last probe found.
+    An unauthorized/offline device (adb sees it but the phone has not accepted the debugging
+    prompt) is skipped entirely: probing it would just report "unreachable" for a reason that has
+    nothing to do with the network. `web` is None (not "unreachable") until the web service is up,
+    since a probe against a service nobody has started yet is not a useful signal."""
+    result: dict = {}
+    if not host:
+        return result
+    for device in devices:
+        if device.get("state") != "device":
+            continue
+        device_id = device["id"]
+        ensure_reachability_watch(device_id, host, backend_port)
+        entry = {"backend": _device_reachability(device_id, backend_port)}
+        if web_up:
+            ensure_reachability_watch(device_id, host, WEB_PORT)
+            entry["web"] = _device_reachability(device_id, WEB_PORT)
+        else:
+            entry["web"] = None
+        result[device_id] = entry
+    return result

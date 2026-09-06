@@ -29,8 +29,11 @@ let mobileDevices = [];
 let mobileLanIp = null;
 let mobileApiPort = null;
 let mobileEmulatorHost = null;
+let mobileReachability = {};
 let mobileLoadError = null;
 let mobileTimer = null;
+let submitting = false;
+let submitConfirming = false;
 
 // Human labels for what Prepare actually did, by service name -- the console's own services.yaml
 // controls what "prepare" means for a given service (an npm/pnpm install, `flutter pub get`, a
@@ -84,6 +87,7 @@ function selectCandidate(id, opts) {
   const c = selected();
   resultsData = c ? c.results : null;
   preparedSummary = [];
+  submitConfirming = false;
   if (!(opts && opts.silent)) {
     history.replaceState(null, '', '#/eyeball/' + id);
   }
@@ -376,6 +380,7 @@ async function loadMobileState() {
     mobileLanIp = data.lan_ip;
     mobileApiPort = data.api_port;
     mobileEmulatorHost = data.emulator_host;
+    mobileReachability = data.reachability || {};
     mobileLoadError = null;
   } catch (e) {
     mobileLoadError = e.message;
@@ -424,18 +429,33 @@ function mobileRunRow() {
   return rows.find((r) => r.name === 'mobile') || null;
 }
 
+function reachabilityLine(label, status) {
+  const { el } = ctx;
+  if (!status || status.reachable === null || status.reachable === undefined) return null;
+  if (status.reachable) {
+    return el('div', { style: 'font-size:12px;color:var(--good);margin-top:2px' }, label + ' reachable from phone');
+  }
+  return el('div', { style: 'font-size:12px;color:var(--bad);margin-top:2px' },
+    label + ' not reachable from phone.',
+    status.remedy ? el('div', {}, el('code', {}, status.remedy)) : null);
+}
+
 function phoneDeviceRow(d, disabled, disabledReason) {
   const { el } = ctx;
   const unauthorized = d.state !== 'device';
   const rowDisabled = disabled || unauthorized;
   const title = unauthorized ? 'Accept the debugging prompt on the phone first.' : disabledReason;
   const label = (d.model ? d.model.replace(/_/g, ' ') : d.id) + ' · ' + d.state;
-  return el('div', { class: 'service-row' },
-    el('span', { class: 'dot ' + (unauthorized ? 'down' : 'up') }),
-    el('span', { class: 'name' }, label),
-    el('div', { style: 'display:flex;gap:4px' },
-      el('button', { disabled: rowDisabled, title, onclick: () => installToDevice(d.id) }, 'Install latest'),
-      el('button', { disabled: rowDisabled, title, onclick: () => runOnDevice(d.id) }, 'Run')));
+  const reach = mobileReachability[d.id];
+  return el('div', { style: 'padding:6px 0' },
+    el('div', { class: 'service-row' },
+      el('span', { class: 'dot ' + (unauthorized ? 'down' : 'up') }),
+      el('span', { class: 'name' }, label),
+      el('div', { style: 'display:flex;gap:4px' },
+        el('button', { disabled: rowDisabled, title, onclick: () => installToDevice(d.id) }, 'Install latest'),
+        el('button', { disabled: rowDisabled, title, onclick: () => runOnDevice(d.id) }, 'Run'))),
+    reach ? el('div', { style: 'padding-left:17px' },
+      reachabilityLine('Backend', reach.backend), reachabilityLine('Web', reach.web)) : null);
 }
 
 function noDeviceHelp() {
@@ -546,16 +566,116 @@ function observationsCard() {
     el('button', { onclick: addObservation }, 'Add observation'));
 }
 
-async function submit() {
-  if (!selectedId) return;
+// --- submit modal ----------------------------------------------------------
+//
+// A tester who clicks Submit and sees nothing happen clicks it again -- this is exactly how a PR
+// eyeball ended up filing a duplicate issue. The result of a submit (success or failure) is
+// always shown in a modal dialog, not a toast: a toast can be missed or dismissed before it is
+// read, a modal cannot.
+
+function closeSubmitModal() {
+  document.getElementById('eyeball-modal-backdrop')?.remove();
+}
+
+function showSubmitModal(contentEl) {
+  const { el } = ctx;
+  closeSubmitModal();
+  const backdrop = el('div', {
+    class: 'modal-backdrop', id: 'eyeball-modal-backdrop',
+    onclick: (e) => { if (e.target.id === 'eyeball-modal-backdrop') closeSubmitModal(); },
+  });
+  backdrop.append(el('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true' }, contentEl));
+  document.body.append(backdrop);
+}
+
+function issueLine(labelText, issueUrl, reused) {
+  const { el } = ctx;
+  return el('li', {}, labelText + ': ', el('a', { href: issueUrl, target: '_blank', rel: 'noopener' }, issueUrl),
+    reused ? el('span', { class: 'chip', style: 'margin-left:6px' }, 'reused') : null);
+}
+
+function submitSuccessModal(candidate, data) {
+  const { el } = ctx;
+  const sub = data.last_submission || {};
+  const checkItems = (candidate.checks || [])
+    .map((c) => ({ c, r: data.checks[c.id] }))
+    .filter(({ r }) => r && r.issue_url)
+    .map(({ c, r }) => issueLine(c.id, r.issue_url, r.issue_reused));
+  const obsItems = (data.observations || [])
+    .filter((o) => o.issue_url)
+    .map((o, i) => issueLine('Observation ' + (i + 1), o.issue_url, o.issue_reused));
+  showSubmitModal(el('div', {},
+    el('h3', {}, 'Submitted'),
+    el('div', {}, sub.passed + '/' + sub.total + ' passed'),
+    sub.label ? el('div', { style: 'margin-top:6px' }, 'Label: ', el('span', { class: 'chip' }, sub.label)) : null,
+    sub.comment_url
+      ? el('div', { style: 'margin-top:6px' }, 'PR comment: ',
+          el('a', { href: sub.comment_url, target: '_blank', rel: 'noopener' }, sub.comment_url))
+      : null,
+    (checkItems.length || obsItems.length)
+      ? el('div', { style: 'margin-top:10px' }, el('strong', {}, 'Issues:'),
+          el('ul', { style: 'margin:4px 0 0;padding-left:18px' }, ...checkItems, ...obsItems))
+      : null,
+    el('div', { style: 'margin-top:14px' },
+      el('button', { class: 'primary', onclick: closeSubmitModal }, 'Done'))));
+}
+
+function submitErrorModal(message) {
+  const { el } = ctx;
+  showSubmitModal(el('div', {},
+    el('h3', {}, 'Submit failed'),
+    el('div', { class: 'step-h-warn', style: 'white-space:pre-wrap' }, message),
+    el('div', { style: 'margin-top:14px;display:flex;gap:8px' },
+      el('button', { class: 'primary', onclick: () => { closeSubmitModal(); doSubmit(); } }, 'Retry'),
+      el('button', { onclick: closeSubmitModal }, 'Close'))));
+}
+
+async function doSubmit() {
+  if (!selectedId || submitting) return;
+  const candidate = selected();
+  submitting = true;
+  submitConfirming = false;
+  renderAll();
   try {
     const data = await apiPost('/api/eyeball/submit', { candidate: selectedId });
     resultsData = data.data;
-    ctx.toast('Submitted', 'success');
+    submitting = false;
     renderAll();
+    submitSuccessModal(candidate, data.data);
   } catch (e) {
-    ctx.toast('Submit failed: ' + e.message, 'error');
+    submitting = false;
+    renderAll();
+    submitErrorModal(e.message);
   }
+}
+
+function handleSubmitClick() {
+  if (submitting) return;
+  const vm = buildChecklistViewModel(selected(), resultsData);
+  if (vm.submitted && !submitConfirming) {
+    submitConfirming = true;
+    renderAll();
+    return;
+  }
+  doSubmit();
+}
+
+function submitControls(vm) {
+  const { el } = ctx;
+  if (submitConfirming) {
+    return el('div', { style: 'display:flex;gap:8px;align-items:center' },
+      el('span', { style: 'font-size:12px;color:var(--muted)' }, 'Submit again? This posts a new PR comment.'),
+      el('button', { class: 'primary', onclick: handleSubmitClick }, 'Confirm submit again'),
+      el('button', { onclick: () => { submitConfirming = false; renderAll(); } }, 'Cancel'));
+  }
+  const label = submitting ? 'Submitting...' : vm.submitted ? 'Submit again' : 'Submit';
+  return el('div', {},
+    el('button', { class: 'primary', disabled: submitting, onclick: handleSubmitClick }, label),
+    vm.submitted && resultsData && resultsData.submitted_at
+      ? el('div', { style: 'font-size:12px;color:var(--muted);margin-top:4px' },
+          'submitted ' + timeAgo(Date.parse(resultsData.submitted_at) / 1000) + ' · ' +
+          vm.checks.filter((c) => c.result === 'pass').length + '/' + vm.total + ' passed')
+      : null);
 }
 
 function checklistSection(candidate) {
@@ -570,7 +690,7 @@ function checklistSection(candidate) {
       ? vm.checks.map((c, i) => checkCard(c, i))
       : emptyState('No checks in this candidate', candidate.parse_error || 'Its handoff has no Eyeball block.'),
     observationsCard(),
-    el('button', { class: 'primary', onclick: submit }, vm.submitted ? 'Re-submit' : 'Submit'));
+    submitControls(vm));
 }
 
 // --- candidate list (left column) ------------------------------------------
@@ -579,6 +699,7 @@ function candidateRow(c) {
   const { el } = ctx;
   const vm = buildChecklistViewModel(c, c.results);
   const stage = c.stage;
+  const passed = vm.checks.filter((chk) => chk.result === 'pass').length;
   return el('div', {
     class: 'candidate-row' + (c.id === selectedId ? ' selected' : ''),
     onclick: () => selectCandidate(c.id),
@@ -590,7 +711,11 @@ function candidateRow(c) {
     el('div', { class: 'cr-title' }, c.title),
     el('div', { class: 'cr-progress' },
       el('div', { class: 'progress' }, el('div', { style: 'width:' + (vm.total ? Math.round(100 * vm.done / vm.total) : 0) + '%' })),
-      el('span', {}, vm.done + ' of ' + vm.total)));
+      el('span', {}, vm.done + ' of ' + vm.total)),
+    vm.submitted && c.results && c.results.submitted_at
+      ? el('div', { style: 'font-size:11px;color:var(--muted);margin-top:2px' },
+          'submitted ' + timeAgo(Date.parse(c.results.submitted_at) / 1000) + ' · ' + passed + '/' + vm.total + ' passed')
+      : null);
 }
 
 // --- first-visit helper text -------------------------------------------------
