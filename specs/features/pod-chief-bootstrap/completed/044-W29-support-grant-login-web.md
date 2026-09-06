@@ -3,7 +3,7 @@ issue: 44
 story: W29
 title: "Super user uses temporary access for debugging"
 platform: web
-status: completed
+status: done
 depends_on: [68]        # B9 grant login + GET /support-access/grants/current, merged in PR #73
 touches:
   - web/src/features/auth
