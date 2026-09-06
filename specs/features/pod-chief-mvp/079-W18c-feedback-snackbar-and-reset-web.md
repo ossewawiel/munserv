@@ -19,7 +19,7 @@ design_artboards:
   - design/canvases/pod-chief-mvp/pod-settings/IdentityInvalidName.dc.html
   - design/canvases/pod-chief-mvp/pod-settings/IdentitySaved.dc.html
   - design/canvases/pod-chief-mvp/pod-settings/IdentityServerError.dc.html
-design_approved: false
+design_approved: true
 created_by: designer
 created_at: "2026-09-06"
 files_changed: []
