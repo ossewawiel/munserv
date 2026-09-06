@@ -4,7 +4,7 @@ story: W16
 title: "Pod Administrator onboarding flow"
 platform: web
 status: pending
-depends_on: ["B-new: admin welcome message (not yet an issue - see Contract)"]
+depends_on: [95]  # B10 admin welcome message
 touches:
   - web/src/shared/types
   - web/src/features/messages
@@ -60,12 +60,12 @@ DB enum and the Dart mirror all stop at `monthly_report`, and nothing creates a 
 `POST /pod/administrators` succeeds. Adding the value to the web union alone is forbidden by
 `web/CLAUDE.md` ("a new enum value that is not also in the backend, mobile and `domain/`").
 
-Proposed backend story to open first — **B10, "New administrator receives a welcome message"**: add
-`admin_welcome` to `domain/language.yaml`, `MessageType.kt`, the `message_type` DB enum and the Dart
-`MessageType`; have `PodAdministratorService` create an `admin_welcome` message for the new admin on
-create, with `recipientType: "admin"`, `senderType: "system"`, `actionType: "acknowledge"` and
-`metadata.tasks` as a `string[]` of the initial tasks. **Do not start this handoff before B10 is
-merged.**
+That backend work is **B10 (#95)**, handoff
+`specs/features/pod-chief-mvp/074-B10-admin-welcome-message-backend.md`: it adds `admin_welcome` to
+`domain/language.yaml`, `MessageType.kt`, the `message_type` DB enum, `specs/contracts/types.md` and
+the Dart `MessageType`, and creates the message on `POST /pod/administrators` with
+`recipientType: "admin"`, `senderType: "system"`, `actionType: "acknowledge"` and `metadata.tasks` as
+a `string[]` of the initial tasks. **Do not start this handoff before #95 is merged.**
 
 The message shape you consume is `Message` in `specs/contracts/types.md` /
 `web/src/shared/types/message.ts`; only `type`, `title`, `body` and `metadata.tasks` matter here.
