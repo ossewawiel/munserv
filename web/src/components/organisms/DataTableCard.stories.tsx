@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import Typography from '@mui/material/Typography';
+import { userEvent, within } from 'storybook/test';
 
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
@@ -131,37 +132,27 @@ export const WithTabsAndBadges: Story = {
   render: () => <WithTabsDemo />,
 };
 
-function WithSortableColumnsDemo() {
-  const [sort, setSort] = useState<SortState>({ key: 'name', direction: 'asc' });
+const ascendingSort: SortState = { key: 'name', direction: 'asc' };
+const descendingSort: SortState = { key: 'name', direction: 'desc' };
 
-  const handleSortChange = (key: string) => {
-    setSort((current) =>
-      current.key === key
-        ? { key, direction: current.direction === 'asc' ? 'desc' : 'asc' }
-        : { key, direction: 'asc' }
-    );
-  };
+/** A sortable column header, ascending. */
+export const WithSortAscending: Story = {
+  args: {
+    ...Basic.args,
+    columns: sortableColumns,
+    sort: ascendingSort,
+    onSortChange: () => {},
+  },
+};
 
-  return (
-    <DataTableCard
-      columns={sortableColumns}
-      data={members}
-      keyExtractor={(item) => item.id}
-      totalItems={members.length}
-      currentPage={1}
-      pageSize={10}
-      onPageChange={() => {}}
-      onPageSizeChange={() => {}}
-      sort={sort}
-      onSortChange={handleSortChange}
-    />
-  );
-}
-
-/** A sortable column, toggled between ascending and descending on click. */
-export const WithSortableColumns: Story = {
-  args: Basic.args,
-  render: () => <WithSortableColumnsDemo />,
+/** The same sortable column header, descending. */
+export const WithSortDescending: Story = {
+  args: {
+    ...Basic.args,
+    columns: sortableColumns,
+    sort: descendingSort,
+    onSortChange: () => {},
+  },
 };
 
 /** Search and filter controls render but are inert until a caller passes a handler. */
@@ -175,8 +166,33 @@ export const WithDisabledSearchAndFilter: Story = {
   },
 };
 
+/** The search field, enabled and holding a query. */
+export const WithSearchActive: Story = {
+  args: {
+    ...Basic.args,
+    search: { value: 'khumalo', placeholder: 'Search members', onChange: () => {} },
+  },
+};
+
+/** The filter drawer opened with no filters applied yet. */
+export const WithFilterPanelDefault: Story = {
+  args: {
+    ...Basic.args,
+    search: { value: '', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Filtering is not switched on yet.</Typography>,
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('open the filter drawer', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: /filters/i }));
+    });
+  },
+};
+
 /** The filter drawer, opened via the toolbar's Filters button, with an active filter count. */
-export const WithOpenFilterDrawer: Story = {
+export const WithFilterPanelApplied: Story = {
   args: {
     ...Basic.args,
     search: { value: '', placeholder: 'Search members', onChange: () => {} },
@@ -187,8 +203,7 @@ export const WithOpenFilterDrawer: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const { within: withinDom, userEvent } = await import('storybook/test');
-    const canvas = withinDom(canvasElement);
+    const canvas = within(canvasElement);
     await step('open the filter drawer', async () => {
       await userEvent.click(canvas.getByRole('button', { name: /filters/i }));
     });

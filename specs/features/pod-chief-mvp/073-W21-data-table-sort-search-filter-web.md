@@ -34,12 +34,18 @@ files_changed:
   - web/src/locales/af/translation.json
   - web/src/locales/zu/translation.json
   - design/registry/web.md
-  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-sortable-columns--light.png
-  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-sortable-columns--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-sort-ascending--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-sort-ascending--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-sort-descending--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-sort-descending--dark.png
   - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-disabled-search-and-filter--light.png
   - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-disabled-search-and-filter--dark.png
-  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-open-filter-drawer--light.png
-  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-open-filter-drawer--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-search-active--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-search-active--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-filter-panel-default--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-filter-panel-default--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-filter-panel-applied--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-filter-panel-applied--dark.png
 tests_added:
   - "web/src/components/organisms/DataTable.test.tsx: should render a sort label only for sortable columns"
   - "web/src/components/organisms/DataTable.test.tsx: should disable the sort label when no sort handler is given"
@@ -171,3 +177,38 @@ cd web && pnpm lint && pnpm typecheck && pnpm test:run
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a
 summary of changes. If you cannot finish, set `status: blocked` and end your message with
 `BLOCKED: <reason>`.
+
+## Eyeball
+```yaml
+- id: E1
+  title: Sortable column headers are inert on the live page, active in the catalogue
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/pod-administrators
+  steps:
+    - Log in as the pod chief and open Pod Administrators.
+    - Click the "Name", "Email", "Role", "Assigned To" or "Created" column header.
+  expect: Each header shows a sort arrow but clicking it does nothing; the row order and data never change.
+- id: E2
+  title: Search field and Filters button render but do nothing on the live page
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/pod-administrators
+  steps:
+    - On Pod Administrators, type into the search field at the head of the toolbar.
+    - Click the "Filters" button.
+  expect: The search field is disabled and ignores typing; the Filters button opens a drawer titled
+    "Filters" showing "Filtering is not switched on yet..." with a disabled Clear filters button.
+- id: E3
+  title: DataTableCard catalogue demonstrates every new state
+  as: none
+  services: [storybook]
+  url: http://localhost:6006/?path=/story/organisms-datatablecard--with-sort-ascending
+  steps:
+    - Open the Storybook sidebar under Organisms > DataTableCard.
+    - Visit the With Sort Ascending, With Sort Descending, With Disabled Search And Filter,
+      With Search Active, With Filter Panel Default and With Filter Panel Applied stories.
+  expect: Sort arrows point the right way in each sort story; the search field is visibly enabled
+    with a typed value in With Search Active; the Filters button is enabled and its drawer is open
+    in both filter panel stories, with a "2" badge and populated Clear button only in Applied.
+```
