@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factory Console</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="banner" id="banner" hidden></div>
+<div class="app-shell">
+  <div class="topbar">
+    <span class="project-name" id="project-name">Factory Console</span>
+    <span class="chip checkout-chip" id="checkout-chip">-</span>
+    <span class="spacer"></span>
+    <span class="updated" id="updated">updated -</span>
+    <button class="theme-toggle" id="theme-toggle">Theme</button>
+  </div>
+  <nav class="nav" id="nav">
+    <a href="#/overview" data-section="overview"><span class="nav-icon">&#9673;</span>Overview</a>
+    <a href="#/knowledge" data-section="knowledge"><span class="nav-icon">&#128218;</span>Knowledge</a>
+    <a href="#/design" data-section="design"><span class="nav-icon">&#127912;</span>Design</a>
+    <a href="#/eyeball" data-section="eyeball"><span class="nav-icon">&#128065;</span>Eyeball</a>
+    <a href="#/release" data-section="release"><span class="nav-icon">&#128640;</span>Release</a>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+<div class="toast-stack" id="toast-stack"></div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
