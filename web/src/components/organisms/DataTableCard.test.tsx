@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { I18nextProvider } from 'react-i18next';
 import i18n from 'i18next';
@@ -22,6 +22,14 @@ i18n.init({
         },
         common: {
           noResults: 'No results',
+        },
+        dataTable: {
+          searchPlaceholder: 'Search',
+          filters: 'Filters',
+          filtersTitle: 'Filters',
+          clearFilters: 'Clear filters',
+          closeFilters: 'Close filters',
+          sortBy: 'Sort by',
         },
       },
     },
@@ -799,6 +807,168 @@ describe('DataTableCard', () => {
         expect(screen.getByTestId('legacy-action')).toBeInTheDocument();
         expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('search', () => {
+    it('should render a disabled search field when no handler is given', () => {
+      renderWithProviders(
+        <DataTableCard
+          columns={mockColumns}
+          data={mockData}
+          keyExtractor={(item) => item.id}
+          totalItems={3}
+          currentPage={1}
+          pageSize={10}
+          onPageChange={vi.fn()}
+          onPageSizeChange={vi.fn()}
+          search={{ value: '' }}
+        />
+      );
+
+      expect(screen.getByPlaceholderText('Search')).toBeDisabled();
+    });
+
+    it('should call the search handler as the user types', () => {
+      const onChange = vi.fn();
+      renderWithProviders(
+        <DataTableCard
+          columns={mockColumns}
+          data={mockData}
+          keyExtractor={(item) => item.id}
+          totalItems={3}
+          currentPage={1}
+          pageSize={10}
+          onPageChange={vi.fn()}
+          onPageSizeChange={vi.fn()}
+          search={{ value: '', onChange }}
+        />
+      );
+
+      fireEvent.change(screen.getByPlaceholderText('Search'), { target: { value: 'a' } });
+
+      expect(onChange).toHaveBeenCalledWith('a');
+    });
+  });
+
+  describe('filter panel', () => {
+    it('should render a disabled filter button when no handler is given', () => {
+      renderWithProviders(
+        <DataTableCard
+          columns={mockColumns}
+          data={mockData}
+          keyExtractor={(item) => item.id}
+          totalItems={3}
+          currentPage={1}
+          pageSize={10}
+          onPageChange={vi.fn()}
+          onPageSizeChange={vi.fn()}
+          filterPanel={{ content: <div>Filter content</div> }}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: 'Filters' })).toBeEnabled();
+    });
+
+    it('should open the filter drawer and show its content', () => {
+      renderWithProviders(
+        <DataTableCard
+          columns={mockColumns}
+          data={mockData}
+          keyExtractor={(item) => item.id}
+          totalItems={3}
+          currentPage={1}
+          pageSize={10}
+          onPageChange={vi.fn()}
+          onPageSizeChange={vi.fn()}
+          filterPanel={{ content: <div>Filter content</div> }}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+
+      expect(screen.getByText('Filter content')).toBeInTheDocument();
+    });
+
+    it('should close the filter drawer', async () => {
+      renderWithProviders(
+        <DataTableCard
+          columns={mockColumns}
+          data={mockData}
+          keyExtractor={(item) => item.id}
+          totalItems={3}
+          currentPage={1}
+          pageSize={10}
+          onPageChange={vi.fn()}
+          onPageSizeChange={vi.fn()}
+          filterPanel={{ content: <div>Filter content</div> }}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Close filters' }));
+
+      await waitForElementToBeRemoved(() => screen.queryByText('Filter content'));
+    });
+
+    it('should badge the filter button with the active filter count', () => {
+      renderWithProviders(
+        <DataTableCard
+          columns={mockColumns}
+          data={mockData}
+          keyExtractor={(item) => item.id}
+          totalItems={3}
+          currentPage={1}
+          pageSize={10}
+          onPageChange={vi.fn()}
+          onPageSizeChange={vi.fn()}
+          filterPanel={{ content: <div>Filter content</div>, activeCount: 2 }}
+        />
+      );
+
+      expect(screen.getByText('2')).toBeInTheDocument();
+    });
+
+    it('should disable the clear button when no clear handler is given', () => {
+      renderWithProviders(
+        <DataTableCard
+          columns={mockColumns}
+          data={mockData}
+          keyExtractor={(item) => item.id}
+          totalItems={3}
+          currentPage={1}
+          pageSize={10}
+          onPageChange={vi.fn()}
+          onPageSizeChange={vi.fn()}
+          filterPanel={{ content: <div>Filter content</div> }}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+
+      expect(screen.getByRole('button', { name: 'Clear filters' })).toBeDisabled();
+    });
+
+    it('should call onClear when the clear button is enabled and clicked', () => {
+      const onClear = vi.fn();
+      renderWithProviders(
+        <DataTableCard
+          columns={mockColumns}
+          data={mockData}
+          keyExtractor={(item) => item.id}
+          totalItems={3}
+          currentPage={1}
+          pageSize={10}
+          onPageChange={vi.fn()}
+          onPageSizeChange={vi.fn()}
+          filterPanel={{ content: <div>Filter content</div>, onClear }}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+
+      expect(onClear).toHaveBeenCalled();
     });
   });
 });

@@ -186,6 +186,14 @@
     "results": "resultate",
     "rowsPerPage": "Rye per bladsy"
   },
+  "dataTable": {
+    "searchPlaceholder": "Soek",
+    "filters": "Filters",
+    "filtersTitle": "Filters",
+    "clearFilters": "Maak filters skoon",
+    "closeFilters": "Maak filters toe",
+    "sortBy": "Sorteer volgens"
+  },
   "errors": {
     "notFound": "Nie Gevind",
     "unauthorized": "Ongemagtig",
@@ -284,6 +292,11 @@
       "nameTooShort": "Pod-naam moet ten minste 2 karakters wees.",
       "nameTooLong": "Pod-naam moet 100 karakters of minder wees.",
       "logoUrlTooLong": "Logo-URL moet 500 karakters of minder wees."
+    }
+  },
+  "podAdministrators": {
+    "filters": {
+      "comingSoon": "Filtrering is nog nie geaktiveer nie. Wanneer dit is, verskyn rol- en toewysingsfilters hier en die telling wys op die Filters-knoppie."
     }
   }
 }
