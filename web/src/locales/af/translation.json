@@ -278,6 +278,7 @@
       "logoUrlLabel": "Logo-URL",
       "logoUrlHelper": "Direkte skakel na 'n PNG- of SVG-beeld, tot 500 karakters. Los dit leeg om net die Munserv-merk te wys.",
       "save": "Stoor veranderinge",
+      "reset": "Herstel",
       "saved": "Gestoor. Die kop lees nou “{{displayName}}”.",
       "nameTooShort": "Pod-naam moet ten minste 2 karakters wees.",
       "nameTooLong": "Pod-naam moet 100 karakters of minder wees.",

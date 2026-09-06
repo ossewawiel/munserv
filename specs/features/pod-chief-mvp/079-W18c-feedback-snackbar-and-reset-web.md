@@ -3,7 +3,7 @@ issue: 132
 story: W18c
 title: "Snackbar feedback and a Reset action on the pod identity form"
 platform: web
-status: pending
+status: completed
 depends_on: [29]
 touches:
   - web/src/components/organisms
@@ -22,8 +22,56 @@ design_artboards:
 design_approved: true
 created_by: designer
 created_at: "2026-09-06"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/components/organisms/FeedbackSnackbar.tsx
+  - web/src/components/organisms/FeedbackSnackbar.test.tsx
+  - web/src/components/organisms/FeedbackSnackbar.stories.tsx
+  - web/src/shared/hooks/FeedbackContext.ts
+  - web/src/shared/hooks/FeedbackProvider.tsx
+  - web/src/shared/hooks/useFeedback.ts
+  - web/src/shared/hooks/useFeedback.test.tsx
+  - web/src/components/templates/DashboardLayout.tsx
+  - web/src/features/pod-settings/components/PodIdentitySection.tsx
+  - web/src/features/pod-settings/components/PodIdentitySection.test.tsx
+  - web/src/features/pod-settings/components/PodIdentitySection.stories.tsx
+  - web/src/features/pod-settings/PodSettingsPage.test.tsx
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-feedbacksnackbar--success--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-feedbacksnackbar--success--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-feedbacksnackbar--error--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-feedbacksnackbar--error--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-dirty--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-dirty--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-saved--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-saved--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--main--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--main--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-no-logo--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-no-logo--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-invalid-name--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-invalid-name--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-server-error--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-server-error--dark.png
+  - design/canvases/pod-chief-mvp/pod-settings/IdentitySaved.dc.html
+  - design/canvases/pod-chief-mvp/pod-settings/canvas.json
+tests_added:
+  - "FeedbackSnackbar: should render the message with the given severity"
+  - "FeedbackSnackbar: should call onClose when it auto-hides"
+  - "FeedbackSnackbar: should render nothing without a message"
+  - "useFeedback: should expose the last message shown"
+  - "useFeedback: should replace an earlier message"
+  - "PodIdentitySection: should show the saved confirmation in a snackbar"
+  - "PodIdentitySection: should not render an inline success alert after a save"
+  - "PodIdentitySection: should keep the server error inline when the save is rejected"
+  - "PodIdentitySection: should disable reset while the form is pristine"
+  - "PodIdentitySection: should restore the saved name when reset is pressed"
+  - "PodIdentitySection: should disable both buttons while saving"
+  - "PodIdentitySection: should not call the mutation when reset is pressed"
+  - "PodIdentitySection: should restore the saved logo URL when reset is pressed"
+  - "PodIdentitySection: should restore the saved values after a rejected save"
+  - "useFeedback: should restart the auto-hide timer for a message that replaces one already showing"
 ---
 
 # W18c · Snackbar feedback and a Reset action on the pod identity form (Web)
