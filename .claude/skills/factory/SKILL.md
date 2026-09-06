@@ -14,7 +14,7 @@ Arguments: `$ARGUMENTS` (default `run --max 3`).
 
 ## `status`
 1. `gh issue list --state open --label status:ready --json number,title,labels,milestone` and the same for `status:in-progress`, `status:blocked`, `status:review`.
-2. `gh pr list --state open --json number,title,headRefName,statusCheckRollup,reviewDecision,labels`. A PR with `reviewDecision: APPROVED` and no `eyeball:pass` / `eyeball:fail` label is "awaiting eyeball" — you never mark eyeball yourself; the user runs `python3 scripts/eyeball.py` for that.
+2. `gh pr list --state open --json number,title,headRefName,statusCheckRollup,reviewDecision,labels`. A PR with `reviewDecision: APPROVED` and no `eyeball:pass` / `eyeball:fail` label is "awaiting eyeball" — you never mark eyeball yourself; the user runs the Eyeball section of the factory console (`./dashboard.sh`) for that.
 3. For each ready story, check whether a handoff exists: `specs/features/*/<issue>-*-<platform>.md` with `status: pending`.
 4. `gh issue list --state open --label source:eyeball --json number,title,labels,milestone` — list these under "From eyeball": bugs and improvements a tester filed while eyeballing a PR.
 Print one table: story, platform, state, handoff (yes / no), blockers (`depends_on` not yet merged), PR and CI state (including "awaiting eyeball"). Then the "From eyeball" list. Stop.
@@ -29,13 +29,13 @@ Print one table: story, platform, state, handoff (yes / no), blockers (`depends_
    - Otherwise open the PR yourself: `gh pr create --head <branch> --title "<type>(<platform>): <story title> (#<issue>)" --body` with summary, `Closes #<issue>`, the handoff path and the commands that passed. Label the issue `status:review`.
 5. Wait for CI (`gh pr checks <n> --watch`). Red → dispatch the same implementer once more with the failing job's log excerpt appended to the prompt. Red twice → label `status:blocked`, comment, stop.
 6. Green → for `ui: true` stories dispatch `design-reviewer` first with the PR number and handoff path; its `REQUEST CHANGES` goes back to the implementer once like a code review. Then dispatch `reviewer` with the PR number and handoff path. `REQUEST CHANGES` → dispatch the implementer once with the review text; then review again. Second `REQUEST CHANGES` → `status:blocked`.
-7. `APPROVE` → the PR is now awaiting eyeball. Leave it for the user to run `python3 scripts/eyeball.py`, tick the checks, and submit. Never run eyeball checks yourself and never apply the `eyeball:*` label; the dashboard does both when the user submits. Never merge.
+7. `APPROVE` → the PR is now awaiting eyeball. Leave it for the user to run the Eyeball section of the factory console (`./dashboard.sh`), tick the checks, and submit. Never run eyeball checks yourself and never apply the `eyeball:*` label; the console does both when the user submits. Never merge.
 8. `python3 scripts/sync-board.py` so the Project board reflects the labels you changed.
 9. Report: one table (story, PR, CI, review, next action for the user) and the token-heavy step of each story if it stood out.
 
 ## Eyeball bugs
-Issues labelled `source:eyeball` come from a failed check or a "Bug" observation filed by the eyeball
-dashboard on Submit. `status` lists them under "From eyeball"; `run` and `story` treat them like any
+Issues labelled `source:eyeball` come from a failed check or a "Bug" observation filed by the factory
+console's Eyeball section on Submit. `status` lists them under "From eyeball"; `run` and `story` treat them like any
 other `type:bug` issue once you decide how to route them: a non-trivial one goes to `investigator`
 first for a root cause and fix handoffs; an obvious one-line fix skips straight to `feature-planner`
 Mode B for a handoff, then the matching implementer. An eyeball-filed `type:feature` issue is a
