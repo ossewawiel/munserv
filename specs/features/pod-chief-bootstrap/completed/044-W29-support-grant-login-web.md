@@ -3,7 +3,7 @@ issue: 44
 story: W29
 title: "Super user uses temporary access for debugging"
 platform: web
-status: completed
+status: done
 depends_on: [68]        # B9 grant login + GET /support-access/grants/current, merged in PR #73
 touches:
   - web/src/features/auth
@@ -228,3 +228,34 @@ cd web && pnpm lint && pnpm typecheck && pnpm test:run
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a
 summary of changes. If you cannot finish, set `status: blocked` and end your message with
 `BLOCKED: <reason>`.
+
+## Eyeball
+```yaml
+- id: E1
+  title: Super user logs in under an active grant and sees the banner
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - Log in as the pod chief and grant support access with a role, e.g. sector_chief.
+    - Log out, then log in on the login page with the super_user credentials.
+  expect: Login succeeds; the dashboard shows a support-session banner naming the granted role and a countdown timer.
+- id: E2
+  title: Activity extends the session, idleness ends it
+  as: super_user
+  services: [db, backend, web]
+  url: http://localhost:3000
+  steps:
+    - While logged in under the grant from E1, click around the dashboard for a minute and watch the timer.
+    - Then stop interacting and wait for the timer to reach zero.
+  expect: The timer resets forward while you interact; once it hits zero the next action logs you out to /login with an explanation.
+- id: E3
+  title: A revoked grant ends the session immediately
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - With a super user still logged in under a grant, revoke that grant from Pod Settings > Support Access in another browser or tab.
+    - In the super user's tab, navigate to any page.
+  expect: The super user is logged out to /login instead of seeing the page; no stale banner remains.
+```

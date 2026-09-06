@@ -51,3 +51,33 @@ Numbered, imperative, one file per step where possible. Each step names the file
 cd backend && ./gradlew ktlintCheck test
 ```
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a summary of changes. If you cannot finish, set `status: blocked` and end your message with `BLOCKED: <reason>`.
+
+## Eyeball
+Manual acceptance checks a human runs in `scripts/eyeball.py` before merge. The planner writes 2 to
+6 checks that together cover every acceptance criterion above; the implementer corrects `url` (and
+`as`, if the route or account changed) if it differs from what shipped; the reviewer verifies the
+checks still cover every AC. `as` is an account key from `scripts/eyeball/accounts.yaml`, or `none`.
+`services` lists what must be running, from `db`, `backend`, `web`, `mobile`, `mock-api`,
+`storybook`. `url` is a full local URL (`http://localhost:3000/...`), or a mobile screen name
+(`MembersListScreen`) for `platform: mobile` stories.
+
+```yaml
+- id: E1
+  title: Pod chief grants support access
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - Log in as the pod chief and open Pod Settings > Support Access.
+    - Click Grant, pick a role and enter a reason, then submit.
+  expect: A new active grant appears in the list with the chosen role, granted time and a revoke button.
+- id: E2
+  title: Super user cannot reuse an expired grant
+  as: super_user
+  services: [db, backend, web]
+  url: http://localhost:3000/login
+  steps:
+    - Wait for the grant from E1 to expire, or revoke it from Pod Settings.
+    - Log in with the super user credentials.
+  expect: Login is refused with an error explaining there is no active grant.
+```
