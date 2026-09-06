@@ -1,0 +1,80 @@
+# Accounts for manual eyeball checks. Keyed by the `as` field in a handoff's Eyeball block.
+#
+# Web admin passwords are bcrypt hashes seeded by Flyway; verified against
+# backend/src/main/resources/db/migration/V005__create_members_table.sql,
+# V006__create_admins_table.sql, V025__add_sector_chief_test_account.sql,
+# V026__fix_admin_password_hashes.sql and V030__add_ward_role_test_accounts.sql, and README.md.
+#
+# `super_user` is NOT a seeded admin: per domain/admin-role.md and README.md it is a JWT role
+# granted from environment configuration (backend/src/main/resources/application-local.yml,
+# `bootstrap.super-user`), not an `admin_role`. It only exists once the backend is started with
+# that profile active. Use it for W22-W24 style checks and for logging in under a pod chief's
+# support grant.
+
+super_user:
+  role: super_user
+  platform: web
+  email: superuser@munserv.local
+  password: super123
+  notes: >
+    Out-of-band account, not in the admins table. Configured by
+    backend/src/main/resources/application-local.yml (bootstrap.super-user); only usable while the
+    backend runs with the local profile and only before a pod chief exists, or afterwards through
+    an active support grant issued from Pod Settings > Support Access.
+
+sector_admin:
+  role: sector_admin
+  platform: web
+  email: admin@ward42.example.com
+  password: admin123
+  notes: >
+    The default seeded login named in root CLAUDE.md and README.md. Seeded by V006 as
+    admin@munserv.local, renamed and rehashed by V026. Scoped to sector
+    550e8400-e29b-41d4-a716-446655440001.
+
+sector_chief:
+  role: sector_chief
+  platform: web
+  email: chief@munserv.local
+  password: chief123
+  notes: Seeded by V025. Scoped to the same sector as sector_admin.
+
+pod_chief:
+  role: pod_chief
+  platform: web
+  email: podchief@munserv.local
+  password: podchief123
+  notes: Seeded by V030. Pod-level, scoped to the MunServ Development Pod.
+
+pod_admin:
+  role: pod_admin
+  platform: web
+  email: podadmin@munserv.local
+  password: podadmin123
+  notes: Seeded by V030. Pod-level, scoped to the MunServ Development Pod.
+
+ward_chief:
+  role: ward_chief
+  platform: web
+  email: wardchief@munserv.local
+  password: wardchief123
+  notes: Seeded by V030. Scoped to "Test Ward North".
+
+ward_admin:
+  role: ward_admin
+  platform: web
+  email: wardadmin@munserv.local
+  password: wardadmin123
+  notes: Seeded by V030. Scoped to "Test Ward North".
+
+member:
+  role: member
+  platform: mobile
+  phone: "+27821234567"
+  pin: "1234"
+  notes: >
+    Seeded by V005 (John Doe, sector 550e8400-e29b-41d4-a716-446655440001). Registration and
+    login OTPs are not sent by SMS in dev: the backend logs them at INFO from
+    backend/src/main/kotlin/com/munserv/auth/service/OtpService.kt
+    ("OTP for <masked phone>: <code>"). The eyeball dashboard reads the latest one from the
+    backend log and shows it in the services panel.

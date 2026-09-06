@@ -1,0 +1,100 @@
+# General smoke checklist: flows that exist today on master, independent of any one PR. Derived
+# from the Done rows in specs/requirements/web.md (W1, W9, W28, W29, W30, W7, W3) and the completed
+# handoffs under specs/features/pod-chief-bootstrap/completed/. Routes verified against
+# web/src/App.tsx. Run this after a quiet period, or whenever you want a baseline reading of
+# master before trusting a PR's own eyeball checks.
+
+- id: S1
+  title: Admin can log in
+  as: sector_admin
+  services: [db, backend, web]
+  url: http://localhost:3000/login
+  steps:
+    - Enter the sector admin email and password and submit.
+  expect: Redirected to the dashboard with the admin's name shown in the header.
+
+- id: S2
+  title: Admin sees the issues list
+  as: sector_admin
+  services: [db, backend, web]
+  url: http://localhost:3000/issues
+  steps:
+    - Open the Issues page from the menu.
+  expect: A paginated list of issues loads with type, state and heat columns; filtering by type and state works.
+
+- id: S3
+  title: Admin sees the members list
+  as: sector_admin
+  services: [db, backend, web]
+  url: http://localhost:3000/members
+  steps:
+    - Open the Members page from the menu.
+  expect: A list of sector members loads with a status filter (all / pending / active / suspended).
+
+- id: S4
+  title: Admin approves a pending member
+  as: sector_admin
+  services: [db, backend, web]
+  url: http://localhost:3000/members
+  steps:
+    - Filter the members list to pending.
+    - Approve one pending registration.
+  expect: The member moves to active and an approval email is sent (check the backend log or the dev mail override recipient).
+
+- id: S5
+  title: Pod chief opens Pod Settings
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - Log in as the pod chief and open Pod Settings.
+  expect: The page loads with a Support Access section, showing pod name and setup status.
+
+- id: S6
+  title: Pod chief grants support access
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - In Pod Settings > Support Access, click Grant.
+    - Pick a manageable role, enter a reason, and submit.
+  expect: A new active grant appears with the chosen role, granted time, and a revoke button; the action is audit logged.
+
+- id: S7
+  title: Super user logs in under an active grant
+  as: super_user
+  services: [db, backend, web]
+  url: http://localhost:3000/login
+  steps:
+    - With the grant from S6 still active, log in with the super user credentials.
+    - Look at the header after login.
+  expect: Login succeeds with the granted role; a support-session banner is visible showing the role and an expiry timer.
+
+- id: S8
+  title: Support session auto-logs-out on expiry
+  as: super_user
+  services: [db, backend, web]
+  url: http://localhost:3000
+  steps:
+    - Stay logged in from S7 without activity, or revoke the grant from Pod Settings in another session.
+    - Wait for the expiry timer to reach zero, or refresh after revoking.
+  expect: The session ends and the super user is returned to the login page with an explanation.
+
+- id: S9
+  title: Pod chief revokes and reviews support session history
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - In Pod Settings > Support Access, revoke an active grant manually.
+    - Open the session history log.
+  expect: The revoked grant disappears from the active list and appears in the history log with role, granted time and last activity.
+
+- id: S10
+  title: Super user cannot log in once a pod chief exists without a grant
+  as: super_user
+  services: [db, backend, web]
+  url: http://localhost:3000/login
+  steps:
+    - With no active support grant, log in with the super user credentials.
+  expect: Login is refused with an error explaining the pod is already bootstrapped and offering to request temporary access.
