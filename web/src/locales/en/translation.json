@@ -22,7 +22,8 @@
     "yes": "Yes",
     "no": "No",
     "close": "Close",
-    "notAvailable": "N/A"
+    "notAvailable": "N/A",
+    "comingSoon": "Coming soon"
   },
   "auth": {
     "login": "Login",
@@ -642,6 +643,22 @@
       "nameTooShort": "Pod name must be at least 2 characters.",
       "nameTooLong": "Pod name must be 100 characters or fewer.",
       "logoUrlTooLong": "Logo URL must be 500 characters or fewer."
+    },
+    "boundaries": {
+      "configure": "Configure boundaries",
+      "comingSoonHint": "Boundary editing is not available yet.",
+      "pod": {
+        "title": "Pod boundaries",
+        "description": "Draw the outline of the whole pod. Reports from outside it are refused, and every map opens on it."
+      },
+      "ward": {
+        "title": "Ward boundaries",
+        "description": "Draw each ward's outline so a ward chief sees exactly the ground they are responsible for."
+      },
+      "sector": {
+        "title": "Sector boundaries",
+        "description": "Draw each sector's outline so an issue reaches the right sector from the GPS point it was reported at."
+      }
     }
   }
 }

@@ -3,7 +3,7 @@ issue: 30
 story: W19
 title: "Boundary configuration placeholder"
 platform: web
-status: pending
+status: completed
 depends_on: []
 touches:
   - web/src/features/pod-settings
@@ -16,8 +16,32 @@ design_artboards:
 design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/features/pod-settings/components/BoundaryPlaceholderCard.tsx
+  - web/src/features/pod-settings/components/BoundaryPlaceholderCard.test.tsx
+  - web/src/features/pod-settings/components/BoundaryPlaceholderCard.stories.tsx
+  - web/src/features/pod-settings/PodSettingsPage.tsx
+  - web/src/features/pod-settings/PodSettingsPage.test.tsx
+  - web/src/features/pod-settings/PodSettingsPage.stories.tsx
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-boundaryplaceholdercard--default--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-boundaryplaceholdercard--default--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-boundaryplaceholdercard--sector-wording--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-boundaryplaceholdercard--sector-wording--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/pages-podsettings-podsettingspage--main--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/pages-podsettings-podsettingspage--main--dark.png
+tests_added:
+  - "BoundaryPlaceholderCard > should render the coming soon chip"
+  - "BoundaryPlaceholderCard > should render the configure button in a disabled state"
+  - "PodSettingsPage > should show a pod boundaries placeholder"
+  - "PodSettingsPage > should label the area placeholder Ward Boundaries when the pod has wards"
+  - "PodSettingsPage > should label the area placeholder Sector Boundaries when the pod has no wards"
+  - "Storybook: Features/PodSettings/BoundaryPlaceholderCard — Default (ward wording, Main.dc.html boundary card)"
+  - "Storybook: Features/PodSettings/BoundaryPlaceholderCard — SectorWording (sector wording, tooltip open, BoundariesSector.dc.html)"
+  - "Storybook: Pages/PodSettings/PodSettingsPage — Main (full page, Main.dc.html)"
+  - "Visual baselines: features-podsettings-boundaryplaceholdercard--default, --sector-wording, pages-podsettings-podsettingspage--main (light + dark)"
 ---
 
 # W19 · Boundary configuration placeholder (Web)
@@ -100,6 +124,26 @@ it.
   W18 has not merged yet, place the two cards above `<SupportAccessSection />` and leave the rest of
   the page as you find it.
 - Do not touch backend, mobile or `specs/contracts/`.
+
+## Eyeball
+```yaml
+- id: E1
+  title: Pod chief sees both boundary placeholders on Pod Settings
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - Open Pod Settings.
+  expect: Below Pod identity, a "Pod boundaries" card and a "Ward boundaries" (or "Sector boundaries", if the pod has no wards) card sit side by side, each with an outlined "Coming soon" chip and a disabled "Configure boundaries" button, both fully readable (not dimmed) and above Support access.
+- id: E2
+  title: The disabled Configure button explains itself
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/settings/pod
+  steps:
+    - Hover the "Configure boundaries" button on either boundary card.
+  expect: A tooltip reads "Boundary editing is not available yet." and the button does not respond to a click.
+```
 
 ## Done when
 ```bash
