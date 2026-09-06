@@ -19,17 +19,29 @@ created_at: "2026-09-05"
 files_changed:
   - web/src/features/pod-settings/components/BoundaryPlaceholderCard.tsx
   - web/src/features/pod-settings/components/BoundaryPlaceholderCard.test.tsx
+  - web/src/features/pod-settings/components/BoundaryPlaceholderCard.stories.tsx
   - web/src/features/pod-settings/PodSettingsPage.tsx
   - web/src/features/pod-settings/PodSettingsPage.test.tsx
+  - web/src/features/pod-settings/PodSettingsPage.stories.tsx
   - web/src/locales/en/translation.json
   - web/src/locales/af/translation.json
   - web/src/locales/zu/translation.json
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-boundaryplaceholdercard--default--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-boundaryplaceholdercard--default--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-boundaryplaceholdercard--sector-wording--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-boundaryplaceholdercard--sector-wording--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/pages-podsettings-podsettingspage--main--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/pages-podsettings-podsettingspage--main--dark.png
 tests_added:
   - "BoundaryPlaceholderCard > should render the coming soon chip"
   - "BoundaryPlaceholderCard > should render the configure button in a disabled state"
   - "PodSettingsPage > should show a pod boundaries placeholder"
   - "PodSettingsPage > should label the area placeholder Ward Boundaries when the pod has wards"
   - "PodSettingsPage > should label the area placeholder Sector Boundaries when the pod has no wards"
+  - "Storybook: Features/PodSettings/BoundaryPlaceholderCard — Default (ward wording, Main.dc.html boundary card)"
+  - "Storybook: Features/PodSettings/BoundaryPlaceholderCard — SectorWording (sector wording, tooltip open, BoundariesSector.dc.html)"
+  - "Storybook: Pages/PodSettings/PodSettingsPage — Main (full page, Main.dc.html)"
+  - "Visual baselines: features-podsettings-boundaryplaceholdercard--default, --sector-wording, pages-podsettings-podsettingspage--main (light + dark)"
 ---
 
 # W19 · Boundary configuration placeholder (Web)
