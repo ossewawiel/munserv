@@ -44,7 +44,7 @@ files_changed:
   - web/src/locales/zu/translation.json
   - web/src/features/members/MembersPage.test.tsx
   - web/public/assets/app-mark.png
-  - web/public/mockServiceWorker.js
+  - web/.storybook/public/mockServiceWorker.js
   - web/.storybook/main.ts
   - web/.storybook/preview.tsx
   - web/eslint.config.js
