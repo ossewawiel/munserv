@@ -21,11 +21,17 @@ files_changed:
   - web/src/features/reports/types.ts
   - web/src/features/reports/ReportsPage.tsx
   - web/src/features/reports/ReportsPage.test.tsx
+  - web/src/features/reports/ReportsPage.stories.tsx
   - web/src/App.tsx
   - web/src/components/templates/Sidebar.test.tsx
   - web/src/locales/en/translation.json
   - web/src/locales/af/translation.json
   - web/src/locales/zu/translation.json
+  - web/.storybook/preview.tsx
+  - web/e2e/visual/__screenshots__/stories.spec/features-reports-reportspage--general--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-reports-reportspage--general--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-reports-reportspage--ward-scope--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-reports-reportspage--ward-scope--dark.png
 tests_added:
   - web/src/features/reports/ReportsPage.test.tsx: should render the three report tabs
   - web/src/features/reports/ReportsPage.test.tsx: should show the ward name in the breadcrumb for a ward report
