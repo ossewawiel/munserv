@@ -53,6 +53,8 @@ cd backend && ./gradlew ktlintCheck test
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a summary of changes. If you cannot finish, set `status: blocked` and end your message with `BLOCKED: <reason>`.
 
 ## Eyeball
+Rules for every check: `url` is the complete address a tester can paste into a browser (scheme, host, port, path, and for Swagger the deep link `http://localhost:8080/swagger-ui/index.html#/<Tag>/<operationId>`). Steps that go through Swagger name the deep link of each operation, the exact request body, and say where the token goes (Authorize button). Never write a bare path like `/api/v1/pod/logo`.
+
 Manual acceptance checks a human runs in `scripts/eyeball.py` before merge. The planner writes 2 to
 6 checks that together cover every acceptance criterion above; the implementer corrects `url` (and
 `as`, if the route or account changed) if it differs from what shipped; the reviewer verifies the
