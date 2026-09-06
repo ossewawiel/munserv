@@ -624,5 +624,21 @@ class ChecklistModelTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
+
+
+class HealthDebounceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        services._health_misses.clear()
+        services._health_seen_up.clear()
+
+    def test_one_slow_probe_does_not_flip_a_running_service_down(self) -> None:
+        seq = [True, False, True, False, False, True]
+        got = [services.debounced_up("backend", ok) for ok in seq]
+        self.assertEqual(got, [True, True, True, True, False, True])
+
+    def test_a_service_never_seen_up_is_down_at_once(self) -> None:
+        self.assertFalse(services.debounced_up("web", False))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

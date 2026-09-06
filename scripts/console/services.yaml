@@ -26,7 +26,8 @@ backend:
   # it, and BootstrapConfig.enabled defaults to false without it, so the super_user account and
   # W22-W24/W29/W30-style checks cannot be exercised on a backend started any other way.
   start: SPRING_PROFILES_ACTIVE=local ./gradlew bootRun
-  health: http://localhost:8080/actuator/health
+  # The liveness group answers in milliseconds; the full health endpoint aggregates every indicator.
+  health: http://localhost:8080/actuator/health/liveness
   url: http://localhost:8080
   prepare:
     copy:

@@ -73,10 +73,31 @@ def health_ok(health: str) -> bool:
             with socket.create_connection(("localhost", port), timeout=1.5):
                 return True
         req = urllib.request.Request(health, method="GET")
-        with urllib.request.urlopen(req, timeout=2) as resp:
+        with urllib.request.urlopen(req, timeout=HEALTH_TIMEOUT_SECONDS) as resp:
             return resp.status < 400
     except (OSError, urllib.error.URLError, ValueError):
         return False
+
+
+HEALTH_TIMEOUT_SECONDS = 4
+# A service that has been seen up is reported down only after this many consecutive failed
+# probes, so one slow answer does not flip the dot; a single success flips it back up.
+HEALTH_DOWN_AFTER_MISSES = 2
+_health_misses: dict[str, int] = {}
+_health_seen_up: set[str] = set()
+
+
+def debounced_up(name: str, probe_ok: bool) -> bool:
+    if probe_ok:
+        _health_misses[name] = 0
+        _health_seen_up.add(name)
+        return True
+    misses = _health_misses.get(name, 0) + 1
+    _health_misses[name] = misses
+    if name in _health_seen_up and misses < HEALTH_DOWN_AFTER_MISSES:
+        return True
+    _health_seen_up.discard(name)
+    return False
 
 
 def process_status(name: str) -> dict:
@@ -261,7 +282,7 @@ def state_snapshot(checkout: Path) -> list[dict]:
     cfg = services_config()
     for name, sc in cfg.items():
         manual = bool(sc.get("manual"))
-        up = False if manual else health_ok(sc["health"])
+        up = False if manual else debounced_up(name, health_ok(sc["health"]))
         proc = process_status(name)
         row = {
             "name": name,
