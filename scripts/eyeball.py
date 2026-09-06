@@ -39,6 +39,38 @@ SOURCE_LABEL = ("source:eyeball", "fbca04", "Filed from a manual eyeball session
 _state_lock = threading.Lock()
 _cache: dict = {"candidates": None, "fetched_at": 0}
 _processes: dict[str, subprocess.Popen] = {}
+_NAME_RE = re.compile(r"^[A-Za-z0-9_.:-]+$")
+
+
+class EyeballParseError(Exception):
+    """A handoff's frontmatter or Eyeball block did not parse."""
+
+
+class ApiError(Exception):
+    """A request was rejected; carries the HTTP status to answer with."""
+
+    def __init__(self, message: str, status: int = 400):
+        super().__init__(message)
+        self.status = status
+
+
+def validate_name(value: str, what: str) -> str:
+    """A candidate id or service name: used to build filesystem paths, so no separators."""
+    if not isinstance(value, str) or not value or not _NAME_RE.match(value) or ".." in value:
+        raise ApiError(f"invalid {what}: {value!r}", 400)
+    return value
+
+
+_BRANCH_RE = re.compile(r"^[^\s\-][^\s]*$")
+
+
+def validate_branch(value: str) -> str:
+    """A git branch name: passed as an argv element (never a shell string) to `git`, not used to
+    build a path, so slashes are fine; reject only whitespace and a leading dash (an option-like
+    value)."""
+    if not isinstance(value, str) or not value or not _BRANCH_RE.match(value) or ".." in value:
+        raise ApiError(f"invalid branch: {value!r}", 400)
+    return value
 
 
 def gh(*args: str) -> str:
@@ -57,14 +89,33 @@ def frontmatter_and_body(text: str) -> tuple[dict, str]:
     m = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.S)
     if not m:
         return {}, text
-    return (yaml.safe_load(m.group(1)) or {}), m.group(2)
+    try:
+        return (yaml.safe_load(m.group(1)) or {}), m.group(2)
+    except yaml.YAMLError as e:
+        raise EyeballParseError(f"handoff frontmatter: {e}") from e
 
 
 def eyeball_block(body: str) -> list:
     m = re.search(r"## Eyeball\b.*?```yaml\n(.*?)\n```", body, re.S)
     if not m:
         return []
-    return yaml.safe_load(m.group(1)) or []
+    try:
+        checks = yaml.safe_load(m.group(1))
+    except yaml.YAMLError as e:
+        raise EyeballParseError(f"Eyeball block: {e}") from e
+    if not isinstance(checks, list) or not all(isinstance(c, dict) and "id" in c for c in checks):
+        raise EyeballParseError("Eyeball block is not a list of checks with an id")
+    return checks
+
+
+def match_handoff(names: list[str], story: str) -> str | None:
+    """Find the handoff for `story` among handoff paths, named `<issue>-<story>-<platform>.md`
+    (or the legacy `<story>-<platform>.md`) anywhere under specs/features."""
+    pattern = re.compile(rf"(?:^|[/-]){re.escape(story)}-")
+    for line in names:
+        if pattern.search(line):
+            return line
+    return None
 
 
 def find_handoff_path(branch: str, story: str) -> str | None:
@@ -72,11 +123,7 @@ def find_handoff_path(branch: str, story: str) -> str | None:
         names = gh_run(["git", "ls-tree", "-r", "--name-only", f"origin/{branch}", "--", "specs/features"])
     except subprocess.CalledProcessError:
         return None
-    pattern = re.compile(rf"/0*{re.escape(story)}-")
-    for line in names.splitlines():
-        if pattern.search("/" + line):
-            return line
-    return None
+    return match_handoff(names.splitlines(), story)
 
 
 def gh_run(args: list[str]) -> str:
@@ -103,6 +150,7 @@ def build_candidates(force: bool) -> list[dict]:
             branch = pr["headRefName"]
             handoff_path = find_handoff_path(branch, story)
             checks: list = []
+            parse_error = None
             handoff_text = ""
             if handoff_path:
                 try:
@@ -110,9 +158,13 @@ def build_candidates(force: bool) -> list[dict]:
                 except subprocess.CalledProcessError:
                     handoff_text = ""
             if handoff_text:
-                fm, body = frontmatter_and_body(handoff_text)
-                checks = eyeball_block(body)
-                platform = fm.get("platform", platform)
+                try:
+                    fm, body = frontmatter_and_body(handoff_text)
+                    checks = eyeball_block(body)
+                    platform = fm.get("platform", platform)
+                except EyeballParseError as e:
+                    checks = []
+                    parse_error = str(e)
             eyeball_label = next((l for l in labels if l.startswith("eyeball:")), None)
             candidates.append({
                 "id": f"pr-{pr['number']}",
@@ -127,13 +179,14 @@ def build_candidates(force: bool) -> list[dict]:
                 "eyeball_label": eyeball_label,
                 "handoff_path": handoff_path,
                 "checks": checks,
+                "parse_error": parse_error,
             })
         smoke_checks = load_yaml(EYEBALL_DIR / "smoke.yaml") or []
         candidates.append({
             "id": "smoke", "kind": "smoke", "number": None, "title": "Smoke checklist",
             "branch": "master", "url": "", "story": "SMOKE", "platform": "web",
             "review_decision": "", "eyeball_label": None, "handoff_path": "scripts/eyeball/smoke.yaml",
-            "checks": smoke_checks,
+            "checks": smoke_checks, "parse_error": None,
         })
         _cache["candidates"] = candidates
         _cache["fetched_at"] = time.time()
@@ -153,13 +206,18 @@ def checkout_branch(checkout: Path, branch: str) -> str:
         subprocess.check_call(["git", "-C", str(checkout), "checkout", branch])
         subprocess.check_call(["git", "-C", str(checkout), "pull", "--ff-only"])
     else:
-        subprocess.check_call(["git", "-C", str(ROOT), "worktree", "add", str(checkout), f"origin/{branch}", "-B", branch])
+        # Never touch the main checkout's own branches: fetch the branch into origin/<branch>,
+        # then add a worktree for it. No -B: that would force-reset a same-named local branch in
+        # the main repo (or fail if it is checked out there or in another agent's worktree).
+        subprocess.check_call(["git", "-C", str(ROOT), "fetch", "origin", branch])
+        subprocess.check_call(["git", "-C", str(ROOT), "worktree", "add", str(checkout), branch])
     return current_branch(checkout)
 
 
 def current_branch(checkout: Path) -> str:
     try:
-        return subprocess.check_output(["git", "-C", str(checkout), "branch", "--show-current"], text=True).strip()
+        return subprocess.check_output(["git", "-C", str(checkout), "branch", "--show-current"], text=True,
+                                        stderr=subprocess.DEVNULL).strip()
     except subprocess.CalledProcessError:
         return ""
 
@@ -263,18 +321,21 @@ def ensure_labels() -> None:
 
 
 def issue_milestone(pr_number: int | None) -> str | None:
+    # `gh pr view --json closingIssuesReferences` does not carry a milestone field; look it up on
+    # the first closing issue instead.
     if pr_number is None:
         return None
     try:
         refs = gh_json("pr", "view", str(pr_number), "--repo", REPO, "--json", "closingIssuesReferences")
         refs = refs.get("closingIssuesReferences") or []
-        for ref in refs:
-            ms = ref.get("milestone")
-            if ms:
-                return ms.get("title")
-    except subprocess.CalledProcessError:
-        pass
-    return None
+        if not refs:
+            return None
+        issue_number = refs[0]["number"]
+        issue = gh_json("issue", "view", str(issue_number), "--repo", REPO, "--json", "milestone")
+        ms = issue.get("milestone")
+        return ms.get("title") if ms else None
+    except (subprocess.CalledProcessError, KeyError, IndexError):
+        return None
 
 
 def file_check_issue(candidate: dict, check: dict, result: dict) -> str:
@@ -330,17 +391,24 @@ def file_observation_issue(candidate: dict, obs: dict) -> str:
     return out.splitlines()[-1]
 
 
-def submit(candidate: dict, data: dict) -> dict:
-    ensure_labels()
+def submit(candidate: dict, data: dict, checkout: Path) -> dict:
     checks = candidate["checks"]
+    passed = sum(1 for c in checks if data["checks"].get(c["id"], {}).get("result") == "pass")
+    failed = sum(1 for c in checks if data["checks"].get(c["id"], {}).get("result") == "fail")
+    if passed + failed == 0:
+        raise ApiError("tick at least one check Pass or Fail before submitting", 400)
+
+    ensure_labels()
     for check in checks:
         cid = check["id"]
         result = data["checks"].setdefault(cid, {"result": None, "note": "", "issue_url": None})
         if result.get("result") == "fail" and not result.get("issue_url"):
             result["issue_url"] = file_check_issue(candidate, check, result)
+            save_results(checkout, candidate["id"], data)
     for obs in data.get("observations", []):
         if not obs.get("issue_url") and obs.get("text", "").strip():
             obs["issue_url"] = file_observation_issue(candidate, obs)
+            save_results(checkout, candidate["id"], data)
 
     total = len(checks)
     passed = sum(1 for c in checks if data["checks"].get(c["id"], {}).get("result") == "pass")
@@ -361,12 +429,15 @@ def submit(candidate: dict, data: dict) -> dict:
     if candidate["kind"] == "pr":
         subprocess.run(["gh", "pr", "comment", str(candidate["number"]), "--repo", REPO, "--body", body],
                         cwd=ROOT, check=False)
-        want = FAIL_LABEL[0] if failed else PASS_LABEL[0]
-        other = PASS_LABEL[0] if failed else FAIL_LABEL[0]
+        # Pass only when every check was ticked Pass and none failed; anything else (including an
+        # untouched check) is eyeball:fail.
+        want = PASS_LABEL[0] if total and passed == total else FAIL_LABEL[0]
+        other = FAIL_LABEL[0] if want == PASS_LABEL[0] else PASS_LABEL[0]
         subprocess.run(["gh", "pr", "edit", str(candidate["number"]), "--repo", REPO,
                         "--remove-label", other, "--add-label", want], cwd=ROOT, check=False)
 
     data["submitted_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    save_results(checkout, candidate["id"], data)
     return data
 
 
@@ -393,63 +464,76 @@ class Handler(BaseHTTPRequestHandler):
         return json.loads(self.rfile.read(length) or b"{}")
 
     def do_GET(self):
-        if self.path == "/" or self.path == "/index.html":
-            html = (EYEBALL_DIR / "dashboard.html").read_bytes()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(html)))
+        try:
+            if self.path == "/" or self.path == "/index.html":
+                html = (EYEBALL_DIR / "dashboard.html").read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(html)))
+                self.end_headers()
+                self.wfile.write(html)
+                return
+            if self.path.startswith("/api/state"):
+                return self._api_state()
+            if self.path.startswith("/api/log"):
+                return self._api_log()
+            self.send_response(404)
             self.end_headers()
-            self.wfile.write(html)
-            return
-        if self.path.startswith("/api/state"):
-            return self._api_state()
-        if self.path.startswith("/api/log"):
-            return self._api_log()
-        self.send_response(404)
-        self.end_headers()
+        except ApiError as e:
+            self._json({"ok": False, "error": str(e)}, e.status)
+        except Exception as e:  # noqa: BLE001 - never let a request bring the server down
+            self._json({"ok": False, "error": str(e)}, 500)
 
     def do_POST(self):
-        if self.path == "/api/refresh":
-            build_candidates(force=True)
-            return self._api_state()
-        if self.path == "/api/checkout":
-            body = self._read_json()
-            branch = checkout_branch(self.checkout, body["branch"])
-            return self._json({"ok": True, "branch": branch})
-        if self.path == "/api/service/start":
-            body = self._read_json()
-            msg = start_service(body["name"], self.checkout)
-            return self._json({"ok": True, "message": msg})
-        if self.path == "/api/service/stop":
-            body = self._read_json()
-            msg = stop_service(body["name"])
-            return self._json({"ok": True, "message": msg})
-        if self.path == "/api/service/start-required":
-            body = self._read_json()
-            names = body.get("names", [])
-            messages = [start_service(n, self.checkout) for n in names]
-            return self._json({"ok": True, "messages": messages})
-        if self.path == "/api/save":
-            body = self._read_json()
-            save_results(self.checkout, body["candidate"], body["data"])
-            return self._json({"ok": True})
-        if self.path == "/api/submit":
-            body = self._read_json()
-            candidate_id = body["candidate"]
-            candidate = next((c for c in build_candidates(False) if c["id"] == candidate_id), None)
-            if not candidate:
-                return self._json({"ok": False, "error": "unknown candidate"}, 404)
-            data = load_results(self.checkout, candidate_id)
-            data = submit(candidate, data)
-            save_results(self.checkout, candidate_id, data)
-            return self._json({"ok": True, "data": data})
-        self.send_response(404)
-        self.end_headers()
+        try:
+            if self.path == "/api/refresh":
+                build_candidates(force=True)
+                return self._api_state()
+            if self.path == "/api/checkout":
+                body = self._read_json()
+                branch = validate_branch(body.get("branch", ""))
+                branch = checkout_branch(self.checkout, branch)
+                return self._json({"ok": True, "branch": branch})
+            if self.path == "/api/service/start":
+                body = self._read_json()
+                name = validate_name(body.get("name", ""), "service name")
+                msg = start_service(name, self.checkout)
+                return self._json({"ok": True, "message": msg})
+            if self.path == "/api/service/stop":
+                body = self._read_json()
+                name = validate_name(body.get("name", ""), "service name")
+                msg = stop_service(name)
+                return self._json({"ok": True, "message": msg})
+            if self.path == "/api/service/start-required":
+                body = self._read_json()
+                names = [validate_name(n, "service name") for n in body.get("names", [])]
+                messages = [start_service(n, self.checkout) for n in names]
+                return self._json({"ok": True, "messages": messages})
+            if self.path == "/api/save":
+                body = self._read_json()
+                candidate_id = validate_name(body.get("candidate", ""), "candidate")
+                save_results(self.checkout, candidate_id, body.get("data", {}))
+                return self._json({"ok": True})
+            if self.path == "/api/submit":
+                body = self._read_json()
+                candidate_id = validate_name(body.get("candidate", ""), "candidate")
+                candidate = next((c for c in build_candidates(False) if c["id"] == candidate_id), None)
+                if not candidate:
+                    return self._json({"ok": False, "error": "unknown candidate"}, 404)
+                data = load_results(self.checkout, candidate_id)
+                data = submit(candidate, data, self.checkout)
+                return self._json({"ok": True, "data": data})
+            self.send_response(404)
+            self.end_headers()
+        except ApiError as e:
+            self._json({"ok": False, "error": str(e)}, e.status)
+        except Exception as e:  # noqa: BLE001 - never let a request bring the server down
+            self._json({"ok": False, "error": str(e)}, 500)
 
     def _api_log(self):
         from urllib.parse import urlparse, parse_qs
         qs = parse_qs(urlparse(self.path).query)
-        name = (qs.get("name") or [""])[0]
+        name = validate_name((qs.get("name") or [""])[0], "service name")
         self._json({"log": tail_log(self.checkout, name)})
 
     def _api_state(self):

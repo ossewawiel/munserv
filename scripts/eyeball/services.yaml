@@ -13,7 +13,10 @@ db:
 
 backend:
   cwd: backend
-  start: ./gradlew bootRun
+  # The local profile is required: bootstrap.super-user (application-local.yml) only loads under
+  # it, and BootstrapConfig.enabled defaults to false without it, so the super_user account and
+  # W22-W24/W29/W30-style checks cannot be exercised on a backend started any other way.
+  start: SPRING_PROFILES_ACTIVE=local ./gradlew bootRun
   stop: (stop the process group)
   health: http://localhost:8080/actuator/health
   url: http://localhost:8080
