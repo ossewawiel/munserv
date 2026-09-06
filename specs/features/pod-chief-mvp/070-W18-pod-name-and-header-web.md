@@ -49,6 +49,10 @@ files_changed:
   - web/.storybook/preview.tsx
   - web/eslint.config.js
   - web/e2e/visual/stories.spec.ts
+  - web/src/components/organisms/SupportGrantBanner.stories.tsx
+  - web/src/components/molecules/PodHeaderLockup.tsx
+  - web/src/components/molecules/PodHeaderLockup.stories.tsx
+  - design/registry/web.md
 tests_added:
   - web/src/features/pod-settings/api.test.ts
   - web/src/features/pod-settings/hooks.test.tsx

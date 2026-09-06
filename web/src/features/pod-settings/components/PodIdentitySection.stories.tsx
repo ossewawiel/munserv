@@ -9,10 +9,13 @@ import { PodIdentitySection } from './PodIdentitySection';
 import { podSettingsKeys } from '../hooks';
 import type { PodSettings } from '../types';
 
+// A local asset, not a remote URL: nothing outside the harness can fetch a
+// real pod-logo URL, so every "with logo" baseline showed a broken-image
+// glyph. This one always resolves, in Storybook and in the screenshot gate.
 const podWithLogo: PodSettings = {
   name: 'Ward42',
   displayName: 'Munserv Pod Ward42',
-  logoUrl: 'https://cdn.ward42.org.za/branding/pod-logo.png',
+  logoUrl: '/assets/app-mark.png',
 };
 
 const podWithoutLogo: PodSettings = {
@@ -66,6 +69,12 @@ export const IdentityInvalidName: Story = {
     const canvas = within(canvasElement.ownerDocument.body);
     const nameField = await canvas.findByLabelText(/pod name/i);
 
+    // The ref-guarded prefill effect races userEvent.clear: without waiting
+    // for it first, the effect can rewrite the field after the clear and
+    // the typed value gets appended to the original name instead of
+    // replacing it.
+    await waitFor(() => expect(nameField).toHaveValue(podWithLogo.name));
+
     await userEvent.clear(nameField);
     await userEvent.type(nameField, 'W');
 
@@ -83,6 +92,8 @@ export const IdentitySaving: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement.ownerDocument.body);
     const nameField = await canvas.findByLabelText(/pod name/i);
+
+    await waitFor(() => expect(nameField).toHaveValue(podWithLogo.name));
 
     await userEvent.clear(nameField);
     await userEvent.type(nameField, 'Ward 42');
@@ -108,6 +119,8 @@ export const IdentityServerError: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement.ownerDocument.body);
     const logoUrlField = await canvas.findByLabelText(/logo url/i);
+
+    await waitFor(() => expect(logoUrlField).toHaveValue(podWithLogo.logoUrl));
 
     await userEvent.clear(logoUrlField);
     await userEvent.type(logoUrlField, 'cdn.ward42.org.za/branding/pod-logo.png');
@@ -136,6 +149,8 @@ export const IdentitySaved: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement.ownerDocument.body);
     const nameField = await canvas.findByLabelText(/pod name/i);
+
+    await waitFor(() => expect(nameField).toHaveValue(podWithLogo.name));
 
     await userEvent.clear(nameField);
     await userEvent.type(nameField, 'Ward 42');

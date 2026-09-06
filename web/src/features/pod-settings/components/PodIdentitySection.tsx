@@ -10,7 +10,13 @@ import { MainCard } from '@/components/atoms/MainCard';
 import { Input } from '@/components/atoms/Input';
 import { Button } from '@/components/atoms/Button';
 import { Spinner } from '@/components/atoms/Spinner';
+import { PodHeaderLockup } from '@/components/molecules/PodHeaderLockup';
 import { usePodSettings, useUpdatePodSettings } from '../hooks';
+
+// The preview's right column matches the artboard's fixed 392px rail
+// (Main.dc.html), expressed as a theme spacing multiple (8px * 49) rather
+// than a literal pixel value.
+const PREVIEW_COLUMN_SPACING_UNITS = 49;
 
 const NAME_MIN_LENGTH = 2;
 const NAME_MAX_LENGTH = 100;
@@ -101,7 +107,7 @@ export const PodIdentitySection: FC = () => {
 
           {justSaved && !updateSettings.isError && data && (
             <Alert severity="success" sx={{ mb: 2.5 }}>
-              {t('podSettings.identity.saved', 'Saved. The header now reads "{{displayName}}".', {
+              {t('podSettings.identity.saved', 'Saved. The header now reads “{{displayName}}”.', {
                 displayName: data.displayName,
               })}
             </Alert>
@@ -133,7 +139,13 @@ export const PodIdentitySection: FC = () => {
               />
             </Box>
 
-            <Box sx={{ width: 392, flex: '0 0 auto' }}>
+            <Box
+              sx={{
+                flexGrow: 0,
+                flexShrink: 0,
+                flexBasis: (theme) => theme.spacing(PREVIEW_COLUMN_SPACING_UNITS),
+              }}
+            >
               <Typography
                 variant="caption"
                 sx={{ fontWeight: 500, letterSpacing: '0.4px', color: 'text.secondary' }}
@@ -166,28 +178,7 @@ export const PodIdentitySection: FC = () => {
                     alt={t('common.appName', 'MunServ Admin')}
                     sx={{ height: 32, width: 32, borderRadius: 0.25 }}
                   />
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 5 }}>
-                    {data?.logoUrl && (
-                      <Box
-                        component="img"
-                        src={data.logoUrl}
-                        alt=""
-                        sx={{ height: 32, width: 32, borderRadius: 1 }}
-                      />
-                    )}
-                    <Typography
-                      sx={{
-                        fontSize: 16,
-                        lineHeight: 1.5,
-                        fontWeight: 600,
-                        letterSpacing: '0.15px',
-                        color: 'primary.main',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {data?.displayName}
-                    </Typography>
-                  </Box>
+                  <PodHeaderLockup displayName={data?.displayName ?? ''} logoUrl={data?.logoUrl} />
                 </Box>
               </Box>
               <Typography

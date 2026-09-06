@@ -66,7 +66,10 @@ export const PodChiefWithLogo: Story = {
     withAuthAndPodSettings(podChief, {
       name: 'Ward42',
       displayName: 'Munserv Pod Ward42',
-      logoUrl: 'https://cdn.ward42.org.za/branding/pod-logo.png',
+      // A local asset, not a remote URL: nothing outside the harness can
+      // fetch a real pod-logo URL, so the baseline would show a
+      // broken-image glyph instead of the artboard's logo badge.
+      logoUrl: '/assets/app-mark.png',
     }),
   ],
 };

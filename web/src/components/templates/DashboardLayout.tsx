@@ -6,13 +6,13 @@ import AppBar from '@mui/material/AppBar';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import MenuIcon from '@mui/icons-material/Menu';
 
 import { ProfileMenu } from '@/components/organisms/ProfileMenu';
 import { NotificationDropdown } from '@/components/organisms/NotificationDropdown';
 import { SupportGrantBanner } from '@/components/organisms/SupportGrantBanner';
+import { PodHeaderLockup } from '@/components/molecules/PodHeaderLockup';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { usePodSettings } from '@/features/pod-settings/hooks';
 import { Sidebar } from './Sidebar';
@@ -197,28 +197,7 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
 
         {/* Pod chief branding: the pod's own logo, if set, then the server-derived displayName */}
         {podSettings && (
-          <Box sx={{ display: 'flex', alignItems: 'center', ml: 5 }}>
-            {podSettings.logoUrl && (
-              <Box
-                component="img"
-                src={podSettings.logoUrl}
-                alt=""
-                sx={{ height: 32, width: 32, borderRadius: 1, mr: 1 }}
-              />
-            )}
-            <Typography
-              sx={{
-                fontSize: 16,
-                lineHeight: 1.5,
-                fontWeight: 600,
-                letterSpacing: '0.15px',
-                color: 'primary.main',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {podSettings.displayName}
-            </Typography>
-          </Box>
+          <PodHeaderLockup displayName={podSettings.displayName} logoUrl={podSettings.logoUrl} />
         )}
 
         {/* Spacer */}
