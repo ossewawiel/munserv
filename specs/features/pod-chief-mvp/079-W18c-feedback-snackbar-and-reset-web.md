@@ -46,6 +46,16 @@ files_changed:
   - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-dirty--dark.png
   - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-saved--light.png
   - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-saved--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--main--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--main--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-no-logo--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-no-logo--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-invalid-name--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-invalid-name--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-server-error--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-podsettings-podidentitysection--identity-server-error--dark.png
+  - design/canvases/pod-chief-mvp/pod-settings/IdentitySaved.dc.html
+  - design/canvases/pod-chief-mvp/pod-settings/canvas.json
 tests_added:
   - "FeedbackSnackbar: should render the message with the given severity"
   - "FeedbackSnackbar: should call onClose when it auto-hides"
@@ -59,6 +69,9 @@ tests_added:
   - "PodIdentitySection: should restore the saved name when reset is pressed"
   - "PodIdentitySection: should disable both buttons while saving"
   - "PodIdentitySection: should not call the mutation when reset is pressed"
+  - "PodIdentitySection: should restore the saved logo URL when reset is pressed"
+  - "PodIdentitySection: should restore the saved values after a rejected save"
+  - "useFeedback: should restart the auto-hide timer for a message that replaces one already showing"
 ---
 
 # W18c · Snackbar feedback and a Reset action on the pod identity form (Web)
