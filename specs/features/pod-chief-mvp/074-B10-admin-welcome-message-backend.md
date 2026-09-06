@@ -41,7 +41,7 @@ tests_added:
   - "PodAdministratorServiceTest > should create a welcome message when the administrator is created"
   - "PodAdministratorServiceTest > should not create a message when creation fails"
   - "PodAdministratorServiceTest > should return the result of the admin service unchanged"
-  - "PodAdministratorControllerTest.CreateAdministrator > should send a welcome message when the administrator is created"
+  - "PodAdministratorControllerTest.CreateAdministrator > should route creation through the pod administrator service"
 ---
 
 # B10 · New administrator receives a welcome message (Backend)
@@ -138,7 +138,7 @@ and `specs/contracts/types.md`. The validator replays enum DDL and compares the 
    `@MockkBean private lateinit var podAdministratorService: PodAdministratorService` and restub the
    four cases in `inner class CreateAdministrator` from `adminService.createAdmin(any(), testAdminId)`
    to `podAdministratorService.createAdministrator(any(), testAdminId)` (same returns, same
-   assertions); add `should send a welcome message when the administrator is created` only if you can
+   assertions); add `should route creation through the pod administrator service` only if you can
    assert it through the mocked service call, not by reaching into the repository.
 8. `mobile/lib/shared/models/message.dart`: add `@JsonValue('admin_welcome') adminWelcome` as the
    last `MessageType` constant and `adminWelcome => 'Welcome'` to the `displayName` switch (it is
