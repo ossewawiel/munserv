@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { vi } from 'vitest';
 
+import { FeedbackProvider } from '@/shared/hooks/FeedbackProvider';
 import { PodSettingsPage } from './PodSettingsPage';
 
 vi.mock('@/components/templates/DashboardLayout', () => ({
@@ -23,7 +24,11 @@ function renderWithProviders(ui: ReactNode) {
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
 
-  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <FeedbackProvider>{ui}</FeedbackProvider>
+    </QueryClientProvider>
+  );
 }
 
 describe('PodSettingsPage', () => {
