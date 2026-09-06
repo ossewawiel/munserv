@@ -208,3 +208,14 @@ textarea.note { width: 100%; min-height: 44px; padding: 6px; }
 .token-row { display: flex; align-items: center; gap: var(--space-2); margin-bottom: 6px; font-size: 12px; }
 
 [hidden] { display: none !important; }
+
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex;
+  align-items: center; justify-content: center; z-index: 200; padding: var(--space-4);
+}
+.modal {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow); padding: var(--space-4); max-width: 480px; width: 100%;
+  max-height: 80vh; overflow-y: auto;
+}
+.modal h3 { margin-bottom: var(--space-2); }
