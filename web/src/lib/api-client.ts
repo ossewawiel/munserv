@@ -30,11 +30,15 @@ function decodeJwtExpirySeconds(token: string): number | null {
   }
 }
 
-/** True when the stored token's `exp` claim has passed. */
+/**
+ * True when the stored token's `exp` claim has passed, or the token
+ * cannot be decoded at all. A corrupted token can never succeed, so
+ * treating it as expired ends the session instead of looping on 403s.
+ */
 function isTokenExpired(token: string): boolean {
   const expirySeconds = decodeJwtExpirySeconds(token);
   if (expirySeconds === null) {
-    return false;
+    return true;
   }
   return expirySeconds * 1000 < Date.now();
 }

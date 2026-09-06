@@ -32,6 +32,7 @@ tests_added:
   - "web/src/lib/api-client.test.ts: should end the session on a 403 under a support grant"
   - "web/src/lib/api-client.test.ts: should end the session on a 403 when the stored token has expired"
   - "web/src/lib/api-client.test.ts: should end the session on a 403 when no token is stored"
+  - "web/src/lib/api-client.test.ts: should end the session on a 403 when the stored token cannot be decoded"
   - "web/src/lib/api-client.test.ts: should end the session on a 401"
   - "web/src/features/dashboard/DashboardPage.test.tsx: should not request the pod dashboard for a pod admin"
   - "web/src/components/organisms/SessionExpiredHandler.test.tsx: should not display session expired message without a support grant (#114)"

@@ -29,6 +29,13 @@ i18n.init({
 
 const theme = createTheme();
 
+/** Builds an unsigned JWT with the given payload, for exp-claim tests only. */
+function makeJwt(payload: Record<string, unknown>): string {
+  const toBase64Url = (obj: Record<string, unknown>): string =>
+    btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return `${toBase64Url({ alg: 'none', typ: 'JWT' })}.${toBase64Url(payload)}.signature`;
+}
+
 // Helper to capture current location
 function LocationDisplay() {
   const location = useLocation();
@@ -233,6 +240,11 @@ describe('SessionExpiredHandler', () => {
 
   describe('when API returns 403 (Forbidden)', () => {
     it('should not display session expired message without a support grant (#114)', async () => {
+      // A syntactically valid, unexpired JWT: a role-only 403 for a token
+      // like this must not end the session.
+      const validToken = makeJwt({ sub: '1', exp: Math.floor(Date.now() / 1000) + 3600 });
+      localStorage.setItem('accessToken', validToken);
+
       server.use(
         http.get('*/admin/dashboard', () => {
           return HttpResponse.json(
@@ -258,7 +270,7 @@ describe('SessionExpiredHandler', () => {
       expect(screen.queryByText(/session has expired/i)).not.toBeInTheDocument();
 
       // Auth data should be untouched
-      expect(localStorage.getItem('accessToken')).toBe('valid-token');
+      expect(localStorage.getItem('accessToken')).toBe(validToken);
     });
 
     it('should display session expired message and redirect under a support grant', async () => {

@@ -17,8 +17,9 @@ function makeJwt(payload: Record<string, unknown>): string {
 
 describe('apiClient response interceptor', () => {
   beforeEach(() => {
+    const validToken = makeJwt({ sub: 'admin-1', exp: Math.floor(Date.now() / 1000) + 3600 });
     localStorage.clear();
-    localStorage.setItem('accessToken', 'token');
+    localStorage.setItem('accessToken', validToken);
     localStorage.setItem('refreshToken', 'refresh');
     localStorage.setItem('admin', JSON.stringify({ id: 'admin-1' }));
   });
@@ -29,6 +30,7 @@ describe('apiClient response interceptor', () => {
   });
 
   it('should not end the session on a 403 without a support grant', async () => {
+    const validToken = localStorage.getItem('accessToken');
     server.use(
       http.get(TEST_URL, () => new HttpResponse(null, { status: 403 }))
     );
@@ -38,7 +40,7 @@ describe('apiClient response interceptor', () => {
     await expect(apiClient.get('/pod/dashboard')).rejects.toBeDefined();
 
     expect(listener).not.toHaveBeenCalled();
-    expect(localStorage.getItem('accessToken')).toBe('token');
+    expect(localStorage.getItem('accessToken')).toBe(validToken);
 
     unsubscribe();
   });
@@ -67,6 +69,24 @@ describe('apiClient response interceptor', () => {
   it('should end the session on a 403 when the stored token has expired', async () => {
     const expiredToken = makeJwt({ sub: 'admin-1', exp: Math.floor(Date.now() / 1000) - 3600 });
     localStorage.setItem('accessToken', expiredToken);
+    server.use(
+      http.get(TEST_URL, () => new HttpResponse(null, { status: 403 }))
+    );
+    const listener = vi.fn();
+    const unsubscribe = authEvents.subscribe(listener);
+
+    await expect(apiClient.get('/pod/dashboard')).rejects.toBeDefined();
+
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'session-expired' })
+    );
+    expect(localStorage.getItem('accessToken')).toBeNull();
+
+    unsubscribe();
+  });
+
+  it('should end the session on a 403 when the stored token cannot be decoded', async () => {
+    localStorage.setItem('accessToken', 'not-a-jwt');
     server.use(
       http.get(TEST_URL, () => new HttpResponse(null, { status: 403 }))
     );

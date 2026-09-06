@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -236,23 +236,38 @@ describe('DashboardPage', () => {
     };
     mockHasPermission = (role: string) => role !== 'pod_chief';
 
-    let requestCount = 0;
     server.use(
-      http.get(POD_DASHBOARD_URL, () => {
-        requestCount += 1;
-        return HttpResponse.json({});
-      })
+      http.get(POD_DASHBOARD_URL, () => HttpResponse.json({}))
     );
 
-    renderWithProviders(<DashboardPage />);
+    // `request:start` fires synchronously the moment MSW intercepts a
+    // request, so counting on it (rather than inside the handler, whose
+    // resolution is asynchronous) lets this assertion actually fail when
+    // the request does fire.
+    let requestCount = 0;
+    const onRequestStart = ({ request }: { request: Request }): void => {
+      if (request.url.includes('/pod/dashboard')) {
+        requestCount += 1;
+      }
+    };
+    server.events.on('request:start', onRequestStart);
 
-    // Wait for the page to settle, then confirm the disabled query never
-    // fired: with `enabled: false` there is no async gap to race, so this
-    // resolves immediately rather than depending on a fixed sleep.
-    await waitFor(() => {
-      expect(screen.getByTestId('dashboard-layout')).toBeInTheDocument();
-    });
+    try {
+      renderWithProviders(<DashboardPage />);
 
-    expect(requestCount).toBe(0);
+      await waitFor(() => {
+        expect(screen.getByTestId('dashboard-layout')).toBeInTheDocument();
+      });
+
+      // Flush any microtasks/timers a wrongly-enabled query would need to
+      // reach the request layer before asserting its absence.
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(requestCount).toBe(0);
+    } finally {
+      server.events.removeListener('request:start', onRequestStart);
+    }
   });
 });
