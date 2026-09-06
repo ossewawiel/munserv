@@ -14,6 +14,7 @@ import { NotificationDropdown } from '@/components/organisms/NotificationDropdow
 import { SupportGrantBanner } from '@/components/organisms/SupportGrantBanner';
 import { PodHeaderLockup } from '@/components/molecules/PodHeaderLockup';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { FeedbackProvider } from '@/shared/hooks/FeedbackProvider';
 import { usePodSettings } from '@/features/pod-settings/hooks';
 import { Sidebar } from './Sidebar';
 import {
@@ -238,7 +239,7 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <Main open={drawerOpen}>
-        {children}
+        <FeedbackProvider>{children}</FeedbackProvider>
       </Main>
     </Box>
   );
