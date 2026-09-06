@@ -139,3 +139,26 @@ cd backend && ./gradlew ktlintCheck test
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a
 summary of changes. If you cannot finish, set `status: blocked` and end your message with
 `BLOCKED: <reason>`.
+
+## Eyeball
+```yaml
+- id: E1
+  title: Pod chief uploads a logo through Swagger
+  as: pod_chief
+  services: [db, backend]
+  url: http://localhost:8080/swagger-ui.html
+  steps:
+    - Call POST /api/v1/auth/admin/login with the pod chief credentials and copy the access token.
+    - Press Authorize and paste the token.
+    - Call POST /api/v1/pod/logo with a PNG under 5MB as the file part.
+  expect: 200 with a JSON body containing logoUrl; opening that URL in the browser shows the image.
+- id: E2
+  title: Wrong file type and wrong role are refused
+  as: ward_admin
+  services: [db, backend]
+  url: http://localhost:8080/swagger-ui.html
+  steps:
+    - As the pod chief, upload a .txt file as the logo.
+    - Log in as the ward admin, authorize with that token, upload a valid PNG.
+  expect: The text file gets 400 with a validation message; the ward admin gets 403.
+```
