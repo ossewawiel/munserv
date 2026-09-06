@@ -169,3 +169,34 @@ cd ../mobile && dart format lib test && flutter analyze --fatal-infos && flutter
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a
 summary of changes. If you cannot finish, set `status: blocked` and end your message with
 `BLOCKED: <reason>`.
+
+## Eyeball
+```yaml
+- id: E1
+  title: New administrator gets a welcome message
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/pod-administrators
+  steps:
+    - Click "Add administrator", enter a new email and display name, pick the Pod Admin role, submit.
+    - Copy the temporary password shown in the confirmation.
+    - Log out, then log in as the new administrator with that temporary password and set a new one.
+    - Open http://localhost:3000/messages.
+  expect: One unread message of type "Welcome" addressed to the new administrator, listing the initial tasks, and the sidebar Messages badge shows 1.
+- id: E2
+  title: Failed creation sends nothing
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/pod-administrators
+  steps:
+    - Click "Add administrator" and submit with the email of an administrator that already exists.
+  expect: The form shows the duplicate-email error and no new message appears for anyone (check the pod chief's own messages list stays unchanged).
+- id: E3
+  title: Mobile still renders every message type
+  as: member
+  services: [db, backend, mobile]
+  url: Messages screen
+  steps:
+    - Log in as the member (OTP from the backend log) and open Messages.
+  expect: The list loads without error; existing message types keep their icons and labels.
+```
