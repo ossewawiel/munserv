@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import { useEffect, type FC, type ReactElement, type ReactNode } from 'react';
 import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -23,11 +23,27 @@ const podSettings: PodSettings = {
   logoUrl: '/assets/app-mark.png',
 };
 
+const AuthSeed: FC<{ children: ReactNode }> = ({ children }) => {
+  // useAuth reads localStorage synchronously (no effect of its own), so the
+  // seed has to happen during render, before DashboardLayout's first read -
+  // an effect would run too late and the page would render once, wrongly,
+  // with no admin. The cleanup effect below removes the seed on unmount so
+  // it never leaks into the next story or a real session in the same tab.
+  localStorage.setItem('accessToken', 'storybook-token');
+  localStorage.setItem('admin', JSON.stringify(podChief));
+
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('admin');
+    };
+  }, []);
+
+  return <>{children}</>;
+};
+
 function withAuthAndPodSettings(): Decorator {
   return (Story): ReactElement => {
-    localStorage.setItem('accessToken', 'storybook-token');
-    localStorage.setItem('admin', JSON.stringify(podChief));
-
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -41,9 +57,11 @@ function withAuthAndPodSettings(): Decorator {
     queryClient.setQueryData(podSettingsKeys.all, podSettings);
 
     return (
-      <QueryClientProvider client={queryClient}>
-        <Story />
-      </QueryClientProvider>
+      <AuthSeed>
+        <QueryClientProvider client={queryClient}>
+          <Story />
+        </QueryClientProvider>
+      </AuthSeed>
     );
   };
 }

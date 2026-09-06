@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -19,7 +19,7 @@ vi.mock('@/features/support-access/SupportAccessSection', () => ({
   SupportAccessSection: () => <div data-testid="support-access-section">Support access</div>,
 }));
 
-let mockPodSetup: PodSetupState = {
+const defaultPodSetup: PodSetupState = {
   status: {
     isComplete: true,
     missingSteps: [],
@@ -33,8 +33,12 @@ let mockPodSetup: PodSetupState = {
   isLoading: false,
 };
 
+// Mutated by individual tests via podSetupState.current; reset in beforeEach
+// so no test leaks its override into the next one.
+const podSetupState: { current: PodSetupState } = { current: defaultPodSetup };
+
 vi.mock('@/shared/hooks/usePodSetup', () => ({
-  usePodSetup: () => mockPodSetup,
+  usePodSetup: () => podSetupState.current,
 }));
 
 function renderWithProviders(ui: ReactNode) {
@@ -46,6 +50,10 @@ function renderWithProviders(ui: ReactNode) {
 }
 
 describe('PodSettingsPage', () => {
+  beforeEach(() => {
+    podSetupState.current = defaultPodSetup;
+  });
+
   it('should show the pod identity section above support access', async () => {
     renderWithProviders(<PodSettingsPage />);
 
@@ -62,8 +70,8 @@ describe('PodSettingsPage', () => {
   });
 
   it('should label the area placeholder Ward Boundaries when the pod has wards', async () => {
-    mockPodSetup = {
-      ...mockPodSetup,
+    podSetupState.current = {
+      ...defaultPodSetup,
       status: {
         isComplete: true,
         missingSteps: [],
@@ -78,8 +86,8 @@ describe('PodSettingsPage', () => {
   });
 
   it('should label the area placeholder Sector Boundaries when the pod has no wards', async () => {
-    mockPodSetup = {
-      ...mockPodSetup,
+    podSetupState.current = {
+      ...defaultPodSetup,
       status: {
         isComplete: true,
         missingSteps: [],

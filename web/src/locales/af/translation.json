@@ -289,7 +289,7 @@
       "comingSoonHint": "Grensredigering is nog nie beskikbaar nie.",
       "pod": {
         "title": "Pod-grense",
-        "description": "Teken die buitelyn van die hele pod. Verslae van buite dit word geweier, en elke kaart open daarop."
+        "description": "Teken die buitelyn van die hele pod. Aanmeldings van buite die pod word geweier, en elke kaart open daarop."
       },
       "ward": {
         "title": "Wyk-grense",
@@ -297,7 +297,7 @@
       },
       "sector": {
         "title": "Sektor-grense",
-        "description": "Teken elke sektor se buitelyn sodat 'n voorval die regte sektor bereik vanaf die GPS-punt waar dit aangemeld is."
+        "description": "Teken elke sektor se buitelyn sodat 'n probleem die regte sektor bereik vanaf die GPS-punt waar dit aangemeld is."
       }
     }
   }

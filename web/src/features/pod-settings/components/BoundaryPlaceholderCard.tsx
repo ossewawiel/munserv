@@ -28,6 +28,7 @@ export const BoundaryPlaceholderCard: FC<BoundaryPlaceholderCardProps> = ({
   return (
     <MainCard
       aria-disabled="true"
+      hoverEffect={false}
       sx={{ bgcolor: 'action.hover', flex: 1, display: 'flex', flexDirection: 'column' }}
       contentSx={{ flex: 1, display: 'flex', flexDirection: 'column' }}
       title={title}
