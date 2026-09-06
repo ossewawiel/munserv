@@ -29,7 +29,12 @@ type Theme = (typeof THEMES)[number];
 
 // Stories skipped from screenshotting, with a reason. Prefer fixing flakiness
 // over widening the diff threshold; only skip a story here as a last resort.
-const SKIPPED_STORY_IDS: Record<string, string> = {};
+const SKIPPED_STORY_IDS: Record<string, string> = {
+  'features-podsettings-podidentitysection--identity-saving':
+    'The story holds a PATCH request open with MSW to freeze the pending state, which the ' +
+    'harness cannot screenshot: page.waitForLoadState("networkidle") never resolves while a ' +
+    'request is in flight, whether real or MSW-intercepted.',
+};
 
 function readStorybookIndex(): StorybookIndexEntry[] {
   const indexPath = path.resolve(dirname, '../../storybook-static/index.json');
