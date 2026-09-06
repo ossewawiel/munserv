@@ -12,8 +12,11 @@ touches:
   - web/src/test/mocks
   - web/src/locales
 ui: true
-design_canvas: ""
-design_artboards: []
+design_canvas: "https://claude.ai/code/artifact/3bd2df22-98a8-4d2e-98d8-f50159379426"
+design_artboards:
+  - "WelcomeMessageList.dc.html — inbox with the welcome message unread and auto-selected at the top, detail pane loading"
+  - "Main.dc.html (WelcomeMessageDetail) — welcome body, the initial task list, Additional Information without tasks, Dismiss"
+  - "WelcomeMessageDetailNoTasks.dc.html — same message with metadata but no task array: body only, no task list"
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-05"
@@ -46,9 +49,27 @@ the fields required: the wording in the issue contradicts the domain, and the re
 domain. AC3 is the new work.
 
 ## Visual (ui stories only)
-The welcome message renders inside the existing `MessageDetail` body. Match artboard: to be produced
-by the designer under `design/canvases/pod-chief-mvp/`. Until then, use the plain-list layout in
-step 3 and do not restyle anything else in `MessageDetail`.
+The welcome message renders inside the existing `MessageDetail` body. Match the canvas in
+`design_canvas` (working files under `design/canvases/pod-chief-mvp/messages/`), artboards
+`WelcomeMessageList`, `Main` (WelcomeMessageDetail) and `WelcomeMessageDetailNoTasks`. Do not
+restyle anything else in `MessageDetail` and change nothing in `MessageList`.
+
+Three things the canvas settles, over and above step 2:
+- The task list is a MUI `List` with `sx={{ listStyleType: 'disc', pl: 3 }}` and `ListItem`s with
+  `sx={{ display: 'list-item', px: 0, py: 0.5 }}` — bulleted, no icons, `body1` text — under a
+  `subtitle2` heading in `text.primary` with `mb: 1`, sitting between the body and the
+  Additional Information block, inside the existing `mb: 4` rhythm.
+- **`tasks` must be excluded from the generic metadata block for `admin_welcome`.** That block
+  prints every metadata entry with `String(value)`, so left alone it would repeat the three tasks as
+  one comma-joined line right under the list. `metadata.role` stays visible there, as the artboards
+  show.
+- The row in `MessageList` is drawn exactly as it renders today: no per-type icon, no type label,
+  and the default `text.secondary` left accent (`admin_welcome` is deliberately not added to
+  `getMessageTypeColor`). `MESSAGE_TYPE_LABELS.admin_welcome` is added for parity with the Dart
+  label; no screen renders it yet.
+
+Copy on the canvas: `messages.welcome.tasksTitle` = "Your first tasks",
+`messages.types.adminWelcome` = "Welcome". The title, body and tasks are B10's, server-owned.
 
 ## Contract
 `GET /messages`, `GET /messages/{id}`, `PATCH /messages/{id}/read` are in `specs/contracts/api.md`
