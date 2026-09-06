@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Launches the eyeball dashboard (scripts/eyeball.py), waits for it to come up, opens it in the
+# Launches the factory console (scripts/console/), waits for it to come up, opens it in the
 # browser, tails its log, and stops the server and every service it started on Ctrl-C.
 #
 # Usage: ./dashboard.sh
-# Env:   EYEBALL_PORT (default 3999)
+# Env:   CONSOLE_PORT (default 3999)
 set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PORT="${EYEBALL_PORT:-3999}"
-LOG_FILE="$(mktemp -t eyeball-dashboard.XXXXXX.log)"
+PORT="${CONSOLE_PORT:-3999}"
+LOG_FILE="$(mktemp -t factory-console.XXXXXX.log)"
 
 PYTHON=""
 for candidate in python3 python; do
@@ -22,7 +22,7 @@ if [[ -z "$PYTHON" ]]; then
   exit 1
 fi
 
-"$PYTHON" "$DIR/scripts/eyeball.py" --port "$PORT" > "$LOG_FILE" 2>&1 &
+(cd "$DIR" && "$PYTHON" -m scripts.console --port "$PORT") > "$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 
 cleanup() {
@@ -36,7 +36,7 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-echo "Starting eyeball dashboard on port $PORT (pid $SERVER_PID)..."
+echo "Starting factory console on port $PORT (pid $SERVER_PID)..."
 STATE_URL="http://localhost:$PORT/api/state"
 for _ in $(seq 1 60); do
   if ! kill -0 "$SERVER_PID" 2>/dev/null; then
@@ -65,7 +65,7 @@ else
   echo "Open $URL in your browser."
 fi
 
-echo "eyeball dashboard is up: $URL"
+echo "factory console is up: $URL"
 echo "Ctrl-C to stop the server and every service it started."
 tail -n +1 -f "$LOG_FILE" &
 TAIL_PID=$!

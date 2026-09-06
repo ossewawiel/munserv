@@ -114,21 +114,41 @@ function initTheme() {
   });
 }
 
+function initNavCollapse() {
+  const shell = document.querySelector('.app-shell');
+  const collapsed = localStorage.getItem('console-nav-collapsed') === '1';
+  shell.classList.toggle('nav-collapsed', collapsed);
+  document.getElementById('nav-collapse-toggle').addEventListener('click', () => {
+    const next = !shell.classList.contains('nav-collapsed');
+    shell.classList.toggle('nav-collapsed', next);
+    localStorage.setItem('console-nav-collapsed', next ? '1' : '0');
+  });
+}
+
+// Accepts '#/overview', '#overview' (alias, no slash) and '#/eyeball/pr-100' (deep-links a
+// candidate into the Eyeball section). Falls back to 'overview' for an empty or unknown hash.
+function parseHash() {
+  const hash = location.hash.replace(/^#\/?/, '');
+  const parts = hash.split('/').filter(Boolean);
+  const sectionId = SECTIONS[parts[0]] ? parts[0] : 'overview';
+  return { sectionId, param: parts[1] || null };
+}
+
 async function route() {
-  const hash = location.hash.replace(/^#\//, '') || 'overview';
-  const sectionId = SECTIONS[hash] ? hash : 'overview';
+  const { sectionId, param } = parseHash();
   for (const link of navLinks) link.classList.toggle('active', link.dataset.section === sectionId);
   if (currentController && currentController.unmount) currentController.unmount();
   currentSection = sectionId;
   main.innerHTML = '';
   const controller = SECTIONS[sectionId];
   currentController = controller;
-  await controller.mount(main, { toast, el, emptyState });
+  await controller.mount(main, { toast, el, emptyState, param });
 }
 
 window.addEventListener('hashchange', route);
 
 initTheme();
+initNavCollapse();
 route();
 pollFastState();
 setInterval(pollFastState, 3000);

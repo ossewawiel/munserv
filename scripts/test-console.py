@@ -10,6 +10,7 @@ Usage: python3 scripts/test-console.py
 """
 from __future__ import annotations
 
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -21,6 +22,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from console import eyeball, gitops, knowledge, services  # noqa: E402
 from console.config import Config  # noqa: E402
+from console.pipeline import classify_pr  # noqa: E402
 from console.server import Handler  # noqa: E402
 
 
@@ -393,6 +395,82 @@ class KnowledgeTests(unittest.TestCase):
             self.assertEqual(k.color_tokens(), {})
         finally:
             k.CONFIG = original_cfg
+
+
+class ClassifyPrTests(unittest.TestCase):
+    """MunServ's reviewer/design-reviewer agents post their verdict with `gh pr review --comment`
+    -- a PR *review*, not a plain issue comment, and never a real GitHub approval -- so
+    `reviewDecision` must never be consulted. Fixtures below mirror the real shape found on PR
+    #100: the verdict line is bold markdown and can carry a trailing parenthetical."""
+
+    def test_no_labels_no_comments_is_in_progress(self):
+        self.assertEqual(classify_pr(set(), []), "in_progress")
+
+    def test_eyeball_pass_label_wins_outright(self):
+        self.assertEqual(classify_pr({"eyeball:pass", "status:review"}, []), "ready_to_merge")
+
+    def test_status_review_label_alone_is_in_review(self):
+        self.assertEqual(classify_pr({"status:review"}, []), "in_review")
+
+    def test_latest_approve_review_is_awaiting_eyeball(self):
+        comments = [{"body": "Looks close.\n\n**REQUEST CHANGES**"}, {"body": "Fixed.\n\n**APPROVE**"}]
+        self.assertEqual(classify_pr(set(), comments), "awaiting_eyeball")
+
+    def test_only_the_latest_verdict_counts(self):
+        comments = [{"body": "**APPROVE**"}, {"body": "**REQUEST CHANGES**"}]
+        self.assertEqual(classify_pr(set(), comments), "in_review")
+
+    def test_approve_with_eyeball_fail_label_is_not_awaiting_eyeball(self):
+        comments = [{"body": "**APPROVE**"}]
+        self.assertEqual(classify_pr({"eyeball:fail"}, comments), "in_progress")
+
+    def test_approve_but_design_review_requests_changes_is_not_awaiting_eyeball(self):
+        comments = [{"body": "**APPROVE**"}, {"body": "Design review: spacing is off.\n\n**REQUEST CHANGES**"}]
+        self.assertEqual(classify_pr(set(), comments), "in_review")
+
+    def test_approve_with_design_review_approve_is_awaiting_eyeball(self):
+        comments = [{"body": "Design review: matches the canvas.\n\n**APPROVE**"}, {"body": "**APPROVE**"}]
+        self.assertEqual(classify_pr(set(), comments), "awaiting_eyeball")
+
+    def test_request_changes_alone_is_in_review(self):
+        comments = [{"body": "Needs another pass.\n\n**REQUEST CHANGES**"}]
+        self.assertEqual(classify_pr(set(), comments), "in_review")
+
+    def test_unrelated_comments_do_not_count_as_a_verdict(self):
+        comments = [{"body": "This looks great, nice work!"}]
+        self.assertEqual(classify_pr(set(), comments), "in_progress")
+
+    def test_request_changes_with_a_trailing_parenthetical_note_still_counts(self):
+        # The real shape from PR #100's first review: the verdict line names the blockers too.
+        comments = [{"body": "## Reviewer verdict\n\nSome findings.\n\n**REQUEST CHANGES** (B1 rebase, B2 wording)."}]
+        self.assertEqual(classify_pr(set(), comments), "in_review")
+
+    def test_approve_bold_markdown_alone_on_its_own_line_is_awaiting_eyeball(self):
+        # The real shape from PR #100's second (re-verify) review.
+        comments = [{"body": "## Reviewer verdict (re-verify)\n\nEverything checks out.\n\n**APPROVE**\n"}]
+        self.assertEqual(classify_pr(set(), comments), "awaiting_eyeball")
+
+    def test_re_review_after_request_changes_supersedes_it(self):
+        comments = [
+            {"body": "## Reviewer verdict\n\n**REQUEST CHANGES** (B1 rebase, B2 wording)."},
+            {"body": "## Reviewer verdict (re-verify)\n\n**APPROVE**"},
+        ]
+        self.assertEqual(classify_pr(set(), comments), "awaiting_eyeball")
+
+
+class ChecklistModelTests(unittest.TestCase):
+    """The JS checklist view-model builder is pure and DOM-independent (see
+    scripts/console/ui/sections/eyeball.model.mjs); run it under Node so its own tests execute
+    alongside the Python suite."""
+
+    def test_node_model_tests_pass(self):
+        node = shutil.which("node")
+        if not node:
+            self.skipTest("node not on PATH")
+        result = subprocess.run(
+            [node, "--test", str(ROOT / "scripts/console/ui/sections/eyeball.model.test.mjs")],
+            capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

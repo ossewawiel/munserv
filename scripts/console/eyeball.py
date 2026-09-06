@@ -16,7 +16,9 @@ from pathlib import Path
 import yaml
 
 from .config import CONFIG
+from .github import pr_verdict_sources
 from .gitops import ApiError, CommandError, gh, repo, run_captured, ROOT
+from .pipeline import classify_pr
 
 PASS_LABEL = ("eyeball:pass", "0e8a16", "Eyeball: every check passed")
 FAIL_LABEL = ("eyeball:fail", "d73a4a", "Eyeball: at least one check failed")
@@ -117,17 +119,19 @@ def build_candidates(force: bool) -> list[dict]:
                     checks = []
                     parse_error = str(e)
             eyeball_label = next((l for l in labels if l.startswith("eyeball:")), None)
+            stage = classify_pr(set(labels), pr_verdict_sources(pr["number"], repo()))
             candidates.append({
                 "id": f"pr-{pr['number']}", "kind": "pr", "number": pr["number"], "title": pr["title"],
                 "branch": branch, "url": pr["url"], "story": story, "platform": platform,
                 "review_decision": pr.get("reviewDecision") or "", "eyeball_label": eyeball_label,
+                "stage": stage,
                 "handoff_path": handoff_path, "checks": checks, "parse_error": parse_error,
             })
         smoke_checks = CONFIG.smoke_config
         candidates.append({
             "id": "smoke", "kind": "smoke", "number": None, "title": "Smoke checklist",
             "branch": "master", "url": "", "story": "SMOKE", "platform": "web",
-            "review_decision": "", "eyeball_label": None,
+            "review_decision": "", "eyeball_label": None, "stage": None,
             "handoff_path": "scripts/console/smoke.yaml", "checks": smoke_checks, "parse_error": None,
         })
         _cache["candidates"] = candidates

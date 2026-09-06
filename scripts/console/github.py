@@ -11,6 +11,7 @@ import threading
 import time
 
 from .gitops import CommandError, gh, repo
+from .pipeline import classify_pr
 
 REFRESH_INTERVAL_SECONDS = 60
 
@@ -28,18 +29,20 @@ def gh_json(*args: str):
     return json.loads(gh(*args))
 
 
-def _pipeline_column(pr: dict) -> str:
-    labels = {l["name"] for l in pr.get("labels", [])}
-    eyeball = next((l for l in labels if l.startswith("eyeball:")), None)
-    if eyeball == "eyeball:pass":
-        return "ready_to_merge"
-    if eyeball == "eyeball:fail":
-        return "in_review"
-    if pr.get("reviewDecision") == "APPROVED":
-        return "awaiting_eyeball"
-    if "status:review" in labels or pr.get("reviewDecision") in ("CHANGES_REQUESTED", "REVIEW_REQUIRED"):
-        return "in_review"
-    return "in_progress"
+def pr_verdict_sources(number: int, slug: str) -> list[dict]:
+    """Every place a verdict could be posted, oldest first: `reviewer` and `design-reviewer` post
+    their APPROVE / REQUEST CHANGES verdict with `gh pr review --comment` (never `--approve` --
+    merging stays the user's call), which is a PR *review* (`reviews`, state COMMENTED), not a
+    plain issue comment (`comments`) -- so `reviewDecision` never reflects it and both lists must
+    be checked, merged in the order they were actually posted."""
+    try:
+        data = gh_json("pr", "view", str(number), "--repo", slug, "--json", "comments,reviews")
+    except CommandError:
+        return []
+    events = [(c.get("createdAt", ""), c) for c in (data.get("comments") or [])]
+    events += [(r.get("submittedAt", ""), r) for r in (data.get("reviews") or [])]
+    events.sort(key=lambda e: e[0])
+    return [body for _, body in events]
 
 
 def _fetch() -> dict:
@@ -61,10 +64,12 @@ def _fetch() -> dict:
     pipeline = {"in_progress": [], "in_review": [], "awaiting_eyeball": [], "ready_to_merge": []}
     try:
         prs = gh_json("pr", "list", "--repo", slug, "--state", "open", "--json",
-                      "number,title,url,labels,reviewDecision,headRefName")
+                      "number,title,url,labels,headRefName")
         for pr in prs:
-            column = _pipeline_column(pr)
-            pipeline[column].append({
+            labels = {l["name"] for l in pr.get("labels", [])}
+            comments = pr_verdict_sources(pr["number"], slug)
+            stage = classify_pr(labels, comments)
+            pipeline[stage].append({
                 "number": pr["number"], "title": pr["title"], "url": pr["url"], "branch": pr["headRefName"],
             })
     except CommandError:
