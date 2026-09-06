@@ -16,7 +16,7 @@ export interface Column<T> {
   width?: string | number;
   align?: 'left' | 'center' | 'right';
   /** Whether this column's header renders a sort label */
-  sortable?: boolean;
+  readonly sortable?: boolean;
 }
 
 /** Current sort state of a table: which column key and in which direction */

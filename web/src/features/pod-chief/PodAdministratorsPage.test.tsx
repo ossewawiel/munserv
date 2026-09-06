@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { I18nextProvider } from 'react-i18next';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
@@ -101,7 +101,6 @@ i18n.init({
           filtersTitle: 'Filters',
           clearFilters: 'Clear filters',
           closeFilters: 'Close filters',
-          sortBy: 'Sort by',
         },
         pagination: {
           page: 'Page',
@@ -168,13 +167,16 @@ describe('PodAdministratorsPage', () => {
   it('should show a disabled search field', () => {
     renderPage();
 
-    expect(screen.getByPlaceholderText('Search')).toBeDisabled();
+    expect(screen.getByRole('textbox', { name: 'Search' })).toBeDisabled();
   });
 
-  it('should show a disabled filter button', () => {
+  it('should show a filter button whose panel has nothing to clear', () => {
     renderPage();
 
-    expect(screen.getByRole('button', { name: 'Filters' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+
+    expect(screen.getByText('Filtering is not switched on yet.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Clear filters' })).toBeDisabled();
   });
 
   it('should show sortable headers that do nothing', () => {

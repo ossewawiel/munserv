@@ -29,7 +29,6 @@ i18n.init({
           filtersTitle: 'Filters',
           clearFilters: 'Clear filters',
           closeFilters: 'Close filters',
-          sortBy: 'Sort by',
         },
       },
     },
@@ -826,7 +825,7 @@ describe('DataTableCard', () => {
         />
       );
 
-      expect(screen.getByPlaceholderText('Search')).toBeDisabled();
+      expect(screen.getByRole('textbox', { name: 'Search' })).toBeDisabled();
     });
 
     it('should call the search handler as the user types', () => {
@@ -845,14 +844,14 @@ describe('DataTableCard', () => {
         />
       );
 
-      fireEvent.change(screen.getByPlaceholderText('Search'), { target: { value: 'a' } });
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'a' } });
 
       expect(onChange).toHaveBeenCalledWith('a');
     });
   });
 
   describe('filter panel', () => {
-    it('should render a disabled filter button when no handler is given', () => {
+    it('should keep the filter button enabled when no clear handler is given', () => {
       renderWithProviders(
         <DataTableCard
           columns={mockColumns}

@@ -46,6 +46,8 @@ files_changed:
   - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-filter-panel-default--dark.png
   - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-filter-panel-applied--light.png
   - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-filter-panel-applied--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-active-filters--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-active-filters--dark.png
 tests_added:
   - "web/src/components/organisms/DataTable.test.tsx: should render a sort label only for sortable columns"
   - "web/src/components/organisms/DataTable.test.tsx: should disable the sort label when no sort handler is given"
@@ -53,14 +55,14 @@ tests_added:
   - "web/src/components/organisms/DataTable.test.tsx: should not reorder the rows it is given"
   - "web/src/components/organisms/DataTableCard.test.tsx: should render a disabled search field when no handler is given"
   - "web/src/components/organisms/DataTableCard.test.tsx: should call the search handler as the user types"
-  - "web/src/components/organisms/DataTableCard.test.tsx: should render a disabled filter button when no handler is given"
+  - "web/src/components/organisms/DataTableCard.test.tsx: should keep the filter button enabled when no clear handler is given"
   - "web/src/components/organisms/DataTableCard.test.tsx: should open the filter drawer and show its content"
   - "web/src/components/organisms/DataTableCard.test.tsx: should close the filter drawer"
   - "web/src/components/organisms/DataTableCard.test.tsx: should badge the filter button with the active filter count"
   - "web/src/components/organisms/DataTableCard.test.tsx: should disable the clear button when no clear handler is given"
   - "web/src/components/organisms/DataTableCard.test.tsx: should call onClear when the clear button is enabled and clicked"
   - "web/src/features/pod-chief/PodAdministratorsPage.test.tsx: should show a disabled search field"
-  - "web/src/features/pod-chief/PodAdministratorsPage.test.tsx: should show a disabled filter button"
+  - "web/src/features/pod-chief/PodAdministratorsPage.test.tsx: should show a filter button whose panel has nothing to clear"
   - "web/src/features/pod-chief/PodAdministratorsPage.test.tsx: should show sortable headers that do nothing"
 ---
 
@@ -136,7 +138,7 @@ None. This is a presentational component; it calls no API and adds no type to `s
    `filterPanel.onClear`. Hold the drawer's open state in `useState`; it is UI state, not server
    state. Test: `DataTableCard.test.tsx` — `should render a disabled search field when no handler is given`,
    `should call the search handler as the user types`,
-   `should render a disabled filter button when no handler is given`,
+   `should keep the filter button enabled when no clear handler is given`,
    `should open the filter drawer and show its content`,
    `should close the filter drawer`, `should badge the filter button with the active filter count`,
    and every existing case stays green.
@@ -145,13 +147,15 @@ None. This is a presentational component; it calls no API and adds no type to `s
    `search={{ value: '' }}` and `filterPanel={{ content: <Typography>{t('podAdministrators.filters.comingSoon')}</Typography> }}`
    with no handlers, so all three controls render inert. Test:
    `web/src/features/pod-chief/PodAdministratorsPage.test.tsx` (new) —
-   `should show a disabled search field`, `should show a disabled filter button`,
+   `should show a disabled search field`, `should show a filter button whose panel has nothing to clear`,
    `should show sortable headers that do nothing`.
 4. `web/src/locales/{en,af,zu}/translation.json`: add a `dataTable` block (`searchPlaceholder`,
-   `filters`, `filtersTitle`, `clearFilters`, `closeFilters`, `sortBy`) and
+   `filters`, `filtersTitle`, `clearFilters`, `closeFilters`) and
    `podAdministrators.filters.comingSoon`. Real Afrikaans and isiZulu translations.
-5. `web/src/components/organisms/DataTableCard.stories.tsx`: add `WithSortableColumns`,
-   `WithDisabledSearchAndFilter` and `WithOpenFilterDrawer` stories, and update the `DataTableCard`
+5. `web/src/components/organisms/DataTableCard.stories.tsx`: add `WithSortAscending`,
+   `WithSortDescending`, `WithDisabledSearchAndFilter`, `WithSearchActive`, `WithFilterPanelDefault`,
+   `WithFilterPanelApplied` and `WithActiveFilters` stories — one per approved artboard, plus a
+   toolbar-only story for the Filters button's active-count badge — and update the `DataTableCard`
    row in `design/registry/web.md` to mention `sort`, `onSortChange`, `search` and `filterPanel`.
 
 ## Do not
@@ -188,7 +192,9 @@ summary of changes. If you cannot finish, set `status: blocked` and end your mes
   steps:
     - Log in as the pod chief and open Pod Administrators.
     - Click the "Name", "Email", "Role", "Assigned To" or "Created" column header.
-  expect: Each header shows a sort arrow but clicking it does nothing; the row order and data never change.
+  expect: Each header shows a sort arrow but clicking it does nothing; the row order and data never
+    change. The Actions column still renders its Edit/Delete controls on every row, unaffected by
+    sorting, and the "Add Administrator" button in the toolbar's right box still opens the add form.
 - id: E2
   title: Search field and Filters button render but do nothing on the live page
   as: pod_chief
