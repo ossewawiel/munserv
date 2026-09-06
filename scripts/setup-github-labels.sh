@@ -88,6 +88,13 @@ create_label "source:agent-requested" "1D76DB" "Created by Claude agent"
 create_label "source:user-requested" "BFD4F2" "Created by human user"
 create_label "source:spec-derived" "D4C5F9" "Derived from spec documents"
 create_label "source:automated" "EDEDED" "Created by automated workflow"
+create_label "source:eyeball" "FBCA04" "Filed from a manual eyeball session"
+
+# ============================================
+# EYEBALL LABELS
+# ============================================
+create_label "eyeball:pass" "0E8A16" "Eyeball: every check passed"
+create_label "eyeball:fail" "D73A4A" "Eyeball: at least one check failed"
 
 echo ""
 echo "Label setup complete!"
