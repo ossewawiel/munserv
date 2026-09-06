@@ -396,6 +396,9 @@ export function DataTableCard<T, TTabValue extends string = string>({
                     input: {
                       startAdornment: <SearchIcon fontSize="small" />,
                     },
+                    htmlInput: {
+                      'aria-label': search.placeholder ?? t('dataTable.searchPlaceholder'),
+                    },
                   }}
                 />
               )}

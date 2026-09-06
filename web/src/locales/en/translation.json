@@ -220,8 +220,7 @@
     "filters": "Filters",
     "filtersTitle": "Filters",
     "clearFilters": "Clear filters",
-    "closeFilters": "Close filters",
-    "sortBy": "Sort by"
+    "closeFilters": "Close filters"
   },
   "errors": {
     "notFound": "Not Found",

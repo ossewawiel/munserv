@@ -135,30 +135,42 @@ export const WithTabsAndBadges: Story = {
 const ascendingSort: SortState = { key: 'name', direction: 'asc' };
 const descendingSort: SortState = { key: 'name', direction: 'desc' };
 
-/** A sortable column header, ascending. */
+/** A sortable column header, ascending, with the full toolbar the artboard shows. */
 export const WithSortAscending: Story = {
   args: {
     ...Basic.args,
     columns: sortableColumns,
     sort: ascendingSort,
     onSortChange: () => {},
+    search: { value: '', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Filtering is not switched on yet.</Typography>,
+    },
   },
 };
 
-/** The same sortable column header, descending. */
+/** The same sortable column header, descending, with the full toolbar the artboard shows. */
 export const WithSortDescending: Story = {
   args: {
     ...Basic.args,
     columns: sortableColumns,
     sort: descendingSort,
     onSortChange: () => {},
+    search: { value: '', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Filtering is not switched on yet.</Typography>,
+    },
   },
 };
 
-/** Search and filter controls render but are inert until a caller passes a handler. */
+/**
+ * Sortable-but-inert columns, an inert search field and an enabled Filters button, matching the
+ * `TableToolbarInert` artboard composition (the same one `PodAdministratorsPage` ships).
+ */
 export const WithDisabledSearchAndFilter: Story = {
   args: {
     ...Basic.args,
+    columns: sortableColumns,
     search: { value: '', placeholder: 'Search members' },
     filterPanel: {
       content: <Typography>Filtering is not switched on yet.</Typography>,
@@ -166,11 +178,27 @@ export const WithDisabledSearchAndFilter: Story = {
   },
 };
 
-/** The search field, enabled and holding a query. */
+/** The search field, enabled and holding a query, with the Filters button beside it. */
 export const WithSearchActive: Story = {
   args: {
     ...Basic.args,
     search: { value: 'khumalo', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Filtering is not switched on yet.</Typography>,
+    },
+  },
+};
+
+/** The Filters button's active-count badge, on the closed toolbar where the drawer cannot occlude it. */
+export const WithActiveFilters: Story = {
+  args: {
+    ...Basic.args,
+    search: { value: '', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Role and status filters go here.</Typography>,
+      activeCount: 2,
+      onClear: () => {},
+    },
   },
 };
 

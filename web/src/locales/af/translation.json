@@ -191,8 +191,7 @@
     "filters": "Filters",
     "filtersTitle": "Filters",
     "clearFilters": "Maak filters skoon",
-    "closeFilters": "Maak filters toe",
-    "sortBy": "Sorteer volgens"
+    "closeFilters": "Maak filters toe"
   },
   "errors": {
     "notFound": "Nie Gevind",

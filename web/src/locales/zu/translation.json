@@ -191,8 +191,7 @@
     "filters": "Izihlungi",
     "filtersTitle": "Izihlungi",
     "clearFilters": "Sula izihlungi",
-    "closeFilters": "Vala izihlungi",
-    "sortBy": "Hlunga nge"
+    "closeFilters": "Vala izihlungi"
   },
   "errors": {
     "notFound": "Ayitholakali",
