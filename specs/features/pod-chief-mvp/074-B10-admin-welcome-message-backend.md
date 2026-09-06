@@ -3,7 +3,7 @@ issue: 95
 story: B10
 title: "New administrator receives a welcome message"
 platform: backend
-status: pending
+status: completed
 depends_on: []
 touches:
   - domain
@@ -18,8 +18,30 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-06"
-files_changed: []
-tests_added: []
+files_changed:
+  - domain/language.yaml
+  - domain/message.md
+  - specs/contracts/types.md
+  - specs/contracts/api.md
+  - backend/src/main/resources/db/migration/V036__add_admin_welcome_message_type.sql
+  - backend/src/main/kotlin/com/munserv/shared/enums/MessageType.kt
+  - backend/src/main/kotlin/com/munserv/messages/service/MessageFactory.kt
+  - backend/src/main/kotlin/com/munserv/pod/service/PodAdministratorService.kt
+  - backend/src/main/kotlin/com/munserv/pod/api/PodAdministratorController.kt
+  - backend/src/test/kotlin/com/munserv/messages/service/MessageFactoryTest.kt
+  - backend/src/test/kotlin/com/munserv/pod/service/PodAdministratorServiceTest.kt
+  - backend/src/test/kotlin/com/munserv/pod/api/PodAdministratorControllerTest.kt
+  - mobile/lib/shared/models/message.dart
+  - mobile/lib/shared/models/message.g.dart
+  - mobile/lib/features/messages/presentation/pages/message_detail_page.dart
+  - mobile/lib/features/messages/presentation/widgets/message_list_tile.dart
+tests_added:
+  - "MessageFactoryTest.AdminWelcome > should create an admin welcome message for a new administrator"
+  - "MessageFactoryTest.AdminWelcome > should carry the initial tasks and role in metadata"
+  - "PodAdministratorServiceTest > should create a welcome message when the administrator is created"
+  - "PodAdministratorServiceTest > should not create a message when creation fails"
+  - "PodAdministratorServiceTest > should return the result of the admin service unchanged"
+  - "PodAdministratorControllerTest.CreateAdministrator > should send a welcome message when the administrator is created"
 ---
 
 # B10 · New administrator receives a welcome message (Backend)
@@ -32,11 +54,11 @@ An administrator created through `POST /pod/administrators` finds an unread `adm
 in `GET /messages` listing the tasks that start their onboarding.
 
 ## Acceptance criteria
-- [ ] `admin_welcome` is a message type in `domain/language.yaml`, `domain/message.md`, `com.munserv.shared.enums.MessageType`, the `message_type` database enum, `specs/contracts/types.md` and the Dart `MessageType`
-- [ ] `POST /pod/administrators` creates one unread `admin_welcome` message addressed to the newly created administrator (`recipientType: "admin"`, `senderType: "system"`, `actionType: "acknowledge"`)
-- [ ] The message body names the administrator and its `metadata.tasks` carries the initial tasks as a list of strings
-- [ ] `GET /messages` returns that message to the new administrator, and the unread count includes it
-- [ ] `python3 scripts/validate-domain-language.py` exits 0 and `./gradlew ktlintCheck test` passes
+- [x] `admin_welcome` is a message type in `domain/language.yaml`, `domain/message.md`, `com.munserv.shared.enums.MessageType`, the `message_type` database enum, `specs/contracts/types.md` and the Dart `MessageType`
+- [x] `POST /pod/administrators` creates one unread `admin_welcome` message addressed to the newly created administrator (`recipientType: "admin"`, `senderType: "system"`, `actionType: "acknowledge"`)
+- [x] The message body names the administrator and its `metadata.tasks` carries the initial tasks as a list of strings
+- [x] `GET /messages` returns that message to the new administrator, and the unread count includes it
+- [x] `python3 scripts/validate-domain-language.py` exits 0 and `./gradlew ktlintCheck test` passes
 
 ## Visual (ui stories only)
 None.

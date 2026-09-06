@@ -26,7 +26,9 @@ enum MessageType {
   @JsonValue('member_registration')
   memberRegistration,
   @JsonValue('monthly_report')
-  monthlyReport;
+  monthlyReport,
+  @JsonValue('admin_welcome')
+  adminWelcome;
 
   String get displayName => switch (this) {
     groundAdminInvitation => 'Ground Admin Invitation',
@@ -40,6 +42,7 @@ enum MessageType {
     verifyFix => 'Verify Fix',
     memberRegistration => 'Member Registration',
     monthlyReport => 'Monthly Report',
+    adminWelcome => 'Welcome',
   };
 }
 

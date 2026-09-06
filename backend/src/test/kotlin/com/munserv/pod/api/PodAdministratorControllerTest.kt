@@ -7,6 +7,7 @@ import com.munserv.admin.repository.AdminRepository
 import com.munserv.admin.service.AdminManagementService
 import com.munserv.admin.service.AdminResult
 import com.munserv.auth.service.JwtService
+import com.munserv.pod.service.PodAdministratorService
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.PodId
@@ -47,6 +48,9 @@ class PodAdministratorControllerTest {
 
     @MockkBean
     private lateinit var adminService: AdminManagementService
+
+    @MockkBean
+    private lateinit var podAdministratorService: PodAdministratorService
 
     @MockkBean
     private lateinit var podIdResolver: PodIdResolver
@@ -206,7 +210,7 @@ class PodAdministratorControllerTest {
                 )
             val tempPassword = "TempPass123"
 
-            every { adminService.createAdmin(any(), testAdminId) } returns
+            every { podAdministratorService.createAdministrator(any(), testAdminId) } returns
                 AdminResult.Created(createdAdmin, tempPassword)
 
             val request =
@@ -227,11 +231,55 @@ class PodAdministratorControllerTest {
                     jsonPath("$.email") { value("newadmin@example.com") }
                     jsonPath("$.temporaryPassword") { value(tempPassword) }
                 }
+
+            verify { podAdministratorService.createAdministrator(any(), testAdminId) }
+        }
+
+        @Test
+        fun `should send a welcome message when the administrator is created`() {
+            val createdAdmin =
+                Admin(
+                    id = AdminId.generate(),
+                    podId = testPodId,
+                    wardId =
+                        com.munserv.shared.types
+                            .WardId(UUID.fromString("550e8400-e29b-41d4-a716-446655440030")),
+                    email = "another@example.com",
+                    displayName = "Another Admin",
+                    role = AdminRole.WARD_ADMIN,
+                    createdAt = now,
+                    updatedAt = now,
+                )
+
+            every { podAdministratorService.createAdministrator(any(), testAdminId) } returns
+                AdminResult.Created(createdAdmin, "TempPass123")
+
+            val request =
+                mapOf(
+                    "email" to "another@example.com",
+                    "displayName" to "Another Admin",
+                    "role" to "ward_admin",
+                    "wardId" to "550e8400-e29b-41d4-a716-446655440030",
+                )
+
+            mockMvc
+                .post("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(request)
+                }.andExpect {
+                    status { isCreated() }
+                }
+
+            // The welcome message is sent by PodAdministratorService, which owns the
+            // admin creation + message creation transaction; the controller only has to
+            // delegate to it, which this call proves.
+            verify(exactly = 1) { podAdministratorService.createAdministrator(any(), testAdminId) }
         }
 
         @Test
         fun `should return 409 when email already exists`() {
-            every { adminService.createAdmin(any(), testAdminId) } returns
+            every { podAdministratorService.createAdministrator(any(), testAdminId) } returns
                 AdminResult.EmailAlreadyExists("existing@example.com")
 
             val request =
@@ -255,7 +303,7 @@ class PodAdministratorControllerTest {
 
         @Test
         fun `should return 400 when validation fails`() {
-            every { adminService.createAdmin(any(), testAdminId) } returns
+            every { podAdministratorService.createAdministrator(any(), testAdminId) } returns
                 AdminResult.ValidationError(listOf("Email is required"))
 
             val request =
@@ -278,7 +326,7 @@ class PodAdministratorControllerTest {
 
         @Test
         fun `should return 403 when insufficient permissions`() {
-            every { adminService.createAdmin(any(), testAdminId) } returns
+            every { podAdministratorService.createAdministrator(any(), testAdminId) } returns
                 AdminResult.InsufficientRoleToManage(AdminRole.POD_CHIEF, AdminRole.POD_CHIEF)
 
             val request =

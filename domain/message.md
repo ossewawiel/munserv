@@ -17,11 +17,12 @@ The system has to ask people to do things and record whether they did. Messages 
 ## Values
 Status: `unread` → `read` → `actioned` or `dismissed`.
 
-Types: `ground_admin_invitation`, `ground_admin_application`, `ground_admin_approved`, `ground_admin_declined`, `ground_admin_invitation_declined`, `ground_admin_invitation_accepted`, `ground_admin_revocation`, `ground_admin_stepdown_request`, `verify_new_issue`, `verify_fix`, `member_registration`, `monthly_report`.
+Types: `ground_admin_invitation`, `ground_admin_application`, `ground_admin_approved`, `ground_admin_declined`, `ground_admin_invitation_declined`, `ground_admin_invitation_accepted`, `ground_admin_revocation`, `ground_admin_stepdown_request`, `verify_new_issue`, `verify_fix`, `member_registration`, `monthly_report`, `admin_welcome`.
 
 ## Invariants
 - Actionable types carry an action payload; acting on a message performs the domain operation (for example accepting a ground admin invitation) and marks it `actioned`.
 - A message is addressed to one recipient: a member or an admin.
+- `admin_welcome` is created when an administrator account is created and carries its initial tasks in `metadata.tasks`.
 
 ## Relationships
 - Produced by [ground admin](ground-admin.md) and [verification](verification.md) flows and by member registration.

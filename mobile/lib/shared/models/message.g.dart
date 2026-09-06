@@ -66,6 +66,7 @@ const _$MessageTypeEnumMap = {
   MessageType.verifyFix: 'verify_fix',
   MessageType.memberRegistration: 'member_registration',
   MessageType.monthlyReport: 'monthly_report',
+  MessageType.adminWelcome: 'admin_welcome',
 };
 
 const _$MessageStatusEnumMap = {
