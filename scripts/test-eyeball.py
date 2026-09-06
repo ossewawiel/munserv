@@ -166,7 +166,7 @@ class StartServiceGuardTests(unittest.TestCase):
                 msg = eyeball.start_service("ok", checkout)
                 self.assertIn("starting", msg)
                 eyeball._processes["ok"].wait(timeout=5)
-                eyeball.stop_service("ok")
+                eyeball.stop_service("ok", checkout)
         finally:
             eyeball.services_config = original
 
@@ -239,6 +239,68 @@ class DetachedWorktreeTests(unittest.TestCase):
             (checkout / ".eyeball").mkdir(parents=True)
             (checkout / "something-else.txt").write_text("x", encoding="utf-8")
             self.assertIsNone(eyeball._preserve_eyeball_state(checkout))
+
+
+class _FakeServer:
+    def __init__(self, port):
+        self.server_address = ("localhost", port)
+
+
+class _FakeHandler:
+    """A stand-in for eyeball.Handler carrying just enough (.headers, .server) for the origin and
+    Content-Type guards, which are plain methods and do not need a real HTTP connection."""
+
+    _allowed_origins = eyeball.Handler._allowed_origins
+    _reject_cross_origin = eyeball.Handler._reject_cross_origin
+    _require_json_content_type = eyeball.Handler._require_json_content_type
+
+    def __init__(self, headers, port=3999):
+        self.headers = headers
+        self.server = _FakeServer(port)
+
+
+class RequestSafetyTests(unittest.TestCase):
+    """The API must reject a cross-origin POST/GET (item 2: no Origin/Content-Type check meant any
+    page open in the tester's browser could trigger real side effects using the tester's `gh`
+    session) while never blocking the dashboard's own same-origin requests."""
+
+    def test_rejects_a_foreign_origin(self):
+        handler = _FakeHandler({"Origin": "https://evil.example"})
+        with self.assertRaises(eyeball.ApiError) as ctx:
+            handler._reject_cross_origin()
+        self.assertEqual(ctx.exception.status, 403)
+
+    def test_allows_no_origin_header(self):
+        handler = _FakeHandler({})
+        handler._reject_cross_origin()  # must not raise
+
+    def test_allows_localhost_on_the_serving_port(self):
+        handler = _FakeHandler({"Origin": "http://localhost:3999"}, port=3999)
+        handler._reject_cross_origin()  # must not raise
+
+    def test_allows_127_0_0_1_on_the_serving_port(self):
+        handler = _FakeHandler({"Origin": "http://127.0.0.1:3999"}, port=3999)
+        handler._reject_cross_origin()  # must not raise
+
+    def test_rejects_localhost_on_a_different_port(self):
+        handler = _FakeHandler({"Origin": "http://localhost:4000"}, port=3999)
+        with self.assertRaises(eyeball.ApiError):
+            handler._reject_cross_origin()
+
+    def test_rejects_a_non_json_content_type(self):
+        handler = _FakeHandler({"Content-Type": "text/plain"})
+        with self.assertRaises(eyeball.ApiError) as ctx:
+            handler._require_json_content_type()
+        self.assertEqual(ctx.exception.status, 403)
+
+    def test_rejects_a_missing_content_type(self):
+        handler = _FakeHandler({})
+        with self.assertRaises(eyeball.ApiError):
+            handler._require_json_content_type()
+
+    def test_allows_json_content_type_with_charset_suffix(self):
+        handler = _FakeHandler({"Content-Type": "application/json; charset=utf-8"})
+        handler._require_json_content_type()  # must not raise
 
 
 if __name__ == "__main__":

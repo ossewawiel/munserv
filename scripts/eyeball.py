@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import signal
@@ -402,17 +403,25 @@ def start_service(name: str, checkout: Path) -> str:
     return f"{name} starting (pid {proc.pid})"
 
 
-def stop_service(name: str) -> str:
+def stop_service(name: str, checkout: Path) -> str:
     proc = _processes.get(name)
-    if not proc or proc.poll() is not None:
-        return f"{name} not running"
-    try:
-        import os
-        os.killpg(proc.pid, signal.SIGTERM)
-    except ProcessLookupError:
-        pass
-    _processes.pop(name, None)
-    return f"{name} stopped"
+    if proc and proc.poll() is None:
+        try:
+            os.killpg(proc.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        _processes.pop(name, None)
+        return f"{name} stopped"
+    # No tracked process, or it already exited on its own (`docker compose up -d` does, since the
+    # containers it starts outlive it): fall back to the service's own `stop` command, if any.
+    cfg = services_config().get(name) or {}
+    stop_cmd = cfg.get("stop")
+    if stop_cmd:
+        cwd = checkout / cfg["cwd"]
+        if cwd.is_dir():
+            subprocess.run(stop_cmd, shell=True, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return f"{name} stopped"
+    return f"{name} not running"
 
 
 def tail_log(checkout: Path, name: str, n: int = 40) -> str:
@@ -616,8 +625,28 @@ class Handler(BaseHTTPRequestHandler):
             return {}
         return json.loads(self.rfile.read(length) or b"{}")
 
+    def _allowed_origins(self) -> set[str]:
+        port = self.server.server_address[1]
+        return {f"http://localhost:{port}", f"http://127.0.0.1:{port}"}
+
+    def _reject_cross_origin(self) -> None:
+        """A `text/plain` (or missing-Content-Type) POST is a CORS *simple* request -- no
+        preflight -- so without this, any page open in the tester's browser while the dashboard
+        runs could POST to it and trigger real side effects (filing issues, swapping labels,
+        starting services) using the tester's own session. Reject any request that carries an
+        Origin header naming something other than this server itself."""
+        origin = self.headers.get("Origin")
+        if origin and origin not in self._allowed_origins():
+            raise ApiError("cross-origin request rejected", 403)
+
+    def _require_json_content_type(self) -> None:
+        content_type = (self.headers.get("Content-Type") or "").split(";", 1)[0].strip()
+        if content_type != "application/json":
+            raise ApiError("Content-Type must be application/json", 403)
+
     def do_GET(self):
         try:
+            self._reject_cross_origin()
             if self.path == "/" or self.path == "/index.html":
                 html = (EYEBALL_DIR / "dashboard.html").read_bytes()
                 self.send_response(200)
@@ -639,6 +668,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         try:
+            self._reject_cross_origin()
+            self._require_json_content_type()
             if self.path == "/api/refresh":
                 build_candidates(force=True)
                 return self._api_state()
@@ -655,7 +686,7 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == "/api/service/stop":
                 body = self._read_json()
                 name = validate_name(body.get("name", ""), "service name")
-                msg = stop_service(name)
+                msg = stop_service(name, self.checkout)
                 return self._json({"ok": True, "message": msg})
             if self.path == "/api/service/start-required":
                 body = self._read_json()
@@ -741,7 +772,7 @@ def main() -> int:
         pass
     finally:
         for name in list(_processes):
-            stop_service(name)
+            stop_service(name, Handler.checkout)
     return 0
 
 

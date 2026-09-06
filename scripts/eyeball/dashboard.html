@@ -9,7 +9,7 @@
     --muted: #5b6470; --accent: #2f6fed; --accent-text: #ffffff;
     --pass: #0e8a16; --pass-tint-bg: #e4f6e5; --pass-tint-border: #7fcf86;
     --fail: #d73a4a; --fail-tint-bg: #fce8e9; --fail-tint-border: #ec9aa2;
-    --warn: #b98900; --code-bg: #eef0f3; --control-bg: #ffffff; --control-text: #1b1f24;
+    --warn: #b98900; --warn-text: #1b1f24; --code-bg: #eef0f3; --control-bg: #ffffff; --control-text: #1b1f24;
     --shadow: 0 1px 2px rgba(0,0,0,.06);
     --radius: 8px; --radius-lg: 12px;
   }
@@ -19,7 +19,7 @@
       --muted: #9aa2ad; --accent: #6ea1ff; --accent-text: #0b1220;
       --pass: #4fd35c; --pass-tint-bg: #163a1c; --pass-tint-border: #2f7a3b;
       --fail: #ff6b7a; --fail-tint-bg: #402026; --fail-tint-border: #8a3944;
-      --warn: #e0b23d; --code-bg: #262a31; --control-bg: #262a31; --control-text: #e7e9ec;
+      --warn: #e0b23d; --warn-text: #1b1f24; --code-bg: #262a31; --control-bg: #262a31; --control-text: #e7e9ec;
       --shadow: 0 1px 2px rgba(0,0,0,.4);
     }
   }
@@ -28,7 +28,7 @@
     --muted: #9aa2ad; --accent: #6ea1ff; --accent-text: #0b1220;
     --pass: #4fd35c; --pass-tint-bg: #163a1c; --pass-tint-border: #2f7a3b;
     --fail: #ff6b7a; --fail-tint-bg: #402026; --fail-tint-border: #8a3944;
-    --warn: #e0b23d; --code-bg: #262a31; --control-bg: #262a31; --control-text: #e7e9ec;
+    --warn: #e0b23d; --warn-text: #1b1f24; --code-bg: #262a31; --control-bg: #262a31; --control-text: #e7e9ec;
     --shadow: 0 1px 2px rgba(0,0,0,.4);
   }
   * { box-sizing: border-box; }
@@ -64,11 +64,13 @@
   .badge.pass { background: var(--pass); color: var(--accent-text); }
   .badge.fail { background: var(--fail); color: var(--accent-text); }
   .badge.none { background: var(--code-bg); color: var(--muted); }
-  .badge.warn { background: var(--warn); color: #1b1f24; }
+  .badge.warn { background: var(--warn); color: var(--warn-text); }
   .check-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
     padding: 12px; margin-bottom: 12px; box-shadow: var(--shadow); }
   .check-card h3 { display: flex; justify-content: space-between; align-items: baseline; }
   .check-card .id { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .check-card pre { white-space: pre-wrap; word-break: break-word; background: var(--code-bg);
+    border-radius: var(--radius); padding: 8px; font-size: 12px; color: var(--fail); }
   .toggle-group { display: flex; gap: 6px; margin: 8px 0; }
   .toggle-group button { flex: 1; padding: 8px; border-radius: var(--radius); background: var(--panel-alt); }
   .toggle-group button.pass.active { background: var(--pass-tint-bg); color: var(--pass); border-color: var(--pass-tint-border); font-weight: 600; }
@@ -101,7 +103,7 @@
   .candidate-header { position: sticky; top: -12px; z-index: 6; background: var(--bg); margin: -12px -12px 10px; padding: 12px 12px 10px; border-bottom: 1px solid var(--border); }
   .candidate-header h2 { position: static; margin: 0 0 4px; padding: 0; border: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 10px; padding: 2px 9px; font-size: 12px; font-weight: 600; background: var(--panel-alt); color: var(--text); border: 1px solid var(--border); }
-  .chip.warn { background: var(--warn); color: #1b1f24; border-color: var(--warn); }
+  .chip.warn { background: var(--warn); color: var(--warn-text); border-color: var(--warn); }
   .helper-text { color: var(--muted); font-size: 12px; margin: 4px 0 10px; }
   .skip-link { font-size: 12px; margin-left: 4px; }
 
@@ -482,6 +484,33 @@ function candidateHeader(candidate) {
   return header;
 }
 
+function handoffUrl(candidate) {
+  if (!candidate.handoff_path || !candidate.url) return null;
+  const m = candidate.url.match(/^(https?:\/\/[^/]+\/[^/]+\/[^/]+)\/pull\/\d+/);
+  if (!m) return null;
+  return `${m[1]}/blob/${candidate.branch}/${candidate.handoff_path}`;
+}
+
+function parseErrorCard(candidate) {
+  const card = el('div', {class: 'check-card'});
+  card.append(el('h3', {}, "This story's Eyeball block could not be parsed"));
+  card.append(el('pre', {}, candidate.parse_error));
+  const url = handoffUrl(candidate);
+  if (url) {
+    card.append(el('div', {}, 'Handoff: ', el('a', {href: url, target: '_blank'}, candidate.handoff_path)));
+  } else if (candidate.handoff_path) {
+    card.append(el('div', {}, 'Handoff: ', el('code', {}, candidate.handoff_path)));
+  }
+  return card;
+}
+
+function noChecksMessage(candidate) {
+  const line = candidate.handoff_path
+    ? `No Eyeball checks in this handoff yet (${candidate.handoff_path}).`
+    : `No Eyeball checks in this handoff yet - no handoff found for ${candidate.story}.`;
+  return el('div', {class: 'check-card'}, line);
+}
+
 async function renderChecks() {
   const empty = document.getElementById('checks-empty');
   const content = document.getElementById('checks-content');
@@ -491,6 +520,11 @@ async function renderChecks() {
   content.hidden = false;
   content.innerHTML = '';
   content.append(candidateHeader(candidate));
+
+  if (candidate.parse_error) {
+    content.append(parseErrorCard(candidate));
+    return;
+  }
 
   const ready = isCheckedOut(candidate) && servicesReady(candidate);
   const stepper = el('div', {class: 'stepper'}, stepOne(candidate), stepTwo(candidate), stepThree(candidate, ready));
@@ -502,7 +536,11 @@ async function renderChecks() {
   const gate = el('div', {class: 'checklist-gate' + (ready ? '' : ' locked')});
   if (!ready) gate.append(el('div', {class: 'checklist-gate-message'}, 'Finish steps 1 and 2 first.'));
   const inner = el('div', {class: 'checklist-inner'});
-  for (const check of candidate.checks) inner.append(checkCard(candidate, check));
+  if (candidate.checks.length === 0) {
+    inner.append(noChecksMessage(candidate));
+  } else {
+    for (const check of candidate.checks) inner.append(checkCard(candidate, check));
+  }
   inner.append(observationsPanel(candidate));
   gate.append(inner);
   content.append(gate);
@@ -571,7 +609,8 @@ async function callService(action, name) {
   setTimeout(loadState, 1000);
 }
 
-document.getElementById('refresh-btn').addEventListener('click', () => api('/api/refresh', { method: 'POST' }).then(() => loadState()));
+document.getElementById('refresh-btn').addEventListener('click', () =>
+  api('/api/refresh', { method: 'POST', headers: {'Content-Type': 'application/json'} }).then(() => loadState()));
 document.getElementById('start-required-btn').addEventListener('click', async () => {
   const candidate = state.candidates.find(c => c.id === state.selected);
   if (!candidate) { toast('Select a candidate first', 'error'); return; }

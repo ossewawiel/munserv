@@ -8,6 +8,12 @@ GitHub issue per failed check when you submit.
 Run it with `./dashboard.sh` from the repo root, or directly with
 `python3 scripts/eyeball.py [--port 3999] [--checkout DIR]`.
 
+## What it looks like
+
+Light and dark themes both render every control (buttons, toggles, chips, inputs) from the same
+CSS custom properties, so nothing falls back to invisible native chrome in dark mode:
+`docs/eyeball/light.png` and `docs/eyeball/dark.png`.
+
 ## What lives where
 
 `scripts/eyeball.py` itself is project-agnostic: every MunServ-specific detail comes from files in
@@ -15,7 +21,7 @@ this directory.
 
 | File | Purpose |
 |---|---|
-| `services.yaml` | The services the dashboard can start/stop/health-check in the checkout under test: `cwd` (relative to the checkout), `start` (a shell command), `health` (a URL or `tcp:<port>`), `url`/`notes` for display. `manual: true` lists a service without starting it (e.g. an emulator). |
+| `services.yaml` | The services the dashboard can start/stop/health-check in the checkout under test: `cwd` (relative to the checkout), `start` (a shell command), `health` (a URL or `tcp:<port>`), `url`/`notes` for display. `manual: true` lists a service without starting it (e.g. an emulator). An optional `stop` (a shell command, run in `cwd`) is used only as a fallback when there is no tracked process left to kill — e.g. `docker compose up -d`, which exits immediately on its own; anything the dashboard runs in the foreground is stopped by killing its process group and needs no `stop` command. |
 | `accounts.yaml` | Test credentials shown next to each check, keyed however you like (role, email, etc). |
 | `smoke.yaml` | The baseline smoke checklist, in the same shape as a handoff's `Eyeball` block: a list of `{id, title, as, url, steps, expect}`. |
 | `project.yaml` | Optional. Overrides the defaults below. |
