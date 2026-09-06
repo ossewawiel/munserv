@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Source Sans 3', Roboto, Helvetica, Arial, sans-serif; }
+    a { color: #A2391A; }
+    a:hover { color: #0C2721; }
+    table { border-spacing: 0; }
+    td { box-sizing: border-box; }
+  </style>
+</helmet>
+<div style="position:relative;width:1440px;height:900px;overflow:hidden;background:#FAF9F7;font-family:'Source Sans 3', Roboto, Helvetica, Arial, sans-serif;color:#1A1C1B;-webkit-font-smoothing:antialiased;">
+<aside style="position:absolute;left:0;top:0;width:260px;height:900px;background:#FAF9F7;box-shadow:0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);z-index:2;box-sizing:border-box;padding:72px 16px 0;overflow:hidden;">
+      <div style="display:flex;align-items:center;min-height:44px;border-radius:16px;margin-bottom:4px;padding:0 16px;">
+        <div style="display:flex;align-items:center;justify-content:center;min-width:36px;margin-right:12px;">
+          <span style="position:relative;display:flex;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#1A1C1B" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path></svg>
+            
+          </span>
+        </div>
+        <span style="flex:1 1 auto;font-size:14px;line-height:1.5;font-weight:400;color:#1A1C1B;">Dashboard</span>
+        
+      </div>
+      <div style="display:flex;align-items:center;min-height:44px;border-radius:16px;margin-bottom:4px;padding:0 16px;">
+        <div style="display:flex;align-items:center;justify-content:center;min-width:36px;margin-right:12px;">
+          <span style="position:relative;display:flex;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#1A1C1B" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"></path></svg>
+            
+          </span>
+        </div>
+        <span style="flex:1 1 auto;font-size:14px;line-height:1.5;font-weight:400;color:#1A1C1B;">Ward Dashboards</span>
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="#1A1C1B" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;min-height:44px;border-radius:16px;margin-bottom:4px;padding:0 16px;">
+        <div style="display:flex;align-items:center;justify-content:center;min-width:36px;margin-right:12px;">
+          <span style="position:relative;display:flex;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#1A1C1B" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"></path></svg>
+            
+          </span>
+        </div>
+        <span style="flex:1 1 auto;font-size:14px;line-height:1.5;font-weight:400;color:#1A1C1B;">Sector Dashboards</span>
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="#1A1C1B" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;min-height:44px;border-radius:16px;margin-bottom:4px;padding:0 16px;">
+        <div style="display:flex;align-items:center;justify-content:center;min-width:36px;margin-right:12px;">
+          <span style="position:relative;display:flex;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#1A1C1B" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58C.48 14.9 0 15.62 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85-.85-.37-1.79-.58-2.78-.58-.39 0-.76.04-1.13.1.4.68.63 1.46.63 2.29V18H24v-1.57zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"></path></svg>
+            
+          </span>
+        </div>
+        <span style="flex:1 1 auto;font-size:14px;line-height:1.5;font-weight:400;color:#1A1C1B;">Pod Administrators</span>
+        
+      </div>
+      <div style="display:flex;align-items:center;min-height:44px;border-radius:16px;margin-bottom:4px;padding:0 16px;">
+        <div style="display:flex;align-items:center;justify-content:center;min-width:36px;margin-right:12px;">
+          <span style="position:relative;display:flex;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#1A1C1B" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-5h2v5zm4 0h-2V7h2v10zm4 0h-2v-3h2v3z"></path></svg>
+            
+          </span>
+        </div>
+        <span style="flex:1 1 auto;font-size:14px;line-height:1.5;font-weight:400;color:#1A1C1B;">Reports</span>
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="#1A1C1B" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;min-height:44px;border-radius:16px;margin-bottom:4px;padding:0 16px;background:rgba(162, 57, 26, 0.15);">
+        <div style="display:flex;align-items:center;justify-content:center;min-width:36px;margin-right:12px;">
+          <span style="position:relative;display:flex;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#A2391A" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"></path></svg>
+            <span style="position:absolute;top:0;right:0;transform:translate(50%, -50%);display:flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:8px;background:#BA1A1A;color:#FFFFFF;font-size:9.6px;font-weight:500;line-height:1;">2</span>
+          </span>
+        </div>
+        <span style="flex:1 1 auto;font-size:14px;line-height:1.5;font-weight:600;color:#A2391A;">Messages</span>
+        
+      </div>
+      <div style="display:flex;align-items:center;min-height:44px;border-radius:16px;margin-bottom:4px;padding:0 16px;">
+        <div style="display:flex;align-items:center;justify-content:center;min-width:36px;margin-right:12px;">
+          <span style="position:relative;display:flex;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#1A1C1B" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
+            
+          </span>
+        </div>
+        <span style="flex:1 1 auto;font-size:14px;line-height:1.5;font-weight:400;color:#1A1C1B;">Pod Settings</span>
+        
+      </div>
+    </aside>
+    <main style="position:absolute;left:260px;top:72px;width:1180px;height:828px;box-sizing:border-box;border-top:1px solid #C1C8C4;border-left:1px solid #C1C8C4;padding:24px;overflow:hidden;background-color:#F7F5F0;background-image:linear-gradient(rgba(247, 245, 240, 0.85), rgba(247, 245, 240, 0.85)), url(./vintage-map.jpg);background-size:cover;background-position:center;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;background:#FAF9F7;border-radius:8px;border:1px solid #C1C8C4;">
+        <div>
+          <h1 style="margin:0;font-size:24px;line-height:1.334;font-weight:600;color:#0C2721;">Messages</h1>
+        </div>
+        <nav style="display:flex;align-items:center;color:#424846;">
+          <span style="display:flex;"><svg viewBox="0 0 24 24" width="20" height="20" fill="#424846" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg></span>
+          <span style="display:flex;margin:0 8px;"><svg viewBox="0 0 24 24" width="20" height="20" fill="#424846" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M10.02 6L8.61 7.41 13.19 12l-4.58 4.59L10.02 18l6-6-6-6z"></path></svg></span>
+          <span style="font-size:14px;line-height:1.57;font-weight:500;letter-spacing:0.1px;">Messages</span>
+        </nav>
+      </div>
+      <div style="display:flex;gap:24px;margin-top:24px;align-items:flex-start;">
+      <div style="width:369px;flex:0 0 auto;height:700px;display:flex;flex-direction:column;background:#FAF9F7;border:1px solid #C1C8C4;border-radius:12px;overflow:hidden;box-sizing:border-box;">
+        <div style="padding:16px;border-bottom:1px solid #C1C8C4;">
+          <div style="position:relative;">
+            <div style="position:absolute;top:-8px;left:9px;padding:0 5px;background:#FAF9F7;font-size:12px;line-height:1.4375;letter-spacing:0.15px;color:#424846;">Status</div>
+            <div style="display:flex;align-items:center;height:40px;padding:0 14px;box-sizing:border-box;border:1px solid #C1C8C4;border-radius:8px;">
+              <span style="flex:1 1 auto;font-size:16px;line-height:1.4375;color:#1A1C1B;">All</span>
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="#424846" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M7 10l5 5 5-5z"></path></svg>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1 1 auto;overflow:hidden;">
+          <div style="display:flex;align-items:center;padding:16px;box-sizing:border-box;border-bottom:1px solid #C1C8C4;border-left:3px solid #0C2721;background:#D0E0DA;">
+            <div style="flex:1 1 auto;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                
+                <span style="flex:1 1 auto;min-width:0;font-size:14px;line-height:1.43;letter-spacing:0.25px;font-weight:400;color:#1A1C1B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Welcome to MunServ</span>
+              </div>
+              <div style="margin-top:4px;">
+                <div style="font-size:12px;line-height:1.66;letter-spacing:0.4px;color:#424846;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Welcome, Jane Ward. Your administrator account is ready. Complete the tasks below to get started.</div>
+                <div style="margin-top:4px;font-size:12px;line-height:1.66;letter-spacing:0.4px;color:rgba(0, 0, 0, 0.38);">45 minutes ago</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;padding:16px;box-sizing:border-box;border-bottom:1px solid #C1C8C4;border-left:3px solid #0C2721;background:#E9E8E6;">
+            <div style="flex:1 1 auto;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <svg viewBox="0 0 24 24" width="8" height="8" fill="#0C2721" aria-hidden="true" style="display:block;flex:0 0 auto;"><circle cx="12" cy="12" r="12"></circle></svg>
+                <span style="flex:1 1 auto;min-width:0;font-size:14px;line-height:1.43;letter-spacing:0.25px;font-weight:600;color:#1A1C1B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Ground Admin Application</span>
+              </div>
+              <div style="margin-top:4px;">
+                <div style="font-size:12px;line-height:1.66;letter-spacing:0.4px;color:#424846;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">John Smith has applied to become a Ground Admin in your sector.</div>
+                <div style="margin-top:4px;font-size:12px;line-height:1.66;letter-spacing:0.4px;color:rgba(0, 0, 0, 0.38);">2 hours ago</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;padding:16px;box-sizing:border-box;border-bottom:1px solid #C1C8C4;border-left:3px solid #FF9800;background:#E9E8E6;">
+            <div style="flex:1 1 auto;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <svg viewBox="0 0 24 24" width="8" height="8" fill="#0C2721" aria-hidden="true" style="display:block;flex:0 0 auto;"><circle cx="12" cy="12" r="12"></circle></svg>
+                <span style="flex:1 1 auto;min-width:0;font-size:14px;line-height:1.43;letter-spacing:0.25px;font-weight:600;color:#1A1C1B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Verify New Issue</span>
+              </div>
+              <div style="margin-top:4px;">
+                <div style="font-size:12px;line-height:1.66;letter-spacing:0.4px;color:#424846;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">A new pothole has been reported at 123 Main Street. Please verify this issue exists.</div>
+                <div style="margin-top:4px;font-size:12px;line-height:1.66;letter-spacing:0.4px;color:rgba(0, 0, 0, 0.38);">2 hours ago</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;padding:16px;box-sizing:border-box;border-bottom:1px solid #C1C8C4;border-left:3px solid #424846;background:transparent;">
+            <div style="flex:1 1 auto;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                
+                <span style="flex:1 1 auto;min-width:0;font-size:14px;line-height:1.43;letter-spacing:0.25px;font-weight:400;color:#1A1C1B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Monthly Report - January 2026</span>
+              </div>
+              <div style="margin-top:4px;">
+                <div style="font-size:12px;line-height:1.66;letter-spacing:0.4px;color:#424846;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Your sector resolved 45 issues this month. View the full report for details.</div>
+                <div style="margin-top:4px;font-size:12px;line-height:1.66;letter-spacing:0.4px;color:rgba(0, 0, 0, 0.38);">4 days ago</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;padding:16px;box-sizing:border-box;border-bottom:1px solid #C1C8C4;border-left:3px solid #4CAF50;background:transparent;">
+            <div style="flex:1 1 auto;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                
+                <span style="flex:1 1 auto;min-width:0;font-size:14px;line-height:1.43;letter-spacing:0.25px;font-weight:400;color:#1A1C1B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Ground Admin Status Approved</span>
+              </div>
+              <div style="margin-top:4px;">
+                <div style="font-size:12px;line-height:1.66;letter-spacing:0.4px;color:#424846;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Your application to become a Ground Admin has been approved.</div>
+                <div style="margin-top:4px;font-size:12px;line-height:1.66;letter-spacing:0.4px;color:rgba(0, 0, 0, 0.38);">Jan 10, 2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1 1 auto;min-width:0;height:700px;background:#FAF9F7;border:1px solid #C1C8C4;border-radius:12px;box-sizing:border-box;overflow:hidden;">
+        <div style="padding:24px;box-sizing:border-box;height:100%;overflow:hidden;">
+        <div style="margin-bottom:24px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;">
+            <h2 style="margin:0;font-size:24px;line-height:1.334;font-weight:500;color:#1A1C1B;">Welcome to MunServ</h2>
+            <span style="display:inline-flex;align-items:center;height:24px;padding:0 8px;box-sizing:border-box;border-radius:8px;background:rgba(0, 0, 0, 0.08);color:#1A1C1B;font-size:13px;font-weight:500;line-height:1;white-space:nowrap;">Read</span>
+          </div>
+          <div style="font-size:12px;line-height:1.66;letter-spacing:0.4px;color:#424846;">Jan 19, 2026, 11:15 AM</div>
+        </div>
+        <div style="height:1px;background:#C1C8C4;margin-bottom:24px;"></div>
+        <div style="margin-bottom:32px;">
+          <p style="margin:0;font-size:16px;line-height:1.5;letter-spacing:0.5px;color:#1A1C1B;white-space:pre-wrap;">Welcome, Jane Ward. Your administrator account is ready. Complete the tasks below to get started.</p>
+        </div>
+        <div style="margin-bottom:32px;">
+          <div style="margin-bottom:8px;font-size:14px;line-height:1.57;font-weight:500;letter-spacing:0.1px;color:#1A1C1B;">Your first tasks</div>
+          <ul style="margin:0;padding:0 0 0 24px;list-style-type:disc;">
+              <li style="display:list-item;padding:4px 0;font-size:16px;line-height:1.5;letter-spacing:0.5px;color:#1A1C1B;">Change your temporary password.</li>
+              <li style="display:list-item;padding:4px 0;font-size:16px;line-height:1.5;letter-spacing:0.5px;color:#1A1C1B;">Complete your profile (optional, you can skip it).</li>
+              <li style="display:list-item;padding:4px 0;font-size:16px;line-height:1.5;letter-spacing:0.5px;color:#1A1C1B;">Open Messages to see what needs your attention.</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:32px;">
+          <div style="margin-bottom:8px;font-size:14px;line-height:1.57;font-weight:500;letter-spacing:0.1px;color:#424846;">Additional Information</div>
+          <div style="padding:16px;box-sizing:border-box;background:#FAF9F7;border:1px solid #C1C8C4;border-radius:8px;">
+            <div style="margin-bottom:8px;"><span style="font-size:12px;line-height:1.66;letter-spacing:0.4px;color:#424846;">role:</span> <span style="font-size:14px;line-height:1.43;letter-spacing:0.25px;color:#1A1C1B;">pod_admin</span></div>
+          </div>
+        </div>
+        <div style="height:1px;background:#C1C8C4;margin-bottom:24px;"></div>
+        <div>
+          <span style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;border-radius:8px;background:#0C2721;color:#FFFFFF;font-size:14px;line-height:1.75;font-weight:500;letter-spacing:0.4px;white-space:nowrap;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="#FFFFFF" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"></path></svg>
+            Dismiss
+          </span>
+        </div>
+        </div>
+      </div>
+      </div>
+    </main>
+    <header style="position:absolute;left:0;top:0;right:0;height:72px;background:#FAF9F7;z-index:3;display:flex;align-items:center;padding:16px;box-sizing:border-box;">
+      <div style="display:flex;align-items:center;width:228px;">
+        <span style="flex:1 1 auto;display:flex;align-items:center;">
+          <img src="app-mark.png" alt="Munserv" style="height:32px;width:32px;display:block;border-radius:2px;">
+        </span>
+        <span style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#FFDDD4;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#A2391A" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:40px;">
+        <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" style="display:block;flex:0 0 auto;"><rect x="0" y="0" width="32" height="32" rx="8" fill="#233D36"></rect><text x="16" y="21.5" text-anchor="middle" fill="#FFFFFF" font-family="'Source Sans 3', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="-0.2">W42</text></svg>
+        <span style="font-size:16px;line-height:1.5;font-weight:600;letter-spacing:0.15px;color:#0C2721;white-space:nowrap;">Munserv Pod Ward42</span>
+      </div>
+      <div style="flex:1 1 auto;"></div>
+      <div style="display:flex;align-items:center;">
+        <span style="position:relative;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#FFDDD4;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#A2391A" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path></svg>
+          <span style="position:absolute;top:-4px;right:-4px;display:flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#BA1A1A;color:#FFFFFF;font-size:10.4px;font-weight:500;line-height:1;">2</span>
+        </span>
+        <span style="display:flex;align-items:center;height:34px;margin-left:8px;border-radius:27px;border:1px solid #D0E0DA;background:#D0E0DA;">
+          <span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;margin-left:4px;border-radius:50%;background:#0C2721;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#FFFFFF" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+          </span>
+          <span style="display:flex;margin:0 6px;"><svg viewBox="0 0 24 24" width="20" height="20" fill="#0C2721" aria-hidden="true" style="display:block;flex:0 0 auto;"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg></span>
+        </span>
+      </div>
+    </header>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{
+  "artboards": [
+    {
+      "file": "WelcomeMessageList.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Inbox — welcome message unread at the top"
+    },
+    {
+      "file": "Main.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "WelcomeMessageDetail — body, initial tasks, acknowledge"
+    },
+    {
+      "file": "WelcomeMessageDetailNoTasks.dc.html",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "WelcomeMessageDetailNoTasks — metadata without tasks"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -560,
+      "w": 1440,
+      "text": "W16 (#27) — the admin_welcome message in the web portal. Web admin portal, 1440x900, light scheme.\n\nScope is only what the handoff's step 2 changes: the welcome message inside the existing MessageDetail, and how its row reads in the existing MessageList. Nothing else on this page is restyled.\n\nThe shell — header, sidebar, Breadcrumbs card, the two Cards of the side-by-side inbox — is lifted byte for byte from the approved design/canvases/pod-chief-mvp/pod-settings artboards and from web/src/features/messages/MessagesPage.tsx as it renders today: Grid spacing 3 (24px), md 4 / md 8 of 12 inside a 1132px content column (369px / 739px), height calc(100vh - 200px) = 700px, so the cards run to the bottom edge of the viewport exactly as they do in the running portal.\n\nColours are scheme.light from design/tokens/color.tokens.json through createPodTheme: surface #FAF9F7, outlineVariant #C1C8C4 (divider), onSurface #1A1C1B, onSurfaceVariant #424846 (text.secondary), surfaceContainerHigh #E9E8E6 (action.hover), primary #0C2721, primaryLight #D0E0DA (primary.light), error #BA1A1A. text.disabled is MUI's own rgba(0,0,0,0.38). Type is Source Sans 3 as web/src/theme/defaultTheme.ts loads it.\n\nNO NEW REGISTRY COMPONENT. Everything drawn exists: DashboardLayout, Breadcrumbs, and MUI Card, List, ListItem, ListItemButton, ListItemText, Typography, Chip, Divider, Select and Button as MessagesPage, MessageList and MessageDetail already use them."
+    },
+    {
+      "id": "copy",
+      "x": 1560,
+      "y": -560,
+      "w": 1440,
+      "text": "Copy, verbatim. English here; af and zu need real translations, not English copies.\n\nFrom B10 (#95), server-owned — do NOT retype it into the web locales:\ntitle: Welcome to MunServ\nbody: Welcome, Jane Ward. Your administrator account is ready. Complete the tasks below to get started.\nmetadata.tasks:\n  1. Change your temporary password.\n  2. Complete your profile (optional, you can skip it).\n  3. Open Messages to see what needs your attention.\nmetadata.role: pod_admin\n\nNew web keys, the only two W16 adds:\nmessages.welcome.tasksTitle: Your first tasks\nmessages.types.adminWelcome: Welcome\n\n\"Your first tasks\" is the heading above the list. It says what the list is without repeating the body's \"Complete the tasks below\", and it matches the neutral, second-person voice of the rest of messages.* (\"Select a message to view\", \"No messages\").\n\nmessages.types.adminWelcome is \"Welcome\" — the same word B10 gives the Dart MessageType.displayName, so a pod administrator reading the same message on both platforms sees one label. Note that MESSAGE_TYPE_LABELS is not rendered anywhere in the web portal today (see the list-row note); the key is added for parity, not because a screen shows it.\n\nEverything else on these artboards is existing copy from web/src/locales/en/translation.json and web/src/test/mocks/handlers.ts."
+    },
+    {
+      "id": "detail",
+      "x": 3120,
+      "y": -560,
+      "w": 1440,
+      "text": "THE DETAIL — what step 2 builds, and the one thing it must also do.\n\nThe task list sits BELOW the body and ABOVE the Additional Information block, inside the existing mb: 4 (32px) rhythm. Heading: Typography subtitle2 (14px / 1.57 / 500 / 0.1px) in text.primary with mb: 1. List: MUI List sx={{ listStyleType: 'disc', pl: 3 }} with ListItem sx={{ display: 'list-item', px: 0, py: 0.5 }} — MUI's own bulleted-list recipe, no new component, no icons. Each item is body1 (16px / 1.5 / 0.5px) in text.primary, keyed by its text, never by index.\n\nTASKS MUST BE EXCLUDED FROM THE GENERIC METADATA BLOCK. MessageDetail renders every metadata entry as String(value); left alone, metadata.tasks would print the three sentences a second time as one comma-joined line directly under the list you just drew. Both detail artboards show Additional Information carrying role only. Filter the tasks key out of that block for admin_welcome — that is part of step 2, not a restyle of anything else, and the second artboard proves the block still stands on its own when tasks are absent.\n\nThe action is the existing ACKNOWLEDGE branch, untouched: one contained Button with the Archive icon, label \"Dismiss\" (messages.actions.dismiss). B10 sets actionType \"acknowledge\", so no new branch and no new label.\n\nStatus chip reads \"Read\", not \"Unread\": MessagesPage marks a selected message read on open (useMarkAsRead), so by the time the detail is on screen the message is read. That is also why the sidebar and header badges read 2 on both detail artboards and 3 on the inbox artboard."
+    },
+    {
+      "id": "list-row",
+      "x": 0,
+      "y": 1040,
+      "w": 1440,
+      "text": "THE LIST ROW — drawn exactly as MessageList renders it today, which means two things the story should not \"fix\".\n\n1. NO PER-TYPE ICON AND NO TYPE LABEL. MessageList shows a 3px left accent, an 8px unread dot, the title, one ellipsised line of body and a relative time. It renders no icon per type and no MESSAGE_TYPE_LABELS text — that map is currently unused in the portal. Adding either would restyle every message type, which the handoff forbids. If a type label in the row is wanted, it is its own story across all twelve types.\n\n2. THE ACCENT IS GREY, DELIBERATELY. admin_welcome is not a case in getMessageTypeColor, so it falls to the default text.secondary #424846 — the same accent monthly_report already carries. No source change in MessageList, and the unread dot plus the 600-weight title carry the row on their own. Do not add a case for admin_welcome.\n\nThe inbox artboard is the arrival state: on /messages with nothing selected, MessagesPage auto-selects messages[0] on desktop, so the welcome row is selected (primary.light #D0E0DA, primary.main left accent) AND still unread (dot, 600 weight) while the detail query is in flight, and the right pane shows the existing centred \"Loading...\" text. A heartbeat later it is the middle artboard. The unread background (action.hover #E9E8E6) is visible on the two rows below it."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}
