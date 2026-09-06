@@ -89,7 +89,9 @@ def eyeball_block(body: str) -> list:
 
 
 def match_handoff(names: list[str], story: str) -> str | None:
-    pattern = re.compile(rf"(?:^|[/-]){re.escape(story)}-")
+    # Case-insensitive and tolerant of a hyphen inside the id (label FIX114, file fix-114-...).
+    alt = "|".join(re.escape(v) for v in {story, re.sub(r"^([A-Za-z]+)(\d+)$", r"\1-\2", story)})
+    pattern = re.compile(rf"(?:^|[/-])(?:{alt})-", re.IGNORECASE)
     for line in names:
         if pattern.search(line):
             return line
