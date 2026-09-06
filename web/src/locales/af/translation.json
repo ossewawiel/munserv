@@ -170,7 +170,22 @@
     "selectLanguage": "Kies voorkeur taal"
   },
   "reports": {
-    "title": "Verslae"
+    "title": "Verslae",
+    "tabsLabel": "Verslagafdelings",
+    "scopes": {
+      "pod": "Pod-verslae",
+      "ward": "Wyk-verslae",
+      "sector": "Sektor-verslae"
+    },
+    "tabs": {
+      "summary": "Opsomming",
+      "issues": "Kwessies",
+      "performance": "Prestasie"
+    },
+    "empty": {
+      "title": "Nog geen verslagdata nie",
+      "description": "Sodra lede kwessies in hierdie omvang aanmeld, verskyn die opsomming, kwessie-uiteensetting en prestasiesyfers hier."
+    }
   },
   "heatReport": {
     "title": "Hitteverslag",

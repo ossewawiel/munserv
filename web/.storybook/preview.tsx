@@ -15,6 +15,12 @@ const withProviders: Decorator = (Story, context) => {
   const mode = context.globals.theme as 'light' | 'dark' | 'system';
   localStorage.setItem(COLOR_MODE_STORAGE_KEY, mode);
 
+  // Stories that read useParams/useSearchParams set `parameters.router.initialEntries`
+  // to control the single MemoryRouter's history; only one Router may exist per story.
+  const initialEntries =
+    (context.parameters.router as { initialEntries?: readonly string[] } | undefined)
+      ?.initialEntries ?? ['/'];
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -23,7 +29,7 @@ const withProviders: Decorator = (Story, context) => {
   });
 
   return (
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <QueryClientProvider client={queryClient}>
         <I18nextProvider i18n={i18n}>
           {/* key forces the theme provider to re-read the persisted color mode on toolbar change */}

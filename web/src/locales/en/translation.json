@@ -199,7 +199,22 @@
     "selectLanguage": "Select preferred language"
   },
   "reports": {
-    "title": "Reports"
+    "title": "Reports",
+    "tabsLabel": "Report sections",
+    "scopes": {
+      "pod": "Pod reports",
+      "ward": "Ward reports",
+      "sector": "Sector reports"
+    },
+    "tabs": {
+      "summary": "Summary",
+      "issues": "Issues",
+      "performance": "Performance"
+    },
+    "empty": {
+      "title": "No report data yet",
+      "description": "Once members log issues in this scope, the summary, issue breakdown and performance figures appear here."
+    }
   },
   "heatReport": {
     "title": "Heat Report",

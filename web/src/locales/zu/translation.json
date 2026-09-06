@@ -170,7 +170,22 @@
     "selectLanguage": "Khetha ulimi oluncamelayo"
   },
   "reports": {
-    "title": "Imibiko"
+    "title": "Imibiko",
+    "tabsLabel": "Izingxenye zombiko",
+    "scopes": {
+      "pod": "Imibiko yepodi",
+      "ward": "Imibiko yesigceme",
+      "sector": "Imibiko yesekthara"
+    },
+    "tabs": {
+      "summary": "Isifinyezo",
+      "issues": "Izinkinga",
+      "performance": "Ukusebenza"
+    },
+    "empty": {
+      "title": "Akukho mininingwane yombiko okwamanje",
+      "description": "Uma amalungu esebika izinkinga kulesi sikali, isifinyezo, ukuhlukaniswa kwezinkinga nezibalo zokusebenza kuzovela lapha."
+    }
   },
   "heatReport": {
     "title": "Umbiko Wokushisa",
