@@ -1068,5 +1068,19 @@ class HealthDebounceTests(unittest.TestCase):
         self.assertFalse(services.debounced_up("web", False))
 
 
+class HandoffLookupCaseTests(unittest.TestCase):
+    def test_label_id_matches_lower_case_and_hyphenated_file_names(self) -> None:
+        files = [
+            "specs/features/x/077-fix-114-pod-admin-web.md",
+            "specs/features/x/078-FIX123-dialog-web.md",
+            "specs/features/x/044-W29-support-grant-login-web.md",
+        ]
+        self.assertEqual(eyeball.match_handoff(files, "FIX114"), files[0])
+        self.assertEqual(eyeball.match_handoff(files, "fix123"), files[1])
+        self.assertEqual(eyeball.match_handoff(files, "W29"), files[2])
+        self.assertIsNone(eyeball.match_handoff(files, "W2"))
+
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

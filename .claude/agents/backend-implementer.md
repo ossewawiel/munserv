@@ -44,3 +44,5 @@ The task names a handoff file under `specs/features/<feature>/`. Read, in this o
 
 ## Output
 End with: branch name, commit sha, files changed, tests added, and the exact commands that passed.
+
+Eyeball URLs are complete addresses a tester pastes into a browser; backend-only checks go through Swagger deep links (`http://localhost:8080/swagger-ui/index.html#/<Tag>/<operationId>`) with the exact request bodies and the Authorize step spelled out.
