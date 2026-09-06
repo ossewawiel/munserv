@@ -189,6 +189,8 @@
   "errors": {
     "notFound": "Nie Gevind",
     "unauthorized": "Ongemagtig",
+    "forbiddenTitle": "Toegang Geweier",
+    "forbidden": "Jy het nie toestemming om hierdie bladsy te sien nie",
     "serverError": "Bedienerfout",
     "networkError": "Netwerkfout"
   },

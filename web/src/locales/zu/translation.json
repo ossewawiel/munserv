@@ -189,6 +189,8 @@
   "errors": {
     "notFound": "Ayitholakali",
     "unauthorized": "Awugunyaziwe",
+    "forbiddenTitle": "Ukungeniswa Kwenqatshelwe",
+    "forbidden": "Awunayo imvume yokubona leli khasi",
     "serverError": "Iphutha Leseva",
     "networkError": "Iphutha Lenethiwekhi"
   },
