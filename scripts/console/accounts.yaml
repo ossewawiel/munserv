@@ -70,11 +70,13 @@ ward_admin:
 member:
   role: member
   platform: mobile
+  email: john.doe@example.com
+  password: member123
   phone: "+27821234567"
   pin: "1234"
   notes: >
-    Seeded by V005 (John Doe, sector 550e8400-e29b-41d4-a716-446655440001). Registration and
+    Seeded by V005 (John Doe, sector 550e8400-e29b-41d4-a716-446655440001); email login password set by V037. Registration and
     login OTPs are not sent by SMS in dev: the backend logs them at INFO from
     backend/src/main/kotlin/com/munserv/auth/service/OtpService.kt
-    ("OTP for <masked phone>: <code>"). The eyeball dashboard reads the latest one from the
+    ("OTP for <masked phone>: <code>"). The factory console reads the latest one from the
     backend log and shows it in the services panel.

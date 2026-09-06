@@ -394,12 +394,26 @@ Partially update pod settings. Only provided fields are updated.
 **Response:** `200` `PodSettingsResponse` (as above, with `displayName` recomputed)
 **Errors:** 400 Validation error (`{ code: "validation_error", message: string }`) | 401 Unauthorized | 403 Not pod chief | 404 Pod not found
 
-There is **no** logo file-upload endpoint. `logoUrl` is a URL the caller supplies;
-multipart upload is not implemented.
+### POST /pod/logo
+Upload a pod logo image. `multipart/form-data`, one part named `file`
+(JPEG, PNG or WebP, max 5MB).
+
+**Response:** `200`
+```json
+{ "logoUrl": "http://localhost:8080/uploads/8f14e45f-ea1e-4d0e-9c6b-2a1c6f1b7d10.png" }
+```
+
+Uploading stores the file only; it does not change the pod. Persist the returned URL with
+`PATCH /pod/settings { "logoUrl": ... }`.
+
+**Errors:** 400 Validation error (`{ code: "validation_error", message: string }`) |
+401 Unauthorized | 403 Not pod chief | 500 Storage error (`{ code: "internal_error", message: string }`)
 
 ---
 
 ## Messages
+
+`admin_welcome` messages are created by `POST /pod/administrators` and carry `metadata.tasks`, a list of strings.
 
 ### GET /messages
 List messages for authenticated user with optional filtering.

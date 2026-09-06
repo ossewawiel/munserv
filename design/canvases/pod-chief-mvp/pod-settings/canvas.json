@@ -49,6 +49,14 @@
       "title": "Pod identity — saved"
     },
     {
+      "file": "IdentityDirty.dc.html",
+      "x": 3120,
+      "y": 2320,
+      "w": 1440,
+      "h": 900,
+      "title": "Pod identity — unsaved edit, Save and Reset both live"
+    },
+    {
       "file": "BoundariesSector.dc.html",
       "x": 0,
       "y": 2320,
@@ -71,7 +79,7 @@
       "x": 0,
       "y": -460,
       "w": 1440,
-      "text": "Pod Settings — W18 (#29) pod name and header branding, W19 (#30) boundary placeholders.\nWeb admin portal, 1440x900, light scheme. Both stories land on one page, so every artboard is that page.\n\nThe page shell — sidebar, header, Breadcrumbs, the Support access card at the fold — is lifted byte for byte from the approved design/canvases/support-access artboards. Colours are scheme.light from design/tokens/color.tokens.json, sizes from size.tokens.json and MUI's own metrics, type is Source Sans 3 as web/src/theme/defaultTheme.ts loads it.\n\nNO NEW REGISTRY COMPONENT. Everything drawn is in design/registry/web.md — DashboardLayout, Breadcrumbs, MainCard, Input, Button — plus MUI Chip, Tooltip and Alert as the portal already uses them. PodIdentitySection and BoundaryPlaceholderCard are feature components under features/pod-settings/components/, so they need no registry row and no Storybook story, exactly as both handoffs say.\n\nRead the artboards in this order: row 1 is the resting form, row 2 its three outcomes, row 3 the W19 copy variant and the header anatomy."
+      "text": "Pod Settings — W18 (#29) pod name and header branding, W19 (#30) boundary placeholders.\nWeb admin portal, 1440x900, light scheme. Both stories land on one page, so every artboard is that page.\n\nThe page shell — sidebar, header, Breadcrumbs, the Support access card at the fold — is lifted byte for byte from the approved design/canvases/support-access artboards. Colours are scheme.light from design/tokens/color.tokens.json, sizes from size.tokens.json and MUI's own metrics, type is Source Sans 3 as web/src/theme/defaultTheme.ts loads it.\n\nNO NEW REGISTRY COMPONENT. Everything drawn is in design/registry/web.md — DashboardLayout, Breadcrumbs, MainCard, Input, Button — plus MUI Chip, Tooltip and Alert as the portal already uses them. PodIdentitySection and BoundaryPlaceholderCard are feature components under features/pod-settings/components/, so they need no registry row and no Storybook story, exactly as both handoffs say.\n\nRead the artboards in this order: row 1 is the resting form, row 2 its three outcomes, row 3 the dirty form, the W19 copy variant and the header anatomy.\n\nW18c (#128, #129) revised this canvas: the saved artboard now shows a bottom-centre snackbar instead of an inline success Alert, every identity artboard carries a Reset beside Save, and IdentityDirty is new. See the feedback annotation on the right."
     },
     {
       "id": "assets",
@@ -107,6 +115,13 @@
       "y": 3320,
       "w": 1440,
       "text": "W19 — the two placeholders, and three deliberate departures from the words in handoff 071.\n\n1. SIDE BY SIDE, NOT STACKED. The handoff says to put both cards in the page's vertical Stack. Two full-width cards that do nothing would push Support access — the one thing on this page that acts — below the fold. They are peers and both inert, so they share a row: a flex row with gap: 3 (24px), each card flex: 1, align-items stretch so the two \"Configure boundaries\" buttons line up. Everything else on the page stays in the Stack.\n\n2. NO opacity: 0.6. The handoff prescribes it; the acceptance criteria say the sections must be VISIBLE. Dimming the whole card takes the title, the chip and the description down with it. Instead the card carries bgcolor: 'action.hover' (#E9E8E6, surfaceContainerHigh) against its #FAF9F7 siblings, which reads as recessed while every word stays at full contrast. Keep aria-disabled=\"true\" on the card root — that part of the handoff stands, and it is the only thing announcing the state to a screen reader.\n\n3. THE CHIP IS OUTLINED. Chip size=\"small\" color=\"default\" variant=\"outlined\": a filled default chip resolves to rgba(0,0,0,.08), which over the #E9E8E6 card is #D6D5D4 and effectively invisible. Outlined keeps the label at full onSurface contrast on a 1px divider-toned border. Height 24, radius 8 from the MuiChip override, 13px at weight 500.\n\nThe Configure button is a disabled Button atom, default (contained) variant — MUI's disabled fill, no override. It sits inside an MUI Tooltip wrapped in a span, since a disabled button fires no events. The tooltip is drawn open on the sector artboard: default bottom placement, centred, 14px below, rgba(97,97,97,0.92) at 11px/500, 4px 8px, radius 8.\n\nThe area card's wording comes from usePodSetup: ward keys when status.wards.length > 0, sector keys otherwise. The mock in usePodSetup.ts currently returns one ward, so the ward variant is what a developer sees — that is the variant on every other artboard here, and the sector variant is on this row. Neither card fetches anything and neither reads pod_boundaries off GET /pod/status."
+    },
+    {
+      "id": "feedback",
+      "x": 4680,
+      "y": -460,
+      "w": 1440,
+      "text": "FEEDBACK CONVENTION — #128 and #129, and it now governs the whole portal, not just this page.\n\nTRANSIENT OUTCOMES ARE SNACKBARS. Saved, revoked, sent, resent, deleted: a bottom-centre MUI Snackbar holding a filled Alert of the matching severity, 4000ms autoHideDuration, one at a time. Look at the saved artboard: the card no longer carries a success Alert, and the row where it used to sit is gone, so nothing on the page reflows when the outcome arrives. The bar is 24px off the bottom edge, centred on the viewport, min-width 288 / max-width 568, padding 6px 16px, radius 8 (shape.borderRadius), success.main #4CAF50 with #FFFFFF text and a 22px check icon at 0.9 opacity, elevation 6. The message is the existing podSettings.identity.saved key, unchanged.\n\nPERSISTENT PROBLEMS STAY INLINE. Compare the server-error artboard, which is untouched: a 400 the user must read and act on stays as an inline Alert at the top of the card, and field validation stays on the field (the invalid-name artboard). Those do not auto-dismiss, because dismissing them would hide the reason the save did not happen.\n\nONE SHARED COMPONENT. Build it once as organisms/FeedbackSnackbar and register it — design/registry/web.md now carries the row. PodIdentitySection must not hand-roll a Snackbar, and SessionExpiredHandler keeps its own top-centre warning bar: that one is a session event with a redirect behind it, not a form outcome, and it is deliberately not a FeedbackSnackbar.\n\nRESET — #129. A Reset button sits to the left of Save with a 12px gap: Button atom, variant=\"secondary\" (outlined, color inherit), medium, padding 7px 15px, border rgba(0,0,0,0.23), label onSurface #1A1C1B. It is ENABLED ONLY WHILE THE FORM IS DIRTY, so it is drawn disabled on the resting, saving and saved artboards (border rgba(0,0,0,0.12), label rgba(0,0,0,0.26)) and live on the dirty and invalid-name artboards. That is the point of the issue: the invalid-name state is exactly where a user needs a way out, and Save is blocked there.\n\nReset restores the LAST SAVED name and logo URL from usePodSettings and clears the field error — it is react-hook-form reset(), not a page reload, and it never touches the header preview, which was already bound to the saved value. During a save both buttons are disabled."
     }
   ],
   "launch": {

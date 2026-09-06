@@ -28,7 +28,7 @@ Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patt
 | Web | `cd web && pnpm dev` | http://localhost:3000, login `admin@ward42.example.com` / `admin123` |
 | Mobile | `cd mobile && flutter run` | emulator reaches the backend on 10.0.2.2:8080 |
 | Mock API (optional) | `cd infrastructure/mock-api && npm start` | localhost:3001, `flutter run --dart-define=API_PORT=3001` |
-| Eyeball dashboard | `./dashboard.sh` (or `python3 scripts/eyeball.py`) | http://localhost:3999 |
+| Factory console | `./dashboard.sh` (or `python3 -m scripts.console`) | http://localhost:3999 |
 
 ## Quality gate
 CI (`.github/workflows/ci.yml`) is required on `master`: domain-language validation, backend ktlint + tests (Testcontainers) + build, web lint + `tsc -b` + Vitest + build, mobile format + analyze (infos fatal) + tests + debug APK. Run the same commands locally before opening a PR. Squash-merge; conventional commit titles (`feat(web): ...`, scopes: backend, web, mobile, db, api, infra, specs, ci).
@@ -46,7 +46,7 @@ Delivery runs through agents defined in `.claude/agents/` and orchestrated by `/
 | `reviewer` | Opus | PR against handoff and domain: verdict per acceptance criterion |
 | `syncer` | Sonnet | After merge: specs status, issue labels, handoff archive |
 
-Handoffs are written from `specs/features/_template/story-handoff.md` and live under `specs/features/<feature>/`. Human gates: story approval, canvas approval for UI stories, eyeball pass, and PR merge. Eyeball is a human running `python3 scripts/eyeball.py` against the handoff's `Eyeball` block after the reviewer approves; it labels the PR `eyeball:pass` or `eyeball:fail` and files a `source:eyeball` bug for every failed check. `/factory status` shows the queue; `/factory run` dispatches up to three stories. Progress is public at https://ossewawiel.github.io/munserv/dashboard/ and on the board https://github.com/users/ossewawiel/projects/5 (`scripts/sync-board.py` mirrors labels onto it).
+Handoffs are written from `specs/features/_template/story-handoff.md` and live under `specs/features/<feature>/`. Human gates: story approval, canvas approval for UI stories, eyeball pass, and PR merge. Eyeball is a human running the Eyeball section of the factory console (`./dashboard.sh`) against the handoff's `Eyeball` block after the reviewer approves; it labels the PR `eyeball:pass` or `eyeball:fail` and files a `source:eyeball` bug for every failed check. The console (`scripts/console/`, see `scripts/console/README.md`) also surfaces milestones, the PR pipeline, the domain language and requirements, and design canvases and registry - it replaces the old `scripts/eyeball.py` dashboard. `/factory status` shows the queue; `/factory run` dispatches up to three stories. Progress is public at https://ossewawiel.github.io/munserv/dashboard/ and on the board https://github.com/users/ossewawiel/projects/5 (`scripts/sync-board.py` mirrors labels onto it).
 
 ## Working with GitHub
 `gh` is the tool. Labels: `type:*`, `platform:*`, `status:*` (`ready` → `in-progress` → `review` → `done`, or `blocked`), `priority:*`, `story:<id>`. Stories are `M*` (mobile), `W*` (web), `B*` (backend). Legacy workflow commands stay in `.claude/commands/`. `.claude/hooks/guard-git.sh` blocks force pushes, pushes to master and history rewrites in every session.
