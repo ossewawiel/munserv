@@ -138,6 +138,7 @@ class _MessageDetailPageState extends ConsumerState<MessageDetailPage> {
       MessageType.groundAdminStepdownRequest => (Colors.purple, 'Step Down'),
       MessageType.memberRegistration => (Colors.teal, 'Registration'),
       MessageType.monthlyReport => (Colors.indigo, 'Report'),
+      MessageType.adminWelcome => (Colors.green, 'Welcome'),
     };
 
     return Container(

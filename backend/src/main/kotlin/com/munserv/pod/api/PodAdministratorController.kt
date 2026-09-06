@@ -8,6 +8,7 @@ import com.munserv.admin.api.UpdateAdminRequest
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.service.AdminManagementService
 import com.munserv.admin.service.AdminResult
+import com.munserv.pod.service.PodAdministratorService
 import com.munserv.shared.security.RequireRole
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.PodId
@@ -45,6 +46,7 @@ import java.util.UUID
 @RequireRole(AdminRole.POD_CHIEF)
 class PodAdministratorController(
     private val adminService: AdminManagementService,
+    private val podAdministratorService: PodAdministratorService,
     private val podIdResolver: PodIdResolver,
 ) {
     @Operation(
@@ -207,7 +209,7 @@ class PodAdministratorController(
                 }
             }
 
-        return when (val result = adminService.createAdmin(command, actorId)) {
+        return when (val result = podAdministratorService.createAdministrator(command, actorId)) {
             is AdminResult.Created -> {
                 ResponseEntity.status(HttpStatus.CREATED).body(
                     AdminCreatedResponse.from(result.admin, result.temporaryPassword),
