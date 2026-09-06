@@ -151,7 +151,8 @@ summary of changes. If you cannot finish, set `status: blocked` and end your mes
     - Call POST /api/v1/auth/admin/login with the pod chief credentials and copy the access token.
     - Press Authorize and paste the token.
     - Call POST /api/v1/pod/logo with a PNG under 5MB as the file part.
-  expect: 200 with a JSON body containing logoUrl; opening that URL in the browser shows the image.
+    - Call PATCH /api/v1/pod/settings with body { "logoUrl": "<the returned logoUrl>" }, then GET /api/v1/pod/settings.
+  expect: The upload answers 200 with a JSON body containing logoUrl and opening that URL in the browser shows the image; the PATCH answers 200 and the GET returns the same logoUrl.
 - id: E2
   title: Wrong file type and wrong role are refused
   as: ward_admin
