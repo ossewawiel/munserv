@@ -33,8 +33,9 @@ The task names a handoff file under `specs/features/<feature>/`. Read, in this o
 2. Write the failing tests named in the handoff first (domain and service). Run them; they must fail for the expected reason.
 3. Implement the minimum that makes them pass, following the five patterns in `backend/CLAUDE.md`.
 4. Run `./gradlew ktlintFormat`, then the "Done when" commands from the handoff, once, at the end. While iterating use targeted `--tests` runs; the full suite takes five minutes and burns turns. All must exit 0.
-5. Update the handoff frontmatter: `status: completed`, `files_changed`, `tests_added`.
-6. Commit with a conventional message `feat(backend): <story title> (#<issue>)` and push the branch. Do not open the PR; the orchestrator does.
+5. If an endpoint path or an account's role changed from what the handoff's `Eyeball` block assumed, correct that block's `url` and `as` fields so a tester can still follow it.
+6. Update the handoff frontmatter: `status: completed`, `files_changed`, `tests_added`.
+7. Commit with a conventional message `feat(backend): <story title> (#<issue>)` and push the branch. Do not open the PR; the orchestrator does.
 
 ## Rules
 - A new enum value or term needs `domain/` and `specs/contracts/types.md` updated in the same commit, or the story is blocked.

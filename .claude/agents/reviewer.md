@@ -27,6 +27,10 @@ The handoff the task names (acceptance criteria, steps, do-not list); `domain/RE
 3. **Contract**: any change to `specs/contracts/*` reflected on every platform that consumes it; new terms present in `domain/`.
 4. **Platform rules**: only the rules in the platform card. Style preferences that ktlint, ESLint or `dart format` do not enforce are not findings.
 5. **Scope**: files touched outside the handoff's list; renames or refactors not asked for.
+6. **Eyeball**: the handoff has an `## Eyeball` block with 2 to 6 checks, and every acceptance
+   criterion is covered by at least one check. If the implementer changed a route or account, the
+   check's `url` / `as` were corrected to match. Missing coverage of an AC is a finding like any
+   other; `REQUEST CHANGES` if the block is absent or does not cover every criterion.
 
 ## Decision
 `APPROVE` when every criterion is met and there is no finding in 2 to 5 above. Otherwise `REQUEST CHANGES` with findings ranked by severity, each with file:line, what is wrong, and the smallest fix. Post the verdict as a PR review comment with `gh pr review <n> --comment --body` (never `--approve`; merging is the user's decision) and end your message with the same text.

@@ -1,0 +1,84 @@
+# Services the console can prepare/start/stop/health-check in the checkout under test. `cwd` is
+# relative to that checkout. `health` is a URL (HTTP 2xx/3xx = up) or `tcp:<port>`. Services with
+# `manual: true` are not started by the console; they are listed so the panel can show what the
+# tester must start themselves. `stop` is a real shell command, run in `cwd`, used only when there
+# is no tracked process to kill (a `start` that detaches, like `docker compose up -d`, which exits
+# immediately on its own); everything the console starts as a foreground process is stopped by
+# killing its process group, with no `stop` command needed.
+#
+# `prepare` (optional) describes the background step that gets a fresh checkout ready before
+# `start` can succeed: `marker` is a path (relative to `cwd`) whose absence means prepare is
+# needed; `newer_than` (optional) is a second path that, when newer than `marker`, also means
+# prepare is needed (a lockfile bumped since the last install); `command` is the shell command to
+# run; `copy` is a list of {src (relative to the repo root), dest (relative to `cwd`)} files
+# copied in only when `dest` does not already exist.
+
+db:
+  cwd: infrastructure/docker
+  start: docker compose up -d
+  stop: docker compose stop
+  health: "tcp:5435"
+  url: "postgresql://localhost:5435"
+
+backend:
+  cwd: backend
+  # The local profile is required: bootstrap.super-user (application-local.yml) only loads under
+  # it, and BootstrapConfig.enabled defaults to false without it, so the super_user account and
+  # W22-W24/W29/W30-style checks cannot be exercised on a backend started any other way.
+  start: SPRING_PROFILES_ACTIVE=local ./gradlew bootRun
+  # The liveness group answers in milliseconds; the full health endpoint aggregates every indicator.
+  health: http://localhost:8080/actuator/health/liveness
+  url: http://localhost:8080
+  prepare:
+    copy:
+      - src: backend/src/main/resources/application-local.yml
+        dest: src/main/resources/application-local.yml
+
+web:
+  cwd: web
+  # The web client falls back to the mock API on 3001 unless VITE_API_URL is set; a fresh
+  # checkout has no .env, so point it at the backend explicitly.
+  start: VITE_API_URL=http://localhost:8080/api/v1 pnpm dev
+  health: http://localhost:3000
+  url: http://localhost:3000
+  prepare:
+    marker: node_modules
+    newer_than: pnpm-lock.yaml
+    command: pnpm install --frozen-lockfile
+
+storybook:
+  cwd: web
+  start: VITE_API_URL=http://localhost:8080/api/v1 pnpm storybook
+  health: http://localhost:6006
+  url: http://localhost:6006
+  prepare:
+    marker: node_modules
+    newer_than: pnpm-lock.yaml
+    command: pnpm install --frozen-lockfile
+
+mock-api:
+  cwd: infrastructure/mock-api
+  start: npm start
+  health: http://localhost:3001
+  url: http://localhost:3001
+  prepare:
+    marker: node_modules
+    command: npm install
+
+mobile:
+  cwd: mobile
+  start: flutter run
+  manual: true
+  # `emulator_host`/`api_port` are read by scripts/console/mobile.py for the Phone panel's own
+  # --dart-define values (a phone gets this machine's LAN address instead of emulator_host); kept
+  # here, not hardcoded in mobile.py, so a project using this console for a different backend port
+  # or emulator convention stays correct without a code change. See mobile/CLAUDE.md and
+  # mobile/lib/shared/providers/dio_provider.dart for the --dart-define=API_HOST/API_PORT contract.
+  emulator_host: "10.0.2.2"
+  api_port: 8080
+  notes: >-
+    The emulator reaches the backend on 10.0.2.2:8080; run and stop it yourself in a terminal.
+    A physical phone can be installed and run from the Eyeball page's Phone panel instead.
+  prepare:
+    marker: .dart_tool
+    command: flutter pub get

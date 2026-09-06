@@ -413,6 +413,8 @@ Uploading stores the file only; it does not change the pod. Persist the returned
 
 ## Messages
 
+`admin_welcome` messages are created by `POST /pod/administrators` and carry `metadata.tasks`, a list of strings.
+
 ### GET /messages
 List messages for authenticated user with optional filtering.
 

@@ -34,8 +34,9 @@ The task names a handoff file under `specs/features/<feature>/`. Read, in this o
 2. Write the failing test(s) named in the handoff first (provider tests with `ProviderContainer` overrides, widget tests in `ProviderScope`). Run them; they must fail for the expected reason.
 3. Implement the minimum that makes them pass: model → API → repository → provider → page/widget. Run `dart run build_runner build --delete-conflicting-outputs` after model or provider changes.
 4. Run `dart format lib test`, then the "Done when" commands (`flutter analyze --fatal-infos`, `flutter test`) once, at the end; while iterating run only the affected test files. All must exit 0.
-5. Update the handoff frontmatter: `status: completed`, `files_changed`, `tests_added`.
-6. Commit with `feat(mobile): <story title> (#<issue>)` and push the branch. Do not open the PR.
+5. If the target screen name or an account's role changed from what the handoff's `Eyeball` block assumed, correct that block's `url` (the screen name) and `as` fields so a tester can still follow it.
+6. Update the handoff frontmatter: `status: completed`, `files_changed`, `tests_added`.
+7. Commit with `feat(mobile): <story title> (#<issue>)` and push the branch. Do not open the PR.
 
 ## Rules
 - Reuse before create: check `shared/widgets/` and add a variant before adding a widget. Theme tokens and sizing constants only.
