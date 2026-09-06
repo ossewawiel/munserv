@@ -296,6 +296,9 @@
   "podAdministrators": {
     "filters": {
       "comingSoon": "Filtrering is nog nie geaktiveer nie. Wanneer dit is, verskyn rol- en toewysingsfilters hier en die telling wys op die Filters-knoppie."
+    },
+    "errors": {
+      "emailExists": "'n Administrateur met hierdie e-posadres bestaan reeds"
     }
   }
 }
