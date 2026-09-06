@@ -25,6 +25,12 @@ let candidatesLoadError = null;
 let retryTimer = null;
 let preparedSummary = [];
 let runningStep = null; // 'checkout' | 'prepare' | 'start' | null -- a single step button in flight
+let mobileDevices = [];
+let mobileLanIp = null;
+let mobileApiPort = null;
+let mobileEmulatorHost = null;
+let mobileLoadError = null;
+let mobileTimer = null;
 
 // Human labels for what Prepare actually did, by service name -- the console's own services.yaml
 // controls what "prepare" means for a given service (an npm/pnpm install, `flutter pub get`, a
@@ -361,6 +367,120 @@ function logPanel() {
     el('div', { class: 'log-drawer' }, el('pre', { id: 'log-pre' }, '')));
 }
 
+// --- right column: phone panel -----------------------------------------
+
+async function loadMobileState() {
+  try {
+    const data = await apiGet('/api/mobile/devices');
+    mobileDevices = data.devices || [];
+    mobileLanIp = data.lan_ip;
+    mobileApiPort = data.api_port;
+    mobileEmulatorHost = data.emulator_host;
+    mobileLoadError = null;
+  } catch (e) {
+    mobileLoadError = e.message;
+  }
+  renderAll();
+}
+
+async function installToDevice(deviceId) {
+  try {
+    await apiPost('/api/mobile/install', { device_id: deviceId });
+    await refreshFastState();
+  } catch (e) {
+    ctx.toast('Could not install: ' + e.message, 'error');
+  }
+}
+
+async function runOnDevice(deviceId) {
+  try {
+    await apiPost('/api/mobile/run', { device_id: deviceId });
+    await refreshFastState();
+    logService = 'mobile';
+    startLogPolling();
+    ctx.toast('flutter run starting - watch the log below.', 'success');
+  } catch (e) {
+    ctx.toast('Could not run: ' + e.message, 'error');
+  }
+}
+
+async function stopMobileRun() {
+  try {
+    await apiPost('/api/service/stop', { name: 'mobile' });
+    await refreshFastState();
+  } catch (e) {
+    ctx.toast('Could not stop: ' + e.message, 'error');
+  }
+}
+
+function currentMobileInstallJob() {
+  const jobs = (fastState && fastState.jobs) || [];
+  return jobs.filter((j) => j.service === 'mobile' && j.kind === 'install')
+    .sort((a, b) => b.started_at - a.started_at)[0] || null;
+}
+
+function mobileRunRow() {
+  const rows = (fastState && fastState.services) || [];
+  return rows.find((r) => r.name === 'mobile') || null;
+}
+
+function phoneDeviceRow(d, disabled, disabledReason) {
+  const { el } = ctx;
+  const unauthorized = d.state !== 'device';
+  const rowDisabled = disabled || unauthorized;
+  const title = unauthorized ? 'Accept the debugging prompt on the phone first.' : disabledReason;
+  const label = (d.model ? d.model.replace(/_/g, ' ') : d.id) + ' · ' + d.state;
+  return el('div', { class: 'service-row' },
+    el('span', { class: 'dot ' + (unauthorized ? 'down' : 'up') }),
+    el('span', { class: 'name' }, label),
+    el('div', { style: 'display:flex;gap:4px' },
+      el('button', { disabled: rowDisabled, title, onclick: () => installToDevice(d.id) }, 'Install latest'),
+      el('button', { disabled: rowDisabled, title, onclick: () => runOnDevice(d.id) }, 'Run')));
+}
+
+function noDeviceHelp() {
+  const { el, emptyState } = ctx;
+  return el('div', { style: 'margin-top:8px' },
+    emptyState('No device connected'),
+    el('ol', { class: 'steps', style: 'margin-top:6px' },
+      el('li', {}, 'On the phone: Settings -> About phone -> tap "Build number" seven times to enable Developer options.'),
+      el('li', {}, 'Settings -> Developer options -> turn on USB debugging (or Wireless debugging).'),
+      el('li', {}, 'Plug in the phone by USB, or pair it under Wireless debugging -> Pair device with a code.'),
+      el('li', {}, 'Accept the "Allow USB debugging" prompt that appears on the phone.'),
+      el('li', {}, 'Run '), el('code', {}, 'adb devices'), ' in a terminal to confirm it shows up, then Refresh here.'),
+    el('div', { style: 'margin-top:8px;font-size:12px;color:var(--muted)' },
+      'No phone handy? The emulator already reaches the backend on ',
+      el('code', {}, (mobileEmulatorHost || '10.0.2.2') + ':' + (mobileApiPort || 8080)),
+      ' -- see the manual mobile row in Services above.'));
+}
+
+function phonePanel() {
+  const { el } = ctx;
+  if (!fastState) return null;
+  const installJob = currentMobileInstallJob();
+  const installRunning = installJob && installJob.status === 'running';
+  const runRow = mobileRunRow();
+  const runRunning = !!(runRow && runRow.running);
+  const busy = installRunning || runRunning;
+  const busyReason = installRunning ? 'An install is already running.'
+    : runRunning ? 'flutter run is already running on this phone.' : '';
+  const addr = mobileLanIp ? 'http://' + mobileLanIp + ':' + (mobileApiPort || 8080) : null;
+  return el('div', { id: 'phone-panel' },
+    el('div', { style: 'font-size:12px;color:var(--muted)' },
+      'Your phone will call: ', addr ? el('code', {}, addr) : el('span', {}, 'could not detect a LAN address on this machine')),
+    el('div', { style: 'font-size:11px;color:var(--muted);margin-top:2px;margin-bottom:8px' },
+      'The phone must be on the same network as this machine, and the backend service above must be running.'),
+    mobileLoadError ? el('div', { class: 'step-h-warn' }, 'Could not list devices: ' + mobileLoadError) : null,
+    mobileDevices.length
+      ? mobileDevices.map((d) => phoneDeviceRow(d, busy, busyReason))
+      : noDeviceHelp(),
+    installJob ? el('div', { style: 'margin-top:8px;font-size:12px;color:var(--muted)' },
+      'Install: ' + (installJob.status === 'running' ? 'running...' : installJob.status + ' - ' + installJob.message)) : null,
+    runRunning ? el('div', { style: 'margin-top:8px;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center' },
+      el('span', {}, 'flutter run is active - see its log below.'),
+      el('button', { onclick: stopMobileRun }, 'Stop')) : null);
+}
+
 function rightColumn() {
   const { el, emptyState } = ctx;
   if (!fastState) return el('div', { class: 'card' }, emptyState('Loading services...'));
@@ -371,7 +491,16 @@ function rightColumn() {
       el('div', { style: 'margin-top:10px;font-size:12px;color:var(--muted)' }, 'Checkout: ',
         el('code', {}, (fastState.checkout.branch || 'none') + (fastState.checkout.sha ? ' @ ' + fastState.checkout.sha : ''))),
       fastState.checkout.notice ? el('div', { style: 'margin-top:6px;font-size:12px;color:var(--muted)' }, fastState.checkout.notice) : null,
+      fastState.checkout.local_files_copied && fastState.checkout.local_files_copied.length
+        ? el('div', { style: 'margin-top:6px;font-size:12px;color:var(--muted)' },
+            'Copied ' + fastState.checkout.local_files_copied.join(', ') + ' from the main checkout.')
+        : null,
       el('div', { style: 'margin-top:6px' }, 'Latest OTP: ', el('code', {}, fastState.otp || '-'))),
+    el('div', { class: 'card' },
+      el('div', { style: 'display:flex;justify-content:space-between;align-items:center' },
+        el('h3', {}, 'Phone'),
+        el('button', { onclick: loadMobileState }, 'Refresh')),
+      phonePanel()),
     el('div', { class: 'card' }, el('h3', {}, 'Log' + (logService ? ': ' + logService : '')), logPanel()));
 }
 
@@ -382,6 +511,10 @@ function checkCard(check, index) {
   const account = check.as ? accounts[check.as] : null;
   return el('div', { class: 'card', id: index === 0 ? 'first-check' : null },
     el('div', { style: 'display:flex;justify-content:space-between' }, el('h3', {}, check.title), el('span', {}, check.id)),
+    (check.services || []).includes('mobile') ? el('a', {
+      href: '#phone-panel', style: 'font-size:11px', class: 'step-h-link',
+      onclick: (e) => { e.preventDefault(); document.getElementById('phone-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
+    }, '📱 Phone') : null,
     account ? el('div', { style: 'font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center' },
       'Account: ', el('code', {}, account.email || account.phone || check.as),
       account.password ? ' / ' + account.password : (account.pin ? ' / PIN ' + account.pin : ''),
@@ -544,10 +677,13 @@ export const eyeballSection = {
     } catch (e) { /* covered by global banner */ }
     await loadCandidates(false);
     candidatesTimer = setInterval(() => loadCandidates(false), 60000);
+    await loadMobileState();
+    mobileTimer = setInterval(loadMobileState, 10000);
   },
   unmount() {
     clearInterval(candidatesTimer);
     clearInterval(logTimer);
+    clearInterval(mobileTimer);
     clearTimeout(retryTimer);
   },
   onFastState(data) {

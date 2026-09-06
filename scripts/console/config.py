@@ -110,6 +110,21 @@ class Config:
         return self.root / self._raw().get("tokens", "design/tokens/color.tokens.json")
 
     @property
+    def local_files(self) -> list[str]:
+        """Paths (relative to the repo root) of untracked, machine-local config a fresh checkout
+        never has -- a tool-version pin (mise/asdf) or a local override file -- copied in from the
+        main repo on checkout and before Prepare/Start so the checkout under test behaves like the
+        tester's own working copy instead of failing with e.g. `mise ERROR No version is set for
+        shim: flutter`. See gitops.copy_local_files."""
+        return self._raw().get("local_files") or [
+            "mise.local.toml",
+            ".tool-versions",
+            ".mise.toml",
+            "backend/src/main/resources/application-local.yml",
+            "web/.env",
+        ]
+
+    @property
     def changelog(self) -> Path:
         return self.root / self._raw().get("changelog", "CHANGELOG.md")
 

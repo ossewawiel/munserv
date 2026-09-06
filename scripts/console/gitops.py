@@ -6,6 +6,7 @@ that may already have been written into the checkout directory before the first 
 """
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import subprocess
@@ -118,6 +119,71 @@ def _restore_state(checkout: Path, tmp: Path | None) -> None:
     shutil.move(str(tmp), str(dest))
 
 
+# --- local-only config -------------------------------------------------------
+#
+# A fresh checkout is a real `git worktree`, so it has everything git tracks -- but nothing a
+# tester's own working copy keeps locally and gitignored: `application-local.yml` (solved once,
+# service-specifically, by services.yaml's own `prepare.copy`), and, more generally, whatever tool
+# manages this machine's toolchain versions (mise's `mise.local.toml`, asdf/mise's
+# `.tool-versions`). Without it, a step as simple as `flutter pub get` fails with
+# "mise ERROR No version is set for shim: flutter" -- a checkout that otherwise looks identical to
+# the tester's own. `project.yaml`'s `local_files` lists what to copy in; see Config.local_files.
+
+def local_files_state_file(checkout: Path) -> Path:
+    return state_root(checkout) / "local_files_copied.json"
+
+
+def local_files_copied(checkout: Path) -> list[str]:
+    """Every local file copied into `checkout` so far (across every checkout and every
+    Prepare/Start since), for the UI to show under the checkout chip. Not merely "does the file
+    exist right now" -- a file already tracked by git is deliberately never in this list even if
+    present, see copy_local_files."""
+    f = local_files_state_file(checkout)
+    if not f.exists():
+        return []
+    try:
+        return json.loads(f.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def _record_local_files_copied(checkout: Path, newly_copied: list[str]) -> None:
+    if not newly_copied:
+        return
+    merged = sorted(set(local_files_copied(checkout)) | set(newly_copied))
+    local_files_state_file(checkout).parent.mkdir(parents=True, exist_ok=True)
+    local_files_state_file(checkout).write_text(json.dumps(merged), encoding="utf-8")
+
+
+def _is_tracked(relpath: str, root: Path) -> bool:
+    result = subprocess.run(["git", "-C", str(root), "ls-files", "--error-unmatch", relpath],
+                             text=True, capture_output=True)
+    return result.returncode == 0
+
+
+def copy_local_files(checkout: Path, root: Path | None = None,
+                      file_list: list[str] | None = None) -> list[str]:
+    """Copy each configured local file from `root` (the main repo) into `checkout` when: the main
+    repo actually has it, the checkout does not have it yet (never overwrite -- a tester's own
+    edits to the copy survive a later Prepare/Start), and git does not track it (a tracked file
+    already arrives with the checkout on its own; copying over it could mask a real diff between
+    branches). Returns the paths (relative to the repo root) copied by *this* call; the running
+    total across every call is in `local_files_copied`."""
+    root = root or ROOT
+    file_list = CONFIG.local_files if file_list is None else file_list
+    copied: list[str] = []
+    for relpath in file_list:
+        src = root / relpath
+        dest = checkout / relpath
+        if not src.is_file() or dest.exists() or _is_tracked(relpath, root):
+            continue
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dest)
+        copied.append(relpath)
+    _record_local_files_copied(checkout, copied)
+    return copied
+
+
 def checkout_branch(checkout: Path, branch: str) -> str:
     checkout.parent.mkdir(parents=True, exist_ok=True)
     if is_worktree(checkout):
@@ -133,6 +199,7 @@ def checkout_branch(checkout: Path, branch: str) -> str:
         _restore_state(checkout, preserved)
     branch_state_file(checkout).parent.mkdir(parents=True, exist_ok=True)
     branch_state_file(checkout).write_text(branch, encoding="utf-8")
+    copy_local_files(checkout)
     return current_branch(checkout)
 
 
