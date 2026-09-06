@@ -1,5 +1,5 @@
 ---
-issue: 128
+issue: 132
 story: W18c
 title: "Snackbar feedback and a Reset action on the pod identity form"
 platform: web
