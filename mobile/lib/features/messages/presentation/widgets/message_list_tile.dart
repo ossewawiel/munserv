@@ -81,6 +81,7 @@ class MessageListTile extends StatelessWidget {
       ),
       MessageType.memberRegistration => (Icons.person_add, Colors.teal),
       MessageType.monthlyReport => (Icons.assessment, Colors.indigo),
+      MessageType.adminWelcome => (Icons.celebration, Colors.green),
     };
 
     return CircleAvatar(

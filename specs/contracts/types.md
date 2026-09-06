@@ -194,6 +194,7 @@ when the super user logs in under an active grant instead of via bootstrap. See
 | verify_fix | Request to verify fix |
 | member_registration | New member registration notification |
 | monthly_report | Monthly activity report |
+| admin_welcome | Welcome message with initial tasks for a new administrator |
 
 ### MessageStatus
 @enum @generate(kotlin, typescript, dart)

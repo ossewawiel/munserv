@@ -3,7 +3,7 @@ issue: 95
 story: B10
 title: "New administrator receives a welcome message"
 platform: backend
-status: pending
+status: completed
 depends_on: []
 touches:
   - domain
@@ -18,8 +18,30 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-06"
-files_changed: []
-tests_added: []
+files_changed:
+  - domain/language.yaml
+  - domain/message.md
+  - specs/contracts/types.md
+  - specs/contracts/api.md
+  - backend/src/main/resources/db/migration/V036__add_admin_welcome_message_type.sql
+  - backend/src/main/kotlin/com/munserv/shared/enums/MessageType.kt
+  - backend/src/main/kotlin/com/munserv/messages/service/MessageFactory.kt
+  - backend/src/main/kotlin/com/munserv/pod/service/PodAdministratorService.kt
+  - backend/src/main/kotlin/com/munserv/pod/api/PodAdministratorController.kt
+  - backend/src/test/kotlin/com/munserv/messages/service/MessageFactoryTest.kt
+  - backend/src/test/kotlin/com/munserv/pod/service/PodAdministratorServiceTest.kt
+  - backend/src/test/kotlin/com/munserv/pod/api/PodAdministratorControllerTest.kt
+  - mobile/lib/shared/models/message.dart
+  - mobile/lib/shared/models/message.g.dart
+  - mobile/lib/features/messages/presentation/pages/message_detail_page.dart
+  - mobile/lib/features/messages/presentation/widgets/message_list_tile.dart
+tests_added:
+  - "MessageFactoryTest.AdminWelcome > should create an admin welcome message for a new administrator"
+  - "MessageFactoryTest.AdminWelcome > should carry the initial tasks and role in metadata"
+  - "PodAdministratorServiceTest > should create a welcome message when the administrator is created"
+  - "PodAdministratorServiceTest > should not create a message when creation fails"
+  - "PodAdministratorServiceTest > should return the result of the admin service unchanged"
+  - "PodAdministratorControllerTest.CreateAdministrator > should route creation through the pod administrator service"
 ---
 
 # B10 · New administrator receives a welcome message (Backend)
@@ -32,11 +54,11 @@ An administrator created through `POST /pod/administrators` finds an unread `adm
 in `GET /messages` listing the tasks that start their onboarding.
 
 ## Acceptance criteria
-- [ ] `admin_welcome` is a message type in `domain/language.yaml`, `domain/message.md`, `com.munserv.shared.enums.MessageType`, the `message_type` database enum, `specs/contracts/types.md` and the Dart `MessageType`
-- [ ] `POST /pod/administrators` creates one unread `admin_welcome` message addressed to the newly created administrator (`recipientType: "admin"`, `senderType: "system"`, `actionType: "acknowledge"`)
-- [ ] The message body names the administrator and its `metadata.tasks` carries the initial tasks as a list of strings
-- [ ] `GET /messages` returns that message to the new administrator, and the unread count includes it
-- [ ] `python3 scripts/validate-domain-language.py` exits 0 and `./gradlew ktlintCheck test` passes
+- [x] `admin_welcome` is a message type in `domain/language.yaml`, `domain/message.md`, `com.munserv.shared.enums.MessageType`, the `message_type` database enum, `specs/contracts/types.md` and the Dart `MessageType`
+- [x] `POST /pod/administrators` creates one unread `admin_welcome` message addressed to the newly created administrator (`recipientType: "admin"`, `senderType: "system"`, `actionType: "acknowledge"`)
+- [x] The message body names the administrator and its `metadata.tasks` carries the initial tasks as a list of strings
+- [x] `GET /messages` returns that message to the new administrator, and the unread count includes it
+- [x] `python3 scripts/validate-domain-language.py` exits 0 and `./gradlew ktlintCheck test` passes
 
 ## Visual (ui stories only)
 None.
@@ -116,7 +138,7 @@ and `specs/contracts/types.md`. The validator replays enum DDL and compares the 
    `@MockkBean private lateinit var podAdministratorService: PodAdministratorService` and restub the
    four cases in `inner class CreateAdministrator` from `adminService.createAdmin(any(), testAdminId)`
    to `podAdministratorService.createAdministrator(any(), testAdminId)` (same returns, same
-   assertions); add `should send a welcome message when the administrator is created` only if you can
+   assertions); add `should route creation through the pod administrator service` only if you can
    assert it through the mocked service call, not by reaching into the repository.
 8. `mobile/lib/shared/models/message.dart`: add `@JsonValue('admin_welcome') adminWelcome` as the
    last `MessageType` constant and `adminWelcome => 'Welcome'` to the `displayName` switch (it is
@@ -147,3 +169,34 @@ cd ../mobile && dart format lib test && flutter analyze --fatal-infos && flutter
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a
 summary of changes. If you cannot finish, set `status: blocked` and end your message with
 `BLOCKED: <reason>`.
+
+## Eyeball
+```yaml
+- id: E1
+  title: New administrator gets a welcome message
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/pod-administrators
+  steps:
+    - Click "Add administrator", enter a new email and display name, pick the Pod Admin role, submit.
+    - Copy the temporary password shown in the confirmation.
+    - Log out, then log in as the new administrator with that temporary password and set a new one.
+    - Open http://localhost:3000/messages.
+  expect: One unread message of type "Welcome" addressed to the new administrator, listing the initial tasks, and the sidebar Messages badge shows 1.
+- id: E2
+  title: Failed creation sends nothing
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/pod-administrators
+  steps:
+    - Click "Add administrator" and submit with the email of an administrator that already exists.
+  expect: The form shows the duplicate-email error and no new message appears for anyone (check the pod chief's own messages list stays unchanged).
+- id: E3
+  title: Mobile still renders every message type
+  as: member
+  services: [db, backend, mobile]
+  url: Messages screen
+  steps:
+    - Log in as the member (OTP from the backend log) and open Messages.
+  expect: The list loads without error; existing message types keep their icons and labels.
+```
