@@ -21,7 +21,8 @@
     "yes": "Yebo",
     "no": "Cha",
     "close": "Vala",
-    "notAvailable": "Ayitholakali"
+    "notAvailable": "Ayitholakali",
+    "comingSoon": "Kuzayo maduze"
   },
   "auth": {
     "login": "Ngena ngemvume",
@@ -282,6 +283,22 @@
       "nameTooShort": "Igama le-Pod kufanele libe okungenani izinhlamvu ezingu-2.",
       "nameTooLong": "Igama le-Pod kufanele libe izinhlamvu ezingu-100 noma ngaphansi.",
       "logoUrlTooLong": "I-URL Yelogo kufanele ibe izinhlamvu ezingu-500 noma ngaphansi."
+    },
+    "boundaries": {
+      "configure": "Hlela imingcele",
+      "comingSoonHint": "Ukuhlela imingcele akukatholakali okwamanje.",
+      "pod": {
+        "title": "Imingcele ye-Pod",
+        "description": "Dweba isimo sonke se-pod. Imibiko evela ngaphandle kwayo iyenqatshwa, futhi yonke imephu ivula kuyo."
+      },
+      "ward": {
+        "title": "Imingcele yeWadi",
+        "description": "Dweba umugqa wewadi ngayinye ukuze isikhulu sewadi sibone kahle indawo esiphethe yona."
+      },
+      "sector": {
+        "title": "Imingcele yeSekthi",
+        "description": "Dweba umugqa wesekthi ngayinye ukuze inkinga ifinyelele kusekthi efanele iqhamuka kusuka endaweni ye-GPS lapho ibikwe khona."
+      }
     }
   }
 }

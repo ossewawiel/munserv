@@ -21,7 +21,8 @@
     "yes": "Ja",
     "no": "Nee",
     "close": "Sluit",
-    "notAvailable": "N.v.t."
+    "notAvailable": "N.v.t.",
+    "comingSoon": "Binnekort beskikbaar"
   },
   "auth": {
     "login": "Teken aan",
@@ -282,6 +283,22 @@
       "nameTooShort": "Pod-naam moet ten minste 2 karakters wees.",
       "nameTooLong": "Pod-naam moet 100 karakters of minder wees.",
       "logoUrlTooLong": "Logo-URL moet 500 karakters of minder wees."
+    },
+    "boundaries": {
+      "configure": "Stel grense op",
+      "comingSoonHint": "Grensredigering is nog nie beskikbaar nie.",
+      "pod": {
+        "title": "Pod-grense",
+        "description": "Teken die buitelyn van die hele pod. Verslae van buite dit word geweier, en elke kaart open daarop."
+      },
+      "ward": {
+        "title": "Wyk-grense",
+        "description": "Teken elke wyk se buitelyn sodat 'n wykhoof presies die gebied sien waarvoor hulle verantwoordelik is."
+      },
+      "sector": {
+        "title": "Sektor-grense",
+        "description": "Teken elke sektor se buitelyn sodat 'n voorval die regte sektor bereik vanaf die GPS-punt waar dit aangemeld is."
+      }
     }
   }
 }
