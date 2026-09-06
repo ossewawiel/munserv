@@ -1,12 +1,19 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { I18nextProvider } from 'react-i18next';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import i18n from 'i18next';
 
 import { ReportsPage } from './ReportsPage';
+
+/** Renders the current router search string so tests can assert on it without reaching into history internals. */
+function LocationSearchDisplay() {
+  const location = useLocation();
+  return <div data-testid="location-search">{location.search}</div>;
+}
 
 // Mock useThemeContext - need to mock both locations it's imported from
 const mockUseThemeContext = vi.fn();
@@ -143,6 +150,7 @@ function renderReportsPage({ initialRoute = '/reports/general' }: RenderOptions 
       <ThemeProvider theme={theme}>
         <I18nextProvider i18n={i18n}>
           <MemoryRouter initialEntries={[initialRoute]}>
+            <LocationSearchDisplay />
             <Routes>
               <Route path="/reports/general" element={<ReportsPage scope="pod" />} />
               <Route path="/reports/ward/:wardId" element={<ReportsPage scope="ward" />} />
@@ -171,11 +179,14 @@ describe('ReportsPage', () => {
     expect(screen.getAllByText('Ward North').length).toBeGreaterThan(0);
   });
 
-  it('should put the selected tab in the query string', () => {
-    renderReportsPage({ initialRoute: '/reports/general?tab=issues' });
+  it('should put the selected tab in the query string', async () => {
+    const user = userEvent.setup();
+    renderReportsPage({ initialRoute: '/reports/general' });
 
-    const issuesTab = screen.getByRole('tab', { name: 'Issues' });
-    expect(issuesTab).toHaveAttribute('aria-selected', 'true');
+    await user.click(screen.getByRole('tab', { name: 'Issues' }));
+
+    expect(screen.getByRole('tab', { name: 'Issues' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('location-search')).toHaveTextContent('?tab=issues');
   });
 
   it('should fall back to the summary tab for an unknown tab value', () => {

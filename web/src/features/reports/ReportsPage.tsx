@@ -48,8 +48,9 @@ export const ReportsPage: FC<ReportsPageProps> = ({ scope }) => {
   const handleTabChange = useCallback(
     (value: ReportTab) => {
       setSearchParams((prev) => {
-        prev.set('tab', value);
-        return prev;
+        const next = new URLSearchParams(prev);
+        next.set('tab', value);
+        return next;
       });
     },
     [setSearchParams]

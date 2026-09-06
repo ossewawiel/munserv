@@ -3,7 +3,6 @@ import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import type { AdminUser } from '@/features/auth/types';
 import { ReportsPage } from './ReportsPage';
 
@@ -55,14 +54,7 @@ export const General: Story = {
   decorators: [withAuth()],
   render: () => (
     <Routes>
-      <Route
-        path="/reports/general"
-        element={
-          <DashboardLayout>
-            <ReportsPage scope="pod" />
-          </DashboardLayout>
-        }
-      />
+      <Route path="/reports/general" element={<ReportsPage scope="pod" />} />
     </Routes>
   ),
 };
@@ -73,14 +65,7 @@ export const WardScope: Story = {
   decorators: [withAuth()],
   render: () => (
     <Routes>
-      <Route
-        path="/reports/ward/:wardId"
-        element={
-          <DashboardLayout>
-            <ReportsPage scope="ward" />
-          </DashboardLayout>
-        }
-      />
+      <Route path="/reports/ward/:wardId" element={<ReportsPage scope="ward" />} />
     </Routes>
   ),
 };
