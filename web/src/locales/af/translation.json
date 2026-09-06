@@ -269,5 +269,10 @@
   "podSettings": {
     "title": "Pod-instellings",
     "subtitle": "Pod-wye konfigurasie, insluitend ondersteuningstoegang vir die Sentrale Owerheid."
+  },
+  "podAdministrators": {
+    "errors": {
+      "emailExists": "'n Administrateur met hierdie e-posadres bestaan reeds"
+    }
   }
 }

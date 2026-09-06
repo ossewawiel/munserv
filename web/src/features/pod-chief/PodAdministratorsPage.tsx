@@ -77,8 +77,9 @@ export const PodAdministratorsPage: FC = () => {
   // Handlers
   const handleCreateClick = useCallback(() => {
     setTemporaryPassword(undefined);
+    createAdmin.reset();
     setCreateDialogOpen(true);
-  }, []);
+  }, [createAdmin]);
 
   const handleCreateSubmit = useCallback(
     (formData: CreatePodAdministratorRequest) => {
@@ -300,6 +301,7 @@ export const PodAdministratorsPage: FC = () => {
         onSubmit={handleCreateSubmit}
         isLoading={createAdmin.isPending}
         temporaryPassword={temporaryPassword}
+        error={createAdmin.error}
       />
 
       {/* Edit Admin Dialog */}

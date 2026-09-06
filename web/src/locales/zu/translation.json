@@ -269,5 +269,10 @@
   "podSettings": {
     "title": "Izilungiselelo ze-Pod",
     "subtitle": "Ukulungiswa kwe-pod jikelele, okuhlanganisa ukufinyelela kokusekela kweGunya Eliyisikhulu."
+  },
+  "podAdministrators": {
+    "errors": {
+      "emailExists": "Kunomphathi osesekhona onale imeyili"
+    }
   }
 }
