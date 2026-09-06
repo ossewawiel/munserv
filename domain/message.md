@@ -22,7 +22,7 @@ Types: `ground_admin_invitation`, `ground_admin_application`, `ground_admin_appr
 ## Invariants
 - Actionable types carry an action payload; acting on a message performs the domain operation (for example accepting a ground admin invitation) and marks it `actioned`.
 - A message is addressed to one recipient: a member or an admin.
-- `admin_welcome` is created when an administrator account is created and carries its initial tasks in `metadata.tasks`.
+- `admin_welcome` is created when a pod chief creates an administrator through `POST /pod/administrators` and carries the initial tasks in `metadata.tasks`.
 
 ## Relationships
 - Produced by [ground admin](ground-admin.md) and [verification](verification.md) flows and by member registration.

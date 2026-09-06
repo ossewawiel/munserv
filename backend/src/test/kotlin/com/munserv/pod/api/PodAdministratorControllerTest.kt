@@ -236,7 +236,7 @@ class PodAdministratorControllerTest {
         }
 
         @Test
-        fun `should send a welcome message when the administrator is created`() {
+        fun `should route creation through the pod administrator service`() {
             val createdAdmin =
                 Admin(
                     id = AdminId.generate(),
@@ -271,9 +271,6 @@ class PodAdministratorControllerTest {
                     status { isCreated() }
                 }
 
-            // The welcome message is sent by PodAdministratorService, which owns the
-            // admin creation + message creation transaction; the controller only has to
-            // delegate to it, which this call proves.
             verify(exactly = 1) { podAdministratorService.createAdministrator(any(), testAdminId) }
         }
 
