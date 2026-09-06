@@ -20,7 +20,7 @@ design_artboards:
   - IdentityServerError.dc.html
   - IdentitySaved.dc.html
   - HeaderStates.dc.html
-design_approved: false
+design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
 files_changed: []
