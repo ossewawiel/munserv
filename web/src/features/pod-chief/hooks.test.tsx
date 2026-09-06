@@ -30,7 +30,7 @@ describe('pod-chief hooks', () => {
       server.use(
         http.post('*/pod/administrators', () =>
           HttpResponse.json(
-            { error: { code: 'email_exists', message: 'Email admin@example.com is already registered' } },
+            { code: 'email_exists', message: 'Email admin@example.com is already registered' },
             { status: 409 }
           )
         )
@@ -54,7 +54,7 @@ describe('pod-chief hooks', () => {
       expect(error).toBeInstanceOf(AxiosError);
       if (error instanceof AxiosError) {
         expect(error.response?.status).toBe(409);
-        expect(error.response?.data.error.code).toBe('email_exists');
+        expect(error.response?.data.code).toBe('email_exists');
       }
     });
   });
