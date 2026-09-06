@@ -134,6 +134,78 @@ class SubmitGuardTests(unittest.TestCase):
                 eyeball.submit(candidate, data, Path(d))
 
 
+class SubmitImprovementTests(unittest.TestCase):
+    """A check ticked Pass, with a note, and "File as improvement" checked must file a
+    `type:feature` issue on submit -- same title format and body shape as a failed check's
+    `type:bug` issue, and the submission's per-check result and PR comment table must both carry
+    an "improvement" marker."""
+
+    def test_a_passing_check_marked_improvement_files_a_type_feature_issue(self):
+        candidate = {
+            "id": "smoke", "kind": "smoke", "number": None, "story": "SMOKE", "platform": "web",
+            "url": "", "checks": [{"id": "S1", "title": "Some check", "as": "none", "services": [],
+                                    "url": "", "steps": [], "expect": "e"}],
+        }
+        data = {
+            "candidate": "smoke",
+            "checks": {"S1": {"result": "pass", "note": "would make a nice shortcut",
+                               "file_as_improvement": True, "issue_url": None}},
+            "observations": [],
+        }
+        original_ensure_labels = eyeball.ensure_labels
+        original_search = eyeball.search_open_issues
+        original_run_captured = eyeball.run_captured
+        eyeball.ensure_labels = lambda: None
+        eyeball.search_open_issues = lambda prefix: []
+        captured = {}
+
+        class FakeResult:
+            stdout = "https://github.com/x/y/issues/42\n"
+
+        def fake_run_captured(args, cwd=None, check=True):
+            captured["args"] = args
+            return FakeResult()
+
+        eyeball.run_captured = fake_run_captured
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                result = eyeball.submit(candidate, data, Path(d))
+        finally:
+            eyeball.ensure_labels = original_ensure_labels
+            eyeball.search_open_issues = original_search
+            eyeball.run_captured = original_run_captured
+
+        self.assertEqual(result["checks"]["S1"]["issue_url"], "https://github.com/x/y/issues/42")
+        self.assertFalse(result["checks"]["S1"]["issue_reused"])
+        args = captured["args"]
+        title = args[args.index("--title") + 1]
+        self.assertEqual(title, "[Eyeball] SMOKE S1: Some check")
+        body = args[args.index("--body") + 1]
+        self.assertIn("would make a nice shortcut", body)
+        self.assertTrue(any("type:feature" in a for a in args))
+        self.assertFalse(any(a.startswith("type:bug") or ",type:bug" in a for a in args))
+
+    def test_a_passing_check_without_the_improvement_flag_files_no_issue(self):
+        candidate = {
+            "id": "smoke", "kind": "smoke", "number": None, "story": "SMOKE", "platform": "web",
+            "url": "", "checks": [{"id": "S1", "title": "Some check", "as": "none", "services": [],
+                                    "url": "", "steps": [], "expect": "e"}],
+        }
+        data = {
+            "candidate": "smoke",
+            "checks": {"S1": {"result": "pass", "note": "worked fine", "issue_url": None}},
+            "observations": [],
+        }
+        original_ensure_labels = eyeball.ensure_labels
+        eyeball.ensure_labels = lambda: None
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                result = eyeball.submit(candidate, data, Path(d))
+        finally:
+            eyeball.ensure_labels = original_ensure_labels
+        self.assertIsNone(result["checks"]["S1"].get("issue_url"))
+
+
 class StartServiceGuardTests(unittest.TestCase):
     """Starting a service before anything has been checked out must fail with a 409 ApiError, not
     a raw FileNotFoundError from Popen."""
