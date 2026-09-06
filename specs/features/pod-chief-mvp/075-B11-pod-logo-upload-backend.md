@@ -3,7 +3,7 @@ issue: 96
 story: B11
 title: "Pod logo upload"
 platform: backend
-status: pending
+status: completed
 depends_on: []
 touches:
   - backend/src/main/kotlin/com/munserv/pod
@@ -14,8 +14,17 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-06"
-files_changed: []
-tests_added: []
+files_changed:
+  - backend/src/main/kotlin/com/munserv/pod/service/PodLogoResult.kt
+  - backend/src/main/kotlin/com/munserv/pod/service/PodLogoService.kt
+  - backend/src/main/kotlin/com/munserv/pod/api/PodDto.kt
+  - backend/src/main/kotlin/com/munserv/pod/api/PodController.kt
+  - backend/src/test/kotlin/com/munserv/pod/service/PodLogoServiceTest.kt
+  - backend/src/test/kotlin/com/munserv/pod/api/PodControllerTest.kt
+  - specs/contracts/api.md
+tests_added:
+  - com.munserv.pod.service.PodLogoServiceTest
+  - com.munserv.pod.api.PodControllerTest.UploadLogo
 ---
 
 # B11 · Pod logo upload (Backend)
