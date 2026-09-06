@@ -246,8 +246,12 @@ describe('DashboardPage', () => {
 
     renderWithProviders(<DashboardPage />);
 
-    // Give any (incorrect) in-flight request a chance to land.
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    // Wait for the page to settle, then confirm the disabled query never
+    // fired: with `enabled: false` there is no async gap to race, so this
+    // resolves immediately rather than depending on a fixed sleep.
+    await waitFor(() => {
+      expect(screen.getByTestId('dashboard-layout')).toBeInTheDocument();
+    });
 
     expect(requestCount).toBe(0);
   });

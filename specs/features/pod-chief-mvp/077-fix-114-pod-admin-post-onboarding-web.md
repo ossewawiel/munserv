@@ -30,6 +30,8 @@ files_changed:
 tests_added:
   - "web/src/lib/api-client.test.ts: should not end the session on a 403 without a support grant"
   - "web/src/lib/api-client.test.ts: should end the session on a 403 under a support grant"
+  - "web/src/lib/api-client.test.ts: should end the session on a 403 when the stored token has expired"
+  - "web/src/lib/api-client.test.ts: should end the session on a 403 when no token is stored"
   - "web/src/lib/api-client.test.ts: should end the session on a 401"
   - "web/src/features/dashboard/DashboardPage.test.tsx: should not request the pod dashboard for a pod admin"
   - "web/src/components/organisms/SessionExpiredHandler.test.tsx: should not display session expired message without a support grant (#114)"
@@ -46,7 +48,7 @@ A pod admin who finishes onboarding lands on a page they may see and stays signe
 ## Acceptance criteria
 - [x] After "Skip for Now" (or completing the profile) a pod admin lands on `/` and stays logged in; no `session-expired` event fires.
 - [x] `GET /pod/dashboard` is only requested for users with `pod_chief` permission (`hasPermission('pod_chief')`).
-- [x] A 403 on any request logs the user out only when a support grant is stored in localStorage (W29 auto-logout keeps working); otherwise the promise rejects and the caller shows its own error.
+- [x] A 403 on any request logs the user out only when a support grant is stored in localStorage (W29 auto-logout keeps working), or when the stored token is missing or expired (this backend answers 403, not 401, for an unauthenticated request — #117); otherwise the promise rejects and the caller shows its own error.
 - [x] A 401 still logs the user out as today.
 - [ ] `/messages` opens for the new pod admin and shows the welcome message (B10, #100) — not verified against the real backend in this session (unit tests pass; step 4 manual/console check was skipped per instructions).
 
@@ -94,4 +96,14 @@ Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`
     - As the pod chief grant support access, log in as the super user under the grant, then revoke the grant as the pod chief in another browser.
     - Navigate to any page as the support user.
   expect: The support user is returned to the login page with the session-expired message.
+- id: E3
+  title: An expired token still ends the session (AC4)
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/
+  steps:
+    - Log in normally and open the browser devtools.
+    - In Application/Storage, set localStorage `accessToken` to a JWT with an `exp` claim in the past (e.g. re-encode the current token's payload with `exp` set to `1`).
+    - Reload the page.
+  expect: The app redirects to the login page with the session-expired message (this backend answers 403, not 401, for an expired token; see #117 — the web client detects this by decoding the token's `exp` claim).
 ```

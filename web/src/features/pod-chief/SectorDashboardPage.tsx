@@ -45,7 +45,7 @@ export const SectorDashboardPage: FC = () => {
       <Box sx={{ mt: 3 }}>
         {!canViewSectorDashboard && (
           <ErrorState
-            title={t('common.error')}
+            title={t('errors.forbiddenTitle')}
             description={t('errors.forbidden')}
           />
         )}

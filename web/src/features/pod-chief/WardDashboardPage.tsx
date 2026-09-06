@@ -45,7 +45,7 @@ export const WardDashboardPage: FC = () => {
       <Box sx={{ mt: 3 }}>
         {!canViewWardDashboard && (
           <ErrorState
-            title={t('common.error')}
+            title={t('errors.forbiddenTitle')}
             description={t('errors.forbidden')}
           />
         )}
