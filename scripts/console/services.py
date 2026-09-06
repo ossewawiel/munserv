@@ -20,7 +20,7 @@ import urllib.request
 from pathlib import Path
 
 from .config import CONFIG, ROOT
-from .gitops import ApiError
+from .gitops import ApiError, copy_local_files, is_worktree
 
 _lock = threading.Lock()
 _processes: dict[str, subprocess.Popen] = {}
@@ -126,16 +126,27 @@ def start_service(name: str, checkout: Path) -> str:
         raise ApiError(f"unknown service: {name}", 404)
     if cfg.get("manual"):
         return f"{name} must be started manually"
-    if name in _processes and _processes[name].poll() is None:
-        return f"{name} already running"
+    if is_worktree(checkout):
+        copy_local_files(checkout)
     cwd = _service_cwd(checkout, cfg)
     if not cwd.is_dir():
         raise ApiError("Check out a branch first", 409)
+    return start_tracked_process(name, checkout, cfg["start"], cwd)
+
+
+def start_tracked_process(name: str, checkout: Path, command: str, cwd: Path) -> str:
+    """Start `command` as a tracked process under `name`, the same way `start_service` does for a
+    configured service -- so it shows up in `process_status`, its output is tailable at the usual
+    log path, and `stop_service(name, ...)` kills it. Used directly (bypassing `services.yaml`'s
+    own `start`/`manual` config) for a process whose command is built at runtime, such as `mobile`
+    running `flutter run` against a phone-specific host."""
+    if name in _processes and _processes[name].poll() is None:
+        return f"{name} already running"
     _exits.pop(name, None)
     with open(log_path(checkout, name), "a", encoding="utf-8") as logf:
         logf.write(f"\n--- console start {time.strftime('%Y-%m-%d %H:%M:%S')} ---\n")
         logf.flush()
-        proc = subprocess.Popen(cfg["start"], shell=True, cwd=cwd, stdout=logf, stderr=subprocess.STDOUT,
+        proc = subprocess.Popen(command, shell=True, cwd=cwd, stdout=logf, stderr=subprocess.STDOUT,
                                  start_new_session=True)
     _processes[name] = proc
     return f"{name} starting (pid {proc.pid})"
@@ -175,6 +186,39 @@ def latest_otp(checkout: Path) -> str | None:
         return None
     phone, code = matches[-1]
     return f"{code} (for {phone.strip()})"
+
+
+# --- jobs -------------------------------------------------------------------
+#
+# A small tracked-background-job machinery shared by any long-running, one-shot action the console
+# kicks off (a service's "Prepare" step, or building/installing a mobile APK): a dict with an id,
+# the service it is for, a kind, a status ("running" | "success" | "failed"), a message and
+# timestamps, polled by the client via /api/state's `jobs` list until it stops being "running".
+
+def new_job(service: str, kind: str) -> dict:
+    global _job_seq
+    with _lock:
+        _job_seq += 1
+        job_id = f"job-{_job_seq}"
+        job = {"id": job_id, "service": service, "kind": kind, "status": "running",
+               "message": "running", "started_at": time.time(), "finished_at": None}
+        _jobs[job_id] = job
+        return job
+
+
+def running_job(service: str, kind: str) -> dict | None:
+    with _lock:
+        for job in _jobs.values():
+            if job["service"] == service and job["kind"] == kind and job["status"] == "running":
+                return job
+    return None
+
+
+def finish_job(job_id: str, status: str, message: str) -> None:
+    with _lock:
+        _jobs[job_id]["status"] = status
+        _jobs[job_id]["message"] = message
+        _jobs[job_id]["finished_at"] = time.time()
 
 
 # --- prepare -----------------------------------------------------------------
@@ -225,40 +269,27 @@ def _run_prepare_job(job_id: str, name: str, checkout: Path) -> None:
             if command:
                 result = subprocess.run(command, shell=True, cwd=cwd, stdout=logf, stderr=subprocess.STDOUT)
                 if result.returncode != 0:
-                    with _lock:
-                        _jobs[job_id]["status"] = "failed"
-                        _jobs[job_id]["message"] = f"exit {result.returncode}"
-                        _jobs[job_id]["finished_at"] = time.time()
+                    finish_job(job_id, "failed", f"exit {result.returncode}")
                     return
-            with _lock:
-                _jobs[job_id]["status"] = "success"
-                _jobs[job_id]["message"] = "ready"
-                _jobs[job_id]["finished_at"] = time.time()
+            finish_job(job_id, "success", "ready")
         except Exception as e:  # noqa: BLE001 - a job must never crash the server thread
-            with _lock:
-                _jobs[job_id]["status"] = "failed"
-                _jobs[job_id]["message"] = str(e)
-                _jobs[job_id]["finished_at"] = time.time()
+            finish_job(job_id, "failed", str(e))
 
 
 def start_prepare(name: str, checkout: Path) -> dict:
     cfg = services_config().get(name)
     if not cfg:
         raise ApiError(f"unknown service: {name}", 404)
+    if is_worktree(checkout):
+        copy_local_files(checkout)
     cwd = _service_cwd(checkout, cfg)
     if not cwd.is_dir():
         raise ApiError("Check out a branch first", 409)
-    global _job_seq
-    with _lock:
-        for job in _jobs.values():
-            if job["service"] == name and job["kind"] == "prepare" and job["status"] == "running":
-                return job
-        _job_seq += 1
-        job_id = f"job-{_job_seq}"
-        job = {"id": job_id, "service": name, "kind": "prepare", "status": "running",
-               "message": "running", "started_at": time.time(), "finished_at": None}
-        _jobs[job_id] = job
-    thread = threading.Thread(target=_run_prepare_job, args=(job_id, name, checkout), daemon=True)
+    existing = running_job(name, "prepare")
+    if existing:
+        return existing
+    job = new_job(name, "prepare")
+    thread = threading.Thread(target=_run_prepare_job, args=(job["id"], name, checkout), daemon=True)
     thread.start()
     return job
 

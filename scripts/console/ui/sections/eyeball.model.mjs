@@ -25,6 +25,7 @@ export function buildChecklistViewModel(candidate, resultsData) {
       title: c.title,
       as: c.as || null,
       url: c.url || '',
+      services: c.services || [],
       steps: c.steps || [],
       expect: c.expect || '',
       result: r.result || null,

@@ -16,11 +16,12 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from console import eyeball, gitops, knowledge, services  # noqa: E402
+from console import eyeball, gitops, knowledge, mobile, services  # noqa: E402
 from console.config import Config  # noqa: E402
 from console.pipeline import classify_pr  # noqa: E402
 from console.server import Handler  # noqa: E402
@@ -624,6 +625,154 @@ class ChecklistModelTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
+
+
+class MobileDeviceParsingTests(unittest.TestCase):
+    def test_parses_a_normal_device(self):
+        output = ("List of devices attached\n"
+                   "R58N30ABCDE    device usb:1-1 product:foo model:Galaxy_S21 device:foo transport_id:3\n")
+        self.assertEqual(mobile.parse_devices(output),
+                          [{"id": "R58N30ABCDE", "state": "device", "model": "Galaxy_S21"}])
+
+    def test_parses_an_unauthorized_device_with_no_model_token(self):
+        output = "List of devices attached\n192.168.1.20:5555    unauthorized transport_id:5\n"
+        self.assertEqual(mobile.parse_devices(output),
+                          [{"id": "192.168.1.20:5555", "state": "unauthorized", "model": None}])
+
+    def test_parses_an_emulator(self):
+        output = ("List of devices attached\n"
+                   "emulator-5554  device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 "
+                   "device:emu64a transport_id:1\n")
+        self.assertEqual(mobile.parse_devices(output),
+                          [{"id": "emulator-5554", "state": "device", "model": "sdk_gphone64_x86_64"}])
+
+    def test_header_only_output_is_no_devices(self):
+        self.assertEqual(mobile.parse_devices("List of devices attached\n"), [])
+
+    def test_no_adb_on_path_returns_empty_list_not_an_error(self):
+        with patch("console.mobile.shutil.which", return_value=None):
+            self.assertEqual(mobile.devices(), [])
+
+    def test_adb_present_but_failing_returns_empty_list(self):
+        with patch("console.mobile.shutil.which", return_value="/usr/bin/adb"), \
+                patch("console.mobile.subprocess.run") as run:
+            run.return_value = subprocess.CompletedProcess(args=[], returncode=1, stdout="")
+            self.assertEqual(mobile.devices(), [])
+
+
+class MobileLanIpTests(unittest.TestCase):
+    def test_uses_the_ip_command_first(self):
+        ip_output = "2: eth0    inet 192.168.1.42/24 brd 192.168.1.255 scope global eth0\n"
+        with patch("console.mobile.subprocess.run") as run:
+            run.return_value = subprocess.CompletedProcess(args=[], returncode=0, stdout=ip_output)
+            self.assertEqual(mobile.lan_ip(), "192.168.1.42")
+
+    def test_falls_back_to_hostname_when_the_ip_command_is_unavailable(self):
+        def fake_run(cmd, **kwargs):
+            if cmd[0] == "ip":
+                raise FileNotFoundError("no ip command")
+            return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="192.168.1.7 172.17.0.1\n")
+        with patch("console.mobile.subprocess.run", side_effect=fake_run):
+            self.assertEqual(mobile.lan_ip(), "192.168.1.7")
+
+    def test_falls_back_to_hostname_when_the_ip_command_finds_nothing(self):
+        def fake_run(cmd, **kwargs):
+            if cmd[0] == "ip":
+                return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="")
+            return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="10.0.0.5\n")
+        with patch("console.mobile.subprocess.run", side_effect=fake_run):
+            self.assertEqual(mobile.lan_ip(), "10.0.0.5")
+
+    def test_returns_none_when_neither_source_has_an_address(self):
+        with patch("console.mobile.subprocess.run") as run:
+            run.return_value = subprocess.CompletedProcess(args=[], returncode=1, stdout="")
+            self.assertIsNone(mobile.lan_ip())
+
+
+class MobileRequestValidationTests(unittest.TestCase):
+    def test_rejects_an_invalid_device_id(self):
+        with self.assertRaises(gitops.ApiError) as ctx:
+            mobile.validate_device_id("not a device id!")
+        self.assertEqual(ctx.exception.status, 400)
+
+    def test_rejects_an_empty_device_id(self):
+        with self.assertRaises(gitops.ApiError):
+            mobile.validate_device_id("")
+
+    def test_accepts_a_usb_serial_and_a_wireless_address(self):
+        self.assertEqual(mobile.validate_device_id("R58N30ABCDE"), "R58N30ABCDE")
+        self.assertEqual(mobile.validate_device_id("192.168.1.20:5555"), "192.168.1.20:5555")
+
+    def test_install_requires_a_checkout_with_a_mobile_directory(self):
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d) / "not-checked-out-yet"
+            checkout.mkdir()
+            with self.assertRaises(gitops.ApiError) as ctx:
+                mobile.start_install("emulator-5554", checkout)
+            self.assertEqual(ctx.exception.status, 409)
+
+    def test_run_requires_a_checkout_with_a_mobile_directory(self):
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d) / "not-checked-out-yet"
+            checkout.mkdir()
+            with self.assertRaises(gitops.ApiError) as ctx:
+                mobile.start_run("emulator-5554", checkout)
+            self.assertEqual(ctx.exception.status, 409)
+
+
+class LocalFilesTests(unittest.TestCase):
+    """gitops.copy_local_files against a real (temporary) git repo, so "never copies a tracked
+    file" is exercised against real `git ls-files`, not a mock."""
+
+    def _init_repo(self, root: Path) -> None:
+        root.mkdir()
+        subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+        (root / "tracked.txt").write_text("tracked", encoding="utf-8")
+        subprocess.run(["git", "add", "tracked.txt"], cwd=root, check=True)
+        subprocess.run(["git", "-c", "user.email=test@example.com", "-c", "user.name=Test",
+                         "commit", "-q", "-m", "init"], cwd=root, check=True)
+
+    def test_copies_a_missing_untracked_file_but_not_a_tracked_or_absent_one(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "repo"
+            self._init_repo(root)
+            (root / "mise.local.toml").write_text("x", encoding="utf-8")
+            checkout = Path(d) / "checkout"
+            checkout.mkdir()
+            copied = gitops.copy_local_files(
+                checkout, root=root, file_list=["mise.local.toml", "tracked.txt", "missing.file"])
+            self.assertEqual(copied, ["mise.local.toml"])
+            self.assertTrue((checkout / "mise.local.toml").exists())
+            self.assertFalse((checkout / "tracked.txt").exists())
+            self.assertFalse((checkout / "missing.file").exists())
+
+    def test_never_overwrites_an_existing_copy(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "repo"
+            self._init_repo(root)
+            (root / "mise.local.toml").write_text("from repo", encoding="utf-8")
+            checkout = Path(d) / "checkout"
+            checkout.mkdir()
+            (checkout / "mise.local.toml").write_text("edited by tester", encoding="utf-8")
+            copied = gitops.copy_local_files(checkout, root=root, file_list=["mise.local.toml"])
+            self.assertEqual(copied, [])
+            self.assertEqual((checkout / "mise.local.toml").read_text(encoding="utf-8"), "edited by tester")
+
+    def test_records_the_running_total_across_calls(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "repo"
+            self._init_repo(root)
+            (root / "a.toml").write_text("a", encoding="utf-8")
+            (root / "b.toml").write_text("b", encoding="utf-8")
+            checkout = Path(d) / "checkout"
+            checkout.mkdir()
+            gitops.copy_local_files(checkout, root=root, file_list=["a.toml"])
+            gitops.copy_local_files(checkout, root=root, file_list=["b.toml"])
+            self.assertEqual(gitops.local_files_copied(checkout), ["a.toml", "b.toml"])
+
+    def test_a_checkout_with_no_copies_yet_reports_an_empty_list(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(gitops.local_files_copied(Path(d)), [])
 
 
 class HealthDebounceTests(unittest.TestCase):

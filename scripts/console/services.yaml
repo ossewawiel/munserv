@@ -69,7 +69,16 @@ mobile:
   cwd: mobile
   start: flutter run
   manual: true
-  notes: The emulator reaches the backend on 10.0.2.2:8080. Run and stop this yourself in a terminal.
+  # `emulator_host`/`api_port` are read by scripts/console/mobile.py for the Phone panel's own
+  # --dart-define values (a phone gets this machine's LAN address instead of emulator_host); kept
+  # here, not hardcoded in mobile.py, so a project using this console for a different backend port
+  # or emulator convention stays correct without a code change. See mobile/CLAUDE.md and
+  # mobile/lib/shared/providers/dio_provider.dart for the --dart-define=API_HOST/API_PORT contract.
+  emulator_host: "10.0.2.2"
+  api_port: 8080
+  notes: >-
+    The emulator reaches the backend on 10.0.2.2:8080; run and stop it yourself in a terminal.
+    A physical phone can be installed and run from the Eyeball page's Phone panel instead.
   prepare:
     marker: .dart_tool
     command: flutter pub get
