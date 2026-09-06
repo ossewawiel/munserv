@@ -3,7 +3,7 @@ issue: 95
 story: B10
 title: "New administrator receives a welcome message"
 platform: backend
-status: completed
+status: done
 depends_on: []
 touches:
   - domain
