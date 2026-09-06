@@ -71,6 +71,13 @@ class Config:
         return self.root.parent / self.checkout_dir_name
 
     @property
+    def legacy_checkout_dir(self) -> Path:
+        """The checkout directory name used before a project renamed `checkout_dir` (e.g. the old
+        eyeball dashboard's `<name>-eyeball`). Reused in place of creating a second worktree when
+        it already exists and the configured one does not -- see gitops.resolve_checkout_dir."""
+        return self.root.parent / f"{self.name}-eyeball"
+
+    @property
     def handoff_glob(self) -> str:
         return self._raw().get("handoff_glob", "specs/features")
 

@@ -17,7 +17,7 @@ from urllib.parse import parse_qs, urlparse
 from . import eyeball, github, knowledge, release, services
 from .config import CONFIG, ROOT
 from .gitops import ApiError, CommandError, checkout_branch, current_branch, current_sha, default_checkout, \
-    validate_branch, validate_name
+    ensure_checked_out, is_worktree, resolve_checkout_dir, validate_branch, validate_name
 
 UI_DIR = Path(__file__).resolve().parent / "ui"
 
@@ -31,6 +31,7 @@ def _load_yaml_or_empty(fn):
 
 class Handler(BaseHTTPRequestHandler):
     checkout: Path = default_checkout()
+    checkout_notice: str | None = None
 
     def log_message(self, *args):  # quiet
         pass
@@ -141,7 +142,8 @@ class Handler(BaseHTTPRequestHandler):
     def _api_state(self):
         self._json({
             "checkout": {"path": str(self.checkout), "branch": current_branch(self.checkout),
-                         "sha": current_sha(self.checkout)},
+                         "sha": current_sha(self.checkout), "is_worktree": is_worktree(self.checkout),
+                         "notice": self.checkout_notice},
             "services": services.state_snapshot(self.checkout),
             "jobs": services.jobs_snapshot(),
             "otp": services.latest_otp(self.checkout),
@@ -175,6 +177,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"ok": True, "branch": branch})
         if path == "/api/prepare":
             name = validate_name(body.get("name", ""), "service name")
+            branch = body.get("branch")
+            if branch:
+                ensure_checked_out(self.checkout, validate_branch(branch))
             job = services.start_prepare(name, self.checkout)
             return self._json({"ok": True, "job": job})
         if path == "/api/service/start":
@@ -189,9 +194,7 @@ class Handler(BaseHTTPRequestHandler):
             names = [validate_name(n, "service name") for n in body.get("names", [])]
             branch = body.get("branch")
             if branch:
-                branch = validate_branch(branch)
-                if current_branch(self.checkout) != branch:
-                    checkout_branch(self.checkout, branch)
+                ensure_checked_out(self.checkout, validate_branch(branch))
             messages = [services.start_service(n, self.checkout) for n in names]
             return self._json({"ok": True, "messages": messages})
         if path == "/api/eyeball/save":
@@ -215,7 +218,10 @@ def _raise_system_exit(signum, frame):  # noqa: ARG001 - signal handler signatur
 
 
 def run(port: int | None = None, checkout: Path | None = None) -> int:
-    Handler.checkout = checkout or default_checkout()
+    if checkout:
+        Handler.checkout, Handler.checkout_notice = checkout, None
+    else:
+        Handler.checkout, Handler.checkout_notice = resolve_checkout_dir(default_checkout())
     Handler.checkout.mkdir(parents=True, exist_ok=True)
     github.start_refresher()
     release.start_refresher()

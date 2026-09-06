@@ -291,6 +291,127 @@ class DetachedWorktreeTests(unittest.TestCase):
             self.assertIsNone(gitops._preserve_state(checkout))
 
 
+class ResolveCheckoutDirTests(unittest.TestCase):
+    """A configured checkout_dir rename must not orphan an existing checkout: if the configured
+    directory is not yet a real worktree but a pre-rename legacy directory already is, the legacy
+    one is reused instead of starting a second checkout alongside it."""
+
+    def _make_worktree_like(self, path: Path) -> None:
+        path.mkdir(parents=True, exist_ok=True)
+        (path / ".git").write_text("gitdir: /somewhere", encoding="utf-8")
+
+    def test_uses_preferred_when_it_is_already_a_worktree(self):
+        with tempfile.TemporaryDirectory() as d:
+            preferred = Path(d) / "munserv-console"
+            self._make_worktree_like(preferred)
+            resolved, notice = gitops.resolve_checkout_dir(preferred)
+            self.assertEqual(resolved, preferred)
+            self.assertIsNone(notice)
+
+    def test_falls_back_to_legacy_when_preferred_is_not_yet_a_worktree(self):
+        original = gitops.CONFIG
+        with tempfile.TemporaryDirectory() as d:
+            legacy = Path(d) / "munserv-eyeball"
+            self._make_worktree_like(legacy)
+            preferred = Path(d) / "munserv-console"  # not a worktree: never checked out
+
+            class _Cfg:
+                legacy_checkout_dir = legacy
+
+            gitops.CONFIG = _Cfg()
+            try:
+                resolved, notice = gitops.resolve_checkout_dir(preferred)
+                self.assertEqual(resolved, legacy)
+                self.assertIsNotNone(notice)
+                self.assertIn(str(legacy), notice)
+            finally:
+                gitops.CONFIG = original
+
+    def test_uses_preferred_when_neither_is_a_worktree(self):
+        original = gitops.CONFIG
+        with tempfile.TemporaryDirectory() as d:
+            legacy = Path(d) / "munserv-eyeball"
+            preferred = Path(d) / "munserv-console"
+
+            class _Cfg:
+                legacy_checkout_dir = legacy
+
+            gitops.CONFIG = _Cfg()
+            try:
+                resolved, notice = gitops.resolve_checkout_dir(preferred)
+                self.assertEqual(resolved, preferred)
+                self.assertIsNone(notice)
+            finally:
+                gitops.CONFIG = original
+
+
+class EnsureCheckedOutTests(unittest.TestCase):
+    def test_skips_the_checkout_when_already_on_the_requested_branch(self):
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d) / "checkout"
+            checkout.mkdir()
+            (checkout / ".git").write_text("gitdir: /somewhere", encoding="utf-8")
+            gitops.branch_state_file(checkout).parent.mkdir(parents=True, exist_ok=True)
+            gitops.branch_state_file(checkout).write_text("master", encoding="utf-8")
+
+            original = gitops.checkout_branch
+            gitops.checkout_branch = lambda *a, **k: self.fail("must not re-run checkout")
+            try:
+                self.assertEqual(gitops.ensure_checked_out(checkout, "master"), "master")
+            finally:
+                gitops.checkout_branch = original
+
+    def test_runs_the_checkout_when_the_folder_does_not_exist_yet(self):
+        # The exact regression: pressing Start (or Prepare) directly, with nothing ever checked
+        # out, must trigger a real checkout rather than raising "Check out a branch first".
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d) / "not-yet-checked-out"
+            calls = []
+            original = gitops.checkout_branch
+            gitops.checkout_branch = lambda co, branch: calls.append((co, branch)) or branch
+            try:
+                result = gitops.ensure_checked_out(checkout, "master")
+                self.assertEqual(result, "master")
+                self.assertEqual(calls, [(checkout, "master")])
+            finally:
+                gitops.checkout_branch = original
+
+    def test_runs_the_checkout_when_on_a_different_branch(self):
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d) / "checkout"
+            checkout.mkdir()
+            (checkout / ".git").write_text("gitdir: /somewhere", encoding="utf-8")
+            gitops.branch_state_file(checkout).parent.mkdir(parents=True, exist_ok=True)
+            gitops.branch_state_file(checkout).write_text("feat/other", encoding="utf-8")
+
+            calls = []
+            original = gitops.checkout_branch
+            gitops.checkout_branch = lambda co, branch: calls.append((co, branch)) or branch
+            try:
+                result = gitops.ensure_checked_out(checkout, "master")
+                self.assertEqual(result, "master")
+                self.assertEqual(calls, [(checkout, "master")])
+            finally:
+                gitops.checkout_branch = original
+
+    def test_wraps_a_failed_checkout_as_a_409_with_the_git_error_text(self):
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d) / "not-yet-checked-out"
+            original = gitops.checkout_branch
+
+            def _boom(co, branch):
+                raise gitops.CommandError("fatal: couldn't find remote ref origin/nope")
+
+            gitops.checkout_branch = _boom
+            try:
+                with self.assertRaises(gitops.ApiError) as ctx:
+                    gitops.ensure_checked_out(checkout, "nope")
+                self.assertEqual(ctx.exception.status, 409)
+                self.assertIn("couldn't find remote ref", str(ctx.exception))
+            finally:
+                gitops.checkout_branch = original
+
+
 class _FakeServer:
     def __init__(self, port):
         self.server_address = ("localhost", port)

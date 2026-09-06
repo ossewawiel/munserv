@@ -64,3 +64,45 @@ export function stageLabel(stage) {
 export function stageChipClass(stage) {
   return STAGE_CLASSES[stage] || '';
 }
+
+// --- per-step stepper buttons ----------------------------------------------
+//
+// Pulled out of eyeball.js so the gating and labelling rules (what disables a step button, what
+// its title/tooltip says, what the "Check out" step is called when the checkout is already on a
+// different branch) are unit-testable without a DOM.
+
+// The branch the checkout is actually on, if it differs from the selected candidate's branch --
+// null when they match or either is unknown. Used both for the "checkout is on <branch>" warning
+// chip and to relabel the Check out button as a switch.
+export function checkoutMismatch(candidate, checkout) {
+  const checkoutBranch = checkout && checkout.branch;
+  if (!checkoutBranch || !candidate || !candidate.branch) return null;
+  if (checkoutBranch === candidate.branch) return null;
+  return checkoutBranch;
+}
+
+export function checkoutButtonLabel(mismatchBranch) {
+  return mismatchBranch ? 'Switch to this branch' : 'Check out';
+}
+
+// Whether the candidate's branch is actually checked out right now. Never inferred from the
+// candidate's kind (a "smoke" candidate does not get a free pass just because it does not need a
+// feature branch) or from an empty/default branch name -- the checkout directory must actually be
+// a worktree, and its recorded branch must actually match. A missing checkout directory reports
+// `is_worktree: false` and `branch: ''`, which must read as "not checked out", not as "checked out
+// with no branch" or "checked out because this is the smoke candidate".
+export function isCheckedOut(candidate, checkout) {
+  return !!(candidate && checkout && checkout.is_worktree && checkout.branch === candidate.branch);
+}
+
+// Whether a step's own action button should be disabled right now, and why -- independent of
+// "a run is already in progress", which the caller layers on top. Only Prepare and Start are
+// gated on a prior step; Check out is always available.
+export function stepButtonGate(key, stepState) {
+  if (key === 'prepare' || key === 'start') {
+    return stepState.checkedOut
+      ? { disabled: false, reason: null }
+      : { disabled: true, reason: 'Check out the candidate\'s branch first.' };
+  }
+  return { disabled: false, reason: null };
+}
