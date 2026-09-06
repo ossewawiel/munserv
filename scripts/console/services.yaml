@@ -36,7 +36,9 @@ backend:
 
 web:
   cwd: web
-  start: pnpm dev
+  # The web client falls back to the mock API on 3001 unless VITE_API_URL is set; a fresh
+  # checkout has no .env, so point it at the backend explicitly.
+  start: VITE_API_URL=http://localhost:8080/api/v1 pnpm dev
   health: http://localhost:3000
   url: http://localhost:3000
   prepare:
@@ -46,7 +48,7 @@ web:
 
 storybook:
   cwd: web
-  start: pnpm storybook
+  start: VITE_API_URL=http://localhost:8080/api/v1 pnpm storybook
   health: http://localhost:6006
   url: http://localhost:6006
   prepare:
