@@ -3,7 +3,7 @@ issue: 29
 story: W18
 title: "Pod name and logo configuration"
 platform: web
-status: pending
+status: completed
 depends_on: []
 touches:
   - web/src/features/pod-settings
@@ -23,8 +23,38 @@ design_artboards:
 design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/features/pod-settings/types.ts
+  - web/src/features/pod-settings/api.ts
+  - web/src/features/pod-settings/api.test.ts
+  - web/src/features/pod-settings/hooks.ts
+  - web/src/features/pod-settings/hooks.test.tsx
+  - web/src/features/pod-settings/components/PodIdentitySection.tsx
+  - web/src/features/pod-settings/components/PodIdentitySection.test.tsx
+  - web/src/features/pod-settings/components/PodIdentitySection.stories.tsx
+  - web/src/features/pod-settings/PodSettingsPage.tsx
+  - web/src/features/pod-settings/PodSettingsPage.test.tsx
+  - web/src/components/templates/DashboardLayout.tsx
+  - web/src/components/templates/DashboardLayout.test.tsx
+  - web/src/components/templates/DashboardLayout.stories.tsx
+  - web/src/test/mocks/handlers.ts
+  - web/src/test/mocks/browser.ts
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+  - web/src/features/members/MembersPage.test.tsx
+  - web/public/assets/app-mark.png
+  - web/public/mockServiceWorker.js
+  - web/.storybook/main.ts
+  - web/.storybook/preview.tsx
+  - web/eslint.config.js
+  - web/e2e/visual/stories.spec.ts
+tests_added:
+  - web/src/features/pod-settings/api.test.ts
+  - web/src/features/pod-settings/hooks.test.tsx
+  - web/src/features/pod-settings/components/PodIdentitySection.test.tsx
+  - web/src/features/pod-settings/PodSettingsPage.test.tsx
+  - web/src/components/templates/DashboardLayout.test.tsx (2 new cases)
 ---
 
 # W18 · Pod name and header branding (Web)
