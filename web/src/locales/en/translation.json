@@ -215,6 +215,13 @@
     "results": "results",
     "rowsPerPage": "Rows per page"
   },
+  "dataTable": {
+    "searchPlaceholder": "Search",
+    "filters": "Filters",
+    "filtersTitle": "Filters",
+    "clearFilters": "Clear filters",
+    "closeFilters": "Close filters"
+  },
   "errors": {
     "notFound": "Not Found",
     "unauthorized": "Unauthorized",
@@ -470,6 +477,9 @@
     "passwordNote": "Save this password - it will only be shown once",
     "passwordCopied": "Password copied to clipboard",
     "empty": "No administrators found. Add your first administrator to get started.",
+    "filters": {
+      "comingSoon": "Filtering is not switched on yet. When it is, role and assignment filters appear here and the count shows on the Filters button."
+    },
     "table": {
       "name": "Name",
       "email": "Email",

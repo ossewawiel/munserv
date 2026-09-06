@@ -33,8 +33,8 @@ The catalogue of web building blocks, as agents must use them. Every entry has a
 ## Organisms and templates
 | Component | Use when | Notes |
 |---|---|---|
-| `DataTableCard` (`organisms`) | Every admin list | Tabs, toolbar, pagination, URL-synced state. See the `web-data-table` skill. Never hand-roll a table. |
-| `DataTable` | Only inside `DataTableCard` | Base table. |
+| `DataTableCard` (`organisms`) | Every admin list | Tabs, toolbar, pagination, URL-synced state. `sort`/`onSortChange` drive per-column `TableSortLabel`s (columns opt in with `sortable: true`); `search` renders an inert-until-wired `Input` with a search icon at the head of the toolbar's left box; `filterPanel` renders a `Filters` button (enabled whenever the prop is set) that opens a right-anchored `Drawer` holding `filterPanel.content` and a `Clear filters` button gated on `filterPanel.onClear`, badged with `filterPanel.activeCount`. Every control renders inert until the caller passes a handler. See the `web-data-table` skill. Never hand-roll a table. |
+| `DataTable` | Only inside `DataTableCard` | Base table. Sortable columns (`Column.sortable`) render `TableSortLabel`; never sorts, filters or searches `data` itself. |
 | `NotificationDropdown`, `ProfileMenu`, `SessionExpiredHandler` | Header and session chrome | One instance each, in `DashboardLayout`. |
 | `SupportGrantBanner` | Header, only while the signed-in user holds an active support grant | Renders `null` with no stored grant. Counts down to the grant's server-owned, sliding `expires_at`; refreshes on route change and once at zero, never on a timer (see `domain/support-grant.md`). |
 | `DashboardLayout`, `AuthLayout` (`templates`) | Page shells | Authenticated pages use `DashboardLayout`; login, register and onboarding use `AuthLayout`. `Sidebar` and `MiniDrawerStyled` belong to `DashboardLayout` only. |
