@@ -152,3 +152,30 @@ def current_sha(checkout: Path) -> str:
 
 def default_checkout() -> Path:
     return CONFIG.checkout_dir
+
+
+def resolve_checkout_dir(preferred: Path) -> tuple[Path, str | None]:
+    """The checkout directory to actually use, and a one-line notice if it differs from
+    `preferred` -- reused when the configured directory is not yet a real worktree (a fresh
+    install, or nothing has been checked out yet) but a pre-rename legacy directory already is,
+    so a project rename of `checkout_dir` does not orphan an existing checkout and start a second
+    one alongside it. Once `preferred` becomes a worktree it is used from then on."""
+    if is_worktree(preferred):
+        return preferred, None
+    legacy = CONFIG.legacy_checkout_dir
+    if legacy != preferred and is_worktree(legacy):
+        return legacy, f"reusing existing checkout at {legacy} ({preferred.name} not found)"
+    return preferred, None
+
+
+def ensure_checked_out(checkout: Path, branch: str) -> str:
+    """Make sure `checkout` is a worktree on `branch`, checking it out if it is missing or on a
+    different branch. Used by /api/prepare and /api/service/start-required so pressing either
+    step button directly (without Check out first) still works. Raises ApiError(409) with the
+    underlying git error text if the checkout itself fails."""
+    if is_worktree(checkout) and current_branch(checkout) == branch:
+        return branch
+    try:
+        return checkout_branch(checkout, branch)
+    except CommandError as e:
+        raise ApiError(str(e), 409) from e

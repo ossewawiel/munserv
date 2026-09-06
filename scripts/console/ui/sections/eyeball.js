@@ -1,5 +1,10 @@
 import { apiGet, apiPost, timeAgo } from '../api.js';
-import { requiredServices, buildChecklistViewModel, stageLabel, stageChipClass } from './eyeball.model.mjs';
+import {
+  requiredServices, buildChecklistViewModel, stageLabel, stageChipClass,
+  checkoutMismatch, checkoutButtonLabel, stepButtonGate, isCheckedOut,
+} from './eyeball.model.mjs';
+
+const HELP_DISMISSED_KEY = 'console-eyeball-help-dismissed';
 
 let root, ctx;
 let candidates = [];
@@ -19,6 +24,7 @@ let candidatesLoading = true;
 let candidatesLoadError = null;
 let retryTimer = null;
 let preparedSummary = [];
+let runningStep = null; // 'checkout' | 'prepare' | 'start' | null -- a single step button in flight
 
 // Human labels for what Prepare actually did, by service name -- the console's own services.yaml
 // controls what "prepare" means for a given service (an npm/pnpm install, `flutter pub get`, a
@@ -117,7 +123,7 @@ function addObservation() {
 // --- stepper sequence ------------------------------------------------------
 
 function stepState(candidate) {
-  const checkedOut = candidate.kind === 'smoke' || (fastState && fastState.checkout.branch === candidate.branch);
+  const checkedOut = isCheckedOut(candidate, fastState && fastState.checkout);
   const needed = requiredServices(candidate);
   const rows = fastState ? fastState.services.filter((s) => needed.includes(s.name)) : [];
   const needsPrepare = rows.some((r) => r.needs_prepare);
@@ -147,40 +153,55 @@ function scrollFirstCheckIntoView() {
   if (first) first.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// The single-step primitives, shared by "Run all steps" and each step's own button. Each posts
+// the candidate's branch to prepare/start so the server checks out (or switches) on its own if
+// the checkout is missing or on another branch -- pressing "Start" (or "Prepare") on its own,
+// without ever pressing "Check out" first, still works.
+
+async function doCheckout(candidate) {
+  await apiPost('/api/checkout', { branch: candidate.branch });
+  await refreshFastState();
+}
+
+async function doPrepareAll(candidate) {
+  const state = await refreshFastState();
+  const needed = requiredServices(candidate);
+  for (const name of needed) {
+    const svc = (state.services || []).find((s) => s.name === name);
+    if (svc && svc.needs_prepare) {
+      const { job } = await apiPost('/api/prepare', { name, branch: candidate.branch });
+      const finished = await waitForJob(job.id);
+      if (finished && finished.status === 'failed') {
+        throw new Error(name + ' prepare failed: ' + finished.message);
+      }
+      preparedSummary.push(prepareLabel(name));
+      renderAll();
+    }
+  }
+}
+
+async function doStart(candidate) {
+  const needed = requiredServices(candidate);
+  await apiPost('/api/service/start-required', { names: needed, branch: candidate.branch });
+  await refreshFastState();
+}
+
 async function runStepperSequence(candidate) {
-  if (sequence.running) return;
+  if (sequence.running || runningStep) return;
   sequence = { running: true, step: 'checkout', error: null };
   preparedSummary = [];
   renderAll();
   try {
-    if (candidate.kind === 'pr') {
-      const s0 = stepState(candidate);
-      if (!s0.checkedOut) {
-        await apiPost('/api/checkout', { branch: candidate.branch });
-      }
+    const s0 = stepState(candidate);
+    if (!s0.checkedOut) {
+      await doCheckout(candidate);
     }
     sequence.step = 'prepare';
     renderAll();
-    // Re-fetch state after checkout: needs_prepare depends on files inside the checkout, which
-    // may not have existed (or may have been a different branch) before the checkout above ran.
-    const afterCheckout = await refreshFastState();
-    const needed = requiredServices(candidate);
-    for (const name of needed) {
-      const svc = (afterCheckout.services || []).find((s) => s.name === name);
-      if (svc && svc.needs_prepare) {
-        const { job } = await apiPost('/api/prepare', { name });
-        const finished = await waitForJob(job.id);
-        if (finished && finished.status === 'failed') {
-          throw new Error(name + ' prepare failed: ' + finished.message);
-        }
-        preparedSummary.push(prepareLabel(name));
-        renderAll();
-      }
-    }
+    await doPrepareAll(candidate);
     sequence.step = 'start';
     renderAll();
-    await apiPost('/api/service/start-required', { names: needed });
-    await refreshFastState();
+    await doStart(candidate);
     sequence = { running: false, step: null, error: null };
     renderAll();
     scrollFirstCheckIntoView();
@@ -190,6 +211,21 @@ async function runStepperSequence(candidate) {
     sequence = { running: false, step: sequence.step, error: e.message };
     ctx.toast('Could not run the sequence: ' + e.message, 'error');
   } finally {
+    renderAll();
+  }
+}
+
+async function runSingleStep(candidate, key, fn) {
+  if (sequence.running || runningStep) return;
+  runningStep = key;
+  renderAll();
+  try {
+    await fn(candidate);
+    ctx.toast(STEP_DEFS.find((d) => d.key === key).title + ' done.', 'success');
+  } catch (e) {
+    ctx.toast('Could not ' + key + ': ' + e.message, 'error');
+  } finally {
+    runningStep = null;
     renderAll();
   }
 }
@@ -225,21 +261,52 @@ function stepDone(key, s) {
   return false;
 }
 
+function stepActionButton(def, s, candidate) {
+  const { el } = ctx;
+  const key = def.key;
+  if (key === 'test') {
+    return el('a', {
+      href: '#', class: 'step-h-link',
+      onclick: (e) => { e.preventDefault(); scrollFirstCheckIntoView(); },
+    }, 'Go to checklist');
+  }
+  if (key === 'submit') return null;
+
+  const busy = (sequence.running && sequence.step === key) || runningStep === key;
+  const anyRunning = sequence.running || !!runningStep;
+  const mismatch = key === 'checkout' ? checkoutMismatch(candidate, fastState && fastState.checkout) : null;
+  const gate = stepButtonGate(key, s);
+  const disabled = anyRunning || gate.disabled;
+  const title = anyRunning && !busy ? 'Another step is running.' : gate.reason || '';
+  const label = key === 'checkout' ? checkoutButtonLabel(mismatch) : def.title;
+  const onclick = key === 'checkout' ? () => runSingleStep(candidate, 'checkout', doCheckout)
+    : key === 'prepare' ? () => runSingleStep(candidate, 'prepare', doPrepareAll)
+      : () => runSingleStep(candidate, 'start', doStart);
+  return el('button', { class: 'step-h-action', disabled, title, onclick }, busy ? 'Running...' : label);
+}
+
 function stepperRow(candidate) {
   const { el } = ctx;
   const s = stepState(candidate);
+  const mismatch = checkoutMismatch(candidate, fastState && fastState.checkout);
   const items = STEP_DEFS.map((def) => {
     const done = stepDone(def.key, s);
     const failed = sequence.error && sequence.step === def.key;
     return el('div', { class: 'step-h-item' + (done ? ' done' : '') + (failed ? ' failed' : '') },
       el('div', { class: 'step-h-icon' }, done ? '✓' : String(def.num)),
-      el('div', {},
+      el('div', { class: 'step-h-body' },
         el('div', { class: 'step-h-title' }, def.title),
-        el('div', { class: 'step-h-status' }, stepStatusText(def.key, s))));
+        el('div', { class: 'step-h-status' }, stepStatusText(def.key, s)),
+        def.key === 'checkout' && mismatch ? el('div', { class: 'step-h-warn' }, 'checkout is on ' + mismatch) : null,
+        stepActionButton(def, s, candidate)));
   });
   return el('div', { class: 'stepper-h' },
-    el('button', { class: 'primary', disabled: sequence.running, onclick: () => runStepperSequence(candidate) },
-      sequence.running ? 'Running...' : 'Start testing'),
+    el('div', { class: 'step-h-primary' },
+      el('button', {
+        class: 'primary', disabled: sequence.running || !!runningStep,
+        onclick: () => runStepperSequence(candidate),
+      }, sequence.running ? 'Running...' : 'Run all steps'),
+      el('div', { class: 'step-h-primary-subtitle' }, 'check out → prepare → start')),
     ...items);
 }
 
@@ -303,6 +370,7 @@ function rightColumn() {
       fastState.services.length ? fastState.services.map(serviceRow) : emptyState('No services configured'),
       el('div', { style: 'margin-top:10px;font-size:12px;color:var(--muted)' }, 'Checkout: ',
         el('code', {}, (fastState.checkout.branch || 'none') + (fastState.checkout.sha ? ' @ ' + fastState.checkout.sha : ''))),
+      fastState.checkout.notice ? el('div', { style: 'margin-top:6px;font-size:12px;color:var(--muted)' }, fastState.checkout.notice) : null,
       el('div', { style: 'margin-top:6px' }, 'Latest OTP: ', el('code', {}, fastState.otp || '-'))),
     el('div', { class: 'card' }, el('h3', {}, 'Log' + (logService ? ': ' + logService : '')), logPanel()));
 }
@@ -392,6 +460,20 @@ function candidateRow(c) {
       el('span', {}, vm.done + ' of ' + vm.total)));
 }
 
+// --- first-visit helper text -------------------------------------------------
+
+function helpBanner() {
+  const { el } = ctx;
+  if (localStorage.getItem(HELP_DISMISSED_KEY) === '1') return null;
+  const path = (fastState && fastState.checkout && fastState.checkout.path) || 'a separate checkout';
+  return el('div', { class: 'eyeball-help' },
+    el('span', {}, 'Tests run against a separate copy of the repository at ', el('code', {}, path),
+      '; your main checkout is never touched. Run all steps, or use the step buttons one at a time.'),
+    el('button', {
+      onclick: () => { localStorage.setItem(HELP_DISMISSED_KEY, '1'); renderAll(); },
+    }, 'Got it'));
+}
+
 // --- top-level render -------------------------------------------------
 
 function renderAll() {
@@ -410,6 +492,8 @@ function renderAll() {
     const center = el('div', { class: 'eyeball-center' });
     const current = selected();
     if (current) {
+      const banner = helpBanner();
+      if (banner) center.append(banner);
       center.append(stepperRow(current));
       center.append(el('h3', {}, 'Checklist'));
       center.append(checklistSection(current));

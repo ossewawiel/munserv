@@ -69,3 +69,15 @@ check names; `smoke.yaml` is a list of checks in the same shape as a handoff's `
   branch already checked out elsewhere (e.g. a factory implementer's own worktree).
 - Every write to the console server's own state lives under `<checkout>/.console/` (results, logs,
   the current branch marker).
+- `checkout_dir` names a directory that is a *sibling of the repo*, created on first use -- it
+  need not exist beforehand, and its mere existence does not count as "checked out": the Eyeball
+  stepper's Check out step is only done once that directory is a real `git worktree` on the
+  selected candidate's branch (`master` for the smoke checklist). If the configured directory is
+  not yet a worktree but a pre-rename directory named `<name>-eyeball` already is, the server
+  reuses that one instead of starting a second checkout (a one-line notice appears next to
+  Checkout on the Eyeball page); this only matters across a `checkout_dir` rename and stops
+  applying once the configured directory has been checked out into.
+- Pressing a step button (Prepare, Start, or "Run all steps") that needs a checkout no longer
+  requires Check out to have run first: `/api/prepare` and `/api/service/start-required` both
+  accept a `branch` and check it out themselves if the checkout is missing or on another branch,
+  failing with a 409 and the underlying git error text only if that checkout itself fails.
