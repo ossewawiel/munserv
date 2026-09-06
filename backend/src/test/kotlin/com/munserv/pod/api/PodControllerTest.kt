@@ -8,6 +8,8 @@ import com.munserv.auth.service.JwtService
 import com.munserv.pod.domain.PodSettings
 import com.munserv.pod.domain.PodSetupStatus
 import com.munserv.pod.domain.SetupStep
+import com.munserv.pod.service.PodLogoResult
+import com.munserv.pod.service.PodLogoService
 import com.munserv.pod.service.PodResult
 import com.munserv.pod.service.PodService
 import com.munserv.pod.service.UpdatePodSettingsCommand
@@ -26,9 +28,11 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.multipart
 import org.springframework.test.web.servlet.patch
 import java.time.Instant
 import java.util.UUID
@@ -52,6 +56,9 @@ class PodControllerTest {
 
     @MockkBean
     private lateinit var adminRepository: AdminRepository
+
+    @MockkBean
+    private lateinit var podLogoService: PodLogoService
 
     private val testPodId = PodId(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"))
     private val testAdminId = AdminId.fromString("550e8400-e29b-41d4-a716-446655440020")
@@ -365,6 +372,113 @@ class PodControllerTest {
 
             commandSlot.captured.name shouldBe "UpdatedPod"
             commandSlot.captured.logoUrl shouldBe "https://example.com/logo.png"
+        }
+    }
+
+    @Nested
+    inner class UploadLogo {
+        @Test
+        fun `should return 200 with the logo url on a successful upload`() {
+            val file =
+                MockMultipartFile(
+                    "file",
+                    "logo.png",
+                    MediaType.IMAGE_PNG_VALUE,
+                    "logo content".toByteArray(),
+                )
+
+            every { podLogoService.uploadLogo(any()) } returns
+                PodLogoResult.Success("http://localhost:8080/uploads/logo.png")
+
+            mockMvc
+                .multipart("/api/v1/pod/logo") {
+                    file(file)
+                    header("Authorization", "Bearer $podChiefToken")
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$.logoUrl") { value("http://localhost:8080/uploads/logo.png") }
+                }
+
+            verify { podLogoService.uploadLogo(any()) }
+        }
+
+        @Test
+        fun `should return 400 when the file fails validation`() {
+            val file =
+                MockMultipartFile(
+                    "file",
+                    "logo.txt",
+                    MediaType.TEXT_PLAIN_VALUE,
+                    "not an image".toByteArray(),
+                )
+
+            every { podLogoService.uploadLogo(any()) } returns
+                PodLogoResult.ValidationError(listOf("Invalid content type: text/plain"))
+
+            mockMvc
+                .multipart("/api/v1/pod/logo") {
+                    file(file)
+                    header("Authorization", "Bearer $podChiefToken")
+                }.andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.code") { value("validation_error") }
+                    jsonPath("$.message") { value("Invalid content type: text/plain") }
+                }
+        }
+
+        @Test
+        fun `should return 500 when storage fails`() {
+            val file =
+                MockMultipartFile(
+                    "file",
+                    "logo.png",
+                    MediaType.IMAGE_PNG_VALUE,
+                    "logo content".toByteArray(),
+                )
+
+            every { podLogoService.uploadLogo(any()) } returns
+                PodLogoResult.StorageError("Disk full")
+
+            mockMvc
+                .multipart("/api/v1/pod/logo") {
+                    file(file)
+                    header("Authorization", "Bearer $podChiefToken")
+                }.andExpect {
+                    status { isInternalServerError() }
+                    jsonPath("$.code") { value("internal_error") }
+                    jsonPath("$.message") { value("Disk full") }
+                }
+        }
+
+        @Test
+        fun `should return 403 when the caller is not a pod chief`() {
+            val podAdmin =
+                Admin(
+                    id = testAdminId,
+                    podId = testPodId,
+                    email = "admin@example.com",
+                    displayName = "Test Pod Admin",
+                    role = AdminRole.POD_ADMIN,
+                    createdAt = fixedInstant,
+                    updatedAt = fixedInstant,
+                )
+            every { adminRepository.findById(testAdminId) } returns podAdmin
+
+            val file =
+                MockMultipartFile(
+                    "file",
+                    "logo.png",
+                    MediaType.IMAGE_PNG_VALUE,
+                    "logo content".toByteArray(),
+                )
+
+            mockMvc
+                .multipart("/api/v1/pod/logo") {
+                    file(file)
+                    header("Authorization", "Bearer $podChiefToken")
+                }.andExpect {
+                    status { isForbidden() }
+                }
         }
     }
 

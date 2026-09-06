@@ -189,6 +189,8 @@
   "errors": {
     "notFound": "Ayitholakali",
     "unauthorized": "Awugunyaziwe",
+    "forbiddenTitle": "Ukungeniswa Kwenqatshelwe",
+    "forbidden": "Awunayo imvume yokubona leli khasi",
     "serverError": "Iphutha Leseva",
     "networkError": "Iphutha Lenethiwekhi"
   },
@@ -268,6 +270,20 @@
   },
   "podSettings": {
     "title": "Izilungiselelo ze-Pod",
-    "subtitle": "Ukulungiswa kwe-pod jikelele, okuhlanganisa ukufinyelela kokusekela kweGunya Eliyisikhulu."
+    "subtitle": "Ukulungiswa kwe-pod jikelele, okuhlanganisa ukufinyelela kokusekela kweGunya Eliyisikhulu.",
+    "identity": {
+      "title": "Ubunikazi be-Pod",
+      "nameLabel": "Igama le-Pod",
+      "nameHelper": "Phakathi kwezinhlamvu ezingu-2 kuya kwezingu-100. Abaphathi namalungu babona leli gama.",
+      "displayNamePreview": "Ukubuka kwesihloko",
+      "previewHint": "Wonke umuntu kule-pod ubona lokhu esihlokweni sesipoteli. Kuvuselelwa uma ushintsho selulondoloziwe.",
+      "logoUrlLabel": "I-URL Yelogo",
+      "logoUrlHelper": "Isixhumanisi esiqondile esiya kumfanekiso we-PNG noma i-SVG, ofinyelela kuzinhlamvu ezingu-500. Shiya kungenalutho ukuze kuvele uphawu lwe-Munserv lodwa.",
+      "save": "Londoloza izinguquko",
+      "saved": "Kulondoloziwe. Isihloko manje sifundeka ngokuthi “{{displayName}}”.",
+      "nameTooShort": "Igama le-Pod kufanele libe okungenani izinhlamvu ezingu-2.",
+      "nameTooLong": "Igama le-Pod kufanele libe izinhlamvu ezingu-100 noma ngaphansi.",
+      "logoUrlTooLong": "I-URL Yelogo kufanele ibe izinhlamvu ezingu-500 noma ngaphansi."
+    }
   }
 }

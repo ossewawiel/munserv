@@ -3,7 +3,7 @@ issue: 96
 story: B11
 title: "Pod logo upload"
 platform: backend
-status: pending
+status: completed
 depends_on: []
 touches:
   - backend/src/main/kotlin/com/munserv/pod
@@ -14,8 +14,17 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-06"
-files_changed: []
-tests_added: []
+files_changed:
+  - backend/src/main/kotlin/com/munserv/pod/service/PodLogoResult.kt
+  - backend/src/main/kotlin/com/munserv/pod/service/PodLogoService.kt
+  - backend/src/main/kotlin/com/munserv/pod/api/PodDto.kt
+  - backend/src/main/kotlin/com/munserv/pod/api/PodController.kt
+  - backend/src/test/kotlin/com/munserv/pod/service/PodLogoServiceTest.kt
+  - backend/src/test/kotlin/com/munserv/pod/api/PodControllerTest.kt
+  - specs/contracts/api.md
+tests_added:
+  - com.munserv.pod.service.PodLogoServiceTest
+  - com.munserv.pod.api.PodControllerTest.UploadLogo
 ---
 
 # B11 · Pod logo upload (Backend)
@@ -130,3 +139,29 @@ cd backend && ./gradlew ktlintCheck test
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a
 summary of changes. If you cannot finish, set `status: blocked` and end your message with
 `BLOCKED: <reason>`.
+
+## Eyeball
+```yaml
+- id: E1
+  title: Pod chief uploads a logo through Swagger and saves it
+  as: pod_chief
+  services: [db, backend]
+  url: http://localhost:8080/swagger-ui/index.html#/Authentication/adminLogin
+  steps:
+    - 'Open http://localhost:8080/swagger-ui/index.html#/Authentication/adminLogin, press "Try it out", send {"email": "podchief@munserv.local", "password": "podchief123"} and copy tokens.accessToken from the response.'
+    - 'Press the green "Authorize" button at the top of the page, paste the token, Authorize, Close.'
+    - 'Open http://localhost:8080/swagger-ui/index.html#/Pod%20Settings/uploadLogo, press "Try it out", choose a PNG under 5MB as the file, Execute.'
+    - 'Open http://localhost:8080/swagger-ui/index.html#/Pod%20Settings/updateSettings_1, press "Try it out", send {"logoUrl": "<the logoUrl from the upload response>"}, Execute.'
+    - 'Open http://localhost:8080/swagger-ui/index.html#/Pod%20Settings/getSettings_1, press "Try it out", Execute.'
+  expect: The upload answers 200 with a JSON body containing logoUrl, and opening http://localhost:8080 followed by that logoUrl path in a browser tab shows the image; the PATCH answers 200 and the GET returns the same logoUrl.
+- id: E2
+  title: Wrong file type and wrong role are refused
+  as: ward_admin
+  services: [db, backend]
+  url: http://localhost:8080/swagger-ui/index.html#/Pod%20Settings/uploadLogo
+  steps:
+    - 'Still authorised as the pod chief, open http://localhost:8080/swagger-ui/index.html#/Pod%20Settings/uploadLogo and upload a .txt file, Execute.'
+    - 'Open http://localhost:8080/swagger-ui/index.html#/Authentication/adminLogin and log in as {"email": "wardadmin@munserv.local", "password": "wardadmin123"}; press Authorize, Logout, then paste the new token and Authorize.'
+    - 'Open http://localhost:8080/swagger-ui/index.html#/Pod%20Settings/uploadLogo again and upload a valid PNG, Execute.'
+  expect: The text file answers 400 with a validation message; the ward admin's upload answers 403.
+```

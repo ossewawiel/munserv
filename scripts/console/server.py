@@ -125,11 +125,17 @@ class Handler(BaseHTTPRequestHandler):
                 c["results"] = eyeball.load_results(self.checkout, c["id"])
             return self._json({"candidates": candidates, "accounts": CONFIG.accounts_config})
         if path == "/api/mobile/devices":
+            devices = mobile.devices()
+            lan_ip = mobile.lan_ip()
+            api_port = mobile.api_port()
+            web_cfg = services.services_config().get("web")
+            web_up = bool(web_cfg and web_cfg.get("health") and services.health_ok(web_cfg["health"]))
             return self._json({
-                "devices": mobile.devices(),
-                "lan_ip": mobile.lan_ip(),
-                "api_port": mobile.api_port(),
+                "devices": devices,
+                "lan_ip": lan_ip,
+                "api_port": api_port,
                 "emulator_host": mobile.emulator_host(),
+                "reachability": mobile.reachability_snapshot(devices, lan_ip, api_port, web_up),
             })
         if path == "/api/log":
             name = validate_name((qs.get("name") or [""])[0], "service name")
@@ -229,12 +235,16 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"ok": True})
         if path == "/api/eyeball/submit":
             candidate_id = validate_name(body.get("candidate", ""), "candidate")
-            candidate = next((c for c in eyeball.build_candidates(False) if c["id"] == candidate_id), None)
-            if not candidate:
-                return self._json({"ok": False, "error": "unknown candidate"}, 404)
-            data = eyeball.load_results(self.checkout, candidate_id)
-            data = eyeball.submit(candidate, data, self.checkout)
-            return self._json({"ok": True, "data": data})
+            eyeball.begin_submit(candidate_id)
+            try:
+                candidate = next((c for c in eyeball.build_candidates(False) if c["id"] == candidate_id), None)
+                if not candidate:
+                    return self._json({"ok": False, "error": "unknown candidate"}, 404)
+                data = eyeball.load_results(self.checkout, candidate_id)
+                data = eyeball.submit(candidate, data, self.checkout)
+                return self._json({"ok": True, "data": data})
+            finally:
+                eyeball.end_submit(candidate_id)
         self.send_response(404)
         self.end_headers()
 

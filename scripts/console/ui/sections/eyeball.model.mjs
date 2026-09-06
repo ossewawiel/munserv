@@ -31,6 +31,7 @@ export function buildChecklistViewModel(candidate, resultsData) {
       result: r.result || null,
       note: r.note || '',
       issue_url: r.issue_url || null,
+      file_as_improvement: !!r.file_as_improvement,
     };
   });
 

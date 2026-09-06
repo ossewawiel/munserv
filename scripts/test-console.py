@@ -134,6 +134,78 @@ class SubmitGuardTests(unittest.TestCase):
                 eyeball.submit(candidate, data, Path(d))
 
 
+class SubmitImprovementTests(unittest.TestCase):
+    """A check ticked Pass, with a note, and "File as improvement" checked must file a
+    `type:feature` issue on submit -- same title format and body shape as a failed check's
+    `type:bug` issue, and the submission's per-check result and PR comment table must both carry
+    an "improvement" marker."""
+
+    def test_a_passing_check_marked_improvement_files_a_type_feature_issue(self):
+        candidate = {
+            "id": "smoke", "kind": "smoke", "number": None, "story": "SMOKE", "platform": "web",
+            "url": "", "checks": [{"id": "S1", "title": "Some check", "as": "none", "services": [],
+                                    "url": "", "steps": [], "expect": "e"}],
+        }
+        data = {
+            "candidate": "smoke",
+            "checks": {"S1": {"result": "pass", "note": "would make a nice shortcut",
+                               "file_as_improvement": True, "issue_url": None}},
+            "observations": [],
+        }
+        original_ensure_labels = eyeball.ensure_labels
+        original_search = eyeball.search_open_issues
+        original_run_captured = eyeball.run_captured
+        eyeball.ensure_labels = lambda: None
+        eyeball.search_open_issues = lambda prefix: []
+        captured = {}
+
+        class FakeResult:
+            stdout = "https://github.com/x/y/issues/42\n"
+
+        def fake_run_captured(args, cwd=None, check=True):
+            captured["args"] = args
+            return FakeResult()
+
+        eyeball.run_captured = fake_run_captured
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                result = eyeball.submit(candidate, data, Path(d))
+        finally:
+            eyeball.ensure_labels = original_ensure_labels
+            eyeball.search_open_issues = original_search
+            eyeball.run_captured = original_run_captured
+
+        self.assertEqual(result["checks"]["S1"]["issue_url"], "https://github.com/x/y/issues/42")
+        self.assertFalse(result["checks"]["S1"]["issue_reused"])
+        args = captured["args"]
+        title = args[args.index("--title") + 1]
+        self.assertEqual(title, "[Eyeball] SMOKE S1: Some check")
+        body = args[args.index("--body") + 1]
+        self.assertIn("would make a nice shortcut", body)
+        self.assertTrue(any("type:feature" in a for a in args))
+        self.assertFalse(any(a.startswith("type:bug") or ",type:bug" in a for a in args))
+
+    def test_a_passing_check_without_the_improvement_flag_files_no_issue(self):
+        candidate = {
+            "id": "smoke", "kind": "smoke", "number": None, "story": "SMOKE", "platform": "web",
+            "url": "", "checks": [{"id": "S1", "title": "Some check", "as": "none", "services": [],
+                                    "url": "", "steps": [], "expect": "e"}],
+        }
+        data = {
+            "candidate": "smoke",
+            "checks": {"S1": {"result": "pass", "note": "worked fine", "issue_url": None}},
+            "observations": [],
+        }
+        original_ensure_labels = eyeball.ensure_labels
+        eyeball.ensure_labels = lambda: None
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                result = eyeball.submit(candidate, data, Path(d))
+        finally:
+            eyeball.ensure_labels = original_ensure_labels
+        self.assertIsNone(result["checks"]["S1"].get("issue_url"))
+
+
 class StartServiceGuardTests(unittest.TestCase):
     """Starting a service before anything has been checked out must fail with a 409 ApiError, not
     a raw FileNotFoundError from Popen."""
@@ -775,6 +847,213 @@ class LocalFilesTests(unittest.TestCase):
             self.assertEqual(gitops.local_files_copied(Path(d)), [])
 
 
+class IssueReuseTests(unittest.TestCase):
+    """The double-submit guard's other half: before filing a new issue for a failed check or an
+    observation, reuse an already-open one from a title search rather than filing a duplicate --
+    this is what would have prevented #122 being filed as a duplicate of #123."""
+
+    def test_pick_reusable_issue_matches_an_exact_prefix(self):
+        issues = [{"number": 1, "url": "https://x/1", "title": "[Eyeball] B10 E1: something else"}]
+        found = eyeball.pick_reusable_issue(issues, "[Eyeball] B10 E1:")
+        self.assertEqual(found["url"], "https://x/1")
+
+    def test_pick_reusable_issue_ignores_a_title_that_merely_contains_the_prefix(self):
+        # gh's `in:title` search is loose (substring/fuzzy); a title that mentions the prefix
+        # somewhere other than at the start must not count as a match.
+        issues = [{"number": 2, "url": "https://x/2", "title": "Unrelated bug mentioning [Eyeball] B10 E1: in passing"}]
+        self.assertIsNone(eyeball.pick_reusable_issue(issues, "[Eyeball] B10 E1:"))
+
+    def test_pick_reusable_issue_returns_none_for_a_different_check_id(self):
+        issues = [{"number": 3, "url": "https://x/3", "title": "[Eyeball] B10 E2: other check"}]
+        self.assertIsNone(eyeball.pick_reusable_issue(issues, "[Eyeball] B10 E1:"))
+
+    def test_pick_reusable_issue_returns_none_on_an_empty_result(self):
+        self.assertIsNone(eyeball.pick_reusable_issue([], "[Eyeball] B10 E1:"))
+
+    def test_pick_reusable_issue_returns_the_first_match(self):
+        issues = [
+            {"number": 4, "url": "https://x/4", "title": "[Eyeball] B10 E1: first"},
+            {"number": 5, "url": "https://x/5", "title": "[Eyeball] B10 E1: second"},
+        ]
+        found = eyeball.pick_reusable_issue(issues, "[Eyeball] B10 E1:")
+        self.assertEqual(found["url"], "https://x/4")
+
+    def test_search_open_issues_returns_empty_list_when_gh_fails(self):
+        original = eyeball.gh_json
+        eyeball.gh_json = lambda *a: (_ for _ in ()).throw(eyeball.CommandError("boom"))
+        try:
+            self.assertEqual(eyeball.search_open_issues("[Eyeball] B10 E1:"), [])
+        finally:
+            eyeball.gh_json = original
+
+    def test_search_open_issues_parses_the_gh_json_shape(self):
+        original = eyeball.gh_json
+        captured = {}
+
+        def fake_gh_json(*args):
+            captured["args"] = args
+            return [{"number": 9, "url": "https://x/9", "title": "[Eyeball] B10 E1: dup"}]
+
+        eyeball.gh_json = fake_gh_json
+        try:
+            result = eyeball.search_open_issues("[Eyeball] B10 E1:")
+            self.assertEqual(result, [{"number": 9, "url": "https://x/9", "title": "[Eyeball] B10 E1: dup"}])
+            self.assertIn("--search", captured["args"])
+            self.assertIn('in:title "[Eyeball] B10 E1:"', captured["args"])
+            self.assertIn("--state", captured["args"])
+            self.assertIn("open", captured["args"])
+        finally:
+            eyeball.gh_json = original
+
+    def test_find_or_create_issue_reuses_a_match_without_calling_create(self):
+        original = eyeball.search_open_issues
+        eyeball.search_open_issues = lambda prefix: [{"number": 1, "url": "https://x/1", "title": prefix + " dup"}]
+        try:
+            def boom():
+                self.fail("must not create a new issue when one can be reused")
+            result = eyeball.find_or_create_issue("[Eyeball] B10 E1:", boom)
+            self.assertEqual(result, {"url": "https://x/1", "reused": True})
+        finally:
+            eyeball.search_open_issues = original
+
+    def test_find_or_create_issue_creates_when_nothing_matches(self):
+        original = eyeball.search_open_issues
+        eyeball.search_open_issues = lambda prefix: []
+        try:
+            result = eyeball.find_or_create_issue("[Eyeball] B10 E1:", lambda: "https://x/new")
+            self.assertEqual(result, {"url": "https://x/new", "reused": False})
+        finally:
+            eyeball.search_open_issues = original
+
+
+class SubmitDoubleGuardTests(unittest.TestCase):
+    """/api/eyeball/submit must refuse a second concurrent submit for the same candidate with a
+    409 -- the exact scenario that let a click-again on PR #100 file issue #122 as a duplicate of
+    #123 while the first submit was still running."""
+
+    def tearDown(self) -> None:
+        eyeball._submitting_candidates.clear()
+
+    def test_begin_submit_raises_409_while_already_running(self):
+        eyeball.begin_submit("pr-100")
+        with self.assertRaises(gitops.ApiError) as ctx:
+            eyeball.begin_submit("pr-100")
+        self.assertEqual(ctx.exception.status, 409)
+
+    def test_begin_submit_allows_a_different_candidate_concurrently(self):
+        eyeball.begin_submit("pr-100")
+        eyeball.begin_submit("pr-101")  # must not raise
+
+    def test_end_submit_clears_the_guard_so_a_later_submit_can_run(self):
+        eyeball.begin_submit("pr-100")
+        eyeball.end_submit("pr-100")
+        eyeball.begin_submit("pr-100")  # must not raise
+
+
+class MobileFirewallRemedyTests(unittest.TestCase):
+    """The exact scenario from live use: ufw blocked the backend port from a phone on the LAN.
+    The remedy line must name the actual command for whichever firewall systemd reports active."""
+
+    def test_ufw_active_gives_the_ufw_allow_command(self):
+        remedy = mobile.firewall_remedy("ufw", 8080, "192.168.1.0/24")
+        self.assertEqual(remedy, "sudo ufw allow from 192.168.1.0/24 to any port 8080 proto tcp")
+
+    def test_firewalld_active_gives_the_firewall_cmd_command(self):
+        remedy = mobile.firewall_remedy("firewalld", 8080, "192.168.1.0/24")
+        self.assertEqual(remedy, "sudo firewall-cmd --add-port=8080/tcp")
+
+    def test_no_known_firewall_gives_a_generic_hint(self):
+        remedy = mobile.firewall_remedy(None, 3000, "192.168.1.0/24")
+        self.assertIn("3000", remedy)
+        self.assertNotIn("ufw", remedy)
+        self.assertNotIn("firewall-cmd", remedy)
+
+    def test_lan_subnet_derives_the_slash_24(self):
+        self.assertEqual(mobile.lan_subnet("192.168.1.42"), "192.168.1.0/24")
+
+    def test_lan_subnet_returns_input_unchanged_when_not_ipv4(self):
+        self.assertEqual(mobile.lan_subnet("not-an-ip"), "not-an-ip")
+
+    def test_detect_active_firewall_prefers_ufw_when_both_checked(self):
+        def fake_run(cmd, **kwargs):
+            active = "ufw" in cmd
+            return subprocess.CompletedProcess(args=cmd, returncode=0 if active else 3,
+                                                stdout="active\n" if active else "inactive\n")
+        with patch("console.mobile.subprocess.run", side_effect=fake_run):
+            self.assertEqual(mobile.detect_active_firewall(), "ufw")
+
+    def test_detect_active_firewall_falls_back_to_firewalld(self):
+        def fake_run(cmd, **kwargs):
+            active = "firewalld" in cmd
+            return subprocess.CompletedProcess(args=cmd, returncode=0 if active else 3,
+                                                stdout="active\n" if active else "inactive\n")
+        with patch("console.mobile.subprocess.run", side_effect=fake_run):
+            self.assertEqual(mobile.detect_active_firewall(), "firewalld")
+
+    def test_detect_active_firewall_returns_none_when_neither_is_active(self):
+        with patch("console.mobile.subprocess.run") as run:
+            run.return_value = subprocess.CompletedProcess(args=[], returncode=3, stdout="inactive\n")
+            self.assertIsNone(mobile.detect_active_firewall())
+
+    def test_detect_active_firewall_returns_none_when_systemctl_is_unavailable(self):
+        with patch("console.mobile.subprocess.run", side_effect=FileNotFoundError()):
+            self.assertIsNone(mobile.detect_active_firewall())
+
+
+class MobileReachabilitySnapshotTests(unittest.TestCase):
+    def setUp(self) -> None:
+        mobile._reachability.clear()
+        mobile._reachability_threads.clear()
+
+    def test_returns_empty_dict_without_a_lan_address(self):
+        self.assertEqual(mobile.reachability_snapshot([{"id": "d1", "state": "device"}], None, 8080, False), {})
+
+    def test_skips_unauthorized_devices(self):
+        with patch("console.mobile.ensure_reachability_watch") as ensure:
+            result = mobile.reachability_snapshot([{"id": "d1", "state": "unauthorized"}], "192.168.1.5", 8080, False)
+            self.assertEqual(result, {})
+            ensure.assert_not_called()
+
+    def test_web_entry_is_none_when_web_is_not_up(self):
+        with patch("console.mobile.ensure_reachability_watch"):
+            result = mobile.reachability_snapshot([{"id": "d1", "state": "device"}], "192.168.1.5", 8080, False)
+            self.assertIsNone(result["d1"]["web"])
+
+    def test_reports_an_unreachable_backend_with_a_remedy(self):
+        mobile._reachability["d1:8080"] = {"reachable": False, "checked_at": 123.0}
+        with patch("console.mobile.ensure_reachability_watch"), \
+                patch("console.mobile.detect_active_firewall", return_value="ufw"):
+            result = mobile.reachability_snapshot([{"id": "d1", "state": "device"}], "192.168.1.5", 8080, False)
+            self.assertFalse(result["d1"]["backend"]["reachable"])
+            self.assertIn("ufw allow", result["d1"]["backend"]["remedy"])
+
+    def test_reports_a_reachable_backend_with_no_remedy(self):
+        mobile._reachability["d1:8080"] = {"reachable": True, "checked_at": 123.0}
+        with patch("console.mobile.ensure_reachability_watch"):
+            result = mobile.reachability_snapshot([{"id": "d1", "state": "device"}], "192.168.1.5", 8080, False)
+            self.assertTrue(result["d1"]["backend"]["reachable"])
+            self.assertIsNone(result["d1"]["backend"]["remedy"])
+
+
+class MobileProbeReachableTests(unittest.TestCase):
+    def test_runs_toybox_nc_with_stdin_closed(self):
+        with patch("console.mobile.subprocess.run") as run:
+            run.return_value = subprocess.CompletedProcess(args=[], returncode=0)
+            self.assertTrue(mobile.probe_reachable("d1", "192.168.1.5", 8080))
+            args, kwargs = run.call_args
+            self.assertEqual(args[0], ["adb", "-s", "d1", "shell", "toybox", "nc", "-w", "3", "192.168.1.5", "8080"])
+            self.assertEqual(kwargs.get("stdin"), subprocess.DEVNULL)
+
+    def test_nonzero_exit_is_unreachable(self):
+        with patch("console.mobile.subprocess.run") as run:
+            run.return_value = subprocess.CompletedProcess(args=[], returncode=1)
+            self.assertFalse(mobile.probe_reachable("d1", "192.168.1.5", 8080))
+
+    def test_timeout_is_unreachable_not_an_error(self):
+        with patch("console.mobile.subprocess.run", side_effect=subprocess.TimeoutExpired(cmd="adb", timeout=8)):
+            self.assertFalse(mobile.probe_reachable("d1", "192.168.1.5", 8080))
+
+
 class HealthDebounceTests(unittest.TestCase):
     def setUp(self) -> None:
         services._health_misses.clear()
@@ -787,6 +1066,20 @@ class HealthDebounceTests(unittest.TestCase):
 
     def test_a_service_never_seen_up_is_down_at_once(self) -> None:
         self.assertFalse(services.debounced_up("web", False))
+
+
+class HandoffLookupCaseTests(unittest.TestCase):
+    def test_label_id_matches_lower_case_and_hyphenated_file_names(self) -> None:
+        files = [
+            "specs/features/x/077-fix-114-pod-admin-web.md",
+            "specs/features/x/078-FIX123-dialog-web.md",
+            "specs/features/x/044-W29-support-grant-login-web.md",
+        ]
+        self.assertEqual(eyeball.match_handoff(files, "FIX114"), files[0])
+        self.assertEqual(eyeball.match_handoff(files, "fix123"), files[1])
+        self.assertEqual(eyeball.match_handoff(files, "W29"), files[2])
+        self.assertIsNone(eyeball.match_handoff(files, "W2"))
+
 
 
 if __name__ == "__main__":

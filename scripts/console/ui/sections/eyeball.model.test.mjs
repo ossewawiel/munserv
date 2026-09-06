@@ -60,6 +60,23 @@ test('buildChecklistViewModel reflects a ticked result and a note', () => {
   assert.equal(vm.done, 1);
 });
 
+test('buildChecklistViewModel carries file_as_improvement through from results', () => {
+  const results = {
+    candidate: 'pr-100',
+    checks: { E1: { result: 'pass', note: 'nice touch', file_as_improvement: true, issue_url: null } },
+    observations: [],
+  };
+  const vm = buildChecklistViewModel(FIXTURE_CANDIDATE, results);
+  assert.equal(vm.checks[0].file_as_improvement, true);
+});
+
+test('buildChecklistViewModel defaults file_as_improvement to false when absent', () => {
+  const results = { candidate: 'pr-100', checks: { E1: { result: 'pass', note: 'x' } }, observations: [] };
+  const vm = buildChecklistViewModel(FIXTURE_CANDIDATE, results);
+  assert.equal(vm.checks[0].file_as_improvement, false);
+  assert.equal(vm.checks[1].file_as_improvement, false);
+});
+
 test('buildChecklistViewModel carries observations through', () => {
   const results = { candidate: 'pr-100', checks: {}, observations: [{ kind: 'bug', text: 'x', issue_url: null }] };
   const vm = buildChecklistViewModel(FIXTURE_CANDIDATE, results);
