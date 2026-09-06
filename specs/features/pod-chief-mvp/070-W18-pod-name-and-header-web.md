@@ -103,6 +103,12 @@ building. Three things they settle:
 `PodIdentitySection` is a **new feature component**, not a registry component: it lives under
 `features/pod-settings/components/` and needs no `design/registry/web.md` row.
 
+The canvas was revised after this story was written (W18c, #128 and #129): `IdentitySaved` now draws
+the confirmation as a bottom-centre snackbar and every identity artboard carries a Reset button
+beside Save. **Both belong to W18c, not to this story.** Build the inline success `Alert` and the
+single Save button exactly as this handoff describes; W18c replaces the alert and adds Reset. Ignore
+the canvas' `feedback` note and its `IdentityDirty` artboard here.
+
 ## Contract
 `specs/contracts/api.md` § Pod. Both endpoints require role `pod_chief`.
 
