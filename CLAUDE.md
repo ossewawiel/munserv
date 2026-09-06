@@ -28,7 +28,7 @@ Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patt
 | Web | `cd web && pnpm dev` | http://localhost:3000, login `admin@ward42.example.com` / `admin123` |
 | Mobile | `cd mobile && flutter run` | emulator reaches the backend on 10.0.2.2:8080 |
 | Mock API (optional) | `cd infrastructure/mock-api && npm start` | localhost:3001, `flutter run --dart-define=API_PORT=3001` |
-| Eyeball dashboard | `python3 scripts/eyeball.py` | http://localhost:3999 |
+| Eyeball dashboard | `./dashboard.sh` (or `python3 scripts/eyeball.py`) | http://localhost:3999 |
 
 ## Quality gate
 CI (`.github/workflows/ci.yml`) is required on `master`: domain-language validation, backend ktlint + tests (Testcontainers) + build, web lint + `tsc -b` + Vitest + build, mobile format + analyze (infos fatal) + tests + debug APK. Run the same commands locally before opening a PR. Squash-merge; conventional commit titles (`feat(web): ...`, scopes: backend, web, mobile, db, api, infra, specs, ci).
