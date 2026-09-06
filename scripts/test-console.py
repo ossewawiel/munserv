@@ -624,8 +624,6 @@ class ChecklistModelTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
 
 
 class HealthDebounceTests(unittest.TestCase):
@@ -640,3 +638,7 @@ class HealthDebounceTests(unittest.TestCase):
 
     def test_a_service_never_seen_up_is_down_at_once(self) -> None:
         self.assertFalse(services.debounced_up("web", False))
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
