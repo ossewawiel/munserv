@@ -258,7 +258,11 @@ def find_or_create_issue(title_prefix: str, create: Callable[[], str]) -> dict:
     return {"url": create(), "reused": False}
 
 
-def file_check_issue(candidate: dict, check: dict, result: dict) -> dict:
+def file_check_issue(candidate: dict, check: dict, result: dict, kind: str = "bug") -> dict:
+    """File (or reuse) an issue for one check -- a `type:bug` for a failed check, or a
+    `type:feature` when the tester ticked "File as improvement" on a passing check with a note.
+    Same title format and body shape either way, so a check's issue is always found by the same
+    title-prefix search regardless of which way it was filed."""
     title_prefix = f"[Eyeball] {candidate['story']} {check['id']}:"
 
     def create() -> str:
@@ -280,7 +284,7 @@ def file_check_issue(candidate: dict, check: dict, result: dict) -> dict:
         args = [
             "issue", "create", "--repo", repo(),
             "--title", f"{title_prefix} {check['title']}",
-            "--body", "\n".join(lines), "--label", "type:bug,status:ready,source:eyeball",
+            "--body", "\n".join(lines), "--label", f"type:{kind},status:ready,source:eyeball",
         ]
         if candidate.get("platform"):
             args += ["--label", f"platform:{candidate['platform']}"]
@@ -332,6 +336,12 @@ def submit(candidate: dict, data: dict, checkout: Path) -> dict:
             result["issue_url"] = filed["url"]
             result["issue_reused"] = filed["reused"]
             save_results(checkout, candidate["id"], data)
+        elif (result.get("result") == "pass" and result.get("file_as_improvement")
+              and result.get("note", "").strip() and not result.get("issue_url")):
+            filed = file_check_issue(candidate, check, result, kind="feature")
+            result["issue_url"] = filed["url"]
+            result["issue_reused"] = filed["reused"]
+            save_results(checkout, candidate["id"], data)
     for obs in data.get("observations", []):
         if not obs.get("issue_url") and obs.get("text", "").strip():
             filed = file_observation_issue(candidate, obs)
@@ -350,6 +360,8 @@ def submit(candidate: dict, data: dict, checkout: Path) -> dict:
         issue = r.get("issue_url") or ""
         if issue and r.get("issue_reused"):
             issue += " (reused)"
+        if issue and r.get("file_as_improvement"):
+            issue += " (improvement)"
         rows.append(f"| {check['id']} | {check['title']} | {result} | {note} | {issue} |")
     body = f"**Eyeball: {passed}/{total} passed**\n\n" + "\n".join(rows)
     obs_with_issues = [o for o in data.get("observations", []) if o.get("issue_url")]

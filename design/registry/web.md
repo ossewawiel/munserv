@@ -29,6 +29,7 @@ The catalogue of web building blocks, as agents must use them. Every entry has a
 | `Pagination` | Below any list not using `DataTableCard` | `page`, `pageSize`, `total`, `onChange` | Tables use `DataTableCard`'s built-in pagination. |
 | `PhotoGallery`, `LocationPickerDialog` | Issue photos; picking a map point | `photos`; `value`, `onChange` | The only map picker; do not embed Leaflet directly in features. |
 | `LoginForm`, `RegisterForm`, `IssueTypeFilterBar` | Their single purpose | see props | Feature-specific molecules; extend, do not duplicate. |
+| `PodHeaderLockup` | Rendering a pod chief's own branding (logo + `displayName`) | `displayName`, `logoUrl` | Used by `DashboardLayout`'s header and the Pod Settings header preview; do not restyle either copy independently. |
 
 ## Organisms and templates
 | Component | Use when | Notes |

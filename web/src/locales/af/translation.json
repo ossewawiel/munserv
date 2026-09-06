@@ -268,6 +268,20 @@
   },
   "podSettings": {
     "title": "Pod-instellings",
-    "subtitle": "Pod-wye konfigurasie, insluitend ondersteuningstoegang vir die Sentrale Owerheid."
+    "subtitle": "Pod-wye konfigurasie, insluitend ondersteuningstoegang vir die Sentrale Owerheid.",
+    "identity": {
+      "title": "Pod-identiteit",
+      "nameLabel": "Pod-naam",
+      "nameHelper": "Tussen 2 en 100 karakters. Administrateurs en lede sien hierdie naam.",
+      "displayNamePreview": "Kopvoorskou",
+      "previewHint": "Almal in hierdie pod sien dit in die portaalkop. Dit word bygewerk sodra die verandering gestoor is.",
+      "logoUrlLabel": "Logo-URL",
+      "logoUrlHelper": "Direkte skakel na 'n PNG- of SVG-beeld, tot 500 karakters. Los dit leeg om net die Munserv-merk te wys.",
+      "save": "Stoor veranderinge",
+      "saved": "Gestoor. Die kop lees nou “{{displayName}}”.",
+      "nameTooShort": "Pod-naam moet ten minste 2 karakters wees.",
+      "nameTooLong": "Pod-naam moet 100 karakters of minder wees.",
+      "logoUrlTooLong": "Logo-URL moet 500 karakters of minder wees."
+    }
   }
 }
