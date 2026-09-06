@@ -12,6 +12,7 @@ import { Button } from '@/components/atoms/Button';
 import { Spinner } from '@/components/atoms/Spinner';
 import { PodHeaderLockup } from '@/components/molecules/PodHeaderLockup';
 import { usePodSettings, useUpdatePodSettings } from '../hooks';
+import type { UpdatePodSettingsRequest } from '../types';
 
 // The preview's right column matches the artboard's fixed 392px rail
 // (Main.dc.html), expressed as a theme spacing multiple (8px * 49) rather
@@ -20,6 +21,7 @@ const PREVIEW_COLUMN_SPACING_UNITS = 49;
 
 const NAME_MIN_LENGTH = 2;
 const NAME_MAX_LENGTH = 100;
+const LOGO_URL_MAX_LENGTH = 500;
 
 interface PodSettingsErrorBody {
   code?: string;
@@ -59,6 +61,12 @@ export const PodIdentitySection: FC = () => {
       ? t('podSettings.identity.nameTooLong', 'Pod name must be 100 characters or fewer.')
       : undefined;
 
+  const trimmedLogoUrl = logoUrl.trim();
+  const logoUrlTooLong = trimmedLogoUrl.length > LOGO_URL_MAX_LENGTH;
+  const logoUrlError = logoUrlTooLong
+    ? t('podSettings.identity.logoUrlTooLong', 'Logo URL must be 500 characters or fewer.')
+    : undefined;
+
   const serverErrorMessage =
     updateSettings.error instanceof AxiosError
       ? (updateSettings.error.response?.data as PodSettingsErrorBody | undefined)?.message
@@ -75,19 +83,27 @@ export const PodIdentitySection: FC = () => {
   }, []);
 
   const handleSave = useCallback(() => {
-    updateSettings.mutate(
-      { name: trimmedName, logoUrl: logoUrl.trim() },
-      {
-        onSuccess: (response) => {
-          setName(response.name);
-          setLogoUrl(response.logoUrl ?? '');
-          setJustSaved(true);
-        },
-      }
-    );
-  }, [trimmedName, logoUrl, updateSettings]);
+    // Only the fields the pod chief actually changed: sending name on a
+    // logo-only edit would re-mark the pod_name setup step complete for no
+    // reason (see backend PodService).
+    const request: UpdatePodSettingsRequest = {};
+    if (trimmedName !== data?.name) {
+      request.name = trimmedName;
+    }
+    if (trimmedLogoUrl !== (data?.logoUrl ?? '')) {
+      request.logoUrl = trimmedLogoUrl;
+    }
 
-  const saveDisabled = nameTooShort || nameTooLong || updateSettings.isPending;
+    updateSettings.mutate(request, {
+      onSuccess: (response) => {
+        setName(response.name);
+        setLogoUrl(response.logoUrl ?? '');
+        setJustSaved(true);
+      },
+    });
+  }, [trimmedName, trimmedLogoUrl, data, updateSettings]);
+
+  const saveDisabled = nameTooShort || nameTooLong || logoUrlTooLong || updateSettings.isPending;
 
   return (
     <MainCard title={t('podSettings.identity.title', 'Pod identity')}>
@@ -132,10 +148,14 @@ export const PodIdentitySection: FC = () => {
                 label={t('podSettings.identity.logoUrlLabel', 'Logo URL')}
                 value={logoUrl}
                 onChange={handleLogoUrlChange}
-                helperText={t(
-                  'podSettings.identity.logoUrlHelper',
-                  'Direct link to a PNG or SVG image, up to 500 characters. Leave it empty to show the Munserv mark on its own.'
-                )}
+                error={logoUrlError}
+                helperText={
+                  logoUrlError ??
+                  t(
+                    'podSettings.identity.logoUrlHelper',
+                    'Direct link to a PNG or SVG image, up to 500 characters. Leave it empty to show the Munserv mark on its own.'
+                  )
+                }
               />
             </Box>
 

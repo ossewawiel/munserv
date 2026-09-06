@@ -86,7 +86,6 @@ export const IdentityInvalidName: Story = {
 export const IdentitySaving: Story = {
   decorators: [withQueryData(podWithLogo)],
   beforeEach: () => {
-    worker.resetHandlers();
     worker.use(http.patch('*/pod/settings', () => new Promise(() => {})));
   },
   play: async ({ canvasElement }) => {
@@ -106,7 +105,6 @@ export const IdentitySaving: Story = {
 export const IdentityServerError: Story = {
   decorators: [withQueryData(podWithLogo)],
   beforeEach: () => {
-    worker.resetHandlers();
     worker.use(
       http.patch('*/pod/settings', () =>
         HttpResponse.json(
@@ -135,7 +133,6 @@ export const IdentityServerError: Story = {
 export const IdentitySaved: Story = {
   decorators: [withQueryData(podWithLogo)],
   beforeEach: () => {
-    worker.resetHandlers();
     worker.use(
       http.patch('*/pod/settings', () =>
         HttpResponse.json({

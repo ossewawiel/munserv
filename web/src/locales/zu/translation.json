@@ -280,7 +280,8 @@
       "save": "Londoloza izinguquko",
       "saved": "Kulondoloziwe. Isihloko manje sifundeka ngokuthi “{{displayName}}”.",
       "nameTooShort": "Igama le-Pod kufanele libe okungenani izinhlamvu ezingu-2.",
-      "nameTooLong": "Igama le-Pod kufanele libe izinhlamvu ezingu-100 noma ngaphansi."
+      "nameTooLong": "Igama le-Pod kufanele libe izinhlamvu ezingu-100 noma ngaphansi.",
+      "logoUrlTooLong": "I-URL Yelogo kufanele ibe izinhlamvu ezingu-500 noma ngaphansi."
     }
   }
 }

@@ -5,7 +5,7 @@ const srcDir = path.resolve(import.meta.dirname, '../src');
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.stories.tsx'],
-  staticDirs: ['../public'],
+  staticDirs: ['../public', './public'],
   addons: [],
   framework: {
     name: '@storybook/react-vite',

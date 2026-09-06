@@ -43,7 +43,7 @@ describe('PodIdentitySection', () => {
     expect(screen.getByRole('button', { name: /save changes/i })).toBeDisabled();
   });
 
-  it('should send the new name when saved', async () => {
+  it('should send only the changed name when saved', async () => {
     let receivedBody: unknown;
     server.use(
       http.patch('*/pod/settings', async ({ request }) => {
@@ -64,10 +64,50 @@ describe('PodIdentitySection', () => {
     fireEvent.change(nameField, { target: { value: 'Ward 42' } });
     fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
 
-    await waitFor(() =>
-      expect(receivedBody).toEqual({ name: 'Ward 42', logoUrl: mockPodSettings.logoUrl })
-    );
+    // logoUrl was not touched, so a name-only edit must not re-send it: doing
+    // so would re-mark the pod_name setup step complete for no reason.
+    await waitFor(() => expect(receivedBody).toEqual({ name: 'Ward 42' }));
     expect(await screen.findByText(/header now reads/i)).toBeInTheDocument();
+  });
+
+  it('should send only the changed logo URL when saved', async () => {
+    let receivedBody: unknown;
+    server.use(
+      http.patch('*/pod/settings', async ({ request }) => {
+        receivedBody = await request.json();
+        return HttpResponse.json({
+          name: mockPodSettings.name,
+          displayName: mockPodSettings.displayName,
+          logoUrl: 'https://cdn.ward42.org.za/branding/new-logo.png',
+        });
+      })
+    );
+
+    renderWithProviders(<PodIdentitySection />);
+
+    const logoUrlField = await screen.findByLabelText(/logo url/i);
+    await waitFor(() => expect(logoUrlField).toHaveValue(mockPodSettings.logoUrl));
+
+    fireEvent.change(logoUrlField, {
+      target: { value: 'https://cdn.ward42.org.za/branding/new-logo.png' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
+
+    await waitFor(() =>
+      expect(receivedBody).toEqual({ logoUrl: 'https://cdn.ward42.org.za/branding/new-logo.png' })
+    );
+  });
+
+  it('should reject a logo URL longer than 500 characters', async () => {
+    renderWithProviders(<PodIdentitySection />);
+
+    const logoUrlField = await screen.findByLabelText(/logo url/i);
+    await waitFor(() => expect(logoUrlField).toHaveValue(mockPodSettings.logoUrl));
+
+    fireEvent.change(logoUrlField, { target: { value: `https://example.com/${'a'.repeat(500)}` } });
+
+    expect(screen.getByText(/500 characters or fewer/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /save changes/i })).toBeDisabled();
   });
 
   it('should show the server validation message on 400', async () => {

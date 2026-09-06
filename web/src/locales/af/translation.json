@@ -280,7 +280,8 @@
       "save": "Stoor veranderinge",
       "saved": "Gestoor. Die kop lees nou “{{displayName}}”.",
       "nameTooShort": "Pod-naam moet ten minste 2 karakters wees.",
-      "nameTooLong": "Pod-naam moet 100 karakters of minder wees."
+      "nameTooLong": "Pod-naam moet 100 karakters of minder wees.",
+      "logoUrlTooLong": "Logo-URL moet 500 karakters of minder wees."
     }
   }
 }

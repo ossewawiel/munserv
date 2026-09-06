@@ -640,7 +640,8 @@
       "save": "Save changes",
       "saved": "Saved. The header now reads “{{displayName}}”.",
       "nameTooShort": "Pod name must be at least 2 characters.",
-      "nameTooLong": "Pod name must be 100 characters or fewer."
+      "nameTooLong": "Pod name must be 100 characters or fewer.",
+      "logoUrlTooLong": "Logo URL must be 500 characters or fewer."
     }
   }
 }
