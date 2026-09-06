@@ -186,6 +186,14 @@
     "results": "imiphumela",
     "rowsPerPage": "Imigqa ngekhasi"
   },
+  "dataTable": {
+    "searchPlaceholder": "Sesha",
+    "filters": "Izihlungi",
+    "filtersTitle": "Izihlungi",
+    "clearFilters": "Sula izihlungi",
+    "closeFilters": "Vala izihlungi",
+    "sortBy": "Hlunga nge"
+  },
   "errors": {
     "notFound": "Ayitholakali",
     "unauthorized": "Awugunyaziwe",
@@ -269,5 +277,10 @@
   "podSettings": {
     "title": "Izilungiselelo ze-Pod",
     "subtitle": "Ukulungiswa kwe-pod jikelele, okuhlanganisa ukufinyelela kokusekela kweGunya Eliyisikhulu."
+  },
+  "podAdministrators": {
+    "filters": {
+      "comingSoon": "Ukuhlunga akukavulwa. Uma sekuvuliwe, izihlungi zeqhaza nokwabiwa zizovela lapha futhi inani liboniswa kunkinobho yeZihlungi."
+    }
   }
 }

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import Typography from '@mui/material/Typography';
 
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 import { EmptyState } from '@/components/molecules/EmptyState';
 import { DataTableCard, type DataTableTab } from './DataTableCard';
-import type { Column } from './DataTable';
+import type { Column, SortState } from './DataTable';
 
 interface DemoMember {
   id: string;
@@ -25,6 +26,18 @@ const columns: Column<DemoMember>[] = [
   { key: 'name', header: 'Name', render: (item) => item.name },
   { key: 'status', header: 'Status', render: (item) => item.status },
   { key: 'issuesReported', header: 'Issues reported', render: (item) => item.issuesReported, align: 'right' },
+];
+
+const sortableColumns: Column<DemoMember>[] = [
+  { key: 'name', header: 'Name', render: (item) => item.name, sortable: true },
+  { key: 'status', header: 'Status', render: (item) => item.status, sortable: true },
+  {
+    key: 'issuesReported',
+    header: 'Issues reported',
+    render: (item) => item.issuesReported,
+    align: 'right',
+    sortable: true,
+  },
 ];
 
 const meta = {
@@ -116,4 +129,68 @@ function WithTabsDemo() {
 export const WithTabsAndBadges: Story = {
   args: Basic.args,
   render: () => <WithTabsDemo />,
+};
+
+function WithSortableColumnsDemo() {
+  const [sort, setSort] = useState<SortState>({ key: 'name', direction: 'asc' });
+
+  const handleSortChange = (key: string) => {
+    setSort((current) =>
+      current.key === key
+        ? { key, direction: current.direction === 'asc' ? 'desc' : 'asc' }
+        : { key, direction: 'asc' }
+    );
+  };
+
+  return (
+    <DataTableCard
+      columns={sortableColumns}
+      data={members}
+      keyExtractor={(item) => item.id}
+      totalItems={members.length}
+      currentPage={1}
+      pageSize={10}
+      onPageChange={() => {}}
+      onPageSizeChange={() => {}}
+      sort={sort}
+      onSortChange={handleSortChange}
+    />
+  );
+}
+
+/** A sortable column, toggled between ascending and descending on click. */
+export const WithSortableColumns: Story = {
+  args: Basic.args,
+  render: () => <WithSortableColumnsDemo />,
+};
+
+/** Search and filter controls render but are inert until a caller passes a handler. */
+export const WithDisabledSearchAndFilter: Story = {
+  args: {
+    ...Basic.args,
+    search: { value: '', placeholder: 'Search members' },
+    filterPanel: {
+      content: <Typography>Filtering is not switched on yet.</Typography>,
+    },
+  },
+};
+
+/** The filter drawer, opened via the toolbar's Filters button, with an active filter count. */
+export const WithOpenFilterDrawer: Story = {
+  args: {
+    ...Basic.args,
+    search: { value: '', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Role and status filters go here.</Typography>,
+      activeCount: 2,
+      onClear: () => {},
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const { within: withinDom, userEvent } = await import('storybook/test');
+    const canvas = withinDom(canvasElement);
+    await step('open the filter drawer', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: /filters/i }));
+    });
+  },
 };

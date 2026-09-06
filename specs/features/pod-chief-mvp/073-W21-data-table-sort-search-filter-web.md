@@ -3,7 +3,7 @@ issue: 32
 story: W21
 title: "Generic data table component: sorting, search and filter panel"
 platform: web
-status: pending
+status: completed
 depends_on: []
 touches:
   - web/src/components/organisms
@@ -22,8 +22,40 @@ design_artboards:
 design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/components/organisms/DataTable.tsx
+  - web/src/components/organisms/DataTable.test.tsx
+  - web/src/components/organisms/DataTableCard.tsx
+  - web/src/components/organisms/DataTableCard.test.tsx
+  - web/src/components/organisms/DataTableCard.stories.tsx
+  - web/src/features/pod-chief/PodAdministratorsPage.tsx
+  - web/src/features/pod-chief/PodAdministratorsPage.test.tsx
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+  - design/registry/web.md
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-sortable-columns--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-sortable-columns--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-disabled-search-and-filter--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-disabled-search-and-filter--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-open-filter-drawer--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/organisms-datatablecard--with-open-filter-drawer--dark.png
+tests_added:
+  - "web/src/components/organisms/DataTable.test.tsx: should render a sort label only for sortable columns"
+  - "web/src/components/organisms/DataTable.test.tsx: should disable the sort label when no sort handler is given"
+  - "web/src/components/organisms/DataTable.test.tsx: should call onSortChange with the column key when a sortable header is clicked"
+  - "web/src/components/organisms/DataTable.test.tsx: should not reorder the rows it is given"
+  - "web/src/components/organisms/DataTableCard.test.tsx: should render a disabled search field when no handler is given"
+  - "web/src/components/organisms/DataTableCard.test.tsx: should call the search handler as the user types"
+  - "web/src/components/organisms/DataTableCard.test.tsx: should render a disabled filter button when no handler is given"
+  - "web/src/components/organisms/DataTableCard.test.tsx: should open the filter drawer and show its content"
+  - "web/src/components/organisms/DataTableCard.test.tsx: should close the filter drawer"
+  - "web/src/components/organisms/DataTableCard.test.tsx: should badge the filter button with the active filter count"
+  - "web/src/components/organisms/DataTableCard.test.tsx: should disable the clear button when no clear handler is given"
+  - "web/src/components/organisms/DataTableCard.test.tsx: should call onClear when the clear button is enabled and clicked"
+  - "web/src/features/pod-chief/PodAdministratorsPage.test.tsx: should show a disabled search field"
+  - "web/src/features/pod-chief/PodAdministratorsPage.test.tsx: should show a disabled filter button"
+  - "web/src/features/pod-chief/PodAdministratorsPage.test.tsx: should show sortable headers that do nothing"
 ---
 
 # W21 · Data table sorting, search and filter panel (Web)

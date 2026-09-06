@@ -186,6 +186,14 @@
     "results": "resultate",
     "rowsPerPage": "Rye per bladsy"
   },
+  "dataTable": {
+    "searchPlaceholder": "Soek",
+    "filters": "Filters",
+    "filtersTitle": "Filters",
+    "clearFilters": "Maak filters skoon",
+    "closeFilters": "Maak filters toe",
+    "sortBy": "Sorteer volgens"
+  },
   "errors": {
     "notFound": "Nie Gevind",
     "unauthorized": "Ongemagtig",
@@ -269,5 +277,10 @@
   "podSettings": {
     "title": "Pod-instellings",
     "subtitle": "Pod-wye konfigurasie, insluitend ondersteuningstoegang vir die Sentrale Owerheid."
+  },
+  "podAdministrators": {
+    "filters": {
+      "comingSoon": "Filtrering is nog nie geaktiveer nie. Wanneer dit is, verskyn rol- en toewysingsfilters hier en die telling wys op die Filters-knoppie."
+    }
   }
 }
