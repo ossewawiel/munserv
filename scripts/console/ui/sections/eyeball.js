@@ -394,7 +394,7 @@ function checkCard(check, index) {
     el('div', { class: 'toggle-group', style: 'margin:8px 0' },
       el('button', { class: 'pass' + (check.result === 'pass' ? ' active' : ''), onclick: () => setCheckResult(check.id, 'pass') }, 'Pass'),
       el('button', { class: 'fail' + (check.result === 'fail' ? ' active' : ''), onclick: () => setCheckResult(check.id, 'fail') }, 'Fail')),
-    el('textarea', { class: 'note', placeholder: 'Note (optional)', value: check.note || '', oninput: (e) => setCheckNote(check.id, e.target.value) }),
+    el('textarea', { class: 'note', placeholder: 'Note (optional)', value: check.note || '', 'data-focus-key': 'note:' + check.id, oninput: (e) => setCheckNote(check.id, e.target.value) }),
     check.issue_url ? el('div', {}, el('a', { href: check.issue_url, target: '_blank', rel: 'noopener' }, 'Filed issue')) : null);
 }
 
@@ -403,11 +403,11 @@ function observationsCard() {
   const data = ensureResultsData();
   return el('div', { class: 'card' },
     el('h3', {}, 'Observations'),
-    data.observations.map((obs) => el('div', { style: 'display:flex;gap:8px;margin-bottom:8px' },
+    data.observations.map((obs, idx) => el('div', { style: 'display:flex;gap:8px;margin-bottom:8px' },
       el('select', { onchange: (e) => { obs.kind = e.target.value; saveResults(); } },
         el('option', { value: 'bug', selected: obs.kind === 'bug' }, 'Bug'),
         el('option', { value: 'improvement', selected: obs.kind === 'improvement' }, 'Improvement')),
-      el('textarea', { style: 'flex:1', value: obs.text, placeholder: 'What did you notice?',
+      el('textarea', { style: 'flex:1', value: obs.text, placeholder: 'What did you notice?', 'data-focus-key': 'obs:' + idx,
         oninput: (e) => { obs.text = e.target.value; saveResults(); } }),
       obs.issue_url ? el('a', { href: obs.issue_url, target: '_blank', rel: 'noopener' }, 'issue') : null)),
     el('button', { onclick: addObservation }, 'Add observation'));
@@ -476,8 +476,27 @@ function helpBanner() {
 
 // --- top-level render -------------------------------------------------
 
+// Re-rendering replaces every node, so remember which field had the cursor and put it back;
+// otherwise the 3s state poll kicks the tester out of the note they are typing.
+function captureFocus() {
+  const active = document.activeElement;
+  if (!active || !root.contains(active) || !active.dataset.focusKey) return null;
+  return { key: active.dataset.focusKey, start: active.selectionStart, end: active.selectionEnd };
+}
+
+function restoreFocus(saved) {
+  if (!saved) return;
+  const target = root.querySelector(`[data-focus-key="${CSS.escape(saved.key)}"]`);
+  if (!target) return;
+  target.focus({ preventScroll: true });
+  if (typeof saved.start === 'number' && typeof target.setSelectionRange === 'function') {
+    try { target.setSelectionRange(saved.start, saved.end); } catch { /* not a text control */ }
+  }
+}
+
 function renderAll() {
   const { el } = ctx;
+  const focus = captureFocus();
   try {
     root.innerHTML = '';
     const staleText = candidatesLoading ? 'loading...' : 'candidates ' + timeAgo(candidatesFetchedAt / 1000);
@@ -504,6 +523,7 @@ function renderAll() {
     }
 
     root.append(el('div', { class: 'eyeball-layout' }, left, center, rightColumn()));
+    restoreFocus(focus);
   } catch (e) {
     // A rendering bug must be visible and diagnosable, never a silently missing section.
     // eslint-disable-next-line no-console
