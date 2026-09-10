@@ -514,4 +514,4 @@ Grant-scoped tokens only (minted by `/auth/admin/login` under a support grant). 
 caller's own grant, so the client can refresh a slid `expiresAt`.
 
 **Response:** `200` `SupportGrant` (same shape as above)
-**Errors:** 401 Not authenticated | 403 Not a support grant token (`{ code: "not_support_grant", message: string }`), or the grant is revoked or expired (empty body: the activity filter clears the token's authentication before the controller runs)
+**Errors:** 401 Not authenticated, or the grant is revoked or expired (`ErrorResponse`, code `UNAUTHENTICATED`: the activity filter clears the token's authentication before the controller runs, so the authentication entry point answers) | 403 Not a support grant token (`{ code: "not_support_grant", message: string }`)

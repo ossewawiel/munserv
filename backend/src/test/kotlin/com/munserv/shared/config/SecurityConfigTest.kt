@@ -2,6 +2,7 @@ package com.munserv.shared.config
 
 import com.munserv.TestContainersConfig
 import com.munserv.auth.service.JwtService
+import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.MemberId
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
@@ -82,6 +83,35 @@ class SecurityConfigTest {
         mockMvc
             .get("/api/v1/admin/dashboard") {
                 header("Authorization", "Bearer $memberToken")
+            }.andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    fun `should answer 401 for GET pod settings when no token is sent`() {
+        // /api/v1/pod/** is guarded only by @RequireRole at the controller; without an
+        // .authenticated() matcher here, the role aspect's AccessDeniedException would be
+        // resolved by GlobalExceptionHandler as a 403 before Spring Security's own
+        // ExceptionTranslationFilter (and so the entry point) ever saw it.
+        mockMvc
+            .get("/api/v1/pod/settings")
+            .andExpect {
+                status { isUnauthorized() }
+                jsonPath("$.error.code") { value("UNAUTHENTICATED") }
+                jsonPath("$.error.message") { value("Authentication required") }
+            }
+    }
+
+    @Test
+    fun `should answer 403 for GET pod settings with a ward admin token`() {
+        // Ward Admin test account seeded by V030__add_ward_role_test_accounts.sql.
+        val wardAdminId = AdminId.fromString("550e8400-e29b-41d4-a716-446655440034")
+        val wardAdminToken = jwtService.generateAccessToken(MemberId(wardAdminId.value), "ward_admin")
+
+        mockMvc
+            .get("/api/v1/pod/settings") {
+                header("Authorization", "Bearer $wardAdminToken")
             }.andExpect {
                 status { isForbidden() }
             }

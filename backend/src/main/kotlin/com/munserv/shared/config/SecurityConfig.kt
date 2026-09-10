@@ -59,6 +59,11 @@ class SecurityConfig(
                     .authenticated()
                     .requestMatchers("/api/v1/auth/logout")
                     .authenticated()
+                    // Sector settings are guarded by @RequireRole (SECTOR_CHIEF); require
+                    // authentication here too so a missing/invalid token hits the entry
+                    // point (401) before the role aspect can turn it into a 403.
+                    .requestMatchers("/api/v1/sectors/*/settings", "/api/v1/sectors/*/settings/**")
+                    .authenticated()
                     .requestMatchers("/api/v1/sectors", "/api/v1/sectors/**")
                     .permitAll()
                     .requestMatchers("/uploads/**")
@@ -82,6 +87,14 @@ class SecurityConfig(
                     .hasRole("SUPER_USER")
                     // Support access endpoints require an authenticated admin (pod chief only, enforced by @RequireRole)
                     .requestMatchers("/api/v1/support-access/**")
+                    .authenticated()
+                    // Pod settings/dashboard/administrators and admin management are guarded by
+                    // @RequireRole (POD_CHIEF / SECTOR_CHIEF); require authentication here too,
+                    // so a missing/invalid token hits the entry point (401) before the role
+                    // aspect's AccessDeniedException can be turned into a 403.
+                    .requestMatchers("/api/v1/pod/**")
+                    .authenticated()
+                    .requestMatchers("/api/v1/admins/**")
                     .authenticated()
                     // Default: allow all for now (remaining endpoints)
                     .anyRequest()

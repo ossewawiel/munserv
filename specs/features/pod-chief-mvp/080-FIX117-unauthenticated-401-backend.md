@@ -28,11 +28,14 @@ files_changed:
   - backend/src/test/kotlin/com/munserv/photos/api/PhotoControllerTest.kt
   - backend/src/test/kotlin/com/munserv/groundadmin/api/GroundAdminControllerTest.kt
   - backend/src/test/kotlin/com/munserv/support/api/SupportGrantAccessRevocationTest.kt
+  - backend/src/main/kotlin/com/munserv/support/api/SupportGrantSelfController.kt
   - specs/contracts/api.md
 tests_added:
   - SecurityConfigTest.should answer 401 with the standard body when no token is sent
   - SecurityConfigTest.should answer 401 when the token is expired
   - SecurityConfigTest.should answer 403 when the role is not allowed
+  - SecurityConfigTest.should answer 401 for GET pod settings when no token is sent
+  - SecurityConfigTest.should answer 403 for GET pod settings with a ward admin token
   - SecurityConfigTest.expired token result should not be valid
 ---
 
@@ -101,4 +104,21 @@ Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`
   steps:
     - Log in on http://localhost:3000/login, then in the browser devtools Application tab delete the accessToken entry from Local Storage and reload the page.
   expect: The app returns to http://localhost:3000/login with the session-expired message.
+- id: E4
+  title: Expired or malformed token answers 401 with the standard body
+  as: none
+  services: [db, backend]
+  url: http://localhost:8080/swagger-ui/index.html#/Pod%20Settings/getSettings_1
+  steps:
+    - 'Press Authorize and paste the literal string `expired.token.value` as the bearer token.'
+    - 'Open http://localhost:8080/swagger-ui/index.html#/Pod%20Settings/getSettings_1, press "Try it out", Execute.'
+  expect: 'Response code 401 and a JSON body with code "UNAUTHENTICATED" and message "Authentication required".'
+- id: E5
+  title: Wrong credentials on admin login still answer 401
+  as: none
+  services: [db, backend]
+  url: http://localhost:8080/swagger-ui/index.html#/Authentication/adminLogin
+  steps:
+    - 'Without pressing Authorize, open http://localhost:8080/swagger-ui/index.html#/Authentication/adminLogin, press "Try it out", and submit {"email": "wardadmin@munserv.local", "password": "wrong-password"}, Execute.'
+  expect: Response code 401.
 ```
