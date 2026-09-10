@@ -10,6 +10,7 @@
 | B4 | Administrator onboarding API | Password change works ǀ Profile completion works ǀ Welcome message sent ǀ Tests pass | 🟢 Done | [#36](https://github.com/ossewawiel/munserv/issues/36) |
 | B10 | As a new administrator, I receive a welcome message with my initial tasks when my account is created | `admin_welcome` message type in domain, Kotlin, DB enum, contracts and Dart ǀ `POST /pod/administrators` creates the message ǀ `metadata.tasks` lists the initial tasks ǀ Domain language validation and tests pass | 🟢 Done | [#95](https://github.com/ossewawiel/munserv/issues/95) |
 | B11 | As a Pod Chief, I can upload a pod logo file | `POST /pod/logo` multipart, pod chief only ǀ Stored through the existing photo storage and served from `/uploads` ǀ Returns `{ logoUrl }` ǀ `PATCH /pod/settings` keeps accepting `logoUrl` ǀ Documented in api.md ǀ Tests pass | 🟢 Done | [#96](https://github.com/ossewawiel/munserv/issues/96) |
+| B12 | As a Pod Chief, I can sort, search and filter the pod administrator list through the API | `sort=<column>:<asc\|desc>` over email, displayName, role, createdAt ǀ `q` matches email or display name case-insensitively ǀ Repeatable `role` and `wardId` filters ǀ List covers ward- and sector-level admins of the pod ǀ Bad parameters answer 400 ǀ Documented in api.md ǀ Tests pass | 🔴 Pending | [#152](https://github.com/ossewawiel/munserv/issues/152) |
 
 ## Pod Chief Bootstrap Stories
 
