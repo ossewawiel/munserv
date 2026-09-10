@@ -298,7 +298,7 @@ class AuthControllerAdditionalTest {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                 }.andExpect {
-                    status { isForbidden() }
+                    status { isUnauthorized() }
                 }
         }
 

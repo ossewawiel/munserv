@@ -47,12 +47,12 @@ class MemberControllerTest {
     }
 
     @Test
-    fun `GET me should return 403 when not authenticated`() {
-        // Spring Security returns 403 Forbidden for missing authentication token
+    fun `GET me should return 401 when not authenticated`() {
+        // The authentication entry point answers 401 for missing authentication
         mockMvc
             .get("/api/v1/members/me")
             .andExpect {
-                status { isForbidden() }
+                status { isUnauthorized() }
             }
     }
 
@@ -92,13 +92,13 @@ class MemberControllerTest {
     }
 
     @Test
-    fun `GET me should return 403 when token is invalid`() {
-        // Spring Security returns 403 Forbidden for invalid authentication token
+    fun `GET me should return 401 when token is invalid`() {
+        // The authentication entry point answers 401 for an invalid authentication token
         mockMvc
             .get("/api/v1/members/me") {
                 header("Authorization", "Bearer invalid-token")
             }.andExpect {
-                status { isForbidden() }
+                status { isUnauthorized() }
             }
     }
 

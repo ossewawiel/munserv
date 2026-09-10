@@ -93,11 +93,13 @@ class SupportGrantAccessRevocationTest {
         supportGrantRepository.save(grant.revoked(Instant.now(), podChiefId))
 
         // The same bearer token must no longer reach an `.authenticated()`-only endpoint.
-        // Spring Security returns 403 Forbidden for a request with no authentication set,
-        // same as a request with no token at all (see MemberControllerTest).
+        // The activity filter clears the authentication for a revoked grant, so the
+        // authentication entry point answers 401, same as a request with no token at
+        // all (see MemberControllerTest); the web client already treats that as
+        // session-expired.
         mockMvc
             .get("/api/v1/issues") {
                 header("Authorization", "Bearer $grantToken")
-            }.andExpect { status { isForbidden() } }
+            }.andExpect { status { isUnauthorized() } }
     }
 }
