@@ -3,7 +3,7 @@ issue: 96
 story: B11
 title: "Pod logo upload"
 platform: backend
-status: completed
+status: done
 depends_on: []
 touches:
   - backend/src/main/kotlin/com/munserv/pod
