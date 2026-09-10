@@ -411,6 +411,96 @@ Uploading stores the file only; it does not change the pod. Persist the returned
 
 ---
 
+## Pod Administrators
+
+Administrator management for the caller's pod. Every endpoint requires an authenticated admin with
+role `pod_chief` (`@RequireRole(AdminRole.POD_CHIEF)` on `PodAdministratorController`).
+See [`domain/admin-role.md`](../../domain/admin-role.md).
+
+A pod's administrators are every admin whose `podId` is that pod, plus every ward- and sector-level
+admin whose ward or sector belongs to that pod (those rows carry a null `podId`).
+
+### GET /pod/administrators
+List the pod's administrators, sorted, searched and filtered. Not paginated: the response carries
+the whole filtered set.
+
+**Query:**
+
+| Param | Values | Default |
+|---|---|---|
+| `sort` | `<column>:<direction>`; column is `email`, `displayName`, `role` or `createdAt`, direction is `asc` or `desc` | `createdAt:asc` |
+| `q` | case-insensitive substring matched against `email` **or** `displayName`; blank or whitespace is ignored | none |
+| `role` | an `admin_role` wire value, repeatable (`?role=ward_chief&role=sector_admin`); an admin matches when its role is any of them | none |
+| `wardId` | UUID; keeps only admins assigned to that ward | none |
+
+Filters combine with AND (`q` AND role-set AND ward). `sort=role:asc` orders by the role hierarchy
+`sector_admin < sector_chief < ward_admin < ward_chief < pod_admin < pod_chief`, not alphabetically;
+`email` and `displayName` sort case-insensitively.
+
+**Response:** `200` `AdminListResponse`
+```json
+{
+  "items": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440031",
+      "email": "podchief@munserv.local",
+      "displayName": "Test Pod Chief",
+      "role": "pod_chief",
+      "level": "pod",
+      "podId": "550e8400-e29b-41d4-a716-446655440000",
+      "wardId": null,
+      "sectorId": null,
+      "createdAt": "2026-01-23T10:00:00Z",
+      "deletedAt": null
+    }
+  ],
+  "total": 1
+}
+```
+`total` is the number of items after filtering; the response is unpaginated, so it always equals
+`items.length`.
+
+**Errors:** 400 `{ code: "invalid_sort" | "invalid_role" | "invalid_ward_id", message: string }` |
+401 Unauthorized (`{ code, message }`) | 403 Not pod chief
+
+### GET /pod/administrators/{id}
+Single administrator.
+
+**Response:** `200` `AdminResponse` (one `items` element of the list above)
+**Errors:** 401 Unauthorized | 403 `{ code: "cross_pod" | "out_of_scope", message }` | 404 Not found
+
+### POST /pod/administrators
+Create an administrator in the pod. Also sends the new admin an `admin_welcome` message.
+
+**Request:**
+```json
+{
+  "email": "newadmin@ward42.example.com",
+  "displayName": "New Admin",
+  "role": "ward_admin",
+  "wardId": "550e8400-e29b-41d4-a716-446655440030"
+}
+```
+`podId` / `wardId` / `sectorId` are set for the level the role belongs to; pod-level roles always
+take the caller's pod.
+
+**Response:** `201` `AdminCreatedResponse` — `AdminResponse` fields plus `temporaryPassword` (shown once)
+**Errors:** 400 `{ code: "validation_error", message }` | 401 | 403 | 409 `{ code: "email_exists", message }`
+
+### PATCH /pod/administrators/{id}
+Update an administrator. Body `{ "displayName": string }`.
+
+**Response:** `200` `AdminResponse`
+**Errors:** 400 | 401 | 403 | 404 Not found
+
+### DELETE /pod/administrators/{id}
+Soft delete an administrator.
+
+**Response:** `204` no body
+**Errors:** 401 | 403 `{ code: "cannot_delete_self" | "insufficient_permissions" | "cross_pod", message }` | 404 Not found
+
+---
+
 ## Messages
 
 `admin_welcome` messages are created by `POST /pod/administrators` and carry `metadata.tasks`, a list of strings.

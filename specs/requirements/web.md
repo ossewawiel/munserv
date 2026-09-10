@@ -31,6 +31,7 @@
 | W19 | As a Pod Chief, I can see placeholder for boundary configuration | Pod boundaries section visible but disabled ǀ Ward/sector boundaries section visible but disabled ǀ "Coming soon" indicator | 🔴 Pending | [#30](https://github.com/ossewawiel/munserv/issues/30) |
 | W20 | As a Pod Chief, I can see the Reports menu structure | Pod reports submenu entry ǀ Ward/sector submenu entries ǀ Clicking goes to placeholder page with tabbed structure | 🔴 Pending | [#31](https://github.com/ossewawiel/munserv/issues/31) |
 | W21 | As a developer, I can use a generic data table component | Supports column definitions ǀ Sort by columns (prepared) ǀ Search input (prepared) ǀ Filter slide-out panel (prepared) ǀ Actions column ǀ Add button slot | 🔴 Pending | [#32](https://github.com/ossewawiel/munserv/issues/32) |
+| W21b | As a Pod Chief, I can sort, search and filter the Pod Administrators table for real | Header click sorts server-side and shows the direction ǀ Search filters by email or name, debounced 300ms ǀ Filter panel offers role (multi) and ward, badges the active count and clears ǀ Sort, search and filters live in the URL and survive a reload ǀ Empty result says no match ǀ Lint, typecheck and tests pass | 🔴 Pending | [#149](https://github.com/ossewawiel/munserv/issues/149) |
 
 ## Pod Chief Bootstrap Stories
 
