@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
     @Lazy private val supportGrantActivityFilter: SupportGrantActivityFilter,
+    private val unauthenticatedEntryPoint: UnauthenticatedEntryPoint,
 ) {
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
@@ -28,6 +29,7 @@ class SecurityConfig(
             .csrf { it.disable() }
             .cors { }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .exceptionHandling { it.authenticationEntryPoint(unauthenticatedEntryPoint) }
             .authorizeHttpRequests { auth ->
                 auth
                     // Public endpoints

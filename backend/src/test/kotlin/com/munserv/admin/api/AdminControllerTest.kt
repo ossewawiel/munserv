@@ -74,15 +74,15 @@ class AdminControllerTest {
         }
 
         @Test
-        fun `GET api-v1-admin-dashboard should return 403 without token`() {
-            // Spring Security returns 403 Forbidden when there's no authentication
-            // and the endpoint requires a specific role
+        fun `GET api-v1-admin-dashboard should return 401 without token`() {
+            // The authentication entry point answers 401 for a missing token; 403 is
+            // reserved for an authenticated request the role may not make.
             mockMvc
                 .get("/api/v1/admin/dashboard") {
                     param("sectorId", testSectorId)
                     accept = MediaType.APPLICATION_JSON
                 }.andExpect {
-                    status { isForbidden() }
+                    status { isUnauthorized() }
                 }
         }
 

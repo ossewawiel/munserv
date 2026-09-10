@@ -3,7 +3,7 @@ issue: 117
 story: FIX117
 title: "Unauthenticated requests answer 401 instead of 403"
 platform: backend
-status: pending
+status: completed
 depends_on: []
 touches:
   - backend/src/main/kotlin/com/munserv/shared/config
@@ -16,8 +16,24 @@ design_artboards: []
 design_approved: false
 created_by: orchestrator
 created_at: "2026-09-10"
-files_changed: []
-tests_added: []
+files_changed:
+  - backend/src/main/kotlin/com/munserv/shared/config/UnauthenticatedEntryPoint.kt
+  - backend/src/main/kotlin/com/munserv/shared/config/SecurityConfig.kt
+  - backend/src/main/kotlin/com/munserv/shared/api/ErrorResponse.kt
+  - backend/src/test/kotlin/com/munserv/shared/config/SecurityConfigTest.kt
+  - backend/src/test/kotlin/com/munserv/auth/api/AuthControllerAdditionalTest.kt
+  - backend/src/test/kotlin/com/munserv/auth/api/WebRegistrationApiContractTest.kt
+  - backend/src/test/kotlin/com/munserv/admin/api/AdminControllerTest.kt
+  - backend/src/test/kotlin/com/munserv/members/api/MemberControllerTest.kt
+  - backend/src/test/kotlin/com/munserv/photos/api/PhotoControllerTest.kt
+  - backend/src/test/kotlin/com/munserv/groundadmin/api/GroundAdminControllerTest.kt
+  - backend/src/test/kotlin/com/munserv/support/api/SupportGrantAccessRevocationTest.kt
+  - specs/contracts/api.md
+tests_added:
+  - SecurityConfigTest.should answer 401 with the standard body when no token is sent
+  - SecurityConfigTest.should answer 401 when the token is expired
+  - SecurityConfigTest.should answer 403 when the role is not allowed
+  - SecurityConfigTest.expired token result should not be valid
 ---
 
 # FIX117 · Unauthenticated requests answer 401, forbidden ones 403 (Backend)
@@ -28,11 +44,11 @@ Read `domain/README.md`. Found by the reviewer of #116: `SecurityConfig` registe
 A client can tell "not signed in" (401) from "not allowed" (403) on every endpoint.
 
 ## Acceptance criteria
-- [ ] A request to any protected endpoint with no `Authorization` header answers `401` with the standard error body (`ErrorResponse` from `com.munserv.shared.api`, code `UNAUTHENTICATED`, message "Authentication required").
-- [ ] A request with an expired or malformed JWT answers `401` with the same body.
-- [ ] An authenticated request to an endpoint the role may not call still answers `403` (unchanged, e.g. a ward admin calling `GET /pod/dashboard`).
-- [ ] `POST /auth/admin/login` with wrong credentials keeps answering `401` as today.
-- [ ] `specs/contracts/api.md` documents the rule once in its error conventions section.
+- [x] A request to any protected endpoint with no `Authorization` header answers `401` with the standard error body (`ErrorResponse` from `com.munserv.shared.api`, code `UNAUTHENTICATED`, message "Authentication required").
+- [x] A request with an expired or malformed JWT answers `401` with the same body.
+- [x] An authenticated request to an endpoint the role may not call still answers `403` (unchanged, e.g. a ward admin calling `GET /pod/dashboard`).
+- [x] `POST /auth/admin/login` with wrong credentials keeps answering `401` as today.
+- [x] `specs/contracts/api.md` documents the rule once in its error conventions section.
 
 ## Visual
 None.

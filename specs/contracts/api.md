@@ -4,6 +4,10 @@ Base URL: `/api/v1`
 
 > **Full examples**: See [archive/MVP_Development_Guide.md §4](../archive/MVP_Development_Guide.md) for complete JSON request/response examples.
 
+## Error conventions
+
+401 `UNAUTHENTICATED`: no, expired or invalid token; 403: authenticated but not allowed.
+
 ## Auth
 
 ### POST /auth/register
