@@ -151,6 +151,7 @@ export const PodAdministratorsPage: FC = () => {
       {
         key: 'displayName',
         header: t('podAdministrators.table.name'),
+        sortable: true,
         render: (admin: PodAdministrator) => (
           <Typography variant="body2" sx={{
             fontWeight: 500
@@ -162,6 +163,7 @@ export const PodAdministratorsPage: FC = () => {
       {
         key: 'email',
         header: t('podAdministrators.table.email'),
+        sortable: true,
         render: (admin: PodAdministrator) => (
           <Typography variant="body2" sx={{
             color: "text.secondary"
@@ -173,6 +175,7 @@ export const PodAdministratorsPage: FC = () => {
       {
         key: 'role',
         header: t('podAdministrators.table.role'),
+        sortable: true,
         render: (admin: PodAdministrator) => (
           <Chip
             label={ADMIN_ROLE_LABELS[admin.role] ?? admin.role}
@@ -184,6 +187,7 @@ export const PodAdministratorsPage: FC = () => {
       {
         key: 'assignedTo',
         header: t('podAdministrators.table.assignedTo'),
+        sortable: true,
         render: (admin: PodAdministrator) => (
           <Typography variant="body2" sx={{
             color: "text.secondary"
@@ -195,6 +199,7 @@ export const PodAdministratorsPage: FC = () => {
       {
         key: 'createdAt',
         header: t('podAdministrators.table.createdAt'),
+        sortable: true,
         render: (admin: PodAdministrator) => (
           <Typography variant="body2" sx={{
             color: "text.secondary"
@@ -271,6 +276,10 @@ export const PodAdministratorsPage: FC = () => {
           pageSize={100}
           isLoading={isLoading}
           hidePagination
+          search={{ value: '' }}
+          filterPanel={{
+            content: <Typography>{t('podAdministrators.filters.comingSoon')}</Typography>,
+          }}
           actionSlot={
             <Button
               variant="contained"

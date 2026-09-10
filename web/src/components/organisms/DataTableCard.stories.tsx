@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import Typography from '@mui/material/Typography';
+import { userEvent, within } from 'storybook/test';
 
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 import { EmptyState } from '@/components/molecules/EmptyState';
 import { DataTableCard, type DataTableTab } from './DataTableCard';
-import type { Column } from './DataTable';
+import type { Column, SortState } from './DataTable';
 
 interface DemoMember {
   id: string;
@@ -25,6 +27,18 @@ const columns: Column<DemoMember>[] = [
   { key: 'name', header: 'Name', render: (item) => item.name },
   { key: 'status', header: 'Status', render: (item) => item.status },
   { key: 'issuesReported', header: 'Issues reported', render: (item) => item.issuesReported, align: 'right' },
+];
+
+const sortableColumns: Column<DemoMember>[] = [
+  { key: 'name', header: 'Name', render: (item) => item.name, sortable: true },
+  { key: 'status', header: 'Status', render: (item) => item.status, sortable: true },
+  {
+    key: 'issuesReported',
+    header: 'Issues reported',
+    render: (item) => item.issuesReported,
+    align: 'right',
+    sortable: true,
+  },
 ];
 
 const meta = {
@@ -116,4 +130,110 @@ function WithTabsDemo() {
 export const WithTabsAndBadges: Story = {
   args: Basic.args,
   render: () => <WithTabsDemo />,
+};
+
+const ascendingSort: SortState = { key: 'name', direction: 'asc' };
+const descendingSort: SortState = { key: 'name', direction: 'desc' };
+
+/** A sortable column header, ascending, with the full toolbar the artboard shows. */
+export const WithSortAscending: Story = {
+  args: {
+    ...Basic.args,
+    columns: sortableColumns,
+    sort: ascendingSort,
+    onSortChange: () => {},
+    search: { value: '', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Filtering is not switched on yet.</Typography>,
+    },
+  },
+};
+
+/** The same sortable column header, descending, with the full toolbar the artboard shows. */
+export const WithSortDescending: Story = {
+  args: {
+    ...Basic.args,
+    columns: sortableColumns,
+    sort: descendingSort,
+    onSortChange: () => {},
+    search: { value: '', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Filtering is not switched on yet.</Typography>,
+    },
+  },
+};
+
+/**
+ * Sortable-but-inert columns, an inert search field and an enabled Filters button, matching the
+ * `TableToolbarInert` artboard composition (the same one `PodAdministratorsPage` ships).
+ */
+export const WithDisabledSearchAndFilter: Story = {
+  args: {
+    ...Basic.args,
+    columns: sortableColumns,
+    search: { value: '', placeholder: 'Search members' },
+    filterPanel: {
+      content: <Typography>Filtering is not switched on yet.</Typography>,
+    },
+  },
+};
+
+/** The search field, enabled and holding a query, with the Filters button beside it. */
+export const WithSearchActive: Story = {
+  args: {
+    ...Basic.args,
+    search: { value: 'khumalo', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Filtering is not switched on yet.</Typography>,
+    },
+  },
+};
+
+/** The Filters button's active-count badge, on the closed toolbar where the drawer cannot occlude it. */
+export const WithActiveFilters: Story = {
+  args: {
+    ...Basic.args,
+    search: { value: '', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Role and status filters go here.</Typography>,
+      activeCount: 2,
+      onClear: () => {},
+    },
+  },
+};
+
+/** The filter drawer opened with no filters applied yet. */
+export const WithFilterPanelDefault: Story = {
+  args: {
+    ...Basic.args,
+    search: { value: '', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Filtering is not switched on yet.</Typography>,
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('open the filter drawer', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: /filters/i }));
+    });
+  },
+};
+
+/** The filter drawer, opened via the toolbar's Filters button, with an active filter count. */
+export const WithFilterPanelApplied: Story = {
+  args: {
+    ...Basic.args,
+    search: { value: '', placeholder: 'Search members', onChange: () => {} },
+    filterPanel: {
+      content: <Typography>Role and status filters go here.</Typography>,
+      activeCount: 2,
+      onClear: () => {},
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('open the filter drawer', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: /filters/i }));
+    });
+  },
 };
