@@ -53,7 +53,7 @@ describe('messages hooks', () => {
       });
 
       expect(result.current.data?.items).toHaveLength(mockMessages.length);
-      expect(result.current.data?.unreadCount).toBe(2);
+      expect(result.current.data?.unreadCount).toBe(3);
     });
 
     it('should filter messages by status', async () => {
@@ -159,7 +159,7 @@ describe('messages hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toBe(2); // msg-1 and msg-2 are unread
+      expect(result.current.data).toBe(3); // msg-1, msg-2 and msg-5 are unread
     });
 
     it('should return loading state initially', () => {

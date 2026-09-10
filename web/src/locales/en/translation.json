@@ -259,7 +259,11 @@
       "verifyNewIssue": "Verify New Issue",
       "verifyFix": "Verify Fix",
       "memberRegistration": "Member Registration",
-      "monthlyReport": "Monthly Report"
+      "monthlyReport": "Monthly Report",
+      "adminWelcome": "Welcome"
+    },
+    "welcome": {
+      "tasksTitle": "Your first tasks"
     },
     "actions": {
       "accept": "Accept",

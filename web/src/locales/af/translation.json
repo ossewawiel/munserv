@@ -285,5 +285,13 @@
       "nameTooLong": "Pod-naam moet 100 karakters of minder wees.",
       "logoUrlTooLong": "Logo-URL moet 500 karakters of minder wees."
     }
+  },
+  "messages": {
+    "types": {
+      "adminWelcome": "Welkom"
+    },
+    "welcome": {
+      "tasksTitle": "Jou eerste take"
+    }
   }
 }
