@@ -9,6 +9,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -21,7 +23,7 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import InboxIcon from '@mui/icons-material/Inbox';
 
 import type { Message } from '@/shared/types/message';
-import { MESSAGE_ACTION_TYPES } from '@/shared/types/message';
+import { MESSAGE_ACTION_TYPES, getWelcomeTasks } from '@/shared/types/message';
 import { formatDateTime } from '@/shared/utils/formatters';
 
 interface MessageDetailProps {
@@ -61,6 +63,19 @@ export const MessageDetail: FC<MessageDetailProps> = ({
   const { t } = useTranslation();
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
+
+  const welcomeTasks = useMemo(
+    () => (message.type === 'admin_welcome' ? getWelcomeTasks(message) : []),
+    [message]
+  );
+
+  const metadataEntries = useMemo(
+    () =>
+      Object.entries(message.metadata ?? {}).filter(
+        ([key]) => !(message.type === 'admin_welcome' && key === 'tasks')
+      ),
+    [message]
+  );
 
   const handleAction = useCallback(
     (action: string) => {
@@ -247,8 +262,24 @@ export const MessageDetail: FC<MessageDetailProps> = ({
         </Typography>
       </Box>
 
+      {/* Welcome tasks */}
+      {welcomeTasks.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="subtitle2" sx={{ color: 'text.primary', mb: 1 }}>
+            {t('messages.welcome.tasksTitle', 'Your first tasks')}
+          </Typography>
+          <List sx={{ listStyleType: 'disc', pl: 3 }}>
+            {welcomeTasks.map((task) => (
+              <ListItem key={task} sx={{ display: 'list-item', px: 0, py: 0.5 }}>
+                <Typography variant="body1">{task}</Typography>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      )}
+
       {/* Metadata */}
-      {message.metadata && Object.keys(message.metadata).length > 0 && (
+      {metadataEntries.length > 0 && (
         <Box sx={{ mb: 4 }}>
           <Typography
             variant="subtitle2"
@@ -267,7 +298,7 @@ export const MessageDetail: FC<MessageDetailProps> = ({
               p: 2,
             }}
           >
-            {Object.entries(message.metadata).map(([key, value]) => (
+            {metadataEntries.map(([key, value]) => (
               <Box key={key} sx={{ mb: 1 }}>
                 <Typography variant="caption" sx={{
                   color: "text.secondary"

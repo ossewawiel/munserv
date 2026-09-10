@@ -214,6 +214,26 @@ export const mockMessages: Message[] = [
     readAt: '2026-01-10T14:30:00Z',
     actionedAt: '2026-01-10T14:30:00Z',
   },
+  {
+    id: 'msg-5',
+    type: 'admin_welcome' as MessageType,
+    title: 'Welcome to MunServ',
+    body: 'Welcome, Jane Ward. Your administrator account is ready. Complete the tasks below to get started.',
+    recipientId: 'admin-1',
+    recipientType: 'admin',
+    senderType: 'system',
+    status: 'unread' as MessageStatus,
+    actionType: 'acknowledge',
+    metadata: {
+      tasks: [
+        'Change your temporary password.',
+        'Complete your profile (optional, you can skip it).',
+        'Open Messages to see what needs your attention.',
+      ],
+      role: 'pod_admin',
+    },
+    createdAt: '2026-01-19T11:00:00Z',
+  },
 ];
 
 // =============================================
