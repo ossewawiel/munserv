@@ -144,6 +144,8 @@ function renderPage() {
     },
     login: vi.fn(),
     logout: vi.fn(),
+    hasPermission: () => true,
+    supportGrant: null,
   });
 
   return render(
