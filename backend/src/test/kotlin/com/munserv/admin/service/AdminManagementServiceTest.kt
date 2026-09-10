@@ -1,11 +1,13 @@
 package com.munserv.admin.service
 
 import com.munserv.admin.domain.Admin
+import com.munserv.admin.domain.AdminListQuery
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.domain.CreateAdminCommand
 import com.munserv.admin.domain.UpdateAdminCommand
 import com.munserv.admin.repository.AdminRepository
 import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldHaveLength
@@ -264,6 +266,68 @@ class AdminManagementServiceTest {
             val result = service.listAdmins(otherSectorId, sectorChiefId)
 
             result.shouldBeInstanceOf<AdminResult.CrossSectorOperation>()
+        }
+    }
+
+    @Nested
+    inner class ListAdminsByPod {
+        private val testPodId = PodId.fromString("550e8400-e29b-41d4-a716-446655440000")
+
+        private fun createTestPodAdmin(
+            id: AdminId = AdminId.generate(),
+            email: String = "admin@example.com",
+            displayName: String = "Test Admin",
+            role: AdminRole = AdminRole.POD_CHIEF,
+        ) = Admin(
+            id = id,
+            podId = testPodId,
+            email = email,
+            displayName = displayName,
+            role = role,
+            createdAt = fixedInstant,
+            updatedAt = fixedInstant,
+        )
+
+        @Test
+        fun `should apply the query to the admins of the pod`() {
+            val podChief = createTestPodAdmin(id = podAdminId, role = AdminRole.POD_CHIEF)
+            val admins =
+                listOf(
+                    createTestPodAdmin(email = "khumalo@example.com", displayName = "Khumalo"),
+                    createTestPodAdmin(email = "other@example.com", displayName = "Other"),
+                )
+
+            every { adminRepository.findById(podAdminId) } returns podChief
+            every { adminRepository.findByPodId(testPodId) } returns admins
+
+            val query = AdminListQuery(search = "khumalo")
+            val result = service.listAdminsByPod(testPodId, podAdminId, query)
+
+            result.shouldBeInstanceOf<AdminResult.ListSuccess>()
+            val listResult = result as AdminResult.ListSuccess
+            listResult.admins.map { it.email } shouldBe listOf("khumalo@example.com")
+        }
+
+        @Test
+        fun `should report the filtered count as total`() {
+            val podChief = createTestPodAdmin(id = podAdminId, role = AdminRole.POD_CHIEF)
+            val admins =
+                listOf(
+                    createTestPodAdmin(email = "one@example.com", role = AdminRole.POD_CHIEF),
+                    createTestPodAdmin(email = "two@example.com", role = AdminRole.POD_ADMIN),
+                    createTestPodAdmin(email = "three@example.com", role = AdminRole.POD_ADMIN),
+                )
+
+            every { adminRepository.findById(podAdminId) } returns podChief
+            every { adminRepository.findByPodId(testPodId) } returns admins
+
+            val query = AdminListQuery(roles = setOf(AdminRole.POD_ADMIN))
+            val result = service.listAdminsByPod(testPodId, podAdminId, query)
+
+            result.shouldBeInstanceOf<AdminResult.ListSuccess>()
+            val listResult = result as AdminResult.ListSuccess
+            listResult.total shouldBe listResult.admins.size
+            listResult.total shouldBe 2
         }
     }
 

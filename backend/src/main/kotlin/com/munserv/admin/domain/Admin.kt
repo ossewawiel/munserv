@@ -129,5 +129,7 @@ enum class AdminRole {
                 "pod_chief" -> POD_CHIEF
                 else -> throw IllegalArgumentException("Unknown admin role: $value")
             }
+
+        fun fromDbValueOrNull(value: String): AdminRole? = entries.find { it.toDbValue() == value.lowercase() }
     }
 }

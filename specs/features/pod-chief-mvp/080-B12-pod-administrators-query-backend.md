@@ -3,7 +3,7 @@ issue: 152
 story: B12
 title: "Sorting, search and filters on GET /pod/administrators"
 platform: backend
-status: pending
+status: completed
 depends_on: []
 touches:
   - backend/src/main/kotlin/com/munserv/admin
@@ -15,8 +15,20 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-10"
-files_changed: []
-tests_added: []
+files_changed:
+  - backend/src/main/kotlin/com/munserv/admin/domain/AdminListQuery.kt
+  - backend/src/main/kotlin/com/munserv/admin/domain/Admin.kt
+  - backend/src/main/kotlin/com/munserv/admin/repository/JpaAdminRepository.kt
+  - backend/src/main/kotlin/com/munserv/admin/service/AdminManagementService.kt
+  - backend/src/main/kotlin/com/munserv/pod/api/PodAdministratorQueryParams.kt
+  - backend/src/main/kotlin/com/munserv/pod/api/PodAdministratorController.kt
+tests_added:
+  - backend/src/test/kotlin/com/munserv/admin/domain/AdminListQueryTest.kt
+  - backend/src/test/kotlin/com/munserv/admin/domain/AdminRoleTest.kt
+  - backend/src/test/kotlin/com/munserv/admin/repository/JpaAdminRepositoryTest.kt
+  - backend/src/test/kotlin/com/munserv/admin/service/AdminManagementServiceTest.kt
+  - backend/src/test/kotlin/com/munserv/pod/api/PodAdministratorQueryParamsTest.kt
+  - backend/src/test/kotlin/com/munserv/pod/api/PodAdministratorControllerTest.kt
 ---
 
 # B12 · Pod administrator query: sort, search, filters (Backend)

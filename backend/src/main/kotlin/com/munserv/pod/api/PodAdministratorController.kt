@@ -8,6 +8,8 @@ import com.munserv.admin.api.UpdateAdminRequest
 import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.service.AdminManagementService
 import com.munserv.admin.service.AdminResult
+import com.munserv.pod.api.PodAdministratorQueryResult.Invalid
+import com.munserv.pod.api.PodAdministratorQueryResult.Parsed
 import com.munserv.pod.service.PodAdministratorService
 import com.munserv.shared.security.RequireRole
 import com.munserv.shared.types.AdminId
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
@@ -51,7 +54,7 @@ class PodAdministratorController(
 ) {
     @Operation(
         summary = "List all administrators in the pod",
-        description = "Returns all administrators (at any level) within the current pod.",
+        description = "Returns all administrators (at any level) within the current pod, sorted, searched and filtered.",
     )
     @ApiResponses(
         value = [
@@ -60,12 +63,39 @@ class PodAdministratorController(
                 description = "Administrators retrieved successfully",
                 content = [Content(schema = Schema(implementation = AdminListResponse::class))],
             ),
+            ApiResponse(responseCode = "400", description = "Invalid sort, role or ward id"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Insufficient permissions"),
         ],
     )
     @GetMapping
-    fun listAdministrators(): ResponseEntity<*> {
+    fun listAdministrators(
+        @Parameter(description = "Sort as <column>:<direction>", example = "createdAt:asc")
+        @RequestParam(required = false)
+        @Schema(
+            allowableValues = [
+                "email:asc",
+                "email:desc",
+                "displayName:asc",
+                "displayName:desc",
+                "role:asc",
+                "role:desc",
+                "createdAt:asc",
+                "createdAt:desc",
+            ],
+        )
+        sort: String?,
+        @Parameter(description = "Case-insensitive substring matched against email or display name")
+        @RequestParam(required = false)
+        q: String?,
+        @Parameter(description = "Repeatable admin_role wire value filter")
+        @RequestParam(required = false)
+        @Schema(allowableValues = ["sector_admin", "sector_chief", "ward_admin", "ward_chief", "pod_admin", "pod_chief"])
+        role: List<String>?,
+        @Parameter(description = "Ward UUID filter")
+        @RequestParam(required = false)
+        wardId: String?,
+    ): ResponseEntity<*> {
         val actorId =
             getCurrentAdminId()
                 ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -78,7 +108,13 @@ class PodAdministratorController(
                     ErrorResponse("unauthorized", "Could not determine pod for current user"),
                 )
 
-        return when (val result = adminService.listAdminsByPod(podId, actorId)) {
+        val query =
+            when (val parsed = PodAdministratorQueryParams(sort, q, role, wardId).toQuery()) {
+                is Invalid -> return ResponseEntity.badRequest().body(ErrorResponse(parsed.code, parsed.message))
+                is Parsed -> parsed.query
+            }
+
+        return when (val result = adminService.listAdminsByPod(podId, actorId, query)) {
             is AdminResult.ListSuccess -> {
                 ResponseEntity.ok(
                     AdminListResponse(
