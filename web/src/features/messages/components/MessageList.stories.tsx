@@ -69,12 +69,12 @@ export const WelcomeMessageList: Story = {
     selectedId: 'msg-5',
     onSelect: () => {},
   },
-  render: () => (
+  render: (args) => (
     <Grid container spacing={3} sx={{ width: 1132, height: 700 }}>
       <Grid size={4}>
         <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
           <Box sx={{ flex: 1, overflow: 'auto' }}>
-            <MessageList messages={messages} selectedId="msg-5" onSelect={() => {}} />
+            <MessageList {...args} />
           </Box>
         </Card>
       </Grid>

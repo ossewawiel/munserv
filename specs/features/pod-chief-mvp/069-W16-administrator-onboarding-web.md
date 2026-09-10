@@ -36,8 +36,8 @@ files_changed:
   - web/src/locales/zu/translation.json
   - e2e/visual/__screenshots__/stories.spec/features-messages-messagedetail--welcome-message-detail--light.png
   - e2e/visual/__screenshots__/stories.spec/features-messages-messagedetail--welcome-message-detail--dark.png
-  - e2e/visual/__screenshots__/stories.spec/features-messages-messagedetail--welcome-message-detail-no-tasks--light.png
-  - e2e/visual/__screenshots__/stories.spec/features-messages-messagedetail--welcome-message-detail-no-tasks--dark.png
+  - e2e/visual/__screenshots__/stories.spec/features-messages-messagedetail--welcome-message-no-tasks--light.png
+  - e2e/visual/__screenshots__/stories.spec/features-messages-messagedetail--welcome-message-no-tasks--dark.png
   - e2e/visual/__screenshots__/stories.spec/features-messages-messagelist--welcome-message-list--light.png
   - e2e/visual/__screenshots__/stories.spec/features-messages-messagelist--welcome-message-list--dark.png
 tests_added:
@@ -165,17 +165,45 @@ summary of changes. If you cannot finish, set `status: blocked` and end your mes
 `BLOCKED: <reason>`.
 
 ## Eyeball
-1. Log in as an existing `pod_chief` at http://localhost:3000/login, then open
-   http://localhost:3000/pod-administrators and create a new administrator (any role up to
-   `pod_admin`). Note the temporary password shown.
-2. Log out and log in as the new administrator at http://localhost:3000/login with that temporary
-   password.
-3. Follow the forced onboarding redirects: change the password at
-   http://localhost:3000/onboarding/change-password, then either fill in or skip
-   http://localhost:3000/onboarding/complete-profile ("Skip for now" must still work — profile
-   completion is optional per `domain/admin-role.md`).
-4. Landing on the dashboard as a pod administrator after onboarding is tracked separately in #136;
-   from wherever you land, navigate to http://localhost:3000/messages.
-5. Expect an unread "Welcome to MunServ" message at the top of the inbox. Opening it should show the
-   welcome body, a "Your first tasks" bulleted list of three tasks, an "Additional Information" box
-   with only `role: pod_admin` (not the tasks again), and a single "Dismiss" button.
+```yaml
+- id: E1
+  title: Pod chief creates a new Pod Admin
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/pod-administrators
+  steps:
+    - Log in as the pod chief and open Pod Administrators.
+    - Create a new administrator with role Pod Admin.
+    - Copy the temporary password shown.
+  expect: The new Pod Admin appears in the list, and a temporary password is displayed to copy.
+- id: E2
+  title: New pod administrator completes onboarding
+  as: none
+  services: [db, backend, web]
+  url: http://localhost:3000/login
+  steps:
+    - Log in as the new administrator with the temporary password from E1.
+    - Set a new password on the forced change-password screen.
+    - Press "Skip for Now" on the complete-profile screen.
+  expect: >
+    Signed in and landed on http://localhost:3000/ (the dashboard being empty for a pod
+    administrator here is tracked separately in #136, not this story).
+- id: E3
+  title: Welcome message with initial tasks
+  as: none
+  services: [db, backend, web]
+  url: http://localhost:3000/messages
+  steps:
+    - Open Messages as the administrator onboarded in E2.
+  expect: >
+    An unread "Welcome to MunServ" message at the top of the inbox; its detail lists the initial
+    tasks under a "Your first tasks" heading and has a single Dismiss button.
+- id: E4
+  title: Welcome message without tasks (Storybook only, not reproducible via UI)
+  as: none
+  services: [storybook]
+  url: http://localhost:6006/?path=/story/features-messages-messagedetail--welcome-message-no-tasks
+  steps:
+    - Open the story.
+  expect: The body renders with no task list, and Additional Information shows role only.
+```
