@@ -3,7 +3,7 @@ issue: 114
 story: FIX114
 title: "A pod admin is logged out right after onboarding because the dashboard call returns 403"
 platform: web
-status: completed
+status: done
 depends_on: []
 touches:
   - web/src/lib/api-client.ts
