@@ -21,8 +21,6 @@ interface SpringDataAdminRepository : JpaRepository<AdminEntity, UUID> {
 
     fun findByWardIdAndDeletedAtIsNull(wardId: UUID): List<AdminEntity>
 
-    fun findByPodIdAndDeletedAtIsNull(podId: UUID): List<AdminEntity>
-
     fun findByEmailAndDeletedAtIsNull(email: String): AdminEntity?
 
     fun findByIdAndDeletedAtIsNull(id: UUID): AdminEntity?
@@ -30,6 +28,18 @@ interface SpringDataAdminRepository : JpaRepository<AdminEntity, UUID> {
     fun existsByEmailAndDeletedAtIsNull(email: String): Boolean
 
     fun countBySectorIdAndDeletedAtIsNull(sectorId: UUID): Int
+
+    @Query(
+        """
+        SELECT a.* FROM admins a
+        LEFT JOIN wards w ON w.id = a.ward_id
+        LEFT JOIN sectors s ON s.id = a.sector_id
+        WHERE a.deleted_at IS NULL
+          AND (a.pod_id = :podId OR w.pod_id = :podId OR s.pod_id = :podId)
+        """,
+        nativeQuery = true,
+    )
+    fun findAllInPod(podId: UUID): List<AdminEntity>
 
     @Query(
         """
@@ -78,7 +88,7 @@ class JpaAdminRepository(
 
     override fun findByWardId(wardId: WardId): List<Admin> = jpa.findByWardIdAndDeletedAtIsNull(wardId.value).map { it.toDomain() }
 
-    override fun findByPodId(podId: PodId): List<Admin> = jpa.findByPodIdAndDeletedAtIsNull(podId.value).map { it.toDomain() }
+    override fun findByPodId(podId: PodId): List<Admin> = jpa.findAllInPod(podId.value).map { it.toDomain() }
 
     override fun findByEmail(email: String): Admin? = jpa.findByEmailAndDeletedAtIsNull(email)?.toDomain()
 

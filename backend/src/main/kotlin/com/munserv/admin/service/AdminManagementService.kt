@@ -2,9 +2,11 @@ package com.munserv.admin.service
 
 import com.munserv.admin.domain.Admin
 import com.munserv.admin.domain.AdminLevel
+import com.munserv.admin.domain.AdminListQuery
 import com.munserv.admin.domain.CreateAdminCommand
 import com.munserv.admin.domain.OnboardingStatus
 import com.munserv.admin.domain.UpdateAdminCommand
+import com.munserv.admin.domain.applyTo
 import com.munserv.admin.repository.AdminRepository
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.PodId
@@ -203,6 +205,7 @@ class AdminManagementService(
     fun listAdminsByPod(
         podId: PodId,
         requestedBy: AdminId,
+        query: AdminListQuery = AdminListQuery.DEFAULT,
     ): AdminResult {
         val actor =
             adminRepository.findById(requestedBy)
@@ -215,8 +218,9 @@ class AdminManagementService(
         }
 
         val admins = adminRepository.findByPodId(podId)
+        val filtered = query.applyTo(admins)
 
-        return AdminResult.ListSuccess(admins, admins.size)
+        return AdminResult.ListSuccess(filtered, filtered.size)
     }
 
     /**

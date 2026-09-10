@@ -2,7 +2,11 @@ package com.munserv.pod.api
 
 import com.munserv.TestContainersConfig
 import com.munserv.admin.domain.Admin
+import com.munserv.admin.domain.AdminListQuery
 import com.munserv.admin.domain.AdminRole
+import com.munserv.admin.domain.AdminSort
+import com.munserv.admin.domain.AdminSortColumn
+import com.munserv.admin.domain.SortDirection
 import com.munserv.admin.repository.AdminRepository
 import com.munserv.admin.service.AdminManagementService
 import com.munserv.admin.service.AdminResult
@@ -11,8 +15,11 @@ import com.munserv.pod.service.PodAdministratorService
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.PodId
+import com.munserv.shared.types.WardId
 import com.ninjasquad.springmockk.MockkBean
+import io.kotest.matchers.shouldBe
 import io.mockk.every
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -107,7 +114,7 @@ class PodAdministratorControllerTest {
         @Test
         fun `should return 200 with list of administrators`() {
             val admins = listOf(testAdmin, podChief)
-            every { adminService.listAdminsByPod(testPodId, testAdminId) } returns
+            every { adminService.listAdminsByPod(testPodId, testAdminId, AdminListQuery.DEFAULT) } returns
                 AdminResult.ListSuccess(admins, 2)
 
             mockMvc
@@ -121,12 +128,12 @@ class PodAdministratorControllerTest {
                     jsonPath("$.items[0].role") { value("ward_admin") }
                 }
 
-            verify { adminService.listAdminsByPod(testPodId, testAdminId) }
+            verify { adminService.listAdminsByPod(testPodId, testAdminId, AdminListQuery.DEFAULT) }
         }
 
         @Test
         fun `should return 200 with empty list when no administrators`() {
-            every { adminService.listAdminsByPod(testPodId, testAdminId) } returns
+            every { adminService.listAdminsByPod(testPodId, testAdminId, AdminListQuery.DEFAULT) } returns
                 AdminResult.ListSuccess(emptyList(), 0)
 
             mockMvc
@@ -137,6 +144,73 @@ class PodAdministratorControllerTest {
                     status { isOk() }
                     jsonPath("$.total") { value(0) }
                     jsonPath("$.items") { isEmpty() }
+                }
+        }
+
+        @Test
+        fun `should pass the parsed query to the service`() {
+            val querySlot = slot<AdminListQuery>()
+            every { adminService.listAdminsByPod(testPodId, testAdminId, capture(querySlot)) } returns
+                AdminResult.ListSuccess(emptyList(), 0)
+            val wardId = WardId(UUID.fromString("550e8400-e29b-41d4-a716-446655440030"))
+
+            mockMvc
+                .get("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                    param("sort", "displayName:desc")
+                    param("q", "khumalo")
+                    param("role", "ward_admin", "ward_chief")
+                    param("wardId", wardId.value.toString())
+                }.andExpect {
+                    status { isOk() }
+                }
+
+            querySlot.captured shouldBe
+                AdminListQuery(
+                    search = "khumalo",
+                    roles = setOf(AdminRole.WARD_ADMIN, AdminRole.WARD_CHIEF),
+                    wardId = wardId,
+                    sort = AdminSort(AdminSortColumn.DISPLAY_NAME, SortDirection.DESC),
+                )
+        }
+
+        @Test
+        fun `should return 400 for an unknown sort column`() {
+            mockMvc
+                .get("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                    param("sort", "assignedTo:asc")
+                }.andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.code") { value("invalid_sort") }
+                }
+        }
+
+        @Test
+        fun `should return 400 for an unknown role`() {
+            mockMvc
+                .get("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                    param("role", "super_user")
+                }.andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.code") { value("invalid_role") }
+                }
+        }
+
+        @Test
+        fun `should return 400 for a ward id that is not a uuid`() {
+            mockMvc
+                .get("/api/v1/pod/administrators") {
+                    header("Authorization", "Bearer $podChiefToken")
+                    accept = MediaType.APPLICATION_JSON
+                    param("wardId", "not-a-uuid")
+                }.andExpect {
+                    status { isBadRequest() }
+                    jsonPath("$.code") { value("invalid_ward_id") }
                 }
         }
     }
