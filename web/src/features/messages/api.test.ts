@@ -10,7 +10,7 @@ describe('messagesApi', () => {
       const result = await messagesApi.getAll();
 
       expect(result.items).toHaveLength(mockMessages.length);
-      expect(result.unreadCount).toBe(2); // msg-1 and msg-2 are unread
+      expect(result.unreadCount).toBe(3); // msg-1, msg-2 and msg-5 are unread
       expect(result.total).toBe(mockMessages.length);
     });
 

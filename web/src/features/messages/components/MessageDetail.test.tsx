@@ -116,6 +116,49 @@ describe('MessageDetail', () => {
 
       expect(screen.getByText('member: member-1')).toBeInTheDocument();
     });
+
+    it('should list the initial tasks of an admin welcome message', () => {
+      const welcomeMessage = createMessage({
+        type: 'admin_welcome',
+        title: 'Welcome to MunServ',
+        body: 'Welcome, Jane Ward. Your administrator account is ready.',
+        actionType: MESSAGE_ACTION_TYPES.ACKNOWLEDGE,
+        metadata: {
+          tasks: [
+            'Change your temporary password.',
+            'Complete your profile (optional, you can skip it).',
+          ],
+          role: 'pod_admin',
+        },
+      });
+
+      render(<MessageDetail message={welcomeMessage} onAction={vi.fn()} />);
+
+      expect(screen.getByText('Your first tasks')).toBeInTheDocument();
+      expect(screen.getByText('Change your temporary password.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Complete your profile (optional, you can skip it).')
+      ).toBeInTheDocument();
+      // metadata.tasks is filtered out of the generic metadata block
+      expect(screen.queryByText('tasks:')).not.toBeInTheDocument();
+      expect(screen.getByText('role:')).toBeInTheDocument();
+      expect(screen.getByText('pod_admin')).toBeInTheDocument();
+    });
+
+    it('should not render a task list for a message without tasks', () => {
+      const welcomeMessage = createMessage({
+        type: 'admin_welcome',
+        title: 'Welcome to MunServ',
+        body: 'Welcome, Jane Ward. Your administrator account is ready.',
+        actionType: MESSAGE_ACTION_TYPES.ACKNOWLEDGE,
+        metadata: { role: 'pod_admin' },
+      });
+
+      render(<MessageDetail message={welcomeMessage} onAction={vi.fn()} />);
+
+      expect(screen.queryByText('Your first tasks')).not.toBeInTheDocument();
+      expect(screen.getByText('role:')).toBeInTheDocument();
+    });
   });
 
   describe('APPROVE_REJECT action type', () => {
