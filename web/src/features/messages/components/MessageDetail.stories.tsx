@@ -55,7 +55,7 @@ export const WelcomeMessageDetail: Story = {
 
 // Matches WelcomeMessageDetailNoTasks.dc.html: same message shape but no task
 // array in metadata, so no task list is rendered.
-export const WelcomeMessageDetailNoTasks: Story = {
+export const WelcomeMessageNoTasks: Story = {
   args: {
     message: {
       ...welcomeMessage,
