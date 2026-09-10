@@ -79,6 +79,14 @@ class PodAdministratorQueryParamsTest {
     }
 
     @Test
+    fun `should treat a blank role as absent`() {
+        val result = params(roles = listOf("")).toQuery()
+
+        result.shouldBeInstanceOf<PodAdministratorQueryResult.Parsed>()
+        (result as PodAdministratorQueryResult.Parsed).query.roles shouldBe emptySet()
+    }
+
+    @Test
     fun `should reject an unknown role`() {
         val result = params(roles = listOf("super_user")).toQuery()
 

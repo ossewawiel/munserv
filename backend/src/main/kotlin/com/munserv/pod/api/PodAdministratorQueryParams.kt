@@ -22,10 +22,12 @@ data class PodAdministratorQueryParams(
         val parsedSort = parseSort(sort) ?: return invalidSort(sort)
         val parsedRoles = parseRoles(roles) ?: return invalidRole()
 
-        if (!wardId.isNullOrBlank() && runCatching { UUID.fromString(wardId) }.isFailure) {
-            return invalidWardId(wardId)
-        }
-        val parsedWardId = wardId?.takeIf { it.isNotBlank() }?.let { WardId(UUID.fromString(it)) }
+        val parsedWardId =
+            when (val result = parseWardId(wardId)) {
+                is WardIdParseResult.Absent -> null
+                is WardIdParseResult.Invalid -> return invalidWardId(wardId)
+                is WardIdParseResult.Present -> result.wardId
+            }
 
         return PodAdministratorQueryResult.Parsed(
             AdminListQuery(
@@ -49,13 +51,20 @@ data class PodAdministratorQueryParams(
     }
 
     private fun parseRoles(values: List<String>?): Set<AdminRole>? {
-        if (values.isNullOrEmpty()) return emptySet()
+        val present = values?.filter { it.isNotBlank() }
+        if (present.isNullOrEmpty()) return emptySet()
 
         val parsed = mutableSetOf<AdminRole>()
-        for (value in values) {
+        for (value in present) {
             parsed += AdminRole.fromDbValueOrNull(value) ?: return null
         }
         return parsed
+    }
+
+    private fun parseWardId(value: String?): WardIdParseResult {
+        if (value.isNullOrBlank()) return WardIdParseResult.Absent
+        val uuid = runCatching { UUID.fromString(value) }.getOrNull() ?: return WardIdParseResult.Invalid
+        return WardIdParseResult.Present(WardId(uuid))
     }
 
     private fun invalidSort(value: String?): PodAdministratorQueryResult.Invalid =
@@ -75,6 +84,19 @@ data class PodAdministratorQueryParams(
             "invalid_ward_id",
             "Invalid wardId '$value'. Must be a UUID.",
         )
+}
+
+/**
+ * Result of parsing the raw wardId string: absent, present and valid, or present and malformed.
+ */
+private sealed interface WardIdParseResult {
+    data object Absent : WardIdParseResult
+
+    data object Invalid : WardIdParseResult
+
+    data class Present(
+        val wardId: WardId,
+    ) : WardIdParseResult
 }
 
 /**
