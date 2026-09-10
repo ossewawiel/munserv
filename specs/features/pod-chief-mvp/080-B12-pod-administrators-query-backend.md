@@ -214,7 +214,7 @@ summary of changes. If you cannot finish, set `status: blocked` and end your mes
     - 'Open http://localhost:8080/swagger-ui/index.html#/Pod%20Administrators/listAdministrators, press "Try it out", leave every parameter empty, Execute.'
     - 'Execute again with sort = displayName:desc, then with sort = role:asc.'
     - 'Execute again with sort empty and q = ward.'
-  expect: The empty call answers 200 and lists the pod-level, ward-level and sector-level administrators (podchief@, podadmin@, wardchief@, wardadmin@, admin@ward42) oldest first by createdAt; displayName:desc reverses the names Z to A; role:asc runs sector_admin first and pod_chief last; q=ward returns only the two ward administrators and total matches the number of items.
+  expect: The empty call answers 200 and lists all six of the pod's administrators oldest first by createdAt (admin@ward42.example.com, chief@munserv.local, podchief@munserv.local, podadmin@munserv.local, wardchief@munserv.local, wardadmin@munserv.local — chief@munserv.local is the sector chief of sector 4…0001, also in this pod); displayName:desc reverses that to Test Ward Chief, Test Ward Admin, Test Sector Chief, Test Pod Chief, Test Pod Admin, Test Admin; role:asc runs admin@ward42.example.com (sector_admin) first and podchief@munserv.local (pod_chief) last; q=ward returns the three administrators whose email or display name contains "ward" (admin@ward42.example.com, wardchief@munserv.local, wardadmin@munserv.local) and total matches the number of items.
 - id: E2
   title: Role and ward filters narrow the list
   as: pod_chief
@@ -226,14 +226,11 @@ summary of changes. If you cannot finish, set `status: blocked` and end your mes
     - 'Execute again with role empty and wardId = 550e8400-e29b-41d4-a716-446655440030.'
   expect: The first call returns only wardadmin@munserv.local; the two-role call returns both ward administrators; the wardId call returns the two administrators of Test Ward North and no pod-level ones.
 - id: E3
-  title: Bad parameters are refused, not crashed
+  title: A malformed ward id is refused, not crashed
   as: pod_chief
   services: [db, backend]
   url: http://localhost:8080/swagger-ui/index.html#/Pod%20Administrators/listAdministrators
   steps:
-    - 'Still authorised as the pod chief, open http://localhost:8080/swagger-ui/index.html#/Pod%20Administrators/listAdministrators and Execute with sort = assignedTo:asc.'
-    - 'Execute again with sort = displayName (no direction).'
-    - 'Execute again with sort empty and role = super_user.'
-    - 'Execute again with role empty and wardId = not-a-uuid.'
-  expect: Each call answers 400 with a JSON body {code, message} naming what was wrong (invalid_sort, invalid_sort, invalid_role, invalid_ward_id); none answers 500.
+    - 'Still authorised as the pod chief, open http://localhost:8080/swagger-ui/index.html#/Pod%20Administrators/listAdministrators and Execute with wardId = not-a-uuid.'
+  expect: The call answers 400 with a JSON body {code, message} naming invalid_ward_id; never 500. (sort and role are Swagger dropdowns restricted to the @Schema(allowableValues) named on those parameters, so an invalid sort column, an invalid direction and an unknown role cannot be typed into this form; their 400 responses are covered by PodAdministratorQueryParamsTest and PodAdministratorControllerTest.)
 ```

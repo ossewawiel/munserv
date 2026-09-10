@@ -2,13 +2,14 @@ package com.munserv.admin.repository
 
 import com.munserv.TestContainersConfig
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.shouldBe
+import io.kotest.matchers.collections.shouldNotContain
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
+import java.time.Instant
 import java.util.UUID
 
 @DataJpaTest
@@ -45,8 +46,27 @@ class JpaAdminRepositoryTest {
 
     @Test
     fun `should not return deleted admins`() {
-        val admins = repository.findAllInPod(defaultPodId)
+        val now = Instant.now()
+        val deletedAdmin =
+            AdminEntity(
+                id = UUID.randomUUID(),
+                podId = defaultPodId,
+                email = "deleted-admin-test@munserv.local",
+                passwordHash = "irrelevant-hash",
+                displayName = "Deleted Test Admin",
+                role = "pod_admin",
+                createdAt = now,
+                updatedAt = now,
+                deletedAt = now,
+            )
+        repository.save(deletedAdmin)
 
-        admins.all { it.deletedAt == null } shouldBe true
+        try {
+            val emails = repository.findAllInPod(defaultPodId).map { it.email }
+
+            emails shouldNotContain "deleted-admin-test@munserv.local"
+        } finally {
+            repository.deleteById(deletedAdmin.id)
+        }
     }
 }
