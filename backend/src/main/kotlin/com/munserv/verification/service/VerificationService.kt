@@ -206,6 +206,21 @@ class VerificationService(
     }
 
     /**
+     * True when the member is an active Ground Admin with a pending verification on the issue
+     * (assigned to them, or unassigned in their sector).
+     */
+    fun mayVerify(
+        issueId: IssueId,
+        memberId: MemberId,
+    ): Boolean {
+        val member = memberRepository.findById(memberId) ?: return false
+        if (!member.isGroundAdmin || member.groundAdminStatus != GroundAdminStatus.ACTIVE) return false
+        return verificationRepository
+            .findPendingForGroundAdmin(member.sectorId, memberId)
+            .any { it.issueId == issueId }
+    }
+
+    /**
      * Get pending verifications for a Ground Admin.
      */
     fun getPendingVerifications(memberId: MemberId): VerificationResult {

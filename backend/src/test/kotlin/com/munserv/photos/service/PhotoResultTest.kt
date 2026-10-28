@@ -61,6 +61,21 @@ class PhotoResultTest {
         }
     }
 
+    @Test
+    fun `Forbidden should contain message`() {
+        val result: PhotoResult = PhotoResult.Forbidden("nope")
+
+        (result as PhotoResult.Forbidden).message shouldBe "nope"
+    }
+
+    @Test
+    fun `IssueNotFound should contain issue id`() {
+        val id = IssueId(UUID.randomUUID())
+        val result: PhotoResult = PhotoResult.IssueNotFound(id)
+
+        (result as PhotoResult.IssueNotFound).id shouldBe id
+    }
+
     @Nested
     inner class UploadResultTypes {
         @Test
@@ -107,6 +122,8 @@ class PhotoResultTest {
                     is PhotoResult.NotFound -> "Not found"
                     is PhotoResult.ValidationError -> "Validation failed"
                     is PhotoResult.StorageError -> "Storage error"
+                    is PhotoResult.Forbidden -> "Forbidden"
+                    is PhotoResult.IssueNotFound -> "Issue not found"
                 }
 
             message shouldBe "Photo uploaded: ${testPhoto.id}"
@@ -122,6 +139,8 @@ class PhotoResultTest {
                     is PhotoResult.NotFound -> "Not found"
                     is PhotoResult.ValidationError -> "Errors: ${result.errors.size}"
                     is PhotoResult.StorageError -> "Storage error"
+                    is PhotoResult.Forbidden -> "Forbidden"
+                    is PhotoResult.IssueNotFound -> "Issue not found"
                 }
 
             message shouldBe "Errors: 2"

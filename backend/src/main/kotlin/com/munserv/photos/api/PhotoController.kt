@@ -4,10 +4,15 @@ import com.munserv.issues.domain.IssueId
 import com.munserv.photos.domain.IssuePhoto
 import com.munserv.photos.domain.PhotoId
 import com.munserv.photos.service.IssuePhotoService
+import com.munserv.photos.service.PhotoActor
 import com.munserv.photos.service.PhotoResult
 import com.munserv.shared.api.ErrorBody
 import com.munserv.shared.api.ErrorCodes
 import com.munserv.shared.api.ErrorResponse
+import com.munserv.shared.api.forbiddenError
+import com.munserv.shared.api.unauthorizedError
+import com.munserv.shared.security.JwtAuthenticationFilter
+import com.munserv.shared.types.MemberId
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -19,6 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -84,6 +90,7 @@ class PhotoController(
             ),
             ApiResponse(responseCode = "400", description = "Invalid file format or size"),
             ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            ApiResponse(responseCode = "403", description = "Not the reporter, an admin or the verifying ground admin"),
             ApiResponse(responseCode = "404", description = "Issue not found"),
             ApiResponse(responseCode = "500", description = "Storage error"),
         ],
@@ -97,10 +104,14 @@ class PhotoController(
         @PathVariable issueId: String,
         @Parameter(description = "Photo file (JPEG, PNG, or WebP, max 5MB)", required = true)
         @RequestParam("file") file: MultipartFile,
+        authentication: Authentication?,
     ): ResponseEntity<*> {
+        val actor =
+            authentication.toPhotoActor()
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(unauthorizedError())
         val issueIdValue = IssueId(UUID.fromString(issueId))
 
-        return when (val result = photoService.uploadPhoto(issueIdValue, file)) {
+        return when (val result = photoService.uploadPhoto(issueIdValue, file, actor)) {
             is PhotoResult.Success -> {
                 ResponseEntity
                     .status(HttpStatus.CREATED)
@@ -123,6 +134,18 @@ class PhotoController(
                 ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Photo not found")))
+            }
+
+            is PhotoResult.IssueNotFound -> {
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Issue not found")))
+            }
+
+            is PhotoResult.Forbidden -> {
+                ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(forbiddenError(result.message))
             }
         }
     }
@@ -165,6 +188,7 @@ class PhotoController(
         value = [
             ApiResponse(responseCode = "204", description = "Photo deleted successfully"),
             ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            ApiResponse(responseCode = "403", description = "Not the reporter or an admin"),
             ApiResponse(responseCode = "404", description = "Photo not found"),
         ],
     )
@@ -172,16 +196,53 @@ class PhotoController(
     fun deletePhoto(
         @Parameter(description = "Photo UUID", required = true, example = "550e8400-e29b-41d4-a716-446655440001")
         @PathVariable photoId: String,
+        authentication: Authentication?,
     ): ResponseEntity<*> {
+        val actor =
+            authentication.toPhotoActor()
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(unauthorizedError())
         val photoIdValue = PhotoId(UUID.fromString(photoId))
-        val deleted = photoService.deletePhoto(photoIdValue)
 
-        return if (deleted) {
-            ResponseEntity.noContent().build<Unit>()
-        } else {
-            ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Photo not found")))
+        return when (val result = photoService.deletePhoto(photoIdValue, actor)) {
+            is PhotoResult.Success -> {
+                ResponseEntity.noContent().build<Unit>()
+            }
+
+            is PhotoResult.NotFound, is PhotoResult.IssueNotFound -> {
+                ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.NOT_FOUND, "Photo not found")))
+            }
+
+            is PhotoResult.Forbidden -> {
+                ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(forbiddenError(result.message))
+            }
+
+            is PhotoResult.ValidationError -> {
+                ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.VALIDATION_ERROR, result.errors.joinToString(", "))))
+            }
+
+            is PhotoResult.StorageError -> {
+                ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ErrorResponse(ErrorBody(ErrorCodes.INTERNAL_ERROR, result.message)))
+            }
         }
     }
+}
+
+private val ADMIN_AUTHORITIES = setOf("ROLE_ADMIN", JwtAuthenticationFilter.SUPPORT_GRANT_AUTHORITY)
+
+/**
+ * Map the request's authentication to a photo actor; null when unauthenticated or the subject is not a UUID.
+ */
+private fun Authentication?.toPhotoActor(): PhotoActor? {
+    val auth = this ?: return null
+    if (auth.authorities.any { it.authority in ADMIN_AUTHORITIES }) return PhotoActor.Admin
+    val subject = auth.principal as? String ?: return null
+    return runCatching { MemberId.fromString(subject) }.getOrNull()?.let { PhotoActor.Member(it) }
 }

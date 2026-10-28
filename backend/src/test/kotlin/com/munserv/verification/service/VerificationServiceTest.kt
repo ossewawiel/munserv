@@ -559,4 +559,60 @@ class VerificationServiceTest {
             result.shouldBeInstanceOf<VerificationResult.NotFound>()
         }
     }
+
+    @Nested
+    inner class MayVerify {
+        private val activeGroundAdmin =
+            createTestMember(isGroundAdmin = true, groundAdminStatus = GroundAdminStatus.ACTIVE)
+
+        @Test
+        fun `should return true when the pending verification is assigned to the member`() {
+            every { memberRepository.findById(memberId) } returns activeGroundAdmin
+            every { verificationRepository.findPendingForGroundAdmin(sectorId, memberId) } returns
+                listOf(createTestVerification(assignedTo = memberId))
+
+            service.mayVerify(issueId, memberId) shouldBe true
+        }
+
+        @Test
+        fun `should return true when the pending verification is unassigned and the issue is in the member's sector`() {
+            every { memberRepository.findById(memberId) } returns activeGroundAdmin
+            every { verificationRepository.findPendingForGroundAdmin(sectorId, memberId) } returns
+                listOf(createTestVerification(assignedTo = null))
+
+            service.mayVerify(issueId, memberId) shouldBe true
+        }
+
+        @Test
+        fun `should return false when the pending verifications do not include this issue`() {
+            every { memberRepository.findById(memberId) } returns activeGroundAdmin
+            every { verificationRepository.findPendingForGroundAdmin(sectorId, memberId) } returns
+                listOf(createTestVerification(issueId = IssueId.generate()))
+
+            service.mayVerify(issueId, memberId) shouldBe false
+        }
+
+        @Test
+        fun `should return false when the member is not a ground admin`() {
+            every { memberRepository.findById(memberId) } returns createTestMember()
+
+            service.mayVerify(issueId, memberId) shouldBe false
+            verify(exactly = 0) { verificationRepository.findPendingForGroundAdmin(any(), any()) }
+        }
+
+        @Test
+        fun `should return false when the ground admin status is not active`() {
+            every { memberRepository.findById(memberId) } returns
+                createTestMember(isGroundAdmin = true, groundAdminStatus = GroundAdminStatus.ON_HOLD)
+
+            service.mayVerify(issueId, memberId) shouldBe false
+        }
+
+        @Test
+        fun `should return false when the member does not exist`() {
+            every { memberRepository.findById(memberId) } returns null
+
+            service.mayVerify(issueId, memberId) shouldBe false
+        }
+    }
 }

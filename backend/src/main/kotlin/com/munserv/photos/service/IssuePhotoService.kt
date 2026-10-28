@@ -1,9 +1,12 @@
 package com.munserv.photos.service
 
 import com.munserv.issues.domain.IssueId
+import com.munserv.issues.service.IssueResult
+import com.munserv.issues.service.IssueService
 import com.munserv.photos.domain.IssuePhoto
 import com.munserv.photos.domain.PhotoId
 import com.munserv.photos.repository.IssuePhotoRepository
+import com.munserv.verification.service.VerificationService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,6 +23,8 @@ class IssuePhotoService(
     private val repository: IssuePhotoRepository,
     private val storageService: PhotoStorageService,
     private val validationService: PhotoValidationService,
+    private val issueService: IssueService,
+    private val verificationService: VerificationService,
     private val clock: Clock,
 ) {
     private val logger = LoggerFactory.getLogger(IssuePhotoService::class.java)
@@ -29,13 +34,26 @@ class IssuePhotoService(
      *
      * @param issueId The issue to attach the photo to
      * @param file The uploaded file
+     * @param actor Who is uploading: the reporter, an admin or the verifying ground admin may
      * @return PhotoResult with the saved photo on success
      */
     @Transactional
     fun uploadPhoto(
         issueId: IssueId,
         file: MultipartFile,
+        actor: PhotoActor,
     ): PhotoResult {
+        val issue =
+            (issueService.findById(issueId) as? IssueResult.Success)?.issue
+                ?: return PhotoResult.IssueNotFound(issueId)
+
+        val allowed =
+            actor.isReporterOrAdminOf(issue) ||
+                (actor is PhotoActor.Member && verificationService.mayVerify(issue.id, actor.id))
+        if (!allowed) {
+            return PhotoResult.Forbidden("Only the reporter, an admin or the verifying ground admin can add photos to this issue")
+        }
+
         // Validate the file
         val validationResult = validationService.validate(file)
         if (validationResult is ValidationResult.Invalid) {
@@ -91,23 +109,27 @@ class IssuePhotoService(
     fun getThumbnailUrl(issueId: IssueId): String? = repository.findByIssueId(issueId).firstOrNull()?.thumbnailUrl
 
     /**
-     * Delete a photo.
-     *
-     * @param photoId The photo to delete
-     * @return true if deleted, false if not found
+     * Delete a photo. Only the reporter of its issue or an admin may delete.
      */
     @Transactional
-    fun deletePhoto(photoId: PhotoId): Boolean {
-        repository.findById(photoId) ?: return false
+    fun deletePhoto(
+        photoId: PhotoId,
+        actor: PhotoActor,
+    ): PhotoResult {
+        val photo = repository.findById(photoId) ?: return PhotoResult.NotFound(photoId)
+        val issue =
+            (issueService.findById(photo.issueId) as? IssueResult.Success)?.issue
+                ?: return PhotoResult.NotFound(photoId)
 
-        // Delete from storage
+        if (!actor.isReporterOrAdminOf(issue)) {
+            return PhotoResult.Forbidden("Only the reporter or an admin can delete this photo")
+        }
+
         storageService.delete(photoId)
-
-        // Delete from database
         repository.deleteById(photoId)
 
         logger.info("Deleted photo $photoId")
-        return true
+        return PhotoResult.Success(photo)
     }
 
     /**

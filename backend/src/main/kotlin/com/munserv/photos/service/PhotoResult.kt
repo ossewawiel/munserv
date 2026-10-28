@@ -1,5 +1,6 @@
 package com.munserv.photos.service
 
+import com.munserv.issues.domain.IssueId
 import com.munserv.photos.domain.IssuePhoto
 import com.munserv.photos.domain.PhotoId
 
@@ -22,6 +23,14 @@ sealed interface PhotoResult {
 
     data class StorageError(
         val message: String,
+    ) : PhotoResult
+
+    data class Forbidden(
+        val message: String,
+    ) : PhotoResult
+
+    data class IssueNotFound(
+        val id: IssueId,
     ) : PhotoResult
 }
 
