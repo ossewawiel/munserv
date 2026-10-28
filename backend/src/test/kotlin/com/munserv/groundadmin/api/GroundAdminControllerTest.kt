@@ -105,12 +105,12 @@ class GroundAdminControllerTest {
         }
 
         @Test
-        fun `POST apply returns 403 when not authenticated`() {
-            // Spring Security returns 403 for missing authentication token on POST
+        fun `POST apply returns 401 when not authenticated`() {
+            // The authentication entry point answers 401 for missing authentication token on POST
             mockMvc
                 .post("/api/v1/members/me/ground-admin/apply")
                 .andExpect {
-                    status { isForbidden() }
+                    status { isUnauthorized() }
                 }
         }
     }
