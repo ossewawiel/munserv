@@ -30,13 +30,14 @@ jobs:
           existing=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
             echo "PR #$existing already open for $BRANCH"
-            exit 0
+          else
+            title=$(git log -1 --format=%s)
+            body=$(git log origin/master..HEAD --format='- %s' | head -n 50)
+            footer=$'\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)'
+            printf '%s\n' "Commits on this branch:" "" "$body" > pr-body.md
+            printf '%s' "$footer" >> pr-body.md
+            existing=$(gh pr create --base master --head "$BRANCH" --title "$title" --body-file pr-body.md | grep -o '[0-9]*$')
           fi
 
-          title=$(git log -1 --format=%s)
-          body=$(git log origin/master..HEAD --format='- %s' | head -n 50)
-          footer=$'\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)'
-          printf '%s\n' "Commits on this branch:" "" "$body" > pr-body.md
-          printf '%s' "$footer" >> pr-body.md
-
-          gh pr create --base master --head "$BRANCH" --title "$title" --body-file pr-body.md
+          # Squash-merge once required checks pass; GitHub waits on the CI status check.
+          gh pr merge "$existing" --auto --squash --delete-branch
