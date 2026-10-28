@@ -10,6 +10,7 @@ Usage: python3 scripts/test-console.py
 """
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -1417,6 +1418,19 @@ class RunningShaTests(unittest.TestCase):
             services.record_running_sha(checkout, "backend")
             self.assertEqual(services.recorded_shas(checkout), {"web": "aaa1111", "backend": "bbb2222"})
             self.assertTrue((checkout / ".console" / "running-sha").is_file())
+
+
+class EnsurePrBranchTests(unittest.TestCase):
+    def pr_info(self, state: str) -> str:
+        return json.dumps({"headRefName": "feat/x", "baseRefName": "master", "state": state})
+
+    def test_an_open_pr_checks_out_its_head_branch(self) -> None:
+        with patch.object(ensure, "gh", return_value=self.pr_info("OPEN")), patch.object(ensure, "repo", return_value="o/r"):
+            self.assertEqual(ensure.pr_branch(1), "feat/x")
+
+    def test_a_merged_pr_checks_out_the_branch_it_merged_into(self) -> None:
+        with patch.object(ensure, "gh", return_value=self.pr_info("MERGED")), patch.object(ensure, "repo", return_value="o/r"):
+            self.assertEqual(ensure.pr_branch(1), "master")
 
 
 class EnsureFailureTests(unittest.TestCase):
