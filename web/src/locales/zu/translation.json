@@ -329,6 +329,9 @@
   "podAdministrators": {
     "filters": {
       "comingSoon": "Ukuhlunga akukavulwa. Uma sekuvuliwe, izihlungi zeqhaza nokwabiwa zizovela lapha futhi inani liboniswa kunkinobho yeZihlungi."
+    },
+    "errors": {
+      "emailExists": "Kunomphathi osesekhona onale imeyili"
     }
   },
   "messages": {
