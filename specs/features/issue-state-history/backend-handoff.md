@@ -367,4 +367,3 @@ value class AdminId(val value: UUID)
 - [ ] Integration tests passing
 - [ ] Contract tests passing
 - [ ] ktlint check passing
-- [ ] No SonarQube issues

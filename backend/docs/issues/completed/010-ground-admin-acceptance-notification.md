@@ -123,7 +123,7 @@ application.invitedBy?.let { inviterId ->
 - [ ] Message `recipientType` is "admin" (goes to admins table users)
 - [ ] Message `relatedEntityId` points to member (for "view" action navigation)
 - [ ] Tests pass
-- [ ] Quality checks pass (ktlintCheck, sonar)
+- [ ] Quality checks pass (ktlintCheck)
 
 ## Test Cases to Add
 

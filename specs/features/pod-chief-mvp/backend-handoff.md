@@ -400,7 +400,6 @@ data class CreatePodAdministratorRequest(
 - [ ] All integration tests passing
 - [ ] OpenAPI documentation complete
 - [ ] No ktlint errors
-- [ ] SonarQube quality gate passed
 - [ ] Follows backend/CLAUDE.md patterns
 
 ## API Summary
