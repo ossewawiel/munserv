@@ -143,6 +143,7 @@ function renderReportsPage({ initialRoute = '/reports/general' }: RenderOptions 
     },
     login: vi.fn(),
     logout: vi.fn(),
+    hasPermission: () => true,
   });
 
   return render(
