@@ -5,6 +5,7 @@ import { http, HttpResponse } from 'msw';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { worker } from '@/test/mocks/browser';
+import { FeedbackProvider } from '@/shared/hooks/FeedbackProvider';
 import { PodIdentitySection } from './PodIdentitySection';
 import { podSettingsKeys } from '../hooks';
 import type { PodSettings } from '../types';
@@ -41,7 +42,9 @@ function withQueryData(settings: PodSettings): Decorator {
 
     return (
       <QueryClientProvider client={queryClient}>
-        <Story />
+        <FeedbackProvider>
+          <Story />
+        </FeedbackProvider>
       </QueryClientProvider>
     );
   };
@@ -61,6 +64,22 @@ export const Main: Story = {
 
 export const IdentityNoLogo: Story = {
   decorators: [withQueryData(podWithoutLogo)],
+};
+
+export const IdentityDirty: Story = {
+  decorators: [withQueryData(podWithLogo)],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement.ownerDocument.body);
+    const nameField = await canvas.findByLabelText(/pod name/i);
+
+    await waitFor(() => expect(nameField).toHaveValue(podWithLogo.name));
+
+    await userEvent.clear(nameField);
+    await userEvent.type(nameField, 'Ward 42');
+
+    await expect(canvas.getByRole('button', { name: /reset/i })).toBeEnabled();
+    await expect(canvas.getByRole('button', { name: /save changes/i })).toBeEnabled();
+  },
 };
 
 export const IdentityInvalidName: Story = {

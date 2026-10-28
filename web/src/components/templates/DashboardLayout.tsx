@@ -14,6 +14,7 @@ import { NotificationDropdown } from '@/components/organisms/NotificationDropdow
 import { SupportGrantBanner } from '@/components/organisms/SupportGrantBanner';
 import { PodHeaderLockup } from '@/components/molecules/PodHeaderLockup';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { FeedbackProvider } from '@/shared/hooks/FeedbackProvider';
 import { usePodSettings } from '@/features/pod-settings/hooks';
 import { Sidebar } from './Sidebar';
 import {
@@ -213,33 +214,33 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      {/* Header */}
-      <AppBar
-        enableColorOnDark
-        position="fixed"
-        color="inherit"
-        elevation={0}
-        sx={{
-          // Use CSS variable for dynamic color scheme switching
-          bgcolor: 'var(--munserv-palette-background-default)',
-          transition: theme.transitions.create('width'),
-        }}
-      >
-        {header}
-      </AppBar>
+    <FeedbackProvider>
+      <Box sx={{ display: 'flex' }}>
+        {/* Header */}
+        <AppBar
+          enableColorOnDark
+          position="fixed"
+          color="inherit"
+          elevation={0}
+          sx={{
+            // Use CSS variable for dynamic color scheme switching
+            bgcolor: 'var(--munserv-palette-background-default)',
+            transition: theme.transitions.create('width'),
+          }}
+        >
+          {header}
+        </AppBar>
 
-      {/* Sidebar */}
-      <Sidebar
-        variant={matchDownMd ? 'temporary' : 'permanent'}
-        open={drawerOpen}
-        onClose={handleDrawerClose}
-      />
+        {/* Sidebar */}
+        <Sidebar
+          variant={matchDownMd ? 'temporary' : 'permanent'}
+          open={drawerOpen}
+          onClose={handleDrawerClose}
+        />
 
-      {/* Main Content */}
-      <Main open={drawerOpen}>
-        {children}
-      </Main>
-    </Box>
+        {/* Main Content */}
+        <Main open={drawerOpen}>{children}</Main>
+      </Box>
+    </FeedbackProvider>
   );
 };

@@ -11,6 +11,7 @@ import { Input } from '@/components/atoms/Input';
 import { Button } from '@/components/atoms/Button';
 import { Spinner } from '@/components/atoms/Spinner';
 import { PodHeaderLockup } from '@/components/molecules/PodHeaderLockup';
+import { useFeedback } from '@/shared/hooks/useFeedback';
 import { usePodSettings, useUpdatePodSettings } from '../hooks';
 import type { UpdatePodSettingsRequest } from '../types';
 
@@ -38,10 +39,10 @@ export const PodIdentitySection: FC = () => {
   const { t } = useTranslation();
   const { data, isLoading } = usePodSettings();
   const updateSettings = useUpdatePodSettings();
+  const { showFeedback } = useFeedback();
 
   const [name, setName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
-  const [justSaved, setJustSaved] = useState(false);
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -73,14 +74,21 @@ export const PodIdentitySection: FC = () => {
       : undefined;
 
   const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setJustSaved(false);
     setName(event.target.value);
   }, []);
 
   const handleLogoUrlChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setJustSaved(false);
     setLogoUrl(event.target.value);
   }, []);
+
+  const isDirty =
+    !!data && (trimmedName !== data.name || trimmedLogoUrl !== (data.logoUrl ?? ''));
+
+  const handleReset = useCallback(() => {
+    if (!data) return;
+    setName(data.name);
+    setLogoUrl(data.logoUrl ?? '');
+  }, [data]);
 
   const handleSave = useCallback(() => {
     // Only the fields the pod chief actually changed: sending name on a
@@ -98,12 +106,18 @@ export const PodIdentitySection: FC = () => {
       onSuccess: (response) => {
         setName(response.name);
         setLogoUrl(response.logoUrl ?? '');
-        setJustSaved(true);
+        showFeedback({
+          message: t('podSettings.identity.saved', 'Saved. The header now reads “{{displayName}}”.', {
+            displayName: response.displayName,
+          }),
+          severity: 'success',
+        });
       },
     });
-  }, [trimmedName, trimmedLogoUrl, data, updateSettings]);
+  }, [trimmedName, trimmedLogoUrl, data, updateSettings, showFeedback, t]);
 
   const saveDisabled = nameTooShort || nameTooLong || logoUrlTooLong || updateSettings.isPending;
+  const resetDisabled = !isDirty || updateSettings.isPending;
 
   return (
     <MainCard title={t('podSettings.identity.title', 'Pod identity')}>
@@ -118,14 +132,6 @@ export const PodIdentitySection: FC = () => {
           {serverErrorMessage && (
             <Alert severity="error" sx={{ mb: 2.5 }}>
               {serverErrorMessage}
-            </Alert>
-          )}
-
-          {justSaved && !updateSettings.isError && data && (
-            <Alert severity="success" sx={{ mb: 2.5 }}>
-              {t('podSettings.identity.saved', 'Saved. The header now reads “{{displayName}}”.', {
-                displayName: data.displayName,
-              })}
             </Alert>
           )}
 
@@ -213,7 +219,10 @@ export const PodIdentitySection: FC = () => {
             </Box>
           </Box>
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5, mt: 2.5 }}>
+            <Button variant="secondary" disabled={resetDisabled} onClick={handleReset}>
+              {t('podSettings.identity.reset', 'Reset')}
+            </Button>
             <Button
               variant="primary"
               disabled={saveDisabled}
