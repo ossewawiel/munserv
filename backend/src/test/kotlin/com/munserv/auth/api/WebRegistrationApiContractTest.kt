@@ -351,8 +351,9 @@ class WebRegistrationApiContractTest {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                 }.andExpect {
-                    // Spring Security returns 403 Forbidden for unauthenticated requests to authenticated() endpoints
-                    status { isForbidden() }
+                    // The authentication entry point answers 401 for a request with no token,
+                    // distinct from the 403 an authenticated-but-forbidden request would get.
+                    status { isUnauthorized() }
                 }
         }
     }

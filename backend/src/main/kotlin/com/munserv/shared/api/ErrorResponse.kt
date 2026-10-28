@@ -35,6 +35,7 @@ data class ErrorBody(
  */
 object ErrorCodes {
     const val VALIDATION_ERROR = "VALIDATION_ERROR"
+    const val UNAUTHENTICATED = "UNAUTHENTICATED"
     const val UNAUTHORIZED = "UNAUTHORIZED"
     const val FORBIDDEN = "FORBIDDEN"
     const val NOT_FOUND = "NOT_FOUND"
