@@ -108,3 +108,28 @@ export function stepButtonGate(key, stepState) {
   }
   return { disabled: false, reason: null };
 }
+
+// --- remote eyeball ----------------------------------------------------------
+//
+// Handoff Eyeball blocks name `http://localhost:3000/...` and `http://localhost:8080/...`. A tester
+// on another machine cannot use those, so when remote mode is on every such address in a check's
+// URL and steps is shown with the console machine's public host instead. Handoffs themselves are
+// never rewritten.
+export function rewriteLocalhost(text, host) {
+  if (!host || typeof text !== 'string') return text;
+  return text
+    .replace(/(\/\/)(?:localhost|127\.0\.0\.1)\b/g, `$1${host}`)
+    .replace(/\b(?:localhost|127\.0\.0\.1)(?=:\d)/g, host);
+}
+
+// The rows of the Remote access panel: label and link. The console link carries the access token
+// only when the server sent one (a loopback request).
+export function remoteLinkRows(remote) {
+  if (!remote || !remote.enabled) return [];
+  const urls = remote.urls || {};
+  return [
+    { label: 'Web portal', url: urls.web },
+    { label: 'Backend Swagger', url: urls.swagger },
+    { label: 'Console', url: urls.console_with_token || urls.console },
+  ].filter((row) => row.url);
+}

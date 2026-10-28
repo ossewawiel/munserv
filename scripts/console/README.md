@@ -42,6 +42,7 @@ changelog, master CI, release checklist).
 | `canvases_dir` | `design/canvases` | Directory of `<feature>/canvas.json` design canvases. |
 | `tokens` | `design/tokens/color.tokens.json` | Path to a DTCG colour tokens file. |
 | `changelog` | `CHANGELOG.md` | Path to the changelog. |
+| `remote` | disabled | Remote eyeball (see below): `enabled`, `bind` (default `0.0.0.0`), `token_file` (default `$XDG_STATE_HOME/<name>-console/token`, i.e. `~/.local/state/<name>-console/token`), `ports` (`web`, `backend`, `console` -- exposed to the LAN and named in the firewall command), `swagger_path` (default `/swagger-ui.html`), `ensure_services` (default `[db, backend, web]`, started in that order). `--remote` / `--local` override `enabled`. |
 | `links` | `{}` | Name -> URL quick links shown on Overview. |
 | `sections` | all enabled | `{overview: true, knowledge: true, design: true, eyeball: true, release: true}` -- set any to `false` to hide it. |
 | `repo` | detected via `gh repo view` | `owner/name` passed to every `gh --repo`; set only if detection is wrong. |
@@ -56,6 +57,13 @@ or `tcp:<port>`), `url`/`notes` for display, `manual: true` to list without star
 `command` (the install command), `copy` (a list of `{src, dest}` files copied from the repo root
 into the checkout when `dest` is missing). See the MunServ `services.yaml` for a worked example
 covering an npm/pnpm install, a Flutter `pub get`, and copying a local config file.
+
+`start`, `url` and `notes` accept placeholders: `{bind}` (`0.0.0.0` in remote mode, else
+`localhost`), `{host}` (the LAN address in remote mode, else `localhost`), `{hostname}` and
+`{api_base}` (empty in remote mode, so the web client calls its own origin; the backend's localhost
+URL otherwise). `health` always probes localhost. `detached: true` marks a service whose start
+command exits at once (`docker compose up -d`); `start_timeout` is the seconds `ensure` waits for
+it to turn healthy.
 
 ### `accounts.yaml` and `smoke.yaml`
 
@@ -91,6 +99,35 @@ like any other service's log). No device connected shows the exact USB/wireless-
 connect one, plus a reminder that the emulator still works with no setup at all. `mobile.py`'s
 `emulator_host`/`api_port` come from `services.yaml`'s `mobile` entry, matching
 `mobile/lib/shared/providers/dio_provider.dart`'s `--dart-define=API_HOST`/`API_PORT` contract.
+
+### Remote eyeball
+
+With `remote.enabled` the console listens on `remote.bind` and the services bind the LAN, so a
+tester on another machine can open the links while everything runs on this one. Requests from
+loopback need no token; every other request (static files and API) needs the access token, sent as
+the `console_token` cookie, a `?token=` query (a GET with a valid one sets the cookie and redirects
+to the same path without it) or an `X-Console-Token` header, else 403. The token is created on first
+start in `remote.token_file` (mode 0600) and never changes, so a bookmark keeps working. The web
+client calls `/api/v1` on its own origin and the Vite proxy forwards it to the backend; handoff
+`localhost` URLs are shown with the machine's address on the Eyeball page, handoffs are not edited.
+Security trade-offs: `specs/architecture/decisions/007-remote-eyeball.md`.
+
+First-time setup, once:
+1. `scripts/install-console-service.sh` -- installs and starts the systemd user unit (no sudo). Add
+   `loginctl enable-linger $USER` to keep it running after logout.
+2. Run the firewall command shown in the Eyeball page's Remote access panel (or printed by
+   `eyeball-up.sh`), e.g. `sudo ufw allow from <subnet> to any port 3000,3999,8080 proto tcp`. The
+   console cannot test it from this machine; open the Web link from another machine to confirm.
+3. Bookmark the console link with the token (the first lines of `journalctl --user -u
+   munserv-console`, or the Console line of `eyeball-up.sh`).
+
+Per PR, after review: `scripts/eyeball-up.sh <pr>` (or `python3 -m scripts.console ensure <pr>`
+with the console running). It checks out the PR head, runs Prepare when needed, and starts db,
+backend and web. A service restarts only when its process exited, the checkout HEAD differs from the
+one recorded in `<checkout>/.console/running-sha` when it started, or it is unhealthy; a re-run with
+nothing changed restarts nothing. It prints the Web, Swagger and Console links, the accounts the
+PR's checks log in as, the latest OTP and the firewall command. A service that does not turn healthy
+in `start_timeout` fails the run with its last log line.
 
 ## Notes
 

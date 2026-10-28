@@ -1,4 +1,5 @@
-"""The factory console HTTP server: a JSON API plus static files, localhost only.
+"""The factory console HTTP server: a JSON API plus static files. Localhost only in local mode; in
+remote mode (remote.py) it listens on the LAN and every non-loopback request needs the access token.
 
 Same request-safety posture as the old eyeball dashboard: an Origin header naming anything other
 than this server is rejected (no CORS preflight would stop a same-page POST otherwise), and every
@@ -14,7 +15,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import eyeball, github, knowledge, mobile, release, services
+from . import ensure, eyeball, github, knowledge, mobile, network, release, remote, services
 from .config import CONFIG, ROOT
 from .gitops import ApiError, CommandError, checkout_branch, current_branch, current_sha, default_checkout, \
     ensure_checked_out, is_worktree, local_files_copied, resolve_checkout_dir, validate_branch, validate_name
@@ -55,8 +56,21 @@ class Handler(BaseHTTPRequestHandler):
         return json.loads(self.rfile.read(length) or b"{}")
 
     def _allowed_origins(self) -> set[str]:
-        port = self.server.server_address[1]
-        return {f"http://localhost:{port}", f"http://127.0.0.1:{port}"}
+        return remote.allowed_origins(self.server.server_address[1])
+
+    def _authorize(self, query: dict) -> str:
+        """How this request got in (see remote.granted_by); raises a 403 when it must be refused."""
+        via = remote.granted_by(self.client_address[0], self.headers, query)
+        if via is None:
+            raise ApiError("access token required", 403)
+        return via
+
+    def _redirect_with_cookie(self, location: str) -> None:
+        self.send_response(302)
+        self.send_header("Location", location)
+        self.send_header("Set-Cookie", remote.cookie_header(remote.token()))
+        self.send_header("Content-Length", "0")
+        self.end_headers()
 
     def _reject_cross_origin(self) -> None:
         origin = self.headers.get("Origin")
@@ -92,10 +106,13 @@ class Handler(BaseHTTPRequestHandler):
             self._reject_cross_origin()
             parsed = urlparse(self.path)
             path = parsed.path
+            query = parse_qs(parsed.query)
+            if self._authorize(query) == "query" and not path.startswith("/api/"):
+                return self._redirect_with_cookie(path)
             if path == "/" or path == "/index.html":
                 return self._require_ok(self._serve_static("index.html"))
             if path.startswith("/api/"):
-                return self._route_get(path, parse_qs(parsed.query))
+                return self._route_get(path, query)
             if self._serve_static(path):
                 return
             self.send_response(404)
@@ -113,6 +130,9 @@ class Handler(BaseHTTPRequestHandler):
     def _route_get(self, path: str, qs: dict) -> None:
         if path == "/api/state":
             return self._api_state()
+        if path == "/api/remote":
+            return self._json(remote.snapshot(self.server.server_address[1],
+                                              remote.is_loopback(self.client_address[0])))
         if path == "/api/github":
             return self._json(github.get_snapshot())
         if path == "/api/knowledge":
@@ -126,7 +146,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"candidates": candidates, "accounts": CONFIG.accounts_config})
         if path == "/api/mobile/devices":
             devices = mobile.devices()
-            lan_ip = mobile.lan_ip()
+            lan_ip = network.lan_ip()
             api_port = mobile.api_port()
             web_cfg = services.services_config().get("web")
             web_up = bool(web_cfg and web_cfg.get("health") and services.health_ok(web_cfg["health"]))
@@ -174,6 +194,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             self._reject_cross_origin()
+            self._authorize(parse_qs(urlparse(self.path).query))
             self._require_json_content_type()
             self._route_post(self.path, self._read_json())
         except ApiError as e:
@@ -229,6 +250,12 @@ class Handler(BaseHTTPRequestHandler):
                 ensure_checked_out(self.checkout, validate_branch(branch))
             message = mobile.start_run(device_id, self.checkout)
             return self._json({"ok": True, "message": message})
+        if path == "/api/eyeball/ensure":
+            pr = body.get("pr")
+            if not isinstance(pr, int) or pr < 1:
+                raise ApiError(f"invalid pr: {pr!r}", 400)
+            result = ensure.ensure(pr, self.checkout, self.server.server_address[1])
+            return self._json({"ok": True, **result})
         if path == "/api/eyeball/save":
             candidate_id = validate_name(body.get("candidate", ""), "candidate")
             eyeball.save_results(self.checkout, candidate_id, body.get("data", {}))
@@ -254,6 +281,7 @@ def _raise_system_exit(signum, frame):  # noqa: ARG001 - signal handler signatur
 
 
 def run(port: int | None = None, checkout: Path | None = None) -> int:
+    port = port or CONFIG.port
     if checkout:
         Handler.checkout, Handler.checkout_notice = checkout, None
     else:
@@ -261,10 +289,12 @@ def run(port: int | None = None, checkout: Path | None = None) -> int:
     Handler.checkout.mkdir(parents=True, exist_ok=True)
     github.start_refresher()
     release.start_refresher()
-    server = ThreadingHTTPServer(("localhost", port or CONFIG.port), Handler)
+    server = ThreadingHTTPServer((remote.listen_address(), port), Handler)
     signal.signal(signal.SIGTERM, _raise_system_exit)
-    print(f"factory console: http://localhost{'' if (port or CONFIG.port) == 80 else ':' + str(port or CONFIG.port)}/")
-    print(f"checkout under test: {Handler.checkout}")
+    print(f"factory console: http://localhost{'' if port == 80 else ':' + str(port)}/", flush=True)
+    if remote.enabled():
+        print(f"remote eyeball: listening on {remote.listen_address()}; LAN link {remote.console_url(port, with_token=True)}", flush=True)
+    print(f"checkout under test: {Handler.checkout}", flush=True)
     try:
         server.serve_forever()
     except (KeyboardInterrupt, SystemExit):

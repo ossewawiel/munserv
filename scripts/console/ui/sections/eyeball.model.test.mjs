@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   requiredServices, buildChecklistViewModel, stageLabel, stageChipClass,
   checkoutMismatch, checkoutButtonLabel, stepButtonGate, isCheckedOut,
+  rewriteLocalhost, remoteLinkRows,
 } from './eyeball.model.mjs';
 
 const FIXTURE_CANDIDATE = {
@@ -156,4 +157,32 @@ test('stepButtonGate never gates the Check out step itself', () => {
   const gate = stepButtonGate('checkout', { checkedOut: false });
   assert.equal(gate.disabled, false);
   assert.equal(gate.reason, null);
+});
+
+test('rewriteLocalhost swaps localhost for the public host in URLs', () => {
+  assert.equal(rewriteLocalhost('http://localhost:3000/pod-administrators', '192.168.1.5'),
+    'http://192.168.1.5:3000/pod-administrators');
+  assert.equal(rewriteLocalhost('http://127.0.0.1:8080/swagger-ui/index.html', 'sagan'),
+    'http://sagan:8080/swagger-ui/index.html');
+});
+
+test('rewriteLocalhost swaps a bare localhost:port in prose and leaves other text alone', () => {
+  assert.equal(rewriteLocalhost('Open localhost:3000 and log in.', '192.168.1.5'), 'Open 192.168.1.5:3000 and log in.');
+  assert.equal(rewriteLocalhost('Use the localhost build.', '192.168.1.5'), 'Use the localhost build.');
+});
+
+test('rewriteLocalhost is a no-op without a host or for non-strings', () => {
+  assert.equal(rewriteLocalhost('http://localhost:3000/', null), 'http://localhost:3000/');
+  assert.equal(rewriteLocalhost(undefined, '192.168.1.5'), undefined);
+});
+
+test('remoteLinkRows lists web, swagger and console, preferring the tokenised console link', () => {
+  const rows = remoteLinkRows({ enabled: true, urls: { web: 'w', swagger: 's', console: 'c', console_with_token: 'ct' } });
+  assert.deepEqual(rows.map((r) => r.url), ['w', 's', 'ct']);
+  assert.equal(remoteLinkRows({ enabled: true, urls: { web: 'w', swagger: 's', console: 'c' } })[2].url, 'c');
+});
+
+test('remoteLinkRows is empty when remote mode is off', () => {
+  assert.deepEqual(remoteLinkRows({ enabled: false }), []);
+  assert.deepEqual(remoteLinkRows(null), []);
 });
