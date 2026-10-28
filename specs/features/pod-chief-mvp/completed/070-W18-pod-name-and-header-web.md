@@ -3,7 +3,7 @@ issue: 29
 story: W18
 title: "Pod name and logo configuration"
 platform: web
-status: completed
+status: done
 depends_on: []
 touches:
   - web/src/features/pod-settings
