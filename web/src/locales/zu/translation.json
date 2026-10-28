@@ -329,5 +329,13 @@
     "filters": {
       "comingSoon": "Ukuhlunga akukavulwa. Uma sekuvuliwe, izihlungi zeqhaza nokwabiwa zizovela lapha futhi inani liboniswa kunkinobho yeZihlungi."
     }
+  },
+  "messages": {
+    "types": {
+      "adminWelcome": "Wamukelekile"
+    },
+    "welcome": {
+      "tasksTitle": "Imisebenzi yakho yokuqala"
+    }
   }
 }

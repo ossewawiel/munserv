@@ -3,7 +3,7 @@ issue: 27
 story: W16
 title: "Pod Administrator onboarding flow"
 platform: web
-status: pending
+status: completed
 depends_on: [95]  # B10 admin welcome message
 touches:
   - web/src/shared/types
@@ -20,8 +20,34 @@ design_artboards:
 design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/shared/types/message.ts
+  - web/src/shared/types/message.test.ts
+  - web/src/features/messages/components/MessageDetail.tsx
+  - web/src/features/messages/components/MessageDetail.test.tsx
+  - web/src/features/messages/components/MessageDetail.stories.tsx
+  - web/src/features/messages/components/MessageList.stories.tsx
+  - web/src/features/messages/hooks.test.tsx
+  - web/src/features/messages/api.test.ts
+  - web/src/test/mocks/handlers.ts
+  - web/src/components/guards/ProtectedRoute.test.tsx
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+  - e2e/visual/__screenshots__/stories.spec/features-messages-messagedetail--welcome-message-detail--light.png
+  - e2e/visual/__screenshots__/stories.spec/features-messages-messagedetail--welcome-message-detail--dark.png
+  - e2e/visual/__screenshots__/stories.spec/features-messages-messagedetail--welcome-message-no-tasks--light.png
+  - e2e/visual/__screenshots__/stories.spec/features-messages-messagedetail--welcome-message-no-tasks--dark.png
+  - e2e/visual/__screenshots__/stories.spec/features-messages-messagelist--welcome-message-list--light.png
+  - e2e/visual/__screenshots__/stories.spec/features-messages-messagelist--welcome-message-list--dark.png
+tests_added:
+  - "web/src/shared/types/message.test.ts: should return the tasks of an admin welcome message"
+  - "web/src/shared/types/message.test.ts: should return an empty list when metadata has no task array"
+  - "web/src/features/messages/components/MessageDetail.test.tsx: should list the initial tasks of an admin welcome message"
+  - "web/src/features/messages/components/MessageDetail.test.tsx: should not render a task list for a message without tasks"
+  - "web/src/components/guards/ProtectedRoute.test.tsx: should send a pending pod administrator to the change password page"
+  - "web/src/components/guards/ProtectedRoute.test.tsx: should send a password-changed pod administrator to the complete profile page"
+  - "web/src/components/guards/ProtectedRoute.test.tsx: should render the dashboard for an active pod administrator"
 ---
 
 # W16 · Pod Administrator onboarding flow (Web)
@@ -137,3 +163,47 @@ cd web && pnpm lint && pnpm typecheck && pnpm test:run
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a
 summary of changes. If you cannot finish, set `status: blocked` and end your message with
 `BLOCKED: <reason>`.
+
+## Eyeball
+```yaml
+- id: E1
+  title: Pod chief creates a new Pod Admin
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/pod-administrators
+  steps:
+    - Log in as the pod chief and open Pod Administrators.
+    - Create a new administrator with role Pod Admin.
+    - Copy the temporary password shown.
+  expect: The new Pod Admin appears in the list, and a temporary password is displayed to copy.
+- id: E2
+  title: New pod administrator completes onboarding
+  as: none
+  services: [db, backend, web]
+  url: http://localhost:3000/login
+  steps:
+    - Log in as the new administrator with the temporary password from E1.
+    - Set a new password on the forced change-password screen.
+    - Press "Skip for Now" on the complete-profile screen.
+  expect: >
+    Signed in and landed on http://localhost:3000/ (the dashboard being empty for a pod
+    administrator here is tracked separately in #136, not this story).
+- id: E3
+  title: Welcome message with initial tasks
+  as: none
+  services: [db, backend, web]
+  url: http://localhost:3000/messages
+  steps:
+    - Open Messages as the administrator onboarded in E2.
+  expect: >
+    An unread "Welcome to MunServ" message at the top of the inbox; its detail lists the initial
+    tasks under a "Your first tasks" heading and has a single Dismiss button.
+- id: E4
+  title: Welcome message without tasks (Storybook only, not reproducible via UI)
+  as: none
+  services: [storybook]
+  url: http://localhost:6006/?path=/story/features-messages-messagedetail--welcome-message-no-tasks
+  steps:
+    - Open the story.
+  expect: The body renders with no task list, and Additional Information shows role only.
+```

@@ -329,5 +329,13 @@
     "filters": {
       "comingSoon": "Filtrering is nog nie geaktiveer nie. Wanneer dit is, verskyn rol- en toewysingsfilters hier en die telling wys op die Filters-knoppie."
     }
+  },
+  "messages": {
+    "types": {
+      "adminWelcome": "Welkom"
+    },
+    "welcome": {
+      "tasksTitle": "Jou eerste take"
+    }
   }
 }
