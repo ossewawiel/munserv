@@ -199,7 +199,7 @@ concepts:
       dart: [MessageType, MessageStatus]
     values:
       message_status: [unread, read, actioned, dismissed]
-      message_type: [ground_admin_invitation, ground_admin_application, ground_admin_approved, ground_admin_declined, ground_admin_invitation_declined, ground_admin_invitation_accepted, ground_admin_revocation, ground_admin_stepdown_request, verify_new_issue, verify_fix, member_registration, monthly_report]
+      message_type: [ground_admin_invitation, ground_admin_application, ground_admin_approved, ground_admin_declined, ground_admin_invitation_declined, ground_admin_invitation_accepted, ground_admin_revocation, ground_admin_stepdown_request, verify_new_issue, verify_fix, member_registration, monthly_report, admin_welcome]
     synonyms_avoid: ["notification (push notifications are a future channel; a message is the record)", "alert"]
 
   bootstrap:

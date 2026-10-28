@@ -1,10 +1,12 @@
 import { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { Breadcrumbs } from '@/components/molecules/Breadcrumbs';
 import { SupportAccessSection } from '@/features/support-access/SupportAccessSection';
+import { PodIdentitySection } from './components/PodIdentitySection';
 
 /**
  * Pod Settings page for Pod Chiefs: pod-wide configuration, including
@@ -28,7 +30,10 @@ export const PodSettingsPage: FC = () => {
       />
 
       <Box sx={{ mt: 3 }}>
-        <SupportAccessSection />
+        <Stack spacing={3}>
+          <PodIdentitySection />
+          <SupportAccessSection />
+        </Stack>
       </Box>
     </DashboardLayout>
   );

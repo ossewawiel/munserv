@@ -22,6 +22,7 @@ enum class MessageType(
     VERIFY_FIX("verify_fix"),
     MEMBER_REGISTRATION("member_registration"),
     MONTHLY_REPORT("monthly_report"),
+    ADMIN_WELCOME("admin_welcome"),
     ;
 
     fun toApiString(): String = apiString

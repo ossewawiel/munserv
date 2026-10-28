@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factory Console</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="banner" id="banner" hidden></div>
+<div class="app-shell">
+  <div class="topbar">
+    <button class="nav-collapse-toggle" id="nav-collapse-toggle" aria-label="Collapse navigation" title="Collapse navigation">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="project-name" id="project-name">Factory Console</span>
+    <span class="chip checkout-chip" id="checkout-chip">-</span>
+    <span class="spacer"></span>
+    <span class="updated" id="updated">updated -</span>
+    <button class="theme-toggle" id="theme-toggle">Theme</button>
+  </div>
+  <nav class="nav" id="nav">
+    <a href="#/overview" data-section="overview" title="Overview">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span>
+      <span class="nav-label">Overview</span>
+    </a>
+    <a href="#/knowledge" data-section="knowledge" title="Knowledge">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg></span>
+      <span class="nav-label">Knowledge</span>
+    </a>
+    <a href="#/design" data-section="design" title="Design">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="10.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="10" cy="15" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+      <span class="nav-label">Design</span>
+    </a>
+    <a href="#/eyeball" data-section="eyeball" title="Eyeball">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+      <span class="nav-label">Eyeball</span>
+    </a>
+    <a href="#/release" data-section="release" title="Release">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5c2 1 4 3 4.5 6-2.5.5-6 3-8 6.5l-3-3c3.5-2 6-5.5 6.5-9.5Z"/><path d="M8 15l-4 4"/><path d="M6 12s-3 1-3 5c4 0 5-3 5-3"/><path d="M12 18s1 3 5 3c0-4-3-5-3-5"/></svg></span>
+      <span class="nav-label">Release</span>
+    </a>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+<div class="toast-stack" id="toast-stack"></div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

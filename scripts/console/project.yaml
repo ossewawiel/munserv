@@ -1,0 +1,31 @@
+# Everything project-specific for the factory console. See scripts/console/README.md for the
+# full key reference and how to install the console into another repository.
+
+name: munserv
+port: 3999
+accent: "#233D36" # design/tokens/color.tokens.json: brand.primary
+checkout_dir: munserv-console
+handoff_glob: specs/features
+story_label_prefix: "story:"
+
+domain_language: domain/language.yaml
+requirements_dir: specs/requirements
+adr_dir: specs/architecture/decisions
+registry_dir: design/registry
+canvases_dir: design/canvases
+tokens: design/tokens/color.tokens.json
+changelog: CHANGELOG.md
+
+links:
+  Pages dashboard: https://ossewawiel.github.io/munserv/dashboard/
+  Board: https://github.com/users/ossewawiel/projects/5
+  Storybook (local): http://localhost:6006
+  Widgetbook (local): http://localhost:7701
+  Swagger: http://localhost:8080/swagger-ui.html
+
+sections:
+  overview: true
+  knowledge: true
+  design: true
+  eyeball: true
+  release: true

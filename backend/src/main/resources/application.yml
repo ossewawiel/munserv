@@ -69,3 +69,9 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
     org.springframework.web.servlet.DispatcherServlet: DEBUG
+
+management:
+  health:
+    mail:
+      # The SMTP probe waits ~2s per call in dev; liveness/readiness stay meaningful without it.
+      enabled: false

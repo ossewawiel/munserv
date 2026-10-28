@@ -144,6 +144,7 @@ function renderMembersPage({ initialRoute = '/members' }: RenderOptions = {}) {
     },
     login: vi.fn(),
     logout: vi.fn(),
+    hasPermission: () => false,
   });
 
   return render(

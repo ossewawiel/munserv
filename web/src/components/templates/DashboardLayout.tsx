@@ -12,6 +12,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { ProfileMenu } from '@/components/organisms/ProfileMenu';
 import { NotificationDropdown } from '@/components/organisms/NotificationDropdown';
 import { SupportGrantBanner } from '@/components/organisms/SupportGrantBanner';
+import { PodHeaderLockup } from '@/components/molecules/PodHeaderLockup';
+import { useAuth } from '@/shared/hooks/useAuth';
+import { usePodSettings } from '@/features/pod-settings/hooks';
 import { Sidebar } from './Sidebar';
 import {
   drawerWidth,
@@ -109,6 +112,10 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
   const { colorMode } = useThemeContext();
   const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const { hasPermission } = useAuth();
+  // Only a pod chief renders the pod's own branding in the header; every
+  // other role never issues the request, so it never turns into a 403.
+  const { data: podSettings } = usePodSettings({ enabled: hasPermission('pod_chief') });
 
   // Resolve color mode: if 'system', use system preference; otherwise use explicit mode
   const isDarkMode = colorMode === 'system' ? prefersDarkMode : colorMode === 'dark';
@@ -150,9 +157,15 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
             >
               <Box
                 component="img"
-                src={isDarkMode ? '/assets/app-logo-dark.png' : '/assets/app-logo.png'}
+                src={
+                  podSettings
+                    ? '/assets/app-mark.png'
+                    : isDarkMode
+                      ? '/assets/app-logo-dark.png'
+                      : '/assets/app-logo.png'
+                }
                 alt={t('common.appName')}
-                sx={{ height: 32 }}
+                sx={podSettings ? { height: 32, width: 32, borderRadius: 0.25 } : { height: 32 }}
               />
             </Box>
           </Box>
@@ -182,6 +195,11 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
           </Avatar>
         </Box>
 
+        {/* Pod chief branding: the pod's own logo, if set, then the server-derived displayName */}
+        {podSettings && (
+          <PodHeaderLockup displayName={podSettings.displayName} logoUrl={podSettings.logoUrl} />
+        )}
+
         {/* Spacer */}
         <Box sx={{ flexGrow: 1 }} />
 
@@ -191,7 +209,7 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
         <ProfileMenu />
       </Toolbar>
     ),
-    [theme, t, isDarkMode, handleDrawerToggle]
+    [theme, t, isDarkMode, handleDrawerToggle, podSettings]
   );
 
   return (

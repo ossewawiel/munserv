@@ -1,19 +1,26 @@
-import { type ReactNode, useCallback, useMemo, useState } from 'react';
+import { type ChangeEvent, type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
 import FormControl from '@mui/material/FormControl';
+import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import MuiPagination from '@mui/material/Pagination';
 import Select, { type SelectChangeEvent } from '@mui/material/Select';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
+import CloseIcon from '@mui/icons-material/Close';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import SearchIcon from '@mui/icons-material/Search';
 
+import { ActionButton } from '@/components/atoms/ActionButton';
+import { Input } from '@/components/atoms/Input';
 import { MainCard } from '@/components/atoms/MainCard';
 import { TableSkeleton } from '@/components/molecules/LoadingSkeleton';
-import { DataTable, type Column } from './DataTable';
+import { DataTable, type Column, type SortState } from './DataTable';
 
 const DEFAULT_PAGE_SIZE_OPTIONS = [5, 10, 20] as const;
 
@@ -105,6 +112,26 @@ export interface DataTableCardProps<T, TTabValue extends string = string> {
   readonly tabs?: DataTableTabsConfig<TTabValue>;
   /** Hide pagination footer */
   readonly hidePagination?: boolean;
+  /** Current sort state, if any column is sorted */
+  readonly sort?: SortState | null;
+  /** Called with the column key when a sortable header is clicked. Omit to keep sorting inert. */
+  readonly onSortChange?: (key: string) => void;
+  /** Search field shown at the head of the toolbar's left box. Omit `onChange` to render it inert. */
+  readonly search?: {
+    readonly value: string;
+    readonly placeholder?: string;
+    readonly onChange?: (value: string) => void;
+  };
+  /**
+   * Filter slide-out panel. Renders a filter button at the head of the toolbar's right box.
+   * The button is enabled whenever this prop is set; only the drawer's clear button is gated
+   * on `onClear`.
+   */
+  readonly filterPanel?: {
+    readonly content: ReactNode;
+    readonly activeCount?: number;
+    readonly onClear?: () => void;
+  };
 }
 
 interface PaginationFooterProps {
@@ -225,7 +252,35 @@ export function DataTableCard<T, TTabValue extends string = string>({
   title,
   tabs,
   hidePagination = false,
+  sort,
+  onSortChange,
+  search,
+  filterPanel,
 }: DataTableCardProps<T, TTabValue>) {
+  const { t } = useTranslation();
+
+  // Filter drawer open state - UI state, not server state
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+
+  const handleSearchChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      search?.onChange?.(event.target.value);
+    },
+    [search]
+  );
+
+  const handleOpenFilterDrawer = useCallback(() => {
+    setIsFilterDrawerOpen(true);
+  }, []);
+
+  const handleCloseFilterDrawer = useCallback(() => {
+    setIsFilterDrawerOpen(false);
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
+    filterPanel?.onClear?.();
+  }, [filterPanel]);
+
   // Tab state management (uncontrolled mode)
   const [internalTabValue, setInternalTabValue] = useState<TTabValue | undefined>(
     tabs?.defaultValue ?? tabs?.tabs[0]?.value
@@ -256,8 +311,10 @@ export function DataTableCard<T, TTabValue extends string = string>({
   const resolvedFilterSlot = activeTab?.filterSlot ?? defaultFilterSlot;
   const resolvedActionSlot = activeTab?.actionSlot ?? defaultActionSlot;
 
-  const showToolbar = !hideToolbarWhenEmpty || resolvedFilterSlot || resolvedActionSlot;
+  const showToolbar =
+    !hideToolbarWhenEmpty || resolvedFilterSlot || resolvedActionSlot || search || filterPanel;
   const totalPages = Math.ceil(totalItems / pageSize);
+  const activeFilterCount = filterPanel?.activeCount ?? 0;
 
   return (
     <MainCard
@@ -327,18 +384,87 @@ export function DataTableCard<T, TTabValue extends string = string>({
           >
             {/* Filter slot - left side */}
             <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
+              {search && (
+                <Input
+                  value={search.value}
+                  onChange={handleSearchChange}
+                  placeholder={search.placeholder ?? t('dataTable.searchPlaceholder')}
+                  disabled={!search.onChange}
+                  size="small"
+                  sx={{ width: 280 }}
+                  slotProps={{
+                    input: {
+                      startAdornment: <SearchIcon fontSize="small" />,
+                    },
+                    htmlInput: {
+                      'aria-label': search.placeholder ?? t('dataTable.searchPlaceholder'),
+                    },
+                  }}
+                />
+              )}
               {resolvedFilterSlot}
             </Box>
 
             {/* Action slot - right side */}
-            {resolvedActionSlot && (
+            {(resolvedActionSlot || filterPanel) && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {filterPanel && (
+                  <Badge
+                    color="primary"
+                    badgeContent={activeFilterCount > 0 ? activeFilterCount : undefined}
+                  >
+                    <ActionButton icon={<FilterListIcon />} onClick={handleOpenFilterDrawer}>
+                      {t('dataTable.filters')}
+                    </ActionButton>
+                  </Badge>
+                )}
                 {resolvedActionSlot}
               </Box>
             )}
           </Box>
           <Divider />
         </>
+      )}
+
+      {filterPanel && (
+        <Drawer
+          anchor="right"
+          open={isFilterDrawerOpen}
+          onClose={handleCloseFilterDrawer}
+          slotProps={{ paper: { sx: { width: { xs: '100%', sm: 360 } } } }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 2,
+              p: 2,
+            }}
+          >
+            <Typography variant="h6">{t('dataTable.filtersTitle')}</Typography>
+            <IconButton
+              onClick={handleCloseFilterDrawer}
+              aria-label={t('dataTable.closeFilters')}
+              size="small"
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+          <Divider />
+          <Box sx={{ flex: '1 1 auto', p: 2 }}>{filterPanel.content}</Box>
+          <Divider />
+          <Box sx={{ p: 2 }}>
+            <ActionButton
+              variant="outlined"
+              onClick={handleClearFilters}
+              disabled={!filterPanel.onClear}
+              sx={{ width: '100%', justifyContent: 'center' }}
+            >
+              {t('dataTable.clearFilters')}
+            </ActionButton>
+          </Box>
+        </Drawer>
       )}
 
       {/* Loading State */}
@@ -357,6 +483,8 @@ export function DataTableCard<T, TTabValue extends string = string>({
           onRowClick={onRowClick}
           emptyMessage={emptyMessage}
           variant="embedded"
+          sort={sort}
+          onSortChange={onSortChange}
         />
       )}
 

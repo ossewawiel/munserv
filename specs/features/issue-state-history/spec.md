@@ -196,7 +196,6 @@ Ensure the API client correctly receives and passes through `stateHistory` when 
 - [ ] Web timeline displays all state transitions
 - [ ] All tests passing
 - [ ] No lint errors
-- [ ] SonarQube analysis clean
 
 ## Future Enhancements (Out of Scope)
 

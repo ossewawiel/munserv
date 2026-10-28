@@ -5,6 +5,7 @@ import type { IssueVerification, VerificationStatus } from '@/shared/types/verif
 import type { SectorSettings, VerificationMode } from '@/shared/types/sectorSettings';
 import type { Admin, AdminCreatedResponse } from '@/features/admin-management/types';
 import type { SupportGrant } from '@/features/support-access/types';
+import type { PodSettings } from '@/features/pod-settings/types';
 
 // Default mock data
 const mockIssues = [
@@ -296,6 +297,15 @@ export const mockVerifications: IssueVerification[] = [
     status: 'completed' as VerificationStatus,
   },
 ];
+
+// =============================================
+// POD SETTINGS MOCK DATA
+// =============================================
+export const mockPodSettings: PodSettings = {
+  name: 'Ward42',
+  displayName: 'Munserv Pod Ward42',
+  logoUrl: 'https://cdn.ward42.org.za/branding/pod-logo.png',
+};
 
 // =============================================
 // SECTOR SETTINGS MOCK DATA
@@ -977,5 +987,22 @@ export const handlers = [
   // GET /support-access/grants/current - The caller's own support grant (grant-scoped tokens only)
   http.get('*/support-access/grants/current', () => {
     return HttpResponse.json(mockCurrentSupportGrant);
+  }),
+
+  // GET /pod/settings - Get the current pod's identity settings
+  http.get('*/pod/settings', () => {
+    return HttpResponse.json(mockPodSettings);
+  }),
+
+  // PATCH /pod/settings - Update the pod's name and/or logoUrl
+  http.patch('*/pod/settings', async ({ request }) => {
+    const body = (await request.json()) as { name?: string; logoUrl?: string };
+    const name = body.name ?? mockPodSettings.name;
+
+    return HttpResponse.json({
+      ...mockPodSettings,
+      ...body,
+      displayName: `Munserv Pod ${name}`,
+    });
   }),
 ];

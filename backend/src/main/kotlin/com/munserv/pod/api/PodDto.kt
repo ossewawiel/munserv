@@ -68,3 +68,15 @@ data class UpdatePodSettingsRequest(
             logoUrl = logoUrl,
         )
 }
+
+/**
+ * Response DTO for a pod logo upload.
+ */
+@Schema(description = "Pod logo upload response")
+data class PodLogoResponse(
+    @Schema(
+        description = "Public URL of the stored logo image",
+        example = "http://localhost:8080/uploads/8f14e45f-ea1e-4d0e-9c6b-2a1c6f1b7d10.png",
+    )
+    val logoUrl: String,
+)

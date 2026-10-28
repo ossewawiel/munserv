@@ -230,9 +230,18 @@
     "results": "results",
     "rowsPerPage": "Rows per page"
   },
+  "dataTable": {
+    "searchPlaceholder": "Search",
+    "filters": "Filters",
+    "filtersTitle": "Filters",
+    "clearFilters": "Clear filters",
+    "closeFilters": "Close filters"
+  },
   "errors": {
     "notFound": "Not Found",
     "unauthorized": "Unauthorized",
+    "forbiddenTitle": "Access Denied",
+    "forbidden": "You do not have permission to view this page",
     "serverError": "Server Error",
     "networkError": "Network Error"
   },
@@ -485,6 +494,9 @@
     "passwordNote": "Save this password - it will only be shown once",
     "passwordCopied": "Password copied to clipboard",
     "empty": "No administrators found. Add your first administrator to get started.",
+    "filters": {
+      "comingSoon": "Filtering is not switched on yet. When it is, role and assignment filters appear here and the count shows on the Filters button."
+    },
     "table": {
       "name": "Name",
       "email": "Email",
@@ -643,6 +655,20 @@
   },
   "podSettings": {
     "title": "Pod Settings",
-    "subtitle": "Pod-wide configuration, including support access for Central Authority."
+    "subtitle": "Pod-wide configuration, including support access for Central Authority.",
+    "identity": {
+      "title": "Pod identity",
+      "nameLabel": "Pod name",
+      "nameHelper": "Between 2 and 100 characters. Administrators and members see this name.",
+      "displayNamePreview": "Header preview",
+      "previewHint": "Everyone in this pod sees this in the portal header. It updates once the change is saved.",
+      "logoUrlLabel": "Logo URL",
+      "logoUrlHelper": "Direct link to a PNG or SVG image, up to 500 characters. Leave it empty to show the Munserv mark on its own.",
+      "save": "Save changes",
+      "saved": "Saved. The header now reads “{{displayName}}”.",
+      "nameTooShort": "Pod name must be at least 2 characters.",
+      "nameTooLong": "Pod name must be 100 characters or fewer.",
+      "logoUrlTooLong": "Logo URL must be 500 characters or fewer."
+    }
   }
 }

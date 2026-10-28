@@ -4,8 +4,10 @@ import com.munserv.shared.enums.MessageStatus
 import com.munserv.shared.enums.MessageType
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotBeBlank
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 
 class MessageFactoryTest {
@@ -295,6 +297,44 @@ class MessageFactoryTest {
             message.recipientType shouldBe "member"
             message.senderType shouldBe "system"
             message.actionType shouldBe "view"
+        }
+    }
+
+    @Nested
+    inner class AdminWelcome {
+        @Test
+        fun `should create an admin welcome message for a new administrator`() {
+            val message =
+                MessageFactory.adminWelcome(
+                    recipientId = recipientId,
+                    displayName = "Jane Ward",
+                    role = "pod_admin",
+                )
+
+            message.type shouldBe MessageType.ADMIN_WELCOME
+            message.title shouldBe "Welcome to MunServ"
+            message.body shouldContain "Jane Ward"
+            message.recipientId shouldBe recipientId
+            message.recipientType shouldBe "admin"
+            message.senderType shouldBe "system"
+            message.actionType shouldBe "acknowledge"
+            message.status shouldBe MessageStatus.UNREAD
+        }
+
+        @Test
+        fun `should carry the initial tasks and role in metadata`() {
+            val message =
+                MessageFactory.adminWelcome(
+                    recipientId = recipientId,
+                    displayName = "Jane Ward",
+                    role = "pod_admin",
+                )
+
+            val metadata = jacksonObjectMapper().readTree(message.metadata)
+            val tasks = metadata.get("tasks")
+            tasks.size() shouldBe 3
+            tasks.forEach { it.asString().shouldNotBeBlank() }
+            metadata.get("role").asString() shouldBe "pod_admin"
         }
     }
 }

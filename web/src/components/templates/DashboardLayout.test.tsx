@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import i18n from 'i18next';
 
+import { server } from '@/test/mocks/server';
+import { mockPodSettings } from '@/test/mocks/handlers';
 import { DashboardLayout } from './DashboardLayout';
 
 // Mock useThemeContext - need to mock both locations it's imported from
@@ -157,7 +159,8 @@ function renderWithProviders(
 beforeEach(() => {
   mockUseThemeContext.mockReset();
   mockUseAuth.mockReset();
-  mockUseAuth.mockReturnValue({ supportGrant: null });
+  mockUseAuth.mockReturnValue({ supportGrant: null, hasPermission: () => false });
+  server.resetHandlers();
 });
 
 describe('DashboardLayout', () => {
@@ -194,6 +197,31 @@ describe('DashboardLayout', () => {
       expect(mainElement).toBeInTheDocument();
     });
 
+    it('should show the pod display name in the header for a pod chief', async () => {
+      mockUseAuth.mockReturnValue({ supportGrant: null, hasPermission: () => true });
+
+      renderWithProviders(
+        <DashboardLayout>
+          <div>Content</div>
+        </DashboardLayout>
+      );
+
+      expect(await screen.findByText(mockPodSettings.displayName)).toBeInTheDocument();
+    });
+
+    it('should keep the app logo for a sector admin', async () => {
+      mockUseAuth.mockReturnValue({ supportGrant: null, hasPermission: () => false });
+
+      renderWithProviders(
+        <DashboardLayout>
+          <div>Content</div>
+        </DashboardLayout>
+      );
+
+      expect(screen.queryByText(mockPodSettings.displayName)).not.toBeInTheDocument();
+      expect(screen.getByAltText('MunServ Admin')).toHaveAttribute('src', '/assets/app-logo.png');
+    });
+
     it('should show the support grant banner when a grant is stored', () => {
       mockUseAuth.mockReturnValue({
         supportGrant: {
@@ -201,6 +229,7 @@ describe('DashboardLayout', () => {
           grantedRole: 'pod_admin',
           expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
         },
+        hasPermission: () => false,
       });
 
       const { container } = renderWithProviders(
