@@ -71,6 +71,7 @@
       "Bash(gh run *)",
       "Bash(python3 scripts/validate-domain-language.py*)",
       "Bash(./scripts/validate-enum-sync.sh*)",
+      "Bash(scripts/eyeball-up.sh *)",
       "Bash(docker compose *)",
       "Bash(docker ps*)",
       "Bash(docker logs*)",
