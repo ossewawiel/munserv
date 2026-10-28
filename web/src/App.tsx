@@ -22,6 +22,7 @@ import { SectorDashboardPage } from '@/features/pod-chief/SectorDashboardPage';
 import { PodAdministratorsPage } from '@/features/pod-chief/PodAdministratorsPage';
 import { SectorSettingsPage } from '@/features/sector-settings/SectorSettingsPage';
 import { PodSettingsPage } from '@/features/pod-settings/PodSettingsPage';
+import { ReportsPage } from '@/features/reports/ReportsPage';
 import { CreatePodChiefPage } from '@/features/bootstrap/CreatePodChiefPage';
 import { ChangePasswordPage } from '@/features/onboarding/ChangePasswordPage';
 import { CompleteProfilePage } from '@/features/onboarding/CompleteProfilePage';
@@ -204,7 +205,7 @@ function App() {
         element={
           <ProtectedRoute>
             <RoleGuard requiredRole="pod_admin">
-              <PlaceholderPage title="General Reports" />
+              <ReportsPage scope="pod" />
             </RoleGuard>
           </ProtectedRoute>
         }
@@ -214,7 +215,7 @@ function App() {
         element={
           <ProtectedRoute>
             <RoleGuard requiredRole="pod_admin">
-              <PlaceholderPage title="Ward Reports" />
+              <ReportsPage scope="ward" />
             </RoleGuard>
           </ProtectedRoute>
         }
@@ -224,7 +225,7 @@ function App() {
         element={
           <ProtectedRoute>
             <RoleGuard requiredRole="pod_admin">
-              <PlaceholderPage title="Sector Reports" />
+              <ReportsPage scope="sector" />
             </RoleGuard>
           </ProtectedRoute>
         }

@@ -3,7 +3,7 @@ issue: 31
 story: W20
 title: "Reports menu structure"
 platform: web
-status: pending
+status: completed
 depends_on: []
 touches:
   - web/src/features/reports
@@ -17,8 +17,27 @@ design_artboards:
 design_approved: true
 created_by: feature-planner
 created_at: "2026-09-05"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/features/reports/types.ts
+  - web/src/features/reports/ReportsPage.tsx
+  - web/src/features/reports/ReportsPage.test.tsx
+  - web/src/features/reports/ReportsPage.stories.tsx
+  - web/src/App.tsx
+  - web/src/components/templates/Sidebar.test.tsx
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+  - web/.storybook/preview.tsx
+  - web/e2e/visual/__screenshots__/stories.spec/features-reports-reportspage--general--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-reports-reportspage--general--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-reports-reportspage--ward-scope--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/features-reports-reportspage--ward-scope--dark.png
+tests_added:
+  - web/src/features/reports/ReportsPage.test.tsx: should render the three report tabs
+  - web/src/features/reports/ReportsPage.test.tsx: should show the ward name in the breadcrumb for a ward report
+  - web/src/features/reports/ReportsPage.test.tsx: should put the selected tab in the query string
+  - web/src/features/reports/ReportsPage.test.tsx: should fall back to the summary tab for an unknown tab value
+  - web/src/components/templates/Sidebar.test.tsx: should list General plus one reports entry per ward under Reports for a pod chief
 ---
 
 # W20 · Reports menu structure (Web)
@@ -107,3 +126,26 @@ cd web && pnpm lint && pnpm typecheck && pnpm test:run
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a
 summary of changes. If you cannot finish, set `status: blocked` and end your message with
 `BLOCKED: <reason>`.
+
+## Eyeball
+
+```yaml
+- id: E1
+  title: Pod chief opens the general pod report from the Reports menu
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/reports/general
+  steps:
+    - Log in as the pod chief and expand Reports in the sidebar.
+    - Click General.
+  expect: The page shows a "Pod reports" breadcrumb (Dashboard > Reports > Pod reports), a Summary/Issues/Performance tab strip with Summary active, and an empty state saying there is no report data yet.
+- id: E2
+  title: Pod chief opens a ward report from the Reports menu
+  as: pod_chief
+  services: [db, backend, web]
+  url: http://localhost:3000/reports/general
+  steps:
+    - With Reports expanded, click a ward entry under Reports (for example Test Ward North).
+    - Click the Issues tab.
+  expect: The breadcrumb and page title show the ward's name instead of "Pod reports", the URL keeps ?tab=issues, and the Issues tab stays selected on refresh.
+```

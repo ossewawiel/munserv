@@ -13,7 +13,8 @@ export type MessageType =
   | 'verify_new_issue'
   | 'verify_fix'
   | 'member_registration'
-  | 'monthly_report';
+  | 'monthly_report'
+  | 'admin_welcome';
 
 /**
  * Status of a message in the system
@@ -109,4 +110,21 @@ export const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
   verify_fix: 'messages.types.verifyFix',
   member_registration: 'messages.types.memberRegistration',
   monthly_report: 'messages.types.monthlyReport',
+  admin_welcome: 'messages.types.adminWelcome',
 };
+
+/**
+ * Type guard for an array of strings, without resorting to `any`.
+ */
+function isStringArray(value: unknown): value is readonly string[] {
+  return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+}
+
+/**
+ * Read the initial onboarding tasks carried by an `admin_welcome` message.
+ * Returns an empty list when `metadata.tasks` is absent or not a string array.
+ */
+export function getWelcomeTasks(message: Message): readonly string[] {
+  const tasks = message.metadata?.tasks;
+  return isStringArray(tasks) ? tasks : [];
+}
