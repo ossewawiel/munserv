@@ -1,0 +1,42 @@
+name: Auto PR
+
+on:
+  push:
+    branches-ignore: [master, "gh-pages"]
+
+concurrency:
+  group: auto-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-pr:
+    name: Open pull request for pushed branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Open the PR if none exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            echo "PR #$existing already open for $BRANCH"
+            exit 0
+          fi
+
+          title=$(git log -1 --format=%s)
+          body=$(git log origin/master..HEAD --format='- %s' | head -n 50)
+          footer=$'\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)'
+          printf '%s\n' "Commits on this branch:" "" "$body" > pr-body.md
+          printf '%s' "$footer" >> pr-body.md
+
+          gh pr create --base master --head "$BRANCH" --title "$title" --body-file pr-body.md
