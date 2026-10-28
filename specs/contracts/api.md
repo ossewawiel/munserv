@@ -140,6 +140,18 @@ Get verification history for issue.
 **Response:** `{ items: IssueVerification[] }`
 **Errors:** 401 Unauthorized | 404 Not found
 
+### POST /issues/{id}/photos
+Upload a photo (multipart field `file`). Allowed: the reporter, an admin, or a ground admin with a pending verification on the issue.
+
+**Response:** 201 `{ id, url, thumbnailUrl, sortOrder, createdAt }`
+**Errors:** 400 Invalid file | 401 Unauthorized | 403 Not reporter, admin or verifying ground admin | 404 Issue not found | 500 Storage error
+
+### DELETE /photos/{id}
+Delete a photo. Reporter or admin only.
+
+**Response:** 204
+**Errors:** 401 Unauthorized | 403 Not reporter or admin | 404 Photo not found
+
 ---
 
 ## Members

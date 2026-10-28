@@ -6,6 +6,7 @@ import com.munserv.issues.domain.IssueId
 import com.munserv.photos.domain.IssuePhoto
 import com.munserv.photos.domain.PhotoId
 import com.munserv.photos.service.IssuePhotoService
+import com.munserv.photos.service.PhotoActor
 import com.munserv.photos.service.PhotoResult
 import com.munserv.shared.types.MemberId
 import com.ninjasquad.springmockk.MockkBean
@@ -69,6 +70,49 @@ class PhotoControllerTest {
 
     @Nested
     inner class UploadPhoto {
+        private fun jpg() = MockMultipartFile("file", "t.jpg", MediaType.IMAGE_JPEG_VALUE, "x".toByteArray())
+
+        @Test
+        fun `POST issues-issueId-photos should return 403 when the service answers Forbidden`() {
+            every { photoService.uploadPhoto(any(), any(), any()) } returns PhotoResult.Forbidden("no")
+
+            mockMvc
+                .multipart("/api/v1/issues/${testIssueId.value}/photos") {
+                    file(jpg())
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isForbidden() }
+                    jsonPath("$.error.code") { value("FORBIDDEN") }
+                }
+        }
+
+        @Test
+        fun `POST issues-issueId-photos should return 404 when the issue does not exist`() {
+            every { photoService.uploadPhoto(any(), any(), any()) } returns PhotoResult.IssueNotFound(testIssueId)
+
+            mockMvc
+                .multipart("/api/v1/issues/${testIssueId.value}/photos") {
+                    file(jpg())
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isNotFound() }
+                    jsonPath("$.error.message") { value("Issue not found") }
+                }
+        }
+
+        @Test
+        fun `POST issues-issueId-photos should pass Admin as actor for an admin token`() {
+            every { photoService.uploadPhoto(any(), any(), any()) } returns PhotoResult.Success(testPhoto)
+
+            mockMvc
+                .multipart("/api/v1/issues/${testIssueId.value}/photos") {
+                    file(jpg())
+                    header("Authorization", "Bearer $adminToken")
+                }.andExpect { status { isCreated() } }
+
+            verify { photoService.uploadPhoto(testIssueId, any(), PhotoActor.Admin) }
+        }
+
         @Test
         fun `POST issues-issueId-photos should return 201 on successful upload`() {
             val file =
@@ -79,7 +123,7 @@ class PhotoControllerTest {
                     "test image content".toByteArray(),
                 )
 
-            every { photoService.uploadPhoto(any(), any()) } returns PhotoResult.Success(testPhoto)
+            every { photoService.uploadPhoto(any(), any(), any()) } returns PhotoResult.Success(testPhoto)
 
             mockMvc
                 .multipart("/api/v1/issues/${testIssueId.value}/photos") {
@@ -94,7 +138,7 @@ class PhotoControllerTest {
                     jsonPath("$.sortOrder") { value(1) }
                 }
 
-            verify { photoService.uploadPhoto(testIssueId, any()) }
+            verify { photoService.uploadPhoto(testIssueId, any(), any()) }
         }
 
         @Test
@@ -107,7 +151,7 @@ class PhotoControllerTest {
                     "not an image".toByteArray(),
                 )
 
-            every { photoService.uploadPhoto(any(), any()) } returns
+            every { photoService.uploadPhoto(any(), any(), any()) } returns
                 PhotoResult.ValidationError(listOf("Invalid file type", "File too large"))
 
             mockMvc
@@ -131,7 +175,7 @@ class PhotoControllerTest {
                     "test image content".toByteArray(),
                 )
 
-            every { photoService.uploadPhoto(any(), any()) } returns
+            every { photoService.uploadPhoto(any(), any(), any()) } returns
                 PhotoResult.StorageError("Disk full")
 
             mockMvc
@@ -226,8 +270,54 @@ class PhotoControllerTest {
     @Nested
     inner class DeletePhoto {
         @Test
+        fun `DELETE photos-photoId should return 401 without token`() {
+            mockMvc
+                .delete("/api/v1/photos/${testPhotoId.value}")
+                .andExpect { status { isUnauthorized() } }
+
+            verify(exactly = 0) { photoService.deletePhoto(any(), any()) }
+        }
+
+        @Test
+        fun `DELETE photos-photoId should return 403 when the service answers Forbidden`() {
+            every { photoService.deletePhoto(testPhotoId, any()) } returns PhotoResult.Forbidden("no")
+
+            mockMvc
+                .delete("/api/v1/photos/${testPhotoId.value}") {
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect {
+                    status { isForbidden() }
+                    jsonPath("$.error.code") { value("FORBIDDEN") }
+                }
+        }
+
+        @Test
+        fun `DELETE photos-photoId should pass the member as actor`() {
+            every { photoService.deletePhoto(testPhotoId, any()) } returns PhotoResult.Success(testPhoto)
+
+            mockMvc
+                .delete("/api/v1/photos/${testPhotoId.value}") {
+                    header("Authorization", "Bearer $memberToken")
+                }.andExpect { status { isNoContent() } }
+
+            verify { photoService.deletePhoto(testPhotoId, PhotoActor.Member(testMemberId)) }
+        }
+
+        @Test
+        fun `DELETE photos-photoId should pass Admin as actor for an admin token`() {
+            every { photoService.deletePhoto(testPhotoId, any()) } returns PhotoResult.Success(testPhoto)
+
+            mockMvc
+                .delete("/api/v1/photos/${testPhotoId.value}") {
+                    header("Authorization", "Bearer $adminToken")
+                }.andExpect { status { isNoContent() } }
+
+            verify { photoService.deletePhoto(testPhotoId, PhotoActor.Admin) }
+        }
+
+        @Test
         fun `DELETE photos-photoId should return 204 on successful delete`() {
-            every { photoService.deletePhoto(testPhotoId) } returns true
+            every { photoService.deletePhoto(testPhotoId, any()) } returns PhotoResult.Success(testPhoto)
 
             mockMvc
                 .delete("/api/v1/photos/${testPhotoId.value}") {
@@ -236,12 +326,12 @@ class PhotoControllerTest {
                     status { isNoContent() }
                 }
 
-            verify { photoService.deletePhoto(testPhotoId) }
+            verify { photoService.deletePhoto(testPhotoId, any()) }
         }
 
         @Test
         fun `DELETE photos-photoId should return 404 when photo not found`() {
-            every { photoService.deletePhoto(testPhotoId) } returns false
+            every { photoService.deletePhoto(testPhotoId, any()) } returns PhotoResult.NotFound(testPhotoId)
 
             mockMvc
                 .delete("/api/v1/photos/${testPhotoId.value}") {

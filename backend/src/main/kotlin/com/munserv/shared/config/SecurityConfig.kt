@@ -5,6 +5,7 @@ import com.munserv.support.api.SupportGrantActivityFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -33,7 +34,9 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     // Public endpoints
-                    .requestMatchers("/actuator/health", "/actuator/info")
+                    .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info")
+                    .permitAll()
+                    .requestMatchers("/error")
                     .permitAll()
                     // Public auth endpoints
                     .requestMatchers("/api/v1/auth/register")
@@ -64,7 +67,7 @@ class SecurityConfig(
                     // point (401) before the role aspect can turn it into a 403.
                     .requestMatchers("/api/v1/sectors/*/settings", "/api/v1/sectors/*/settings/**")
                     .authenticated()
-                    .requestMatchers("/api/v1/sectors", "/api/v1/sectors/**")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/sectors", "/api/v1/sectors/*")
                     .permitAll()
                     .requestMatchers("/uploads/**")
                     .permitAll()
@@ -96,9 +99,8 @@ class SecurityConfig(
                     .authenticated()
                     .requestMatchers("/api/v1/admins/**")
                     .authenticated()
-                    // Default: allow all for now (remaining endpoints)
                     .anyRequest()
-                    .permitAll()
+                    .authenticated()
             }.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .addFilterAfter(supportGrantActivityFilter, JwtAuthenticationFilter::class.java)
             .build()

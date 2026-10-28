@@ -12,12 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
+import java.util.UUID
 
 /**
  * A client must be able to tell "not signed in" (401) from "not allowed" (403).
@@ -134,5 +138,82 @@ class SecurityConfigTest {
                 .compact()
 
         jwtService.validateToken(expiredToken).isValid shouldBe false
+    }
+
+    @Test
+    fun `should answer 401 for DELETE photo when no token is sent`() {
+        mockMvc
+            .delete("/api/v1/photos/${UUID.randomUUID()}")
+            .andExpect {
+                status { isUnauthorized() }
+                jsonPath("$.error.code") { value("UNAUTHENTICATED") }
+            }
+    }
+
+    @Test
+    fun `should answer 401 for GET messages when no token is sent`() {
+        mockMvc
+            .get("/api/v1/messages")
+            .andExpect {
+                status { isUnauthorized() }
+                jsonPath("$.error.code") { value("UNAUTHENTICATED") }
+            }
+    }
+
+    @Test
+    fun `should answer 401 for an unmapped path when no token is sent`() {
+        mockMvc
+            .get("/api/v1/does-not-exist")
+            .andExpect { status { isUnauthorized() } }
+    }
+
+    @Test
+    fun `should answer 401 for GET sector ground admins when no token is sent`() {
+        mockMvc
+            .get("/api/v1/sectors/${UUID.randomUUID()}/ground-admins")
+            .andExpect { status { isUnauthorized() } }
+    }
+
+    @Test
+    fun `should keep health reachable without a token`() {
+        val status =
+            mockMvc
+                .get("/actuator/health/liveness")
+                .andReturn()
+                .response.status
+        (status != 401 && status != 403) shouldBe true
+    }
+
+    @Test
+    fun `should keep api docs reachable without a token`() {
+        val status =
+            mockMvc
+                .get("/v3/api-docs")
+                .andReturn()
+                .response.status
+        (status != 401 && status != 403) shouldBe true
+    }
+
+    @Test
+    fun `should keep sectors reachable without a token`() {
+        val status =
+            mockMvc
+                .get("/api/v1/sectors")
+                .andReturn()
+                .response.status
+        (status != 401 && status != 403) shouldBe true
+    }
+
+    @Test
+    fun `should keep member login reachable without a token`() {
+        // A wrong password is refused by the login handler, not by the chain's entry point.
+        val body =
+            mockMvc
+                .post("/api/v1/auth/member/login") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = """{"email":"nobody@example.com","password":"wrong-password"}"""
+                }.andReturn()
+                .response.contentAsString
+        body.contains("UNAUTHENTICATED") shouldBe false
     }
 }
