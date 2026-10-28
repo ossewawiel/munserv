@@ -187,9 +187,18 @@
     "results": "imiphumela",
     "rowsPerPage": "Imigqa ngekhasi"
   },
+  "dataTable": {
+    "searchPlaceholder": "Sesha",
+    "filters": "Izihlungi",
+    "filtersTitle": "Izihlungi",
+    "clearFilters": "Sula izihlungi",
+    "closeFilters": "Vala izihlungi"
+  },
   "errors": {
     "notFound": "Ayitholakali",
     "unauthorized": "Awugunyaziwe",
+    "forbiddenTitle": "Ukungeniswa Kwenqatshelwe",
+    "forbidden": "Awunayo imvume yokubona leli khasi",
     "serverError": "Iphutha Leseva",
     "networkError": "Iphutha Lenethiwekhi"
   },
@@ -299,6 +308,11 @@
         "title": "Imingcele yeSekthi",
         "description": "Dweba umugqa wesekthi ngayinye ukuze inkinga ifinyelele kusekthi efanele iqhamuka kusuka endaweni ye-GPS lapho ibikwe khona."
       }
+    }
+  },
+  "podAdministrators": {
+    "filters": {
+      "comingSoon": "Ukuhlunga akukavulwa. Uma sekuvuliwe, izihlungi zeqhaza nokwabiwa zizovela lapha futhi inani liboniswa kunkinobho yeZihlungi."
     }
   }
 }

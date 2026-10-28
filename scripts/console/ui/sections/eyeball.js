@@ -123,6 +123,14 @@ function setCheckNote(checkId, note) {
   saveResults();
 }
 
+function setCheckFileAsImprovement(checkId, value) {
+  const data = ensureResultsData();
+  data.checks[checkId] = data.checks[checkId] || { result: null, note: '', issue_url: null };
+  data.checks[checkId].file_as_improvement = value;
+  saveResults();
+  renderAll();
+}
+
 function addObservation() {
   const data = ensureResultsData();
   data.observations.push({ kind: 'bug', text: '', issue_url: null });
@@ -548,7 +556,16 @@ function checkCard(check, index) {
       el('button', { class: 'pass' + (check.result === 'pass' ? ' active' : ''), onclick: () => setCheckResult(check.id, 'pass') }, 'Pass'),
       el('button', { class: 'fail' + (check.result === 'fail' ? ' active' : ''), onclick: () => setCheckResult(check.id, 'fail') }, 'Fail')),
     el('textarea', { class: 'note', placeholder: 'Note (optional)', value: check.note || '', 'data-focus-key': 'note:' + check.id, oninput: (e) => setCheckNote(check.id, e.target.value) }),
-    check.issue_url ? el('div', {}, el('a', { href: check.issue_url, target: '_blank', rel: 'noopener' }, 'Filed issue')) : null);
+    check.result === 'pass' && (check.note || '').trim()
+      ? el('label', { style: 'display:flex;align-items:center;gap:6px;font-size:12px;margin:6px 0' },
+          el('input', {
+            type: 'checkbox', checked: !!check.file_as_improvement, 'data-focus-key': 'improve:' + check.id,
+            onchange: (e) => setCheckFileAsImprovement(check.id, e.target.checked),
+          }),
+          'File as improvement')
+      : null,
+    check.issue_url ? el('div', {}, el('a', { href: check.issue_url, target: '_blank', rel: 'noopener' }, 'Filed issue'),
+      check.file_as_improvement ? el('span', { class: 'chip', style: 'margin-left:6px' }, 'improvement') : null) : null);
 }
 
 function observationsCard() {
@@ -588,10 +605,11 @@ function showSubmitModal(contentEl) {
   document.body.append(backdrop);
 }
 
-function issueLine(labelText, issueUrl, reused) {
+function issueLine(labelText, issueUrl, reused, improvement) {
   const { el } = ctx;
   return el('li', {}, labelText + ': ', el('a', { href: issueUrl, target: '_blank', rel: 'noopener' }, issueUrl),
-    reused ? el('span', { class: 'chip', style: 'margin-left:6px' }, 'reused') : null);
+    reused ? el('span', { class: 'chip', style: 'margin-left:6px' }, 'reused') : null,
+    improvement ? el('span', { class: 'chip', style: 'margin-left:6px' }, 'improvement') : null);
 }
 
 function submitSuccessModal(candidate, data) {
@@ -600,7 +618,7 @@ function submitSuccessModal(candidate, data) {
   const checkItems = (candidate.checks || [])
     .map((c) => ({ c, r: data.checks[c.id] }))
     .filter(({ r }) => r && r.issue_url)
-    .map(({ c, r }) => issueLine(c.id, r.issue_url, r.issue_reused));
+    .map(({ c, r }) => issueLine(c.id, r.issue_url, r.issue_reused, r.file_as_improvement));
   const obsItems = (data.observations || [])
     .filter((o) => o.issue_url)
     .map((o, i) => issueLine('Observation ' + (i + 1), o.issue_url, o.issue_reused));

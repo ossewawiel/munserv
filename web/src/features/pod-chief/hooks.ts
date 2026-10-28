@@ -23,34 +23,37 @@ export const podChiefKeys = {
  * Hook to fetch pod-level dashboard statistics
  * For Pod Chief users only
  */
-export function usePodDashboard() {
+export function usePodDashboard({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: podChiefKeys.dashboard(),
     queryFn: podChiefApi.getDashboard,
+    enabled,
   });
 }
 
 /**
  * Hook to fetch ward-level dashboard statistics
+ * For Pod Chief users only; pass `enabled: false` for any other role.
  * @param wardId - The ward UUID to fetch stats for
  */
-export function useWardDashboard(wardId: string) {
+export function useWardDashboard(wardId: string, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: podChiefKeys.wardDashboard(wardId),
     queryFn: () => podChiefApi.getWardDashboard(wardId),
-    enabled: !!wardId,
+    enabled: !!wardId && enabled,
   });
 }
 
 /**
  * Hook to fetch sector-level dashboard statistics
+ * For Pod Chief users only; pass `enabled: false` for any other role.
  * @param sectorId - The sector UUID to fetch stats for
  */
-export function useSectorDashboard(sectorId: string) {
+export function useSectorDashboard(sectorId: string, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: podChiefKeys.sectorDashboard(sectorId),
     queryFn: () => podChiefApi.getSectorDashboard(sectorId),
-    enabled: !!sectorId,
+    enabled: !!sectorId && enabled,
   });
 }
 

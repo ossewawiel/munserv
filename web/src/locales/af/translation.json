@@ -187,9 +187,18 @@
     "results": "resultate",
     "rowsPerPage": "Rye per bladsy"
   },
+  "dataTable": {
+    "searchPlaceholder": "Soek",
+    "filters": "Filters",
+    "filtersTitle": "Filters",
+    "clearFilters": "Maak filters skoon",
+    "closeFilters": "Maak filters toe"
+  },
   "errors": {
     "notFound": "Nie Gevind",
     "unauthorized": "Ongemagtig",
+    "forbiddenTitle": "Toegang Geweier",
+    "forbidden": "Jy het nie toestemming om hierdie bladsy te sien nie",
     "serverError": "Bedienerfout",
     "networkError": "Netwerkfout"
   },
@@ -299,6 +308,11 @@
         "title": "Sektor-grense",
         "description": "Teken elke sektor se buitelyn sodat 'n probleem die regte sektor bereik vanaf die GPS-punt waar dit aangemeld is."
       }
+    }
+  },
+  "podAdministrators": {
+    "filters": {
+      "comingSoon": "Filtrering is nog nie geaktiveer nie. Wanneer dit is, verskyn rol- en toewysingsfilters hier en die telling wys op die Filters-knoppie."
     }
   }
 }

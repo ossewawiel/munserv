@@ -10,8 +10,11 @@ touches:
   - web/src/test/mocks
   - web/src/locales
 ui: true
-design_canvas: ""
-design_artboards: []
+design_canvas: "https://claude.ai/code/artifact/1f658255-0e88-48ac-ab86-1be239115d50"
+design_artboards:
+  - design/canvases/pod-chief-mvp/pod-settings/LogoUpload.dc.html
+  - design/canvases/pod-chief-mvp/pod-settings/LogoUploadError.dc.html
+  - design/canvases/pod-chief-mvp/pod-settings/LogoUploading.dc.html
 design_approved: false
 created_by: feature-planner
 created_at: "2026-09-06"
@@ -36,9 +39,14 @@ the identity card and the portal header, without ever typing a URL.
 - [ ] The control is disabled while an upload is in flight and a server error is shown without losing the current logo
 
 ## Visual (ui stories only)
-One screen changes: Pod Settings, the identity card built by W18 (#29). Match artboard: to be
-produced by the designer under `design/canvases/pod-chief-mvp/pod-settings/` (states: no logo, logo
-set, uploading, rejected file, server error). Until the canvas exists this story is not dispatchable.
+One screen changes: Pod Settings, the identity card built by W18 (#29). Match artboards:
+`LogoUpload.dc.html` (a file was picked, uploaded and saved: the 56x56 preview, the header preview
+panel and the portal header all show the new logo, and the outcome is a bottom-centre snackbar),
+`LogoUploadError.dc.html` (a file rejected client-side: the message replaces the helper line in
+error red, the saved logo is untouched, nothing was uploaded — the server-failure case renders in
+that same slot) and `LogoUploading.dc.html` (upload in flight: the control disabled with a
+`CircularProgress` startIcon, Save and Reset disabled with it). The `logo-upload` and `logo-copy`
+notes beside that row carry the anatomy and the final English strings.
 The artboards outrank this handoff on copy, layout and order. `PodLogoUpload` is a feature component
 under `features/pod-settings/components/`, not a registry component, so it needs no
 `design/registry/web.md` row.

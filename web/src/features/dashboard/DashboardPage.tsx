@@ -10,6 +10,7 @@ import { CardSkeleton } from '@/components/molecules/LoadingSkeleton';
 import { SetupBanners, PodChiefWidgets } from '@/features/pod-chief/components';
 import { usePodDashboard } from '@/features/pod-chief/hooks';
 import { usePodSetup } from '@/shared/hooks/usePodSetup';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { useDashboardStats } from './hooks';
 import { StatsGrid } from './components/StatsGrid';
 import { IssuesByStateChart } from './components/IssuesByStateChart';
@@ -17,16 +18,21 @@ import { IssuesByTypeChart } from './components/IssuesByTypeChart';
 
 export const DashboardPage: FC = () => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
   const podSetup = usePodSetup();
 
   // Fetch sector-level stats for non-pod-level users
   const sectorDashboard = useDashboardStats();
 
-  // Fetch pod-level stats for Pod Chiefs when setup is complete
-  const podDashboard = usePodDashboard();
+  // Fetch pod-level stats for Pod Chiefs when setup is complete.
+  // Only a pod_chief may call GET /pod/dashboard; a pod admin who just
+  // finished onboarding must never issue this request (#114).
+  const canViewPodDashboard =
+    hasPermission('pod_chief') && podSetup.isPodLevel && podSetup.isSetupComplete;
+  const podDashboard = usePodDashboard({ enabled: canViewPodDashboard });
 
   // Determine which dashboard to show
-  const showPodDashboard = podSetup.isPodLevel && podSetup.isSetupComplete;
+  const showPodDashboard = canViewPodDashboard;
 
   // Show setup banners for pod-level users when setup is incomplete
   const showSetupBanners =

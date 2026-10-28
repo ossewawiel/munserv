@@ -44,3 +44,5 @@ A handoff longer than about 120 lines means the story is too big: split it and s
 
 ## Output
 Mode A: the approved table, created issue numbers, milestone URL, paths of the spec and handoffs. Mode B: the handoff path and a three-line summary. Never claim an issue was created unless the `gh` command returned its URL.
+
+Eyeball URLs are complete addresses a tester pastes into a browser; backend-only checks go through Swagger deep links (`http://localhost:8080/swagger-ui/index.html#/<Tag>/<operationId>`) with the exact request bodies and the Authorize step spelled out.
