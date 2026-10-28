@@ -116,11 +116,14 @@ def _ensure_service(name: str, cfg: dict, checkout: Path, head: str) -> dict:
 
 
 def pr_branch(pr: int) -> str:
+    """The branch to check out for PR `pr`: its head while it is open, the branch it merged into
+    once it is merged (the head branch is deleted on merge, and the merged result is what is left
+    to eyeball)."""
     try:
-        info = json.loads(gh("pr", "view", str(pr), "--repo", repo(), "--json", "headRefName"))
+        info = json.loads(gh("pr", "view", str(pr), "--repo", repo(), "--json", "headRefName,baseRefName,state"))
     except (CommandError, json.JSONDecodeError) as e:
         raise ApiError(f"cannot read PR #{pr}: {e}", 404) from e
-    return info["headRefName"]
+    return info["baseRefName"] if info["state"] == "MERGED" else info["headRefName"]
 
 
 def story_accounts(pr: int) -> dict:
