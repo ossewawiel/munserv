@@ -3,7 +3,7 @@ name: factory
 description: Orchestrate MunServ story delivery - pick ready stories, dispatch platform implementers into worktrees, run the reviewer on finished branches, open PRs, and report. Run by the user from a normal session; never auto-invoked.
 disable-model-invocation: true
 argument-hint: "[run|status|story <id>|review <pr>|sync <pr>] [--max 3]"
-allowed-tools: Bash(gh *) Bash(git *) Read Grep Glob Agent
+allowed-tools: Bash(gh *) Bash(git *) Bash(scripts/eyeball-up.sh *) Read Grep Glob Agent
 ---
 
 # /factory
