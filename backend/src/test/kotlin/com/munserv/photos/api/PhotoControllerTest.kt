@@ -146,7 +146,7 @@ class PhotoControllerTest {
         }
 
         @Test
-        fun `POST issues-issueId-photos should return 403 without token`() {
+        fun `POST issues-issueId-photos should return 401 without token`() {
             val file =
                 MockMultipartFile(
                     "file",
@@ -159,7 +159,7 @@ class PhotoControllerTest {
                 .multipart("/api/v1/issues/${testIssueId.value}/photos") {
                     file(file)
                 }.andExpect {
-                    status { isForbidden() }
+                    status { isUnauthorized() }
                 }
         }
     }
@@ -213,12 +213,12 @@ class PhotoControllerTest {
         }
 
         @Test
-        fun `GET issues-issueId-photos should return 403 without token`() {
+        fun `GET issues-issueId-photos should return 401 without token`() {
             mockMvc
                 .get("/api/v1/issues/${testIssueId.value}/photos") {
                     accept = MediaType.APPLICATION_JSON
                 }.andExpect {
-                    status { isForbidden() }
+                    status { isUnauthorized() }
                 }
         }
     }
