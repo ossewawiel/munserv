@@ -29,7 +29,8 @@ The handoff the task names (acceptance criteria, steps, do-not list); `domain/RE
 5. **Scope**: files touched outside the handoff's list; renames or refactors not asked for.
 6. **Eyeball**: the handoff has an `## Eyeball` block with 2 to 6 checks, and every acceptance
    criterion is covered by at least one check. If the implementer changed a route or account, the
-   check's `url` / `as` were corrected to match. Missing coverage of an AC is a finding like any
+   check's `url` / `as` were corrected to match. Check URLs stay on `localhost`; the console
+   rewrites them to the public host for remote eyeball. Missing coverage of an AC is a finding like any
    other; `REQUEST CHANGES` if the block is absent or does not cover every criterion.
 
 ## Decision

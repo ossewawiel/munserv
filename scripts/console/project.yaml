@@ -23,6 +23,18 @@ links:
   Widgetbook (local): http://localhost:7701
   Swagger: http://localhost:8080/swagger-ui.html
 
+# Remote eyeball: the console listens on `bind`, every non-loopback request needs the token in
+# `token_file` (created on first start), and the services bind the LAN too. `--local` turns it off.
+remote:
+  enabled: true
+  bind: 0.0.0.0
+  ports:
+    web: 3000
+    backend: 8080
+    console: 3999
+  swagger_path: /swagger-ui.html
+  ensure_services: [db, backend, web]
+
 sections:
   overview: true
   knowledge: true

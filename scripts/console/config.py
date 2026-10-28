@@ -7,6 +7,7 @@ console into another project.
 """
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
@@ -127,6 +128,24 @@ class Config:
     @property
     def changelog(self) -> Path:
         return self.root / self._raw().get("changelog", "CHANGELOG.md")
+
+    @property
+    def remote(self) -> dict:
+        """Remote eyeball settings (see remote.py): `enabled`, `bind` (the address the console
+        listens on when enabled), `token_file` (where the access token lives; default under the XDG
+        state dir) and `ports` (name -> port exposed to the LAN: web, backend, console), `swagger_path` and
+        `ensure_services` (what ensure starts, in order)."""
+        raw = self._raw().get("remote") or {}
+        state_home = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local" / "state")
+        return {
+            "enabled": bool(raw.get("enabled", False)),
+            "bind": raw.get("bind", "0.0.0.0"),
+            "token_file": Path(raw["token_file"]).expanduser() if raw.get("token_file")
+            else state_home / f"{self.name}-console" / "token",
+            "ports": raw.get("ports") or {"web": 3000, "backend": 8080, "console": self.port},
+            "swagger_path": raw.get("swagger_path", "/swagger-ui.html"),
+            "ensure_services": raw.get("ensure_services") or ["db", "backend", "web"],
+        }
 
     @property
     def links(self) -> dict:

@@ -8,6 +8,7 @@ API can report its exit code and the last meaningful log line, with a remedy ("R
 """
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import signal
@@ -19,8 +20,9 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from . import remote
 from .config import CONFIG, ROOT
-from .gitops import ApiError, copy_local_files, is_worktree
+from .gitops import ApiError, copy_local_files, current_sha, is_worktree
 
 _lock = threading.Lock()
 _processes: dict[str, subprocess.Popen] = {}
@@ -29,8 +31,16 @@ _jobs: dict[str, dict] = {}  # job id -> {service, kind, status, started_at, fin
 _job_seq = 0
 
 
+EXPANDED_KEYS = ("start", "url", "notes")
+
+
 def services_config() -> dict:
-    return CONFIG.services_config
+    """services.yaml with `{bind}`, `{host}`, `{hostname}` and `{api_base}` filled in (see
+    remote.expand) in the values meant for a command or for display. `health` stays as written:
+    the console always probes its own services on localhost."""
+    return {name: {key: remote.expand(value) if key in EXPANDED_KEYS and isinstance(value, str) else value
+                   for key, value in cfg.items()}
+            for name, cfg in CONFIG.services_config.items()}
 
 
 def state_dir(checkout: Path) -> Path:
@@ -131,7 +141,9 @@ def start_service(name: str, checkout: Path) -> str:
     cwd = _service_cwd(checkout, cfg)
     if not cwd.is_dir():
         raise ApiError("Check out a branch first", 409)
-    return start_tracked_process(name, checkout, cfg["start"], cwd)
+    message = start_tracked_process(name, checkout, cfg["start"], cwd)
+    record_running_sha(checkout, name)
+    return message
 
 
 def start_tracked_process(name: str, checkout: Path, command: str, cwd: Path) -> str:
@@ -150,6 +162,32 @@ def start_tracked_process(name: str, checkout: Path, command: str, cwd: Path) ->
                                  start_new_session=True)
     _processes[name] = proc
     return f"{name} starting (pid {proc.pid})"
+
+
+# --- the checkout a service was started from ---------------------------------
+#
+# A service keeps running the code it was started with. `.console/running-sha` maps each service to
+# the checkout HEAD at its last start, so a later ensure can tell that the checkout moved on and the
+# service must restart.
+
+def running_sha_path(checkout: Path) -> Path:
+    return state_dir(checkout) / "running-sha"
+
+
+def recorded_shas(checkout: Path) -> dict[str, str]:
+    path = running_sha_path(checkout)
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def record_running_sha(checkout: Path, name: str) -> None:
+    shas = recorded_shas(checkout)
+    shas[name] = current_sha(checkout)
+    running_sha_path(checkout).write_text(json.dumps(shas), encoding="utf-8")
 
 
 def stop_service(name: str, checkout: Path) -> str:

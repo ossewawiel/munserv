@@ -29,9 +29,9 @@ Print one table: story, platform, state, handoff (yes / no), blockers (`depends_
    - Otherwise open the PR yourself: `gh pr create --head <branch> --title "<type>(<platform>): <story title> (#<issue>)" --body` with summary, `Closes #<issue>`, the handoff path and the commands that passed. Label the issue `status:review`.
 5. Wait for CI (`gh pr checks <n> --watch`). Red → dispatch the same implementer once more with the failing job's log excerpt appended to the prompt. Red twice → label `status:blocked`, comment, stop.
 6. Green → for `ui: true` stories dispatch `design-reviewer` first with the PR number and handoff path; its `REQUEST CHANGES` goes back to the implementer once like a code review. Then dispatch `reviewer` with the PR number and handoff path. `REQUEST CHANGES` → dispatch the implementer once with the review text; then review again. Second `REQUEST CHANGES` → `status:blocked`.
-7. `APPROVE` → the PR is now awaiting eyeball. Leave it for the user to run the Eyeball section of the factory console (`./dashboard.sh`), tick the checks, and submit. Never run eyeball checks yourself and never apply the `eyeball:*` label; the console does both when the user submits. Never merge.
+7. `APPROVE` → the PR is now awaiting eyeball. Once CI is green, run `scripts/eyeball-up.sh <pr>`: it checks the PR out, restarts only what changed and prints the Web URL, Swagger URL, console link, accounts and, on first use, a firewall command. The user opens those links from another machine, ticks the checks in the Eyeball section of the factory console and submits. If the script fails, put its error text in the report. Never run eyeball checks yourself and never apply the `eyeball:*` label; the console does both when the user submits. Never merge.
 8. `python3 scripts/sync-board.py` so the Project board reflects the labels you changed.
-9. Report: one table (story, PR, CI, review, next action for the user) and the token-heavy step of each story if it stood out.
+9. Report: one table (story, PR, CI, review, next action for the user) and the token-heavy step of each story if it stood out. For a story awaiting eyeball, the next action holds the Web URL, Swagger URL, console link, accounts and the firewall command (if the script printed one) from `scripts/eyeball-up.sh`. Two stories awaiting eyeball share one set of services, so run the script for one PR at a time and report the others as "run `scripts/eyeball-up.sh <pr>` when you are ready".
 
 ## Eyeball bugs
 Issues labelled `source:eyeball` come from a failed check or a "Bug" observation filed by the factory
@@ -51,7 +51,7 @@ Dispatch `reviewer` for that PR with its handoff path and print the verdict.
 Dispatch `syncer` for a merged PR and print its report.
 
 ## Rules
-- Never run platform builds or tests yourself; that is the implementers' job and their Stop hook enforces it.
+- Never run platform builds or tests yourself; that is the implementers' job and their Stop hook enforces it. `scripts/eyeball-up.sh` is the one exception: it starts services for the user to eyeball, it is not a gate.
 - Never edit code, handoffs or specs yourself, except flipping `design_approved` after the user's word.
 - Three concurrent implementers at most, whatever `--max` says.
 - Every GitHub write you make is one of: add or remove a `status:*` label, an issue comment, `gh pr create`, and the board sync script. Nothing else.

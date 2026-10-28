@@ -8,6 +8,7 @@
 | 004 | [Result Pattern](004-result-pattern.md) | Accepted | 2024-12 |
 | 005 | [Feature-based Folders](005-feature-folders.md) | Accepted | 2024-12 |
 | 006 | [PostGIS for Geospatial](006-postgis-database.md) | Accepted | 2024-12 |
+| 007 | [Remote eyeball](007-remote-eyeball.md) | Accepted | 2026-10 |
 
 ## ADR Template
 

@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -21,7 +22,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from console import eyeball, gitops, knowledge, mobile, services  # noqa: E402
+from console import ensure, eyeball, gitops, knowledge, mobile, network, remote, services  # noqa: E402
 from console.config import Config  # noqa: E402
 from console.pipeline import classify_pr  # noqa: E402
 from console.server import Handler  # noqa: E402
@@ -737,7 +738,7 @@ class MobileLanIpTests(unittest.TestCase):
         ip_output = "2: eth0    inet 192.168.1.42/24 brd 192.168.1.255 scope global eth0\n"
         with patch("console.mobile.subprocess.run") as run:
             run.return_value = subprocess.CompletedProcess(args=[], returncode=0, stdout=ip_output)
-            self.assertEqual(mobile.lan_ip(), "192.168.1.42")
+            self.assertEqual(network.lan_ip(), "192.168.1.42")
 
     def test_falls_back_to_hostname_when_the_ip_command_is_unavailable(self):
         def fake_run(cmd, **kwargs):
@@ -745,7 +746,7 @@ class MobileLanIpTests(unittest.TestCase):
                 raise FileNotFoundError("no ip command")
             return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="192.168.1.7 172.17.0.1\n")
         with patch("console.mobile.subprocess.run", side_effect=fake_run):
-            self.assertEqual(mobile.lan_ip(), "192.168.1.7")
+            self.assertEqual(network.lan_ip(), "192.168.1.7")
 
     def test_falls_back_to_hostname_when_the_ip_command_finds_nothing(self):
         def fake_run(cmd, **kwargs):
@@ -753,12 +754,12 @@ class MobileLanIpTests(unittest.TestCase):
                 return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="")
             return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="10.0.0.5\n")
         with patch("console.mobile.subprocess.run", side_effect=fake_run):
-            self.assertEqual(mobile.lan_ip(), "10.0.0.5")
+            self.assertEqual(network.lan_ip(), "10.0.0.5")
 
     def test_returns_none_when_neither_source_has_an_address(self):
         with patch("console.mobile.subprocess.run") as run:
             run.return_value = subprocess.CompletedProcess(args=[], returncode=1, stdout="")
-            self.assertIsNone(mobile.lan_ip())
+            self.assertIsNone(network.lan_ip())
 
 
 class MobileRequestValidationTests(unittest.TestCase):
@@ -955,24 +956,24 @@ class MobileFirewallRemedyTests(unittest.TestCase):
     The remedy line must name the actual command for whichever firewall systemd reports active."""
 
     def test_ufw_active_gives_the_ufw_allow_command(self):
-        remedy = mobile.firewall_remedy("ufw", 8080, "192.168.1.0/24")
+        remedy = network.firewall_remedy("ufw", 8080, "192.168.1.0/24")
         self.assertEqual(remedy, "sudo ufw allow from 192.168.1.0/24 to any port 8080 proto tcp")
 
     def test_firewalld_active_gives_the_firewall_cmd_command(self):
-        remedy = mobile.firewall_remedy("firewalld", 8080, "192.168.1.0/24")
+        remedy = network.firewall_remedy("firewalld", 8080, "192.168.1.0/24")
         self.assertEqual(remedy, "sudo firewall-cmd --add-port=8080/tcp")
 
     def test_no_known_firewall_gives_a_generic_hint(self):
-        remedy = mobile.firewall_remedy(None, 3000, "192.168.1.0/24")
+        remedy = network.firewall_remedy(None, 3000, "192.168.1.0/24")
         self.assertIn("3000", remedy)
         self.assertNotIn("ufw", remedy)
         self.assertNotIn("firewall-cmd", remedy)
 
     def test_lan_subnet_derives_the_slash_24(self):
-        self.assertEqual(mobile.lan_subnet("192.168.1.42"), "192.168.1.0/24")
+        self.assertEqual(network.lan_subnet("192.168.1.42"), "192.168.1.0/24")
 
     def test_lan_subnet_returns_input_unchanged_when_not_ipv4(self):
-        self.assertEqual(mobile.lan_subnet("not-an-ip"), "not-an-ip")
+        self.assertEqual(network.lan_subnet("not-an-ip"), "not-an-ip")
 
     def test_detect_active_firewall_prefers_ufw_when_both_checked(self):
         def fake_run(cmd, **kwargs):
@@ -980,7 +981,7 @@ class MobileFirewallRemedyTests(unittest.TestCase):
             return subprocess.CompletedProcess(args=cmd, returncode=0 if active else 3,
                                                 stdout="active\n" if active else "inactive\n")
         with patch("console.mobile.subprocess.run", side_effect=fake_run):
-            self.assertEqual(mobile.detect_active_firewall(), "ufw")
+            self.assertEqual(network.detect_active_firewall(), "ufw")
 
     def test_detect_active_firewall_falls_back_to_firewalld(self):
         def fake_run(cmd, **kwargs):
@@ -988,16 +989,16 @@ class MobileFirewallRemedyTests(unittest.TestCase):
             return subprocess.CompletedProcess(args=cmd, returncode=0 if active else 3,
                                                 stdout="active\n" if active else "inactive\n")
         with patch("console.mobile.subprocess.run", side_effect=fake_run):
-            self.assertEqual(mobile.detect_active_firewall(), "firewalld")
+            self.assertEqual(network.detect_active_firewall(), "firewalld")
 
     def test_detect_active_firewall_returns_none_when_neither_is_active(self):
         with patch("console.mobile.subprocess.run") as run:
             run.return_value = subprocess.CompletedProcess(args=[], returncode=3, stdout="inactive\n")
-            self.assertIsNone(mobile.detect_active_firewall())
+            self.assertIsNone(network.detect_active_firewall())
 
     def test_detect_active_firewall_returns_none_when_systemctl_is_unavailable(self):
         with patch("console.mobile.subprocess.run", side_effect=FileNotFoundError()):
-            self.assertIsNone(mobile.detect_active_firewall())
+            self.assertIsNone(network.detect_active_firewall())
 
 
 class MobileReachabilitySnapshotTests(unittest.TestCase):
@@ -1080,6 +1081,387 @@ class HandoffLookupCaseTests(unittest.TestCase):
         self.assertEqual(eyeball.match_handoff(files, "W29"), files[2])
         self.assertIsNone(eyeball.match_handoff(files, "W2"))
 
+
+# --- remote eyeball -----------------------------------------------------------
+
+class _RemoteTestCase(unittest.TestCase):
+    """Runs against a throwaway project.yaml (token file in a temp dir) with remote mode forced on
+    or off, a fixed LAN address and hostname, and no real firewall lookups."""
+    remote_on = True
+
+    def setUp(self) -> None:
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        (self.tmp / "project.yaml").write_text(
+            f"name: demo\nport: 3999\nremote:\n  enabled: false\n  token_file: {self.tmp / 'state' / 'token'}\n"
+            "  ports: {web: 3000, backend: 8080, console: 3999}\n", encoding="utf-8")
+        patchers = [
+            patch("console.remote.CONFIG", Config(self.tmp, self.tmp)),
+            patch("console.network.lan_ip", return_value="192.168.1.42"),
+            patch("console.remote.socket.gethostname", return_value="sagan"),
+            patch("console.network.detect_active_firewall", return_value="ufw"),
+        ]
+        for patcher in patchers:
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        remote._host_cache.update(value="", at=None)
+        remote.set_mode(self.remote_on)
+        self.addCleanup(remote.set_mode, None)
+
+
+class RemoteTokenTests(_RemoteTestCase):
+    def test_token_is_created_private_and_stable(self) -> None:
+        first = remote.token()
+        path = self.tmp / "state" / "token"
+        self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(remote.token(), first)
+        self.assertGreaterEqual(len(first), 32)
+
+    def test_loopback_needs_no_token(self) -> None:
+        self.assertEqual(remote.granted_by("127.0.0.1", {}, {}), "open")
+        self.assertEqual(remote.granted_by("::1", {}, {}), "open")
+
+    def test_other_addresses_without_a_token_are_refused(self) -> None:
+        self.assertIsNone(remote.granted_by("192.168.1.9", {}, {}))
+
+    def test_token_accepted_from_cookie_header_or_query(self) -> None:
+        token = remote.token()
+        self.assertEqual(remote.granted_by("192.168.1.9", {"Cookie": f"console_token={token}"}, {}), "cookie")
+        self.assertEqual(remote.granted_by("192.168.1.9", {"X-Console-Token": token}, {}), "header")
+        self.assertEqual(remote.granted_by("192.168.1.9", {}, {"token": [token]}), "query")
+
+    def test_a_wrong_token_is_refused_everywhere(self) -> None:
+        remote.token()
+        self.assertIsNone(remote.granted_by("192.168.1.9", {"Cookie": "console_token=nope"}, {}))
+        self.assertIsNone(remote.granted_by("192.168.1.9", {"X-Console-Token": "nope"}, {}))
+        self.assertIsNone(remote.granted_by("192.168.1.9", {}, {"token": ["nope"]}))
+
+    def test_malformed_cookie_header_counts_as_no_token(self) -> None:
+        self.assertIsNone(remote.cookie_token("garbage;;="))
+
+    def test_cookie_is_http_only_strict_and_site_wide(self) -> None:
+        header = remote.cookie_header("abc")
+        for part in ("console_token=abc", "HttpOnly", "SameSite=Strict", "Path=/"):
+            self.assertIn(part, header)
+
+
+class RemoteLocalModeTests(_RemoteTestCase):
+    remote_on = False
+
+    def test_local_mode_needs_no_token_from_anyone(self) -> None:
+        self.assertEqual(remote.granted_by("192.168.1.9", {}, {}), "open")
+
+    def test_local_mode_binds_localhost_and_allows_only_local_origins(self) -> None:
+        self.assertEqual(remote.listen_address(), "localhost")
+        self.assertEqual(remote.allowed_origins(3999), {"http://localhost:3999", "http://127.0.0.1:3999"})
+
+    def test_snapshot_reports_disabled(self) -> None:
+        self.assertEqual(remote.snapshot(3999, True), {"enabled": False})
+
+
+class RemoteModeTests(_RemoteTestCase):
+    def test_binds_the_configured_address(self) -> None:
+        self.assertEqual(remote.listen_address(), "0.0.0.0")
+
+    def test_origin_allow_list_gains_lan_address_and_hostname(self) -> None:
+        self.assertEqual(remote.allowed_origins(3999), {
+            "http://localhost:3999", "http://127.0.0.1:3999",
+            "http://192.168.1.42:3999", "http://sagan:3999"})
+
+    def test_a_foreign_origin_is_still_rejected(self) -> None:
+        handler = _FakeHandler({"Origin": "http://evil.example:3999"})
+        with self.assertRaises(gitops.ApiError):
+            handler._reject_cross_origin()
+
+    def test_the_lan_origin_is_accepted(self) -> None:
+        _FakeHandler({"Origin": "http://192.168.1.42:3999"})._reject_cross_origin()
+
+    def test_urls_use_the_lan_address(self) -> None:
+        self.assertEqual(remote.urls(3999), {
+            "web": "http://192.168.1.42:3000", "swagger": "http://192.168.1.42:8080/swagger-ui.html",
+            "console": "http://192.168.1.42:3999"})
+
+    def test_firewall_command_opens_all_three_ports_in_one_ufw_rule(self) -> None:
+        fw = remote.firewall(3999)
+        self.assertEqual(fw["command"], "sudo ufw allow from 192.168.1.0/24 to any port 3000,3999,8080 proto tcp")
+        self.assertEqual((fw["active"], fw["subnet"]), ("ufw", "192.168.1.0/24"))
+
+    def test_firewalld_command_lists_each_port(self) -> None:
+        self.assertEqual(network.firewall_remedy_for_ports("firewalld", [8080, 3000], "10.0.0.0/24"),
+                         "sudo firewall-cmd --add-port=3000/tcp --add-port=8080/tcp")
+
+    def test_snapshot_hides_the_token_from_remote_users(self) -> None:
+        shown = remote.snapshot(3999, loopback=False)
+        self.assertNotIn("console_with_token", shown["urls"])
+        self.assertNotIn(remote.token(), repr(shown))
+        local = remote.snapshot(3999, loopback=True)
+        self.assertEqual(local["urls"]["console_with_token"], f"http://192.168.1.42:3999/?token={remote.token()}")
+        self.assertEqual(local["ports"], {"web": 3000, "backend": 8080, "console": 3999})
+
+
+class ServiceTemplateTests(_RemoteTestCase):
+    def test_expand_fills_every_placeholder_and_leaves_other_braces(self) -> None:
+        self.assertEqual(remote.expand("{bind} {host} {hostname} [{api_base}] ${HOME} {x}"),
+                         "0.0.0.0 192.168.1.42 sagan [] ${HOME} {x}")
+
+    def test_remote_web_start_uses_a_relative_api_and_binds_the_lan(self) -> None:
+        start = services.services_config()["web"]["start"]
+        self.assertIn("VITE_API_URL=/api/v1 ", start)
+        self.assertIn("__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=sagan", start)
+        self.assertTrue(start.endswith("--host 0.0.0.0"))
+
+    def test_remote_backend_start_points_emailed_links_at_the_public_web_url(self) -> None:
+        start = services.services_config()["backend"]["start"]
+        self.assertIn("MUNSERV_APP_ADMIN_PORTAL_URL=http://192.168.1.42:3000", start)
+
+    def test_health_checks_keep_probing_localhost(self) -> None:
+        cfg = services.services_config()
+        self.assertEqual(cfg["web"]["health"], "http://localhost:3000")
+        self.assertEqual(cfg["web"]["url"], "http://192.168.1.42:3000")
+
+    def test_local_mode_keeps_todays_commands(self) -> None:
+        remote.set_mode(False)
+        web = services.services_config()["web"]
+        self.assertIn("VITE_API_URL=http://localhost:8080/api/v1 ", web["start"])
+        self.assertTrue(web["start"].endswith("--host localhost"))
+        self.assertEqual(web["url"], "http://localhost:3000")
+
+
+class _ServerTestCase(_RemoteTestCase):
+    """A real console server on an ephemeral port. Every request is treated as non-loopback unless
+    a test says otherwise, because the test client is itself on loopback."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        from http.server import ThreadingHTTPServer
+        self.is_loopback = patch("console.remote.is_loopback", return_value=False)
+        self.is_loopback.start()
+        self.addCleanup(self.is_loopback.stop)
+        self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.port = self.server.server_address[1]
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.addCleanup(self.server.server_close)
+        self.addCleanup(self.server.shutdown)
+
+    def request(self, path, headers=None, method="GET", body=None):
+        import http.client
+        conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=5)
+        conn.request(method, path, body=body, headers=headers or {})
+        response = conn.getresponse()
+        response.read()
+        conn.close()
+        return response
+
+
+class ConsoleAuthHttpTests(_ServerTestCase):
+    def test_static_files_and_api_are_refused_without_a_token(self) -> None:
+        self.assertEqual(self.request("/").status, 403)
+        self.assertEqual(self.request("/app.css").status, 403)
+        self.assertEqual(self.request("/api/remote").status, 403)
+
+    def test_post_is_refused_without_a_token_and_reaches_routing_with_one(self) -> None:
+        json_headers = {"Content-Type": "application/json"}
+        self.assertEqual(self.request("/api/nope", json_headers, "POST", "{}").status, 403)
+        with_token = {**json_headers, "X-Console-Token": remote.token()}
+        self.assertEqual(self.request("/api/nope", with_token, "POST", "{}").status, 404)
+
+    def test_header_token_is_accepted(self) -> None:
+        self.assertEqual(self.request("/app.css", {"X-Console-Token": remote.token()}).status, 200)
+
+    def test_wrong_token_is_refused(self) -> None:
+        self.assertEqual(self.request("/?token=wrong").status, 403)
+
+    def test_query_token_sets_the_cookie_and_redirects_without_the_token(self) -> None:
+        response = self.request(f"/?token={remote.token()}")
+        self.assertEqual(response.status, 302)
+        self.assertEqual(response.getheader("Location"), "/")
+        self.assertIn(f"console_token={remote.token()}", response.getheader("Set-Cookie"))
+
+    def test_cookie_then_opens_the_page(self) -> None:
+        self.assertEqual(self.request("/", {"Cookie": f"console_token={remote.token()}"}).status, 200)
+
+    def test_loopback_is_exempt(self) -> None:
+        self.is_loopback.stop()
+        self.addCleanup(self.is_loopback.start)
+        self.assertEqual(self.request("/").status, 200)
+
+    def test_local_mode_serves_everyone_without_a_token(self) -> None:
+        remote.set_mode(False)
+        self.assertEqual(self.request("/").status, 200)
+
+
+class RestartReasonTests(unittest.TestCase):
+    base = dict(detached=False, tracked_running=True, healthy=True, recorded_sha="abc1234", head_sha="abc1234")
+
+    def reason(self, **overrides):
+        return ensure.restart_reason(**{**self.base, **overrides})
+
+    def test_unchanged_healthy_service_is_left_alone(self) -> None:
+        self.assertIsNone(self.reason())
+
+    def test_exited_process_restarts(self) -> None:
+        self.assertEqual(self.reason(tracked_running=False), "process exited")
+
+    def test_never_started_service_starts(self) -> None:
+        self.assertEqual(self.reason(tracked_running=False, recorded_sha=None), "not running")
+
+    def test_moved_checkout_restarts(self) -> None:
+        self.assertIn("abc1234 -> def5678", self.reason(head_sha="def5678"))
+
+    def test_unhealthy_service_restarts(self) -> None:
+        self.assertEqual(self.reason(healthy=False), "unhealthy")
+
+    def test_detached_service_is_kept_while_healthy_even_if_the_checkout_moved(self) -> None:
+        self.assertIsNone(self.reason(detached=True, tracked_running=False, head_sha="def5678"))
+
+    def test_detached_service_starts_when_down(self) -> None:
+        self.assertEqual(self.reason(detached=True, tracked_running=False, healthy=False), "not running")
+
+
+class EnsureFlowTests(_RemoteTestCase):
+    """ensure() with git, gh and the service processes mocked: what it starts, what it keeps."""
+    CFG = {"db": {"health": "tcp:1", "detached": True}, "backend": {"health": "http://h/b"},
+           "web": {"health": "http://h/w"}}
+    HEALTH_OWNER = {"tcp:1": "db", "http://h/b": "backend", "http://h/w": "web"}
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.up, self.running, self.shas = set(), set(), {}
+        self.head = "aaa1111"
+        self.stopped, self.started = [], []
+
+        def start(name, checkout):
+            self.started.append(name)
+            self.running.add(name)
+            self.up.add(name)
+            self.shas[name] = self.head
+
+        def stop(name, checkout):
+            self.stopped.append(name)
+            self.running.discard(name)
+            self.up.discard(name)
+
+        patchers = [
+            patch.object(ensure, "pr_branch", return_value="feat/x"),
+            patch.object(ensure, "checkout_branch"),
+            patch.object(ensure, "current_sha", side_effect=lambda c: self.head),
+            patch.object(ensure, "story_accounts", return_value={"admin": {"email": "a@b", "password": "pw"}}),
+            patch.object(ensure, "HEALTH_POLL_SECONDS", 0),
+            patch.object(ensure, "STOP_TIMEOUT_SECONDS", 0),
+            patch.object(services, "services_config", return_value=self.CFG),
+            patch.object(services, "prepare_needed", return_value=False),
+            patch.object(services, "process_status",
+                         side_effect=lambda n: {"running": n in self.running, "exit_code": None}),
+            patch.object(services, "health_ok", side_effect=lambda h: self.HEALTH_OWNER[h] in self.up),
+            patch.object(services, "recorded_shas", side_effect=lambda c: dict(self.shas)),
+            patch.object(services, "start_service", side_effect=start),
+            patch.object(services, "stop_service", side_effect=stop),
+            patch.object(services, "latest_otp", return_value="123456 (for 0821234567)"),
+        ]
+        for patcher in patchers:
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        self.checkout = self.tmp / "checkout"
+
+    def run_ensure(self):
+        return ensure.ensure(42, self.checkout, 3999)
+
+    def test_result_shape(self) -> None:
+        result = self.run_ensure()
+        self.assertEqual(result["pr"], 42)
+        self.assertEqual(result["sha"], "aaa1111")
+        self.assertEqual(set(result["services"]), {"db", "backend", "web"})
+        self.assertEqual(result["urls"]["web"], "http://192.168.1.42:3000")
+        self.assertEqual(result["urls"]["console"], f"http://192.168.1.42:3999/?token={remote.token()}")
+        self.assertEqual(result["accounts"]["admin"]["password"], "pw")
+        self.assertEqual(result["otp"], "123456 (for 0821234567)")
+        self.assertIn("ufw allow from 192.168.1.0/24", result["firewall_command"])
+
+    def test_first_run_starts_everything_without_calling_it_a_restart(self) -> None:
+        result = self.run_ensure()
+        self.assertEqual(self.started, ["db", "backend", "web"])
+        self.assertTrue(all(not s["restarted"] and s["state"] == "up" for s in result["services"].values()))
+
+    def test_second_run_with_nothing_changed_starts_nothing(self) -> None:
+        self.run_ensure()
+        self.started.clear()
+        result = self.run_ensure()
+        self.assertEqual((self.started, self.stopped), ([], []))
+        self.assertTrue(all(not s["restarted"] for s in result["services"].values()))
+
+    def test_a_moved_checkout_restarts_the_app_services_but_not_the_database(self) -> None:
+        self.run_ensure()
+        self.started.clear()
+        self.head = "bbb2222"
+        result = self.run_ensure()
+        self.assertEqual(sorted(self.stopped), ["backend", "web"])
+        self.assertTrue(result["services"]["web"]["restarted"])
+        self.assertFalse(result["services"]["db"]["restarted"])
+        self.assertEqual(self.shas["web"], "bbb2222")
+
+    def test_an_exited_service_is_started_again(self) -> None:
+        self.run_ensure()
+        self.running.discard("web")
+        self.up.discard("web")
+        self.started.clear()
+        self.run_ensure()
+        self.assertEqual(self.started, ["web"])
+
+
+class RunningShaTests(unittest.TestCase):
+    def test_the_sha_a_service_started_from_is_recorded_per_service(self) -> None:
+        with tempfile.TemporaryDirectory() as d, patch.object(services, "current_sha", side_effect=["aaa1111", "bbb2222"]):
+            checkout = Path(d)
+            self.assertEqual(services.recorded_shas(checkout), {})
+            services.record_running_sha(checkout, "web")
+            services.record_running_sha(checkout, "backend")
+            self.assertEqual(services.recorded_shas(checkout), {"web": "aaa1111", "backend": "bbb2222"})
+            self.assertTrue((checkout / ".console" / "running-sha").is_file())
+
+
+class EnsureFailureTests(unittest.TestCase):
+    def test_timeout_reports_the_last_log_line(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d)
+            services.log_path(checkout, "backend").write_text(
+                "starting\nPort 8080 was already in use.\n", encoding="utf-8")
+            with patch.object(services, "health_ok", return_value=False), \
+                    patch.object(services, "process_status", return_value={"running": True, "exit_code": None}):
+                with self.assertRaises(gitops.ApiError) as ctx:
+                    ensure._wait_healthy("backend", {"health": "http://h/b"}, checkout, timeout=0)
+            self.assertEqual(ctx.exception.status, 504)
+            self.assertIn("Port 8080 was already in use.", str(ctx.exception))
+
+    def test_an_exited_process_fails_at_once(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            with patch.object(services, "health_ok", return_value=False), \
+                    patch.object(services, "process_status", return_value={"running": False, "exit_code": 1}):
+                with self.assertRaises(gitops.ApiError) as ctx:
+                    ensure._wait_healthy("web", {"health": "http://h/w"}, Path(d), timeout=60)
+            self.assertIn("exited with code 1", str(ctx.exception))
+
+
+class EnsureReportTests(unittest.TestCase):
+    RESULT = {
+        "pr": 42, "sha": "aaa1111", "branch": "feat/x",
+        "services": {"db": {"state": "up", "restarted": False, "reason": "unchanged"},
+                     "web": {"state": "up", "restarted": True, "reason": "checkout moved (a -> b)"}},
+        "urls": {"web": "http://h:3000", "swagger": "http://h:8080/swagger-ui.html",
+                 "console": "http://h:3999/?token=t"},
+        "accounts": {"admin": {"email": "a@b", "password": "pw"}}, "otp": None,
+        "firewall_command": "sudo ufw allow from 10.0.0.0/24 to any port 3000,3999,8080 proto tcp",
+    }
+
+    def test_report_lists_links_accounts_and_the_firewall_command(self) -> None:
+        text = ensure.format_report(self.RESULT)
+        for expected in ("PR #42 at aaa1111", "web: up (restarted: checkout moved (a -> b))",
+                         "Web:     http://h:3000", "Swagger: http://h:8080/swagger-ui.html",
+                         "Console: http://h:3999/?token=t", "admin: a@b / pw", "sudo ufw allow from 10.0.0.0/24"):
+            self.assertIn(expected, text)
+        self.assertNotIn("OTP", text)
+
+    def test_report_omits_the_firewall_block_in_local_mode(self) -> None:
+        self.assertNotIn("First time", ensure.format_report({**self.RESULT, "firewall_command": None}))
 
 
 if __name__ == "__main__":

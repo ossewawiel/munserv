@@ -1,0 +1,16 @@
+# Factory console in remote eyeball mode, as a systemd user service.
+# Install with scripts/install-console-service.sh: it fills in @REPO@ (the checkout the console runs
+# from) and @PATH@ (the installing shell's PATH, so the toolchain shims the services need resolve).
+[Unit]
+Description=MunServ factory console (remote eyeball)
+After=network-online.target
+
+[Service]
+WorkingDirectory=@REPO@
+Environment="PATH=@PATH@"
+ExecStart=/usr/bin/env python3 -m scripts.console --remote
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

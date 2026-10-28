@@ -1,7 +1,7 @@
 import { apiGet, apiPost, timeAgo } from '../api.js';
 import {
   requiredServices, buildChecklistViewModel, stageLabel, stageChipClass,
-  checkoutMismatch, checkoutButtonLabel, stepButtonGate, isCheckedOut,
+  checkoutMismatch, checkoutButtonLabel, stepButtonGate, isCheckedOut, rewriteLocalhost, remoteLinkRows,
 } from './eyeball.model.mjs';
 
 const HELP_DISMISSED_KEY = 'console-eyeball-help-dismissed';
@@ -11,6 +11,7 @@ let candidates = [];
 let selectedId = null;
 let resultsData = null;
 let fastState = null;
+let remoteInfo = null;
 let accounts = {};
 let candidatesFetchedAt = 0;
 let candidatesTimer = null;
@@ -524,6 +525,7 @@ function rightColumn() {
             'Copied ' + fastState.checkout.local_files_copied.join(', ') + ' from the main checkout.')
         : null,
       el('div', { style: 'margin-top:6px' }, 'Latest OTP: ', el('code', {}, fastState.otp || '-'))),
+    remotePanel(),
     el('div', { class: 'card' },
       el('div', { style: 'display:flex;justify-content:space-between;align-items:center' },
         el('h3', {}, 'Phone'),
@@ -534,8 +536,51 @@ function rightColumn() {
 
 // --- checklist -----------------------------------------------------------
 
+// Clipboard API only exists in secure contexts; the console served over http on a LAN address is
+// not one, so fall back to a selected textarea and execCommand.
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const area = document.createElement('textarea');
+  area.value = text;
+  document.body.append(area);
+  area.select();
+  document.execCommand('copy');
+  area.remove();
+}
+
+function copyButton(text) {
+  return ctx.el('button', {
+    onclick: () => copyText(text).then(() => ctx.toast('Copied', 'success'), () => ctx.toast('Copy failed', 'error')),
+  }, 'Copy');
+}
+
+function remotePanel() {
+  const { el } = ctx;
+  const rows = remoteLinkRows(remoteInfo);
+  if (!rows.length) return null;
+  const fw = remoteInfo.firewall;
+  return el('div', { class: 'card' },
+    el('h3', {}, 'Remote access'),
+    rows.map((row) => el('div', { class: 'service-row' },
+      el('span', { class: 'name' }, row.label),
+      el('div', { style: 'display:flex;gap:4px;align-items:center;min-width:0' },
+        el('a', { href: row.url, target: '_blank', rel: 'noopener', style: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap' },
+          row.url.replace(/\?token=.*/, '?token=...')),
+        copyButton(row.url)))),
+    el('div', { style: 'margin-top:10px;font-size:12px;color:var(--muted)' },
+      'One-time firewall rule, run on ' + remoteInfo.hostname + ' (needs sudo)' + (fw.active ? ' - ' + fw.active : '') + ':'),
+    el('div', { style: 'display:flex;gap:4px;align-items:center;margin-top:4px' },
+      el('code', { style: 'overflow-wrap:anywhere' }, fw.command), copyButton(fw.command)),
+    el('div', { style: 'margin-top:6px;font-size:12px;color:var(--muted)' },
+      'This machine cannot test the rule against itself: open the Web link from another machine on the network to confirm.'));
+}
+
 function checkCard(check, index) {
   const { el } = ctx;
+  const publicHost = remoteInfo && remoteInfo.enabled ? remoteInfo.host : null;
   const account = check.as ? accounts[check.as] : null;
   return el('div', { class: 'card', id: index === 0 ? 'first-check' : null },
     el('div', { style: 'display:flex;justify-content:space-between' }, el('h3', {}, check.title), el('span', {}, check.id)),
@@ -547,10 +592,10 @@ function checkCard(check, index) {
       'Account: ', el('code', {}, account.email || account.phone || check.as),
       account.password ? ' / ' + account.password : (account.pin ? ' / PIN ' + account.pin : ''),
       el('button', {
-        onclick: () => { navigator.clipboard?.writeText(account.email || account.phone || ''); ctx.toast('Copied', 'success'); },
+        onclick: () => copyText(account.email || account.phone || '').then(() => ctx.toast('Copied', 'success'), () => ctx.toast('Copy failed', 'error')),
       }, 'Copy')) : null,
-    check.url ? el('div', {}, el('a', { href: check.url, target: '_blank', rel: 'noopener' }, el('button', {}, 'Open URL'))) : null,
-    el('ol', { class: 'steps' }, check.steps.map((s) => el('li', {}, s))),
+    check.url ? el('div', {}, el('a', { href: rewriteLocalhost(check.url, publicHost), target: '_blank', rel: 'noopener' }, el('button', {}, 'Open URL'))) : null,
+    el('ol', { class: 'steps' }, check.steps.map((s) => el('li', {}, rewriteLocalhost(s, publicHost)))),
     el('div', {}, el('strong', {}, 'Expected: '), check.expect),
     el('div', { class: 'toggle-group', style: 'margin:8px 0' },
       el('button', { class: 'pass' + (check.result === 'pass' ? ' active' : ''), onclick: () => setCheckResult(check.id, 'pass') }, 'Pass'),
@@ -817,6 +862,9 @@ export const eyeballSection = {
     renderAll();
     try {
       fastState = await apiGet('/api/state');
+    } catch (e) { /* covered by global banner */ }
+    try {
+      remoteInfo = await apiGet('/api/remote');
     } catch (e) { /* covered by global banner */ }
     await loadCandidates(false);
     candidatesTimer = setInterval(() => loadCandidates(false), 60000);
