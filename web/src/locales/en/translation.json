@@ -22,7 +22,8 @@
     "yes": "Yes",
     "no": "No",
     "close": "Close",
-    "notAvailable": "N/A"
+    "notAvailable": "N/A",
+    "comingSoon": "Coming soon"
   },
   "auth": {
     "login": "Login",
@@ -199,7 +200,22 @@
     "selectLanguage": "Select preferred language"
   },
   "reports": {
-    "title": "Reports"
+    "title": "Reports",
+    "tabsLabel": "Report sections",
+    "scopes": {
+      "pod": "Pod reports",
+      "ward": "Ward reports",
+      "sector": "Sector reports"
+    },
+    "tabs": {
+      "summary": "Summary",
+      "issues": "Issues",
+      "performance": "Performance"
+    },
+    "empty": {
+      "title": "No report data yet",
+      "description": "Once members log issues in this scope, the summary, issue breakdown and performance figures appear here."
+    }
   },
   "heatReport": {
     "title": "Heat Report",
@@ -658,6 +674,22 @@
       "nameTooShort": "Pod name must be at least 2 characters.",
       "nameTooLong": "Pod name must be 100 characters or fewer.",
       "logoUrlTooLong": "Logo URL must be 500 characters or fewer."
+    },
+    "boundaries": {
+      "configure": "Configure boundaries",
+      "comingSoonHint": "Boundary editing is not available yet.",
+      "pod": {
+        "title": "Pod boundaries",
+        "description": "Draw the outline of the whole pod. Reports from outside it are refused, and every map opens on it."
+      },
+      "ward": {
+        "title": "Ward boundaries",
+        "description": "Draw each ward's outline so a ward chief sees exactly the ground they are responsible for."
+      },
+      "sector": {
+        "title": "Sector boundaries",
+        "description": "Draw each sector's outline so an issue reaches the right sector from the GPS point it was reported at."
+      }
     }
   }
 }

@@ -234,5 +234,18 @@ describe('Sidebar', () => {
       const messagesLink = screen.getByRole('link', { name: /messages/i });
       expect(messagesLink).toHaveClass('Mui-selected');
     });
+
+    it('should list General plus one reports entry per ward and per sector under Reports for a pod chief', () => {
+      renderSidebar();
+
+      const reportsButton = screen.getByRole('button', { name: /reports/i });
+      fireEvent.click(reportsButton);
+
+      expect(screen.getByText('General')).toBeInTheDocument();
+      expect(screen.getByText('Ward North')).toBeInTheDocument();
+      expect(screen.getByText('Ward South')).toBeInTheDocument();
+      expect(screen.getByText('Sector A')).toBeInTheDocument();
+      expect(screen.getByText('Sector B')).toBeInTheDocument();
+    });
   });
 });

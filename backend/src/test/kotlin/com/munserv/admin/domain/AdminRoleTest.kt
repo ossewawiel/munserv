@@ -44,6 +44,21 @@ class AdminRoleTest {
     }
 
     @Nested
+    inner class FromDbValueOrNull {
+        @Test
+        fun `should return null for an unknown role wire value`() {
+            AdminRole.fromDbValueOrNull("unknown") shouldBe null
+        }
+
+        @Test
+        fun `should parse every role wire value`() {
+            AdminRole.entries.forEach { role ->
+                AdminRole.fromDbValueOrNull(role.toDbValue()) shouldBe role
+            }
+        }
+    }
+
+    @Nested
     inner class ToDbValue {
         @Test
         fun `should return lowercase snake_case`() {
