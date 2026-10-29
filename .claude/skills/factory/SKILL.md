@@ -31,7 +31,7 @@ Print one table: story, platform, state, handoff (yes / no), blockers (`depends_
 6. Green → for `ui: true` stories dispatch `design-reviewer` first with the PR number and handoff path; its `REQUEST CHANGES` goes back to the implementer once like a code review. On its `APPROVE`, run `gh pr edit <pr> --add-label design-approved`: CI re-runs the visual job on that label, and the baseline guards need it. Then dispatch `reviewer` with the PR number and handoff path. `REQUEST CHANGES` → dispatch the implementer once with the review text; then review again. Second `REQUEST CHANGES` → `status:blocked`.
 7. `APPROVE` → the PR is now awaiting eyeball. Once CI is green, run `scripts/eyeball-up.sh <pr>`: it checks the PR out, restarts only what changed and prints the Web URL, Swagger URL, console link, accounts and, on first use, a firewall command. The user opens those links from another machine, ticks the checks in the Eyeball section of the factory console and submits. If the script fails, put its error text in the report. Never run eyeball checks yourself and never apply the `eyeball:*` label; the console does both when the user submits. Never merge.
 8. `python3 scripts/sync-board.py` so the Project board reflects the labels you changed.
-9. Report: one table (story, PR, CI as `green` or `red - <job>: <error>`, review, next action for the user) and the token-heavy step of each story if it stood out. For a story awaiting eyeball, the next action holds the Web URL, Swagger URL, console link and accounts from `scripts/eyeball-up.sh`. Two stories awaiting eyeball share one set of services, so run the script for one PR at a time and report the others as "run `scripts/eyeball-up.sh <pr>` when you are ready".
+9. Report: one table (story, PR, CI as `green` or `red - <job>: <error>`, plan step and the status you wrote, review, next action for the user) and the token-heavy step of each story if it stood out. For a story awaiting eyeball, the next action holds the Web URL, Swagger URL, console link and accounts from `scripts/eyeball-up.sh`. Two stories awaiting eyeball share one set of services, so run the script for one PR at a time and report the others as "run `scripts/eyeball-up.sh <pr>` when you are ready".
    The user has a terminal only on this laptop (root `CLAUDE.md`, "When a person must act"). A next action is therefore a link that opens off the laptop (github.com, claude.ai, the LAN links the script prints) or a command. End the report with every command the user must run, the firewall command included when the script printed one, in one fenced `bash` block, in run order, each with a one-line `#` comment. Never name a `localhost` URL or a desktop app as a next action.
 
 ## Eyeball bugs
@@ -49,7 +49,7 @@ Same as `run` for exactly that story, ignoring `--max`. If it has no handoff, ru
 Dispatch `reviewer` for that PR with its handoff path and print the verdict.
 
 ## `sync <pr>`
-Dispatch `syncer` for a merged PR and print its report.
+Dispatch `syncer` for a merged PR and print its report. Then write the PR's plan step in the Operation V1 store (root `CLAUDE.md`, "Plan upkeep") and print the `Plan:` line.
 
 ## Rules
 - Never run platform builds or tests yourself; that is the implementers' job and their Stop hook enforces it. `scripts/eyeball-up.sh` is the one exception: it starts services for the user to eyeball, it is not a gate.

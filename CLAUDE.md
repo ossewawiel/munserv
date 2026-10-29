@@ -42,7 +42,14 @@ CI (`.github/workflows/ci.yml`) is required on `master`: domain-language validat
 The user reaches this laptop through a terminal only: no desktop and no browser on it. Do every step you can yourself. When a step needs the user (sudo, a secret, an interactive login, a judgement), end your message with the exact commands in one fenced `bash` block, in the order to run them, each preceded by a one-line `#` comment saying what it does. Never point the user at a `localhost` URL or a desktop app on the laptop: give a `curl` command instead, or a LAN link that `scripts/eyeball-up.sh` prints. Links on github.com and claude.ai are fine; they open on the user's own machine. Plan steps, factory reports and handoff Eyeball blocks follow the same rule.
 
 ## Plan upkeep
-The Operation V1 plan artifact (https://claude.ai/artifact/3y9tTBbG7o2a7NLm8MnVut) is the source of truth for where the work stands. Read its store (`ArtifactData` `list` on `steps` and `decisions`) before starting a plan step. When a step's PR merges or its checks run, write the step's `status` and `note` in the same session; when steps are added or rewritten, republish the page from `.critique/2026-10-28-factory-road-to-v1/plan.html` to the same URL. Its "Where we are" map redraws from the store.
+The Operation V1 plan artifact (https://claude.ai/artifact/3y9tTBbG7o2a7NLm8MnVut) is the source of truth for where the work stands. Read its store (`ArtifactData` `list` on `steps` and `decisions`) before starting a plan step. When steps are added or rewritten, republish the page from `.critique/2026-10-28-factory-road-to-v1/plan.html` to the same URL. Its "Where we are" map redraws from the store.
+
+**Keep the store current without being asked.** The user does not remind you; a stale step is a defect.
+- Before you open a PR, find its step in the store and in `plan.html`. Put `Plan step: S<nn>` (or `Plan step: none`) in the PR body.
+- When you open the PR, write the step `running` with the PR number in its `note`.
+- When `scripts/watch-ci.sh` ends, and whenever `gh pr view` shows the PR merged (the user merges without saying so), write the step's `status` and `note` in that same turn: `done` when its "Done when" check passed, `running` with what is left when the check needs the user, `blocked` with the reason.
+- A note says what merged (PR, commit), what the done check showed, and what was not run.
+- Every message that names a PR ends with a `Plan:` line under the CI line: `Plan: S06 done`, `Plan: S42 running - waits on your SSH run`, or `Plan: no step`.
 
 ## The factory
 Delivery runs through agents defined in `.claude/agents/` and orchestrated by `/factory`:
