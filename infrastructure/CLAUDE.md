@@ -46,25 +46,6 @@ Remote eyeball exposes web 3000, backend 8080 and the console 3999 to the LAN; P
 
 The factory console runs as a systemd user unit so a tester on another machine can eyeball PRs while the services run on this laptop. Files: `infrastructure/systemd/munserv-console.service` (installed by `scripts/install-console-service.sh`, no sudo), the `remote:` key in `scripts/console/project.yaml`, and `scripts/eyeball-up.sh <pr>`. The firewall rule is opened once by a person: the console prints the exact command (`sudo ufw allow from <subnet> to any port 3000,3999,8080 proto tcp`). Design and risks: `specs/architecture/decisions/007-remote-eyeball.md`; usage: `scripts/console/README.md`.
 
-## Folder structure
-
-```
-infrastructure/
-├── CLAUDE.md                    # This file
-├── claude_desktop_config.example.json  # Example for Claude Desktop
-├── docker/
-│   ├── docker-compose.yml       # Local dev services
-│   └── init/
-│       └── 01-extensions.sql    # PostGIS setup
-├── systemd/
-│   └── munserv-console.service  # Factory console user unit (remote eyeball)
-├── mock-api/                    # JSON Server mock API
-│   ├── server.js
-│   ├── package.json
-│   └── data/
-└── scripts/                     # Utility scripts
-```
-
 ## Environment variables (backend)
 | Variable | Purpose | Default |
 |---|---|---|

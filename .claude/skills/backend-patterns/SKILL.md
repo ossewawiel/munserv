@@ -246,48 +246,9 @@ fun Issue.toResponse() = IssueResponse(
 )
 ```
 
-## Null Handling
-
-```kotlin
-// ✅ Early return with elvis
-val issue = repository.findById(id) ?: return IssueResult.NotFound(id)
-
-// ✅ Safe call with let
-user?.let { sendNotification(it) }
-
-// ✅ Elvis for defaults
-val name = user?.name ?: "Unknown"
-
-// ❌ Never force unwrap
-val name = user!!.name
-```
-
-## Cross-Module Communication
-
-```kotlin
-// Module exposes interface in its package
-interface SectorService {
-    fun findById(id: SectorId): Sector?
-    fun findByLocation(point: GeoPoint): Sector?
-}
-
-// Other modules depend on interface only
-class IssueService(
-    private val sectorService: SectorService  // Injected
-)
-
-// ❌ Never access another module's repository directly
-```
-
 ## OpenAPI/Swagger Documentation
 
-**URLs:**
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-
-**Configuration:**
-- `shared/config/OpenApiConfig.kt` - Global OpenAPI settings
-- `application.yml` - SpringDoc configuration
+Swagger URL and the annotation rule: `backend/CLAUDE.md`, Commands. Global settings: `shared/config/OpenApiConfig.kt`, `application.yml`.
 
 ### Controller-Level Annotations
 
@@ -334,26 +295,7 @@ data class CreateIssueRequest(
 )
 ```
 
-### Annotation Quick Reference
-
-| Annotation | Purpose | Location |
-|------------|---------|----------|
-| `@Tag` | Group endpoints | Controller class |
-| `@Operation` | Endpoint description | Method |
-| `@ApiResponses` | Response codes | Method |
-| `@Parameter` | Path/query param | Parameter |
-| `@Schema` | Data type docs | DTO field |
-| `@SecurityRequirement` | Auth required | Class/method |
-| `@Hidden` | Exclude from docs | Any |
-
 ## Testing (JUnit 6 + MockK + Kotest)
-
-### Test Framework Stack
-- **JUnit 6** - Test framework
-- **MockK** - Mocking library for Kotlin
-- **Kotest** - Assertion library
-- **TestContainers** - PostgreSQL + PostGIS for integration tests
-- **SpringMockK** - MockK integration with Spring
 
 ### Unit Test Pattern
 ```kotlin
@@ -385,9 +327,7 @@ class IssueServiceTest {
 ```
 
 ### Integration Test Pattern (Testcontainers)
-Every Spring context test imports the shared `TestContainersConfig`, which
-exposes a PostGIS `PostgreSQLContainer` bean with `@ServiceConnection`. No
-`@DynamicPropertySource` and no datasource URL in `application-test.yml`.
+Rules and Boot 4 test packages: `backend/CLAUDE.md`, Tests.
 ```kotlin
 @SpringBootTest
 @Import(TestContainersConfig::class)
@@ -400,9 +340,6 @@ class IssueApiContractTest { ... }
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class IssueRepositoryTest { ... }
 ```
-Boot 4 packages: `org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc`,
-`org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest`,
-`org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase`.
 
 ### API Contract Test Pattern
 ```kotlin
@@ -421,33 +358,4 @@ class IssueApiContractTest {
             .andExpect { status { isOk() } }
     }
 }
-```
-
-### Test Commands
-```bash
-./gradlew test                    # Run all tests
-./gradlew test --tests "*.IssueServiceTest"  # Run specific test
-./gradlew test --info             # Verbose output
-./gradlew jacocoTestReport        # Generate coverage
-```
-
-### Kotest Assertions
-```kotlin
-result shouldBe expected
-result shouldNotBe other
-result.shouldBeInstanceOf<Type>()
-result.shouldNotBeNull()
-list.shouldContain(element)
-list.shouldHaveSize(3)
-shouldThrow<Exception> { code() }
-```
-
-### MockK Patterns
-```kotlin
-every { mock.method(any()) } returns value
-every { mock.method(any()) } returns null
-verify { mock.method(any()) }
-verify(exactly = 1) { mock.method(testId) }
-val slot = slot<Issue>()
-every { repo.save(capture(slot)) } answers { slot.captured }
 ```
