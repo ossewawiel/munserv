@@ -66,6 +66,9 @@ class StubConsole:
                 self._json({"error": "not found"}, 404)
 
             def do_POST(self) -> None:
+                if self.path == "/api/refresh":
+                    stub.posts.append(("refresh", ""))
+                    return self._json({"ok": True})
                 name = json.loads(self.rfile.read(int(self.headers["Content-Length"])))["name"]
                 verb = self.path.rsplit("/", 1)[-1]
                 stub.posts.append((verb, name))
@@ -100,6 +103,20 @@ class TuiTest(unittest.TestCase):
             table = app.query_one("#services")
             states = [str(table.get_cell(key, "state")) for key in ("db", "backend", "web")]
             self.assertEqual(states, ["● up", "● up", "✕ exited 1"])
+        self.run_app(scenario)
+
+    def test_table_shows_port_health_and_checkout_sha(self) -> None:
+        async def scenario(app, pilot) -> None:
+            table = app.query_one("#services")
+            row = lambda key: [str(table.get_cell(key, c)) for c in ("port", "health", "sha")]
+            self.assertEqual(row("db"), ["5435", "healthy", "a222098"])
+            self.assertEqual(row("web"), ["3000", "down", ""])
+        self.run_app(scenario)
+
+    def test_refresh_key_posts_to_the_console(self) -> None:
+        async def scenario(app, pilot) -> None:
+            await pilot.press("f")
+            await wait_for(pilot, lambda: ("refresh", "") in self.stub.posts)
         self.run_app(scenario)
 
     def test_log_follows_the_highlighted_service(self) -> None:
@@ -149,6 +166,16 @@ class ApiTest(unittest.TestCase):
                  ({"up": False, "running": False, "exit_code": 0}, "stopped")]
         for fields, expected in cases:
             self.assertEqual(Service.from_json({**base, **fields}).state, expected)
+
+    def test_port_and_health_words(self) -> None:
+        base = {"name": "x", "manual": False, "needs_prepare": False, "exit_code": None}
+        cases = [({"url": "http://h:8080", "up": True, "running": True}, "8080", "healthy"),
+                 ({"url": "", "up": False, "running": True}, "", "waiting"),
+                 ({"url": "postgresql://localhost:5435", "up": False, "running": False}, "5435", "down"),
+                 ({"url": "", "up": False, "running": False, "manual": True}, "", "n/a")]
+        for fields, port, health in cases:
+            service = Service.from_json({**base, **fields})
+            self.assertEqual((service.port, service.health), (port, health))
 
     def test_unreachable_console_raises_console_error(self) -> None:
         with self.assertRaises(ConsoleError):
