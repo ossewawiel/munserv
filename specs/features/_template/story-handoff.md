@@ -58,7 +58,7 @@ Rules for every check: `url` is the complete address a tester can paste into a b
 Manual acceptance checks a human runs in `scripts/eyeball.py` before merge. The planner writes 2 to
 6 checks that together cover every acceptance criterion above; the implementer corrects `url` (and
 `as`, if the route or account changed) if it differs from what shipped; the reviewer verifies the
-checks still cover every AC. `as` is an account key from `scripts/eyeball/accounts.yaml`, or `none`.
+checks still cover every AC. `as` is an account key from `scripts/console/accounts.yaml`, or `none`.
 `services` lists what must be running, from `db`, `backend`, `web`, `mobile`, `mock-api`,
 `storybook`. `url` is a full local URL (`http://localhost:3000/...`), or a mobile screen name
 (`MembersListScreen`) for `platform: mobile` stories.

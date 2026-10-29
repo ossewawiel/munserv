@@ -5,6 +5,7 @@ on:
     branches: ['**']
   pull_request:
     branches: [master]
+    types: [opened, synchronize, reopened, labeled]
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -139,7 +140,9 @@ jobs:
   visual-web:
     name: Visual regression (Storybook)
     needs: changes
-    if: needs.changes.outputs.web == 'true'
+    if: >-
+      needs.changes.outputs.web == 'true' &&
+      (github.event.action != 'labeled' || github.event.label.name == 'design-approved')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

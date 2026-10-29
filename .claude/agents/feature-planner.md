@@ -33,7 +33,7 @@ Copy `specs/features/_template/story-handoff.md` to `specs/features/<name>/<issu
 - Steps: one file per step with its test. Name real paths that follow the platform card's layout; check with Grep that referenced classes exist.
 - `touches`: the feature folders edited, so the orchestrator can serialise overlapping stories.
 - `Eyeball`: 2 to 6 checks, in the schema the template shows, that together cover every acceptance
-  criterion. Pick a real account key from `scripts/eyeball/accounts.yaml` (or `none`), the real
+  criterion. Pick a real account key from `scripts/console/accounts.yaml` (or `none`), the real
   services the check needs, and the URL the story should end up serving at (the implementer
   corrects it if the actual route differs). Steps are imperative and short; expect is one sentence
   a tester can judge without guessing.
