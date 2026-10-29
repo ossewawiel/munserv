@@ -19,7 +19,7 @@ Every table has `created_at` and `updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`
 Points are `GEOGRAPHY(POINT, 4326)`, boundaries `GEOGRAPHY(POLYGON, 4326)`, both with a GIST index. Hibernate maps them to JTS types; do not store lat/lng in two float columns.
 
 ## Migrations
-`backend/src/main/resources/db/migration/V{NNN}__{description}.sql`, three-digit numbers, one transaction each, immutable once merged to `master`, rollback as a comment. Currently at V034. Adding an enum value is `ALTER TYPE ... ADD VALUE` plus the Kotlin, web, mobile and `domain/` changes in the same PR; renaming a type uses the create-new, cast, drop, rename sequence (see V028).
+`backend/src/main/resources/db/migration/V{NNN}__{description}.sql`, three-digit numbers, one transaction each, immutable once merged to `master`, rollback as a comment. The newest number is the highest file in that folder. Adding an enum value is `ALTER TYPE ... ADD VALUE` plus the Kotlin, web, mobile and `domain/` changes in the same PR; renaming a type uses the create-new, cast, drop, rename sequence (see V028).
 
 ## Forbidden
 `SELECT *` in application queries; `ON DELETE CASCADE` on core entities; `VARCHAR` without length (use `TEXT`); nullable foreign keys without a comment saying why; string-concatenated SQL; storing passwords or PINs in clear.

@@ -65,17 +65,25 @@ Output of `claude -p "/skill-doctor"`, skills loaded this session. Context is th
 
 ## Bytes each agent loads at start
 
-| Agent | Root CLAUDE.md | Agent body | Preloaded skills | Cards read | Total bytes | Cards read: files |
-|---|---|---|---|---|---|---|
-| backend-implementer | 7,271 | 2,106 | 13,007 | 15,258 | 37,642 | domain/README.md + backend/CLAUDE.md |
-| web-implementer | 7,271 | 2,302 | 15,596 | 6,132 | 31,301 | domain/README.md + web/CLAUDE.md |
-| mobile-implementer | 7,271 | 2,374 | 19,848 | 6,884 | 36,377 | domain/README.md + mobile/CLAUDE.md |
-| feature-planner | 7,271 | 3,812 | 0 | 22,280 | 33,363 | domain/README.md + backend, web, mobile cards |
-| investigator | 7,271 | 1,493 | 0 | 22,280 | 31,044 | domain/README.md + all three platform cards (upper bound) |
-| reviewer | 7,271 | 2,215 | 0 | 15,258 | 24,744 | domain/README.md + largest platform card (backend) |
-| designer | 7,271 | 2,915 | 0 | 15,640 | 25,826 | domain/README.md + design/README.md + design/registry/web.md + mobile.md |
-| design-reviewer | 7,271 | 2,088 | 0 | 10,794 | 20,153 | design/registry/web.md + mobile.md (tokens not counted) |
-| syncer | 7,271 | 1,206 | 0 | 0 | 8,477 | none named |
+| Agent | Root CLAUDE.md | Agent body | Preloaded skills | Cards read | Total bytes | Cards read: files | After: total | After: vs baseline | After: vs master before this PR |
+|---|---|---|---|---|---|---|---|---|---|
+| backend-implementer | 7,271 | 2,106 | 13,007 | 15,258 | 37,642 | domain/README.md + backend/CLAUDE.md | 31,247 | -6,395 | -8,335 |
+| web-implementer | 7,271 | 2,302 | 15,596 | 6,132 | 31,301 | domain/README.md + web/CLAUDE.md | 33,448 | +2,147 | +207 |
+| mobile-implementer | 7,271 | 2,374 | 19,848 | 6,884 | 36,377 | domain/README.md + mobile/CLAUDE.md | 38,499 | +2,122 | +182 |
+| feature-planner | 7,271 | 3,812 | 0 | 22,280 | 33,363 | domain/README.md + backend, web, mobile cards | 26,968 | -6,395 | -8,335 |
+| investigator | 7,271 | 1,493 | 0 | 22,280 | 31,044 | domain/README.md + all three platform cards (upper bound) | 24,649 | -6,395 | -8,335 |
+| reviewer | 7,271 | 2,215 | 0 | 15,258 | 24,744 | domain/README.md + largest platform card (backend) | 18,517 | -6,227 | -8,167 |
+| designer | 7,271 | 2,915 | 0 | 15,640 | 25,826 | domain/README.md + design/README.md + design/registry/web.md + mobile.md | 27,973 | +2,147 | +207 |
+| design-reviewer | 7,271 | 2,088 | 0 | 10,794 | 20,153 | design/registry/web.md + mobile.md (tokens not counted) | 22,300 | +2,147 | +207 |
+| syncer | 7,271 | 1,206 | 0 | 0 | 8,477 | none named | 10,624 | +2,147 | +207 |
+
+After column: remeasured 2026-10-29 on branch `chore/context-diet-v2` with the same method (the method reproduces the baseline numbers exactly on 39d908d). Root `CLAUDE.md` grew from 7,271 to 9,211 bytes on master between the baseline and this PR (#175, #176, #178, #179); this PR adds 207 bytes to it (design and visual-web jobs in the Quality gate). "vs master before this PR" isolates this PR's effect.
+
+| File | Baseline bytes | Master before this PR | After |
+|---|---|---|---|
+| `backend/CLAUDE.md` (351 lines) | 12,261 | 12,261 | 3,719 (38 lines) |
+| `shared/CLAUDE.md` (333 lines) | 7,575 | 7,575 | deleted |
+| `infrastructure/CLAUDE.md` (127 lines) | 5,810 | 5,810 | 5,125 (89 lines) |
 
 ## MCP servers that fail at session start
 
@@ -105,3 +113,18 @@ Count of first-parent commits on master, ISO weeks, last 8 weeks to 2026-10-29.
 | 2026-W43 | 0 |
 | 2026-W44 | 19 |
 | Total | 24 |
+
+## After: remeasured 2026-10-29
+
+| Measure | Baseline | After |
+|---|---|---|
+| Skills loaded, never invoked | 22 | 22 (no change; out of scope) |
+| claude.ai synced skills never invoked | 17 | 17 |
+| Plugin skills never invoked | 1 | 1 |
+| Plugins unused | 3 | 3 |
+| `.claude/settings.json` ignored `Write(path)` rules | 5 | 5 |
+| MCP servers failing at start | fetch, context7 | fetch, context7 |
+| Open PRs | 0 | 1 (#182, not this branch) |
+| Merges, ISO week 2026-W44 | 19 | 27 (master moved on; weeks W38-W43 still 0) |
+
+Skills, MCP and PR rows are unchanged by design: this PR touches cards and one skill example file only.

@@ -346,10 +346,10 @@ data class CreateIssueRequest(
 | `@SecurityRequirement` | Auth required | Class/method |
 | `@Hidden` | Exclude from docs | Any |
 
-## Testing (JUnit 5 + MockK + Kotest)
+## Testing (JUnit 6 + MockK + Kotest)
 
 ### Test Framework Stack
-- **JUnit 5** - Test framework
+- **JUnit 6** - Test framework
 - **MockK** - Mocking library for Kotlin
 - **Kotest** - Assertion library
 - **TestContainers** - PostgreSQL + PostGIS for integration tests

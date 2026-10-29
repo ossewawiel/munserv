@@ -17,7 +17,7 @@ part 'issue.freezed.dart';
 part 'issue.g.dart';
 
 @freezed
-class Issue with _$Issue {
+abstract class Issue with _$Issue {
   const Issue._();  // Private constructor for methods
   
   const factory Issue({
@@ -126,14 +126,14 @@ part 'issue_providers.g.dart';
 
 // Repository provider
 @riverpod
-IssueRepository issueRepository(IssueRepositoryRef ref) {
+IssueRepository issueRepository(Ref ref) {
   final dio = ref.watch(dioProvider);
   return IssueRepositoryImpl(IssueApi(dio));
 }
 
 // Async data provider
 @riverpod
-Future<List<Issue>> issues(IssuesRef ref) async {
+Future<List<Issue>> issues(Ref ref) async {
   final repository = ref.watch(issueRepositoryProvider);
   final result = await repository.getIssues();
   return switch (result) {
@@ -144,7 +144,7 @@ Future<List<Issue>> issues(IssuesRef ref) async {
 
 // Filtered provider
 @riverpod
-Future<List<Issue>> issuesByState(IssuesByStateRef ref, IssueState state) async {
+Future<List<Issue>> issuesByState(Ref ref, IssueState state) async {
   final issues = await ref.watch(issuesProvider.future);
   return issues.where((i) => i.state == state).toList();
 }
