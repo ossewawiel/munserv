@@ -1,6 +1,6 @@
 # Layered on top of the local profile (SPRING_PROFILES_ACTIVE=local,mailpit): every e-mail goes
 # to the Mailpit container in infrastructure/docker, so flows that send mail (member approval,
-# admin onboarding) work offline. Read the mail at http://localhost:8026.
+# admin onboarding) work offline. Read the mail with the curl commands in infrastructure/CLAUDE.md.
 spring:
   mail:
     host: localhost
