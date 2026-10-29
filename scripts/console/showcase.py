@@ -34,6 +34,7 @@ BRANCH = "master"
 SEED_SCRIPT = ROOT / "scripts" / "dev-seed.py"
 SEED_WAIT_SECONDS = 240
 SEED_POLL_SECONDS = 2
+SEED_ATTEMPTS = 3  # the first mail after a cold start can exceed the SMTP timeout; the seed is idempotent
 DB_STEP_TIMEOUT_SECONDS = 60
 _DB_NAME_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
 _log_lock = threading.Lock()
@@ -213,13 +214,15 @@ def _seed_once(main: Path) -> None:
         time.sleep(SEED_POLL_SECONDS)
     else:
         return
-    with _log_lock, open(services.log_path(main, BACKEND), "a", encoding="utf-8") as logf:
-        logf.write("\n--- dev-seed ---\n")
-        logf.flush()
-        result = subprocess.run([sys.executable, str(SEED_SCRIPT), "--base-url", f"http://localhost:{cfg()['backend_port']}"],
-                                cwd=ROOT, stdout=logf, stderr=subprocess.STDOUT)
-    if result.returncode == 0:
-        state_file("seeded").write_text("ok", encoding="utf-8")
+    command = [sys.executable, str(SEED_SCRIPT), "--base-url", f"http://localhost:{cfg()['backend_port']}"]
+    for attempt in range(1, SEED_ATTEMPTS + 1):
+        with _log_lock, open(services.log_path(main, BACKEND), "a", encoding="utf-8") as logf:
+            logf.write(f"\n--- dev-seed (attempt {attempt}) ---\n")
+            logf.flush()
+            result = subprocess.run(command, cwd=ROOT, stdout=logf, stderr=subprocess.STDOUT)
+        if result.returncode == 0:
+            state_file("seeded").write_text("ok", encoding="utf-8")
+            return
 
 
 # --- what the state and remote endpoints report ------------------------------

@@ -40,12 +40,18 @@ Backend tests do not use this database; they start their own PostGIS container t
 | Mock API | 3001 |
 | Web dev server | 3000 |
 | Factory console | 3999 |
+| Showcase backend (`demo` profile, own database `munserv_demo`) | 8090 |
+| Showcase web (`vite preview`) | 4000 |
 
 Remote eyeball exposes web 3000, backend 8080 and the console 3999 to the LAN; PostgreSQL 5435 and Storybook 6006 stay local.
 
 ## Remote eyeball
 
 The factory console runs as a systemd user unit so a tester on another machine can eyeball PRs while the services run on this laptop. Files: `infrastructure/systemd/munserv-console.service` (installed by `scripts/install-console-service.sh`, no sudo), the `remote:` key in `scripts/console/project.yaml`, and `scripts/eyeball-up.sh <pr>`. The firewall rule is opened once by a person: the console prints the exact command (`sudo ufw allow from <subnet> to any port 3000,3999,8080 proto tcp`). Design and risks: `specs/architecture/decisions/007-remote-eyeball.md`; usage: `scripts/console/README.md`.
+
+## Showcase stack
+
+A second, independent run of `origin/master` for demos, beside the dev stack. It lives in a detached git worktree at `../munserv-demo` that only ever follows `origin/master`; the database `munserv_demo` is created in the same PostGIS container; the backend runs as `java -jar` from `bootJar` under `SPRING_PROFILES_ACTIVE=local,mailpit,demo` on 8090 (`application-demo.yml` sets the port and the datasource only); the web build is served by `vite preview` on 4000 and proxies `/api` to 8090. Code: `scripts/console/showcase.py`. In the TUI (`./tui.sh`): `u` update from master, `b` build (the build log opens in the log pane), `d` start, `e` stop. The first start runs `scripts/dev-seed.py --base-url http://localhost:8090`. The TUI prints the firewall command for 4000 and 8090. Update does not restart anything; build, then stop and start, to show new code.
 
 ## Environment variables (backend)
 | Variable | Purpose | Default |
