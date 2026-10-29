@@ -6,10 +6,9 @@ import com.munserv.shared.types.SectorId
 import com.munserv.shared.types.SectorSettingsId
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnTransformer
 import java.time.Instant
 import java.util.UUID
 
@@ -24,12 +23,12 @@ class SectorSettingsEntity(
     val id: UUID,
     @Column(name = "sector_id", nullable = false, unique = true)
     val sectorId: UUID,
-    @Enumerated(EnumType.STRING)
-    @Column(name = "new_issue_verification_mode", nullable = false)
-    val newIssueVerificationMode: VerificationMode,
-    @Enumerated(EnumType.STRING)
-    @Column(name = "fix_verification_mode", nullable = false)
-    val fixVerificationMode: VerificationMode,
+    @Column(name = "new_issue_verification_mode", nullable = false, columnDefinition = "verification_mode")
+    @ColumnTransformer(write = "?::verification_mode")
+    val newIssueVerificationMode: String,
+    @Column(name = "fix_verification_mode", nullable = false, columnDefinition = "verification_mode")
+    @ColumnTransformer(write = "?::verification_mode")
+    val fixVerificationMode: String,
     @Column(name = "days_fixed_before_closed", nullable = false)
     val daysFixedBeforeClosed: Int,
     @Column(name = "minimum_ground_admins", nullable = false)
@@ -46,8 +45,8 @@ class SectorSettingsEntity(
         SectorSettings(
             id = SectorSettingsId(id),
             sectorId = SectorId(sectorId),
-            newIssueVerificationMode = newIssueVerificationMode,
-            fixVerificationMode = fixVerificationMode,
+            newIssueVerificationMode = VerificationMode.fromString(newIssueVerificationMode),
+            fixVerificationMode = VerificationMode.fromString(fixVerificationMode),
             daysFixedBeforeClosed = daysFixedBeforeClosed,
             minimumGroundAdmins = minimumGroundAdmins,
             createdAt = createdAt,
@@ -62,8 +61,8 @@ class SectorSettingsEntity(
             SectorSettingsEntity(
                 id = settings.id.value,
                 sectorId = settings.sectorId.value,
-                newIssueVerificationMode = settings.newIssueVerificationMode,
-                fixVerificationMode = settings.fixVerificationMode,
+                newIssueVerificationMode = settings.newIssueVerificationMode.toApiString(),
+                fixVerificationMode = settings.fixVerificationMode.toApiString(),
                 daysFixedBeforeClosed = settings.daysFixedBeforeClosed,
                 minimumGroundAdmins = settings.minimumGroundAdmins,
                 createdAt = settings.createdAt,

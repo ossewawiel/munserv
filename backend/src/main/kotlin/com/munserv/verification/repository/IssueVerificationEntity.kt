@@ -12,6 +12,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnTransformer
 import java.time.Instant
 import java.util.UUID
 
@@ -33,7 +34,8 @@ class IssueVerificationEntity(
     val verifiedBy: UUID? = null,
     @Column(name = "result", length = 20)
     val outcome: String? = null,
-    @Column(name = "reason", length = 50)
+    @Column(name = "reason", columnDefinition = "verification_reason")
+    @ColumnTransformer(write = "?::verification_reason")
     val reason: String? = null,
     @Column(name = "note", columnDefinition = "TEXT")
     val note: String? = null,
