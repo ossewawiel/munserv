@@ -36,16 +36,28 @@ while [[ -z "$ids" ]]; do
   ids="$(run_ids)"
 done
 
+# The push run and the pull_request run do not appear together, so list again after each pass and
+# watch any run not yet seen, until a pass finds none.
 failed=0
-for id in $ids; do
-  gh run watch "$id" --interval 30 >/dev/null 2>&1 || true
-  conclusion="$(gh run view "$id" --json conclusion --jq .conclusion)"
-  gh run view "$id" --json event,jobs --jq '.event as $e | .jobs[] | "\($e)\t\(.name)\t\(.conclusion)"'
-  if [[ "$conclusion" != "success" ]]; then
-    failed=1
-    echo "--- run $id: $conclusion; failed log tail ---"
-    gh run view "$id" --log-failed 2>/dev/null | tail -n 40 || true
-  fi
+seen=" "
+while true; do
+  sleep "$POLL_SECONDS"
+  new_ids=""
+  for id in $(run_ids); do
+    [[ "$seen" == *" $id "* ]] || new_ids+="$id "
+  done
+  [[ -n "$new_ids" ]] || break
+  for id in $new_ids; do
+    seen+="$id "
+    gh run watch "$id" --interval 30 >/dev/null 2>&1 || true
+    conclusion="$(gh run view "$id" --json conclusion --jq .conclusion)"
+    gh run view "$id" --json event,jobs --jq '.event as $e | .jobs[] | "\($e)\t\(.name)\t\(.conclusion)"'
+    if [[ "$conclusion" != "success" ]]; then
+      failed=1
+      echo "--- run $id: $conclusion; failed log tail ---"
+      gh run view "$id" --log-failed 2>/dev/null | tail -n 40 || true
+    fi
+  done
 done
 
 if (( failed )); then
