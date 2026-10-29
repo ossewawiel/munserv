@@ -6,6 +6,7 @@
         "run",
         "-i",
         "--rm",
+        "--init",
         "--network",
         "host",
         "-e",

@@ -81,7 +81,8 @@
   },
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true,
-    "dart-flutter@dart-flutter": true
+    "dart-flutter@dart-flutter": true,
+    "context7@claude-plugins-official": false
   },
   "extraKnownMarketplaces": {
     "dart-flutter": {
