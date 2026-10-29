@@ -36,8 +36,10 @@ backend:
   # The local profile is required: bootstrap.super-user (application-local.yml) only loads under
   # it, and BootstrapConfig.enabled defaults to false without it, so the super_user account and
   # W22-W24/W29/W30-style checks cannot be exercised on a backend started any other way.
+  # The mailpit profile sends every e-mail to the Mailpit container the db service starts, so
+  # member approval works offline (read the mail at http://localhost:8026).
   # MUNSERV_APP_ADMIN_PORTAL_URL is the web URL e-mailed links point at.
-  start: MUNSERV_APP_ADMIN_PORTAL_URL=http://{host}:3000 SPRING_PROFILES_ACTIVE=local ./gradlew bootRun
+  start: MUNSERV_APP_ADMIN_PORTAL_URL=http://{host}:3000 SPRING_PROFILES_ACTIVE=local,mailpit ./gradlew bootRun
   start_timeout: 300
   # The liveness group answers in milliseconds; the full health endpoint aggregates every indicator.
   health: http://localhost:8080/actuator/health/liveness

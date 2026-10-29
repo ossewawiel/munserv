@@ -80,3 +80,33 @@ member:
     backend/src/main/kotlin/com/munserv/auth/service/OtpService.kt
     ("OTP for <masked phone>: <code>"). The factory console reads the latest one from the
     backend log and shows it in the services panel.
+
+# The accounts below are not seeded by Flyway. scripts/dev-seed.py creates them through the
+# API (register, approve, set the password, apply and approve as ground admin) on a backend
+# run with the mailpit profile, and it reads their details from here. Run it once per fresh
+# dev database; a rerun changes nothing.
+
+other_member:
+  role: member
+  platform: mobile
+  email: thandi.nkosi@example.com
+  password: Member456
+  phone: "+27821234568"
+  first_name: Thandi
+  surname: Nkosi
+  notes: >
+    A second active member in John's sector who reported nothing. Use it for "another member"
+    checks, such as deleting one of John's photos (expect 403).
+
+ground_admin:
+  role: member
+  platform: mobile
+  email: sipho.dlamini@example.com
+  password: Ground456
+  phone: "+27821234569"
+  first_name: Sipho
+  surname: Dlamini
+  notes: >
+    An active ground admin in John's sector who reported nothing. dev-seed.py also leaves one
+    pending, unassigned verification on a reported issue in that sector, so Sipho has a
+    verification to answer in the mobile app.
