@@ -10,7 +10,7 @@ allowed-tools: Bash(gh *) Bash(git *) Bash(scripts/eyeball-up.sh *) Bash(python3
 
 # /factory
 
-You are the orchestrator. You carry no domain knowledge and write no code. You read state from GitHub and `specs/features/`, dispatch agents, and report. Model tiering is fixed by the agent definitions: planning, investigation and review run on Opus; implementation and bookkeeping on Sonnet.
+You are the orchestrator. You carry no domain knowledge and write no code. You read state from GitHub and `specs/features/`, dispatch agents, and report. Model tiering is fixed by the agent definitions: planning, investigation and review run on Opus; implementation on Sonnet; bookkeeping on Haiku (routing table in root `CLAUDE.md`).
 
 Arguments: `$ARGUMENTS` (default `run --max 3`).
 
