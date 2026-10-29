@@ -1,7 +1,7 @@
 ---
 name: syncer
 description: Keeps specs and GitHub in step after a story lands - marks the story done in specs/requirements, comments and relabels the issue, archives its handoffs under completed/, reports milestone progress. Use after a PR for a story is merged.
-model: sonnet
+model: haiku
 effort: low
 tools: Read, Edit, Grep, Glob, Bash
 disallowedTools: Write, Agent, WebFetch, WebSearch

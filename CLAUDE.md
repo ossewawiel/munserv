@@ -62,7 +62,17 @@ Delivery runs through agents defined in `.claude/agents/` and orchestrated by `/
 | `designer` | Opus | UI story → canvas from tokens and registry, one artboard per screen and state; you approve it before implementation |
 | `design-reviewer` | Opus | Screenshots and goldens of the build against the approved canvas and the registry |
 | `reviewer` | Opus | PR against handoff and domain: verdict per acceptance criterion |
-| `syncer` | Sonnet | After merge: specs status, issue labels, handoff archive |
+| `syncer` | Haiku | After merge: specs status, issue labels, handoff archive |
+
+Model routing (set in each definition's frontmatter; the `factory` skill itself runs on sonnet, effort low):
+
+| Agent | Model | Effort |
+|---|---|---|
+| `feature-planner`, `investigator`, `reviewer`, `designer`, `design-reviewer` | opus | high |
+| `backend-implementer`, `web-implementer`, `mobile-implementer` | sonnet | medium |
+| `clerk` (status tables, label and milestone fixes, board sync, handoff lint; never edits code), `syncer` | haiku | low |
+
+CI-fix retries are dispatched with `effort: low`.
 
 Handoffs are written from `specs/features/_template/story-handoff.md` and live under `specs/features/<feature>/`. Human gates: story approval, canvas approval for UI stories, eyeball pass, and PR merge. Eyeball is a human running the Eyeball section of the factory console (`./dashboard.sh`) against the handoff's `Eyeball` block after the reviewer approves; it labels the PR `eyeball:pass` or `eyeball:fail` and files a `source:eyeball` bug for every failed check. Eyeball is run remotely: after the reviewer approves, `scripts/eyeball-up.sh <pr>` checks the PR out, restarts only the services that changed and prints the links, which the user opens from another machine (`specs/architecture/decisions/007-remote-eyeball.md`). The console (`scripts/console/`, see `scripts/console/README.md`) also surfaces milestones, the PR pipeline, the domain language and requirements, and design canvases and registry - it replaces the old `scripts/eyeball.py` dashboard. `/factory status` shows the queue; `/factory run` dispatches up to three stories. Progress is public at https://ossewawiel.github.io/munserv/dashboard/ and on the board https://github.com/users/ossewawiel/projects/5 (`scripts/sync-board.py` mirrors labels onto it).
 
