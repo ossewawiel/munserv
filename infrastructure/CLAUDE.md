@@ -23,68 +23,30 @@ curl -s "localhost:8026/api/v1/message/$(curl -s 'localhost:8026/api/v1/search?q
 
 ```bash
 cd infrastructure/docker
-docker compose up -d                 # start
-docker compose down -v && docker compose up -d   # reset (destroys data)
+docker compose up -d                              # start
+docker compose down                               # stop
+docker compose down -v && docker compose up -d    # reset (destroys data)
 psql postgresql://munserv:munserv_dev@localhost:5435/munserv_dev
-
-# Stop services
-docker compose down
-
-# Reset database (destroys all data)
-docker compose down -v && docker compose up -d
 ```
+Backend tests do not use this database; they start their own PostGIS container through Testcontainers.
 
-### Services
-
-| Service | Image | Port |
-|---------|-------|------|
-| PostgreSQL + PostGIS | postgis/postgis:18-3.6 | 5435 (host) → 5432 |
-
-### Connection Strings
-
-```
-PostgreSQL: postgresql://munserv:munserv_dev@localhost:5435/munserv_dev
-```
-
----
-
-## Port Allocations
-
+## Port allocations
 | Service | Port |
-|---------|------|
-| PostgreSQL | 5435 |
+|---|---|
+| PostgreSQL (host, maps to 5432) | 5435 |
 | Mailpit SMTP / UI | 1026 / 8026 |
 | Backend API | 8080 |
 | Mock API | 3001 |
-| Web Dev Server | 3000 |
+| Web dev server | 3000 |
+| Factory console | 3999 |
 
 Remote eyeball exposes web 3000, backend 8080 and the console 3999 to the LAN; PostgreSQL 5435 and Storybook 6006 stay local.
-
----
 
 ## Remote eyeball
 
 The factory console runs as a systemd user unit so a tester on another machine can eyeball PRs while the services run on this laptop. Files: `infrastructure/systemd/munserv-console.service` (installed by `scripts/install-console-service.sh`, no sudo), the `remote:` key in `scripts/console/project.yaml`, and `scripts/eyeball-up.sh <pr>`. The firewall rule is opened once by a person: the console prints the exact command (`sudo ufw allow from <subnet> to any port 3000,3999,8080 proto tcp`). Design and risks: `specs/architecture/decisions/007-remote-eyeball.md`; usage: `scripts/console/README.md`.
 
----
-
-## Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `DB_URL` | Database JDBC URL |
-| `DB_USER` | Database user |
-| `DB_PASSWORD` | Database password |
-| `R2_BUCKET` | Cloudflare R2 bucket |
-| `R2_ACCESS_KEY` | R2 access key |
-| `R2_SECRET_KEY` | R2 secret key |
-| `JWT_SECRET` | JWT signing key |
-| `SMS_API_KEY` | SMS provider key |
-| `GITHUB_TOKEN` | GitHub PAT for MCP |
-
----
-
-## Folder Structure
+## Folder structure
 
 ```
 infrastructure/
@@ -102,7 +64,6 @@ infrastructure/
 │   └── data/
 └── scripts/                     # Utility scripts
 ```
-Backend tests do not use this database; they start their own PostGIS container through Testcontainers.
 
 ## Environment variables (backend)
 | Variable | Purpose | Default |
