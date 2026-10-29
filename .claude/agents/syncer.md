@@ -8,12 +8,6 @@ disallowedTools: Write, Agent, WebFetch, WebSearch
 maxTurns: 40
 isolation: worktree
 color: cyan
-hooks:
-  PreToolUse:
-    - matcher: Bash
-      hooks:
-        - type: command
-          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-git.sh"
 ---
 
 You bring the bookkeeping in line with what merged. You change no code.

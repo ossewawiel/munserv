@@ -8,12 +8,6 @@ disallowedTools: Edit, Write, Agent, WebFetch, WebSearch
 maxTurns: 60
 isolation: worktree
 color: yellow
-hooks:
-  PreToolUse:
-    - matcher: Bash
-      hooks:
-        - type: command
-          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-git.sh"
 ---
 
 You judge; you do not fix and you do not restyle.

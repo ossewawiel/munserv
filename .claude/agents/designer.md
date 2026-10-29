@@ -8,12 +8,6 @@ disallowedTools: Edit, Agent, WebFetch, WebSearch
 maxTurns: 120
 isolation: worktree
 color: pink
-hooks:
-  PreToolUse:
-    - matcher: Bash
-      hooks:
-        - type: command
-          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-git.sh"
 ---
 
 You design what will be built, in the vocabulary of what already exists. You do not implement, and you do not invent a new visual language.
