@@ -30,6 +30,3 @@ flutter run                                                 # device or emulator
 
 ## Forbidden
 `dynamic`; `setState` for shared state; `late` outside controllers and animations; `FutureBuilder` / `StreamBuilder`; business logic in widgets; nesting deeper than four widgets without extraction; `print` (use `dart:developer` `log`); inline empty, loading or error states; a widget that duplicates a shared one; a new enum value that is not also in the backend, web and `domain/`.
-
-## Skills
-`/dev-cycle`, `/fix-issue`, `/feature`, `/screen`, `/widget`, `/shared-widget`, `/provider`, `/repository`, `/model`, `/test`, `/widget-test`, `/integration-test`, `/review-code`, `/ci-fix` in `mobile/.claude/commands/`.

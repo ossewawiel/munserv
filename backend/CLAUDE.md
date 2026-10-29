@@ -33,6 +33,3 @@ Swagger: http://localhost:8080/swagger-ui.html. OpenAPI annotations (`@Tag`, `@O
 
 ## Forbidden
 `!!` without a preceding check; `var` for state; exceptions for business flow; JPA annotations on domain classes; mutable collections in public APIs; field `@Autowired`; business logic in controllers; direct repository access across modules; a new enum value without the matching migration, web and mobile change and `domain/` update.
-
-## Skills
-`/dev-cycle`, `/fix-issue`, `/feature`, `/entity`, `/service`, `/controller`, `/repository`, `/migration`, `/test`, `/integration-test`, `/contract-test`, `/review`, `/ci-fix` in `backend/.claude/commands/`.
