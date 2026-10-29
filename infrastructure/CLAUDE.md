@@ -12,6 +12,15 @@ Ports 1025, 5432, 5433, 5434, 6379 and 8025 belong to other projects on the dev 
 
 `python3 scripts/dev-seed.py` adds the accounts Flyway does not seed (a second member, a ground admin, a pending verification) through the API; it needs the mailpit profile. The accounts are listed in `scripts/console/accounts.yaml`.
 
+The user has a terminal only on this laptop, so read Mailpit through its API, not its UI:
+
+```bash
+# Subject, recipient and time of the ten newest mails
+curl -s 'localhost:8026/api/v1/messages?limit=10' | python3 -c 'import json,sys; [print(m["Created"][:19], m["To"][0]["Address"], "|", m["Subject"]) for m in json.load(sys.stdin)["messages"]]'
+# Text of the newest mail to one address
+curl -s "localhost:8026/api/v1/message/$(curl -s 'localhost:8026/api/v1/search?query=to:thandi.nkosi@example.com' | python3 -c 'import json,sys; print(json.load(sys.stdin)["messages"][0]["ID"])')" | python3 -c 'import json,sys; print(json.load(sys.stdin)["Text"])'
+```
+
 ```bash
 cd infrastructure/docker
 docker compose up -d                 # start

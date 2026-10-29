@@ -24,7 +24,7 @@ Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patt
 | What | Command | Where |
 |---|---|---|
 | Dev database (PostGIS 18) | `cd infrastructure/docker && docker compose up -d` | localhost:5435 |
-| Backend | `cd backend && ./gradlew bootRun` | http://localhost:8080 (Swagger at `/swagger-ui.html`); add `SPRING_PROFILES_ACTIVE=local,mailpit` to send mail to Mailpit (http://localhost:8026) |
+| Backend | `cd backend && ./gradlew bootRun` | http://localhost:8080 (Swagger at `/swagger-ui.html`); add `SPRING_PROFILES_ACTIVE=local,mailpit` to send mail to Mailpit (read it with the `curl` commands in `infrastructure/CLAUDE.md`) |
 | Dev accounts | `python3 scripts/dev-seed.py` | second member, ground admin and a pending verification, listed in `scripts/console/accounts.yaml` |
 | Web | `cd web && pnpm dev` | http://localhost:3000, login `admin@ward42.example.com` / `admin123` |
 | Mobile | `cd mobile && flutter run` | emulator reaches the backend on 10.0.2.2:8080 |
@@ -34,6 +34,9 @@ Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patt
 
 ## Quality gate
 CI (`.github/workflows/ci.yml`) is required on `master`: domain-language validation, backend ktlint + tests (Testcontainers) + build, web lint + `tsc -b` + Vitest + build, mobile format + analyze (infos fatal) + tests + debug APK. Run the same commands locally before opening a PR. Squash-merge; conventional commit titles (`feat(web): ...`, scopes: backend, web, mobile, db, api, infra, specs, ci).
+
+## When a person must act
+The user reaches this laptop through a terminal only: no desktop and no browser on it. Do every step you can yourself. When a step needs the user (sudo, a secret, an interactive login, a judgement), end your message with the exact commands in one fenced `bash` block, in the order to run them, each preceded by a one-line `#` comment saying what it does. Never point the user at a `localhost` URL or a desktop app on the laptop: give a `curl` command instead, or a LAN link that `scripts/eyeball-up.sh` prints. Links on github.com and claude.ai are fine; they open on the user's own machine. Plan steps, factory reports and handoff Eyeball blocks follow the same rule.
 
 ## The factory
 Delivery runs through agents defined in `.claude/agents/` and orchestrated by `/factory`:
