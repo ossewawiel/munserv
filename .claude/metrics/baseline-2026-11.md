@@ -128,3 +128,16 @@ Count of first-parent commits on master, ISO weeks, last 8 weeks to 2026-10-29.
 | Merges, ISO week 2026-W44 | 19 | 27 (master moved on; weeks W38-W43 still 0) |
 
 Skills, MCP and PR rows are unchanged by design: this PR touches cards and one skill example file only.
+
+## After follow-up (chore/context-diet-v3)
+
+The done check for S08 needs a backend dispatch at least 9 KB lighter than baseline and no card over 80 lines. The first PR (#183) fell short on both: 31,247 bytes and `infrastructure/CLAUDE.md` at 88 lines.
+
+| Measure | Baseline | After #183 | After this PR |
+|---|---|---|---|
+| backend-implementer start bytes | 37,642 | 31,247 | 28,599 (-9,043 vs baseline) |
+| `backend-patterns` skill bytes | 13,007 | 13,007 | 10,359 |
+| `infrastructure/CLAUDE.md` lines | 127 | 88 | 69 |
+| Longest card in lines | 351 (backend) | 88 (infrastructure) | 80 (root `CLAUDE.md`) |
+
+Removed from the skill because a card or generic Kotlin already says it: Null Handling, Cross-Module Communication, the annotation table, the framework list, the Testcontainers prose and Boot 4 package names, Kotest and MockK snippets, the Swagger URL block, the test commands. Removed from the infrastructure card: the folder tree (`ls` shows it).
