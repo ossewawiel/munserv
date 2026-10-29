@@ -16,11 +16,12 @@ from textual.containers import Horizontal, Vertical
 from textual.theme import Theme
 from textual.widgets import DataTable, Footer, Log, Static
 
-from .api import ConsoleApi, ConsoleError, Remote, Service, State
+from .api import ConsoleApi, ConsoleError, Remote, Service, Showcase, State
 
 POLL_SECONDS = 2.0
 STOP_WAIT_SECONDS = 30
 EYEBALL_STACK = ("db", "backend", "web")
+BUILD_LOG_ROW = "demo-build"
 
 # House palette (~/.claude/skills/house-style/design.md, dark set): graphite ground, one warm accent.
 HOUSE_THEME = Theme(
@@ -73,6 +74,15 @@ def note_cell(service: Service) -> Text:
     return Text("")
 
 
+def showcase_summary(showcase: Showcase) -> str:
+    """One phrase: the demo worktree's SHA, whether the build matches it, and how far master is."""
+    if not showcase.exists:
+        return "no worktree yet (u)"
+    built = "built" if showcase.built_sha == showcase.sha else f"built {showcase.built_sha or 'never'}"
+    behind = "" if showcase.master_sha in ("", showcase.sha) else f", master {showcase.master_sha}"
+    return f"{showcase.sha} {built}{behind}"
+
+
 class OperatorApp(App):
     TITLE = "MunServ operator"
     CSS_PATH = "app.tcss"
@@ -83,6 +93,10 @@ class OperatorApp(App):
         Binding("a", "start_stack", "Start db+backend+web"),
         Binding("c", "copy('console')", "Copy console link"),
         Binding("w", "copy('web')", "Copy web link"),
+        Binding("u", "showcase('update')", "Demo: update from master"),
+        Binding("b", "showcase('build')", "Demo: build"),
+        Binding("d", "showcase('start')", "Demo: start"),
+        Binding("e", "showcase('stop')", "Demo: stop"),
         Binding("f", "refresh", "Refresh"),
         Binding("q", "quit", "Quit"),
     ]
@@ -156,6 +170,8 @@ class OperatorApp(App):
             ("MunServ operator", "bold #F0873F"), (" │ checkout ", "#9AA3B2"),
             (f"{checkout.branch or 'detached'}@{checkout.sha}", "#E6E9EE"), (" │ laptop ", "#9AA3B2"), (host, "#E6E9EE"),
         )
+        if state.showcase:
+            top.append_text(Text.assemble((" │ demo ", "#9AA3B2"), (showcase_summary(state.showcase), "#E6E9EE")))
         self.query_one("#topbar", Static).update(top)
         self.fill_table(state.services, checkout.sha)
         if name and self.selected is None:
@@ -199,6 +215,11 @@ class OperatorApp(App):
                  if remote.urls.get(key)]
         if remote.firewall_command:
             lines.append(Text.assemble(("Firewall ", "#9AA3B2"), (remote.firewall_command, "#E5B73B")))
+        for key, label in (("web", "Demo web"), ("swagger", "Demo API")):
+            if remote.showcase_urls.get(key):
+                lines.append(Text.assemble((f"{label:<9}", "#9AA3B2"), (remote.showcase_urls[key], "#E6E9EE")))
+        if remote.showcase_firewall_command:
+            lines.append(Text.assemble(("Demo fw  ", "#9AA3B2"), (remote.showcase_firewall_command, "#E5B73B")))
         self.query_one("#links", Static).update(Text("\n").join(lines))
 
     def show_links_error(self, message: str) -> None:
@@ -249,6 +270,29 @@ class OperatorApp(App):
         except ConsoleError as err:
             self.call_from_thread(self.notify, str(err), severity="error")
             return
+        self.call_from_thread(self.poll)
+
+    def action_showcase(self, verb: str) -> None:
+        if verb == "build":
+            self.select_row(BUILD_LOG_ROW)  # the build log fills the log pane
+        self.run_showcase_action(verb)
+
+    def select_row(self, name: str) -> None:
+        table = self.query_one("#services", DataTable)
+        keys = [str(key.value) for key in table.rows]
+        if name in keys:
+            table.move_cursor(row=keys.index(name))
+
+    @work(thread=True, group="showcase")
+    def run_showcase_action(self, verb: str) -> None:
+        actions = {"update": self.api.showcase_update, "build": self.api.showcase_build,
+                   "start": self.api.showcase_start, "stop": self.api.showcase_stop}
+        self.call_from_thread(self.notify, f"demo {verb}: working")
+        try:
+            message = actions[verb]()
+            self.call_from_thread(self.notify, message or f"demo {verb}: done")
+        except ConsoleError as err:
+            self.call_from_thread(self.notify, str(err), severity="error")
         self.call_from_thread(self.poll)
 
     def action_copy(self, key: str) -> None:

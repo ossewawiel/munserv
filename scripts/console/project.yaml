@@ -35,6 +35,18 @@ remote:
   swagger_path: /swagger-ui.html
   ensure_services: [db, backend, web]
 
+# Showcase stack (scripts/console/showcase.py): a second, independent run of origin/master for demos.
+# Ports here must match the demo-* entries in services.yaml and backend application-demo.yml.
+showcase:
+  checkout_dir: munserv-demo
+  database: munserv_demo
+  backend_port: 8090
+  web_port: 4000
+  db_host: localhost
+  db_port: 5435
+  db_user: munserv
+  db_password: munserv_dev
+
 sections:
   overview: true
   knowledge: true

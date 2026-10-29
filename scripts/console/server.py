@@ -15,7 +15,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import cost, ensure, eyeball, github, knowledge, mobile, network, release, remote, services
+from . import cost, ensure, eyeball, github, knowledge, mobile, network, release, remote, services, showcase
 from .config import CONFIG, ROOT
 from .gitops import ApiError, CommandError, checkout_branch, current_branch, current_sha, default_checkout, \
     ensure_checked_out, is_worktree, local_files_copied, resolve_checkout_dir, validate_branch, validate_name
@@ -131,8 +131,10 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/state":
             return self._api_state()
         if path == "/api/remote":
-            return self._json(remote.snapshot(self.server.server_address[1],
-                                              remote.is_loopback(self.client_address[0])))
+            snapshot = remote.snapshot(self.server.server_address[1], remote.is_loopback(self.client_address[0]))
+            if snapshot.get("enabled"):
+                snapshot["showcase"] = showcase.remote_block()
+            return self._json(snapshot)
         if path == "/api/github":
             return self._json(github.get_snapshot())
         if path == "/api/knowledge":
@@ -186,6 +188,7 @@ class Handler(BaseHTTPRequestHandler):
                          "local_files_copied": local_files_copied(self.checkout)},
             "services": services.state_snapshot(self.checkout),
             "jobs": services.jobs_snapshot(),
+            "showcase": showcase.snapshot(),
             "otp": services.latest_otp(self.checkout),
             "project": {"name": CONFIG.name, "accent": CONFIG.accent, "links": CONFIG.links,
                         "sections": {s: CONFIG.section_enabled(s) for s in
@@ -225,8 +228,22 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"ok": True, "job": job})
         if path == "/api/service/start":
             name = validate_name(body.get("name", ""), "service name")
+            if showcase.owns(name):
+                return self._json({"ok": True, "message": "; ".join(showcase.start(self.checkout, (name,)))})
             msg = services.start_service(name, self.checkout)
             return self._json({"ok": True, "message": msg})
+        if path == "/api/showcase/update":
+            try:
+                sha = showcase.update()
+            except CommandError as e:
+                raise ApiError(str(e), 409) from e
+            return self._json({"ok": True, "message": f"showcase worktree at origin/master {sha}"})
+        if path == "/api/showcase/build":
+            return self._json({"ok": True, "job": showcase.start_build(self.checkout)})
+        if path == "/api/showcase/start":
+            return self._json({"ok": True, "message": "; ".join(showcase.start(self.checkout))})
+        if path == "/api/showcase/stop":
+            return self._json({"ok": True, "message": "; ".join(showcase.stop(self.checkout))})
         if path == "/api/service/stop":
             name = validate_name(body.get("name", ""), "service name")
             msg = services.stop_service(name, self.checkout)

@@ -23,7 +23,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from console import cost, ensure, eyeball, gitops, knowledge, mobile, network, remote, services  # noqa: E402
+from console import cost, ensure, eyeball, gitops, knowledge, mobile, network, remote, services, showcase  # noqa: E402
 from console.config import Config  # noqa: E402
 from console.pipeline import classify_pr  # noqa: E402
 from console.server import Handler  # noqa: E402
@@ -1531,6 +1531,87 @@ class CostAggregateTests(unittest.TestCase):
             snapshot = cost.get_snapshot()
         self.assertFalse(snapshot["available"])
         self.assertEqual(snapshot["agent"], [])
+
+
+class ShowcaseTests(unittest.TestCase):
+    def test_config_defaults_place_the_worktree_beside_the_repo(self):
+        settings = showcase.cfg()
+        self.assertEqual(settings["checkout_dir"], ROOT.parent / "munserv-demo")
+        self.assertEqual((settings["backend_port"], settings["web_port"], settings["database"]), (8090, 4000, "munserv_demo"))
+
+    def test_demo_services_exist_with_the_showcase_ports(self):
+        cfg = services.services_config()
+        self.assertIn(":8090/", cfg["demo-backend"]["health"])
+        self.assertTrue(cfg["demo-web"]["health"].endswith(":4000"))
+        self.assertTrue(cfg["demo-build"]["manual"])
+        self.assertTrue(all(cfg[name].get("showcase") for name in ("demo-backend", "demo-web", "demo-build")))
+
+    def test_database_commands_create_only_the_showcase_database(self):
+        probe, create, extensions = showcase.database_commands(showcase.cfg())
+        self.assertIn("datname = 'munserv_demo'", probe[-1])
+        self.assertEqual(create[-1], "CREATE DATABASE munserv_demo")
+        self.assertIn("munserv_demo", extensions)
+        self.assertIn("postgis", extensions[-1])
+
+    def test_database_name_is_validated_before_it_reaches_sql(self):
+        with self.assertRaises(gitops.ApiError):
+            showcase.database_commands({**showcase.cfg(), "database": "x; DROP DATABASE munserv_dev"})
+
+    def test_backend_command_runs_the_jar_under_the_demo_profile(self):
+        command = showcase.backend_command(Path("/w/munserv-demo/backend/build/libs/app.jar"))
+        self.assertIn("SPRING_PROFILES_ACTIVE=local,mailpit,demo", command)
+        self.assertTrue(command.endswith("java -jar /w/munserv-demo/backend/build/libs/app.jar"))
+
+    def test_web_is_served_by_vite_preview_on_4000_and_proxied_to_8090(self):
+        command = showcase.web_command()
+        self.assertIn("PREVIEW_API_TARGET=http://localhost:8090", command)
+        self.assertIn("vite preview", command)
+        self.assertIn("--port 4000 --strictPort", command)
+        self.assertEqual(showcase.web_build_env()["VITE_API_URL"], "/api/v1")
+
+    def test_built_jar_skips_the_plain_jar(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            libs = Path(tmp) / "backend" / "build" / "libs"
+            libs.mkdir(parents=True)
+            (libs / "app-plain.jar").write_text("")
+            (libs / "app.jar").write_text("")
+            with patch.object(showcase, "checkout", return_value=Path(tmp)):
+                self.assertEqual(showcase.built_jar(), libs / "app.jar")
+
+    def test_start_without_a_build_is_refused(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(showcase, "checkout", return_value=Path(tmp)):
+            with self.assertRaises(gitops.ApiError) as raised:
+                showcase.start(Path(tmp))
+        self.assertEqual(raised.exception.status, 409)
+
+    def test_update_creates_a_detached_worktree_then_follows_origin_master(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            origin, repo, demo = tmp_path / "origin.git", tmp_path / "repo", tmp_path / "demo"
+
+            def git(*args, cwd=repo):
+                return subprocess.check_output(["git", "-C", str(cwd), *args], text=True).strip()
+
+            subprocess.check_call(["git", "init", "-q", "--bare", "-b", "master", str(origin)])
+            subprocess.check_call(["git", "clone", "-q", str(origin), str(repo)], stderr=subprocess.DEVNULL)
+            git("config", "user.email", "t@example.com")
+            git("config", "user.name", "t")
+            (repo / "a.txt").write_text("1")
+            git("add", ".")
+            git("commit", "-qm", "one")
+            git("push", "-q", "origin", "HEAD:master")
+            with patch.object(showcase, "ROOT", repo), patch.object(showcase, "checkout", return_value=demo), \
+                    patch.object(showcase, "copy_local_files"):
+                first = showcase.update()
+                self.assertEqual(first, git("rev-parse", "--short", "HEAD"))
+                self.assertEqual(git("rev-parse", "--abbrev-ref", "HEAD", cwd=demo), "HEAD")  # detached
+                (repo / "a.txt").write_text("2")
+                git("commit", "-qam", "two")
+                git("push", "-q", "origin", "HEAD:master")
+                second = showcase.update()
+            self.assertEqual(second, git("rev-parse", "--short", "HEAD"))
+            self.assertNotEqual(first, second)
+            self.assertEqual((demo / "a.txt").read_text(), "2")
 
 
 if __name__ == "__main__":

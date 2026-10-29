@@ -54,7 +54,9 @@ class StubConsole:
                 url = urlparse(self.path)
                 if url.path == "/api/state":
                     return self._json({"checkout": {"path": "/x", "branch": "master", "sha": "a222098abcdef"},
-                                       "services": list(stub.services.values())})
+                                       "services": list(stub.services.values()),
+                                       "showcase": {"exists": True, "sha": "b111111", "built_sha": "a000000",
+                                                    "master_sha": "c222222"}})
                 if url.path == "/api/remote":
                     return self._json({"host": "79.6.23.52", "urls": {"web": "http://79.6.23.52:3000",
                                        "swagger": "http://79.6.23.52:8080/swagger-ui.html",
@@ -66,6 +68,10 @@ class StubConsole:
                 self._json({"error": "not found"}, 404)
 
             def do_POST(self) -> None:
+                if self.path.startswith("/api/showcase/"):
+                    verb = self.path.rsplit("/", 1)[-1]
+                    stub.posts.append(("showcase", verb))
+                    return self._json({"ok": True, "message": f"showcase {verb}", "job": {"status": "running"}})
                 if self.path == "/api/refresh":
                     stub.posts.append(("refresh", ""))
                     return self._json({"ok": True})
@@ -111,6 +117,19 @@ class TuiTest(unittest.TestCase):
             row = lambda key: [str(table.get_cell(key, c)) for c in ("port", "health", "sha")]
             self.assertEqual(row("db"), ["5435", "healthy", "a222098"])
             self.assertEqual(row("web"), ["3000", "down", ""])
+        self.run_app(scenario)
+
+    def test_demo_keys_post_the_showcase_actions(self) -> None:
+        async def scenario(app, pilot) -> None:
+            for key, verb in (("u", "update"), ("b", "build"), ("d", "start"), ("e", "stop")):
+                await pilot.press(key)
+                await wait_for(pilot, lambda verb=verb: ("showcase", verb) in self.stub.posts)
+        self.run_app(scenario)
+
+    def test_top_bar_summarises_the_demo_worktree(self) -> None:
+        async def scenario(app, pilot) -> None:
+            await wait_for(pilot, lambda: "demo" in str(app.query_one("#topbar").render()))
+            self.assertIn("b111111 built a000000, master c222222", str(app.query_one("#topbar").render()))
         self.run_app(scenario)
 
     def test_refresh_key_posts_to_the_console(self) -> None:

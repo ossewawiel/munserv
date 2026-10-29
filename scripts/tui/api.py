@@ -11,10 +11,11 @@ import json
 import urllib.error
 import urllib.parse
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 DEFAULT_BASE_URL = "http://localhost:3999"
 TIMEOUT_SECONDS = 10
+UPDATE_TIMEOUT_SECONDS = 120  # the showcase update runs git fetch inside the request
 
 
 class ConsoleError(Exception):
@@ -83,9 +84,18 @@ class Checkout:
 
 
 @dataclass(frozen=True)
+class Showcase:
+    exists: bool
+    sha: str
+    built_sha: str
+    master_sha: str
+
+
+@dataclass(frozen=True)
 class State:
     checkout: Checkout
     services: tuple[Service, ...]
+    showcase: Showcase | None = None
 
 
 @dataclass(frozen=True)
@@ -93,19 +103,21 @@ class Remote:
     host: str
     urls: dict[str, str]
     firewall_command: str
+    showcase_urls: dict[str, str] = field(default_factory=dict)
+    showcase_firewall_command: str = ""
 
 
 class ConsoleApi:
     def __init__(self, base_url: str = DEFAULT_BASE_URL) -> None:
         self.base_url = base_url.rstrip("/")
 
-    def _request(self, method: str, path: str, body: dict | None = None) -> dict:
+    def _request(self, method: str, path: str, body: dict | None = None, timeout: int = TIMEOUT_SECONDS) -> dict:
         data = json.dumps(body).encode() if body is not None else None
         req = urllib.request.Request(self.base_url + path, data=data, method=method)
         if data is not None:
             req.add_header("Content-Type", "application/json")
         try:
-            with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return json.loads(resp.read() or b"{}")
         except urllib.error.HTTPError as err:
             try:
@@ -126,7 +138,15 @@ class ConsoleApi:
                 sha=(checkout.get("sha") or "")[:7],
             ),
             services=tuple(Service.from_json(s) for s in data.get("services", [])),
+            showcase=self._showcase(data.get("showcase")),
         )
+
+    @staticmethod
+    def _showcase(data: dict | None) -> Showcase | None:
+        if not data:
+            return None
+        return Showcase(exists=bool(data.get("exists")), sha=data.get("sha") or "",
+                        built_sha=data.get("built_sha") or "", master_sha=data.get("master_sha") or "")
 
     def remote(self) -> Remote:
         data = self._request("GET", "/api/remote")
@@ -134,6 +154,8 @@ class ConsoleApi:
             host=data.get("host") or "localhost",
             urls=dict(data.get("urls") or {}),
             firewall_command=(data.get("firewall") or {}).get("command") or "",
+            showcase_urls=dict((data.get("showcase") or {}).get("urls") or {}),
+            showcase_firewall_command=((data.get("showcase") or {}).get("firewall") or {}).get("command") or "",
         )
 
     def refresh(self) -> None:
@@ -148,3 +170,16 @@ class ConsoleApi:
 
     def stop(self, name: str) -> str:
         return self._request("POST", "/api/service/stop", {"name": name}).get("message", "")
+
+    def showcase_update(self) -> str:
+        return self._request("POST", "/api/showcase/update", {}, timeout=UPDATE_TIMEOUT_SECONDS).get("message", "")
+
+    def showcase_build(self) -> str:
+        job = self._request("POST", "/api/showcase/build", {}).get("job") or {}
+        return f"showcase build {job.get('status', 'started')}"
+
+    def showcase_start(self) -> str:
+        return self._request("POST", "/api/showcase/start", {}).get("message", "")
+
+    def showcase_stop(self) -> str:
+        return self._request("POST", "/api/showcase/stop", {}).get("message", "")
