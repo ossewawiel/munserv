@@ -126,6 +126,10 @@ class Config:
         ]
 
     @property
+    def telemetry_dir(self) -> Path:
+        return self.root / self._raw().get("telemetry_dir", "infrastructure/telemetry/data")
+
+    @property
     def changelog(self) -> Path:
         return self.root / self._raw().get("changelog", "CHANGELOG.md")
 

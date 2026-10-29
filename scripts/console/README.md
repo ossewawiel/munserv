@@ -9,6 +9,8 @@ Run it with `./dashboard.sh` from the repo root, or directly with
 
 ## Sections
 
+Cost (Claude Code spend and tokens per day, agent, model and story, read from the OTLP metrics the telemetry collector writes; see `infrastructure/CLAUDE.md`).
+
 Overview (milestones, PR pipeline, eyeball-filed issues, quick links), Knowledge (domain language,
 requirements, ADRs), Design (canvases, component registry, colour tokens), Eyeball (candidates,
 guided checkout/prepare/start/test/submit, services, checklist), Release (latest tag, commits,
@@ -41,10 +43,11 @@ changelog, master CI, release checklist).
 | `registry_dir` | `design/registry` | Directory of component-registry markdown files. |
 | `canvases_dir` | `design/canvases` | Directory of `<feature>/canvas.json` design canvases. |
 | `tokens` | `design/tokens/color.tokens.json` | Path to a DTCG colour tokens file. |
+| `telemetry_dir` | `infrastructure/telemetry/data` | Directory holding the collector's `metrics.jsonl`, read by the Cost section. |
 | `changelog` | `CHANGELOG.md` | Path to the changelog. |
 | `remote` | disabled | Remote eyeball (see below): `enabled`, `bind` (default `0.0.0.0`), `token_file` (default `$XDG_STATE_HOME/<name>-console/token`, i.e. `~/.local/state/<name>-console/token`), `ports` (`web`, `backend`, `console` -- exposed to the LAN and named in the firewall command), `swagger_path` (default `/swagger-ui.html`), `ensure_services` (default `[db, backend, web]`, started in that order). `--remote` / `--local` override `enabled`. |
 | `links` | `{}` | Name -> URL quick links shown on Overview. |
-| `sections` | all enabled | `{overview: true, knowledge: true, design: true, eyeball: true, release: true}` -- set any to `false` to hide it. |
+| `sections` | all enabled | `{overview: true, knowledge: true, design: true, eyeball: true, release: true, cost: true}` -- set any to `false` to hide it. |
 | `repo` | detected via `gh repo view` | `owner/name` passed to every `gh --repo`; set only if detection is wrong. |
 | `local_files` | `[mise.local.toml, .tool-versions, .mise.toml, backend/src/main/resources/application-local.yml, web/.env]` | Paths (relative to the repo root) of untracked, machine-local config copied from the main repo into the checkout -- see "Local-only config" below. |
 

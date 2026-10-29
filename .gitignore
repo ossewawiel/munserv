@@ -101,3 +101,6 @@ site/dashboard/
 # Python bytecode caches
 __pycache__/
 *.pyc
+
+# Claude Code telemetry written by the otel-collector (docker compose --profile telemetry)
+infrastructure/telemetry/data/*.jsonl

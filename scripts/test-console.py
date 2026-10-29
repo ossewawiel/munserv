@@ -23,7 +23,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from console import ensure, eyeball, gitops, knowledge, mobile, network, remote, services  # noqa: E402
+from console import cost, ensure, eyeball, gitops, knowledge, mobile, network, remote, services  # noqa: E402
 from console.config import Config  # noqa: E402
 from console.pipeline import classify_pr  # noqa: E402
 from console.server import Handler  # noqa: E402
@@ -1476,6 +1476,61 @@ class EnsureReportTests(unittest.TestCase):
 
     def test_report_omits_the_firewall_block_in_local_mode(self) -> None:
         self.assertNotIn("First time", ensure.format_report({**self.RESULT, "firewall_command": None}))
+
+
+class CostAggregateTests(unittest.TestCase):
+    @staticmethod
+    def _point(value, nanos, **attrs):
+        return {"asDouble": value, "timeUnixNano": str(nanos),
+                "attributes": [{"key": k, "value": {"stringValue": v}} for k, v in attrs.items()]}
+
+    def _doc(self, metric, points, story=None):
+        resource = [{"key": "story.id", "value": {"stringValue": story}}] if story else []
+        return json.dumps({"resourceMetrics": [{"resource": {"attributes": resource},
+                           "scopeMetrics": [{"metrics": [{"name": metric, "sum": {"dataPoints": points}}]}]}]})
+
+    def _aggregate(self, lines: list[str]) -> dict:
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "metrics.jsonl"
+            path.write_bytes("\n".join(lines).encode())
+            return cost.aggregate(path)
+
+    def test_groups_cost_and_tokens_by_day_agent_model_and_story(self) -> None:
+        day1, day2 = 1_793_293_476_000_000_000, 1_793_293_476_000_000_000 + 2 * 86_400 * 10**9
+        result = self._aggregate([
+            self._doc(cost.COST_METRIC, [self._point(0.5, day1, model="opus"),
+                                         self._point(0.25, day2, model="haiku", **{"agent.name": "clerk"})], story="W1"),
+            self._doc(cost.TOKEN_METRIC, [self._point(100, day1, model="opus", type="output"),
+                                          self._point(7, day2, model="haiku", type="cacheRead",
+                                                      **{"agent.name": "clerk"})], story="W1"),
+        ])
+        self.assertAlmostEqual(result["total"]["cost"], 0.75)
+        by = lambda dim: {r["key"]: r for r in result[dim]}  # noqa: E731
+        self.assertEqual(set(by("agent")), {"main", "clerk"})
+        self.assertAlmostEqual(by("agent")["clerk"]["cost"], 0.25)
+        self.assertEqual(by("agent")["clerk"]["tokens"]["cacheRead"], 7)
+        self.assertEqual(by("model")["opus"]["tokens"]["output"], 100)
+        self.assertEqual(set(by("story")), {"W1"})
+        self.assertEqual(len(result["day"]), 2)
+        self.assertGreater(result["day"][0]["key"], result["day"][1]["key"])  # newest day first
+
+    def test_a_run_without_a_story_lands_under_none(self) -> None:
+        result = self._aggregate([self._doc(cost.COST_METRIC, [self._point(1.0, 10**18, model="m")])])
+        self.assertEqual([r["key"] for r in result["story"]], [cost.NO_STORY])
+
+    def test_ignores_other_metrics_blank_nul_padded_and_truncated_lines(self) -> None:
+        good = self._doc(cost.COST_METRIC, [self._point(2.0, 10**18, model="m")])
+        result = self._aggregate(["\0\0\0" + good, "", '{"resourceMetrics": [{"trunc',
+                                  self._doc("claude_code.session.count", [self._point(1, 10**18)])])
+        self.assertAlmostEqual(result["total"]["cost"], 2.0)
+
+    def test_a_missing_file_reports_unavailable_not_an_error(self) -> None:
+        with tempfile.TemporaryDirectory() as d, patch.object(cost.CONFIG, "_raw",
+                                                              return_value={"telemetry_dir": d + "/none"}):
+            cost._cache["key"] = None
+            snapshot = cost.get_snapshot()
+        self.assertFalse(snapshot["available"])
+        self.assertEqual(snapshot["agent"], [])
 
 
 if __name__ == "__main__":

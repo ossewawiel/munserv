@@ -4,6 +4,7 @@ import { knowledgeSection } from './sections/knowledge.js';
 import { designSection } from './sections/design.js';
 import { eyeballSection } from './sections/eyeball.js';
 import { releaseSection } from './sections/release.js';
+import { costSection } from './sections/cost.js';
 
 export function el(tag, attrs, ...children) {
   const e = document.createElement(tag);
@@ -38,6 +39,7 @@ const SECTIONS = {
   design: designSection,
   eyeball: eyeballSection,
   release: releaseSection,
+  cost: costSection,
 };
 
 const main = document.getElementById('main');
