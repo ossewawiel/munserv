@@ -1,25 +1,27 @@
 {
   "mcpServers": {
-    "memory": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ]
-    },
-    "fetch": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-fetch"
-      ]
-    },
     "postgres": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--network",
+        "host",
+        "-e",
+        "DATABASE_URI",
+        "crystaldba/postgres-mcp:0.3.0",
+        "--access-mode=restricted"
+      ],
+      "env": {
+        "DATABASE_URI": "${MUNSERV_DB_URL}"
+      }
+    },
+    "playwright": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://munserv:munserv_dev@localhost:5435/munserv_dev"
+        "@playwright/mcp"
       ]
     }
   }

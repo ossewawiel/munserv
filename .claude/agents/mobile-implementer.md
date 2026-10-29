@@ -3,7 +3,7 @@ name: mobile-implementer
 description: Implements one mobile (Flutter/Riverpod/Freezed) story or fix from its handoff under specs/features/<feature>/ in an isolated worktree, test-first, and does not finish until format, analyze and flutter test pass. Use for any change under mobile/ that already has a handoff.
 model: sonnet
 effort: medium
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash, mcp__plugin_dart-flutter_dart-mcp-server
 disallowedTools: Agent, WebFetch, WebSearch
 skills:
   - mobile-patterns
