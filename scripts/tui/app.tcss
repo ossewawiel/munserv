@@ -1,0 +1,66 @@
+/* House layout: graphite ground, hairline borders, uppercase eyebrows, one warm accent. */
+Screen {
+    background: $background;
+}
+
+* {
+    scrollbar-color: $panel-lighten-2;
+    scrollbar-color-hover: $primary 60%;
+    scrollbar-background: $background;
+    scrollbar-size-horizontal: 0;
+}
+
+#topbar {
+    height: 1;
+    padding: 0 1;
+    background: $surface;
+}
+
+#main {
+    height: 1fr;
+}
+
+#left {
+    width: 3fr;
+    min-width: 60;
+    padding: 0 1;
+}
+
+#right {
+    width: 4fr;
+    padding: 0 1;
+    border-left: vkey $panel;
+}
+
+.eyebrow {
+    height: 1;
+    margin: 1 0 0 0;
+    color: $foreground-muted;
+    text-style: bold;
+}
+
+#services {
+    height: auto;
+    max-height: 60%;
+    background: $background;
+}
+
+#services > .datatable--header {
+    background: $background;
+    color: $foreground-muted;
+}
+
+#services > .datatable--cursor {
+    background: $primary 25%;
+}
+
+#links {
+    height: auto;
+    padding: 0 0 1 0;
+}
+
+#log {
+    height: 1fr;
+    background: $surface;
+    border: none;
+}
