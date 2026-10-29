@@ -76,62 +76,7 @@ munserv/
 
 This project is built by an agent factory. Agents in `.claude/agents/` plan (Opus), implement (Sonnet, one story per isolated worktree, tests first), review (Opus) and sync bookkeeping (Sonnet); `/factory` orchestrates them and a human approves stories and merges PRs. `domain/` is the shared vocabulary and CI validates it against the code. See `CLAUDE.md` for the roster.
 
-### Project-Level Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `/add-story` | Add user story to requirements |
-| `/add-feature` | Create feature specification |
-| `/plan-feature` | Generate cross-platform implementation plan |
-| `/add-endpoint` | Add API endpoint to contract |
-| `/add-type` | Add shared type definition |
-| `/add-adr` | Create Architecture Decision Record |
-| `/add-pattern` | Add code pattern documentation |
-| `/update-readme` | Update README files |
-| `/sync-docs` | Validate documentation consistency |
-
-### Platform Skills
-
-Each platform has its own development skills:
-
-**Backend** (`cd backend`)
-| Skill | Purpose |
-|-------|---------|
-| `/dev-cycle` | Full TDD workflow |
-| `/entity` | Create JPA entity |
-| `/service` | Create service class |
-| `/controller` | Create REST controller |
-| `/repository` | Create Spring Data repository |
-| `/test` | Generate unit test |
-| `/contract-test` | Generate API contract test |
-| `/review` | Code review |
-
-**Web** (`cd web`)
-| Skill | Purpose |
-|-------|---------|
-| `/dev-cycle` | Full TDD workflow |
-| `/component` | Generate MUI component |
-| `/page` | Generate page with routing |
-| `/hook` | Create React Query hook |
-| `/api` | Add API endpoint function |
-| `/form` | Create form with validation |
-| `/test` | Generate Vitest test |
-| `/e2e` | Generate Playwright E2E test |
-| `/review` | Code review |
-
-**Mobile** (`cd mobile`)
-| Skill | Purpose |
-|-------|---------|
-| `/dev-cycle` | Full TDD workflow |
-| `/screen` | Generate screen with navigation |
-| `/widget` | Generate Flutter widget |
-| `/shared-widget` | Generate shared widget |
-| `/provider` | Create Riverpod provider |
-| `/repository` | Create repository class |
-| `/model` | Generate Freezed model |
-| `/test` | Generate unit test |
-| `/widget-test` | Generate widget test |
-| `/review-code` | Code review |
+Slash commands are retired; the factory section of `CLAUDE.md` describes how work is delivered.
 
 ### MCP Integrations
 

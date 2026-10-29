@@ -235,37 +235,7 @@ See `specs/architecture/standards-registry.md` for all coding standards and thei
 
 ## Working with Claude Agent
 
-### Available Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `/create-issue` | Create GitHub issue from conversation |
-| `/sync-github` | Sync specs ↔ GitHub issues |
-| `/close-handoff` | Mark handoff resolved, close issues |
-| `/generate-types` | Generate types from specs |
-| `/add-story` | Add user story to specs |
-| `/plan-feature` | Plan cross-platform feature |
-| `/add-endpoint` | Add API endpoint to contract |
-
-### Example Workflows
-
-**Bug investigation:**
-```
-I'm seeing an error when approving ground admins. The API returns 500.
-Can you investigate and create an issue?
-```
-
-**Feature planning:**
-```
-We need to add email notifications when issues change state.
-/plan-feature feature=email-notifications
-```
-
-**Type synchronization:**
-```
-I added a new enum value to the backend. Generate the TypeScript and Dart versions.
-/generate-types type=IssueState
-```
+Slash commands are retired; see the Factory section of `CLAUDE.md` for how work is delivered.
 
 ---
 

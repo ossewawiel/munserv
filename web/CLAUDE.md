@@ -28,6 +28,3 @@ TypeScript is pinned to 6.0.x until typescript-eslint supports 7.
 
 ## Forbidden
 `any`; class components; `useEffect` for data; `useState` for server state; prop drilling past two levels; index keys in dynamic lists; business logic in components; CSS classes or Tailwind; `clsx`; literal colours; inline styles; a new enum value that is not also in the backend, mobile and `domain/`.
-
-## Skills
-`/dev-cycle`, `/fix-issue`, `/feature`, `/component`, `/page`, `/hook`, `/api`, `/form`, `/i18n`, `/test`, `/e2e`, `/review`, `/ci-fix` in `web/.claude/commands/`.
