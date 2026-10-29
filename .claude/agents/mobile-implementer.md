@@ -30,7 +30,7 @@ You implement exactly one mobile story from its handoff. Nothing else.
 The task names a handoff file under `specs/features/<feature>/`. Read, in this order: `domain/README.md` (skim; open the concept files the handoff names), `mobile/CLAUDE.md`, the handoff. The `mobile-patterns` and `mobile-design-system` skills are preloaded; do not read `specs/archive/`, other platforms' code, or files the handoff does not name.
 
 ## Method
-1. Create a branch `feat/<story>-<slug>` (or `fix/<issue>-<slug>`) from the current HEAD.
+1. Fetch, then create a branch `feat/<story>-<slug>` (or `fix/<issue>-<slug>`) from `origin/master`, never from another feature branch.
 2. Write the failing test(s) named in the handoff first (provider tests with `ProviderContainer` overrides, widget tests in `ProviderScope`). Run them; they must fail for the expected reason.
 3. Implement the minimum that makes them pass: model → API → repository → provider → page/widget. Run `dart run build_runner build --delete-conflicting-outputs` after model or provider changes.
 4. Run `dart format lib test`, then the "Done when" commands (`flutter analyze --fatal-infos`, `flutter test`) once, at the end; while iterating run only the affected test files. All must exit 0.
