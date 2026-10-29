@@ -60,7 +60,14 @@ The factory console runs as a systemd user unit so a tester on another machine c
 `.github/workflows/ci.yml`: `domain` (language validation), `backend`, `web`, `mobile`, each path-filtered, plus the `CI status` aggregate that branch protection requires. Other workflows: `standards-check` (advisory), `validate-specs` (weekly), `generate-changelog` (on tags).
 
 ## MCP servers
-Declared in `.mcp.json`: `memory`, `fetch`, `postgres` (points at 5435). Set `GITHUB_TOKEN` to enable the GitHub server declared in `.claude/settings.json`; `gh` works without it.
+Servers live in `.mcp.json`; plugins in `enabledPlugins` of `.claude/settings.json`. Web fetch is the built-in `WebFetch` and GitHub goes through `gh`, so neither has a server. Export `MUNSERV_DB_URL` (for the dev database: `postgresql://munserv:munserv_dev@localhost:5435/munserv_dev`) before you start Claude Code.
+
+| Name | Kind | Runs | Used by | Notes |
+|---|---|---|---|---|
+| `postgres` | MCP server | `docker run` of `crystaldba/postgres-mcp:0.3.0`, `--access-mode=restricted`, `--network host`, URL from `MUNSERV_DB_URL` | `investigator` (`execute_sql`, `list_objects`, `get_object_details`) | Read-only; the restricted parser rejects writes and some functions such as `postgis_full_version()`. Check PostGIS with `pg_extension`. The PyPI package does not install (`pglast==7.2.0` is missing), so use the image. |
+| `playwright` | MCP server | `npx -y @playwright/mcp` | web UI checks in a session | Not granted to any agent. |
+| `typescript-lsp` | plugin (`claude-plugins-official`) | `typescript-language-server` on PATH | `web-implementer` (`LSP` tool) | Install once: `npm install -g typescript-language-server typescript`. |
+| `dart-flutter` | plugin (marketplace `flutter/agent-plugins`) | `dart mcp-server` from the Dart SDK on PATH, plus 25 Dart and Flutter skills | `mobile-implementer` (all `dart-mcp-server` tools) | Official Dart and Flutter team plugin, v1.0.7. Adds about 2.5k tokens to every session. |
 
 ## Mock API
 `infrastructure/mock-api` (Express) on port 3001 for mobile UI work without the backend: `npm start`, then `flutter run --dart-define=API_PORT=3001`.

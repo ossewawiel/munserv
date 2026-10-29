@@ -3,7 +3,7 @@ name: investigator
 description: Investigates a bug or failing behaviour to its root cause across backend, web, mobile and the database, then writes an investigation record and a fix handoff per affected platform. Use for any type:bug issue before an implementer touches it.
 model: opus
 effort: high
-tools: Read, Grep, Glob, Write, Bash, mcp__postgres__query
+tools: Read, Grep, Glob, Write, Bash, mcp__postgres__execute_sql, mcp__postgres__list_objects, mcp__postgres__get_object_details
 disallowedTools: Edit, Agent, WebFetch, WebSearch
 maxTurns: 80
 color: red

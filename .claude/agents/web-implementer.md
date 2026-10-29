@@ -3,7 +3,7 @@ name: web-implementer
 description: Implements one web (React/MUI/React Query) story or fix from its handoff under specs/features/<feature>/ in an isolated worktree, test-first, and does not finish until lint, typecheck and Vitest pass. Use for any change under web/ that already has a handoff.
 model: sonnet
 effort: medium
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash, LSP
 disallowedTools: Agent, WebFetch, WebSearch
 skills:
   - web-patterns
