@@ -29,7 +29,7 @@ You implement exactly one backend story from its handoff. Nothing else.
 The task names a handoff file under `specs/features/<feature>/`. Read, in this order: `domain/README.md` (skim; open the concept files the handoff names), `backend/CLAUDE.md`, the handoff. The `backend-patterns` skill is preloaded; do not read `specs/archive/`, other platforms' code, or files the handoff does not name unless a compile error forces you to.
 
 ## Method
-1. Create a branch `feat/<story>-<slug>` (or `fix/<issue>-<slug>`) from the current HEAD.
+1. Fetch, then create a branch `feat/<story>-<slug>` (or `fix/<issue>-<slug>`) from `origin/master`, never from another feature branch.
 2. Write the failing tests named in the handoff first (domain and service). Run them; they must fail for the expected reason.
 3. Implement the minimum that makes them pass, following the five patterns in `backend/CLAUDE.md`.
 4. Run `./gradlew ktlintFormat`, then the "Done when" commands from the handoff, once, at the end. While iterating use targeted `--tests` runs; the full suite takes five minutes and burns turns. All must exit 0.
