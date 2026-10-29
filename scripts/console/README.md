@@ -46,6 +46,7 @@ changelog, master CI, release checklist).
 | `telemetry_dir` | `infrastructure/telemetry/data` | Directory holding the collector's `metrics.jsonl`, read by the Cost section. |
 | `changelog` | `CHANGELOG.md` | Path to the changelog. |
 | `remote` | disabled | Remote eyeball (see below): `enabled`, `bind` (default `0.0.0.0`), `token_file` (default `$XDG_STATE_HOME/<name>-console/token`, i.e. `~/.local/state/<name>-console/token`), `ports` (`web`, `backend`, `console` -- exposed to the LAN and named in the firewall command), `swagger_path` (default `/swagger-ui.html`), `ensure_services` (default `[db, backend, web]`, started in that order). `--remote` / `--local` override `enabled`. |
+| `showcase` | see below | Showcase stack (`checkout_dir`, `database`, `backend_port`, `web_port`, `db_host`, `db_port`, `db_user`, `db_password`). The ports must match the `demo-*` entries in `services.yaml`. |
 | `links` | `{}` | Name -> URL quick links shown on Overview. |
 | `sections` | all enabled | `{overview: true, knowledge: true, design: true, eyeball: true, release: true, cost: true}` -- set any to `false` to hide it. |
 | `repo` | detected via `gh repo view` | `owner/name` passed to every `gh --repo`; set only if detection is wrong. |
@@ -152,3 +153,7 @@ in `start_timeout` fails the run with its last log line.
   requires Check out to have run first: `/api/prepare` and `/api/service/start-required` both
   accept a `branch` and check it out themselves if the checkout is missing or on another branch,
   failing with a 409 and the underlying git error text only if that checkout itself fails.
+
+## Showcase stack
+
+`showcase.py` runs a second copy of `origin/master` for demos: worktree `../<name>-demo` (detached, only follows `origin/master`), its own database, `java -jar` backend on 8090 and `vite preview` web on 4000. API: `POST /api/showcase/update|build|start|stop`; `/api/state` carries a `showcase` block (SHA, built SHA, master SHA) and `/api/remote` the demo links and firewall command. The `demo-backend`, `demo-web` and `demo-build` rows in `services.yaml` give it health dots and logs; `demo-build` holds the build log. The TUI binds `u`, `b`, `d`, `e`.

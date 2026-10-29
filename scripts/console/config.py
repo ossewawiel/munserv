@@ -152,6 +152,22 @@ class Config:
         }
 
     @property
+    def showcase(self) -> dict:
+        """Showcase stack settings (see showcase.py): the worktree directory name, its database,
+        the two ports and the PostgreSQL admin connection used to create that database."""
+        raw = self._raw().get("showcase") or {}
+        return {
+            "checkout_dir": self.root.parent / raw.get("checkout_dir", f"{self.name}-demo"),
+            "database": raw.get("database", f"{self.name}_demo"),
+            "backend_port": int(raw.get("backend_port", 8090)),
+            "web_port": int(raw.get("web_port", 4000)),
+            "db_host": raw.get("db_host", "localhost"),
+            "db_port": int(raw.get("db_port", 5435)),
+            "db_user": raw.get("db_user", self.name),
+            "db_password": raw.get("db_password", ""),
+        }
+
+    @property
     def links(self) -> dict:
         return self._raw().get("links") or {}
 

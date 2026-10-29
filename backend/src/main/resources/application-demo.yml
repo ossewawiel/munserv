@@ -1,0 +1,9 @@
+# Showcase stack (scripts/console/showcase.py): layered after local,mailpit as
+# SPRING_PROFILES_ACTIVE=local,mailpit,demo. Moves the backend to its own port and its own
+# database in the shared PostGIS container; nothing else differs from the dev run.
+server:
+  port: 8090
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5435/munserv_demo

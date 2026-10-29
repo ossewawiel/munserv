@@ -99,3 +99,24 @@ mobile:
   prepare:
     marker: .dart_tool
     command: flutter pub get
+
+# Showcase stack: a built copy of origin/master in its own worktree, started and stopped by
+# showcase.py (the cwd and start here only feed the service table; the ports must match the
+# `showcase` block of project.yaml). demo-build is the build log's row, not a process.
+demo-backend:
+  cwd: backend
+  showcase: true
+  health: http://localhost:8090/actuator/health/liveness
+  url: http://{host}:8090
+
+demo-web:
+  cwd: web
+  showcase: true
+  health: http://localhost:4000
+  url: http://{host}:4000
+
+demo-build:
+  cwd: .
+  showcase: true
+  manual: true
+  notes: Build log of the showcase stack (Update, then Build, then Start).
