@@ -1,0 +1,28 @@
+# Receives Claude Code's OTLP/HTTP metrics and logs and appends them, one OTLP JSON document per
+# line, to the files the factory console's Cost section reads.
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+
+exporters:
+  file/metrics:
+    path: /data/metrics.jsonl
+  file/logs:
+    path: /data/logs.jsonl
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [file/metrics]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [file/logs]

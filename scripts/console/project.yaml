@@ -41,3 +41,4 @@ sections:
   design: true
   eyeball: true
   release: true
+  cost: true

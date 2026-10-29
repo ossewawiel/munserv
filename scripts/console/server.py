@@ -15,7 +15,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import ensure, eyeball, github, knowledge, mobile, network, release, remote, services
+from . import cost, ensure, eyeball, github, knowledge, mobile, network, release, remote, services
 from .config import CONFIG, ROOT
 from .gitops import ApiError, CommandError, checkout_branch, current_branch, current_sha, default_checkout, \
     ensure_checked_out, is_worktree, local_files_copied, resolve_checkout_dir, validate_branch, validate_name
@@ -137,6 +137,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(github.get_snapshot())
         if path == "/api/knowledge":
             return self._api_knowledge()
+        if path == "/api/cost":
+            return self._json(cost.get_snapshot())
         if path == "/api/release":
             return self._json(release.get_snapshot())
         if path == "/api/eyeball/candidates":
@@ -187,7 +189,7 @@ class Handler(BaseHTTPRequestHandler):
             "otp": services.latest_otp(self.checkout),
             "project": {"name": CONFIG.name, "accent": CONFIG.accent, "links": CONFIG.links,
                         "sections": {s: CONFIG.section_enabled(s) for s in
-                                     ("overview", "knowledge", "design", "eyeball", "release")}},
+                                     ("overview", "knowledge", "design", "eyeball", "release", "cost")}},
             "fetched_at": time.time(),
         })
 

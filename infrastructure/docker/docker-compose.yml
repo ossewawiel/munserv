@@ -26,5 +26,20 @@ services:
       - "127.0.0.1:1026:1025"
       - "127.0.0.1:8026:8025"
 
+  # Collects Claude Code's OTLP metrics and logs for the console's Cost section:
+  # `docker compose --profile telemetry up -d`. Writes metrics.jsonl and logs.jsonl under
+  # infrastructure/telemetry/data (gitignored). Localhost only; 4318 is the OTLP/HTTP default.
+  otel-collector:
+    profiles: ["telemetry"]
+    image: otel/opentelemetry-collector-contrib:0.141.0
+    container_name: munserv-otel
+    user: "${TELEMETRY_UID:-1000}:${TELEMETRY_GID:-1000}"
+    command: ["--config=/etc/otelcol/config.yaml"]
+    ports:
+      - "127.0.0.1:4318:4318"
+    volumes:
+      - ../telemetry/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+      - ../telemetry/data:/data
+
 volumes:
   pgdata:
