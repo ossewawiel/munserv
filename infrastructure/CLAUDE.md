@@ -1,13 +1,16 @@
 # Infrastructure card
 
 ## Local services
-`infrastructure/docker/docker-compose.yml` runs the only local dependency:
+`infrastructure/docker/docker-compose.yml` runs the local dependencies:
 
 | Service | Image | Host port | Notes |
 |---|---|---|---|
 | PostgreSQL + PostGIS | `postgis/postgis:18-3.6` | 5435 | Volume mounted at `/var/lib/postgresql` as the 18 image requires |
+| Mailpit | `axllent/mailpit:v1.27` | 1026 SMTP, 8026 UI | Catches all mail from a backend run with `SPRING_PROFILES_ACTIVE=local,mailpit` (`application-mailpit.yml`); localhost only |
 
-Ports 5432, 5433, 5434 and 6379 belong to other projects on the dev machine; do not reuse them.
+Ports 1025, 5432, 5433, 5434, 6379 and 8025 belong to other projects on the dev machine; do not reuse them.
+
+`python3 scripts/dev-seed.py` adds the accounts Flyway does not seed (a second member, a ground admin, a pending verification) through the API; it needs the mailpit profile. The accounts are listed in `scripts/console/accounts.yaml`.
 
 ```bash
 cd infrastructure/docker
@@ -41,6 +44,7 @@ PostgreSQL: postgresql://munserv:munserv_dev@localhost:5435/munserv_dev
 | Service | Port |
 |---------|------|
 | PostgreSQL | 5435 |
+| Mailpit SMTP / UI | 1026 / 8026 |
 | Backend API | 8080 |
 | Mock API | 3001 |
 | Web Dev Server | 3000 |

@@ -24,7 +24,8 @@ Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patt
 | What | Command | Where |
 |---|---|---|
 | Dev database (PostGIS 18) | `cd infrastructure/docker && docker compose up -d` | localhost:5435 |
-| Backend | `cd backend && ./gradlew bootRun` | http://localhost:8080 (Swagger at `/swagger-ui.html`) |
+| Backend | `cd backend && ./gradlew bootRun` | http://localhost:8080 (Swagger at `/swagger-ui.html`); add `SPRING_PROFILES_ACTIVE=local,mailpit` to send mail to Mailpit (http://localhost:8026) |
+| Dev accounts | `python3 scripts/dev-seed.py` | second member, ground admin and a pending verification, listed in `scripts/console/accounts.yaml` |
 | Web | `cd web && pnpm dev` | http://localhost:3000, login `admin@ward42.example.com` / `admin123` |
 | Mobile | `cd mobile && flutter run` | emulator reaches the backend on 10.0.2.2:8080 |
 | Mock API (optional) | `cd infrastructure/mock-api && npm start` | localhost:3001, `flutter run --dart-define=API_PORT=3001` |
