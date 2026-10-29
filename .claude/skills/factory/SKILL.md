@@ -3,7 +3,7 @@ name: factory
 description: Orchestrate MunServ story delivery - pick ready stories, dispatch platform implementers into worktrees, run the reviewer on finished branches, open PRs, and report. Run by the user from a normal session; never auto-invoked.
 disable-model-invocation: true
 argument-hint: "[run|status|story <id>|review <pr>|sync <pr>] [--max 3]"
-allowed-tools: Bash(gh *) Bash(git *) Bash(scripts/eyeball-up.sh *) Bash(python3 scripts/sync-board.py*) Read Grep Glob Agent
+allowed-tools: Bash(gh *) Bash(git *) Bash(scripts/eyeball-up.sh *) Bash(python3 scripts/sync-board.py*) Bash(scripts/watch-ci.sh *) Read Grep Glob Agent
 ---
 
 # /factory
@@ -27,7 +27,7 @@ Print one table: story, platform, state, handoff (yes / no), blockers (`depends_
 4. When an implementer returns:
    - `BLOCKED:` in its output → label `status:blocked`, comment the reason on the issue, stop that story.
    - Otherwise open the PR yourself: `gh pr create --head <branch> --title "<type>(<platform>): <story title> (#<issue>)" --body` with summary, `Closes #<issue>`, the handoff path and the commands that passed. Label the issue `status:review`.
-5. Wait for CI (`gh pr checks <n> --watch`, root `CLAUDE.md`, "Watch CI"); a story is never reported with CI pending. Red → dispatch the same implementer once more with the failing job's log excerpt appended to the prompt. Red twice → label `status:blocked`, comment, stop.
+5. Wait for CI (`scripts/watch-ci.sh <n>`, root `CLAUDE.md`, "Watch CI"); a story is never reported with CI pending. Red → dispatch the same implementer once more with the failing job's log excerpt appended to the prompt. Red twice → label `status:blocked`, comment, stop.
 6. Green → for `ui: true` stories dispatch `design-reviewer` first with the PR number and handoff path; its `REQUEST CHANGES` goes back to the implementer once like a code review. On its `APPROVE`, run `gh pr edit <pr> --add-label design-approved`: CI re-runs the visual job on that label, and the baseline guards need it. Then dispatch `reviewer` with the PR number and handoff path. `REQUEST CHANGES` → dispatch the implementer once with the review text; then review again. Second `REQUEST CHANGES` → `status:blocked`.
 7. `APPROVE` → the PR is now awaiting eyeball. Once CI is green, run `scripts/eyeball-up.sh <pr>`: it checks the PR out, restarts only what changed and prints the Web URL, Swagger URL, console link, accounts and, on first use, a firewall command. The user opens those links from another machine, ticks the checks in the Eyeball section of the factory console and submits. If the script fails, put its error text in the report. Never run eyeball checks yourself and never apply the `eyeball:*` label; the console does both when the user submits. Never merge.
 8. `python3 scripts/sync-board.py` so the Project board reflects the labels you changed.

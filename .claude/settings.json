@@ -73,6 +73,7 @@
       "Bash(./scripts/validate-enum-sync.sh*)",
       "Bash(scripts/eyeball-up.sh *)",
       "Bash(python3 scripts/sync-board.py*)",
+      "Bash(scripts/watch-ci.sh *)",
       "Bash(docker compose *)",
       "Bash(docker ps*)",
       "Bash(docker logs*)",

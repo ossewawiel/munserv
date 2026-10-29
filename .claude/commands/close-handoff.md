@@ -192,7 +192,7 @@ EOF
 )"
 
 # Watch CI in the background and report the result (root CLAUDE.md, "Watch CI")
-gh pr checks <pr-number> --watch --interval 30
+scripts/watch-ci.sh <pr-number>
 ```
 
 ### Step 8: Archive Handoff Documents
