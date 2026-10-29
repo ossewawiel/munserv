@@ -30,6 +30,7 @@ Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patt
 | Mobile | `cd mobile && flutter run` | emulator reaches the backend on 10.0.2.2:8080 |
 | Mock API (optional) | `cd infrastructure/mock-api && npm start` | localhost:3001, `flutter run --dart-define=API_PORT=3001` |
 | Factory console | `./dashboard.sh` (or `python3 -m scripts.console`) | http://localhost:3999 |
+| Operator TUI | `./tui.sh` | in your SSH terminal: services, logs and LAN links over the console API (`scripts/tui/`) |
 | Remote eyeball | `scripts/eyeball-up.sh <pr>` | prints web, Swagger and console links for another machine on the LAN |
 
 ## Quality gate
@@ -37,6 +38,9 @@ CI (`.github/workflows/ci.yml`) is required on `master`: domain-language validat
 
 ## When a person must act
 The user reaches this laptop through a terminal only: no desktop and no browser on it. Do every step you can yourself. When a step needs the user (sudo, a secret, an interactive login, a judgement), end your message with the exact commands in one fenced `bash` block, in the order to run them, each preceded by a one-line `#` comment saying what it does. Never point the user at a `localhost` URL or a desktop app on the laptop: give a `curl` command instead, or a LAN link that `scripts/eyeball-up.sh` prints. Links on github.com and claude.ai are fine; they open on the user's own machine. Plan steps, factory reports and handoff Eyeball blocks follow the same rule.
+
+## Plan upkeep
+The Operation V1 plan artifact (https://claude.ai/artifact/3y9tTBbG7o2a7NLm8MnVut) is the source of truth for where the work stands. Read its store (`ArtifactData` `list` on `steps` and `decisions`) before starting a plan step. When a step's PR merges or its checks run, write the step's `status` and `note` in the same session; when steps are added or rewritten, republish the page from `.critique/2026-10-28-factory-road-to-v1/plan.html` to the same URL. Its "Where we are" map redraws from the store.
 
 ## The factory
 Delivery runs through agents defined in `.claude/agents/` and orchestrated by `/factory`:
