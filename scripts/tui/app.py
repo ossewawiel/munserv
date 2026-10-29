@@ -54,6 +54,19 @@ def state_cell(service: Service) -> Text:
     return Text(label, style=colour)
 
 
+HEALTH_STYLE = {"healthy": "#5DBE8A", "waiting": "#7FB3D5", "down": "#FF6B62", "n/a": "#9AA3B2"}
+
+
+def health_cell(service: Service) -> Text:
+    return Text(service.health, style=HEALTH_STYLE[service.health])
+
+
+def sha_cell(service: Service, checkout_sha: str) -> Text:
+    """Every service runs from the one checkout, so a live service shows its SHA and a stopped one none."""
+    live = service.up or service.running
+    return Text(checkout_sha if live else "", style="#E6E9EE")
+
+
 def note_cell(service: Service) -> Text:
     if service.needs_prepare:
         return Text("prepare", style="#E5B73B")
@@ -101,7 +114,9 @@ class OperatorApp(App):
         table = self.query_one("#services", DataTable)
         table.add_column("State", key="state", width=12)
         table.add_column("Service", key="name", width=10)
-        table.add_column("Address", key="url", width=28)
+        table.add_column("Port", key="port", width=6)
+        table.add_column("Health", key="health", width=9)
+        table.add_column("SHA", key="sha", width=8)
         table.add_column("", key="note", width=9)
         self.load_remote()
         self.poll()
@@ -142,7 +157,7 @@ class OperatorApp(App):
             (f"{checkout.branch or 'detached'}@{checkout.sha}", "#E6E9EE"), (" │ laptop ", "#9AA3B2"), (host, "#E6E9EE"),
         )
         self.query_one("#topbar", Static).update(top)
-        self.fill_table(state.services)
+        self.fill_table(state.services, checkout.sha)
         if name and self.selected is None:
             self.selected = name
         self.query_one("#log-title", Static).update(f"LOG · {self.selected or ''}")
@@ -152,7 +167,7 @@ class OperatorApp(App):
             widget.write(log)
             self.last_log = log
 
-    def fill_table(self, services: tuple[Service, ...]) -> None:
+    def fill_table(self, services: tuple[Service, ...], sha: str) -> None:
         table = self.query_one("#services", DataTable)
         names = [s.name for s in services]
         current = [str(key.value) for key in table.rows]
@@ -160,14 +175,16 @@ class OperatorApp(App):
             cursor = table.cursor_row
             table.clear()
             for s in services:
-                table.add_row(state_cell(s), s.name, s.url, note_cell(s), key=s.name)
+                table.add_row(state_cell(s), s.name, s.port, health_cell(s), sha_cell(s, sha), note_cell(s), key=s.name)
             if services:
                 table.move_cursor(row=min(cursor, len(services) - 1))
             return
         for s in services:
             cell = Text("… working", style="#F0873F") if s.name in self.busy else state_cell(s)
             table.update_cell(s.name, "state", cell)
-            table.update_cell(s.name, "url", s.url)
+            table.update_cell(s.name, "port", s.port)
+            table.update_cell(s.name, "health", health_cell(s))
+            table.update_cell(s.name, "sha", sha_cell(s, sha))
             table.update_cell(s.name, "note", note_cell(s))
 
     def show_offline(self, message: str) -> None:
@@ -222,8 +239,17 @@ class OperatorApp(App):
         self.run_service_action("start", EYEBALL_STACK)
 
     def action_refresh(self) -> None:
+        self.refresh_console()
         self.load_remote()
-        self.poll()
+
+    @work(thread=True, exclusive=True, group="refresh")
+    def refresh_console(self) -> None:
+        try:
+            self.api.refresh()
+        except ConsoleError as err:
+            self.call_from_thread(self.notify, str(err), severity="error")
+            return
+        self.call_from_thread(self.poll)
 
     def action_copy(self, key: str) -> None:
         urls = self.remote_info.urls if self.remote_info else {}

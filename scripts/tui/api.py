@@ -44,6 +44,24 @@ class Service:
             return "exited"
         return "stopped"
 
+    @property
+    def port(self) -> str:
+        """The port in the service's address, or an empty string when it has none."""
+        try:
+            port = urllib.parse.urlparse(self.url).port
+        except ValueError:
+            return ""
+        return str(port) if port else ""
+
+    @property
+    def health(self) -> str:
+        """The health check's word: healthy, waiting (process up, check failing), down or n/a (manual)."""
+        if self.manual:
+            return "n/a"
+        if self.up:
+            return "healthy"
+        return "waiting" if self.running else "down"
+
     @classmethod
     def from_json(cls, data: dict) -> Service:
         return cls(
@@ -117,6 +135,9 @@ class ConsoleApi:
             urls=dict(data.get("urls") or {}),
             firewall_command=(data.get("firewall") or {}).get("command") or "",
         )
+
+    def refresh(self) -> None:
+        self._request("POST", "/api/refresh", {})
 
     def log(self, name: str) -> str:
         query = urllib.parse.urlencode({"name": name})
