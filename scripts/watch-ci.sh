@@ -4,11 +4,18 @@
 # right after a push the new runs sit in `pending` with no jobs, so it sees only finished checks and
 # exits green.
 #
+# When CI is green the script keeps going: merging is automatic (auto-merge), so it polls the PR
+# every MERGE_POLL_SECONDS for up to MERGE_TIMEOUT and ends on the real outcome, never on "armed".
+# It is read-only: it never arms or runs a merge itself.
+#
 # Usage: scripts/watch-ci.sh <pr-number>
 # Env:   CI_WORKFLOW (default CI), CI_APPEAR_TIMEOUT (seconds to wait for runs to appear, default 120)
+#        MERGE_TIMEOUT (seconds to wait for the merge after green CI, default 90)
 #        A pull_request run with no jobs is skipped: GitHub fails it at once when the PR was opened
 #        with GITHUB_TOKEN (the Auto PR workflow), and the push run covers the same commit.
-# Exit:  0 when every run passed, 1 when one failed or was cancelled, 2 on usage or timeout.
+# Exit:  0 when CI passed and the PR merged, 1 when a run failed or was cancelled, 2 on usage or
+#        timeout, 3 when CI passed but the PR did not merge (conflict, behind, no auto-merge, closed,
+#        or still open after MERGE_TIMEOUT).
 set -euo pipefail
 
 if [[ $# -ne 1 || ! "$1" =~ ^[0-9]+$ ]]; then
@@ -19,6 +26,8 @@ PR="$1"
 WORKFLOW="${CI_WORKFLOW:-CI}"
 APPEAR_TIMEOUT="${CI_APPEAR_TIMEOUT:-120}"
 POLL_SECONDS=10
+MERGE_TIMEOUT="${MERGE_TIMEOUT:-90}"
+MERGE_POLL_SECONDS=5
 
 read -r SHA BRANCH < <(gh pr view "$PR" --json headRefOid,headRefName --jq '"\(.headRefOid) \(.headRefName)"')
 
@@ -71,3 +80,37 @@ if (( failed )); then
   exit 1
 fi
 echo "CI: green (${SHA:0:7})"
+
+# Merge phase. Auto-merge lands the squash a few seconds after green CI, so one look at the PR
+# right now often still reads OPEN. Poll until MERGED, or until a state auto-merge cannot clear.
+merge_waited=0
+while true; do
+  read -r state merge_state armed < <(gh pr view "$PR" --json state,mergeStateStatus,autoMergeRequest \
+    --jq '"\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null)"')
+  case "$state" in
+    MERGED)
+      echo "CI: green, merged"
+      exit 0 ;;
+    CLOSED)
+      echo "CI: green, but the PR is closed without merging"
+      exit 3 ;;
+  esac
+  case "$merge_state" in
+    DIRTY)
+      echo "CI: green, not merging - conflicts with master; rebase onto origin/master and push"
+      exit 3 ;;
+    BEHIND)
+      echo "CI: green, not merging - branch is behind master; rebase onto origin/master and push"
+      exit 3 ;;
+  esac
+  if [[ "$armed" != "true" && $merge_waited -ge 15 ]]; then
+    echo "CI: green, not merging - auto-merge is not armed (mergeStateStatus $merge_state); arm it with gh pr merge $PR --auto --squash"
+    exit 3
+  fi
+  if (( merge_waited >= MERGE_TIMEOUT )); then
+    echo "CI: green, still OPEN after ${MERGE_TIMEOUT}s (mergeStateStatus $merge_state, auto-merge armed: $armed)"
+    exit 3
+  fi
+  sleep "$MERGE_POLL_SECONDS"
+  merge_waited=$(( merge_waited + MERGE_POLL_SECONDS ))
+done
