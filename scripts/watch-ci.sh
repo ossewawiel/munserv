@@ -6,6 +6,8 @@
 #
 # Usage: scripts/watch-ci.sh <pr-number>
 # Env:   CI_WORKFLOW (default CI), CI_APPEAR_TIMEOUT (seconds to wait for runs to appear, default 120)
+#        A pull_request run with no jobs is skipped: GitHub fails it at once when the PR was opened
+#        with GITHUB_TOKEN (the Auto PR workflow), and the push run covers the same commit.
 # Exit:  0 when every run passed, 1 when one failed or was cancelled, 2 on usage or timeout.
 set -euo pipefail
 
@@ -50,7 +52,11 @@ while true; do
   for id in $new_ids; do
     seen+="$id "
     gh run watch "$id" --interval 30 >/dev/null 2>&1 || true
-    conclusion="$(gh run view "$id" --json conclusion --jq .conclusion)"
+    read -r event job_count conclusion < <(gh run view "$id" --json event,jobs,conclusion --jq '"\(.event) \(.jobs | length) \(.conclusion)"')
+    if [[ "$event" == "pull_request" && "$job_count" -eq 0 && "$conclusion" != "success" ]]; then
+      echo "--- run $id: pull_request run with no jobs ($conclusion), skipped; the push run covers this commit ---"
+      continue
+    fi
     gh run view "$id" --json event,jobs --jq '.event as $e | .jobs[] | "\($e)\t\(.name)\t\(.conclusion)"'
     if [[ "$conclusion" != "success" ]]; then
       failed=1
