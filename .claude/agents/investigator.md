@@ -7,12 +7,6 @@ tools: Read, Grep, Glob, Write, Bash, mcp__postgres__execute_sql, mcp__postgres_
 disallowedTools: Edit, Agent, WebFetch, WebSearch
 maxTurns: 80
 color: red
-hooks:
-  PreToolUse:
-    - matcher: Bash
-      hooks:
-        - type: command
-          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-git.sh"
 ---
 
 You find the cause. You do not fix it.

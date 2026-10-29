@@ -20,3 +20,16 @@ EOF
 2	master	git push origin
 0	master	git push -q -u origin feat/x
 0	master	cd /tmp/wt && git push origin feat/x
+0	gh pr merge 12 --auto --squash
+0	gh pr merge 12 --squash --auto --delete-branch
+0	gh pr view 12 --json state
+2	gh pr merge 12 --squash
+2	gh pr merge 12
+2	gh pr merge 12 --admin --squash
+2	git -C /tmp/wt push origin master
+2	git -C /tmp/wt push origin HEAD:master
+2	git -C "/tmp/my wt" push origin master
+2	git -C /tmp/wt reset --hard HEAD~1
+2	git -c user.name=x -C /tmp/wt push -f origin feat/x
+0	git -C /tmp/wt push -u origin feat/x
+0	git -C /tmp/wt status

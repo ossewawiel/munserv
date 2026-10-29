@@ -11,11 +11,6 @@ isolation: worktree
 maxTurns: 200
 color: purple
 hooks:
-  PreToolUse:
-    - matcher: Bash
-      hooks:
-        - type: command
-          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-git.sh"
   Stop:
     - hooks:
         - type: command

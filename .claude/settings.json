@@ -49,7 +49,9 @@
       "Write(./web/**)",
       "Write(./mobile/**)",
       "Write(./specs/**)",
-      "Write(./domain/**)"
+      "Write(./domain/**)",
+      "Edit(./design/**)",
+      "Write(./design/**)"
     ],
     "deny": [
       "Read(./.env)",
@@ -62,7 +64,11 @@
       "Bash(git push --force *)",
       "Bash(git push -f *)",
       "Bash(git push * --force)",
-      "Bash(git push * -f)"
+      "Bash(git push * -f)",
+      "Bash(gh api -X DELETE*)",
+      "Bash(gh api --method DELETE*)",
+      "Bash(docker compose down --volumes*)",
+      "Read(./web/.env*)"
     ]
   },
   "hooks": {

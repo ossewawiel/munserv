@@ -15,12 +15,14 @@ stripped=$(printf '%s\n' "$cmd" \
            if (match($0, /<<-?[\047"]?[A-Za-z_][A-Za-z0-9_]*/)) {
              tag=substr($0, RSTART, RLENGTH); sub(/^<<-?[\047"]?/, "", tag); print; skip=1; next }
            print }' \
-  | sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g")
+  | sed -E "s/'[^']*'/_/g; s/\"[^\"]*\"/_/g")
 # GUARD_GIT_BRANCH lets the test runner pin the branch context (CI checks out master).
 branch="${GUARD_GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null)}"
 
 check() {
   local g="$1"
+  # `git -C <dir> push` and `git -c k=v push` hide the subcommand; drop the global options first.
+  g=$(printf '%s' "$g" | sed -E 's/^(sudo )?git( +(-C|-c) +[^ ]+)+/\1git/')
   case "$g" in
     *"git push"*)
       if printf '%s' "$g" | grep -Eq -- '(^|[[:space:]])(--force|-f)([[:space:]]|$)' && ! printf '%s' "$g" | grep -q -- '--force-with-lease'; then
@@ -42,8 +44,15 @@ check() {
   fi
 }
 
+check_gh() {
+  # Merging is automatic (auto-pr.yml arms --auto); a manual merge skips the CI gate.
+  if printf '%s' "$1" | grep -Eq '^gh pr merge' && ! printf '%s' "$1" | grep -Eq -- '(^|[[:space:]])--auto([[:space:]]|$)'; then
+    deny "merging is automatic; use gh pr merge <n> --auto --squash only"
+  fi
+}
+
 while IFS= read -r seg; do
   seg="${seg#"${seg%%[![:space:]]*}"}"
-  case "$seg" in git\ *|sudo\ git\ *) check "$seg" ;; esac
+  case "$seg" in git\ *|sudo\ git\ *) check "$seg" ;; gh\ *) check_gh "$seg" ;; esac
 done < <(printf '%s\n' "$stripped" | tr ';&|' '\n\n\n')
 exit 0

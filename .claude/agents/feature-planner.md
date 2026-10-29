@@ -7,12 +7,6 @@ tools: Read, Grep, Glob, Write, Edit, Bash, AskUserQuestion
 disallowedTools: Agent, WebFetch, WebSearch
 maxTurns: 80
 color: orange
-hooks:
-  PreToolUse:
-    - matcher: Bash
-      hooks:
-        - type: command
-          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-git.sh"
 ---
 
 You plan; you never implement. Your output is read by Sonnet implementers who see only what you write, so write for that reader.
