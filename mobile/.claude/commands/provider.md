@@ -33,7 +33,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part '{{feature}}_providers.g.dart';
 
 @riverpod
-{{ReturnType}} {{name}}({{Name}}Ref ref) {
+{{ReturnType}} {{name}}(Ref ref) {
   // For dependency injection
   final dependency = ref.watch(someDependencyProvider);
   return SomeService(dependency);
@@ -45,7 +45,7 @@ Use for: Data that varies by ID, filtered lists
 
 ```dart
 @riverpod
-Future<Issue?> issueDetail(IssueDetailRef ref, String id) async {
+Future<Issue?> issueDetail(Ref ref, String id) async {
   final repository = ref.watch(issueRepositoryProvider);
   final result = await repository.getById(id);
   return switch (result) {
@@ -63,7 +63,7 @@ Use for: Data fetching, async operations
 
 ```dart
 @riverpod
-Future<List<Issue>> issues(IssuesRef ref) async {
+Future<List<Issue>> issues(Ref ref) async {
   final repository = ref.watch(issueRepositoryProvider);
   final result = await repository.getAll();
   return switch (result) {
@@ -141,7 +141,7 @@ Use for: Real-time data, WebSocket connections
 
 ```dart
 @riverpod
-Stream<List<Issue>> issuesStream(IssuesStreamRef ref) {
+Stream<List<Issue>> issuesStream(Ref ref) {
   final repository = ref.watch(issueRepositoryProvider);
   return repository.watchAll();
 }
@@ -163,7 +163,7 @@ lib/features/{{feature}}/providers/{{name}}_provider.dart
 ### Repository Provider
 ```dart
 @riverpod
-IssueRepository issueRepository(IssueRepositoryRef ref) {
+IssueRepository issueRepository(Ref ref) {
   final dio = ref.watch(dioProvider);
   return IssueRepositoryImpl(IssueApi(dio));
 }
@@ -172,7 +172,7 @@ IssueRepository issueRepository(IssueRepositoryRef ref) {
 ### Filtered/Derived Provider
 ```dart
 @riverpod
-Future<List<Issue>> issuesByState(IssuesByStateRef ref, IssueState state) async {
+Future<List<Issue>> issuesByState(Ref ref, IssueState state) async {
   final issues = await ref.watch(issuesProvider.future);
   return issues.where((i) => i.state == state).toList();
 }
@@ -182,7 +182,7 @@ Future<List<Issue>> issuesByState(IssuesByStateRef ref, IssueState state) async 
 ```dart
 @riverpod
 Future<IssueWithMember> issueWithReporter(
-  IssueWithReporterRef ref,
+  Ref ref,
   String issueId,
 ) async {
   final issue = await ref.watch(issueDetailProvider(issueId).future);

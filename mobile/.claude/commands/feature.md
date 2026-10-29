@@ -55,7 +55,7 @@ part '{{entity}}.freezed.dart';
 part '{{entity}}.g.dart';
 
 @freezed
-class {{Entity}} with _${{Entity}} {
+abstract class {{Entity}} with _${{Entity}} {
   const {{Entity}}._();
 
   const factory {{Entity}}({
@@ -80,7 +80,7 @@ part '{{name}}_dto.freezed.dart';
 part '{{name}}_dto.g.dart';
 
 @freezed
-class {{Entity}}Dto with _${{Entity}}Dto {
+abstract class {{Entity}}Dto with _${{Entity}}Dto {
   const {{Entity}}Dto._();
 
   const factory {{Entity}}Dto({
@@ -201,13 +201,13 @@ import '../domain/{{entity}}.dart';
 part '{{name}}_providers.g.dart';
 
 @riverpod
-{{Name}}Repository {{name}}Repository({{Name}}RepositoryRef ref) {
+{{Name}}Repository {{name}}Repository(Ref ref) {
   final dio = ref.watch(dioProvider);
   return {{Name}}RepositoryImpl({{Name}}Api(dio));
 }
 
 @riverpod
-Future<List<{{Entity}}>> {{name}}List({{Name}}ListRef ref) async {
+Future<List<{{Entity}}>> {{name}}List(Ref ref) async {
   final repository = ref.watch({{name}}RepositoryProvider);
   final result = await repository.getAll();
   return switch (result) {
@@ -217,7 +217,7 @@ Future<List<{{Entity}}>> {{name}}List({{Name}}ListRef ref) async {
 }
 
 @riverpod
-Future<{{Entity}}?> {{name}}Detail({{Name}}DetailRef ref, String id) async {
+Future<{{Entity}}?> {{name}}Detail(Ref ref, String id) async {
   final repository = ref.watch({{name}}RepositoryProvider);
   final result = await repository.getById(id);
   return switch (result) {

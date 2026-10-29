@@ -39,7 +39,7 @@ part '{{snake_case(name)}}.g.dart';
 ///
 /// Represents a {{description}}.
 @freezed
-class {{name}} with _${{name}} {
+abstract class {{name}} with _${{name}} {
   const {{name}}._(); // Private constructor for custom methods
 
   const factory {{name}}({
@@ -60,7 +60,7 @@ class {{name}} with _${{name}} {
 
 ```dart
 @freezed
-class Issue with _$Issue {
+abstract class Issue with _$Issue {
   const Issue._();
 
   const factory Issue({
@@ -98,7 +98,7 @@ class Issue with _$Issue {
 
 ```dart
 @freezed
-class Member with _$Member {
+abstract class Member with _$Member {
   const Member._();
 
   const factory Member({
@@ -129,7 +129,7 @@ class Member with _$Member {
 
 ```dart
 @freezed
-class GeoPoint with _$GeoPoint {
+abstract class GeoPoint with _$GeoPoint {
   const GeoPoint._();
 
   const factory GeoPoint({
@@ -227,7 +227,7 @@ switch (result) {
 
 ```dart
 @freezed
-class IssueDto with _$IssueDto {
+abstract class IssueDto with _$IssueDto {
   const IssueDto._();
 
   const factory IssueDto({

@@ -111,7 +111,7 @@ part '{{snake_case(name)}}_dto.freezed.dart';
 part '{{snake_case(name)}}_dto.g.dart';
 
 @freezed
-class {{name}}Dto with _${{name}}Dto {
+abstract class {{name}}Dto with _${{name}}Dto {
   const {{name}}Dto._();
 
   const factory {{name}}Dto({
@@ -134,7 +134,7 @@ class {{name}}Dto with _${{name}}Dto {
 
 /// Request DTO for creating {{name}}
 @freezed
-class Create{{name}}Request with _$Create{{name}}Request {
+abstract class Create{{name}}Request with _$Create{{name}}Request {
   const Create{{name}}Request._();
 
   const factory Create{{name}}Request({
@@ -310,7 +310,7 @@ sealed class AppError with _$AppError {
 ```dart
 // lib/features/{{feature}}/providers/{{feature}}_providers.dart
 @riverpod
-{{name}}Repository {{camelCase(name)}}Repository({{name}}RepositoryRef ref) {
+{{name}}Repository {{camelCase(name)}}Repository(Ref ref) {
   final dio = ref.watch(dioProvider);
   return {{name}}RepositoryImpl({{name}}Api(dio));
 }

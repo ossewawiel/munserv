@@ -254,7 +254,7 @@ issuesAsync.when(
 ```dart
 // ✅ GOOD - Domain entity (pure Dart)
 @freezed
-class Issue with _$Issue {
+abstract class Issue with _$Issue {
   const Issue._();
 
   const factory Issue({
