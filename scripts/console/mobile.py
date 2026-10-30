@@ -34,8 +34,15 @@ from .gitops import ApiError, copy_local_files, is_worktree
 from .network import detect_active_firewall, firewall_remedy, lan_ip, lan_subnet
 
 _DEVICE_ID_RE = re.compile(r"^[A-Za-z0-9_.:-]+$")
+_ADDRESS_RE = re.compile(r"^(?:\d{1,3}\.){3}\d{1,3}:\d{1,5}$")
+_PAIRING_CODE_RE = re.compile(r"^\d{6}$")
 
+APP_ID = "com.munserv.munserv_mobile"  # mobile/android/app/build.gradle.kts applicationId
+MIN_ANDROID_SDK = 30  # Android 11: the first release with wireless debugging pairing
 ADB_TIMEOUT_SECONDS = 10
+ADB_PAIR_TIMEOUT_SECONDS = 30
+INSTALL_LOG = "mobile-install"
+LOGCAT_PROCESS = "phone-logcat"
 REACHABILITY_INTERVAL_SECONDS = 30
 NC_TIMEOUT_SECONDS = 3
 WEB_PORT = 3000
@@ -107,13 +114,97 @@ def parse_devices(output: str) -> list[dict]:
     return rows
 
 
+def validate_address(value: str) -> str:
+    if not isinstance(value, str) or not _ADDRESS_RE.match(value):
+        raise ApiError(f"invalid address, expected <ip>:<port>: {value!r}", 400)
+    return value
+
+
+def validate_pairing_code(value: str) -> str:
+    if not isinstance(value, str) or not _PAIRING_CODE_RE.match(value):
+        raise ApiError("the pairing code is six digits", 400)
+    return value
+
+
+def _adb(args: list[str], timeout: int = ADB_TIMEOUT_SECONDS) -> subprocess.CompletedProcess:
+    if not shutil.which("adb"):
+        raise ApiError("adb is not installed on this machine", 409)
+    try:
+        return subprocess.run(["adb", *args], text=True, capture_output=True, timeout=timeout)
+    except subprocess.TimeoutExpired as e:
+        raise ApiError(f"adb {args[0]} timed out after {timeout} seconds", 409) from e
+    except OSError as e:
+        raise ApiError(f"adb {args[0]} failed: {e}", 409) from e
+
+
+def _adb_message(result: subprocess.CompletedProcess) -> str:
+    return (result.stdout + result.stderr).strip()
+
+
+def pair(address: str, code: str) -> str:
+    """`adb pair <ip>:<port> <code>` with the address and code the phone shows on its "Pair device
+    with pairing code" dialog. adb exits 0 even on a wrong code, so success is read from its text."""
+    result = _adb(["pair", validate_address(address), validate_pairing_code(code)], ADB_PAIR_TIMEOUT_SECONDS)
+    message = _adb_message(result)
+    if "Successfully paired" not in message:
+        raise ApiError(message or "adb pair printed nothing", 409)
+    return message
+
+
+def connect(address: str) -> str:
+    """`adb connect <ip>:<port>` with the address on the phone's Wireless debugging screen (a
+    different port from the pairing dialog's). adb exits 0 on failure, so read its text."""
+    message = _adb_message(_adb(["connect", validate_address(address)]))
+    if not message.startswith(("connected to", "already connected to")):
+        raise ApiError(message or "adb connect printed nothing", 409)
+    return message
+
+
+_android_versions: dict[str, dict] = {}
+
+
+def android_version(device_id: str) -> dict | None:
+    """{"release": "14", "sdk": 34} read from the phone's build properties; None while the phone
+    does not answer (unauthorized, offline). A successful answer is cached: it cannot change."""
+    cached = _android_versions.get(device_id)
+    if cached:
+        return cached
+    try:
+        result = _adb(["-s", device_id, "shell", "getprop ro.build.version.release; getprop ro.build.version.sdk"])
+    except ApiError:
+        return None
+    lines = result.stdout.split()
+    if result.returncode != 0 or len(lines) != 2 or not lines[1].isdigit():
+        return None
+    version = {"release": lines[0], "sdk": int(lines[1])}
+    _android_versions[device_id] = version
+    return version
+
+
+def describe_devices(rows: list[dict]) -> list[dict]:
+    """Each device row plus `android` ({release, sdk} or None) for the phones that answer."""
+    return [{**row, "android": android_version(row["id"]) if row["state"] == "device" else None} for row in rows]
+
+
+def launch_app(device_id: str) -> str:
+    device_id = validate_device_id(device_id)
+    result = _adb(["-s", device_id, "shell", "monkey", "-p", APP_ID, "-c", "android.intent.category.LAUNCHER", "1"])
+    if result.returncode != 0 or "No activities found" in _adb_message(result):
+        raise ApiError(f"could not open {APP_ID}: {_adb_message(result)}", 409)
+    return f"opened {APP_ID} on {device_id}"
+
+
 # --- install (background job) --------------------------------------------
 
 def _mobile_dir(checkout: Path) -> Path:
     return checkout / "mobile"
 
 
-def start_install(device_id: str, checkout: Path) -> dict:
+def start_install(device_id: str, checkout: Path, api_port_override: int | None = None,
+                  log_root: Path | None = None) -> dict:
+    """Build the debug APK from `checkout`, install it and open it. The phone's backend port is
+    `api_port_override` (the showcase's), else the configured dev one. The job's log lives under
+    `log_root` (default: `checkout`) so the console's /api/log finds it whichever checkout builds."""
     device_id = validate_device_id(device_id)
     mobile_dir = _mobile_dir(checkout)
     if not mobile_dir.is_dir():
@@ -124,14 +215,15 @@ def start_install(device_id: str, checkout: Path) -> dict:
     if existing:
         return existing
     job = services_mod.new_job("mobile", "install")
-    thread = threading.Thread(target=_run_install_job, args=(job["id"], device_id, checkout), daemon=True)
+    thread = threading.Thread(target=_run_install_job, daemon=True, args=(
+        job["id"], device_id, checkout, api_port_override or api_port(), log_root or checkout))
     thread.start()
     return job
 
 
-def _run_install_job(job_id: str, device_id: str, checkout: Path) -> None:
+def _run_install_job(job_id: str, device_id: str, checkout: Path, backend_port: int, log_root: Path) -> None:
     mobile_dir = _mobile_dir(checkout)
-    log_path = services_mod.log_dir(checkout) / "mobile-install.log"
+    log_path = services_mod.log_path(log_root, INSTALL_LOG)
     with open(log_path, "a", encoding="utf-8") as logf:
         logf.write(f"\n--- install start {time.strftime('%Y-%m-%d %H:%M:%S')} ---\n")
         logf.flush()
@@ -149,7 +241,7 @@ def _run_install_job(job_id: str, device_id: str, checkout: Path) -> None:
                 services_mod.finish_job(job_id, "failed", "could not determine this machine's LAN address")
                 return
             build_cmd = ["flutter", "build", "apk", "--debug",
-                         f"--dart-define=API_HOST={host}", f"--dart-define=API_PORT={api_port()}"]
+                         f"--dart-define=API_HOST={host}", f"--dart-define=API_PORT={backend_port}"]
             logf.write(" ".join(build_cmd) + "\n")
             logf.flush()
             result = subprocess.run(build_cmd, cwd=mobile_dir, stdout=logf, stderr=subprocess.STDOUT)
@@ -164,13 +256,40 @@ def _run_install_job(job_id: str, device_id: str, checkout: Path) -> None:
             if result.returncode != 0:
                 services_mod.finish_job(job_id, "failed", f"adb install exit {result.returncode}")
                 return
-            services_mod.finish_job(job_id, "success", f"installed on {device_id}")
+            logf.write(f"launching {APP_ID}\n")
+            logf.flush()
+            try:
+                launch_app(device_id)
+            except ApiError as e:
+                services_mod.finish_job(job_id, "failed", f"installed, but {e}")
+                return
+            services_mod.finish_job(job_id, "success", f"installed and opened on {device_id}")
         except Exception as e:  # noqa: BLE001 - a job must never crash the server thread
             services_mod.finish_job(job_id, "failed", str(e))
 
 
 # The install log is tailed the same way any other service's is: GET /api/log?name=mobile-install
-# reads services.log_path(checkout, "mobile-install"), the exact path _run_install_job writes to.
+# reads services.log_path(checkout, INSTALL_LOG), the exact path _run_install_job writes to.
+
+
+# --- logcat (tracked process) ----------------------------------------------
+
+def start_logcat(device_id: str, log_root: Path) -> str:
+    """Tail the phone's log, filtered to the app's process, into the `phone-logcat` log. The filter
+    is the app's pid (`logcat --pid`, Android 7+), so the app must be running when this starts; a
+    relaunch changes the pid and needs a restart of the tail."""
+    device_id = validate_device_id(device_id)
+    pid = _adb(["-s", device_id, "shell", "pidof", "-s", APP_ID]).stdout.strip()
+    if not pid.isdigit():
+        raise ApiError("The app is not running on the phone. Open it, then start the log.", 409)
+    services_mod.stop_service(LOGCAT_PROCESS, log_root)
+    services_mod.log_path(log_root, LOGCAT_PROCESS).write_text("", encoding="utf-8")
+    command = f"adb -s {shlex.quote(device_id)} logcat -v time --pid={pid}"
+    return services_mod.start_tracked_process(LOGCAT_PROCESS, log_root, command, log_root)
+
+
+def stop_logcat(log_root: Path) -> str:
+    return services_mod.stop_service(LOGCAT_PROCESS, log_root)
 
 
 # --- run (tracked process) ------------------------------------------------

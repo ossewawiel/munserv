@@ -22,6 +22,7 @@ sys.path.insert(0, str(ROOT))
 
 from scripts.tui.api import ConsoleApi, ConsoleError, Service  # noqa: E402
 from scripts.tui.app import OperatorApp  # noqa: E402
+from scripts.tui.phone import PhoneScreen  # noqa: E402
 
 
 class StubConsole:
@@ -34,6 +35,12 @@ class StubConsole:
             "web": {"name": "web", "up": False, "running": False, "manual": False, "url": "http://79.6.23.52:3000", "exit_code": 1},
         }
         self.posts: list[tuple[str, str]] = []
+        self.bodies: list[tuple[str, dict]] = []
+        self.pair_error = ""
+        self.devices = [
+            {"id": "192.168.1.20:41233", "state": "device", "model": "Pixel_8", "android": {"release": "14", "sdk": 34}},
+            {"id": "R58N30ABCDE", "state": "device", "model": "Galaxy_S9", "android": {"release": "10", "sdk": 29}},
+        ]
 
     def handler(self):
         stub = self
@@ -52,8 +59,13 @@ class StubConsole:
 
             def do_GET(self) -> None:
                 url = urlparse(self.path)
+                if url.path == "/api/mobile/devices":
+                    return self._json({"devices": stub.devices, "lan_ip": "192.168.1.5", "api_port": 8080,
+                                       "showcase_api_port": 8090, "min_android_sdk": 30})
                 if url.path == "/api/state":
-                    return self._json({"checkout": {"path": "/x", "branch": "master", "sha": "a222098abcdef"},
+                    return self._json({"jobs": [{"service": "mobile", "kind": "install", "status": "success",
+                                                 "message": "installed and opened on x"}],
+                                       "checkout": {"path": "/x", "branch": "master", "sha": "a222098abcdef"},
                                        "services": list(stub.services.values()),
                                        "showcase": {"exists": True, "sha": "b111111", "built_sha": "a000000",
                                                     "master_sha": "c222222"}})
@@ -72,6 +84,12 @@ class StubConsole:
                     verb = self.path.rsplit("/", 1)[-1]
                     stub.posts.append(("showcase", verb))
                     return self._json({"ok": True, "message": f"showcase {verb}", "job": {"status": "running"}})
+                if self.path.startswith("/api/mobile/"):
+                    body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+                    stub.bodies.append((self.path.rsplit("/", 1)[-1], body))
+                    if stub.pair_error and self.path.endswith("/pair"):
+                        return self._json({"ok": False, "error": stub.pair_error}, 409)
+                    return self._json({"ok": True, "message": "done"})
                 if self.path == "/api/refresh":
                     stub.posts.append(("refresh", ""))
                     return self._json({"ok": True})
@@ -85,7 +103,7 @@ class StubConsole:
         return Handler
 
 
-class TuiTest(unittest.TestCase):
+class StubbedTuiCase(unittest.TestCase):
     def setUp(self) -> None:
         self.stub = StubConsole()
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), self.stub.handler())
@@ -104,6 +122,8 @@ class TuiTest(unittest.TestCase):
                 await scenario(app, pilot)
         asyncio.run(main())
 
+
+class TuiTest(StubbedTuiCase):
     def test_table_lists_every_service_with_its_state(self) -> None:
         async def scenario(app, pilot) -> None:
             table = app.query_one("#services")
@@ -174,6 +194,85 @@ class TuiTest(unittest.TestCase):
             self.assertIn("http://79.6.23.52:3000", links)
             self.assertIn("sudo ufw allow", links)
         self.run_app(scenario)
+
+
+class PhoneScreenTest(StubbedTuiCase):
+    def run_phone(self, scenario) -> None:
+        async def main() -> None:
+            app = OperatorApp(self.api)
+            async with app.run_test(size=(140, 40)) as pilot:
+                await wait_for(pilot, lambda: app.query_one("#services").row_count == 3)
+                await pilot.press("p")
+                await wait_for(pilot, lambda: isinstance(app.screen, PhoneScreen)
+                               and app.screen.query_one("#devices").row_count == 2)
+                await scenario(app.screen, pilot)
+        asyncio.run(main())
+
+    def sent(self, verb: str) -> list[dict]:
+        return [body for name, body in self.stub.bodies if name == verb]
+
+    def test_device_list_shows_model_and_android_version(self) -> None:
+        async def scenario(screen, pilot) -> None:
+            table = screen.query_one("#devices")
+            row = lambda key: [str(table.get_cell(key, c)) for c in ("model", "android", "state")]
+            self.assertEqual(row("192.168.1.20:41233"), ["Pixel 8", "14", "device"])
+            self.assertEqual(row("R58N30ABCDE"), ["Galaxy S9", "10 (too old)", "device"])
+            self.assertIn("192.168.1.5", str(screen.query_one("#phone-top").render()))
+        self.run_phone(scenario)
+
+    def test_wizard_pairs_then_connects_with_the_typed_addresses(self) -> None:
+        async def scenario(screen, pilot) -> None:
+            self.assertIn("step 1 of 5", str(screen.query_one("#wizard-title").render()))
+            await pilot.press("n", "n")
+            self.assertIn("step 3 of 5", str(screen.query_one("#wizard-title").render()))
+            await pilot.press(*"192.168.1.20:37099", "enter", *"123456", "enter")
+            await wait_for(pilot, lambda: self.sent("pair"))
+            self.assertEqual(self.sent("pair"), [{"address": "192.168.1.20:37099", "code": "123456"}])
+            await wait_for(pilot, lambda: "step 4 of 5" in str(screen.query_one("#wizard-title").render()))
+            await pilot.press(*"192.168.1.20:41233", "enter")
+            await wait_for(pilot, lambda: self.sent("connect"))
+            self.assertEqual(self.sent("connect"), [{"address": "192.168.1.20:41233"}])
+            await wait_for(pilot, lambda: "step 5 of 5" in str(screen.query_one("#wizard-title").render()))
+        self.run_phone(scenario)
+
+    def test_failed_pairing_stays_on_the_pairing_step(self) -> None:
+        self.stub.pair_error = "Failed: wrong pairing code"
+        async def scenario(screen, pilot) -> None:
+            await pilot.press("n", "n", *"192.168.1.20:37099", "enter", *"000000", "enter")
+            await wait_for(pilot, lambda: self.sent("pair"))
+            await pilot.pause(0.3)
+            self.assertIn("step 3 of 5", str(screen.query_one("#wizard-title").render()))
+        self.run_phone(scenario)
+
+    def test_install_keys_pick_the_checkout_for_the_highlighted_phone(self) -> None:
+        async def scenario(screen, pilot) -> None:
+            screen.query_one("#devices").focus()
+            await pilot.press("i")
+            await wait_for(pilot, lambda: self.sent("install"))
+            await pilot.press("s")
+            await wait_for(pilot, lambda: len(self.sent("install")) == 2)
+            self.assertEqual(self.sent("install"), [{"device_id": "192.168.1.20:41233", "source": "eyeball"},
+                                                    {"device_id": "192.168.1.20:41233", "source": "showcase"}])
+        self.run_phone(scenario)
+
+    def test_install_refuses_a_phone_older_than_android_11(self) -> None:
+        async def scenario(screen, pilot) -> None:
+            screen.query_one("#devices").focus()
+            await pilot.press("down", "i")
+            await pilot.pause(0.3)
+            self.assertEqual(self.sent("install"), [])
+        self.run_phone(scenario)
+
+    def test_open_and_log_keys_call_the_console(self) -> None:
+        async def scenario(screen, pilot) -> None:
+            screen.query_one("#devices").focus()
+            await pilot.press("o")
+            await wait_for(pilot, lambda: self.sent("launch"))
+            await pilot.press("l")
+            await wait_for(pilot, lambda: self.sent("logcat"))
+            self.assertEqual(self.sent("logcat"), [{"device_id": "192.168.1.20:41233"}])
+            self.assertEqual(screen.view, "phone-logcat")
+        self.run_phone(scenario)
 
 
 class ApiTest(unittest.TestCase):
