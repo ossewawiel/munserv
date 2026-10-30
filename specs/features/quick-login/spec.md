@@ -59,7 +59,7 @@ Order: by group in the order above, then by name.
 
 | Canvas | Covers | Working files | Approved |
 |---|---|---|---|
-| [Quick Login](https://claude.ai/artifact/Fi653crxT7uArKg4apB9vR), mobile row | M8 (#209) app quick login | `design/canvases/quick-login/` | No |
+| [Quick Login](https://claude.ai/artifact/Fi653crxT7uArKg4apB9vR), mobile row | M8 (#209) app quick login | `design/canvases/quick-login/` | Yes, 2026-10-30 |
 | [Quick Login](https://claude.ai/artifact/Fi653crxT7uArKg4apB9vR), web rows | W31 (#208) portal quick login | `design/canvases/quick-login/web/` | Yes, 2026-10-30 |
 
 **M8.** There are three artboards at 390x844, light scheme. `Main` shows `EmailLoginPage` with the Quick login dropdown
