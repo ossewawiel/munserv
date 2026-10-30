@@ -64,6 +64,27 @@ Order: by group in the order above, then by name.
 | W31 | [#208](https://github.com/ossewawiel/munserv/issues/208) | web | true | #207 |
 | M8 | [#209](https://github.com/ossewawiel/munserv/issues/209) | mobile | true | #207 |
 
+## Design
+
+W31 has a design canvas. It awaits approval:
+<https://claude.ai/artifact/Fi653crxT7uArKg4apB9vR>
+
+The working files are in `design/canvases/quick-login/`, as 1440x900 web frames:
+
+| Artboard | State |
+|---|---|
+| `Main.dc.html` | Login page, Quick login closed above Email |
+| `QuickLoginOpen.dc.html` | Menu open with the dev input: six role headings, highest first, one nameless option each |
+| `QuickLoginOpenNamed.dc.html` | Menu open with Storybook accounts: "<Role> · <name>" plus one nameless entry |
+| `QuickLoginSigningIn.dc.html` | After a pick: fields filled, form disabled while the login is pending |
+| `QuickLoginError.dc.html` | Failed quick login: the existing error Alert above Quick login |
+| `NoQuickLogin.dc.html` | No input: today's page, unchanged |
+
+The canvas adds one new molecule, `QuickLoginSelect`. It needs a row in
+`design/registry/web.md`, because the `Select` atom has no grouped options. Every other
+component on the canvas is in the registry. `design_approved` stays `false` in the W31 handoff
+until the user signs off. M8 (mobile) has no canvas yet.
+
 ## Done check for the whole feature
 1. On the showcase site (http://localhost:4000/login, opened through the LAN link), picking
    "Sector Admin" logs you in to the dashboard.

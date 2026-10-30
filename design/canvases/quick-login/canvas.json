@@ -1,0 +1,46 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-30T09:32:06Z" },
+  "title": "Quick Login",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Login — Quick login closed" },
+    "QuickLoginOpen.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 900, "title": "Login — Quick login open, dev accounts" },
+    "QuickLoginOpenNamed.dc.html": { "x": 3040, "y": 0, "w": 1440, "h": 900, "title": "Quick login open — accounts with names (Storybook data)" },
+    "QuickLoginSigningIn.dc.html": { "x": 0, "y": 1020, "w": 1440, "h": 900, "title": "After a pick — signing in" },
+    "QuickLoginError.dc.html": { "x": 1520, "y": 1020, "w": 1440, "h": 900, "title": "Quick login failed — normal login error" },
+    "NoQuickLogin.dc.html": { "x": 3040, "y": 1020, "w": 1440, "h": 900, "title": "No demo accounts — today's page, unchanged" }
+  },
+  "order": [
+    "Main.dc.html",
+    "QuickLoginOpen.dc.html",
+    "QuickLoginOpenNamed.dc.html",
+    "QuickLoginSigningIn.dc.html",
+    "QuickLoginError.dc.html",
+    "NoQuickLogin.dc.html"
+  ],
+  "notes": {
+    "title": {
+      "x": 0, "y": -300, "kind": "title1", "maxW": 4480,
+      "text": "Quick login — W31 (#208), admin portal login page"
+    },
+    "anatomy": {
+      "x": 4560, "y": 0, "w": 620, "size": "s", "fill": "teal",
+      "text": "Anatomy — QuickLoginSelect, a MUI TextField select as the theme renders it (size small, outlined).\n\nPlace: first child of the LoginForm box, above Email. The form's gap stays 24px, so the field adds 64px and the card grows from 589px to 653px. AuthLayout re-centres it; nothing else moves.\n\nField: 395 × 40px, radius 8px, outline rgba(0,0,0,0.23), input padding 8.5px 32px 8.5px 14px, ArrowDropDown 24px at right 7px in rgba(0,0,0,0.54). These are MUI's own state alphas, exactly what the Email field already renders.\n\nLabel 'Quick login' is always shrunk (InputLabel shrink + Select displayEmpty), so the placeholder 'Choose an account' shows in text.secondary #424846. Open: outline 2px primary #0C2721, label #0C2721, arrow turned 180°.\n\nMenu: opens below the field and shifts up to keep 16px clear of the window, so with six groups it covers the field (top 364px, bottom 884px). Paper radius 12px, background.paper #FAF9F7, elevation 8, list padding 8px 0. ListSubheader 48px, 14px weight 500, text.secondary #424846. MenuItem 36px, 16px/24px, onSurface #1A1C1B; hover is action.hover #E9E8E6."
+    },
+    "copy": {
+      "x": 5260, "y": 0, "w": 620, "size": "s", "fill": "orange",
+      "text": "Copy — new keys under auth.quickLogin; headings reuse roles.*.\n\nlabel\nen: Quick login\naf: Vinnige aanmelding\nzu: Ukungena ngokushesha\n\nplaceholder\nen: Choose an account\naf: Kies 'n rekening\nzu: Khetha i-akhawunti\n\noption: \"{{role}} · {{name}}\" in all three (middle dot, a space either side). With an empty name the item is the role alone.\n\nHeadings: roles.pod_chief … roles.sector_admin as they stand — Pod Chief, Pod Admin, Ward Chief, Ward Admin, Sector Chief, Sector Admin — highest first. A heading renders only when its group has an account.\n\nThe dev input has one admin per role and no names (I1), so every dev item repeats its heading. The named board shows the format with the Storybook fixtures (example.test accounts)."
+    },
+    "states": {
+      "x": 4560, "y": 1020, "w": 620, "size": "s", "fill": "blue",
+      "text": "States.\n\nAfter a pick: the select resets to empty, Email and Password hold the picked account, and the form submits at once. While useLogin is pending all three fields and the button are disabled — disabled label and text rgba(0,0,0,0.38), outline and arrow rgba(0,0,0,0.26), button rgba(0,0,0,0.12) with a 16px spinner. The button reads 'Loading...' because the Button atom replaces its children while isLoading; that is today's behaviour and this story does not change it.\n\nFailed: the existing outlined error Alert (auth.loginError, 'Invalid email or password') sits at the top of the form, above Quick login. The fields keep the picked account, the select is empty and enabled, so a second pick works. Border errorContainer #FFDAD6, icon error #BA1A1A, text is MUI's derived Alert colour rgb(102,87,85).\n\nNo input: no field, no gap, and the page is pixel for pixel today's LoginForm Default story."
+    },
+    "registry": {
+      "x": 5260, "y": 1020, "w": 620, "size": "s", "fill": "purple",
+      "text": "Registry.\n\nEverything drawn already exists in design/registry/web.md: AuthLayout, LoginForm, Input, Button, plus MUI Alert, Divider, ListSubheader and MenuItem as the portal renders them.\n\nNEW MOLECULE: QuickLoginSelect (src/components/molecules). It needs a row under Molecules and its Storybook story. The Select atom cannot carry it: Select takes a flat options list with no ListSubheader groups, and the handoff forbids changing it. Suggested row: 'QuickLoginSelect | Demo and dev builds only: pick a demo account on the login page | accounts, onPick, disabled | Renders only inside LoginForm when accounts is non-empty; never read import.meta.env in it.'"
+    }
+  },
+  "designSystems": []
+}
