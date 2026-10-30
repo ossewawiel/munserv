@@ -3,7 +3,7 @@ issue: 208
 story: W31
 title: "Quick login dropdown on the portal login page"
 platform: web
-status: pending
+status: completed
 depends_on: [207]
 touches:
   - web/src/features/auth
@@ -23,8 +23,27 @@ design_artboards:
 design_approved: true
 created_by: feature-planner
 created_at: "2026-10-30"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/env.d.ts
+  - web/src/shared/types/demoAccount.ts
+  - web/src/features/auth/demoAccounts.ts
+  - web/src/features/auth/LoginPage.tsx
+  - web/src/components/molecules/QuickLoginSelect.tsx
+  - web/src/components/molecules/QuickLoginSelect.stories.tsx
+  - web/src/components/molecules/LoginForm.tsx
+  - web/src/components/molecules/LoginForm.stories.tsx
+  - web/src/components/molecules/index.ts
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+  - web/e2e/visual/__screenshots__/stories.spec (6 new baselines)
+  - domain/language.yaml
+  - domain/demo-account.md
+tests_added:
+  - web/src/shared/types/demoAccount.test.ts
+  - web/src/components/molecules/QuickLoginSelect.test.tsx
+  - web/src/components/molecules/LoginForm.test.tsx
+  - web/src/features/auth/LoginPage.test.tsx
 ---
 
 # W31 · Quick login dropdown on the portal login page (Web)

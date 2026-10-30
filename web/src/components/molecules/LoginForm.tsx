@@ -5,17 +5,21 @@ import Alert from '@mui/material/Alert';
 
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
+import { QuickLoginSelect } from './QuickLoginSelect';
+import type { DemoAccount } from '@/shared/types/demoAccount';
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => void;
   isLoading?: boolean;
   error?: string | null;
+  quickLoginAccounts?: readonly DemoAccount[];
 }
 
 export const LoginForm: FC<LoginFormProps> = ({
   onSubmit,
   isLoading = false,
   error = null,
+  quickLoginAccounts = [],
 }) => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -52,12 +56,29 @@ export const LoginForm: FC<LoginFormProps> = ({
     [email, password, validate, onSubmit]
   );
 
+  const handlePick = useCallback(
+    (account: DemoAccount) => {
+      setEmail(account.email);
+      setPassword(account.password);
+      onSubmit(account.email, account.password);
+    },
+    [onSubmit]
+  );
+
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {error && (
         <Alert severity="error" variant="outlined">
           {error}
         </Alert>
+      )}
+
+      {quickLoginAccounts.length > 0 && (
+        <QuickLoginSelect
+          accounts={quickLoginAccounts}
+          onPick={handlePick}
+          disabled={isLoading}
+        />
       )}
 
       <Input
