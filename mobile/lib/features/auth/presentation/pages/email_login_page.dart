@@ -5,11 +5,14 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/theme/typography.dart';
 import '../../../../shared/utils/result.dart';
 import '../../../../shared/widgets/form_error_banner.dart';
+import '../../domain/demo_account.dart';
 import '../../providers/auth_providers.dart';
+import '../../providers/demo_accounts_provider.dart';
 import '../widgets/auth_page_layout.dart';
 import '../widgets/email_input_field.dart';
 import '../widgets/loading_button.dart';
 import '../widgets/password_input_field.dart';
+import '../widgets/quick_login_dropdown.dart';
 
 /// Login page with email and password
 /// Used for members who registered via web portal
@@ -82,10 +85,17 @@ class _EmailLoginPageState extends ConsumerState<EmailLoginPage> {
     );
   }
 
+  Future<void> _quickLogin(DemoAccount account) {
+    _emailController.text = account.email;
+    _passwordController.text = account.password;
+    return _login();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final theme = Theme.of(context);
+    final demoAccounts = ref.watch(demoAccountsProvider);
 
     return AuthPageLayout(
       title: l10n.loginTitle,
@@ -95,6 +105,15 @@ class _EmailLoginPageState extends ConsumerState<EmailLoginPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (demoAccounts.isNotEmpty) ...[
+              QuickLoginDropdown(
+                accounts: demoAccounts,
+                enabled: !_isLoading,
+                onSelected: _quickLogin,
+              ),
+              const SizedBox(height: Spacing.md),
+            ],
+
             // Email field
             EmailInputField(
               controller: _emailController,

@@ -256,6 +256,7 @@ concepts:
     file: demo-account.md
     code:
       typescript: [DemoAccount, parseDemoAccounts, DEMO_ACCOUNT_GROUP_ORDER]
+      dart: [DemoAccount, DemoAccountGroup]
     values:
       demo_account_group: [pod_chief, pod_admin, ward_chief, ward_admin, sector_chief, sector_admin, member, ground_admin]
     relationships: { is_a: [admin-role, member] }

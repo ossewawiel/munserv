@@ -980,6 +980,30 @@ abstract class S {
   /// In en, this message translates to:
   /// **'View on Map'**
   String get viewOnMap;
+
+  /// Label of the demo account dropdown on the email login page (demo and dev builds only)
+  ///
+  /// In en, this message translates to:
+  /// **'Quick login'**
+  String get quickLoginLabel;
+
+  /// Heading above the member demo accounts in the quick login dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get quickLoginGroupMember;
+
+  /// Heading above the ground admin demo accounts in the quick login dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Ground admin'**
+  String get quickLoginGroupGroundAdmin;
+
+  /// A demo account option in the quick login dropdown: role, middle dot, name
+  ///
+  /// In en, this message translates to:
+  /// **'{role} · {name}'**
+  String quickLoginOption(String role, String name);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {
