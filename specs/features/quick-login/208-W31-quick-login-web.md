@@ -99,6 +99,8 @@ cd web && pnpm lint && pnpm typecheck && pnpm test:run && pnpm build && pnpm tes
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and summarise. If blocked, set `status: blocked` and end with `BLOCKED: <reason>`.
 
 ## Eyeball
+E6's typeface part passes only on a computer with Source Sans 3 installed: the portal ships no web font (W32). If the letters differ, fail E6 and name the font you see.
+
 ```yaml
 - id: E1
   title: The list shows administrator roles only, and Sector Admin logs straight in
@@ -137,4 +139,40 @@ Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`
   steps:
     - '`cd /home/ossewawiel/Work/munserv-console/web && pnpm build > /dev/null && python3 ../scripts/check-no-demo-accounts.py dist`'
   expect: The command ends with "no demo account" and the file count.
+- id: E5
+  title: Afrikaans and isiZulu read correctly in Quick login
+  as: sector_admin
+  services: [db, backend, web]
+  url: http://localhost:3000/login
+  steps:
+    - Pick Sector Admin in the Quick login list.
+    - Open the profile menu, choose Language, then Afrikaans.
+    - Log out, then read the Quick login box.
+    - Pick Sector Admin again, switch the language to isiZulu, and log out.
+    - Read the Quick login box.
+    - Log in, switch the language back to English, and log out.
+  expect: Afrikaans shows "Vinnige aanmelding" over "Kies 'n rekening", and isiZulu shows "Ukungena ngokushesha" over "Khetha i-akhawunti".
+- id: E6
+  title: The real login page matches the canvas, font included
+  as: none
+  services: [db, backend, web]
+  url: http://localhost:3000/login
+  steps:
+    - Open the login page, logged out.
+    - On your computer, open https://claude.ai/artifact/Fi653crxT7uArKg4apB9vR and find the web frame Main.
+    - Compare the page with the frame Main.
+    - Open the Quick login list and compare it with the web frame QuickLoginOpen.
+    - Compare the letter shapes on the page with the canvas text.
+  expect: Layout, colours, headings and wording match both frames, and the page text uses the same typeface as the canvas.
+- id: E7
+  title: The Storybook stories show both states and the named menu
+  as: none
+  services: [storybook]
+  url: http://localhost:6006/?path=/story/molecules-quickloginselect--closed
+  steps:
+    - Open the link and look at the closed Quick login box.
+    - In the side list, open QuickLoginSelect, then Open.
+    - Compare the open menu with the web frame QuickLoginOpenNamed on the canvas.
+    - In the side list, open LoginForm, then With Quick Login.
+  expect: Closed shows an empty box reading "Choose an account"; Open matches QuickLoginOpenNamed, from "Pod Chief · Tester 5" down to a bare "Sector Admin"; With Quick Login shows the box above Email.
 ```
