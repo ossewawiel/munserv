@@ -55,6 +55,20 @@ Order: by group in the order above, then by name.
 - A client treats an unset, empty, non-JSON or non-array value as "no accounts" and renders
   nothing. It skips an entry whose group it does not show.
 
+## Design
+
+| Canvas | Covers | Working files | Approved |
+|---|---|---|---|
+| Quick Login (not yet published; the user runs `/design` to publish it) | M8 (#209) app quick login | `design/canvases/quick-login/` | No |
+
+There are three artboards at 390x844, light scheme. `Main` shows `EmailLoginPage` with the Quick login dropdown
+closed. `QuickLoginOpen` shows the menu open, with the Member and Ground admin headings over John,
+Thandi and Sipho. `QuickLoginError` shows the page after a failed quick login: the fields are filled,
+the dropdown is reset and the usual `FormErrorBanner` reads "No internet connection". The dropdown
+is a Material 3 `DropdownMenu` inside the feature widget `QuickLoginDropdown`. No shared widget is
+added. The canvas notes give the anatomy, the copy and the behaviour between frames. W31 (web)
+has no artboards yet.
+
 ## Stories
 | Id | Issue | Platform | ui | Depends on |
 |---|---|---|---|---|
