@@ -3,7 +3,7 @@ issue: 221
 story: M9
 title: "M8 Eyeball block: canvas and Widgetbook checks"
 platform: mobile
-status: pending
+status: completed
 depends_on: []
 touches:
   - specs/features/quick-login/209-M8-quick-login-mobile.md
@@ -13,7 +13,8 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-10-30"
-files_changed: []
+files_changed:
+  - specs/features/quick-login/209-M8-quick-login-mobile.md
 tests_added: []
 ---
 
