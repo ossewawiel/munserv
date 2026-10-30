@@ -29,7 +29,8 @@ Copy `specs/features/_template/story-handoff.md` to `specs/features/<name>/<issu
 - `Eyeball`: 2 to 6 checks, in the schema the template shows, that together cover every acceptance
   criterion. Pick a real account key from `scripts/console/accounts.yaml` (or `none`), the real
   services the check needs, and the URL the story should end up serving at (the implementer
-  corrects it if the actual route differs). Steps are imperative and short; expect is one sentence
+  corrects it if the actual route differs). Steps follow the template's plain-English rule: one action per step,
+  at most 20 words, no jargon; a terminal command is the command alone in backticks, so the TUI can run it. Expect is one sentence
   a tester can judge without guessing.
 - `ui: true` for any story that adds or changes a screen, dialog or visible component; the orchestrator then requires an approved canvas before dispatch. In Steps, name the artboard each screen must match (`design/canvases/<feature>/<Artboard>.dc.html`) once the designer has produced it; if planning before the canvas exists, write "match artboard: to be produced by designer" and the designer fills the names in.
 - Do not: list the tempting mistakes for this story.

@@ -22,8 +22,10 @@ sys.path.insert(0, str(ROOT))
 
 from textual.content import Content  # noqa: E402
 from textual.markup import MarkupError  # noqa: E402
-from scripts.tui.api import ConsoleApi, ConsoleError, Service  # noqa: E402
+from scripts.tui.api import Check, ConsoleApi, ConsoleError, Service  # noqa: E402
 from scripts.tui.app import OperatorApp  # noqa: E402
+from scripts.tui.eyeball import EyeballScreen, card_text  # noqa: E402
+from scripts.tui.runner import command_of, run_command  # noqa: E402
 from scripts.tui.phone import PhoneScreen  # noqa: E402
 
 
@@ -38,6 +40,19 @@ class StubConsole:
         }
         self.posts: list[tuple[str, str]] = []
         self.bodies: list[tuple[str, dict]] = []
+        self.eyeball_posts: list[tuple[str, dict]] = []
+        self.submit_error = ""
+        self.candidates = [
+            {"id": "pr-12", "number": 12, "title": "feat(web): pod logo", "stage": "awaiting_eyeball", "parse_error": None,
+             "results": {"candidate": "pr-12", "checks": {}, "observations": []},
+             "checks": [
+                 {"id": "E1", "title": "Chief uploads a logo", "as": "sector_admin", "url": "http://localhost:3000/settings",
+                  "steps": ["Open Pod Settings.", "`echo logo-ok`", "Click Upload."], "expect": "The logo shows in the header."},
+                 {"id": "E2", "title": "Bad file is refused", "as": "none", "url": "", "steps": ["Pick a text file."],
+                  "expect": "An error says the file is not an image."}]},
+            {"id": "pr-13", "number": 13, "title": "fix(api): bad block", "stage": "in_review",
+             "parse_error": "Eyeball block: bad yaml", "checks": [], "results": None},
+        ]
         self.pair_error = ""
         self.pair_message = "done"
         self.devices = [
@@ -77,6 +92,9 @@ class StubConsole:
                                        "swagger": "http://79.6.23.52:8080/swagger-ui.html",
                                        "console_with_token": "http://79.6.23.52:3999/?token=t"},
                                        "firewall": {"command": "sudo ufw allow from 79.6.23.0/24 to any port 3000,3999,8080 proto tcp"}})
+                if url.path == "/api/eyeball/candidates":
+                    return self._json({"candidates": stub.candidates, "accounts": {
+                        "sector_admin": {"email": "admin@ward42.example.com", "password": "admin123"}}})
                 if url.path == "/api/log":
                     name = parse_qs(url.query)["name"][0]
                     return self._json({"log": f"{name} line 1\n{name} line 2"})
@@ -93,6 +111,18 @@ class StubConsole:
                     if stub.pair_error and self.path.endswith("/pair"):
                         return self._json({"ok": False, "error": stub.pair_error}, 409)
                     return self._json({"ok": True, "message": stub.pair_message})
+                if self.path.startswith("/api/eyeball/"):
+                    body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+                    verb = self.path.rsplit("/", 1)[-1]
+                    stub.eyeball_posts.append((verb, body))
+                    if verb == "submit" and stub.submit_error:
+                        return self._json({"ok": False, "error": stub.submit_error}, 400)
+                    if verb == "submit":
+                        saved = [b for v, b in stub.eyeball_posts if v == "save"][-1]["data"]
+                        saved["last_submission"] = {"comment_url": "https://github.com/x/y/pull/12#c1",
+                                                    "label": "eyeball:fail", "passed": 1, "total": 2}
+                        return self._json({"ok": True, "data": saved})
+                    return self._json({"ok": True})
                 if self.path == "/api/refresh":
                     stub.posts.append(("refresh", ""))
                     return self._json({"ok": True})
@@ -290,6 +320,111 @@ class PhoneScreenTest(StubbedTuiCase):
             self.assertEqual(self.sent("logcat"), [{"device_id": "192.168.1.20:41233"}])
             self.assertEqual(screen.view, "phone-logcat")
         self.run_phone(scenario)
+
+
+class EyeballScreenTest(StubbedTuiCase):
+    def run_eyeball(self, scenario) -> None:
+        async def main() -> None:
+            app = OperatorApp(self.api)
+            async with app.run_test(size=(140, 50)) as pilot:
+                await wait_for(pilot, lambda: app.query_one("#services").row_count == 3)
+                await pilot.press("y")
+                await wait_for(pilot, lambda: isinstance(app.screen, EyeballScreen) and app.screen.eyeball is not None)
+                await pilot.pause(0.1)
+                await scenario(app.screen, pilot)
+        asyncio.run(main())
+
+    def posts(self, verb: str) -> list[dict]:
+        return [body for name, body in self.stub.eyeball_posts if name == verb]
+
+    def cards(self, screen) -> str:
+        return "\n".join(str(card.render()) for card in screen.query(".card"))
+
+    def test_each_check_is_a_card_with_login_steps_and_expectation(self) -> None:
+        async def scenario(screen, pilot) -> None:
+            text = self.cards(screen)
+            for word in ("E1  Chief uploads a logo", "admin@ward42.example.com / admin123", "http://localhost:3000/settings",
+                         " 1. Open Pod Settings.", " 3. Click Upload.", "You should see  The logo shows in the header.",
+                         "E2  Bad file is refused", "no login needed"):
+                self.assertIn(word, text)
+            self.assertIn("PR #12", str(screen.query_one("#candidates").render()))
+        self.run_eyeball(scenario)
+
+    def test_only_a_command_step_gets_a_run_key_and_its_output_shows_under_it(self) -> None:
+        async def scenario(screen, pilot) -> None:
+            self.assertEqual(self.cards(screen).count("press"), 1)
+            self.assertIn(" 2. echo logo-ok   ▶ press 2 to run", self.cards(screen))
+            await pilot.press("2")
+            await wait_for(pilot, lambda: "logo-ok\n" in self.cards(screen) + "\n" and "exit 0" in self.cards(screen))
+            await pilot.press("1")
+            await pilot.pause(0.1)
+            self.assertNotIn("running", self.cards(screen))
+        self.run_eyeball(scenario)
+
+    def test_pass_fail_and_note_save_through_the_console(self) -> None:
+        async def scenario(screen, pilot) -> None:
+            await pilot.press("p", "down", "f", "n", *"wrong text", "enter")
+            await wait_for(pilot, lambda: any(b["data"]["checks"].get("E2", {}).get("note") for b in self.posts("save")))
+            saved = self.posts("save")[-1]
+            self.assertEqual(saved["candidate"], "pr-12")
+            self.assertEqual(saved["data"]["checks"]["E1"]["result"], "pass")
+            self.assertEqual(saved["data"]["checks"]["E2"]["result"], "fail")
+            self.assertEqual(saved["data"]["checks"]["E2"]["note"], "wrong text")
+            self.assertIn("[FAIL]", self.cards(screen))
+            await pilot.press("f")
+            self.assertNotIn("[FAIL]", self.cards(screen))
+        self.run_eyeball(scenario)
+
+    def test_submit_needs_a_second_press_and_reports_the_label(self) -> None:
+        async def scenario(screen, pilot) -> None:
+            sent = []
+            screen.notify = lambda text, **kwargs: sent.append(text)
+            await pilot.press("s")
+            self.assertEqual(self.posts("submit"), [])
+            await pilot.press("p", "s")
+            await pilot.pause(0.2)
+            self.assertEqual(self.posts("submit"), [])
+            await pilot.press("s")
+            await wait_for(pilot, lambda: self.posts("submit"))
+            await wait_for(pilot, lambda: any("Label: eyeball:fail" in text for text in sent))
+            self.assertEqual(self.posts("submit"), [{"candidate": "pr-12"}])
+            self.assertTrue(any("Mark at least one" in text for text in sent))
+        self.run_eyeball(scenario)
+
+    def test_a_refused_submit_shows_the_console_message(self) -> None:
+        self.stub.submit_error = "a submit for pr-12 is already running"
+        async def scenario(screen, pilot) -> None:
+            sent = []
+            screen.notify = lambda text, **kwargs: sent.append(text)
+            await pilot.press("p", "s", "s")
+            await wait_for(pilot, lambda: any("already running" in text for text in sent))
+        self.run_eyeball(scenario)
+
+    def test_a_handoff_that_does_not_parse_says_so(self) -> None:
+        async def scenario(screen, pilot) -> None:
+            await pilot.press("right_square_bracket")
+            self.assertIn("does not parse: Eyeball block: bad yaml", self.cards(screen))
+        self.run_eyeball(scenario)
+
+
+class RunnerTest(unittest.TestCase):
+    def test_command_steps_are_one_backtick_span_or_a_dollar_line(self) -> None:
+        self.assertEqual(command_of("`curl -s localhost:8080/health`"), "curl -s localhost:8080/health")
+        self.assertEqual(command_of("$ docker ps"), "docker ps")
+        self.assertIsNone(command_of("Click `Save` and wait."))
+        self.assertIsNone(command_of("Open Pod Settings."))
+        self.assertIsNone(command_of("$ "))
+
+    def test_run_returns_output_then_exit_code(self) -> None:
+        self.assertEqual(run_command("echo hi; echo oops >&2; exit 3"), "hi\noops\nexit 3")
+
+    def test_long_output_is_cut(self) -> None:
+        lines = run_command("seq 1 100").splitlines()
+        self.assertEqual((lines[0], lines[-2], lines[-1]), ("1", "... 60 more lines", "exit 0"))
+
+    def test_card_shows_output_under_its_step(self) -> None:
+        check = Check.from_json({"id": "E1", "title": "t", "steps": ["`echo a`"], "expect": "x"})
+        self.assertIn("      a", str(card_text(check, {}, {}, {0: "a"})))
 
 
 class ApiTest(unittest.TestCase):

@@ -31,6 +31,7 @@ Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patt
 | Mock API (optional) | `cd infrastructure/mock-api && npm start` | localhost:3001, `flutter run --dart-define=API_PORT=3001` |
 | Factory console | `./dashboard.sh` (or `python3 -m scripts.console`) | http://localhost:3999 |
 | Operator TUI | `./tui.sh` | in your SSH terminal: services, logs and LAN links over the console API (`scripts/tui/`) |
+| Eyeball in the TUI | `./tui.sh`, then `y` | a card per check from the handoff's Eyeball block; `j`/`k` move, `p` pass, `f` fail, `n` note, `1`-`9` run a command step, `[`/`]` switch PR, `s` twice submits (labels the PR like the console) |
 | Real phone | `./tui.sh`, then `p` | Phone screen: pairing wizard (Android 11+, wireless debugging), device list, `i` build and install from the eyeball checkout (API 8080), `s` from the showcase checkout (API 8090), `o` open app, `l` app log |
 | Showcase stack | `./tui.sh`, then `u` (update), `b` (build), `d` (start), `e` (stop) | web on :4000, API on :8090; worktree `../munserv-demo` follows `origin/master` |
 | Remote eyeball | `scripts/eyeball-up.sh <pr>` | prints web, Swagger and console links for another machine on the LAN |
