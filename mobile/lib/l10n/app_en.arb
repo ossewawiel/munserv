@@ -769,5 +769,35 @@
   "viewOnMap": "View on Map",
   "@viewOnMap": {
     "description": "Button to view on map"
+  },
+
+  "quickLoginLabel": "Quick login",
+  "@quickLoginLabel": {
+    "description": "Label of the demo account dropdown on the email login page (demo and dev builds only)"
+  },
+
+  "quickLoginGroupMember": "Member",
+  "@quickLoginGroupMember": {
+    "description": "Heading above the member demo accounts in the quick login dropdown"
+  },
+
+  "quickLoginGroupGroundAdmin": "Ground admin",
+  "@quickLoginGroupGroundAdmin": {
+    "description": "Heading above the ground admin demo accounts in the quick login dropdown"
+  },
+
+  "quickLoginOption": "{role} · {name}",
+  "@quickLoginOption": {
+    "description": "A demo account option in the quick login dropdown: role, middle dot, name",
+    "placeholders": {
+      "role": {
+        "type": "String",
+        "example": "Ground admin"
+      },
+      "name": {
+        "type": "String",
+        "example": "Sipho"
+      }
+    }
   }
 }

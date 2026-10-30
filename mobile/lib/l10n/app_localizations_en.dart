@@ -475,4 +475,18 @@ class SEn extends S {
 
   @override
   String get viewOnMap => 'View on Map';
+
+  @override
+  String get quickLoginLabel => 'Quick login';
+
+  @override
+  String get quickLoginGroupMember => 'Member';
+
+  @override
+  String get quickLoginGroupGroundAdmin => 'Ground admin';
+
+  @override
+  String quickLoginOption(String role, String name) {
+    return '$role · $name';
+  }
 }

@@ -6,6 +6,9 @@ import 'package:munserv_mobile/features/auth/data/auth_api.dart';
 // ignore: implementation_imports
 import 'package:munserv_mobile/features/auth/data/auth_repository.dart';
 import 'package:munserv_mobile/features/auth/data/secure_storage.dart';
+import 'package:munserv_mobile/features/auth/domain/demo_account.dart';
+import 'package:munserv_mobile/features/auth/presentation/widgets/quick_login_dropdown.dart';
+import 'package:munserv_mobile/features/auth/providers/demo_accounts_provider.dart';
 import 'package:munserv_mobile/features/auth/presentation/pages/email_login_page.dart';
 import 'package:munserv_mobile/features/auth/presentation/widgets/email_input_field.dart';
 import 'package:munserv_mobile/features/auth/presentation/widgets/loading_button.dart';
@@ -33,9 +36,10 @@ void main() {
     mockAuthApi = MockAuthApi();
   });
 
-  Widget createTestWidget() {
+  Widget createTestWidget({List<DemoAccount> demoAccounts = const []}) {
     return ProviderScope(
       overrides: [
+        demoAccountsProvider.overrideWithValue(demoAccounts),
         authRepositoryProvider.overrideWithValue(mockRepository),
         secureStorageProvider.overrideWithValue(mockStorage),
         authApiProvider.overrideWithValue(mockAuthApi),
@@ -378,6 +382,81 @@ void main() {
 
       // Second call should have happened
       expect(callCount, 2);
+    });
+  });
+
+  group('EmailLoginPage quick login', () {
+    const accounts = [
+      DemoAccount(
+        group: DemoAccountGroup.member,
+        name: 'John',
+        email: 'john@example.test',
+        password: 'pw-john',
+      ),
+    ];
+
+    void stubStorage() {
+      when(() => mockStorage.getTokens()).thenAnswer((_) async => null);
+      when(() => mockStorage.getProfile()).thenAnswer((_) async => null);
+      when(() => mockStorage.getEmail()).thenAnswer((_) async => null);
+      when(
+        () => mockRepository.loginWithEmail(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer(
+        (_) async => const Result.failure(
+          AppError.unauthorized(message: 'Invalid credentials'),
+        ),
+      );
+    }
+
+    Future<void> pickJohn(WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget(demoAccounts: accounts));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(QuickLoginDropdown));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Member · John'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('hides quick login without demo accounts', (tester) async {
+      stubStorage();
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(QuickLoginDropdown), findsNothing);
+    });
+
+    testWidgets('fills the fields and logs in when an account is picked', (
+      tester,
+    ) async {
+      stubStorage();
+      await pickJohn(tester);
+
+      final emailField = tester.widget<TextFormField>(
+        find.descendant(
+          of: find.byType(EmailInputField),
+          matching: find.byType(TextFormField),
+        ),
+      );
+      expect(emailField.controller?.text, 'john@example.test');
+      verify(
+        () => mockRepository.loginWithEmail(
+          email: 'john@example.test',
+          password: 'pw-john',
+        ),
+      ).called(1);
+    });
+
+    testWidgets('shows the error banner when a quick login fails', (
+      tester,
+    ) async {
+      stubStorage();
+      await pickJohn(tester);
+
+      expect(find.byType(FormErrorBanner), findsOneWidget);
+      expect(find.text('Invalid credentials'), findsOneWidget);
     });
   });
 }
