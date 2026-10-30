@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 DEFAULT_BASE_URL = "http://localhost:3999"
 TIMEOUT_SECONDS = 10
 UPDATE_TIMEOUT_SECONDS = 120  # the showcase update runs git fetch inside the request
+PHONE_TIMEOUT_SECONDS = 45  # adb pair waits up to 30 seconds for the phone
 
 
 class ConsoleError(Exception):
@@ -96,6 +97,35 @@ class State:
     checkout: Checkout
     services: tuple[Service, ...]
     showcase: Showcase | None = None
+
+
+@dataclass(frozen=True)
+class Device:
+    id: str
+    state: str
+    model: str
+    release: str
+    sdk: int
+
+    @classmethod
+    def from_json(cls, data: dict) -> Device:
+        android = data.get("android") or {}
+        return cls(id=data["id"], state=data.get("state") or "", model=(data.get("model") or "").replace("_", " "),
+                   release=android.get("release") or "", sdk=int(android.get("sdk") or 0))
+
+
+@dataclass(frozen=True)
+class Phone:
+    lan_ip: str
+    min_sdk: int
+    ports: dict[str, int]
+    devices: tuple[Device, ...]
+
+
+@dataclass(frozen=True)
+class Job:
+    status: str
+    message: str
 
 
 @dataclass(frozen=True)
@@ -183,3 +213,38 @@ class ConsoleApi:
 
     def showcase_stop(self) -> str:
         return self._request("POST", "/api/showcase/stop", {}).get("message", "")
+
+    def phone(self) -> Phone:
+        data = self._request("GET", "/api/mobile/devices")
+        return Phone(
+            lan_ip=data.get("lan_ip") or "",
+            min_sdk=int(data.get("min_android_sdk") or 0),
+            ports={"eyeball": int(data.get("api_port") or 0), "showcase": int(data.get("showcase_api_port") or 0)},
+            devices=tuple(Device.from_json(d) for d in data.get("devices", [])),
+        )
+
+    def install_job(self) -> Job | None:
+        """The newest phone build-and-install job, or None before the first."""
+        jobs = [j for j in self._request("GET", "/api/state").get("jobs", [])
+                if j.get("service") == "mobile" and j.get("kind") == "install"]
+        return Job(status=jobs[-1]["status"], message=jobs[-1].get("message") or "") if jobs else None
+
+    def phone_pair(self, address: str, code: str) -> str:
+        return self._request("POST", "/api/mobile/pair", {"address": address, "code": code},
+                             timeout=PHONE_TIMEOUT_SECONDS).get("message", "")
+
+    def phone_connect(self, address: str) -> str:
+        return self._request("POST", "/api/mobile/connect", {"address": address},
+                             timeout=PHONE_TIMEOUT_SECONDS).get("message", "")
+
+    def phone_install(self, device_id: str, source: str) -> None:
+        self._request("POST", "/api/mobile/install", {"device_id": device_id, "source": source})
+
+    def phone_launch(self, device_id: str) -> str:
+        return self._request("POST", "/api/mobile/launch", {"device_id": device_id}).get("message", "")
+
+    def phone_logcat(self, device_id: str) -> str:
+        return self._request("POST", "/api/mobile/logcat", {"device_id": device_id}).get("message", "")
+
+    def phone_logcat_stop(self) -> str:
+        return self._request("POST", "/api/mobile/logcat/stop", {}).get("message", "")

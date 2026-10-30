@@ -17,6 +17,7 @@ from textual.theme import Theme
 from textual.widgets import DataTable, Footer, Log, Static
 
 from .api import ConsoleApi, ConsoleError, Remote, Service, Showcase, State
+from .phone import PhoneScreen
 
 POLL_SECONDS = 2.0
 STOP_WAIT_SECONDS = 30
@@ -97,6 +98,7 @@ class OperatorApp(App):
         Binding("b", "showcase('build')", "Demo: build"),
         Binding("d", "showcase('start')", "Demo: start"),
         Binding("e", "showcase('stop')", "Demo: stop"),
+        Binding("p", "phone", "Phone"),
         Binding("f", "refresh", "Refresh"),
         Binding("q", "quit", "Quit"),
     ]
@@ -258,6 +260,9 @@ class OperatorApp(App):
 
     def action_start_stack(self) -> None:
         self.run_service_action("start", EYEBALL_STACK)
+
+    def action_phone(self) -> None:
+        self.push_screen(PhoneScreen(self.api))
 
     def action_refresh(self) -> None:
         self.refresh_console()

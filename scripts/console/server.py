@@ -155,9 +155,11 @@ class Handler(BaseHTTPRequestHandler):
             web_cfg = services.services_config().get("web")
             web_up = bool(web_cfg and web_cfg.get("health") and services.health_ok(web_cfg["health"]))
             return self._json({
-                "devices": devices,
+                "devices": mobile.describe_devices(devices),
+                "min_android_sdk": mobile.MIN_ANDROID_SDK,
                 "lan_ip": lan_ip,
                 "api_port": api_port,
+                "showcase_api_port": showcase.cfg()["backend_port"],
                 "emulator_host": mobile.emulator_host(),
                 "reachability": mobile.reachability_snapshot(devices, lan_ip, api_port, web_up),
             })
@@ -257,11 +259,28 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"ok": True, "messages": messages})
         if path == "/api/mobile/install":
             device_id = mobile.validate_device_id(body.get("device_id", ""))
+            if body.get("source") == "showcase":
+                if not showcase.checkout().is_dir():
+                    raise ApiError("The demo worktree does not exist yet; update it first", 409)
+                job = mobile.start_install(device_id, showcase.checkout(), showcase.cfg()["backend_port"], self.checkout)
+                return self._json({"ok": True, "job": job})
             branch = body.get("branch")
             if branch:
                 ensure_checked_out(self.checkout, validate_branch(branch))
             job = mobile.start_install(device_id, self.checkout)
             return self._json({"ok": True, "job": job})
+        if path == "/api/mobile/pair":
+            message = mobile.pair(body.get("address", ""), body.get("code", ""))
+            return self._json({"ok": True, "message": message})
+        if path == "/api/mobile/connect":
+            return self._json({"ok": True, "message": mobile.connect(body.get("address", ""))})
+        if path == "/api/mobile/launch":
+            return self._json({"ok": True, "message": mobile.launch_app(body.get("device_id", ""))})
+        if path == "/api/mobile/logcat":
+            message = mobile.start_logcat(body.get("device_id", ""), self.checkout)
+            return self._json({"ok": True, "message": message})
+        if path == "/api/mobile/logcat/stop":
+            return self._json({"ok": True, "message": mobile.stop_logcat(self.checkout)})
         if path == "/api/mobile/run":
             device_id = mobile.validate_device_id(body.get("device_id", ""))
             branch = body.get("branch")

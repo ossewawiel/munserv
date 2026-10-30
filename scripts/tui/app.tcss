@@ -64,3 +64,55 @@ Screen {
     background: $surface;
     border: none;
 }
+
+#phone-top {
+    height: 1;
+    padding: 0 1;
+    background: $surface;
+}
+
+#phone-main {
+    height: 1fr;
+}
+
+#phone-left {
+    width: 3fr;
+    min-width: 60;
+    padding: 0 1;
+}
+
+#phone-right {
+    width: 4fr;
+    padding: 0 1;
+    border-left: vkey $panel;
+}
+
+#devices {
+    height: auto;
+    max-height: 40%;
+    background: $background;
+}
+
+#devices > .datatable--header {
+    background: $background;
+    color: $foreground-muted;
+}
+
+#devices > .datatable--cursor {
+    background: $primary 25%;
+}
+
+#wizard-text {
+    height: auto;
+    padding: 0 0 1 0;
+}
+
+#phone-left Input {
+    margin: 0 0 1 0;
+}
+
+#phone-log {
+    height: 1fr;
+    background: $surface;
+    border: none;
+}

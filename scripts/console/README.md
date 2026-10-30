@@ -157,3 +157,7 @@ in `start_timeout` fails the run with its last log line.
 ## Showcase stack
 
 `showcase.py` runs a second copy of `origin/master` for demos: worktree `../<name>-demo` (detached, only follows `origin/master`), its own database, `java -jar` backend on 8090 and `vite preview` web on 4000. API: `POST /api/showcase/update|build|start|stop`; `/api/state` carries a `showcase` block (SHA, built SHA, master SHA) and `/api/remote` the demo links and firewall command. The `demo-backend`, `demo-web` and `demo-build` rows in `services.yaml` give it health dots and logs; `demo-build` holds the build log. The TUI binds `u`, `b`, `d`, `e`.
+
+### Phone over wireless debugging
+
+`mobile.py` serves the TUI's Phone screen (`p`; `scripts/tui/phone.py`). API: `POST /api/mobile/pair` (`address`, `code`; runs `adb pair`), `POST /api/mobile/connect` (`address`; runs `adb connect`), `GET /api/mobile/devices` (id, model, Android release and API level, `min_android_sdk`, both backend ports), `POST /api/mobile/install` (`device_id`, `source`: `eyeball` builds the console checkout against its API port, `showcase` builds `../<name>-demo` against the demo port; the job installs with `adb install -r`, then opens the app), `POST /api/mobile/launch`, `POST /api/mobile/logcat` (tails the app's process into the `phone-logcat` log; the app must be running) and `POST /api/mobile/logcat/stop`. The build log is `mobile-install`, always in the console checkout's log folder.

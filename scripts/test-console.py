@@ -794,6 +794,122 @@ class MobileRequestValidationTests(unittest.TestCase):
             self.assertEqual(ctx.exception.status, 409)
 
 
+def _adb_result(stdout: str = "", returncode: int = 0, stderr: str = "") -> subprocess.CompletedProcess:
+    return subprocess.CompletedProcess(args=[], returncode=returncode, stdout=stdout, stderr=stderr)
+
+
+class MobileWirelessDebuggingTests(unittest.TestCase):
+    def setUp(self):
+        which = patch("console.mobile.shutil.which", return_value="/usr/bin/adb")
+        which.start()
+        self.addCleanup(which.stop)
+        mobile._android_versions.clear()
+
+    def test_pair_passes_the_address_and_code_to_adb(self):
+        with patch("console.mobile.subprocess.run",
+                   return_value=_adb_result("Successfully paired to 192.168.1.20:37099 [guid=x]\n")) as run:
+            message = mobile.pair("192.168.1.20:37099", "123456")
+        self.assertEqual(run.call_args.args[0], ["adb", "pair", "192.168.1.20:37099", "123456"])
+        self.assertIn("Successfully paired", message)
+
+    def test_pair_reports_adb_text_when_the_code_is_wrong(self):
+        with patch("console.mobile.subprocess.run", return_value=_adb_result("Failed: Wrong password\n")):
+            with self.assertRaises(gitops.ApiError) as ctx:
+                mobile.pair("192.168.1.20:37099", "000000")
+        self.assertEqual(ctx.exception.status, 409)
+        self.assertIn("Wrong password", str(ctx.exception))
+
+    def test_pair_and_connect_reject_malformed_input_before_running_adb(self):
+        with patch("console.mobile.subprocess.run") as run:
+            for call in (lambda: mobile.pair("not-an-address", "123456"),
+                         lambda: mobile.pair("192.168.1.20:37099", "12345"),
+                         lambda: mobile.connect("192.168.1.20; rm -rf /")):
+                with self.assertRaises(gitops.ApiError) as ctx:
+                    call()
+                self.assertEqual(ctx.exception.status, 400)
+        run.assert_not_called()
+
+    def test_connect_succeeds_on_connected_and_already_connected(self):
+        for text in ("connected to 192.168.1.20:41233\n", "already connected to 192.168.1.20:41233\n"):
+            with patch("console.mobile.subprocess.run", return_value=_adb_result(text)):
+                self.assertEqual(mobile.connect("192.168.1.20:41233"), text.strip())
+
+    def test_connect_fails_on_adb_text_even_with_exit_code_zero(self):
+        text = "failed to connect to '192.168.1.20:41233': Connection refused\n"
+        with patch("console.mobile.subprocess.run", return_value=_adb_result(text)):
+            with self.assertRaises(gitops.ApiError):
+                mobile.connect("192.168.1.20:41233")
+
+    def test_android_version_is_read_once_and_cached(self):
+        with patch("console.mobile.subprocess.run", return_value=_adb_result("14\n34\n")) as run:
+            self.assertEqual(mobile.android_version("R58N30ABCDE"), {"release": "14", "sdk": 34})
+            self.assertEqual(mobile.android_version("R58N30ABCDE"), {"release": "14", "sdk": 34})
+        self.assertEqual(run.call_count, 1)
+
+    def test_android_version_is_none_while_the_phone_does_not_answer(self):
+        with patch("console.mobile.subprocess.run", return_value=_adb_result("", 1, "error: device unauthorized")):
+            self.assertIsNone(mobile.android_version("R58N30ABCDE"))
+
+    def test_describe_devices_skips_phones_that_are_not_authorised(self):
+        rows = [{"id": "a", "state": "unauthorized", "model": None}]
+        with patch("console.mobile.subprocess.run") as run:
+            self.assertEqual(mobile.describe_devices(rows), [{**rows[0], "android": None}])
+        run.assert_not_called()
+
+    def test_launch_opens_the_app_by_its_application_id(self):
+        with patch("console.mobile.subprocess.run", return_value=_adb_result("Events injected: 1\n")) as run:
+            mobile.launch_app("R58N30ABCDE")
+        self.assertIn(mobile.APP_ID, run.call_args.args[0])
+
+    def test_launch_fails_when_the_app_is_not_installed(self):
+        with patch("console.mobile.subprocess.run",
+                   return_value=_adb_result("** No activities found to run, monkey aborted.\n")):
+            with self.assertRaises(gitops.ApiError):
+                mobile.launch_app("R58N30ABCDE")
+
+    def test_logcat_needs_the_app_running(self):
+        with tempfile.TemporaryDirectory() as d, \
+                patch("console.mobile.subprocess.run", return_value=_adb_result("\n", 1)):
+            with self.assertRaises(gitops.ApiError) as ctx:
+                mobile.start_logcat("R58N30ABCDE", Path(d))
+        self.assertEqual(ctx.exception.status, 409)
+
+    def test_logcat_filters_to_the_apps_pid_and_starts_a_tracked_process(self):
+        with tempfile.TemporaryDirectory() as d, \
+                patch("console.mobile.subprocess.run", return_value=_adb_result("4242\n")), \
+                patch("console.mobile.services_mod.stop_service"), \
+                patch("console.mobile.services_mod.start_tracked_process", return_value="started") as start:
+            mobile.start_logcat("R58N30ABCDE", Path(d))
+        self.assertEqual(start.call_args.args[0], mobile.LOGCAT_PROCESS)
+        self.assertEqual(start.call_args.args[2], "adb -s R58N30ABCDE logcat -v time --pid=4242")
+
+    def test_install_job_logs_under_the_log_root_and_uses_the_given_port(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            build, logs = root / "demo", root / "main"
+            (build / "mobile" / ".dart_tool").mkdir(parents=True)
+            logs.mkdir()
+            commands = []
+            def fake_run(cmd, **kwargs):
+                commands.append(cmd)
+                return _adb_result("")
+            with patch("console.mobile.subprocess.run", side_effect=fake_run), \
+                    patch("console.mobile.lan_ip", return_value="192.168.1.5"), \
+                    patch("console.mobile.is_worktree", return_value=False), \
+                    patch("console.mobile.launch_app", return_value="opened"):
+                job = mobile.start_install("R58N30ABCDE", build, 8090, logs)
+                for _ in range(100):
+                    if services.running_job("mobile", "install") is None:
+                        break
+                    threading.Event().wait(0.05)
+            self.assertIn("--dart-define=API_PORT=8090", commands[0])
+            self.assertIn("--dart-define=API_HOST=192.168.1.5", commands[0])
+            self.assertTrue(services.log_path(logs, mobile.INSTALL_LOG).exists())
+            self.assertFalse(services.log_path(build, mobile.INSTALL_LOG).exists())
+            self.assertEqual(services.jobs_snapshot()[-1]["id"], job["id"])
+            self.assertEqual(services.jobs_snapshot()[-1]["status"], "success")
+
+
 class LocalFilesTests(unittest.TestCase):
     """gitops.copy_local_files against a real (temporary) git repo, so "never copies a tracked
     file" is exercised against real `git ls-files`, not a mock."""
