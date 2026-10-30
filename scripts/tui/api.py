@@ -17,6 +17,7 @@ DEFAULT_BASE_URL = "http://localhost:3999"
 TIMEOUT_SECONDS = 10
 UPDATE_TIMEOUT_SECONDS = 120  # the showcase update runs git fetch inside the request
 PHONE_TIMEOUT_SECONDS = 45  # adb pair waits up to 30 seconds for the phone
+SUBMIT_TIMEOUT_SECONDS = 180  # a submit runs several gh calls: issue search, create, comment, label
 
 
 class ConsoleError(Exception):
@@ -137,6 +138,54 @@ class Remote:
     showcase_firewall_command: str = ""
 
 
+@dataclass(frozen=True)
+class Check:
+    id: str
+    title: str
+    account: str
+    url: str
+    steps: tuple[str, ...]
+    expect: str
+
+    @classmethod
+    def from_json(cls, data: dict) -> Check:
+        return cls(id=str(data["id"]), title=data.get("title") or str(data["id"]), account=data.get("as") or "none",
+                   url=data.get("url") or "", steps=tuple(str(s) for s in data.get("steps") or ()),
+                   expect=data.get("expect") or "")
+
+
+@dataclass(frozen=True)
+class Candidate:
+    id: str
+    title: str
+    number: int | None
+    stage: str
+    parse_error: str
+    checks: tuple[Check, ...]
+    results: dict
+
+    @classmethod
+    def from_json(cls, data: dict) -> Candidate:
+        return cls(id=data["id"], title=data.get("title") or data["id"], number=data.get("number"),
+                   stage=data.get("stage") or "", parse_error=data.get("parse_error") or "",
+                   checks=tuple(Check.from_json(c) for c in data.get("checks") or ()),
+                   results=data.get("results") or {"candidate": data["id"], "checks": {}, "observations": []})
+
+
+@dataclass(frozen=True)
+class Submission:
+    label: str
+    comment_url: str
+    passed: int
+    total: int
+
+
+@dataclass(frozen=True)
+class Eyeball:
+    candidates: tuple[Candidate, ...]
+    accounts: dict[str, dict]
+
+
 class ConsoleApi:
     def __init__(self, base_url: str = DEFAULT_BASE_URL) -> None:
         self.base_url = base_url.rstrip("/")
@@ -248,3 +297,19 @@ class ConsoleApi:
 
     def phone_logcat_stop(self) -> str:
         return self._request("POST", "/api/mobile/logcat/stop", {}).get("message", "")
+
+    def eyeball(self, refresh: bool = False) -> Eyeball:
+        data = self._request("GET", "/api/eyeball/candidates" + ("?refresh=1" if refresh else ""))
+        return Eyeball(candidates=tuple(Candidate.from_json(c) for c in data.get("candidates", [])),
+                       accounts=dict(data.get("accounts") or {}))
+
+    def eyeball_save(self, candidate_id: str, results: dict) -> None:
+        self._request("POST", "/api/eyeball/save", {"candidate": candidate_id, "data": results})
+
+    def eyeball_submit(self, candidate_id: str) -> tuple[Submission, dict]:
+        """Files the failures, comments on the PR and sets its eyeball label; returns the tally and the stored results."""
+        data = self._request("POST", "/api/eyeball/submit", {"candidate": candidate_id},
+                             timeout=SUBMIT_TIMEOUT_SECONDS).get("data") or {}
+        last = data.get("last_submission") or {}
+        return (Submission(label=last.get("label") or "", comment_url=last.get("comment_url") or "",
+                           passed=int(last.get("passed") or 0), total=int(last.get("total") or 0)), data)

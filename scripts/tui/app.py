@@ -17,6 +17,7 @@ from textual.theme import Theme
 from textual.widgets import DataTable, Footer, Log, Static
 
 from .api import ConsoleApi, ConsoleError, Remote, Service, Showcase, State
+from .eyeball import EyeballScreen
 from .phone import PhoneScreen
 
 POLL_SECONDS = 2.0
@@ -99,6 +100,7 @@ class OperatorApp(App):
         Binding("d", "showcase('start')", "Demo: start"),
         Binding("e", "showcase('stop')", "Demo: stop"),
         Binding("p", "phone", "Phone"),
+        Binding("y", "eyeball", "Eyeball"),
         Binding("f", "refresh", "Refresh"),
         Binding("q", "quit", "Quit"),
     ]
@@ -263,6 +265,9 @@ class OperatorApp(App):
 
     def action_phone(self) -> None:
         self.push_screen(PhoneScreen(self.api))
+
+    def action_eyeball(self) -> None:
+        self.push_screen(EyeballScreen(self.api))
 
     def action_refresh(self) -> None:
         self.refresh_console()
