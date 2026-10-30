@@ -17,7 +17,7 @@ interface QuickLoginSelectProps {
  * drops those props so the heading stays a non-selectable group label.
  */
 const GroupHeading: FC<{ readonly children: string }> = ({ children }) => (
-  <ListSubheader role="presentation">{children}</ListSubheader>
+  <ListSubheader role="presentation" disableSticky sx={{ bgcolor: 'transparent' }}>{children}</ListSubheader>
 );
 
 export const QuickLoginSelect: FC<QuickLoginSelectProps> = ({
