@@ -102,6 +102,10 @@ class PhoneScreen(Screen):
         self.poll()
         self.set_interval(POLL_SECONDS, self.poll)
 
+    def say(self, message: str, severity: str = "information") -> None:
+        """A toast with markup off: adb text such as `[guid=adb-...]` is not Textual markup."""
+        self.notify(message, severity=severity, markup=False)
+
     # ---- polling -------------------------------------------------------------------------------
 
     @work(thread=True, exclusive=True, group="phone-poll")
@@ -129,7 +133,7 @@ class PhoneScreen(Screen):
         self.fill_devices(phone)
         if self.awaiting_job and job and job.status != "running":
             self.awaiting_job = False
-            self.notify(job.message, severity="information" if job.status == "success" else "error")
+            self.say(job.message, severity="information" if job.status == "success" else "error")
         if log != self.last_log:
             widget = self.query_one("#phone-log", Log)
             widget.clear()
@@ -163,11 +167,11 @@ class PhoneScreen(Screen):
         """The highlighted phone when it can take the app; otherwise a notice saying why not."""
         device = self.selected_device()
         if device is None:
-            self.notify("No phone in the list. Pair one with the wizard first.", severity="warning")
+            self.say("No phone in the list. Pair one with the wizard first.", severity="warning")
         elif device.state != "device":
-            self.notify(f"{device.id} is {device.state}. Accept the debugging prompt on the phone.", severity="warning")
+            self.say(f"{device.id} is {device.state}. Accept the debugging prompt on the phone.", severity="warning")
         elif self.phone and device.sdk < self.phone.min_sdk:
-            self.notify(f"{device.id} runs Android {device.release}. Wireless debugging needs "
+            self.say(f"{device.id} runs Android {device.release}. Wireless debugging needs "
                         f"{_release_name(self.phone.min_sdk)} or newer.", severity="error")
         else:
             return device
@@ -207,21 +211,21 @@ class PhoneScreen(Screen):
 
     @work(thread=True, exclusive=True, group="phone-wizard")
     def run_pair(self, address: str, code: str) -> None:
-        self.app.call_from_thread(self.notify, "pairing: working")
+        self.app.call_from_thread(self.say, "pairing: working")
         try:
             message = self.api.phone_pair(address, code)
         except ConsoleError as err:
-            self.app.call_from_thread(self.notify, str(err), severity="error")
+            self.app.call_from_thread(self.say, str(err), severity="error")
             return
         self.app.call_from_thread(self.wizard_to, CONNECT_STEP, message)
 
     @work(thread=True, exclusive=True, group="phone-wizard")
     def run_connect(self, address: str) -> None:
-        self.app.call_from_thread(self.notify, "connecting: working")
+        self.app.call_from_thread(self.say, "connecting: working")
         try:
             message = self.api.phone_connect(address)
         except ConsoleError as err:
-            self.app.call_from_thread(self.notify, str(err), severity="error")
+            self.app.call_from_thread(self.say, str(err), severity="error")
             return
         self.app.call_from_thread(self.wizard_to, LAST_STEP, message)
         self.app.call_from_thread(self.poll)
@@ -229,7 +233,7 @@ class PhoneScreen(Screen):
     def wizard_to(self, step: int, message: str) -> None:
         self.step = step
         self.show_step()
-        self.notify(message)
+        self.say(message)
 
     # ---- build, install, launch, log -----------------------------------------------------------
 
@@ -245,10 +249,10 @@ class PhoneScreen(Screen):
         try:
             self.api.phone_install(device_id, source)
         except ConsoleError as err:
-            self.app.call_from_thread(self.notify, str(err), severity="error")
+            self.app.call_from_thread(self.say, str(err), severity="error")
             return
         self.awaiting_job = True
-        self.app.call_from_thread(self.notify, f"building from {SOURCE_LABEL[source]}, then installing on {device_id}")
+        self.app.call_from_thread(self.say, f"building from {SOURCE_LABEL[source]}, then installing on {device_id}")
         self.app.call_from_thread(self.poll)
 
     def action_open_app(self) -> None:
@@ -279,9 +283,9 @@ class PhoneScreen(Screen):
     @work(thread=True, group="phone-action")
     def run_simple(self, call) -> None:
         try:
-            self.app.call_from_thread(self.notify, call())
+            self.app.call_from_thread(self.say, call())
         except ConsoleError as err:
-            self.app.call_from_thread(self.notify, str(err), severity="error")
+            self.app.call_from_thread(self.say, str(err), severity="error")
         self.app.call_from_thread(self.poll)
 
     def action_back(self) -> None:
