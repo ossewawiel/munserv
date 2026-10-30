@@ -126,4 +126,28 @@ Install with the operator screen: `./tui.sh`, then `p`, then `i` (eyeball checko
   steps:
     - '`cd /home/ossewawiel/Work/munserv-console/mobile && flutter build apk --debug > /dev/null && python3 ../scripts/check-no-demo-accounts.py build/app/outputs/flutter-apk/app-debug.apk`'
   expect: The command ends with "no demo account", so a build without the accounts file has none inside.
+- id: E5
+  title: The login page on the phone matches the canvas
+  as: none
+  services: [db, backend, mobile]
+  url: EmailLoginPage
+  steps:
+    - Open the app on the phone. If it asks for a PIN, tap Use Different Account.
+    - On your computer, open https://claude.ai/artifact/Fi653crxT7uArKg4apB9vR and find the app frame Main.
+    - Compare the login page on the phone with the frame Main.
+    - Open the Quick login list on the phone.
+    - Compare the open list with the app frame QuickLoginOpen.
+  expect: Both phone screens match their frames in order, colours, filled boxes, row heights, heading indent and wording.
+- id: E6
+  title: The Widgetbook entry works switched on and off
+  as: none
+  services: []
+  url: https://ossewawiel.github.io/munserv/widgetbook/
+  steps:
+    - Open the Widgetbook link.
+    - In the side list, open QuickLoginDropdown, then Default.
+    - Open the Quick login list and read the names.
+    - In the settings panel, switch Enabled off.
+    - Try to open the Quick login list again.
+  expect: Switched on, the list shows John and Thandi under Member and Sipho under Ground admin; switched off, the box is greyed out and does not open.
 ```
