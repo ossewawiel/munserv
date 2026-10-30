@@ -1,68 +1,76 @@
 {
-  "artboards": [
-    {
-      "file": "Main.dc.html",
-      "x": 0,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Email login — Quick login closed"
-    },
-    {
-      "file": "QuickLoginOpen.dc.html",
-      "x": 510,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Email login — Quick login open"
-    },
-    {
-      "file": "QuickLoginError.dc.html",
-      "x": 1020,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Email login — quick login failed"
-    }
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-30T09:32:06Z" },
+  "title": "Quick Login",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Login — Quick login closed" },
+    "QuickLoginOpen.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 900, "title": "Login — Quick login open, dev accounts" },
+    "QuickLoginOpenNamed.dc.html": { "x": 3040, "y": 0, "w": 1440, "h": 900, "title": "Quick login open — accounts with names (Storybook data)" },
+    "QuickLoginSigningIn.dc.html": { "x": 0, "y": 1020, "w": 1440, "h": 900, "title": "After a pick — signing in" },
+    "QuickLoginError.dc.html": { "x": 1520, "y": 1020, "w": 1440, "h": 900, "title": "Quick login failed — normal login error" },
+    "NoQuickLogin.dc.html": { "x": 3040, "y": 1020, "w": 1440, "h": 900, "title": "No demo accounts — today's page, unchanged" },
+    "app/Main.dc.html": { "x": 0, "y": 2400, "w": 390, "h": 844, "title": "App email login — Quick login closed" },
+    "app/QuickLoginOpen.dc.html": { "x": 470, "y": 2400, "w": 390, "h": 844, "title": "App email login — Quick login open" },
+    "app/QuickLoginError.dc.html": { "x": 940, "y": 2400, "w": 390, "h": 844, "title": "App email login — quick login failed" }
+  },
+  "order": [
+    "Main.dc.html",
+    "QuickLoginOpen.dc.html",
+    "QuickLoginOpenNamed.dc.html",
+    "QuickLoginSigningIn.dc.html",
+    "QuickLoginError.dc.html",
+    "NoQuickLogin.dc.html",
+    "app/Main.dc.html",
+    "app/QuickLoginOpen.dc.html",
+    "app/QuickLoginError.dc.html"
   ],
-  "annotations": [
-    {
-      "id": "brief",
-      "x": 0,
-      "y": -420,
-      "w": 900,
-      "text": "Quick login — M8 (#209), mobile EmailLoginPage on a demo or dev build. 390x844, light scheme.\n\nThe page is today's EmailLoginPage unchanged: BrandingHeader, AuthPageLayout over MapBackground, \"Welcome Back\" and the subtitle, EmailInputField, PasswordInputField, LoadingButton \"Log In\" and the register hint. The only addition is QuickLoginDropdown as the first child of the form column, then Spacing.md (16) before the email field.\n\nWithout DEMO_ACCOUNTS the page is exactly as it is now, so there is no artboard for it.\n\nColours are M3ColorSchemes.light (= scheme.light in design/tokens/color.tokens.json) plus TokensSemanticText.primary #2D4A47, which AppTypography uses as its light text colour. Type is Source Sans 3 from AppTypography. Sizes are Spacing and Radii tokens and Flutter's own Material 3 metrics."
+  "notes": {
+    "title": {
+      "x": 0, "y": -300, "kind": "title1", "maxW": 4480,
+      "text": "Quick login — W31 (#208), admin portal login page"
     },
-    {
-      "id": "anatomy",
-      "x": 1020,
-      "y": -420,
-      "w": 900,
+    "anatomy": {
+      "x": 4560, "y": 0, "w": 620, "size": "s", "fill": "teal",
+      "text": "Anatomy — QuickLoginSelect, a MUI TextField select as the theme renders it (size small, outlined).\n\nPlace: first child of the LoginForm box, above Email. The form's gap stays 24px, so the field adds 64px and the card grows from 589px to 653px. AuthLayout re-centres it; nothing else moves.\n\nField: 395 × 40px, radius 8px, outline rgba(0,0,0,0.23), input padding 8.5px 32px 8.5px 14px, ArrowDropDown 24px at right 7px in rgba(0,0,0,0.54). These are MUI's own state alphas, exactly what the Email field already renders.\n\nLabel 'Quick login' is always shrunk (InputLabel shrink + Select displayEmpty), so the placeholder 'Choose an account' shows in text.secondary #424846. Open: outline 2px primary #0C2721, label #0C2721, arrow turned 180°.\n\nMenu: opens below the field and shifts up to keep 16px clear of the window, so with six groups it covers the field (top 364px, bottom 884px). Paper radius 12px, background.paper #FAF9F7, elevation 8, list padding 8px 0. ListSubheader 48px, 14px weight 500, text.secondary #424846. MenuItem 36px, 16px/24px, onSurface #1A1C1B; hover is action.hover #E9E8E6."
+    },
+    "copy": {
+      "x": 5260, "y": 0, "w": 620, "size": "s", "fill": "orange",
+      "text": "Copy — new keys under auth.quickLogin; headings reuse roles.*.\n\nlabel\nen: Quick login\naf: Vinnige aanmelding\nzu: Ukungena ngokushesha\n\nplaceholder\nen: Choose an account\naf: Kies 'n rekening\nzu: Khetha i-akhawunti\n\noption: \"{{role}} · {{name}}\" in all three (middle dot, a space either side). With an empty name the item is the role alone.\n\nHeadings: roles.pod_chief … roles.sector_admin as they stand — Pod Chief, Pod Admin, Ward Chief, Ward Admin, Sector Chief, Sector Admin — highest first. A heading renders only when its group has an account.\n\nThe dev input has one admin per role and no names (I1), so every dev item repeats its heading. The named board shows the format with the Storybook fixtures (example.test accounts)."
+    },
+    "states": {
+      "x": 4560, "y": 1020, "w": 620, "size": "s", "fill": "blue",
+      "text": "States.\n\nAfter a pick: the select resets to empty, Email and Password hold the picked account, and the form submits at once. While useLogin is pending all three fields and the button are disabled — disabled label and text rgba(0,0,0,0.38), outline and arrow rgba(0,0,0,0.26), button rgba(0,0,0,0.12) with a 16px spinner. The button reads 'Loading...' because the Button atom replaces its children while isLoading; that is today's behaviour and this story does not change it.\n\nFailed: the existing outlined error Alert (auth.loginError, 'Invalid email or password') sits at the top of the form, above Quick login. The fields keep the picked account, the select is empty and enabled, so a second pick works. Border errorContainer #FFDAD6, icon error #BA1A1A, text is MUI's derived Alert colour rgb(102,87,85).\n\nNo input: no field, no gap, and the page is pixel for pixel today's LoginForm Default story."
+    },
+    "registry": {
+      "x": 5260, "y": 1020, "w": 620, "size": "s", "fill": "purple",
+      "text": "Registry.\n\nEverything drawn already exists in design/registry/web.md: AuthLayout, LoginForm, Input, Button, plus MUI Alert, Divider, ListSubheader and MenuItem as the portal renders them.\n\nNEW MOLECULE: QuickLoginSelect (src/components/molecules). It needs a row under Molecules and its Storybook story. The Select atom cannot carry it: Select takes a flat options list with no ListSubheader groups, and the handoff forbids changing it. Suggested row: 'QuickLoginSelect | Demo and dev builds only: pick a demo account on the login page | accounts, onPick, disabled | Renders only inside LoginForm when accounts is non-empty; never read import.meta.env in it.'"
+    },
+    "titleApp": {
+      "x": 0, "y": 2100, "kind": "title1", "maxW": 4480,
+      "text": "Quick login — M8 (#209), app email login page"
+    },
+    "appBrief": {
+      "x": 1410, "y": 2400, "w": 680, "size": "s", "fill": "gray",
+      "text": "Brief — M8 (#209), mobile EmailLoginPage on a demo or dev build. 390x844, light scheme.\n\nThe page is today's EmailLoginPage unchanged: BrandingHeader, AuthPageLayout over MapBackground, \"Welcome Back\" and the subtitle, EmailInputField, PasswordInputField, LoadingButton \"Log In\" and the register hint. The only addition is QuickLoginDropdown as the first child of the form column, then Spacing.md (16) before the email field.\n\nWithout DEMO_ACCOUNTS the page is exactly as it is now, so there is no artboard for it.\n\nColours are M3ColorSchemes.light (= scheme.light in design/tokens/color.tokens.json) plus TokensSemanticText.primary #2D4A47, which AppTypography uses as its light text colour. Type is Source Sans 3 from AppTypography. Sizes are Spacing and Radii tokens and Flutter's own Material 3 metrics.\n\nRepo: these three frames are design/canvases/quick-login/*.dc.html; the web frames are in design/canvases/quick-login/web/."
+    },
+    "appAnatomy": {
+      "x": 2170, "y": 2400, "w": 680, "size": "s", "fill": "teal",
       "text": "Anatomy — a Material 3 DropdownMenu<DemoAccount>, as Flutter renders it under AppTheme.\n\nField: inherits inputDecorationTheme, so it is the same box as the email and password fields. Filled surfaceContainerHighest #E3E2E1, 1px outline #727975, 4px radius, 56px high. leadingIcon Icons.person_outline (24, onSurfaceVariant). trailingIcon arrow_drop_down, selectedTrailingIcon arrow_drop_up. Label \"Quick login\" rests in place in bodyLarge onSurfaceVariant. Use expandedInsets: EdgeInsets.zero so the field and the menu take the full form width. Leave requestFocusOnTap false (the mobile default) so no keyboard opens.\n\nMenu: MenuAnchor M3 defaults. surfaceContainer #EFEEEC, elevation 3, 4px radius, 8px top and bottom padding. It opens directly under the field at the same width and covers the fields below; there is no scrim.\n\nOptions: DropdownMenuEntry, 48px MenuItemButton rows, labelLarge (16 / 500) in onSurface. The text starts 48px in, under the field text, because the field has a leading icon.\n\nHeadings: disabled entries (enabled: false) with labelWidget Text in labelMedium (14 / 500) and colour onSurfaceVariant #424846. Set the entry style minimumSize to Size.fromHeight(Spacing.xl), so a heading is 32px high. The style colour overrides the disabled 38% fade. There is no divider and no icon on any entry."
     },
-    {
-      "id": "copy",
-      "x": 0,
-      "y": 900,
-      "w": 900,
-      "text": "Copy — app_en.arb\n\nquickLoginLabel: \"Quick login\"\nquickLoginGroupMember: \"Member\"\nquickLoginGroupGroundAdmin: \"Ground admin\"\nquickLoginOption: \"{role} · {name}\". This is a middle dot with a space either side. When name is empty, the option is the role alone.\n\nThe names drawn are the ones scripts/demo_accounts.py produces from scripts/console/accounts.yaml: John (member), Thandi (other_member) and Sipho (ground_admin), ordered by group and then by name. accounts.yaml has no first_name for John today, so I1 must add one, or the option reads \"Member\" alone. Eyeball E2 expects \"John\"."
+    "appCopy": {
+      "x": 2930, "y": 2400, "w": 680, "size": "s", "fill": "orange",
+      "text": "Copy — app_en.arb\n\nquickLoginLabel: \"Quick login\"\nquickLoginGroupMember: \"Member\"\nquickLoginGroupGroundAdmin: \"Ground admin\"\nquickLoginOption: \"{role} · {name}\". This is a middle dot with a space either side. When name is empty, the option is the role alone.\n\nThe names drawn are the ones scripts/demo_accounts.py produces from scripts/console/accounts.yaml: John (member), Thandi (other_member) and Sipho (ground_admin), ordered by group and then by name.\n\nJohn's option reads \"Member · John\" only because accounts.yaml now gives him first_name: John. I1 (#211) added it; without it the option would read \"Member\" alone. Eyeball E2 expects \"John\"."
     },
-    {
-      "id": "behaviour",
-      "x": 1020,
-      "y": 900,
-      "w": 900,
-      "text": "Behaviour between the frames — no extra artboard needed.\n\nPicking an option: the menu closes and the field goes back to empty (clear its controller), as the web W31 control does. The email and password fields fill, and _login() runs at once. There is no confirm button.\n\nWhile signing in: the dropdown, both fields and the button are disabled (enabled: !_isLoading), and LoadingButton shows its existing spinner. Use Flutter's own disabled rendering; add no custom style.\n\nOn success the router moves on to change password, PIN setup or Home, as after a typed login.\n\nOn failure (third frame): the existing FormErrorBanner appears under the password field with the error's displayMessage. Stopping the backend gives \"No internet connection\" (eyeball E3). The dropdown is empty again, and the email and password fields keep the picked values, so the tester sees which account was tried. Picking any option, the same one included, retries."
+    "appBehaviour": {
+      "x": 3690, "y": 2400, "w": 680, "size": "s", "fill": "blue",
+      "text": "Behaviour between the frames.\n\nPicking an option: the menu closes and the dropdown empties again (clear its controller), as the web control does. The email and password fields fill, and _login() runs at once. There is no confirm button.\n\nSigning in has no artboard. While _isLoading, the dropdown, both fields and the button are disabled (enabled: !_isLoading), and LoadingButton shows its existing spinner. Use Flutter's own disabled rendering; add no custom style.\n\nOn success the router moves on to change password, PIN setup or Home, as after a typed login.\n\nOn failure (third frame): the existing FormErrorBanner appears under the password field with the error's displayMessage. Stopping the backend gives \"No internet connection\" (eyeball E3). The dropdown is empty, and the email and password fields keep the picked values, so the tester sees which account was tried. Picking any option, the same one included, retries."
     },
-    {
-      "id": "registry",
-      "x": 0,
-      "y": 1300,
-      "w": 1410,
+    "appRegistry": {
+      "x": 4450, "y": 2400, "w": 680, "size": "s", "fill": "purple",
       "text": "Registry — FormErrorBanner, BrandingHeader and MapBackground are in design/registry/mobile.md. AuthPageLayout, EmailInputField, PasswordInputField and LoadingButton are the existing auth feature widgets.\n\nNew: QuickLoginDropdown in features/auth/presentation/widgets, a feature widget with one use (the handoff says do not move it to shared/widgets). It wraps the Material DropdownMenu, which the app does not use yet. No shared widget fits, because the registry has no select or menu control. Because it is not shared, it needs no registry row. It still gets the Widgetbook use-case and the closed and open goldens the handoff asks for.\n\nDark scheme: the widget uses theme roles only, so the dark goldens follow M3ColorSchemes.dark. That scheme differs from the web dark tokens on 13 roles, which is a known issue. Do not fix it in this story."
     }
-  ],
-  "launch": {
-    "view": "canvas"
-  }
+  },
+  "designSystems": []
 }

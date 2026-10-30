@@ -12,7 +12,7 @@ touches:
   - mobile/test
   - domain/language.yaml
 ui: true
-design_canvas: ""
+design_canvas: "https://claude.ai/artifact/Fi653crxT7uArKg4apB9vR"
 design_artboards:
   - design/canvases/quick-login/Main.dc.html
   - design/canvases/quick-login/QuickLoginOpen.dc.html
