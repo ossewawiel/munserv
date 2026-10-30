@@ -94,6 +94,39 @@ until the user signs off.
 | W31 | [#208](https://github.com/ossewawiel/munserv/issues/208) | web | true | #207 |
 | M8 | [#209](https://github.com/ossewawiel/munserv/issues/209) | mobile | true | #207 |
 
+## Follow-ups (after the W31 and M8 reviews)
+PRs #219 (M8) and #220 (W31) merged before their code reviews ran. Both reviews returned
+REQUEST CHANGES; the code met its criteria, and the findings are below. The user approved all
+four items in the words "do them all before moving on".
+
+| Id | Issue | Platform | ui | Depends on | Item |
+|---|---|---|---|---|---|
+| M9 | [#221](https://github.com/ossewawiel/munserv/issues/221) | mobile (docs) | false | none | M8 Eyeball: canvas check on a phone, Widgetbook check |
+| W32 | [#222](https://github.com/ossewawiel/munserv/issues/222) | web | true | none | Quick login baselines from CI's render; font and tolerance report; W31 Eyeball: af/zu, Storybook, /login against the canvas |
+| W33 | [#223](https://github.com/ossewawiel/munserv/issues/223) | web | false | none | `pnpm build` fails on a set-but-invalid `VITE_DEMO_ACCOUNTS` |
+| I4 | [#224](https://github.com/ossewawiel/munserv/issues/224) | infra | false | none | Showcase build refuses (409) while the worktree is behind origin/master |
+
+Findings that shaped W32:
+1. The portal ships no web font. Nothing declares `@font-face` or links Source Sans 3. The theme
+   names the family, and the browser takes it from the operating system. The laptop has it
+   installed; the CI runner does not, so CI renders a fallback.
+2. So `document.fonts.load('... "Source Sans 3"')` before the Open click, the fix the W31 review
+   asked for, cannot change CI's render. The Open baselines are already CI renders. The Closed
+   and WithQuickLogin baselines came from the laptop and pass only inside the tolerance. W32
+   retakes those four from CI instead.
+3. The visual tolerance is `maxDiffPixelRatio: 0.002` with Playwright's default `threshold: 0.2`.
+   A dark-surface change of about 25 luma levels (the striped menu fixed in c3707d0) stays under
+   the per-pixel threshold, so the gate cannot see it. W32 reports the figures and changes nothing.
+4. The real `/login` page renders Source Sans 3 only on a computer that has it installed. W31's
+   new canvas check (E6) will fail on any other machine. That failure is honest.
+
+Proposed, not created: (a) self-host Source Sans 3 in the portal and Storybook, which
+rebaselines the whole catalogue; (b) tighten `threshold` in `web/playwright.visual.config.ts`.
+
+Known residue after W33: a valid array that holds only `member` or `ground_admin` entries still
+builds and inlines its string, as the user scoped the check to `demo_account_group`. The I3 CI
+check and the rule that production never sets the variable cover that case.
+
 ## Done check for the whole feature
 1. On the showcase site (http://localhost:4000/login, opened through the LAN link), picking
    "Sector Admin" logs you in to the dashboard.
