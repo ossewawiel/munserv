@@ -17,7 +17,7 @@ design_artboards:
   - design/canvases/quick-login/Main.dc.html
   - design/canvases/quick-login/QuickLoginOpen.dc.html
   - design/canvases/quick-login/QuickLoginError.dc.html
-design_approved: false
+design_approved: true
 created_by: feature-planner
 created_at: "2026-10-30"
 files_changed: []
