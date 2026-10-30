@@ -60,14 +60,30 @@ Order: by group in the order above, then by name.
 | Canvas | Covers | Working files | Approved |
 |---|---|---|---|
 | Quick Login (not yet published; the user runs `/design` to publish it) | M8 (#209) app quick login | `design/canvases/quick-login/` | No |
+| [Quick Login · Web](https://claude.ai/artifact/Fi653crxT7uArKg4apB9vR) | W31 (#208) portal quick login | `design/canvases/quick-login/web/` | Yes, 2026-10-30 |
 
-There are three artboards at 390x844, light scheme. `Main` shows `EmailLoginPage` with the Quick login dropdown
+**M8.** There are three artboards at 390x844, light scheme. `Main` shows `EmailLoginPage` with the Quick login dropdown
 closed. `QuickLoginOpen` shows the menu open, with the Member and Ground admin headings over John,
 Thandi and Sipho. `QuickLoginError` shows the page after a failed quick login: the fields are filled,
 the dropdown is reset and the usual `FormErrorBanner` reads "No internet connection". The dropdown
 is a Material 3 `DropdownMenu` inside the feature widget `QuickLoginDropdown`. No shared widget is
-added. The canvas notes give the anatomy, the copy and the behaviour between frames. W31 (web)
-has no artboards yet.
+added. The canvas notes give the anatomy, the copy and the behaviour between frames.
+
+**W31.** There are six artboards at 1440x900, light scheme:
+
+| Artboard (`web/`) | State |
+|---|---|
+| `Main.dc.html` | Login page, Quick login closed above Email |
+| `QuickLoginOpen.dc.html` | Menu open with the dev input: six role headings, highest first, one nameless option each |
+| `QuickLoginOpenNamed.dc.html` | Menu open with Storybook accounts: "<Role> · <name>" plus one nameless entry |
+| `QuickLoginSigningIn.dc.html` | After a pick: fields filled, form disabled while the login is pending |
+| `QuickLoginError.dc.html` | Failed quick login: the existing error Alert above Quick login |
+| `NoQuickLogin.dc.html` | No input: today's page, unchanged |
+
+The W31 canvas adds one new molecule, `QuickLoginSelect`. It needs a row in
+`design/registry/web.md`, because the `Select` atom has no grouped options. Every other
+component on the canvas is in the registry. `design_approved` stays `false` in both handoffs
+until the user signs off.
 
 ## Stories
 | Id | Issue | Platform | ui | Depends on |
