@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+import type { DemoAccount } from '@/shared/types/demoAccount';
 import { LoginForm } from './LoginForm';
 
 const meta = {
@@ -18,3 +19,10 @@ export const Default: Story = {};
 export const Loading: Story = { args: { isLoading: true } };
 
 export const WithError: Story = { args: { error: 'Invalid email or password' } };
+
+const quickLoginAccounts: readonly DemoAccount[] = [
+  { group: 'pod_chief', name: 'Thandi', email: 'pod.chief@example.test', password: 'example-password' },
+  { group: 'sector_admin', name: '', email: 'sector.admin@example.test', password: 'example-password' },
+];
+
+export const WithQuickLogin: Story = { args: { quickLoginAccounts } };

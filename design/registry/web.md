@@ -24,6 +24,7 @@ The catalogue of web building blocks, as agents must use them. Every entry has a
 | `StatCard` | A single figure with label and trend | `value`, `label`, `icon`, `color` | Dashboards only; use `IconAvatar` for the icon. |
 | `IssueStateBadge`, `IssueTypeBadge`, `MemberStatusBadge` | Showing a domain state or type | `state` / `type` / `status` (wire value) | Colours come from `semanticIssueState` / `semanticIssueType` tokens; never restyle. |
 | `HeatIndicator` | Heat 0 to 100 | `heat` | Levels from `getHeatLevel`; do not compute thresholds elsewhere. |
+| `QuickLoginSelect` | Demo and dev builds only: pick a demo account on the login page | `accounts`, `onPick`, `disabled` | Renders only inside `LoginForm` when `accounts` is non-empty; never read `import.meta.env` in it. |
 | `EmptyState`, `ErrorState`, `LoadingSkeleton` | Empty, error, loading content areas | `title`, `description`, `action`; `error`, `onRetry`; `variant` | Do not write inline empty or error markup. |
 | `ConfirmDialog` | Any destructive or irreversible action | `title`, `message`, `confirmLabel`, `onConfirm`, `isLoading` | Confirm is `contained primary`, cancel is `outlined secondary`. |
 | `Pagination` | Below any list not using `DataTableCard` | `page`, `pageSize`, `total`, `onChange` | Tables use `DataTableCard`'s built-in pagination. |

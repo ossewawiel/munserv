@@ -25,6 +25,11 @@
     "comingSoon": "Kuzayo maduze"
   },
   "auth": {
+    "quickLogin": {
+      "label": "Ukungena ngokushesha",
+      "placeholder": "Khetha i-akhawunti",
+      "option": "{{role}} · {{name}}"
+    },
     "login": "Ngena ngemvume",
     "logout": "Phuma",
     "email": "I-imeyili",

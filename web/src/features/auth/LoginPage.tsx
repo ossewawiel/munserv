@@ -9,6 +9,7 @@ import Button from '@mui/material/Button';
 import { AuthLayout } from '@/components/templates/AuthLayout';
 import { LoginForm } from '@/components/molecules/LoginForm';
 import { useLogin } from './hooks';
+import { DEMO_ACCOUNTS } from './demoAccounts';
 import { useAuth } from '@/shared/hooks/useAuth';
 import type { LoginResponse } from './types';
 
@@ -82,6 +83,7 @@ export const LoginPage: FC = () => {
         onSubmit={handleSubmit}
         isLoading={loginMutation.isPending}
         error={errorMessage}
+        quickLoginAccounts={DEMO_ACCOUNTS}
       />
 
       <Divider sx={{ my: 3 }}>

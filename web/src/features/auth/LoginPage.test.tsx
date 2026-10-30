@@ -11,6 +11,16 @@ import i18n from 'i18next';
 import { server } from '@/test/mocks/server';
 import { LoginPage } from './LoginPage';
 
+// Mock the build-time demo accounts; each test sets the list it needs
+const demoState = vi.hoisted(() => ({
+  accounts: [] as readonly { group: string; name: string; email: string; password: string }[],
+}));
+vi.mock('./demoAccounts', () => ({
+  get DEMO_ACCOUNTS() {
+    return demoState.accounts;
+  },
+}));
+
 // Mock useThemeContext
 const mockUseThemeContext = vi.fn();
 vi.mock('@/theme', async () => {
@@ -62,7 +72,9 @@ i18n.init({
           or: 'or',
           newMember: 'New to the community?',
           registerAsNewMember: 'Register as a New Member',
+          quickLogin: { label: 'Quick login', placeholder: 'Choose an account', option: '{{role}} · {{name}}' },
         },
+        roles: { sector_admin: 'Sector Admin' },
       },
     },
   },
@@ -130,6 +142,44 @@ describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    demoState.accounts = [];
+  });
+
+  describe('quick login', () => {
+    const account = {
+      group: 'sector_admin',
+      name: '',
+      email: 'admin@ward42.example.com',
+      password: 'admin123',
+    };
+
+    it('should log in and redirect when a quick login account is picked', async () => {
+      demoState.accounts = [account];
+      renderLoginPage();
+
+      await userEvent.click(screen.getByRole('combobox'));
+      await userEvent.click(screen.getByRole('option', { name: 'Sector Admin' }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dashboard')).toBeInTheDocument();
+      });
+    });
+
+    it('should show the login error when a quick login fails', async () => {
+      demoState.accounts = [{ ...account, password: 'wrong' }];
+      renderLoginPage();
+
+      await userEvent.click(screen.getByRole('combobox'));
+      await userEvent.click(screen.getByRole('option', { name: 'Sector Admin' }));
+
+      expect(await screen.findByText('Invalid email or password')).toBeInTheDocument();
+    });
+
+    it('should not show quick login when there are no demo accounts', () => {
+      renderLoginPage();
+
+      expect(screen.queryByText('Quick login')).not.toBeInTheDocument();
+    });
   });
 
   describe('rendering', () => {

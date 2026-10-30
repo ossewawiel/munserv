@@ -26,6 +26,11 @@
     "comingSoon": "Coming soon"
   },
   "auth": {
+    "quickLogin": {
+      "label": "Quick login",
+      "placeholder": "Choose an account",
+      "option": "{{role}} · {{name}}"
+    },
     "login": "Login",
     "logout": "Logout",
     "email": "Email",

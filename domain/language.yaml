@@ -255,6 +255,7 @@ concepts:
     definition: A dev account from scripts/console/accounts.yaml that demo and dev builds offer on the login page for quick login, and that production builds never contain.
     file: demo-account.md
     code:
+      typescript: [DemoAccount, parseDemoAccounts, DEMO_ACCOUNT_GROUP_ORDER]
       dart: [DemoAccount, DemoAccountGroup]
     values:
       demo_account_group: [pod_chief, pod_admin, ward_chief, ward_admin, sector_chief, sector_admin, member, ground_admin]

@@ -25,6 +25,11 @@
     "comingSoon": "Binnekort beskikbaar"
   },
   "auth": {
+    "quickLogin": {
+      "label": "Vinnige aanmelding",
+      "placeholder": "Kies 'n rekening",
+      "option": "{{role}} · {{name}}"
+    },
     "login": "Teken aan",
     "logout": "Teken uit",
     "email": "E-pos",
