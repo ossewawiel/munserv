@@ -20,7 +20,7 @@ import threading
 import time
 from pathlib import Path
 
-from . import network, remote, services
+from . import demo_input, network, remote, services
 from .config import CONFIG, ROOT
 from .gitops import ApiError, CommandError, copy_local_files, current_sha, is_worktree, run_captured
 
@@ -117,8 +117,9 @@ def ensure_database(logf) -> bool:
 
 
 def web_build_env() -> dict:
-    """The build bakes a relative API URL; `vite preview` proxies it to the showcase backend."""
-    return {**os.environ, "VITE_API_URL": "/api/v1"}
+    """The build bakes a relative API URL; `vite preview` proxies it to the showcase backend. It
+    also bakes the quick-login input, so the showcase site offers the dev accounts."""
+    return {**os.environ, "VITE_API_URL": "/api/v1", "VITE_DEMO_ACCOUNTS": demo_input.web_value()}
 
 
 def _run_build(job_id: str, main: Path) -> None:
@@ -142,7 +143,9 @@ def _run_build(job_id: str, main: Path) -> None:
             ok = ensure_database(logf)
             ok = ok and step("backend: bootJar", ["./gradlew", "bootJar"], directory / "backend")
             ok = ok and step("web: install", ["pnpm", "install", "--frozen-lockfile"], directory / "web")
-            ok = ok and step("web: build", ["pnpm", "build"], directory / "web", web_build_env())
+            env = web_build_env()
+            say(f"web: quick login with {demo_input.count(env['VITE_DEMO_ACCOUNTS'])} accounts")
+            ok = ok and step("web: build", ["pnpm", "build"], directory / "web", env)
             if not ok:
                 say("FAILED")
                 services.finish_job(job_id, "failed", "see the demo-build log")

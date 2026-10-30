@@ -17,7 +17,8 @@
 # dev server listens on: 0.0.0.0 in remote mode, localhost otherwise), `{host}` (what a browser
 # calls this machine: its LAN address in remote mode, localhost otherwise), `{hostname}` (the
 # machine's hostname, for dev servers that check the Host header) and `{api_base}` (empty in remote
-# mode so the web client calls its own origin; the backend's localhost URL otherwise).
+# mode so the web client calls its own origin; the backend's localhost URL otherwise) and
+# `{demo_accounts_web}` (the shell-quoted quick-login input for the portal, from demo_input.py).
 # `detached: true` marks a service whose start command exits at once (docker compose up -d): ensure
 # keeps it while it is healthy and never restarts it because the checkout moved.
 # `start_timeout` is the seconds ensure waits for the service to turn healthy after starting it.
@@ -54,7 +55,7 @@ web:
   # The web client falls back to the mock API on 3001 unless VITE_API_URL is set; a fresh
   # checkout has no .env, so point it at the backend explicitly. In remote mode the URL is
   # relative (/api/v1) and the Vite proxy forwards it to the backend.
-  start: VITE_API_URL={api_base}/api/v1 __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS={hostname} pnpm dev --host {bind}
+  start: VITE_DEMO_ACCOUNTS={demo_accounts_web} VITE_API_URL={api_base}/api/v1 __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS={hostname} pnpm dev --host {bind}
   start_timeout: 120
   health: http://localhost:3000
   url: http://{host}:3000

@@ -12,11 +12,12 @@ import hmac
 import ipaddress
 import os
 import secrets
+import shlex
 import socket
 import time
 from http.cookies import SimpleCookie
 
-from . import network
+from . import demo_input, network
 from .config import CONFIG
 
 LOCAL_HOST = "localhost"
@@ -74,9 +75,10 @@ def api_base() -> str:
 
 
 def expand(text: str) -> str:
-    """Fill the `{bind}`, `{host}`, `{hostname}` and `{api_base}` placeholders in a services.yaml
-    value. Plain replacement, so other braces in a shell command are left alone."""
-    values = {"{bind}": listen_address, "{host}": host, "{hostname}": hostname, "{api_base}": api_base}
+    """Fill the `{bind}`, `{host}`, `{hostname}`, `{api_base}` and `{demo_accounts_web}` placeholders
+    in a services.yaml value. Plain replacement, so other braces in a shell command are left alone."""
+    values = {"{bind}": listen_address, "{host}": host, "{hostname}": hostname, "{api_base}": api_base,
+              "{demo_accounts_web}": lambda: shlex.quote(demo_input.web_value())}
     for key, value in values.items():
         if key in text:
             text = text.replace(key, value())
