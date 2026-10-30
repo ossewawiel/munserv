@@ -1,0 +1,68 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Email login — Quick login closed"
+    },
+    {
+      "file": "QuickLoginOpen.dc.html",
+      "x": 510,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Email login — Quick login open"
+    },
+    {
+      "file": "QuickLoginError.dc.html",
+      "x": 1020,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Email login — quick login failed"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -420,
+      "w": 900,
+      "text": "Quick login — M8 (#209), mobile EmailLoginPage on a demo or dev build. 390x844, light scheme.\n\nThe page is today's EmailLoginPage unchanged: BrandingHeader, AuthPageLayout over MapBackground, \"Welcome Back\" and the subtitle, EmailInputField, PasswordInputField, LoadingButton \"Log In\" and the register hint. The only addition is QuickLoginDropdown as the first child of the form column, then Spacing.md (16) before the email field.\n\nWithout DEMO_ACCOUNTS the page is exactly as it is now, so there is no artboard for it.\n\nColours are M3ColorSchemes.light (= scheme.light in design/tokens/color.tokens.json) plus TokensSemanticText.primary #2D4A47, which AppTypography uses as its light text colour. Type is Source Sans 3 from AppTypography. Sizes are Spacing and Radii tokens and Flutter's own Material 3 metrics."
+    },
+    {
+      "id": "anatomy",
+      "x": 1020,
+      "y": -420,
+      "w": 900,
+      "text": "Anatomy — a Material 3 DropdownMenu<DemoAccount>, as Flutter renders it under AppTheme.\n\nField: inherits inputDecorationTheme, so it is the same box as the email and password fields. Filled surfaceContainerHighest #E3E2E1, 1px outline #727975, 4px radius, 56px high. leadingIcon Icons.person_outline (24, onSurfaceVariant). trailingIcon arrow_drop_down, selectedTrailingIcon arrow_drop_up. Label \"Quick login\" rests in place in bodyLarge onSurfaceVariant. Use expandedInsets: EdgeInsets.zero so the field and the menu take the full form width. Leave requestFocusOnTap false (the mobile default) so no keyboard opens.\n\nMenu: MenuAnchor M3 defaults. surfaceContainer #EFEEEC, elevation 3, 4px radius, 8px top and bottom padding. It opens directly under the field at the same width and covers the fields below; there is no scrim.\n\nOptions: DropdownMenuEntry, 48px MenuItemButton rows, labelLarge (16 / 500) in onSurface. The text starts 48px in, under the field text, because the field has a leading icon.\n\nHeadings: disabled entries (enabled: false) with labelWidget Text in labelMedium (14 / 500) and colour onSurfaceVariant #424846. Set the entry style minimumSize to Size.fromHeight(Spacing.xl), so a heading is 32px high. The style colour overrides the disabled 38% fade. There is no divider and no icon on any entry."
+    },
+    {
+      "id": "copy",
+      "x": 0,
+      "y": 900,
+      "w": 900,
+      "text": "Copy — app_en.arb\n\nquickLoginLabel: \"Quick login\"\nquickLoginGroupMember: \"Member\"\nquickLoginGroupGroundAdmin: \"Ground admin\"\nquickLoginOption: \"{role} · {name}\". This is a middle dot with a space either side. When name is empty, the option is the role alone.\n\nThe names drawn are the ones scripts/demo_accounts.py produces from scripts/console/accounts.yaml: John (member), Thandi (other_member) and Sipho (ground_admin), ordered by group and then by name. accounts.yaml has no first_name for John today, so I1 must add one, or the option reads \"Member\" alone. Eyeball E2 expects \"John\"."
+    },
+    {
+      "id": "behaviour",
+      "x": 1020,
+      "y": 900,
+      "w": 900,
+      "text": "Behaviour between the frames — no extra artboard needed.\n\nPicking an option: the menu closes and the field goes back to empty (clear its controller), as the web W31 control does. The email and password fields fill, and _login() runs at once. There is no confirm button.\n\nWhile signing in: the dropdown, both fields and the button are disabled (enabled: !_isLoading), and LoadingButton shows its existing spinner. Use Flutter's own disabled rendering; add no custom style.\n\nOn success the router moves on to change password, PIN setup or Home, as after a typed login.\n\nOn failure (third frame): the existing FormErrorBanner appears under the password field with the error's displayMessage. Stopping the backend gives \"No internet connection\" (eyeball E3). The dropdown is empty again, and the email and password fields keep the picked values, so the tester sees which account was tried. Picking any option, the same one included, retries."
+    },
+    {
+      "id": "registry",
+      "x": 0,
+      "y": 1300,
+      "w": 1410,
+      "text": "Registry — FormErrorBanner, BrandingHeader and MapBackground are in design/registry/mobile.md. AuthPageLayout, EmailInputField, PasswordInputField and LoadingButton are the existing auth feature widgets.\n\nNew: QuickLoginDropdown in features/auth/presentation/widgets, a feature widget with one use (the handoff says do not move it to shared/widgets). It wraps the Material DropdownMenu, which the app does not use yet. No shared widget fits, because the registry has no select or menu control. Because it is not shared, it needs no registry row. It still gets the Widgetbook use-case and the closed and open goldens the handoff asks for.\n\nDark scheme: the widget uses theme roles only, so the dark goldens follow M3ColorSchemes.dark. That scheme differs from the web dark tokens on 13 roles, which is a known issue. Do not fix it in this story."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}
