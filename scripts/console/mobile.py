@@ -29,6 +29,7 @@ import threading
 import time
 from pathlib import Path
 
+from . import demo_input
 from . import services as services_mod
 from .gitops import ApiError, copy_local_files, is_worktree
 from .network import detect_active_firewall, firewall_remedy, lan_ip, lan_subnet
@@ -240,8 +241,11 @@ def _run_install_job(job_id: str, device_id: str, checkout: Path, backend_port: 
             if not host:
                 services_mod.finish_job(job_id, "failed", "could not determine this machine's LAN address")
                 return
+            demo_file = demo_input.write_mobile_file(mobile_dir)
+            logf.write(f"quick login input written to {demo_file}\n")
             build_cmd = ["flutter", "build", "apk", "--debug",
-                         f"--dart-define=API_HOST={host}", f"--dart-define=API_PORT={backend_port}"]
+                         f"--dart-define=API_HOST={host}", f"--dart-define=API_PORT={backend_port}",
+                         demo_input.DART_DEFINE]
             logf.write(" ".join(build_cmd) + "\n")
             logf.flush()
             result = subprocess.run(build_cmd, cwd=mobile_dir, stdout=logf, stderr=subprocess.STDOUT)
@@ -304,8 +308,9 @@ def start_run(device_id: str, checkout: Path) -> str:
     host = lan_ip()
     if not host:
         raise ApiError("Could not determine this machine's LAN address", 409)
+    demo_input.write_mobile_file(mobile_dir)
     command = (f"flutter run -d {shlex.quote(device_id)} "
-               f"--dart-define=API_HOST={host} --dart-define=API_PORT={api_port()}")
+               f"--dart-define=API_HOST={host} --dart-define=API_PORT={api_port()} {demo_input.DART_DEFINE}")
     return services_mod.start_tracked_process("mobile", checkout, command, mobile_dir)
 
 

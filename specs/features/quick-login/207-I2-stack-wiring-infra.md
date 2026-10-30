@@ -3,7 +3,7 @@ issue: 207
 story: I2
 title: "Quick-login input on the showcase and eyeball stacks"
 platform: infra
-status: pending
+status: completed
 depends_on: [205]
 touches:
   - scripts/console
@@ -13,8 +13,8 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-10-30"
-files_changed: []
-tests_added: []
+files_changed: [scripts/console/demo_input.py, scripts/console/showcase.py, scripts/console/remote.py, scripts/console/services.yaml, scripts/console/mobile.py, scripts/test-console.py]
+tests_added: [DemoInputTests, ServiceTemplateTests, MobileWirelessDebuggingTests, showcase web_build_env test]
 ---
 
 # I2 · Quick-login input on the showcase and eyeball stacks (Infra)

@@ -11,6 +11,7 @@ Usage: python3 scripts/test-console.py
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -23,7 +24,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from console import cost, ensure, eyeball, gitops, knowledge, mobile, network, remote, services, showcase  # noqa: E402
+from console import cost, demo_input, ensure, eyeball, gitops, knowledge, mobile, network, remote, services, showcase  # noqa: E402
 from console.config import Config  # noqa: E402
 from console.pipeline import classify_pr  # noqa: E402
 from console.server import Handler  # noqa: E402
@@ -896,6 +897,7 @@ class MobileWirelessDebuggingTests(unittest.TestCase):
             with patch("console.mobile.subprocess.run", side_effect=fake_run), \
                     patch("console.mobile.lan_ip", return_value="192.168.1.5"), \
                     patch("console.mobile.is_worktree", return_value=False), \
+                    patch("console.mobile.demo_input.write_mobile_file", return_value=build / "mobile" / "demo-accounts.json"), \
                     patch("console.mobile.launch_app", return_value="opened"):
                 job = mobile.start_install("R58N30ABCDE", build, 8090, logs)
                 for _ in range(100):
@@ -904,10 +906,45 @@ class MobileWirelessDebuggingTests(unittest.TestCase):
                     threading.Event().wait(0.05)
             self.assertIn("--dart-define=API_PORT=8090", commands[0])
             self.assertIn("--dart-define=API_HOST=192.168.1.5", commands[0])
+            self.assertIn("--dart-define-from-file=demo-accounts.json", commands[0])
             self.assertTrue(services.log_path(logs, mobile.INSTALL_LOG).exists())
             self.assertFalse(services.log_path(build, mobile.INSTALL_LOG).exists())
             self.assertEqual(services.jobs_snapshot()[-1]["id"], job["id"])
             self.assertEqual(services.jobs_snapshot()[-1]["status"], "success")
+
+    def test_install_from_showcase_checkout_writes_the_file_there(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            build, logs = root / "demo", root / "main"
+            (build / "mobile" / ".dart_tool").mkdir(parents=True)
+            logs.mkdir()
+            written = []
+            def fake_write(mobile_dir):
+                written.append(mobile_dir)
+                return mobile_dir / "demo-accounts.json"
+            with patch("console.mobile.subprocess.run", return_value=_adb_result("")), \
+                    patch("console.mobile.lan_ip", return_value="192.168.1.5"), \
+                    patch("console.mobile.is_worktree", return_value=False), \
+                    patch("console.mobile.demo_input.write_mobile_file", side_effect=fake_write), \
+                    patch("console.mobile.launch_app", return_value="opened"):
+                mobile.start_install("R58N30ABCDE", build, 8090, logs)
+                for _ in range(100):
+                    if services.running_job("mobile", "install") is None:
+                        break
+                    threading.Event().wait(0.05)
+            self.assertEqual(written, [build / "mobile"])
+
+    def test_run_command_passes_the_define_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            checkout = Path(d)
+            (checkout / "mobile").mkdir()
+            with patch("console.mobile.lan_ip", return_value="192.168.1.5"), \
+                    patch("console.mobile.is_worktree", return_value=False), \
+                    patch("console.mobile.demo_input.write_mobile_file") as write, \
+                    patch("console.mobile.services_mod.start_tracked_process", return_value="started") as start:
+                mobile.start_run("emulator-5554", checkout)
+            write.assert_called_once_with(checkout / "mobile")
+            self.assertIn("--dart-define-from-file=demo-accounts.json", start.call_args.args[2])
 
 
 class LocalFilesTests(unittest.TestCase):
@@ -1316,7 +1353,46 @@ class RemoteModeTests(_RemoteTestCase):
         self.assertEqual(local["ports"], {"web": 3000, "backend": 8080, "console": 3999})
 
 
+class DemoInputTests(unittest.TestCase):
+    def setUp(self) -> None:
+        demo_input._web_cache.update(mtime=None, value="")
+
+    def test_web_value_is_a_json_array(self) -> None:
+        self.assertEqual(demo_input.count(demo_input.web_value()), 6)
+
+    def test_web_value_is_cached_until_accounts_change(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            accounts = Path(d) / "accounts.yaml"
+            accounts.write_text("x: {}\n", encoding="utf-8")
+            with patch.object(demo_input, "ACCOUNTS", accounts), \
+                    patch.object(demo_input, "_run", return_value="[]") as run:
+                demo_input.web_value()
+                demo_input.web_value()
+                self.assertEqual(run.call_count, 1)
+                os.utime(accounts, (1, 1))
+                demo_input.web_value()
+                self.assertEqual(run.call_count, 2)
+
+    def test_write_mobile_file_writes_the_define_file(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            path = demo_input.write_mobile_file(Path(d))
+            self.assertEqual(path, Path(d) / "demo-accounts.json")
+            define = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(demo_input.count(define["DEMO_ACCOUNTS"]), 3)
+
+
 class ServiceTemplateTests(_RemoteTestCase):
+    def test_expand_fills_demo_accounts_web_shell_quoted(self) -> None:
+        with patch.object(demo_input, "web_value", return_value='[{"name":"it\'s"}]'):
+            self.assertEqual(remote.expand("X={demo_accounts_web}"), "X='[{\"name\":\"it'\"'\"'s\"}]'")
+
+    def test_web_start_command_carries_the_demo_accounts(self) -> None:
+        start = services.services_config()["web"]["start"]
+        self.assertTrue(start.startswith("VITE_DEMO_ACCOUNTS='["), start[:40])
+
+    def test_storybook_start_does_not_carry_the_demo_accounts(self) -> None:
+        self.assertNotIn("VITE_DEMO_ACCOUNTS", services.services_config()["storybook"]["start"])
+
     def test_expand_fills_every_placeholder_and_leaves_other_braces(self) -> None:
         self.assertEqual(remote.expand("{bind} {host} {hostname} [{api_base}] ${HOME} {x}"),
                          "0.0.0.0 192.168.1.42 sagan [] ${HOME} {x}")
@@ -1684,6 +1760,9 @@ class ShowcaseTests(unittest.TestCase):
         self.assertIn("vite preview", command)
         self.assertIn("--port 4000 --strictPort", command)
         self.assertEqual(showcase.web_build_env()["VITE_API_URL"], "/api/v1")
+
+    def test_web_build_env_carries_the_demo_accounts(self):
+        self.assertEqual(demo_input.count(showcase.web_build_env()["VITE_DEMO_ACCOUNTS"]), 6)
 
     def test_built_jar_skips_the_plain_jar(self):
         with tempfile.TemporaryDirectory() as tmp:
