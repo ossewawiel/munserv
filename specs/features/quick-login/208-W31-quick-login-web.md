@@ -20,7 +20,7 @@ design_artboards:
   - "web/QuickLoginSigningIn.dc.html — after a pick: select reset, fields filled, form disabled while useLogin is pending"
   - "web/QuickLoginError.dc.html — failed quick login: the existing outlined error Alert above Quick login, fields keep the account"
   - "web/NoQuickLogin.dc.html — no input: today's page, unchanged (reference)"
-design_approved: false
+design_approved: true
 created_by: feature-planner
 created_at: "2026-10-30"
 files_changed: []
