@@ -12,6 +12,12 @@
 | M6 | View issue details | See photo(s), type, state, location, timestamps | 🟢 Done | - |
 | M7 | View my reports | See list of issues I reported with current status | 🟢 Done | - |
 
+## Quick Login Stories (demo and dev builds only)
+
+| ID | Story | Acceptance Criteria | Status | Issue |
+|----|-------|---------------------|--------|-------|
+| M8 | As a tester on a demo or dev build of the app, I can pick a member account from a dropdown on the email login page, so that I am logged in as that member without typing | `DEMO_ACCOUNTS` from `--dart-define-from-file` shows a Quick login dropdown above the form on `EmailLoginPage` ǀ Options under Member and Ground admin, each "<Role> · <name>" ǀ Picking fills email and password and submits; first-login steps follow ǀ A failed quick login shows the normal error banner ǀ No define: no dropdown ǀ ARB strings; Widgetbook use-case and goldens; format, analyze, tests, debug APK pass ǀ Matches the approved canvas | 🔴 Pending | [#209](https://github.com/ossewawiel/munserv/issues/209) |
+
 **Note:** M1 changed from phone+OTP to email+password. Registration now happens on web (W8).
 
 ## Status Legend
