@@ -20,6 +20,8 @@ from urllib.parse import parse_qs, urlparse
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from textual.content import Content  # noqa: E402
+from textual.markup import MarkupError  # noqa: E402
 from scripts.tui.api import ConsoleApi, ConsoleError, Service  # noqa: E402
 from scripts.tui.app import OperatorApp  # noqa: E402
 from scripts.tui.phone import PhoneScreen  # noqa: E402
@@ -37,6 +39,7 @@ class StubConsole:
         self.posts: list[tuple[str, str]] = []
         self.bodies: list[tuple[str, dict]] = []
         self.pair_error = ""
+        self.pair_message = "done"
         self.devices = [
             {"id": "192.168.1.20:41233", "state": "device", "model": "Pixel_8", "android": {"release": "14", "sdk": 34}},
             {"id": "R58N30ABCDE", "state": "device", "model": "Galaxy_S9", "android": {"release": "10", "sdk": 29}},
@@ -89,7 +92,7 @@ class StubConsole:
                     stub.bodies.append((self.path.rsplit("/", 1)[-1], body))
                     if stub.pair_error and self.path.endswith("/pair"):
                         return self._json({"ok": False, "error": stub.pair_error}, 409)
-                    return self._json({"ok": True, "message": "done"})
+                    return self._json({"ok": True, "message": stub.pair_message})
                 if self.path == "/api/refresh":
                     stub.posts.append(("refresh", ""))
                     return self._json({"ok": True})
@@ -233,6 +236,20 @@ class PhoneScreenTest(StubbedTuiCase):
             await wait_for(pilot, lambda: self.sent("connect"))
             self.assertEqual(self.sent("connect"), [{"address": "192.168.1.20:41233"}])
             await wait_for(pilot, lambda: "step 5 of 5" in str(screen.query_one("#wizard-title").render()))
+        self.run_phone(scenario)
+
+    def test_phone_notices_are_sent_with_markup_off(self) -> None:
+        """adb text such as `[guid=adb-X-Y]` raises MarkupError in a toast that parses markup."""
+        message = "Successfully paired to 192.168.1.20:37099 [guid=adb-RZCY124598B-k9NK9H]"
+        with self.assertRaises(MarkupError):
+            Content.from_markup(message)
+        self.stub.pair_message = message
+        async def scenario(screen, pilot) -> None:
+            sent = []
+            screen.notify = lambda text, **kwargs: sent.append((text, kwargs))
+            await pilot.press("n", "n", *"192.168.1.20:37099", "enter", *"123456", "enter")
+            await wait_for(pilot, lambda: any(text == message for text, _ in sent))
+            self.assertTrue(all(kwargs.get("markup") is False for _, kwargs in sent), sent)
         self.run_phone(scenario)
 
     def test_failed_pairing_stays_on_the_pairing_step(self) -> None:
