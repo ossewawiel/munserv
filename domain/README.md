@@ -30,6 +30,7 @@ Read in this order the first time; each file is short.
 | [bootstrap](bootstrap.md) | How a fresh pod gets its first pod chief |
 | [audit](audit.md) | The security log of super user actions |
 | [support-grant](support-grant.md) | Temporary, pod-chief-issued super user access to a live pod |
+| [demo-account](demo-account.md) | A dev account that demo and dev builds offer for quick login, never production |
 
 ## How a concept file is laid out
 

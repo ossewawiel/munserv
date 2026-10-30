@@ -1,3 +1,4 @@
+# `group` opts an account into quick login (scripts/demo_accounts.py); an account without one is never offered.
 # Accounts for manual eyeball checks. Keyed by the `as` field in a handoff's Eyeball block.
 #
 # Web admin passwords are bcrypt hashes seeded by Flyway; verified against
@@ -25,6 +26,7 @@ super_user:
 sector_admin:
   role: sector_admin
   platform: web
+  group: sector_admin
   email: admin@ward42.example.com
   password: admin123
   notes: >
@@ -35,6 +37,7 @@ sector_admin:
 sector_chief:
   role: sector_chief
   platform: web
+  group: sector_chief
   email: chief@munserv.local
   password: chief123
   notes: Seeded by V025. Scoped to the same sector as sector_admin.
@@ -42,6 +45,7 @@ sector_chief:
 pod_chief:
   role: pod_chief
   platform: web
+  group: pod_chief
   email: podchief@munserv.local
   password: podchief123
   notes: Seeded by V030. Pod-level, scoped to the MunServ Development Pod.
@@ -49,6 +53,7 @@ pod_chief:
 pod_admin:
   role: pod_admin
   platform: web
+  group: pod_admin
   email: podadmin@munserv.local
   password: podadmin123
   notes: Seeded by V030. Pod-level, scoped to the MunServ Development Pod.
@@ -56,6 +61,7 @@ pod_admin:
 ward_chief:
   role: ward_chief
   platform: web
+  group: ward_chief
   email: wardchief@munserv.local
   password: wardchief123
   notes: Seeded by V030. Scoped to "Test Ward North".
@@ -63,6 +69,7 @@ ward_chief:
 ward_admin:
   role: ward_admin
   platform: web
+  group: ward_admin
   email: wardadmin@munserv.local
   password: wardadmin123
   notes: Seeded by V030. Scoped to "Test Ward North".
@@ -70,9 +77,12 @@ ward_admin:
 member:
   role: member
   platform: mobile
+  group: member
   email: john.doe@example.com
   password: member123
   phone: "+27821234567"
+  first_name: John
+  surname: Doe
   pin: "1234"
   notes: >
     Seeded by V005 (John Doe, sector 550e8400-e29b-41d4-a716-446655440001); email login password set by V037. Registration and
@@ -89,6 +99,7 @@ member:
 other_member:
   role: member
   platform: mobile
+  group: member
   email: thandi.nkosi@example.com
   password: Member456
   phone: "+27821234568"
@@ -101,6 +112,7 @@ other_member:
 ground_admin:
   role: member
   platform: mobile
+  group: ground_admin
   email: sipho.dlamini@example.com
   password: Ground456
   phone: "+27821234569"
