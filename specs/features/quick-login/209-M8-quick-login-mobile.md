@@ -3,7 +3,7 @@ issue: 209
 story: M8
 title: "Quick login dropdown on the app's email login page"
 platform: mobile
-status: pending
+status: completed
 depends_on: [207]
 touches:
   - mobile/lib/features/auth
@@ -20,8 +20,23 @@ design_artboards:
 design_approved: true
 created_by: feature-planner
 created_at: "2026-10-30"
-files_changed: []
-tests_added: []
+files_changed:
+  - mobile/lib/features/auth/domain/demo_account.dart
+  - mobile/lib/features/auth/providers/demo_accounts_provider.dart
+  - mobile/lib/features/auth/presentation/widgets/quick_login_dropdown.dart
+  - mobile/lib/features/auth/presentation/widgets/widgets.dart
+  - mobile/lib/features/auth/presentation/pages/email_login_page.dart
+  - mobile/lib/l10n/app_en.arb
+  - mobile/widgetbook/use_cases/quick_login_dropdown.dart
+  - mobile/test/goldens/goldens/quick_login_dropdown_*.png
+  - domain/language.yaml
+  - domain/demo-account.md
+tests_added:
+  - mobile/test/features/auth/domain/demo_account_test.dart
+  - mobile/test/features/auth/providers/demo_accounts_provider_test.dart
+  - mobile/test/features/auth/presentation/widgets/quick_login_dropdown_test.dart
+  - mobile/test/features/auth/presentation/pages/email_login_page_test.dart
+  - mobile/test/goldens/quick_login_dropdown_golden_test.dart
 ---
 
 # M8 · Quick login dropdown on the app's email login page (Mobile)

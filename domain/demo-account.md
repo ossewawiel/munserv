@@ -11,7 +11,7 @@ Testers switch between roles many times per eyeball run. Typing an email and pas
 |---|---|
 | Python | `scripts/demo_accounts.py` |
 | TypeScript | added by story W31 |
-| Dart | added by story M8 |
+| Dart | `DemoAccount`, `DemoAccountGroup` |
 | Database | none |
 
 ## Invariants

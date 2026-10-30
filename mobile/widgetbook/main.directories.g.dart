@@ -45,6 +45,8 @@ import 'use_cases/photo_thumbnail_carousel.dart'
     as _asset_munserv_mobile_widgetbook_use_cases_photo_thumbnail_carousel;
 import 'use_cases/quick_action_card.dart'
     as _asset_munserv_mobile_widgetbook_use_cases_quick_action_card;
+import 'use_cases/quick_login_dropdown.dart'
+    as _asset_munserv_mobile_widgetbook_use_cases_quick_login_dropdown;
 import 'use_cases/step_indicator.dart'
     as _asset_munserv_mobile_widgetbook_use_cases_step_indicator;
 
@@ -52,6 +54,32 @@ final directories = <_widgetbook.WidgetbookNode>[
   _widgetbook.WidgetbookFolder(
     name: 'features',
     children: [
+      _widgetbook.WidgetbookFolder(
+        name: 'auth',
+        children: [
+          _widgetbook.WidgetbookFolder(
+            name: 'presentation',
+            children: [
+              _widgetbook.WidgetbookFolder(
+                name: 'widgets',
+                children: [
+                  _widgetbook.WidgetbookComponent(
+                    name: 'QuickLoginDropdown',
+                    useCases: [
+                      _widgetbook.WidgetbookUseCase(
+                        name: 'Default',
+                        builder:
+                            _asset_munserv_mobile_widgetbook_use_cases_quick_login_dropdown
+                                .quickLoginDropdown,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
       _widgetbook.WidgetbookFolder(
         name: 'issues',
         children: [

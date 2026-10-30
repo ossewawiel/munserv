@@ -4,3 +4,4 @@ export 'email_input_field.dart';
 export 'loading_button.dart';
 export 'password_input_field.dart';
 export 'pin_input_field.dart';
+export 'quick_login_dropdown.dart';
