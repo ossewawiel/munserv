@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quick login open with names</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&amp;display=swap">
+<style>
+body { margin: 0; }
+a { color: #0C2721; } a:hover { color: #A2391A; }
+.auth-bg { background-color: #F7F5F0; background-image: linear-gradient(rgba(247, 245, 240, 0.85), rgba(247, 245, 240, 0.85)), url(vintage-map.jpg); background-size: cover; background-position: center; }
+</style>
+</helmet>
+<div class="auth-bg" style="position: relative; width: 1440px; height: 900px; overflow: hidden; font-family: 'Source Sans 3', Roboto, Helvetica, Arial, sans-serif; color: #1A1C1B; -webkit-font-smoothing: antialiased;">
+  <main style="position: absolute; left: 482.5px; top: 123.47px; width: 475px; box-sizing: border-box; padding: 40px; background: #FAF9F7; border-radius: 16px; box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 3px -2px, rgba(0, 0, 0, 0.14) 0px 3px 4px 0px, rgba(0, 0, 0, 0.12) 0px 1px 8px 0px;">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <img src="app-logo.png" alt="MunServ Admin" style="display: block; width: 256.75px; height: 66.08px; margin: 0 auto 15px;">
+      <p style="margin: 0; font-size: 14px; line-height: 20.02px; letter-spacing: 0.25px; color: #424846;">Municipal Service Admin Portal</p>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 24px;">
+      <h1 style="margin: 0; font-size: 24px; line-height: 32.02px; font-weight: 600; letter-spacing: 0.5px; color: #A2391A;">Hi, Welcome Back</h1>
+      <p style="margin: 0; font-size: 14px; line-height: 20.02px; letter-spacing: 0.25px; color: #424846; text-align: center;">Enter your credentials to continue</p>
+    </div>
+    <form style="display: flex; flex-direction: column; gap: 24px; margin: 0;">
+      <div style="position: relative; height: 40px;">
+        <div aria-hidden="true" style="position: absolute; inset: 0; border: 2px solid #0C2721; border-radius: 8px;"></div>
+        <label id="quick-login-label" for="quick-login" style="position: absolute; left: 9px; top: -9px; padding: 0 5px; background: #FAF9F7; font-size: 12px; line-height: 17.25px; letter-spacing: 0.375px; color: #0C2721;">Quick login</label>
+        <button id="quick-login" type="button" aria-haspopup="listbox" aria-expanded="true" style="position: relative; display: block; width: 100%; height: 40px; margin: 0; border: 0; background: transparent; box-sizing: border-box; padding: 8.5px 32px 8.5px 14px; text-align: left; font-family: inherit; font-size: 16px; line-height: 23px; font-weight: 400; letter-spacing: 0.5px; color: #424846;">Choose an account</button>
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="rgba(0, 0, 0, 0.54)" aria-hidden="true" style="position: absolute; right: 7px; top: 8px; transform: rotate(180deg); pointer-events: none;"><path d="M7 10l5 5 5-5z"></path></svg>
+      </div>
+      <div style="position: relative; height: 40px;">
+        <div aria-hidden="true" style="position: absolute; inset: 0; border: 1px solid rgba(0, 0, 0, 0.23); border-radius: 8px;"></div>
+        <input id="email" type="email" autocomplete="email" style="position: relative; display: block; width: 100%; height: 40px; margin: 0; border: 0; outline: none; background: transparent; box-sizing: border-box; padding: 8.5px 14px; font-family: inherit; font-size: 16px; line-height: 23px; letter-spacing: 0.5px; color: #1A1C1B;">
+        <label for="email" style="position: absolute; left: 14px; top: 9px; font-size: 16px; line-height: 23px; letter-spacing: 0.5px; color: #424846; pointer-events: none;">Email</label>
+      </div>
+      <div style="position: relative; height: 40px;">
+        <div aria-hidden="true" style="position: absolute; inset: 0; border: 1px solid rgba(0, 0, 0, 0.23); border-radius: 8px;"></div>
+        <input id="password" type="password" autocomplete="current-password" style="position: relative; display: block; width: 100%; height: 40px; margin: 0; border: 0; outline: none; background: transparent; box-sizing: border-box; padding: 8.5px 14px; font-family: inherit; font-size: 16px; line-height: 23px; letter-spacing: 0.5px; color: #1A1C1B;">
+        <label for="password" style="position: absolute; left: 14px; top: 9px; font-size: 16px; line-height: 23px; letter-spacing: 0.5px; color: #424846; pointer-events: none;">Password</label>
+      </div>
+      <button type="submit" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 40.5px; margin: 0; border: 0; border-radius: 8px; box-sizing: border-box; padding: 8px 16px; background: #0C2721; color: #FFFFFF; font-family: inherit; font-size: 14px; line-height: 24.5px; font-weight: 500; letter-spacing: 0.4px;">Sign In</button>
+    </form>
+    <div role="separator" style="display: flex; align-items: center; margin: 24px 0;">
+      <span style="flex: 1 1 0; border-top: 1px solid #C1C8C4;"></span>
+      <span style="padding: 0 9.6px; font-size: 14px; line-height: 20.02px; letter-spacing: 0.25px; color: #424846;">or</span>
+      <span style="flex: 1 1 0; border-top: 1px solid #C1C8C4;"></span>
+    </div>
+    <div style="text-align: center;">
+      <p style="margin: 0 0 4.9px; font-size: 14px; line-height: 20.02px; letter-spacing: 0.25px; color: #424846;">New to the community?</p>
+      <a href="#register" style="display: flex; align-items: center; justify-content: center; height: 42.5px; box-sizing: border-box; padding: 8px 16px; border: 1px solid rgba(12, 39, 33, 0.5); border-radius: 8px; color: #0C2721; text-decoration: none; font-size: 14px; line-height: 24.5px; font-weight: 500; letter-spacing: 0.4px;">Register as a New Member</a>
+    </div>
+  </main>
+  <div style="position: absolute; left: 523px; top: 328px; width: 395px; box-sizing: border-box; background: #FAF9F7; border-radius: 12px; overflow: hidden; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 5px -3px, rgba(0, 0, 0, 0.14) 0px 8px 10px 1px, rgba(0, 0, 0, 0.12) 0px 3px 14px 2px;">
+    <ul role="listbox" aria-labelledby="quick-login-label" style="margin: 0; padding: 8px 0; list-style: none;">
+      <li role="presentation" style="box-sizing: border-box; line-height: 48px; padding: 0 16px; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; color: #424846;">Pod Chief</li>
+      <li role="option" aria-selected="false" style="display: flex; align-items: center; min-height: 36px; box-sizing: border-box; padding: 6px 16px; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: #1A1C1B; white-space: nowrap;">Pod Chief · Naledi</li>
+      <li role="presentation" style="box-sizing: border-box; line-height: 48px; padding: 0 16px; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; color: #424846;">Pod Admin</li>
+      <li role="option" aria-selected="false" style="display: flex; align-items: center; min-height: 36px; box-sizing: border-box; padding: 6px 16px; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: #1A1C1B; white-space: nowrap;">Pod Admin · Pieter</li>
+      <li role="presentation" style="box-sizing: border-box; line-height: 48px; padding: 0 16px; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; color: #424846;">Ward Chief</li>
+      <li role="option" aria-selected="false" style="display: flex; align-items: center; min-height: 36px; box-sizing: border-box; padding: 6px 16px; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: #1A1C1B; white-space: nowrap;">Ward Chief · Ayanda</li>
+      <li role="presentation" style="box-sizing: border-box; line-height: 48px; padding: 0 16px; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; color: #424846;">Ward Admin</li>
+      <li role="option" aria-selected="false" style="display: flex; align-items: center; min-height: 36px; box-sizing: border-box; padding: 6px 16px; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: #1A1C1B; white-space: nowrap;">Ward Admin · Lerato</li>
+      <li role="presentation" style="box-sizing: border-box; line-height: 48px; padding: 0 16px; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; color: #424846;">Sector Chief</li>
+      <li role="option" aria-selected="false" style="display: flex; align-items: center; min-height: 36px; box-sizing: border-box; padding: 6px 16px; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: #1A1C1B; white-space: nowrap;">Sector Chief · Johan</li>
+      <li role="presentation" style="box-sizing: border-box; line-height: 48px; padding: 0 16px; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; color: #424846;">Sector Admin</li>
+      <li role="option" aria-selected="false" style="display: flex; align-items: center; min-height: 36px; box-sizing: border-box; padding: 6px 16px; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: #1A1C1B; white-space: nowrap;">Sector Admin</li>
+      <li role="option" aria-selected="false" style="display: flex; align-items: center; min-height: 36px; box-sizing: border-box; padding: 6px 16px; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: #1A1C1B; white-space: nowrap;">Sector Admin · Thandeka</li>
+    </ul>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

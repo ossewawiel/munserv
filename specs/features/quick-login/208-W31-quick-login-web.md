@@ -12,8 +12,14 @@ touches:
   - web/src/locales
   - domain/language.yaml
 ui: true
-design_canvas: ""
-design_artboards: []
+design_canvas: "https://claude.ai/artifact/Fi653crxT7uArKg4apB9vR"
+design_artboards:
+  - "web/Main.dc.html — login page with the Quick login field closed above Email: shrunk label, placeholder 'Choose an account'"
+  - "web/QuickLoginOpen.dc.html — menu open with the dev input: six role headings, highest first, each over one nameless option; Sector Admin hovered"
+  - "web/QuickLoginOpenNamed.dc.html — the same menu with Storybook example.test accounts: '<Role> · <name>' plus one nameless entry"
+  - "web/QuickLoginSigningIn.dc.html — after a pick: select reset, fields filled, form disabled while useLogin is pending"
+  - "web/QuickLoginError.dc.html — failed quick login: the existing outlined error Alert above Quick login, fields keep the account"
+  - "web/NoQuickLogin.dc.html — no input: today's page, unchanged (reference)"
 design_approved: false
 created_by: feature-planner
 created_at: "2026-10-30"
@@ -38,7 +44,13 @@ On a demo or dev build, a tester picks an administrator account on the login pag
 - [ ] The page matches the approved canvas
 
 ## Visual
-Match the artboards to be produced by the designer (`design/canvases/quick-login/<Artboard>.dc.html`): the login page with the dropdown closed, and with it open showing the role headings. The designer fills in the names. Without the input, the page stays exactly as today's `LoginForm` Default story.
+Match the canvas <https://claude.ai/artifact/Fi653crxT7uArKg4apB9vR>. The working files are `design/canvases/quick-login/web/<Artboard>.dc.html`, 1440x900. The artboards are `Main` (closed), `QuickLoginOpen` (open, dev input), `QuickLoginOpenNamed` (open, with names), `QuickLoginSigningIn` (pending), `QuickLoginError` (failed) and `NoQuickLogin` (no input). Without the input, the page stays exactly as today's `LoginForm` Default story.
+
+The canvas settles these points:
+- The field is the first child of the form, above Email, inside the existing 24px gap. When `error` is set, the existing Alert stays first, above Quick login.
+- The label is always shrunk (`InputLabel` `shrink`, Select `displayEmpty`). The placeholder `auth.quickLogin.placeholder` shows in `text.secondary`.
+- The copy is as follows. Label: "Quick login" / "Vinnige aanmelding" / "Ukungena ngokushesha". Placeholder: "Choose an account" / "Kies 'n rekening" / "Khetha i-akhawunti". Option: `"{{role}} · {{name}}"` in all three. Headings reuse `roles.*` as they stand ("Pod Chief" to "Sector Admin").
+- The canvas notes hold the anatomy values: menu, `ListSubheader`, `MenuItem` and the disabled colours.
 
 ## Contract
 `specs/features/quick-login/spec.md` § The build input. `VITE_DEMO_ACCOUNTS` is a JSON array of `{ "group": AdminRole, "name": string, "email": string, "password": string }`. Example: `[{"group":"sector_admin","name":"","email":"admin@ward42.example.com","password":"admin123"}]`. Login stays `POST /auth/admin/login` through the existing `useLogin`; nothing new on the wire.
