@@ -250,3 +250,11 @@ concepts:
       support_grant_status: [active, expired, revoked]
     relationships: { belongs_to: [pod], granted_by: [admin-role] }
     synonyms_avoid: ["session (a grant outlives one login)", "impersonation", "backdoor", "elevation"]
+
+  demo-account:
+    definition: A dev account from scripts/console/accounts.yaml that demo and dev builds offer on the login page for quick login, and that production builds never contain.
+    file: demo-account.md
+    values:
+      demo_account_group: [pod_chief, pod_admin, ward_chief, ward_admin, sector_chief, sector_admin, member, ground_admin]
+    relationships: { is_a: [admin-role, member] }
+    synonyms_avoid: ["test user", "backdoor", "auto-login"]
