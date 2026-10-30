@@ -47,6 +47,12 @@
 | W29 | As a super user, I can use temporary access for debugging | Login with temp grant ǀ Role-limited access ǀ Session shows expiry timer ǀ Auto-logout on expiry ǀ All actions audit logged | 🟢 Done | [#44](https://github.com/ossewawiel/munserv/issues/44) |
 | W30 | As a Pod Chief, I can view/revoke active super user sessions | Located in Pod Settings > Support Access section ǀ See active sessions with role, granted time, last activity ǀ Manual revoke button ǀ Session history log | 🟢 Done | [#45](https://github.com/ossewawiel/munserv/issues/45) |
 
+## Quick Login Stories (demo and dev builds only)
+
+| ID | Story | Acceptance Criteria | Status | Issue |
+|----|-------|---------------------|--------|-------|
+| W31 | As a tester on a demo or dev build of the portal, I can pick an administrator account from a dropdown on the login page, so that I am logged in as that role without typing | `VITE_DEMO_ACCOUNTS` set at build time shows a Quick login dropdown above the form ǀ Options grouped under Pod chief, Pod admin, Ward chief, Ward admin, Sector chief, Sector admin, each "<Role> · <name>" or "<Role>" ǀ Picking fills email and password and submits, same redirect as a typed login ǀ A failed quick login shows the normal error ǀ Unset, empty or invalid: no dropdown and no account data in the bundle ǀ i18n in en, af, zu; Storybook stories; lint, typecheck, tests, visual gate pass ǀ Matches the approved canvas | 🔴 Pending | [#208](https://github.com/ossewawiel/munserv/issues/208) |
+
 ## Status Legend
 - 🟢 Done
 - 🟡 In Progress
