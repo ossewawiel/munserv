@@ -26,6 +26,10 @@ class QuickLoginDropdown extends StatelessWidget {
 
     final headingStyle = ButtonStyle(
       minimumSize: const WidgetStatePropertyAll(Size.fromHeight(Spacing.xl)),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      padding: const WidgetStatePropertyAll(
+        EdgeInsetsDirectional.only(start: Spacing.xxl, end: Spacing.sm),
+      ),
       foregroundColor: WidgetStatePropertyAll(colors.onSurfaceVariant),
       textStyle: WidgetStatePropertyAll(textTheme.labelMedium),
     );
@@ -68,6 +72,7 @@ class QuickLoginDropdown extends StatelessWidget {
     return DropdownMenu<DemoAccount>(
       expandedInsets: EdgeInsets.zero,
       enabled: enabled,
+      inputDecorationTheme: Theme.of(context).inputDecorationTheme,
       label: Text(l10n.quickLoginLabel),
       leadingIcon: const Icon(Icons.person_outline),
       dropdownMenuEntries: entries,
