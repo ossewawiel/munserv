@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   requiredServices, buildChecklistViewModel, stageLabel, stageChipClass,
   checkoutMismatch, checkoutButtonLabel, stepButtonGate, isCheckedOut,
-  rewriteLocalhost, remoteLinkRows,
+  rewriteLocalhost, remoteLinkRows, evidenceLines,
 } from './eyeball.model.mjs';
 
 const FIXTURE_CANDIDATE = {
