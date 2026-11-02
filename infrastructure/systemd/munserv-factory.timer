@@ -1,0 +1,13 @@
+# Starts munserv-factory.service on the tick schedule. scripts/install-factory-tick.sh writes
+# @ON_CALENDAR@ from TICK_FIRST_HOUR, TICK_LAST_HOUR and TICK_EVERY_HOURS in tick.env
+# (default *-*-* 07..21/2:00:00: 07:00, 09:00 ... 21:00).
+[Unit]
+Description=MunServ factory tick schedule
+
+[Timer]
+OnCalendar=@ON_CALENDAR@
+# A tick missed while the laptop slept runs on wake; the script skips it outside the hours window.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

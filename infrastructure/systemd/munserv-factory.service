@@ -1,0 +1,14 @@
+# One factory tick (scripts/factory-tick.sh), started by munserv-factory.timer.
+# Install with scripts/install-factory-tick.sh: it fills in @REPO@ (the checkout that holds the
+# script) and @PATH@ (the installing shell's PATH, so claude, gh, git and jq resolve).
+[Unit]
+Description=MunServ factory tick
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=@REPO@
+Environment="PATH=@PATH@"
+ExecStart=@REPO@/scripts/factory-tick.sh
+# Two story runs can take hours; the tick's own lock keeps runs from overlapping.
+TimeoutStartSec=6h

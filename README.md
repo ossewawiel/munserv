@@ -78,6 +78,42 @@ This project is built by an agent factory. Agents in `.claude/agents/` plan (Opu
 
 Slash commands are retired; the factory section of `CLAUDE.md` describes how work is delivered.
 
+### Factory tick (unattended runs)
+
+A systemd user timer runs `scripts/factory-tick.sh` every 2 hours from 07:00 to 21:00. Each tick:
+
+1. Exits if `~/.config/munserv-factory/pause` exists, or if another tick holds the lock.
+2. Fast-forwards `master` in `REPO_DIR`. It stops on another branch, uncommitted tracked changes or a failed fast-forward.
+3. Sums today's `total_cost_usd` in `~/.local/state/munserv-factory/ticks.jsonl`. It exits when the sum reaches `DAILY_BUDGET_USD`.
+4. Asks the clerk on Haiku, with structured output, for up to `STORIES_PER_TICK` stories it can dispatch now. A story qualifies only when it waits on no person: it is ready, has a pending handoff, its dependencies are closed, and a UI story has its design approved.
+5. Runs `claude -p "/factory story <n>"` on Sonnet for each pick, with `--max-turns 150` and `--permission-mode acceptEdits`. The budget is the smaller of `RUN_BUDGET_USD` and what is left today. `OTEL_RESOURCE_ATTRIBUTES=story.id=<n>` joins the run to the cost meter. Tools outside the allow list are denied and counted in `permission_denials`. Permissions are never bypassed.
+6. Appends one ledger line per Claude run, sends one `notify-send` line and comments on the pinned **Factory log** issue. The first tick creates and pins that issue.
+
+All settings live in `~/.config/munserv-factory/tick.env`. The template is `infrastructure/systemd/tick.env.example`. A later move to a server or to GitHub Actions changes that file only.
+
+```bash
+# Install: writes tick.env once (never overwrites it), installs both units and enables the timer
+scripts/install-factory-tick.sh
+# Keep the timer running after you log out
+loginctl enable-linger "$USER"
+# See the picks without dispatching anything (one Haiku call, about $0.01)
+scripts/factory-tick.sh --dry-run
+# Run one tick now
+systemctl --user start munserv-factory.service
+# Follow a tick's output
+journalctl --user -u munserv-factory -f
+# Pause: every tick exits at once while the file exists
+touch ~/.config/munserv-factory/pause
+# Resume
+rm ~/.config/munserv-factory/pause
+# Stop the timer altogether
+systemctl --user disable --now munserv-factory.timer
+# Today's spend in dollars
+jq -nR --arg d "$(date +%F)" '[inputs | fromjson? | select(.date == $d) | .total_cost_usd] | add // 0' ~/.local/state/munserv-factory/ticks.jsonl
+```
+
+**Budget.** The defaults are $10 a day and $5 per story run (decision D6). The clerk's call costs about $0.01 and counts toward the day. To change the caps, edit `DAILY_BUDGET_USD` and `RUN_BUDGET_USD` in `tick.env`; the next tick reads the new values. To change the hours, edit `TICK_FIRST_HOUR`, `TICK_LAST_HOUR` and `TICK_EVERY_HOURS`, then rerun the installer, which rewrites the timer. A run that hits its cap ends with subtype `error_max_budget_usd` in the ledger. Its PR or branch stays as it was.
+
 ### MCP Integrations
 
 | Server | Purpose |
