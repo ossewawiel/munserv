@@ -34,6 +34,7 @@ Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patt
 | Eyeball in the TUI | `./tui.sh`, then `y` | a card per check from the handoff's Eyeball block; `j`/`k` move, `p` pass, `f` fail, `n` note, `1`-`9` run a command step, `[`/`]` switch PR, `s` twice submits (labels the PR like the console) |
 | Real phone | `./tui.sh`, then `p` | Phone screen: pairing wizard (Android 11+, wireless debugging), device list, `i` build and install from the eyeball checkout (API 8080), `s` from the showcase checkout (API 8090), `o` open app, `l` app log |
 | Showcase stack | `./tui.sh`, then `u` (update), `b` (build), `d` (start), `e` (stop) | web on :4000, API on :8090; worktree `../munserv-demo` follows `origin/master` |
+| Factory tick | `scripts/install-factory-tick.sh` once; `touch ~/.config/munserv-factory/pause` pauses | systemd user timer, every 2 h 07:00-21:00, $10 a day; settings in `~/.config/munserv-factory/tick.env`, ledger `~/.local/state/munserv-factory/ticks.jsonl` (README, "Factory tick") |
 | Remote eyeball | `scripts/eyeball-up.sh <pr>` | prints web, Swagger and console links for another machine on the LAN |
 
 ## Quality gate
