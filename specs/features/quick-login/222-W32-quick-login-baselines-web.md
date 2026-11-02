@@ -3,7 +3,7 @@ issue: 222
 story: W32
 title: "Quick login baselines from CI's render, W31 Eyeball gaps"
 platform: web
-status: pending
+status: completed
 depends_on: []
 touches:
   - web/src/components/molecules
@@ -17,8 +17,14 @@ design_artboards:
 design_approved: true
 created_by: feature-planner
 created_at: "2026-10-30"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/components/molecules/QuickLoginSelect.stories.tsx
+  - web/e2e/visual/__screenshots__/stories.spec/molecules-quickloginselect--closed--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/molecules-quickloginselect--closed--dark.png
+  - web/e2e/visual/__screenshots__/stories.spec/molecules-loginform--with-quick-login--light.png
+  - web/e2e/visual/__screenshots__/stories.spec/molecules-loginform--with-quick-login--dark.png
+  - specs/features/quick-login/208-W31-quick-login-web.md
+tests_added: []  # none: baselines retaken from CI run 41110419188
 ---
 
 # W32 · Quick login baselines from CI's render, W31 Eyeball gaps (Web)

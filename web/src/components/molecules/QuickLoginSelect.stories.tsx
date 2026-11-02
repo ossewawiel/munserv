@@ -28,8 +28,5 @@ export const Closed: Story = {};
 export const Open: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.click(within(canvasElement).getByRole('combobox'));
-    // The menu text is the first use of some font faces; the browser loads them lazily,
-    // so wait for them before the story counts as settled.
-    await document.fonts.ready;
   },
 };
