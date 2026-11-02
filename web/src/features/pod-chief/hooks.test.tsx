@@ -5,7 +5,7 @@ import { http, HttpResponse } from 'msw';
 import { AxiosError } from 'axios';
 import type { ReactNode } from 'react';
 import { server } from '@/test/mocks/server';
-import { useCreatePodAdministrator } from './hooks';
+import { useCreatePodAdministrator, podChiefKeys } from './hooks';
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -23,6 +23,16 @@ describe('pod-chief hooks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     server.resetHandlers();
+  });
+
+  describe('podChiefKeys.administratorList', () => {
+    it('should key the administrator list by its query', () => {
+      const a = podChiefKeys.administratorList({ q: 'a' });
+      const b = podChiefKeys.administratorList({ q: 'b' });
+
+      expect(a).not.toEqual(b);
+      expect(a.slice(0, 2)).toEqual(podChiefKeys.administrators());
+    });
   });
 
   describe('useCreatePodAdministrator', () => {

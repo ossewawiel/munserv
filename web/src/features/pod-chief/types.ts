@@ -83,6 +83,24 @@ export interface PodAdministratorListResponse {
   total: number;
 }
 
+export const POD_ADMINISTRATOR_SORT_COLUMNS = ['displayName', 'email', 'role', 'createdAt'] as const;
+export type PodAdministratorSortColumn = (typeof POD_ADMINISTRATOR_SORT_COLUMNS)[number];
+
+export interface PodAdministratorSort {
+  readonly column: PodAdministratorSortColumn;
+  readonly direction: 'asc' | 'desc';
+}
+
+/**
+ * Query for GET /api/v1/pod/administrators; every field is optional.
+ */
+export interface PodAdministratorQuery {
+  readonly q?: string;
+  readonly roles?: readonly AdminRole[];
+  readonly wardId?: string;
+  readonly sort?: PodAdministratorSort;
+}
+
 /**
  * Request to create a new pod administrator
  */
