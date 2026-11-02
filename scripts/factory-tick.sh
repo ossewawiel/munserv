@@ -173,7 +173,11 @@ if ((DRY_RUN)); then
   exit 0
 fi
 
+# The run's final report goes into the Factory log comment, because commands it hands to a person
+# reach nobody otherwise; the raw result is kept under runs/ for `claude --resume <session_id>` triage.
+mkdir -p "$STATE_DIR/runs"
 lines=()
+reports=""
 for id in $(jq -r '.[]' <<<"$picks"); do
   left="$(left_today)"
   if jq -en "$left <= 0" >/dev/null; then
@@ -189,17 +193,27 @@ for id in $(jq -r '.[]' <<<"$picks"); do
   out="$(OTEL_RESOURCE_ATTRIBUTES="story.id=$id" claude -p "/factory story $id" --model "$STORY_MODEL" \
     --max-turns "$STORY_MAX_TURNS" --output-format json --max-budget-usd "$run_budget" \
     --permission-mode acceptEdits </dev/null)" || rc=$?
+  printf '%s\n' "$out" >"$STATE_DIR/runs/$TICK_ID-$id.json"
   if jq -e 'type == "object"' <<<"$out" >/dev/null 2>&1; then
     cost="$(jq -r '.total_cost_usd // 0' <<<"$out")"
     subtype="$(jq -r '.subtype // "unknown"' <<<"$out")"
-    summary="$(jq -r '.result // "" | split("\n") | map(select(length > 0)) | last // ""' <<<"$out" | head -c 300)"
+    # The report's CI and Plan lines, else its last line that is not a code fence.
+    summary="$(jq -r '.result // "" | split("\n") | map(select(length > 0 and (startswith("```") | not))) as $l
+      | ([$l[] | select(test("^(CI|Plan):"))] | join(" / ")) as $status
+      | if $status != "" then $status else ($l | last // "") end' <<<"$out" | head -c 300)"
+    denied="$(jq -c '[.permission_denials // [] | .[] | "\(.tool_name): \(.tool_input.command // .tool_input | tostring | .[0:120])"]' <<<"$out")"
     record story --argjson story "$id" --argjson exit "$rc" --argjson total_cost_usd "$cost" \
       --arg subtype "$subtype" --argjson is_error "$(jq '.is_error // false' <<<"$out")" \
       --argjson num_turns "$(jq '.num_turns // 0' <<<"$out")" \
       --argjson duration_ms "$(jq '.duration_ms // 0' <<<"$out")" \
       --arg session_id "$(jq -r '.session_id // ""' <<<"$out")" \
-      --argjson permission_denials "$(jq '.permission_denials // [] | length' <<<"$out")" \
+      --argjson permission_denials "$denied" \
       --arg summary "$summary"
+    reports+=$'\n\n'"<details><summary>#$id report</summary>"$'\n\n'"$(jq -r '.result // "" | .[0:20000]' <<<"$out")"
+    if [[ "$denied" != "[]" ]]; then
+      reports+=$'\n\n'"Denied: "$'\n'"$(jq -r '.[] | "- `" + gsub("`"; "\u2032") + "`"' <<<"$denied")"
+    fi
+    reports+=$'\n\n'"</details>"
   else
     cost=0
     subtype="no_json"
@@ -215,5 +229,5 @@ body="**Tick $TICK_ID** - \$$spent of \$$DAILY_BUDGET_USD spent today"
 for line in "${lines[@]}"; do
   body+=$'\n'"- $line"
 done
-log_to_issue "$body"
+log_to_issue "$body$reports"
 printf '%s\n' "${lines[@]}"
