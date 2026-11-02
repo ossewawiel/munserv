@@ -13,6 +13,16 @@ export function requiredServices(candidate) {
   return [...set];
 }
 
+// One line per request of a probe, or the problems of a page check, for the evidence block.
+export function evidenceLines(evidence) {
+  if (!evidence) return [];
+  if (evidence.kind === 'probe') {
+    const lines = (evidence.requests || []).map((r) => r.method + ' ' + r.path + ' -> ' + r.status);
+    return lines.concat((evidence.requests || []).flatMap((r) => r.problems || []));
+  }
+  return (evidence.problems || []).length ? evidence.problems : ['text found on ' + (evidence.url || 'the page')];
+}
+
 export function buildChecklistViewModel(candidate, resultsData) {
   const safe = resultsData && typeof resultsData === 'object'
     ? { checks: resultsData.checks || {}, observations: resultsData.observations || [] }
@@ -28,6 +38,8 @@ export function buildChecklistViewModel(candidate, resultsData) {
       services: c.services || [],
       steps: c.steps || [],
       expect: c.expect || '',
+      auto: c.auto === true,
+      evidence: r.auto || null,
       result: r.result || null,
       note: r.note || '',
       issue_url: r.issue_url || null,

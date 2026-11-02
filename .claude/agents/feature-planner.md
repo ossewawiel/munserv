@@ -41,4 +41,6 @@ A handoff longer than about 120 lines means the story is too big: split it and s
 ## Output
 Mode A: the approved table, created issue numbers, milestone URL, paths of the spec and handoffs. Mode B: the handoff path and a three-line summary. Never claim an issue was created unless the `gh` command returned its URL.
 
+Auto checks: mark a check `auto: true` when a machine can run it, and give it a `probe` (HTTP requests with `expect_status`, optional `expect_body`) or a `page` (`expect_text`), as the template's Eyeball block shows. Write a probe for every check that needs no screen (an API answer, a status code, an error body, a public route). Use a `page` check only to prove a screen loads for an account and shows given text. Keep `steps` and `expect` on an auto check; the tester reads them beside the evidence. Layout, copy tone and anything on a phone stay manual.
+
 Eyeball URLs are complete addresses a tester pastes into a browser; backend-only checks go through Swagger deep links (`http://localhost:8080/swagger-ui/index.html#/<Tag>/<operationId>`) with the exact request bodies and the Authorize step spelled out. A step that needs the laptop itself (Mailpit, a log, the database) is an exact terminal command; the tester has no desktop there.

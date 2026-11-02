@@ -186,3 +186,16 @@ test('remoteLinkRows is empty when remote mode is off', () => {
   assert.deepEqual(remoteLinkRows({ enabled: false }), []);
   assert.deepEqual(remoteLinkRows(null), []);
 });
+
+test('evidenceLines lists each probe request with its status, then the problems', () => {
+  const lines = evidenceLines({ kind: 'probe', requests: [
+    { method: 'GET', path: '/a', status: 200, problems: [] },
+    { method: 'GET', path: '/b', status: 500, problems: ['status 500, expected 200'] }] });
+  assert.deepEqual(lines, ['GET /a -> 200', 'GET /b -> 500', 'status 500, expected 200']);
+});
+
+test('evidenceLines says where a page check found its text, or what was missing', () => {
+  assert.deepEqual(evidenceLines({ kind: 'page', url: 'http://h/x', problems: [] }), ['text found on http://h/x']);
+  assert.deepEqual(evidenceLines({ kind: 'page', problems: ['text not visible: Hi'] }), ['text not visible: Hi']);
+  assert.deepEqual(evidenceLines(null), []);
+});

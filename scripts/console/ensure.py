@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from . import eyeball, remote, services
+from . import autocheck, eyeball, remote, services
 from .config import CONFIG
 from .gitops import ApiError, CommandError, checkout_branch, current_sha, gh, repo
 
@@ -135,6 +135,17 @@ def story_accounts(pr: int) -> dict:
             for k in keys}
 
 
+def run_auto(pr: int, checkout: Path) -> dict:
+    """Run the PR's auto checks now that its services are up; `{check id: "pass" | "fail"}`, empty
+    when it has none. A failure of the runner itself is a failed check, never a failed ensure."""
+    candidate = next((c for c in eyeball.build_candidates(force=False) if c.get("number") == pr), None)
+    if not candidate or not any(autocheck.is_auto(c) for c in candidate["checks"]):
+        return {}
+    data = autocheck.run_auto_checks(candidate, eyeball.load_results(checkout, candidate["id"]), checkout)
+    eyeball.save_results(checkout, candidate["id"], data)
+    return {c["id"]: data["checks"][c["id"]]["result"] for c in candidate["checks"] if autocheck.is_auto(c)}
+
+
 def ensure(pr: int, checkout: Path, console_port: int) -> dict:
     """Check out PR `pr`, prepare, start or restart what changed, and return the report."""
     with _ensure_lock:
@@ -149,10 +160,12 @@ def ensure(pr: int, checkout: Path, console_port: int) -> dict:
         for name in names:
             _prepare(name, checkout)
         result_services = {name: _ensure_service(name, configured[name], checkout, head) for name in names}
+        auto = run_auto(pr, checkout)
         return {
             "pr": pr, "sha": head, "branch": branch, "services": result_services,
             "urls": {**remote.urls(console_port), "console": remote.console_url(console_port, with_token=True)},
             "accounts": story_accounts(pr),
+            "auto": auto,
             "otp": services.latest_otp(checkout),
             "firewall_command": remote.firewall(console_port)["command"] if remote.enabled() else None,
         }
@@ -173,6 +186,8 @@ def format_report(result: dict) -> str:
             login = acc.get("email") or acc.get("phone") or ""
             secret = acc.get("password") or (f"PIN {acc['pin']}" if acc.get("pin") else "")
             lines.append(f"  {key}: {login} / {secret}")
+    if result.get("auto"):
+        lines += ["", "Auto checks:"] + [f"  {cid}: {outcome}" for cid, outcome in result["auto"].items()]
     if result.get("otp"):
         lines += ["", f"Latest OTP: {result['otp']}"]
     if result.get("firewall_command"):
