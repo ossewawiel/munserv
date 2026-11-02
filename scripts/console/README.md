@@ -74,6 +74,17 @@ it to turn healthy.
 Same shapes the eyeball dashboard used: `accounts.yaml` is free-form, keyed by the `as` field a
 check names; `smoke.yaml` is a list of checks in the same shape as a handoff's `Eyeball` block.
 
+### Auto checks
+
+A check with `auto: true` in a handoff's Eyeball block is run by `autocheck.py` before a tester opens
+the PR: `ensure` (and so `scripts/eyeball-up.sh`) runs them once the services are up, and the
+Eyeball section has a "Run auto checks" button. Each is pre-ticked Pass or Fail with its evidence (the
+requests and responses, or a screenshot) in `<checkout>/.console/results/<candidate>.json`; the
+tester can still flip the tick. A check has a `probe` (HTTP requests as the `as` account, no
+screen) or a `page` (headless Chromium opens `url` as that account, asserts `page.expect_text`,
+saves a screenshot). Both go to the public host, `remote.host()`, not `localhost`. Fields are in the
+handoff template. Page checks need Playwright in `web/node_modules` (`pnpm install`).
+
 ### Local-only config
 
 A fresh checkout is a real `git worktree`, so it has everything git tracks -- but nothing a

@@ -68,6 +68,11 @@ checks still cover every AC. `as` is an account key from `scripts/console/accoun
 `storybook`. `url` is a full local URL (`http://localhost:3000/...`), or a mobile screen name
 (`MembersListScreen`) for `platform: mobile` stories.
 
+**Auto checks.** Add `auto: true` to a check a machine can run before the tester opens the PR. The console runs it on the public host (the address `scripts/eyeball-up.sh` prints), as the `as` account from `scripts/console/accounts.yaml`, and pre-ticks the check with its evidence. Two kinds:
+- `probe`: HTTP requests, no screen. Each has `method`, `path` (from `/api/v1/...`), optional `body`, `expect_status` and optional `expect_body` (text or a list of texts the response must contain). `save: {name: "dotted.path"}` keeps a value from the JSON response; a later `path` or `body` string uses it as `{name}`. Give a list of requests for a chain. Write a probe for every check that needs no screen. A probe may delete or create data: use it only where the check already does.
+- `page`: Playwright opens `url` as the account, asserts every text in `page.expect_text` is visible and saves a screenshot. It proves reachability and text, never layout.
+A check without `auto` stays manual. Keep `steps` and `expect` on an auto check: the tester reads them next to the evidence.
+
 ```yaml
 - id: E1
   title: Pod chief grants support access
@@ -90,4 +95,31 @@ checks still cover every AC. `as` is an account key from `scripts/console/accoun
     - Open Pod Settings, then Support Access, and click Revoke on the grant from E1.
     - Log in as the super user.
   expect: Login is refused with an error explaining there is no active grant.
+- id: E3
+  title: Anonymous delete is refused
+  as: none
+  auto: true
+  services: [db, backend]
+  url: http://localhost:8080/swagger-ui/index.html#/Photos/deletePhoto
+  probe:
+    method: DELETE
+    path: /api/v1/photos/00000000-0000-0000-0000-000000000000
+    expect_status: 401
+    expect_body: UNAUTHENTICATED
+  steps:
+    - Open the deletePhoto operation without logging in.
+    - Press Try it out, then Execute.
+  expect: The answer is 401 with the code UNAUTHENTICATED.
+- id: E4
+  title: Admin sees the issue list
+  as: sector_admin
+  auto: true
+  services: [db, backend, web]
+  url: http://localhost:3000/issues
+  page:
+    expect_text: [Issues]
+  steps:
+    - Log in as the sector admin.
+    - Open Issues.
+  expect: The issue list shows.
 ```

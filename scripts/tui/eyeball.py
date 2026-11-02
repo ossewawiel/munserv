@@ -49,6 +49,17 @@ def login_line(check: Check, accounts: dict[str, dict]) -> str:
     return check.account
 
 
+def auto_lines(evidence: dict | None) -> list[str]:
+    """What an auto check found, one line each: every request with its status, then any problem."""
+    if not evidence:
+        return []
+    if evidence.get("kind") == "probe":
+        requests = evidence.get("requests") or []
+        return [f"{r['method']} {r['path']} -> {r['status']}" for r in requests] + [
+            problem for r in requests for problem in r.get("problems") or []]
+    return list(evidence.get("problems") or []) or [f"text found on {evidence.get('url', 'the page')}"]
+
+
 def card_text(check: Check, entry: dict, accounts: dict[str, dict], outputs: dict[int, str]) -> Text:
     """One check as a card. `outputs` maps a step index to what its command printed."""
     mark, colour = RESULT_MARK[entry.get("result")]
@@ -71,6 +82,9 @@ def card_text(check: Check, entry: dict, accounts: dict[str, dict], outputs: dic
             text.append("\n" + "\n".join(f"      {line}" for line in outputs[index].splitlines()), style="#9AA3B2")
     text.append("\nYou should see  ", style="#9AA3B2")
     text.append(check.expect)
+    for line in auto_lines(entry.get("auto")):
+        text.append("\nAuto check      ", style="#9AA3B2")
+        text.append(line)
     if entry.get("note"):
         text.append("\nNote            ", style="#9AA3B2")
         text.append(entry["note"], style="#E5B73B")

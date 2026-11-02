@@ -19,12 +19,12 @@ import tempfile
 import threading
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from console import cost, demo_input, ensure, eyeball, gitops, knowledge, mobile, network, remote, services, showcase  # noqa: E402
+from console import autocheck, cost, demo_input, ensure, eyeball, gitops, knowledge, mobile, network, remote, services, showcase  # noqa: E402
 from console.config import Config  # noqa: E402
 from console.pipeline import classify_pr  # noqa: E402
 from console.server import Handler  # noqa: E402
@@ -1862,6 +1862,114 @@ class ShowcaseTests(unittest.TestCase):
             with self.assertRaises(gitops.ApiError) as raised:
                 self._start_build(Path(tmp), Path(tmp))
         self.assertEqual((raised.exception.status, str(raised.exception)), (409, "git fetch: no route"))
+
+
+class AutoCheckTests(unittest.TestCase):
+    """Probe checks against a stub HTTP server; the runner must pre-tick with evidence and keep the
+    token out of it."""
+
+    @classmethod
+    def setUpClass(cls):
+        import http.server
+        seen = cls.seen = []
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+
+            def _reply(self, status, body):
+                raw = json.dumps(body).encode()
+                self.send_response(status)
+                self.send_header("Content-Length", str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
+
+            def do_POST(self):
+                self.rfile.read(int(self.headers.get("Content-Length", 0)))
+                self._reply(200, {"accessToken": "SECRET", "refreshToken": "R"})
+
+            def do_GET(self):
+                seen.append(self.headers.get("Authorization"))
+                if self.path == "/api/v1/items":
+                    self._reply(200, {"items": [{"id": "abc"}]})
+                elif self.path == "/api/v1/items/abc":
+                    self._reply(200, {"id": "abc"})
+                else:
+                    self._reply(401, {"error": {"code": "UNAUTHENTICATED"}})
+
+            do_DELETE = do_GET
+
+        cls.server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=cls.server.serve_forever, daemon=True).start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server.shutdown()
+
+    def setUp(self):
+        self.autocheck = autocheck
+        port = self.server.server_address[1]
+        self.patches = [
+            patch.object(autocheck, "backend_base", return_value=f"http://127.0.0.1:{port}"),
+            patch.object(autocheck.CONFIG.__class__, "accounts_config", new_callable=PropertyMock,
+                         return_value={"member": {"role": "member", "platform": "mobile",
+                                                  "email": "m@x", "password": "p"}}),
+        ]
+        for p in self.patches:
+            p.start()
+        self.seen.clear()
+
+    def tearDown(self):
+        for p in self.patches:
+            p.stop()
+
+    def run_candidate(self, check):
+        candidate = {"id": "pr-1", "checks": [check]}
+        with tempfile.TemporaryDirectory() as d:
+            data = {"candidate": "pr-1", "checks": {}, "observations": []}
+            return self.autocheck.run_auto_checks(candidate, data, Path(d))["checks"][check["id"]]
+
+    def test_anonymous_probe_passes_and_sends_no_token(self):
+        entry = self.run_candidate({"id": "E1", "auto": True, "as": "none", "probe": {
+            "method": "DELETE", "path": "/api/v1/photos/x", "expect_status": 401, "expect_body": "UNAUTHENTICATED"}})
+        self.assertEqual(entry["result"], "pass")
+        self.assertEqual(entry["auto"]["requests"][0]["status"], 401)
+        self.assertEqual(self.seen, [None])
+
+    def test_wrong_status_is_a_fail_with_the_problem_recorded(self):
+        entry = self.run_candidate({"id": "E1", "auto": True, "as": "none", "probe": {
+            "method": "GET", "path": "/api/v1/items", "expect_status": 401}})
+        self.assertEqual(entry["result"], "fail")
+        self.assertIn("status 200, expected 401", entry["auto"]["requests"][0]["problems"][0])
+
+    def test_missing_body_text_is_a_fail(self):
+        entry = self.run_candidate({"id": "E1", "auto": True, "as": "none", "probe": {
+            "method": "GET", "path": "/api/v1/items", "expect_status": 200, "expect_body": ["abc", "nope"]}})
+        self.assertEqual(entry["result"], "fail")
+        self.assertEqual(entry["auto"]["requests"][0]["problems"], ["body lacks 'nope'"])
+
+    def test_chain_saves_a_value_and_sends_the_account_token_without_recording_it(self):
+        entry = self.run_candidate({"id": "E2", "auto": True, "as": "member", "probe": [
+            {"path": "/api/v1/items", "expect_status": 200, "save": {"item": "items.0.id"}},
+            {"path": "/api/v1/items/{item}", "expect_status": 200, "expect_body": "abc"}]})
+        self.assertEqual(entry["result"], "pass")
+        self.assertEqual(entry["auto"]["requests"][1]["path"], "/api/v1/items/abc")
+        self.assertEqual(self.seen, ["Bearer SECRET", "Bearer SECRET"])
+        self.assertNotIn("SECRET", json.dumps(entry))
+
+    def test_manual_check_is_left_alone(self):
+        candidate = {"id": "pr-1", "checks": [{"id": "E9", "title": "t"}]}
+        with tempfile.TemporaryDirectory() as d:
+            data = self.autocheck.run_auto_checks(candidate, {"checks": {}}, Path(d))
+        self.assertEqual(data["checks"], {})
+
+    def test_auto_without_probe_or_page_fails(self):
+        entry = self.run_candidate({"id": "E1", "auto": True})
+        self.assertEqual(entry["result"], "fail")
+
+    def test_public_url_replaces_localhost_with_the_public_host(self):
+        with patch.object(self.autocheck.remote, "host", return_value="192.168.1.9"):
+            self.assertEqual(self.autocheck.public_url("http://localhost:3000/issues"), "http://192.168.1.9:3000/issues")
 
 
 if __name__ == "__main__":

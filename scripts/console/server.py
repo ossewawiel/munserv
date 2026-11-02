@@ -15,7 +15,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import cost, ensure, eyeball, github, knowledge, mobile, network, release, remote, services, showcase
+from . import autocheck, cost, ensure, eyeball, github, knowledge, mobile, network, release, remote, services, showcase
 from .config import CONFIG, ROOT
 from .gitops import ApiError, CommandError, checkout_branch, current_branch, current_sha, default_checkout, \
     ensure_checked_out, is_worktree, local_files_copied, resolve_checkout_dir, validate_branch, validate_name
@@ -148,6 +148,9 @@ class Handler(BaseHTTPRequestHandler):
             for c in candidates:
                 c["results"] = eyeball.load_results(self.checkout, c["id"])
             return self._json({"candidates": candidates, "accounts": CONFIG.accounts_config})
+        if path == "/api/eyeball/evidence":
+            name = (qs.get("file") or [""])[0]
+            return self._serve_evidence(name)
         if path == "/api/mobile/devices":
             devices = mobile.devices()
             lan_ip = network.lan_ip()
@@ -170,6 +173,19 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"log": log})
         self.send_response(404)
         self.end_headers()
+
+    def _serve_evidence(self, name: str) -> None:
+        """A screenshot an auto check saved: `<candidate>/<check id>.png` under the checkout's evidence dir."""
+        root = (self.checkout / ".console" / autocheck.EVIDENCE_DIR).resolve()
+        target = (root / name).resolve()
+        if root not in target.parents or target.suffix != ".png" or not target.is_file():
+            raise ApiError(f"no such evidence: {name!r}", 404)
+        body = target.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", "image/png")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def _api_knowledge(self):
         self._json({
@@ -294,6 +310,14 @@ class Handler(BaseHTTPRequestHandler):
                 raise ApiError(f"invalid pr: {pr!r}", 400)
             result = ensure.ensure(pr, self.checkout, self.server.server_address[1])
             return self._json({"ok": True, **result})
+        if path == "/api/eyeball/auto":
+            candidate_id = validate_name(body.get("candidate", ""), "candidate")
+            candidate = next((c for c in eyeball.build_candidates(False) if c["id"] == candidate_id), None)
+            if not candidate:
+                return self._json({"ok": False, "error": "unknown candidate"}, 404)
+            data = autocheck.run_auto_checks(candidate, eyeball.load_results(self.checkout, candidate_id), self.checkout)
+            eyeball.save_results(self.checkout, candidate_id, data)
+            return self._json({"ok": True, "data": data})
         if path == "/api/eyeball/save":
             candidate_id = validate_name(body.get("candidate", ""), "candidate")
             eyeball.save_results(self.checkout, candidate_id, body.get("data", {}))

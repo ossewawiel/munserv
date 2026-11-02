@@ -2,6 +2,7 @@ import { apiGet, apiPost, timeAgo } from '../api.js';
 import {
   requiredServices, buildChecklistViewModel, stageLabel, stageChipClass,
   checkoutMismatch, checkoutButtonLabel, stepButtonGate, isCheckedOut, rewriteLocalhost, remoteLinkRows,
+  evidenceLines,
 } from './eyeball.model.mjs';
 
 const HELP_DISMISSED_KEY = 'console-eyeball-help-dismissed';
@@ -578,6 +579,32 @@ function remotePanel() {
       'This machine cannot test the rule against itself: open the Web link from another machine on the network to confirm.'));
 }
 
+function evidenceBlock(check) {
+  const { el } = ctx;
+  if (!check.auto) return null;
+  if (!check.evidence) return el('div', { class: 'chip' }, 'auto check: not run yet');
+  const shot = check.evidence.screenshot;
+  return el('div', { style: 'margin:8px 0' },
+    el('span', { class: 'chip' }, 'auto check'),
+    el('pre', { style: 'white-space:pre-wrap;font-size:12px;margin:6px 0' }, evidenceLines(check.evidence).join('\n')),
+    (check.evidence.requests || []).map((r) => el('details', {},
+      el('summary', {}, r.method + ' ' + r.path + ' response'),
+      el('pre', { style: 'white-space:pre-wrap;font-size:12px' }, r.response))),
+    shot ? el('a', { href: '/api/eyeball/evidence?file=' + encodeURIComponent(shot), target: '_blank', rel: 'noopener' },
+      el('img', { src: '/api/eyeball/evidence?file=' + encodeURIComponent(shot), style: 'max-width:100%;border:1px solid var(--border)' })) : null);
+}
+
+async function runAutoChecks() {
+  try {
+    const data = await apiPost('/api/eyeball/auto', { candidate: selectedId });
+    resultsData = data.data;
+    ctx.toast('Auto checks done', 'success');
+  } catch (e) {
+    ctx.toast('Auto checks failed: ' + e.message, 'error');
+  }
+  renderAll();
+}
+
 function checkCard(check, index) {
   const { el } = ctx;
   const publicHost = remoteInfo && remoteInfo.enabled ? remoteInfo.host : null;
@@ -597,6 +624,7 @@ function checkCard(check, index) {
     check.url ? el('div', {}, el('a', { href: rewriteLocalhost(check.url, publicHost), target: '_blank', rel: 'noopener' }, el('button', {}, 'Open URL'))) : null,
     el('ol', { class: 'steps' }, check.steps.map((s) => el('li', {}, rewriteLocalhost(s, publicHost)))),
     el('div', {}, el('strong', {}, 'Expected: '), check.expect),
+    evidenceBlock(check),
     el('div', { class: 'toggle-group', style: 'margin:8px 0' },
       el('button', { class: 'pass' + (check.result === 'pass' ? ' active' : ''), onclick: () => setCheckResult(check.id, 'pass') }, 'Pass'),
       el('button', { class: 'fail' + (check.result === 'fail' ? ' active' : ''), onclick: () => setCheckResult(check.id, 'fail') }, 'Fail')),
@@ -749,6 +777,8 @@ function checklistSection(candidate) {
   return el('div', {},
     gated ? el('div', { class: 'empty-state', style: 'margin-bottom:12px' },
       'Check out and start services first (see the stepper above) - the checklist below still works, it just is not backed by a running environment yet.') : null,
+    vm.checks.some((c) => c.auto)
+      ? el('div', { style: 'margin-bottom:12px' }, el('button', { onclick: runAutoChecks }, 'Run auto checks')) : null,
     vm.checks.length
       ? vm.checks.map((c, i) => checkCard(c, i))
       : emptyState('No checks in this candidate', candidate.parse_error || 'Its handoff has no Eyeball block.'),
