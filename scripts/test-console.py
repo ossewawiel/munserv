@@ -24,7 +24,7 @@ from unittest.mock import PropertyMock, patch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from console import autocheck, cost, demo_input, ensure, eyeball, gitops, knowledge, mobile, network, remote, services, showcase  # noqa: E402
+from console import autocheck, cost, demo_input, ensure, eyeball, gitops, knowledge, mobile, network, remote, services, showcase, smoke_run  # noqa: E402
 from console.config import Config  # noqa: E402
 from console.pipeline import classify_pr  # noqa: E402
 from console.server import Handler  # noqa: E402
@@ -1970,6 +1970,56 @@ class AutoCheckTests(unittest.TestCase):
     def test_public_url_replaces_localhost_with_the_public_host(self):
         with patch.object(self.autocheck.remote, "host", return_value="192.168.1.9"):
             self.assertEqual(self.autocheck.public_url("http://localhost:3000/issues"), "http://192.168.1.9:3000/issues")
+
+
+class SmokeRunTests(unittest.TestCase):
+    """Collecting probes from completed handoffs and smoke.yaml, and the issue text of a failure."""
+
+    HANDOFF = "---\nstory: X1\n---\n## Eyeball\n\n```yaml\n{checks}\n```\n"
+
+    def features(self, root: Path, handoffs: dict[str, str]) -> Path:
+        features = root / "specs" / "features"
+        for name, checks in handoffs.items():
+            path = features / "feat" / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(self.HANDOFF.format(checks=checks), encoding="utf-8")
+        return features
+
+    def test_collects_probes_only_from_completed_handoffs_and_smoke_yaml(self):
+        checks = ("- {id: E1, title: a, auto: true, probe: {path: /x, expect_status: 200}}\n"
+                  "- {id: E2, title: b}\n"
+                  "- {id: E3, title: c, auto: true, page: {expect_text: [x]}}")
+        with tempfile.TemporaryDirectory() as d:
+            features = self.features(Path(d), {"completed/1-done.md": checks, "2-open.md": checks})
+            found, unparsed = smoke_run.collect(features, [
+                {"id": "S1", "title": "s", "auto": True, "probe": {"path": "/y", "expect_status": 200}},
+                {"id": "S2", "title": "manual"}])
+        self.assertEqual([(e["source"], e["check"]["id"]) for e in found],
+                         [("1-done", "E1"), ("smoke.yaml", "S1")])
+        self.assertEqual(unparsed, [])
+
+    def test_a_handoff_that_does_not_parse_is_reported_and_skipped(self):
+        with tempfile.TemporaryDirectory() as d:
+            features = self.features(Path(d), {"completed/1-bad.md": "not: [a list"})
+            found, unparsed = smoke_run.collect(features, [])
+        self.assertEqual(found, [])
+        self.assertEqual(len(unparsed), 1)
+
+    def test_issue_text_names_the_commit_and_the_failing_request(self):
+        entry = {"source": "163-x", "check": {"id": "E1", "title": "Anonymous delete is refused"}}
+        evidence = {"ok": False, "requests": [{"method": "DELETE", "path": "/p", "status": 404,
+                                               "response": "nope", "problems": ["status 404, expected 401"]}]}
+        body = smoke_run.issue_body(entry, evidence, "abc123", "https://run")
+        self.assertEqual(smoke_run.issue_prefix(entry), "[Smoke] 163-x E1:")
+        for text in ("abc123", "https://run", "DELETE /p: status 404, expected 401", "nope"):
+            self.assertIn(text, body)
+
+    def test_run_all_uses_localhost_and_fails_when_nothing_answers(self):
+        entry = {"source": "s", "check": {"id": "E1", "title": "t", "auto": True, "as": "none",
+                                          "probe": {"path": "/x", "expect_status": 200}}}
+        with patch.object(autocheck, "backend_base", return_value="http://127.0.0.1:9"):
+            results = smoke_run.run_all([entry])
+        self.assertFalse(results[0]["evidence"]["ok"])
 
 
 if __name__ == "__main__":
