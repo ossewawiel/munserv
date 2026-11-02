@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [master]
     types: [opened, synchronize, reopened, labeled]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag or commit to smoke-test
+        default: master
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -268,6 +273,62 @@ jobs:
         run: flutter build apk --debug
       - name: No demo account in the APK
         run: python3 ../scripts/check-no-demo-accounts.py build/app/outputs/flutter-apk/app-debug.apk
+
+  # After a merge to master (and on demand): run every probe check of the completed handoffs and
+  # scripts/console/smoke.yaml against a live backend. Auto-merge can land a PR before a review or
+  # eyeball verdict arrives, so this re-proves what is now on master. A failure opens or updates one
+  # `source:smoke` bug per check. Not part of `CI status`: it never gates a PR.
+  smoke:
+    name: Smoke (master)
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BACKEND_LOG: ${{ github.workspace }}/backend-smoke.log
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PyYAML
+        run: pip install --quiet pyyaml
+      - name: Start the database
+        run: docker compose -f infrastructure/docker/docker-compose.yml up -d --wait postgres
+      - name: Start the backend (local profile)
+        working-directory: backend
+        env:
+          SPRING_PROFILES_ACTIVE: local
+        run: |
+          nohup ./gradlew bootRun --no-daemon > "$BACKEND_LOG" 2>&1 &
+          for _ in $(seq 1 90); do
+            if curl -fsS http://localhost:8080/actuator/health/liveness > /dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          echo "backend did not come up in 180 s"; tail -n 60 "$BACKEND_LOG"; exit 1
+      - name: Run the probe checks
+        run: |
+          python3 -m scripts.console.smoke_run --file-issues \
+            --commit "$(git rev-parse HEAD)" \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      - name: Upload the backend log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-backend-log
+          path: backend-smoke.log
+          if-no-files-found: ignore
 
   # Single required status check for branch protection. Passes when every
   # triggered platform job passed and none failed.
