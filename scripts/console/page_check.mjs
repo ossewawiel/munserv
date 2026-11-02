@@ -36,7 +36,9 @@ try {
     }, entries);
   }
   const page = await context.newPage();
-  await page.goto(job.url, { waitUntil: 'networkidle', timeout: NAVIGATION_TIMEOUT_MS });
+  // `load`, not `networkidle`: on any host but localhost the app asks for the pod theme, the 401 answer
+  // never counts as finished, and networkidle times out. The text waits below prove the page rendered.
+  await page.goto(job.url, { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT_MS });
   for (const text of job.expect_text) {
     try {
       await page.getByText(text).first().waitFor({ state: 'visible', timeout: TEXT_TIMEOUT_MS });
