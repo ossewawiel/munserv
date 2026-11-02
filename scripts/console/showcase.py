@@ -29,6 +29,7 @@ WEB = "demo-web"
 BUILD_LOG = "demo-build"
 SERVICES = (BACKEND, WEB)
 JOB_SERVICE = "demo"
+BEHIND_MESSAGE = "Update the showcase first: it is behind origin/master"
 
 BRANCH = "master"
 SEED_SCRIPT = ROOT / "scripts" / "dev-seed.py"
@@ -157,10 +158,26 @@ def _run_build(job_id: str, main: Path) -> None:
         services.finish_job(job_id, "failed", str(e))
 
 
+def behind_master() -> bool:
+    """True when the worktree's HEAD is not origin/master. The worktree shares the main repo's refs,
+    so one fetch there covers both."""
+    run_captured(["git", "-C", str(ROOT), "fetch", "origin", BRANCH], cwd=ROOT)
+    head = run_captured(["git", "-C", str(checkout()), "rev-parse", "HEAD"], cwd=ROOT).stdout.strip()
+    tip = run_captured(["git", "-C", str(ROOT), "rev-parse", f"origin/{BRANCH}"], cwd=ROOT).stdout.strip()
+    return head != tip
+
+
 def start_build(main: Path) -> dict:
     existing = services.running_job(JOB_SERVICE, "build")
     if existing:
         return existing
+    if is_worktree(checkout()):
+        try:
+            behind = behind_master()
+        except CommandError as e:
+            raise ApiError(str(e), 409) from e
+        if behind:
+            raise ApiError(BEHIND_MESSAGE, 409)
     job = services.new_job(JOB_SERVICE, "build")
     threading.Thread(target=_run_build, args=(job["id"], main), daemon=True).start()
     return job

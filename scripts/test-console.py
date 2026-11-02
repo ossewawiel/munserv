@@ -1779,22 +1779,26 @@ class ShowcaseTests(unittest.TestCase):
                 showcase.start(Path(tmp))
         self.assertEqual(raised.exception.status, 409)
 
+    @staticmethod
+    def _origin_fixture(tmp_path: Path):
+        origin, repo, demo = tmp_path / "origin.git", tmp_path / "repo", tmp_path / "demo"
+
+        def git(*args, cwd=repo):
+            return subprocess.check_output(["git", "-C", str(cwd), *args], text=True).strip()
+
+        subprocess.check_call(["git", "init", "-q", "--bare", "-b", "master", str(origin)])
+        subprocess.check_call(["git", "clone", "-q", str(origin), str(repo)], stderr=subprocess.DEVNULL)
+        git("config", "user.email", "t@example.com")
+        git("config", "user.name", "t")
+        (repo / "a.txt").write_text("1")
+        git("add", ".")
+        git("commit", "-qm", "one")
+        git("push", "-q", "origin", "HEAD:master")
+        return repo, demo, git
+
     def test_update_creates_a_detached_worktree_then_follows_origin_master(self):
         with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            origin, repo, demo = tmp_path / "origin.git", tmp_path / "repo", tmp_path / "demo"
-
-            def git(*args, cwd=repo):
-                return subprocess.check_output(["git", "-C", str(cwd), *args], text=True).strip()
-
-            subprocess.check_call(["git", "init", "-q", "--bare", "-b", "master", str(origin)])
-            subprocess.check_call(["git", "clone", "-q", str(origin), str(repo)], stderr=subprocess.DEVNULL)
-            git("config", "user.email", "t@example.com")
-            git("config", "user.name", "t")
-            (repo / "a.txt").write_text("1")
-            git("add", ".")
-            git("commit", "-qm", "one")
-            git("push", "-q", "origin", "HEAD:master")
+            repo, demo, git = self._origin_fixture(Path(tmp))
             with patch.object(showcase, "ROOT", repo), patch.object(showcase, "checkout", return_value=demo), \
                     patch.object(showcase, "copy_local_files"):
                 first = showcase.update()
@@ -1807,6 +1811,57 @@ class ShowcaseTests(unittest.TestCase):
             self.assertEqual(second, git("rev-parse", "--short", "HEAD"))
             self.assertNotEqual(first, second)
             self.assertEqual((demo / "a.txt").read_text(), "2")
+
+    def _start_build(self, repo: Path, demo: Path, running=None):
+        with patch.object(showcase, "ROOT", repo), patch.object(showcase, "checkout", return_value=demo), \
+                patch.object(services, "running_job", return_value=running), \
+                patch.object(services, "new_job", return_value={"id": "j1"}), \
+                patch.object(showcase.threading, "Thread"):
+            return showcase.start_build(repo)
+
+    def test_build_is_refused_when_origin_master_moved_on(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, demo, git = self._origin_fixture(Path(tmp))
+            with patch.object(showcase, "ROOT", repo), patch.object(showcase, "checkout", return_value=demo), \
+                    patch.object(showcase, "copy_local_files"):
+                showcase.update()
+            other = Path(tmp) / "other"
+            subprocess.check_call(["git", "clone", "-q", str(Path(tmp) / "origin.git"), str(other)],
+                                  stderr=subprocess.DEVNULL)
+            git("config", "user.email", "t@example.com", cwd=other)
+            git("config", "user.name", "t", cwd=other)
+            (other / "a.txt").write_text("3")
+            git("commit", "-qam", "three", cwd=other)
+            git("push", "-q", "origin", "HEAD:master", cwd=other)
+            with self.assertRaises(gitops.ApiError) as raised:
+                self._start_build(repo, demo)
+        self.assertEqual((raised.exception.status, str(raised.exception)), (409, showcase.BEHIND_MESSAGE))
+
+    def test_build_starts_when_the_worktree_is_current(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, demo, _ = self._origin_fixture(Path(tmp))
+            with patch.object(showcase, "ROOT", repo), patch.object(showcase, "checkout", return_value=demo), \
+                    patch.object(showcase, "copy_local_files"):
+                showcase.update()
+            self.assertEqual(self._start_build(repo, demo), {"id": "j1"})
+
+    def test_build_without_a_worktree_skips_the_check(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(showcase, "behind_master") as behind:
+            self.assertEqual(self._start_build(Path(tmp), Path(tmp) / "missing"), {"id": "j1"})
+        behind.assert_not_called()
+
+    def test_running_build_is_returned_without_a_fetch(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(showcase, "behind_master") as behind:
+            self.assertEqual(self._start_build(Path(tmp), Path(tmp), running={"id": "j0"}), {"id": "j0"})
+        behind.assert_not_called()
+
+    def test_failed_fetch_answers_409(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(showcase, "is_worktree", return_value=True), \
+                patch.object(showcase, "behind_master", side_effect=gitops.CommandError("git fetch: no route")):
+            with self.assertRaises(gitops.ApiError) as raised:
+                self._start_build(Path(tmp), Path(tmp))
+        self.assertEqual((raised.exception.status, str(raised.exception)), (409, "git fetch: no route"))
 
 
 if __name__ == "__main__":

@@ -54,6 +54,7 @@ class StubConsole:
              "parse_error": "Eyeball block: bad yaml", "checks": [], "results": None},
         ]
         self.pair_error = ""
+        self.build_error = ""
         self.pair_message = "done"
         self.devices = [
             {"id": "192.168.1.20:41233", "state": "device", "model": "Pixel_8", "android": {"release": "14", "sdk": 34}},
@@ -104,6 +105,8 @@ class StubConsole:
                 if self.path.startswith("/api/showcase/"):
                     verb = self.path.rsplit("/", 1)[-1]
                     stub.posts.append(("showcase", verb))
+                    if verb == "build" and stub.build_error:
+                        return self._json({"ok": False, "error": stub.build_error}, 409)
                     return self._json({"ok": True, "message": f"showcase {verb}", "job": {"status": "running"}})
                 if self.path.startswith("/api/mobile/"):
                     body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
@@ -177,6 +180,15 @@ class TuiTest(StubbedTuiCase):
             for key, verb in (("u", "update"), ("b", "build"), ("d", "start"), ("e", "stop")):
                 await pilot.press(key)
                 await wait_for(pilot, lambda verb=verb: ("showcase", verb) in self.stub.posts)
+        self.run_app(scenario)
+
+    def test_demo_build_shows_the_console_refusal(self) -> None:
+        self.stub.build_error = "Update the showcase first: it is behind origin/master"
+        async def scenario(app, pilot) -> None:
+            sent = []
+            app.notify = lambda text, **kwargs: sent.append(text)
+            await pilot.press("b")
+            await wait_for(pilot, lambda: any("Update the showcase first" in text for text in sent))
         self.run_app(scenario)
 
     def test_top_bar_summarises_the_demo_worktree(self) -> None:

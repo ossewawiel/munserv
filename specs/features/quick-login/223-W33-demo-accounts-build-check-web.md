@@ -3,7 +3,7 @@ issue: 223
 story: W33
 title: "pnpm build fails on an invalid VITE_DEMO_ACCOUNTS"
 platform: web
-status: pending
+status: completed
 depends_on: []
 touches:
   - web/vite.config.ts
@@ -15,8 +15,12 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-10-30"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/config/demoAccountsInput.ts
+  - web/tsconfig.node.json
+  - web/vite.config.ts
+tests_added:
+  - web/config/demoAccountsInput.test.ts
 ---
 
 # W33 · `pnpm build` fails on an invalid VITE_DEMO_ACCOUNTS (Web)

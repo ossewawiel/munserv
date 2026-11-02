@@ -3,7 +3,7 @@ issue: 224
 story: I4
 title: "Showcase build refuses while the worktree is behind origin/master"
 platform: infra
-status: pending
+status: completed
 depends_on: []
 touches:
   - scripts/console
@@ -15,8 +15,8 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-10-30"
-files_changed: []
-tests_added: []
+files_changed: [scripts/console/showcase.py, scripts/test-console.py, scripts/test-tui.py]
+tests_added: [test_build_is_refused_when_origin_master_moved_on, test_build_starts_when_the_worktree_is_current, test_build_without_a_worktree_skips_the_check, test_running_build_is_returned_without_a_fetch, test_failed_fetch_answers_409, test_demo_build_shows_the_console_refusal]
 ---
 
 # I4 · Showcase build refuses while the worktree is behind origin/master (Infra)
