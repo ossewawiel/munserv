@@ -5,6 +5,7 @@ import type {
   SectorDashboardStats,
   PodAdministrator,
   PodAdministratorListResponse,
+  PodAdministratorQuery,
   PodAdministratorCreatedResponse,
   CreatePodAdministratorRequest,
   UpdatePodAdministratorRequest,
@@ -48,10 +49,17 @@ export const podChiefApi = {
    * List all administrators in the pod
    * GET /api/v1/pod/administrators
    */
-  listAdministrators: () =>
-    apiClient
-      .get<PodAdministratorListResponse>('/pod/administrators')
-      .then((r) => r.data),
+  listAdministrators: (query: PodAdministratorQuery = {}) => {
+    const params = new URLSearchParams();
+    if (query.q) params.append('q', query.q);
+    query.roles?.forEach((role) => params.append('role', role));
+    if (query.wardId) params.append('wardId', query.wardId);
+    if (query.sort) params.append('sort', `${query.sort.column}:${query.sort.direction}`);
+    const qs = params.toString();
+    return apiClient
+      .get<PodAdministratorListResponse>(qs ? `/pod/administrators?${qs}` : '/pod/administrators')
+      .then((r) => r.data);
+  },
 
   /**
    * Get a single administrator by ID

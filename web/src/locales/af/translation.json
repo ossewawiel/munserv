@@ -332,8 +332,11 @@
     }
   },
   "podAdministrators": {
+    "emptyFiltered": "Geen administrateurs pas by jou soektog of filters nie. Probeer 'n ander soektog of vee die filters uit.",
     "filters": {
-      "comingSoon": "Filtrering is nog nie geaktiveer nie. Wanneer dit is, verskyn rol- en toewysingsfilters hier en die telling wys op die Filters-knoppie."
+      "role": "Rol",
+      "assignedTo": "Toegewys aan",
+      "allAssignments": "Alle toewysings"
     },
     "errors": {
       "emailExists": "'n Administrateur met hierdie e-posadres bestaan reeds"

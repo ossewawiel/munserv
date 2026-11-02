@@ -504,8 +504,11 @@
     "passwordNote": "Save this password - it will only be shown once",
     "passwordCopied": "Password copied to clipboard",
     "empty": "No administrators found. Add your first administrator to get started.",
+    "emptyFiltered": "No administrators match your search or filters. Try a different search or clear the filters.",
     "filters": {
-      "comingSoon": "Filtering is not switched on yet. When it is, role and assignment filters appear here and the count shows on the Filters button."
+      "role": "Role",
+      "assignedTo": "Assigned to",
+      "allAssignments": "All assignments"
     },
     "table": {
       "name": "Name",

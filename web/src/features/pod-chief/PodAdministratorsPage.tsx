@@ -1,5 +1,6 @@
 import { type FC, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
@@ -22,9 +23,38 @@ import {
   useUpdatePodAdministrator,
   useDeletePodAdministrator,
 } from './hooks';
-import { ADMIN_ROLE_LABELS } from '@/shared/types/admin';
+import { PodAdministratorFilters } from './components/PodAdministratorFilters';
+import { useDebouncedCallback } from '@/shared/hooks/useDebouncedCallback';
+import { usePodSetup } from '@/shared/hooks/usePodSetup';
+import { ADMIN_ROLES, ADMIN_ROLE_LABELS, type AdminRole } from '@/shared/types/admin';
 import { formatDate } from '@/shared/utils/formatters';
-import type { PodAdministrator, CreatePodAdministratorRequest } from './types';
+import {
+  POD_ADMINISTRATOR_SORT_COLUMNS,
+  type PodAdministrator,
+  type PodAdministratorQuery,
+  type PodAdministratorSort,
+  type PodAdministratorSortColumn,
+  type CreatePodAdministratorRequest,
+} from './types';
+
+const SEARCH_DEBOUNCE_MS = 300;
+
+function isAdminRoleValue(value: string): value is AdminRole {
+  return (ADMIN_ROLES as readonly string[]).includes(value);
+}
+
+function isSortColumn(value: string): value is PodAdministratorSortColumn {
+  return (POD_ADMINISTRATOR_SORT_COLUMNS as readonly string[]).includes(value);
+}
+
+/** Parses `column:direction`; anything unknown means no sort. */
+function parseSort(value: string | null): PodAdministratorSort | null {
+  if (!value) return null;
+  const [column, direction] = value.split(':');
+  if (!column || !isSortColumn(column)) return null;
+  if (direction !== 'asc' && direction !== 'desc') return null;
+  return { column, direction };
+}
 
 /**
  * Gets a human-readable description of an administrator's assignment.
@@ -56,9 +86,106 @@ function getAssignmentLabel(admin: PodAdministrator, t: (key: string) => string)
  */
 export const PodAdministratorsPage: FC = () => {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { status: podSetupStatus } = usePodSetup();
+  const wards = podSetupStatus?.wards ?? [];
+
+  // The URL is the single source of truth for the query; only the raw search text is local.
+  const urlSearch = searchParams.get('q') ?? '';
+  const urlWardId = searchParams.get('ward');
+  const urlRoleKey = searchParams.getAll('role').join(',');
+  const urlSortParam = searchParams.get('sort');
+  const [searchInput, setSearchInput] = useState(urlSearch);
+
+  const roles = useMemo(() => urlRoleKey.split(',').filter(isAdminRoleValue), [urlRoleKey]);
+  const sort = useMemo(() => parseSort(urlSortParam), [urlSortParam]);
+
+  const query = useMemo<PodAdministratorQuery>(
+    () => ({
+      ...(urlSearch ? { q: urlSearch } : {}),
+      ...(roles.length > 0 ? { roles } : {}),
+      ...(urlWardId ? { wardId: urlWardId } : {}),
+      sort: sort ?? undefined,
+    }),
+    [urlSearch, roles, urlWardId, sort]
+  );
 
   // Data fetching
-  const { data, isLoading, error } = usePodAdministrators();
+  const { data, isLoading, error } = usePodAdministrators(query);
+
+  const writeSearch = useDebouncedCallback((value: string) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value) {
+          next.set('q', value);
+        } else {
+          next.delete('q');
+        }
+        return next;
+      },
+      { replace: true }
+    );
+  }, SEARCH_DEBOUNCE_MS);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value);
+      writeSearch(value);
+    },
+    [writeSearch]
+  );
+
+  const handleSortChange = useCallback(
+    (column: string) => {
+      if (!isSortColumn(column)) return;
+      const direction = sort?.column === column && sort.direction === 'asc' ? 'desc' : 'asc';
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('sort', `${column}:${direction}`);
+        return next;
+      });
+    },
+    [sort, setSearchParams]
+  );
+
+  const handleRolesChange = useCallback(
+    (nextRoles: readonly AdminRole[]) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('role');
+        nextRoles.forEach((role) => next.append('role', role));
+        return next;
+      });
+    },
+    [setSearchParams]
+  );
+
+  const handleWardChange = useCallback(
+    (wardId: string | null) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        if (wardId) {
+          next.set('ward', wardId);
+        } else {
+          next.delete('ward');
+        }
+        return next;
+      });
+    },
+    [setSearchParams]
+  );
+
+  const handleClearFilters = useCallback(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('role');
+      next.delete('ward');
+      return next;
+    });
+  }, [setSearchParams]);
+
+  const hasQuery = urlSearch !== '' || roles.length > 0 || urlWardId !== null;
 
   // Mutations
   const createAdmin = useCreatePodAdministrator();
@@ -188,7 +315,6 @@ export const PodAdministratorsPage: FC = () => {
       {
         key: 'assignedTo',
         header: t('podAdministrators.table.assignedTo'),
-        sortable: true,
         render: (admin: PodAdministrator) => (
           <Typography variant="body2" sx={{
             color: "text.secondary"
@@ -277,9 +403,21 @@ export const PodAdministratorsPage: FC = () => {
           pageSize={100}
           isLoading={isLoading}
           hidePagination
-          search={{ value: '' }}
+          sort={sort ? { key: sort.column, direction: sort.direction } : null}
+          onSortChange={handleSortChange}
+          search={{ value: searchInput, onChange: handleSearchChange }}
           filterPanel={{
-            content: <Typography>{t('podAdministrators.filters.comingSoon')}</Typography>,
+            content: (
+              <PodAdministratorFilters
+                roles={roles}
+                wardId={urlWardId}
+                wards={wards}
+                onRolesChange={handleRolesChange}
+                onWardChange={handleWardChange}
+              />
+            ),
+            activeCount: roles.length + (urlWardId ? 1 : 0),
+            onClear: handleClearFilters,
           }}
           actionSlot={
             <Button
@@ -296,7 +434,7 @@ export const PodAdministratorsPage: FC = () => {
               <Typography sx={{
                 color: "text.secondary"
               }}>
-                {t('podAdministrators.empty')}
+                {hasQuery ? t('podAdministrators.emptyFiltered') : t('podAdministrators.empty')}
               </Typography>
             </Box>
           }

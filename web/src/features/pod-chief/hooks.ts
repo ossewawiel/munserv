@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { podChiefApi } from './api';
 import type {
   CreatePodAdministratorRequest,
+  PodAdministratorQuery,
   UpdatePodAdministratorRequest,
 } from './types';
 
@@ -16,6 +17,8 @@ export const podChiefKeys = {
   sectorDashboard: (sectorId: string) =>
     [...podChiefKeys.all, 'dashboard', 'sector', sectorId] as const,
   administrators: () => [...podChiefKeys.all, 'administrators'] as const,
+  administratorList: (query: PodAdministratorQuery) =>
+    [...podChiefKeys.administrators(), query] as const,
   administrator: (id: string) => [...podChiefKeys.all, 'administrators', id] as const,
 };
 
@@ -64,10 +67,10 @@ export function useSectorDashboard(sectorId: string, { enabled = true }: { enabl
 /**
  * Hook to fetch all administrators in the pod
  */
-export function usePodAdministrators() {
+export function usePodAdministrators(query: PodAdministratorQuery = {}) {
   return useQuery({
-    queryKey: podChiefKeys.administrators(),
-    queryFn: () => podChiefApi.listAdministrators(),
+    queryKey: podChiefKeys.administratorList(query),
+    queryFn: () => podChiefApi.listAdministrators(query),
   });
 }
 

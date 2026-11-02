@@ -3,7 +3,7 @@ issue: 149
 story: W21b
 title: "Live sorting, search and filters on the Pod Administrators page"
 platform: web
-status: pending
+status: completed
 depends_on: [32, 152]
 touches:
   - web/src/features/pod-chief
@@ -19,8 +19,22 @@ design_artboards:
 design_approved: true
 created_by: feature-planner
 created_at: "2026-09-10"
-files_changed: []
-tests_added: []
+files_changed:
+  - web/src/shared/hooks/useDebouncedCallback.ts
+  - web/src/features/pod-chief/types.ts
+  - web/src/features/pod-chief/api.ts
+  - web/src/features/pod-chief/hooks.ts
+  - web/src/features/pod-chief/components/PodAdministratorFilters.tsx
+  - web/src/features/pod-chief/PodAdministratorsPage.tsx
+  - web/src/locales/en/translation.json
+  - web/src/locales/af/translation.json
+  - web/src/locales/zu/translation.json
+tests_added:
+  - web/src/shared/hooks/useDebouncedCallback.test.ts
+  - web/src/features/pod-chief/api.test.ts
+  - web/src/features/pod-chief/hooks.test.tsx
+  - web/src/features/pod-chief/components/PodAdministratorFilters.test.tsx
+  - web/src/features/pod-chief/PodAdministratorsPage.test.tsx
 ---
 
 # W21b · Live Pod Administrators table (Web)

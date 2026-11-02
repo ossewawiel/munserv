@@ -332,8 +332,11 @@
     }
   },
   "podAdministrators": {
+    "emptyFiltered": "Akukho baphathi abafana nosesho lwakho noma izihlungi. Zama okunye usesho noma ususe izihlungi.",
     "filters": {
-      "comingSoon": "Ukuhlunga akukavulwa. Uma sekuvuliwe, izihlungi zeqhaza nokwabiwa zizovela lapha futhi inani liboniswa kunkinobho yeZihlungi."
+      "role": "Iqhaza",
+      "assignedTo": "Okwabelwe",
+      "allAssignments": "Konke okwabelwe"
     },
     "errors": {
       "emailExists": "Kunomphathi osesekhona onale imeyili"
