@@ -7,6 +7,7 @@ status: pending
 depends_on: []          # other story ids or issue numbers that must be merged first
 touches: []             # feature folders this story edits; the orchestrator serialises overlaps
 ui: false               # true when the story adds or changes a screen; then a canvas is required before dispatch
+user_facing: false      # true when a person outside the team sees or feels the change (API behaviour, mail, data they read); ui or user_facing requires an Eyeball block
 design_canvas: ""       # set by the designer: canvas URL
 design_artboards: []    # set by the designer: artboard files under design/canvases/<feature>/
 design_approved: false  # set by the user (through the orchestrator) after reviewing the canvas
@@ -53,6 +54,8 @@ cd backend && ./gradlew ktlintCheck test
 Then update the frontmatter (`status: completed`, `files_changed`, `tests_added`) and end with a summary of changes. If you cannot finish, set `status: blocked` and end your message with `BLOCKED: <reason>`.
 
 ## Eyeball
+**Required only when `ui: true` or `user_facing: true`.** For any other story, delete this section; the story goes from reviewer `APPROVE` straight to ready to merge.
+
 **Plain-English rule for `steps` and `expect`.** One action per step. At most 20 words per step. Plain words: no jargon, no code names, no abbreviations a member of the public would not know. A step that is a terminal command is the command alone in one pair of backticks (for example `` `curl -s http://localhost:8080/actuator/health` ``); the TUI shows a Run key for it and prints the output under the step, and the word limit does not apply to the command. `expect` is one sentence a tester can judge by looking.
 
 Rules for every check: `url` is the complete address a tester can paste into a browser (scheme, host, port, path, and for Swagger the deep link `http://localhost:8080/swagger-ui/index.html#/<Tag>/<operationId>`). Steps that go through Swagger name the deep link of each operation, the exact request body, and say where the token goes (Authorize button). Never write a bare path like `/api/v1/pod/logo`. The tester reaches the laptop through a terminal only (root `CLAUDE.md`, "When a person must act"); the console rewrites `localhost` in `url` to the LAN host, so browser links stay as they are. A step that needs the laptop itself (a mail in Mailpit, a log line, a database row) is an exact command to paste into that terminal, never "open http://localhost:8026" or a desktop app.

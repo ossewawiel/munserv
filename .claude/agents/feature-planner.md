@@ -26,7 +26,8 @@ Copy `specs/features/_template/story-handoff.md` to `specs/features/<name>/<issu
 - Contract: quote the exact request/response shapes; add missing endpoints to `specs/contracts/api.md` first.
 - Steps: one file per step with its test. Name real paths that follow the platform card's layout; check with Grep that referenced classes exist.
 - `touches`: the feature folders edited, so the orchestrator can serialise overlapping stories.
-- `Eyeball`: 2 to 6 checks, in the schema the template shows, that together cover every acceptance
+- `user_facing: true` for any story whose change a member, administrator or integrator sees or feels without reading code (a screen, an API response, a mail, data they read); `false` for internal work (refactors, CI, infra, docs, specs). Write an `Eyeball` block only when `ui: true` or `user_facing: true`; otherwise omit the section.
+- `Eyeball` (only for `ui: true` or `user_facing: true` stories): 2 to 6 checks, in the schema the template shows, that together cover every acceptance
   criterion. Pick a real account key from `scripts/console/accounts.yaml` (or `none`), the real
   services the check needs, and the URL the story should end up serving at (the implementer
   corrects it if the actual route differs). Steps follow the template's plain-English rule: one action per step,
