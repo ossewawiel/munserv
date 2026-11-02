@@ -87,7 +87,7 @@ A systemd user timer runs `scripts/factory-tick.sh` every 2 hours from 07:00 to 
 3. Sums today's `total_cost_usd` in `~/.local/state/munserv-factory/ticks.jsonl`. It exits when the sum reaches `DAILY_BUDGET_USD`.
 4. Asks the clerk on Haiku, with structured output, for up to `STORIES_PER_TICK` stories it can dispatch now. A story qualifies only when it waits on no person: it is ready, has a pending handoff, its dependencies are closed, and a UI story has its design approved.
 5. Runs `claude -p "/factory story <n>"` on Sonnet for each pick, with `--max-turns 150` and `--permission-mode acceptEdits`. The budget is the smaller of `RUN_BUDGET_USD` and what is left today. `OTEL_RESOURCE_ATTRIBUTES=story.id=<n>` joins the run to the cost meter. Tools outside the allow list are denied and counted in `permission_denials`. Permissions are never bypassed.
-6. Appends one ledger line per Claude run, sends one `notify-send` line and comments on the pinned **Factory log** issue. The first tick creates and pins that issue.
+6. Appends one ledger line per Claude run, with the report's `CI:` and `Plan:` lines as its summary and any denied commands. It keeps the raw result in `~/.local/state/munserv-factory/runs/<tick>-<n>.json`, sends one `notify-send` line and comments on the pinned **Factory log** issue (#239). The comment carries each run's full report, so commands the run hands to a person reach your phone.
 
 All settings live in `~/.config/munserv-factory/tick.env`. The template is `infrastructure/systemd/tick.env.example`. A later move to a server or to GitHub Actions changes that file only.
 

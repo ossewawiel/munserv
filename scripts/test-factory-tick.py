@@ -28,8 +28,9 @@ if "--json-schema" in sys.argv:
                       "structured_output": {"stories": json.loads(os.environ.get("STUB_PICKS", "[]")), "reason": "stub pick"}}))
 else:
     print(json.dumps({"type": "result", "subtype": "success", "is_error": False, "total_cost_usd": float(os.environ.get("STUB_STORY_COST", "1.5")),
-                      "num_turns": 12, "duration_ms": 1000, "session_id": "s1", "permission_denials": [],
-                      "result": "Story done\nPR #300 CI: green, merged"}))
+                      "num_turns": 12, "duration_ms": 1000, "session_id": "s1",
+                      "permission_denials": [{"tool_name": "Bash", "tool_use_id": "t1", "tool_input": {"command": "gh label list"}}],
+                      "result": "Story done\n```bash\ngh issue create\n```\nCI: green, merged\nPlan: no step\n```"}))
 """
 
 GH_STUB = r"""#!/usr/bin/env python3
@@ -154,8 +155,18 @@ def case_dispatch(sb: Sandbox) -> list[str]:
     kinds = [(x["kind"], x.get("story")) for x in sb.ledger()]
     if kinds != [("select", None), ("story", 12), ("skip", 14)]:
         errors.append(f"ledger {kinds}: the second story should be skipped once 6.75 + 0.04 + 3.21 reaches 10")
-    if not any(c["argv"][:2] == ["issue", "comment"] for c in sb.calls("gh")):
+    story_row = next((x for x in sb.ledger() if x["kind"] == "story"), {})
+    if story_row.get("summary") != "CI: green, merged / Plan: no step":
+        errors.append(f"summary {story_row.get('summary')!r}, want the CI and Plan lines")
+    if story_row.get("permission_denials") != ["Bash: gh label list"]:
+        errors.append(f"permission_denials {story_row.get('permission_denials')}")
+    if not (sb.state / "runs" / f"{story_row.get('tick')}-12.json").exists():
+        errors.append("raw result not kept under runs/")
+    comments = [c["argv"] for c in sb.calls("gh") if c["argv"][:2] == ["issue", "comment"]]
+    if not comments:
         errors.append("no Factory log comment")
+    elif "gh issue create" not in arg_after(comments[0], "--body") or "gh label list" not in arg_after(comments[0], "--body"):
+        errors.append("Factory log comment lacks the run's report or its denials")
     return errors
 
 
