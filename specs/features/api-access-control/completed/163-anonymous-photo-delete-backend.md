@@ -192,8 +192,14 @@ The dev database has one member (`john.doe@example.com`). He reported every seed
 - id: E1
   title: Anonymous photo delete is refused
   as: none
+  auto: true
   services: [db, backend]
   url: http://localhost:8080/swagger-ui/index.html#/Photos/deletePhoto
+  probe:
+    method: DELETE
+    path: /api/v1/photos/00000000-0000-0000-0000-000000000000
+    expect_status: 401
+    expect_body: [UNAUTHENTICATED, Authentication required]
   steps:
     - Do not press Authorize. If a token is set, press Authorize, then Logout.
     - Open the deletePhoto operation, press Try it out, enter photoId 00000000-0000-0000-0000-000000000000 and press Execute.
@@ -213,8 +219,15 @@ The dev database has one member (`john.doe@example.com`). He reported every seed
 - id: E3
   title: Public routes still work without a token
   as: none
+  auto: true
   services: [db, backend, web]
   url: http://localhost:3000/register
+  probe:
+    - path: /api/v1/sectors
+      expect_status: 200
+    - path: /actuator/health/liveness
+      expect_status: 200
+      expect_body: '"status":"UP"'
   steps:
     - Open the registration page in a private window, signed out.
     - Open the sector dropdown.
@@ -223,8 +236,11 @@ The dev database has one member (`john.doe@example.com`). He reported every seed
 - id: E4
   title: Signed-in web portal is unaffected
   as: sector_admin
+  auto: true
   services: [db, backend, web]
-  url: http://localhost:3000/login
+  url: http://localhost:3000/issues
+  page:
+    expect_text: [Issues]
   steps:
     - Log in as admin@ward42.example.com / admin123.
     - Open Issues, open an issue that has photos, then open Messages.
