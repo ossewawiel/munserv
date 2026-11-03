@@ -24,7 +24,7 @@ from unittest.mock import PropertyMock, patch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from console import autocheck, cost, demo_input, ensure, eyeball, gitops, knowledge, mobile, network, remote, services, showcase, smoke_run  # noqa: E402
+from console import autocheck, cost, demo_input, ensure, eyeball, gitops, inbox, knowledge, mobile, network, remote, services, showcase, smoke_run  # noqa: E402
 from console.config import Config  # noqa: E402
 from console.pipeline import classify_pr  # noqa: E402
 from console.server import Handler  # noqa: E402
@@ -2020,6 +2020,65 @@ class SmokeRunTests(unittest.TestCase):
         with patch.object(autocheck, "backend_base", return_value="http://127.0.0.1:9"):
             results = smoke_run.run_all([entry])
         self.assertFalse(results[0]["evidence"]["ok"])
+
+
+class InboxTests(unittest.TestCase):
+    NOW = 1_000_000.0
+    LINKS = {"web": "http://h:4000", "swagger": "http://h:8080/swagger-ui.html", "console": "http://h:3999"}
+
+    def build(self, **overrides):
+        args = {"triage_issues": [], "canvases": [], "prs": [], "blocked_issues": [], "links": self.LINKS, "now": self.NOW}
+        return inbox.build(**{**args, **overrides})
+
+    def test_oldest_first_across_every_kind(self):
+        items = self.build(
+            triage_issues=[{"number": 1, "title": "t", "url": "u1", "since": self.NOW - 100}],
+            canvases=[{"story": "W9", "title": "c", "url": "u2", "path": "p", "since": self.NOW - 500}],
+            prs=[{"number": 7, "title": "e", "url": "u3", "stage": "awaiting_eyeball", "since": self.NOW - 300},
+                 {"number": 8, "title": "m", "url": "u4", "stage": "ready_to_merge", "since": self.NOW - 50}],
+            blocked_issues=[{"number": 2, "title": "b", "url": "u5", "since": self.NOW - 900, "reason": "CI red twice"}])
+        self.assertEqual([i["kind"] for i in items], ["blocked", "canvas", "eyeball", "story", "merge"])
+
+    def test_pipeline_stages_that_wait_on_nobody_are_left_out(self):
+        prs = [{"number": n, "title": "x", "url": "u", "stage": stage, "since": self.NOW}
+               for n, stage in enumerate(("in_progress", "in_review"), 1)]
+        self.assertEqual(self.build(prs=prs), [])
+
+    def test_eyeball_item_carries_the_links_and_the_command_but_no_token(self):
+        [item] = self.build(prs=[{"number": 12, "title": "e", "url": "u", "stage": "awaiting_eyeball", "since": self.NOW}])
+        self.assertEqual(item["links"], self.LINKS)
+        self.assertEqual(item["command"], "scripts/eyeball-up.sh 12")
+        self.assertNotIn("token=", inbox.render_markdown([item]))
+
+    def test_blocked_item_names_its_reason_and_falls_back_when_there_is_none(self):
+        items = self.build(blocked_issues=[{"number": 2, "title": "b", "url": "u", "since": 1, "reason": "CI red twice"},
+                                           {"number": 3, "title": "b", "url": "u", "since": 2}])
+        self.assertEqual([i["detail"] for i in items], ["CI red twice", "no reason commented"])
+
+    def test_an_unknown_start_time_sorts_last_instead_of_vanishing(self):
+        items = self.build(triage_issues=[{"number": 1, "title": "t", "url": "u", "since": None},
+                                          {"number": 2, "title": "t", "url": "u", "since": self.NOW - 60}])
+        self.assertEqual([i["number"] for i in items], [2, 1])
+
+    def test_format_age(self):
+        self.assertEqual([inbox.format_age(s) for s in (59, 600, 3 * 3600 + 120, 2 * 86400 + 5 * 3600)],
+                         ["0m", "10m", "3h 2m", "2d 5h"])
+
+    def test_markdown_round_trips_the_item_keys_and_new_items_are_the_difference(self):
+        first = self.build(triage_issues=[{"number": 1, "title": "t", "url": "u", "since": 1}])
+        body = inbox.render_markdown(first)
+        both = self.build(triage_issues=[{"number": 1, "title": "t", "url": "u", "since": 1},
+                                         {"number": 2, "title": "t", "url": "u", "since": 2}])
+        self.assertEqual([i["number"] for i in inbox.new_items(both, inbox.previous_keys(body))], [2])
+        self.assertEqual(inbox.previous_keys("no marker here"), set())
+
+    def test_empty_inbox_says_so(self):
+        self.assertTrue(inbox.render_markdown([]).startswith(inbox.EMPTY_MESSAGE))
+
+    def test_parse_time_accepts_github_timestamps_and_rejects_junk(self):
+        self.assertEqual(inbox.parse_time("2026-01-01T00:00:00Z"), 1767225600.0)
+        self.assertIsNone(inbox.parse_time("soon"))
+        self.assertIsNone(inbox.parse_time(None))
 
 
 if __name__ == "__main__":

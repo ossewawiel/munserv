@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # One unattended factory tick, run by the munserv-factory systemd user timer (or by hand).
 #
+# On every exit after the lock (skip, stop or run) the pinned "Waiting on you" issue is refreshed from
+# `python3 -m scripts.console inbox --publish`; it comments, mentioning the owner, only when items arrived.
+#
 # Order: pause file -> lock -> hours window -> fast-forward master -> daily budget -> clerk picks up
 # to STORIES_PER_TICK dispatchable stories (Haiku, structured output) -> one `/factory story <n>` run
 # per story (Sonnet), each capped at the smaller of RUN_BUDGET_USD and what is left of today's budget.
@@ -54,6 +57,7 @@ REPO_DIR="${REPO_DIR:-$SCRIPT_REPO}"
 # A tick that fires right after the laptop wakes can beat the network; retry the fetch for 2 minutes.
 FETCH_ATTEMPTS="${FETCH_ATTEMPTS:-6}"
 FETCH_WAIT_SECONDS="${FETCH_WAIT_SECONDS:-20}"
+INBOX_UPDATE="${INBOX_UPDATE:-1}"
 
 mkdir -p "$STATE_DIR"
 exec 9>"$STATE_DIR/tick.lock"
@@ -111,6 +115,20 @@ stop() {
   log_to_issue "**Tick $TICK_ID stopped:** $1"
   exit 1
 }
+
+# Refresh the pinned "Waiting on you" issue. Never fails the tick and never changes its exit code.
+update_inbox() {
+  ((INBOX_UPDATE)) || return 0
+  [[ -f "$REPO_DIR/scripts/console/inbox.py" ]] || return 0
+  local result
+  if result="$(cd "$REPO_DIR" && python3 -m scripts.console inbox --publish 2>&1)"; then
+    echo "factory-tick: inbox: $result"
+  else
+    echo "factory-tick: inbox update failed: $(tail -n 1 <<<"$result")" >&2
+  fi
+  return 0
+}
+trap update_inbox EXIT
 
 hour="$(date +%-H)"
 if ((hour < TICK_FIRST_HOUR || hour > TICK_LAST_HOUR)); then

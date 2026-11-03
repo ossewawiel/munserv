@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from . import ensure, remote
+from . import ensure, inbox, remote
 from .config import CONFIG
 from .server import run
 
@@ -21,9 +21,15 @@ def main() -> int:
     subcommands = parser.add_subparsers(dest="command")
     ensure_parser = subcommands.add_parser("ensure", help="check out a PR and start what it needs")
     ensure_parser.add_argument("pr", type=int)
+    inbox_parser = subcommands.add_parser("inbox", help="print what is waiting on a human, oldest first")
+    inbox_parser.add_argument("--json", action="store_true")
+    inbox_parser.add_argument("--publish", action="store_true",
+                              help="update the pinned 'Waiting on you' issue instead of printing")
     args = parser.parse_args()
     if args.command == "ensure":
         return ensure.main(args.pr, args.port)
+    if args.command == "inbox":
+        return inbox.main("json" if args.json else "markdown", args.port, args.publish)
     remote.set_mode(True if args.remote else False if args.local else None)
     return run(port=args.port, checkout=args.checkout)
 

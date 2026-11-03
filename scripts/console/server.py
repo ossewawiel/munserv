@@ -349,7 +349,7 @@ def run(port: int | None = None, checkout: Path | None = None) -> int:
     else:
         Handler.checkout, Handler.checkout_notice = resolve_checkout_dir(default_checkout())
     Handler.checkout.mkdir(parents=True, exist_ok=True)
-    github.start_refresher()
+    github.start_refresher(port)
     release.start_refresher()
     server = ThreadingHTTPServer((remote.listen_address(), port), Handler)
     signal.signal(signal.SIGTERM, _raise_system_exit)

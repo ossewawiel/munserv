@@ -207,6 +207,53 @@ def case_not_on_master(sb: Sandbox) -> list[str]:
     ] if isinstance(e, str)]
 
 
+def install_inbox_stub(sb: Sandbox, exit_code: int = 0) -> Path:
+    """A `scripts.console` package whose `inbox --publish` records its argv; the real one needs GitHub."""
+    package = sb.repo / "scripts" / "console"
+    package.mkdir(parents=True)
+    (sb.repo / "scripts" / "__init__.py").write_text("")
+    (package / "__init__.py").write_text("")
+    (package / "inbox.py").write_text("")
+    marker = sb.tmp / "inbox.argv"
+    (package / "__main__.py").write_text(
+        f"import sys\nopen({str(marker)!r}, 'a').write(' '.join(sys.argv[1:]) + '\\n')\nprint('stub inbox')\nsys.exit({exit_code})\n")
+    return marker
+
+
+def case_inbox_on_skip(sb: Sandbox) -> list[str]:
+    marker = install_inbox_stub(sb)
+    r = sb.run(STUB_PICKS="[12]")
+    return [e for e in [
+        r.returncode != 0 and f"exit {r.returncode}",
+        not marker.exists() and "inbox was not published on a skipped tick",
+        marker.exists() and "inbox --publish" not in marker.read_text() and f"inbox argv {marker.read_text()!r}",
+    ] if isinstance(e, str)]
+
+
+def case_inbox_on_stop(sb: Sandbox) -> list[str]:
+    marker = install_inbox_stub(sb)
+    r = sb.run(STUB_PICKS="[12]")
+    return [e for e in [
+        r.returncode != 1 and f"exit {r.returncode}, want 1",
+        not marker.exists() and "inbox was not published on a stopped tick",
+    ] if isinstance(e, str)]
+
+
+def case_inbox_failure_keeps_exit_code(sb: Sandbox) -> list[str]:
+    install_inbox_stub(sb, exit_code=1)
+    r = sb.run(STUB_PICKS="[12]")
+    return [e for e in [
+        r.returncode != 0 and f"exit {r.returncode}, want 0",
+        "inbox update failed" not in r.stderr and "failure not reported on stderr",
+    ] if isinstance(e, str)]
+
+
+def case_inbox_off(sb: Sandbox) -> list[str]:
+    marker = install_inbox_stub(sb)
+    sb.run(STUB_PICKS="[12]", INBOX_UPDATE="0")
+    return [e for e in [marker.exists() and "inbox published although INBOX_UPDATE=0"] if isinstance(e, str)]
+
+
 def spent(amount: float) -> list[dict]:
     return [{"date": TODAY, "kind": "story", "total_cost_usd": amount}, {"date": "2000-01-01", "total_cost_usd": 99}]
 
@@ -219,6 +266,10 @@ CASES = [
     ("dry run dispatches nothing", case_dry_run, {}),
     ("a checkout off master stops the tick", case_not_on_master, {"branch": "feat/x"}),
     ("an unreachable origin stops after the retries", case_fetch_fails, {}),
+    ("the inbox is published when the tick skips", case_inbox_on_skip, {"ledger": spent(10)}),
+    ("the inbox is published when the tick stops", case_inbox_on_stop, {"branch": "feat/x"}),
+    ("a failing inbox update keeps the tick's exit code", case_inbox_failure_keeps_exit_code, {"ledger": spent(10)}),
+    ("INBOX_UPDATE=0 leaves the inbox alone", case_inbox_off, {"ledger": spent(10)}),
 ]
 
 
