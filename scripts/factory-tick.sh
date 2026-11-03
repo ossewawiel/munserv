@@ -51,6 +51,9 @@ STORY_MAX_TURNS="${STORY_MAX_TURNS:-150}"
 SELECT_MODEL="${SELECT_MODEL:-haiku}"
 STORY_MODEL="${STORY_MODEL:-sonnet}"
 REPO_DIR="${REPO_DIR:-$SCRIPT_REPO}"
+# A tick that fires right after the laptop wakes can beat the network; retry the fetch for 2 minutes.
+FETCH_ATTEMPTS="${FETCH_ATTEMPTS:-6}"
+FETCH_WAIT_SECONDS="${FETCH_WAIT_SECONDS:-20}"
 
 mkdir -p "$STATE_DIR"
 exec 9>"$STATE_DIR/tick.lock"
@@ -120,7 +123,15 @@ cd "$REPO_DIR"
 branch="$(git symbolic-ref --short -q HEAD || true)"
 [[ "$branch" == master ]] || stop "$REPO_DIR is on '${branch:-detached HEAD}', not master"
 git diff --quiet && git diff --cached --quiet || stop "$REPO_DIR has uncommitted changes"
-git fetch -q origin || stop "git fetch failed"
+fetched=0
+for ((attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++)); do
+  if git fetch -q origin; then
+    fetched=1
+    break
+  fi
+  ((attempt < FETCH_ATTEMPTS)) && sleep "$FETCH_WAIT_SECONDS"
+done
+((fetched)) || stop "git fetch failed after $FETCH_ATTEMPTS attempts"
 git merge -q --ff-only origin/master || stop "master cannot fast-forward to origin/master"
 
 left="$(left_today)"

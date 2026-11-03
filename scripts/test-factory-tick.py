@@ -187,6 +187,17 @@ def case_dry_run(sb: Sandbox) -> list[str]:
     ] if isinstance(e, str)]
 
 
+def case_fetch_fails(sb: Sandbox) -> list[str]:
+    git("remote", "set-url", "origin", str(sb.tmp / "missing.git"), cwd=sb.repo)
+    r = sb.run(STUB_PICKS="[12]", FETCH_WAIT_SECONDS="0", FETCH_ATTEMPTS="3")
+    last = sb.ledger()[-1] if sb.ledger() else {}
+    return [e for e in [
+        r.returncode != 1 and f"exit {r.returncode}, want 1",
+        sb.calls("claude") and "claude was called without a fetch",
+        last.get("reason") != "git fetch failed after 3 attempts" and f"last ledger line {last}",
+    ] if isinstance(e, str)]
+
+
 def case_not_on_master(sb: Sandbox) -> list[str]:
     r = sb.run(STUB_PICKS="[12]")
     return [e for e in [
@@ -207,6 +218,7 @@ CASES = [
     ("nothing ready runs only the clerk", case_nothing_ready, {}),
     ("dry run dispatches nothing", case_dry_run, {}),
     ("a checkout off master stops the tick", case_not_on_master, {"branch": "feat/x"}),
+    ("an unreachable origin stops after the retries", case_fetch_fails, {}),
 ]
 
 
