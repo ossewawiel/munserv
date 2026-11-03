@@ -11,10 +11,26 @@ Run it with `./dashboard.sh` from the repo root, or directly with
 
 Cost (Claude Code spend and tokens per day, agent, model and story, read from the OTLP metrics the telemetry collector writes; see `infrastructure/CLAUDE.md`).
 
-Overview (milestones, PR pipeline, eyeball-filed issues, quick links), Knowledge (domain language,
+Overview (Inbox of everything waiting on a human, milestones, PR pipeline, eyeball-filed issues, quick links), Knowledge (domain language,
 requirements, ADRs), Design (canvases, component registry, colour tokens), Eyeball (candidates,
 guided checkout/prepare/start/test/submit, services, checklist), Release (latest tag, commits,
 changelog, master CI, release checklist).
+
+## Inbox
+
+The top of Overview lists every item waiting on a human, oldest first, with its age: `status:triage`
+issues (story awaiting approval), pending UI handoffs with a canvas and `design_approved: false`,
+PRs with a reviewer `APPROVE` and no eyeball label (with the web, Swagger and console links and the
+`scripts/eyeball-up.sh <pr>` command), PRs labelled `eyeball:pass`, and `status:blocked` issues with
+the last comment as the reason. `python3 -m scripts.console inbox [--json]` prints the same list.
+
+`python3 -m scripts.console inbox --publish` writes it into the pinned issue "Waiting on you"
+(created and pinned on first use). `scripts/factory-tick.sh` runs it on every exit; set
+`INBOX_UPDATE=0` in `tick.env` to stop that. An issue edit sends no notification, so the command also
+posts a comment that mentions the repo owner whenever items have arrived since the last run.
+GitHub does not notify an account about its own comments: if the tick runs under your own `gh`
+login, put another account's `GH_TOKEN` in `tick.env` for the phone notification to fire. The
+issue is public, so its links carry no console access token.
 
 ## Installing into another repository
 

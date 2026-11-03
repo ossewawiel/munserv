@@ -33,12 +33,38 @@ function pipelineColumn(title, items) {
       : el('div', { class: 'hint', style: 'color:var(--muted);font-size:12px' }, 'none'));
 }
 
+const INBOX_KINDS = {
+  story: 'Story awaiting approval', canvas: 'Canvas awaiting approval', eyeball: 'PR awaiting eyeball',
+  merge: 'PR ready to merge', blocked: 'Blocked story',
+};
+
+function inboxRow(it) {
+  const { el } = ctx;
+  const extra = [];
+  if (it.detail) extra.push(el('div', { class: 'hint' }, it.detail));
+  if (it.kind === 'eyeball') {
+    extra.push(el('div', { class: 'hint' },
+      Object.entries(it.links || {}).filter(([, url]) => url).map(([name, url]) =>
+        el('a', { href: url, target: '_blank', rel: 'noopener', style: 'margin-right:10px' }, name)),
+      el('code', {}, it.command)));
+  }
+  return el('div', { class: 'pipeline-item' },
+    el('span', { class: 'chip' }, it.age), ' ', INBOX_KINDS[it.kind] + ' ',
+    el('a', { href: it.url, target: '_blank', rel: 'noopener' }, it.ref), ' ' + it.title, ...extra);
+}
+
 function render(data) {
   const { el, emptyState } = ctx;
   root.innerHTML = '';
   root.append(el('div', { class: 'section-title' }, el('h2', {}, 'Overview'),
     el('span', { class: 'stale' }, 'GitHub data ' + timeAgo(lastFetch / 1000)),
     el('button', { onclick: () => apiPost('/api/refresh', {}).then(load) }, 'Refresh')));
+
+  const waiting = data.inbox || [];
+  root.append(el('h3', {}, 'Inbox (' + waiting.length + ')'));
+  root.append(waiting.length
+    ? el('div', { class: 'card' }, waiting.map(inboxRow))
+    : emptyState('Nothing is waiting on you', 'Stories, canvases, PRs and blocked work that need you appear here, oldest first.'));
 
   root.append(el('h3', {}, 'Milestones'));
   root.append(data.milestones.length

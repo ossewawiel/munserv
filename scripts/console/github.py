@@ -10,16 +10,19 @@ import json
 import threading
 import time
 
+from . import inbox
+from .config import CONFIG
 from .gitops import CommandError, gh, repo
-from .pipeline import classify_pr
+from .pipeline import classify_pr, latest_verdict_comment
 
 REFRESH_INTERVAL_SECONDS = 60
 
 _lock = threading.Lock()
 _snapshot: dict = {
     "milestones": [], "pipeline": {"in_progress": [], "in_review": [], "awaiting_eyeball": [], "ready_to_merge": []},
-    "eyeball_issues": [], "fetched_at": 0, "error": None,
+    "eyeball_issues": [], "inbox": [], "fetched_at": 0, "error": None,
 }
+_console_port = CONFIG.port
 _thread: threading.Thread | None = None
 _stop = threading.Event()
 _wake = threading.Event()
@@ -45,6 +48,26 @@ def pr_verdict_sources(number: int, slug: str) -> list[dict]:
     return [body for _, body in events]
 
 
+def fetch_prs(slug: str) -> list[dict]:
+    """Every open PR with its pipeline stage and, in `since`, when its latest verdict was posted."""
+    try:
+        prs = gh_json("pr", "list", "--repo", slug, "--state", "open", "--json",
+                      "number,title,url,labels,headRefName")
+    except CommandError:
+        return []
+    out = []
+    for pr in prs:
+        labels = {l["name"] for l in pr.get("labels", [])}
+        comments = pr_verdict_sources(pr["number"], slug)
+        verdict = latest_verdict_comment(comments)
+        out.append({
+            "number": pr["number"], "title": pr["title"], "url": pr["url"], "branch": pr["headRefName"],
+            "stage": classify_pr(labels, comments),
+            "since": inbox.parse_time((verdict or {}).get("createdAt") or (verdict or {}).get("submittedAt")),
+        })
+    return out
+
+
 def _fetch() -> dict:
     slug = repo()
     milestones = []
@@ -62,18 +85,11 @@ def _fetch() -> dict:
         pass
 
     pipeline = {"in_progress": [], "in_review": [], "awaiting_eyeball": [], "ready_to_merge": []}
-    try:
-        prs = gh_json("pr", "list", "--repo", slug, "--state", "open", "--json",
-                      "number,title,url,labels,headRefName")
-        for pr in prs:
-            labels = {l["name"] for l in pr.get("labels", [])}
-            comments = pr_verdict_sources(pr["number"], slug)
-            stage = classify_pr(labels, comments)
-            pipeline[stage].append({
-                "number": pr["number"], "title": pr["title"], "url": pr["url"], "branch": pr["headRefName"],
-            })
-    except CommandError:
-        pass
+    prs = fetch_prs(slug)
+    for pr in prs:
+        pipeline[pr["stage"]].append({
+            "number": pr["number"], "title": pr["title"], "url": pr["url"], "branch": pr["branch"],
+        })
 
     eyeball_issues = []
     try:
@@ -87,7 +103,12 @@ def _fetch() -> dict:
     except CommandError:
         pass
 
-    return {"milestones": milestones, "pipeline": pipeline, "eyeball_issues": eyeball_issues,
+    try:
+        waiting = inbox.collect(slug, prs, CONFIG.root, _console_port)
+    except Exception:  # noqa: BLE001 - a broken inbox must not blank the milestones and pipeline
+        waiting = []
+
+    return {"milestones": milestones, "pipeline": pipeline, "eyeball_issues": eyeball_issues, "inbox": waiting,
             "fetched_at": time.time(), "error": None}
 
 
@@ -104,8 +125,9 @@ def _loop() -> None:
         _wake.clear()
 
 
-def start_refresher() -> None:
-    global _thread
+def start_refresher(console_port: int) -> None:
+    global _thread, _console_port
+    _console_port = console_port
     if _thread is not None:
         return
     _thread = threading.Thread(target=_loop, daemon=True)

@@ -37,6 +37,12 @@ def _verdict(body: str) -> str | None:
     return result
 
 
+def latest_verdict_comment(comments: list[dict]) -> dict | None:
+    """The newest comment or review whose body names a verdict (the one `classify_pr` goes by)."""
+    verdicts = [c for c in comments if _verdict(c.get("body", ""))]
+    return verdicts[-1] if verdicts else None
+
+
 def classify_pr(labels: set[str], comments: list[dict]) -> str:
     """`labels` is a set of label names; `comments` is every comment and review on the PR (see
     github.pr_verdict_sources), as `{"body": str}`, in the order they were actually posted --
