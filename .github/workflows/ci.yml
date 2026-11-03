@@ -53,11 +53,32 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install PyYAML
         run: pip install --quiet pyyaml
+      - name: Test the handoff lint
+        run: python3 scripts/test-lint-handoffs.py
+      - name: Lint the Eyeball block of every new handoff
+        run: python3 scripts/lint-handoffs.py --changed-since origin/master
+      - name: One error body type in the backend
+        # The wire has one error body, com.munserv.shared.api.ErrorResponse. The two allowlisted
+        # duplicates are #246; remove each line here when #246 deletes the class.
+        run: |
+          extra=$(grep -rlE --include='*.kt' '^(data )?class ErrorResponse\b' backend/src/main \
+            | grep -vxF \
+                -e backend/src/main/kotlin/com/munserv/shared/api/ErrorResponse.kt \
+                -e backend/src/main/kotlin/com/munserv/auth/api/AuthResponse.kt \
+                -e backend/src/main/kotlin/com/munserv/pod/api/PodController.kt \
+            || true)
+          if [ -n "$extra" ]; then
+            echo "A new ErrorResponse class puts another error shape on the wire. Use com.munserv.shared.api.ErrorResponse:"
+            echo "$extra"
+            exit 1
+          fi
       - name: Validate domain/language.yaml against the code
         run: python3 scripts/validate-domain-language.py
       - name: Test the git guard hook
