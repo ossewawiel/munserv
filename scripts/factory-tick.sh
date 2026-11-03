@@ -4,7 +4,8 @@
 # On every exit after the lock (skip, stop or run) the pinned "Waiting on you" issue is refreshed from
 # `python3 -m scripts.console inbox --publish`; it comments, mentioning the owner, only when items arrived.
 #
-# Order: pause file -> lock -> hours window -> fast-forward master -> daily budget -> clerk picks up
+# Order: pause file -> lock -> hours window -> fast-forward master -> daily budget -> on RETRO_WEEKDAY,
+# the day's first tick runs `/factory-retro` once (Opus, capped at RETRO_BUDGET_USD) -> clerk picks up
 # to STORIES_PER_TICK dispatchable stories (Haiku, structured output) -> one `/factory story <n>` run
 # per story (Sonnet), each capped at the smaller of RUN_BUDGET_USD and what is left of today's budget.
 # Every Claude run appends its total_cost_usd to the ledger; today's sum is the budget gate.
@@ -58,6 +59,11 @@ REPO_DIR="${REPO_DIR:-$SCRIPT_REPO}"
 FETCH_ATTEMPTS="${FETCH_ATTEMPTS:-6}"
 FETCH_WAIT_SECONDS="${FETCH_WAIT_SECONDS:-20}"
 INBOX_UPDATE="${INBOX_UPDATE:-1}"
+# Weekly retro: `date +%u` day (1 = Monday); empty turns it off.
+RETRO_WEEKDAY="${RETRO_WEEKDAY-1}"
+RETRO_BUDGET_USD="${RETRO_BUDGET_USD:-5}"
+RETRO_MODEL="${RETRO_MODEL:-opus}"
+RETRO_MAX_TURNS="${RETRO_MAX_TURNS:-120}"
 
 mkdir -p "$STATE_DIR"
 exec 9>"$STATE_DIR/tick.lock"
@@ -157,6 +163,39 @@ if jq -en "$left <= 0" >/dev/null; then
   echo "factory-tick: daily budget of \$$DAILY_BUDGET_USD reached"
   record skip --arg reason "daily budget reached"
   exit 0
+fi
+
+# Weekly retro, once per RETRO_WEEKDAY: any retro line in today's ledger (run, failed or capped) means
+# it was tried, and a last-retro of today means someone ran it by hand. A failed retro never stops the tick.
+retro_tried_today() {
+  [[ "$(cat "$REPO_DIR/.claude/metrics/last-retro" 2>/dev/null)" == "$(date +%F)" ]] && return 0
+  [[ -f "$LEDGER" ]] && jq -enR --arg d "$(date +%F)" \
+    'first(inputs | fromjson? | select(.date == $d and .kind == "retro")) // false' "$LEDGER" >/dev/null
+}
+if [[ -n "$RETRO_WEEKDAY" && "$(date +%u)" == "$RETRO_WEEKDAY" ]] && ! retro_tried_today; then
+  if ((DRY_RUN)); then
+    echo "factory-tick: dry run, the weekly retro is due but not run"
+  else
+    retro_budget="$(jq -n --argjson a "$RETRO_BUDGET_USD" --argjson b "$left" '[$a, $b] | min')"
+    echo "factory-tick: /factory-retro (budget \$$retro_budget)"
+    mkdir -p "$STATE_DIR/runs"
+    rc=0
+    out="$(OTEL_RESOURCE_ATTRIBUTES="story.id=retro" claude -p "/factory-retro" --model "$RETRO_MODEL" \
+      --max-turns "$RETRO_MAX_TURNS" --output-format json --max-budget-usd "$retro_budget" \
+      --permission-mode acceptEdits </dev/null)" || rc=$?
+    printf '%s\n' "$out" >"$STATE_DIR/runs/$TICK_ID-retro.json"
+    cost="$(jq -r '.total_cost_usd // 0' <<<"$out" 2>/dev/null || echo 0)"
+    subtype="$(jq -r '.subtype // "unknown"' <<<"$out" 2>/dev/null || echo no_json)"
+    summary="$(jq -r '.result // "" | split("\n") | map(select(test("^(CI:|https://github.com/.*/pull/)"))) | join(" / ")' \
+      <<<"$out" 2>/dev/null | head -c 300 || true)"
+    record retro --argjson exit "$rc" --argjson total_cost_usd "$cost" --arg subtype "$subtype" --arg summary "$summary"
+    log_to_issue "**Tick $TICK_ID retro** - $subtype, \$$cost: ${summary:-no PR line in the report}"
+  fi
+  left="$(left_today)"
+  if jq -en "$left <= 0" >/dev/null; then
+    echo "factory-tick: daily budget of \$$DAILY_BUDGET_USD reached after the retro"
+    exit 0
+  fi
 fi
 
 SCHEMA="$(jq -cn --argjson max "$STORIES_PER_TICK" '{

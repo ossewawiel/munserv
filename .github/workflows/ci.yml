@@ -72,6 +72,8 @@ jobs:
         run: python3 scripts/test-check-no-demo-accounts.py
       - name: Test the factory tick
         run: python3 scripts/test-factory-tick.py
+      - name: Test the retro evidence gatherer
+        run: python3 scripts/test-retro-gather.py
 
   design:
     name: Design tokens

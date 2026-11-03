@@ -72,8 +72,9 @@ def _day(point: dict) -> str:
     return datetime.fromtimestamp(nanos / 1e9).strftime("%Y-%m-%d")
 
 
-def aggregate(path: Path) -> dict:
-    """Group the cost and token delta points in one metrics.jsonl file."""
+def aggregate(path: Path, since: str | None = None) -> dict:
+    """Group the cost and token delta points in one metrics.jsonl file; `since` (YYYY-MM-DD) drops
+    points from earlier days."""
     groups: dict[str, dict] = {"day": {}, "agent": {}, "model": {}, "story": {}}
     total = _empty()
     for doc in _read_lines(path):
@@ -85,6 +86,8 @@ def aggregate(path: Path) -> dict:
                     if name not in (COST_METRIC, TOKEN_METRIC):
                         continue
                     for point in (metric.get("sum") or {}).get("dataPoints", []):
+                        if since and _day(point) < since:
+                            continue
                         attrs = _attr_map(point.get("attributes", []))
                         value = _point_value(point)
                         token_type = attrs.get("type")

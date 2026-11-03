@@ -76,12 +76,19 @@ class Sandbox:
         git("push", "-q", "origin", "master", cwd=self.repo)
         if branch != "master":
             git("switch", "-q", "-c", branch, cwd=self.repo)
-        base = ["TICK_FIRST_HOUR=0", "TICK_LAST_HOUR=23", f"REPO_DIR={self.repo}", "DAILY_BUDGET_USD=10", "RUN_BUDGET_USD=5", "STORIES_PER_TICK=2"]
+        # RETRO_WEEKDAY is empty so a Monday CI run never starts the retro; the retro cases set it.
+        base = ["TICK_FIRST_HOUR=0", "TICK_LAST_HOUR=23", f"REPO_DIR={self.repo}", "DAILY_BUDGET_USD=10", "RUN_BUDGET_USD=5",
+                "STORIES_PER_TICK=2", "RETRO_WEEKDAY="]
         (self.config / "tick.env").write_text("\n".join(base) + "\n")
         if ledger:
             (self.state / "ticks.jsonl").write_text("".join((r if isinstance(r, str) else json.dumps(r)) + "\n" for r in ledger))
         self.env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}", "STUB_LOG": str(self.log),
                     "MUNSERV_FACTORY_CONFIG": str(self.config), "MUNSERV_FACTORY_STATE": str(self.state)}
+
+    def set_env(self, line: str) -> None:
+        """Append a tick.env line; it wins over the base lines and over the process environment."""
+        with (self.config / "tick.env").open("a") as f:
+            f.write(line + "\n")
 
     def run(self, *args: str, **env: str) -> subprocess.CompletedProcess:
         return subprocess.run([str(TICK), *args], env={**self.env, **env}, capture_output=True, text=True, timeout=60)
@@ -254,6 +261,59 @@ def case_inbox_off(sb: Sandbox) -> list[str]:
     return [e for e in [marker.exists() and "inbox published although INBOX_UPDATE=0"] if isinstance(e, str)]
 
 
+WEEKDAY = str(datetime.date.today().isoweekday())
+OTHER_WEEKDAY = str(datetime.date.today().isoweekday() % 7 + 1)
+
+
+def case_retro_runs_once_on_its_day(sb: Sandbox) -> list[str]:
+    sb.set_env(f"RETRO_WEEKDAY={WEEKDAY}")
+    first = sb.run(STUB_PICKS="[]", STUB_STORY_COST="1.25")
+    second = sb.run(STUB_PICKS="[]")
+    calls = [c["argv"] for c in sb.calls("claude")]
+    retros = [a for a in calls if a[:2] == ["-p", "/factory-retro"]]
+    errors = [f"exit {r.returncode}: {r.stderr}" for r in (first, second) if r.returncode]
+    if len(retros) != 1:
+        return errors + [f"{len(retros)} retro runs over two ticks, want 1"]
+    retro = retros[0]
+    errors += [e for e in [
+        calls[0][:2] != ["-p", "/factory-retro"] and "retro did not run before the clerk",
+        arg_after(retro, "--model") != "opus" and "retro not on opus",
+        arg_after(retro, "--max-budget-usd") != "5" and f"retro budget {arg_after(retro, '--max-budget-usd')}, want 5",
+        arg_after(retro, "--permission-mode") != "acceptEdits" and "retro not in acceptEdits",
+        sb.calls("claude")[0]["otel"] != "story.id=retro" and "retro not tagged for the cost meter",
+    ] if isinstance(e, str)]
+    kinds = [x["kind"] for x in sb.ledger()]
+    if kinds != ["retro", "select", "select"]:
+        errors.append(f"ledger kinds {kinds}, want retro then one select per tick")
+    retro_row = next((x for x in sb.ledger() if x["kind"] == "retro"), {})
+    if retro_row.get("total_cost_usd") != 1.25 or retro_row.get("summary") != "CI: green, merged":
+        errors.append(f"retro ledger row {retro_row}")
+    return errors
+
+
+def case_retro_skips_other_days(sb: Sandbox) -> list[str]:
+    sb.set_env(f"RETRO_WEEKDAY={OTHER_WEEKDAY}")
+    sb.run(STUB_PICKS="[]")
+    return ["retro ran on the wrong day"] if any("/factory-retro" in c["argv"] for c in sb.calls("claude")) else []
+
+
+def case_retro_skips_after_a_manual_run(sb: Sandbox) -> list[str]:
+    sb.set_env(f"RETRO_WEEKDAY={WEEKDAY}")
+    (sb.repo / ".claude" / "metrics").mkdir(parents=True)
+    (sb.repo / ".claude" / "metrics" / "last-retro").write_text(TODAY + "\n")
+    sb.run(STUB_PICKS="[]")
+    return ["retro ran although last-retro is today"] if any("/factory-retro" in c["argv"] for c in sb.calls("claude")) else []
+
+
+def case_retro_not_in_dry_run(sb: Sandbox) -> list[str]:
+    sb.set_env(f"RETRO_WEEKDAY={WEEKDAY}")
+    r = sb.run("--dry-run", STUB_PICKS="[]")
+    return [e for e in [
+        any("/factory-retro" in c["argv"] for c in sb.calls("claude")) and "dry run ran the retro",
+        "retro is due" not in r.stdout and "dry run does not say the retro is due",
+    ] if isinstance(e, str)]
+
+
 def spent(amount: float) -> list[dict]:
     return [{"date": TODAY, "kind": "story", "total_cost_usd": amount}, {"date": "2000-01-01", "total_cost_usd": 99}]
 
@@ -270,6 +330,10 @@ CASES = [
     ("the inbox is published when the tick stops", case_inbox_on_stop, {"branch": "feat/x"}),
     ("a failing inbox update keeps the tick's exit code", case_inbox_failure_keeps_exit_code, {"ledger": spent(10)}),
     ("INBOX_UPDATE=0 leaves the inbox alone", case_inbox_off, {"ledger": spent(10)}),
+    ("the retro runs once on its weekday, before the clerk", case_retro_runs_once_on_its_day, {}),
+    ("the retro waits on other weekdays", case_retro_skips_other_days, {}),
+    ("a retro run by hand today is not repeated", case_retro_skips_after_a_manual_run, {}),
+    ("a dry run reports the retro but does not run it", case_retro_not_in_dry_run, {}),
 ]
 
 
