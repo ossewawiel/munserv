@@ -7,7 +7,7 @@
 
 ## Problem
 
-`DELETE /api/v1/photos/{photoId}` runs with no `Authorization` header. Any caller who knows a photo id can delete the file and its `issue_photos` row. A signed-in member can also delete or add photos on another member's issue. A photo is evidence on an [issue](../../../domain/issue.md). The fix lets the reporter and admins add and delete photos, and lets the ground admin verifying the issue add one.
+`DELETE /api/v1/photos/{photoId}` runs with no `Authorization` header. Any caller who knows a photo id can delete the file and its `issue_photos` row. A signed-in member can also delete or add photos on another member's issue. A photo is evidence on an [issue](../../../../domain/issue.md). The fix lets the reporter and admins add and delete photos, and lets the ground admin verifying the issue add one.
 
 ## Reproduction
 

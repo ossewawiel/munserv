@@ -271,4 +271,4 @@ curl -X POST http://localhost:8080/api/v1/issues/$ID/photos \
 | [Mobile Phase](./mobile-phase.md) | Detailed mobile tasks |
 | [Backend Phase](./backend-phase.md) | Backend verification |
 | [Web Phase](./web-phase.md) | Web verification |
-| [API Contract](../../contracts/api.md) | Endpoint specifications |
+| [API Contract](../../../contracts/api.md) | Endpoint specifications |

@@ -1,369 +1,75 @@
 # Contributing to MunServ
 
-This guide explains how to contribute features, fix bugs, and maintain code quality in MunServ.
+Work reaches `master` through the factory flow below. Agents and people follow the same rules.
 
-## Quick Reference
+## Before you start
 
-| I want to... | Do this |
-|--------------|---------|
-| Report a bug | [Create bug issue](#reporting-bugs) |
-| Request a feature | [Create feature issue](#requesting-features) |
-| Fix a bug | [Bug fix workflow](#bug-fix-workflow) |
-| Add a feature | [Feature workflow](#feature-workflow) |
-| Check my code | [Run standards check](#code-standards) |
+1. Read [`domain/README.md`](domain/README.md). A term that is not there does not exist yet. A story, PR or UI string that introduces a new term is not ready until its concept file and its `domain/language.yaml` entry exist. CI runs `scripts/validate-domain-language.py`.
+2. Read the card for the code you touch: [`backend/CLAUDE.md`](backend/CLAUDE.md), [`web/CLAUDE.md`](web/CLAUDE.md), [`mobile/CLAUDE.md`](mobile/CLAUDE.md), [`database/CLAUDE.md`](database/CLAUDE.md) or [`infrastructure/CLAUDE.md`](infrastructure/CLAUDE.md). The root [`CLAUDE.md`](CLAUDE.md) holds the rules that apply to every platform.
+3. Before you add or change UI, check the [live catalogues](https://ossewawiel.github.io/munserv/) and `design/registry/`. A new component needs a registry row and a story or use case. A UI story needs an approved design canvas.
+4. Install and sign in to the GitHub CLI (`gh auth login`). Run `scripts/setup-github-labels.sh` once on a fresh repository.
 
----
+## The factory flow
 
-## Getting Started
+The root [`CLAUDE.md`](CLAUDE.md) describes the agents. The path of one change:
 
-### Prerequisites
-
-1. **GitHub CLI** - Required for issue management
+1. **Issue.** Report a bug or request a feature with the issue templates (`bug_report.yml`, `feature_request.yml`). A bug goes to the `investigator`. A feature goes to the `feature-planner`, which writes stories, issues, a spec and one handoff per story per platform. A person approves the stories.
+2. **Canvas.** A UI story needs an approved design canvas before anyone builds it.
+3. **Implementation.** An implementer takes one handoff from `specs/features/<feature>/`, works in an isolated worktree, writes tests first and cannot finish while its platform gate is red.
+4. **Branch.** Every branch starts from the latest `origin/master`:
    ```bash
-   # Install
-   brew install gh  # macOS
-   sudo apt install gh  # Ubuntu
-
-   # Authenticate
-   gh auth login
+   git fetch origin && git switch -c <branch> origin/master
    ```
+5. **PR.** Pushing a branch opens the PR and arms auto-merge (`.github/workflows/auto-pr.yml`). Do not run `gh pr merge` yourself. Watch CI with `scripts/watch-ci.sh <pr>`. Do not use `gh pr checks --watch`: it exits green while new runs are still pending.
+6. **Review.** The `reviewer` gives a verdict per acceptance criterion against the handoff and the domain language. A UI story also goes through the `design-reviewer`.
+7. **Eyeball.** A UI or user-facing story (`ui: true` or `user_facing: true`) waits for a person to run the Eyeball block of its handoff. `scripts/eyeball-up.sh <pr>` prints the links. The result labels the PR `eyeball:pass` or `eyeball:fail`, and each failed check files a `source:eyeball` bug.
+8. **Merge.** GitHub squash-merges when `CI status` is green.
+9. **After the merge.** Sync your checkout: `git fetch origin && git switch master && git pull --ff-only`, then `git branch -d <branch>`. The `syncer` updates specs and issue labels.
 
-2. **Setup Labels** (first time only)
-   ```bash
-   ./scripts/setup-github-labels.sh
-   ```
+`.claude/hooks/guard-git.sh` blocks force pushes, pushes to `master` and history rewrites.
 
-3. **Read the domain language** - `domain/README.md` defines every term. A story, PR or UI string that introduces a term not in `domain/` is not ready; add the concept file and the `language.yaml` entry first. CI runs `scripts/validate-domain-language.py`.
+## Run the gate locally
 
-4. **Check the design system** - Before adding or changing UI, look at the live catalogues (https://ossewawiel.github.io/munserv/) and `design/registry/`; a new component needs a registry row and a story or use-case, and a UI story needs an approved design canvas.
+CI (`.github/workflows/ci.yml`) is required on `master`. Run the same commands before you push.
 
-5. **Read Platform Guide** - Before working on any platform:
-   - Backend: `backend/CLAUDE.md`
-   - Web: `web/CLAUDE.md`
-   - Mobile: `mobile/CLAUDE.md`
+| Area | Commands |
+|---|---|
+| Domain | `python3 scripts/validate-domain-language.py` (the `domain` job also runs the `scripts/test-*.py` suites) |
+| Backend | `cd backend && ./gradlew ktlintCheck test build` (tests use Testcontainers, so Docker must run) |
+| Web | `cd web && pnpm lint && pnpm typecheck && pnpm test:run && pnpm build` |
+| Design tokens | `pnpm --dir design check` |
+| Web visual regression | `pnpm --dir web test:visual`; a changed baseline under `web/e2e/visual/__screenshots__/` needs the `design-approved` label |
+| Mobile | `cd mobile && dart format --set-exit-if-changed lib test && flutter analyze --fatal-infos && flutter test` |
 
----
+CI also runs the `standards-check` workflow (advisory) on PRs that touch source files. It flags wildcard imports, `any`/`dynamic`, hardcoded URLs and debug prints. For a manual check of enums across platforms, run `scripts/validate-enum-sync.sh`.
 
-## Reporting Bugs
+## Commits and PRs
 
-### Option 1: GitHub Issue (Recommended)
-
-1. Go to **Issues** > **New Issue** > **Bug Report**
-2. Fill in the template:
-   - Platform affected
-   - Severity (Low/Medium/High/Critical)
-   - Steps to reproduce
-   - Expected vs actual behavior
-
-### Option 2: Claude Agent
-
-```
-/create-issue type=bug title="Description of the bug" platform=backend
-```
-
-The agent will gather context from the conversation and create a well-formatted issue.
-
----
-
-## Requesting Features
-
-### Option 1: GitHub Issue
-
-1. Go to **Issues** > **New Issue** > **Feature Request**
-2. Fill in:
-   - User story ("As a [role], I can [action]")
-   - Acceptance criteria
-   - Platforms affected
-   - Priority
-
-### Option 2: Claude Agent
-
-```
-/add-story platform=web story="As an admin, I can export issues to CSV"
-```
-
-This adds the story to specs and optionally creates a GitHub issue.
-
----
-
-## Bug Fix Workflow
-
-### Step 1: Find or Create Issue
-
-```bash
-# Search for existing issue
-gh issue list --label "type:bug" --search "keyword"
-
-# Or create new issue
-gh issue create --template bug_report.yml
-```
-
-### Step 2: Create Branch
-
-```bash
-git checkout -b fix/issue-123-brief-description
-```
-
-### Step 3: Investigate & Fix
-
-Read the relevant `CLAUDE.md` for the platform, then fix the bug.
-
-**With Claude Agent:**
-```
-Investigate bug #123 and propose a fix
-```
-
-### Step 4: Run Tests & Standards Check
-
-```bash
-# Backend
-cd backend && ./gradlew test
-
-# Web
-cd web && pnpm test && pnpm lint
-
-# Mobile
-cd mobile && flutter test && flutter analyze
-```
-
-### Step 5: Create PR
-
-```bash
-gh pr create --title "fix: Brief description" --body "Fixes #123"
-```
-
-The PR will automatically:
-- Run standards check (warnings only)
-- Link to the issue
-- Update spec status when merged
-
-### Step 6: Close Handoff (if applicable)
-
-If you created a handoff document during investigation:
-```
-/close-handoff handoff=specs/features/some-feature/bug-handoff.md
-```
-
----
-
-## Feature Workflow
-
-### Step 1: Create or Find Story
-
-Check if a story exists in `specs/requirements/`:
-- `mobile.md` for mobile features
-- `web.md` for web features
-
-**Create new story:**
-```
-/add-story platform=mobile story="As a member, I can filter issues by date range"
-```
-
-### Step 2: Plan the Feature
-
-```
-/plan-feature feature=date-filter
-```
-
-This will:
-1. Create/find a GitHub milestone
-2. Analyze impact across platforms
-3. Generate implementation plan
-4. Optionally create platform-specific issues
-
-### Step 3: Implement (Platform by Platform)
-
-**Backend first:**
-```bash
-git checkout -b feat/date-filter-backend
-cd backend
-# Implement following backend/CLAUDE.md patterns
-```
-
-**Then Web/Mobile:**
-```bash
-git checkout -b feat/date-filter-web
-cd web
-# Implement following web/CLAUDE.md patterns
-```
-
-### Step 4: Create PRs
-
-```bash
-# Link PRs to issues and milestone
-gh pr create --title "feat(backend): Add date filter API" \
-  --body "Part of #45 milestone" \
-  --milestone "date-filter"
-```
-
-### Step 5: Sync Status
-
-When all platform PRs are merged:
-```
-/sync-github
-```
-
-Or let the automated workflow handle it.
-
----
-
-## Code Standards
-
-### Automated Checks
-
-PRs automatically run `.github/workflows/standards-check.yml` which warns about:
-- Wildcard imports
-- `any`/`dynamic` types
-- Hardcoded URLs
-- Debug print statements
-
-### Manual Validation
-
-```bash
-# Check enum synchronization across platforms
-./scripts/validate-enum-sync.sh
-
-# Reconcile specs with GitHub
-./scripts/reconcile-specs.sh
-```
-
-### Standards Registry
-
-See `specs/architecture/standards-registry.md` for all coding standards and their enforcement.
-
----
-
-## Working with Claude Agent
-
-Slash commands are retired; see the Factory section of `CLAUDE.md` for how work is delivered.
-
----
-
-## Commit Convention
-
-Use [Conventional Commits](https://www.conventionalcommits.org/):
+Use [Conventional Commits](https://www.conventionalcommits.org/). The PR title becomes the squash-merge commit, so it follows the same shape:
 
 ```
 <type>(<scope>): <description>
-
-[optional body]
-
-[optional footer]
 ```
 
-### Types
-- `feat` - New feature
-- `fix` - Bug fix
-- `docs` - Documentation
-- `style` - Formatting
-- `refactor` - Code restructuring
-- `test` - Adding tests
-- `chore` - Maintenance
+| Part | Values |
+|---|---|
+| Type | `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore` |
+| Scope | `backend`, `web`, `mobile`, `db`, `api`, `infra`, `specs`, `ci` |
 
-### Scopes
-- `backend` - Kotlin/Spring Boot
-- `web` - React/TypeScript
-- `mobile` - Flutter/Dart
-- `specs` - Documentation
-- `ci` - GitHub Actions
+Examples: `feat(web): add the members table filter`, `fix(backend): ground admin management checks the admin role (#253)`, `chore(specs): sync FIX253 after #268`.
 
-### Examples
-```
-feat(backend): Add date range filter to issues API
-fix(web): Correct enum serialization for GroundAdminStatus
-docs(specs): Update API contract for messaging feature
-chore(ci): Add enum validation to standards check
-```
+A PR body names the issue it closes (`Fixes #123`), the plan step if there is one, and what you ran to test it. Add screenshots for UI changes.
 
----
+## Releases
 
-## Pull Request Guidelines
+Pushing a version tag (`v1.2.0`) runs `.github/workflows/generate-changelog.yml`. It regenerates `CHANGELOG.md` with git-cliff, marks the stories the commits name as done in `specs/requirements/`, and opens a pull request with the result. There is no deploy step: nothing is deployed yet.
 
-### Title Format
-```
-<type>(<scope>): Brief description
-```
+## Where to look
 
-### Body Template
-```markdown
-## Summary
-Brief description of changes.
-
-## Related Issues
-- Fixes #123
-- Part of #45 milestone
-
-## Test Plan
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-- [ ] Manual testing done
-
-## Screenshots (if UI changes)
-[Add screenshots here]
-```
-
-### Checklist Before Merging
-- [ ] Tests pass
-- [ ] No lint errors
-- [ ] Standards check reviewed (warnings addressed or justified)
-- [ ] Follows platform CLAUDE.md patterns
-- [ ] API changes documented in specs/contracts/api.md
-- [ ] New types added to specs/contracts/types.md
-
----
-
-## Release Process
-
-### Version Tags
-
-```bash
-git tag v1.2.0
-git push origin v1.2.0
-```
-
-This triggers:
-1. Changelog generation from commits
-2. GitHub Release creation
-3. Spec status updates
-
-### Changelog
-
-Generated automatically from conventional commits. See `CHANGELOG.md`.
-
----
-
-## Getting Help
-
-- **Stuck?** Ask in the issue or PR comments
-- **Standards question?** Check `specs/architecture/standards-registry.md`
-- **API question?** Check `specs/contracts/api.md`
-- **Architecture question?** Check `specs/architecture/` directory
-
----
-
-## Quick Commands Reference
-
-```bash
-# Issues
-gh issue list                          # List all issues
-gh issue list --label "type:bug"       # List bugs
-gh issue view 123                      # View issue details
-gh issue create --template bug_report.yml  # Create bug
-
-# PRs
-gh pr create                           # Create PR interactively
-gh pr list                             # List open PRs
-gh pr checks                           # View PR check status
-
-# Labels
-gh label list                          # List all labels
-
-# Milestones
-gh api repos/:owner/:repo/milestones   # List milestones
-
-# Scripts
-./scripts/setup-github-labels.sh       # Setup labels
-./scripts/validate-enum-sync.sh        # Check enum sync
-./scripts/reconcile-specs.sh           # Reconcile specs
-./scripts/generate-types.sh --dry-run  # Preview type generation
-```
+| Question | Read |
+|---|---|
+| What does this word mean? | [`domain/`](domain/README.md) |
+| What does the API accept? | [`specs/contracts/api.md`](specs/contracts/api.md), [`specs/contracts/types.md`](specs/contracts/types.md) |
+| Why is it built this way? | [`specs/architecture/decisions/`](specs/architecture/decisions/) |
+| How is a standard enforced? | [`specs/architecture/standards-registry.md`](specs/architecture/standards-registry.md) |
+| What is the status of a story? | [`specs/requirements/`](specs/requirements/) and the GitHub issue |

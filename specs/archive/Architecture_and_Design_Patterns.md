@@ -469,7 +469,7 @@ function IssuesPage() {
 
 ### 4.4 MUI Theming Patterns
 
-The web admin uses MUI v7 with CSS variables for theming. See [Web_Theming_Guide.md](Web_Theming_Guide.md) for complete theming documentation.
+The web admin uses MUI v7 with CSS variables for theming. See [Web_Theming_Guide.md](../Web_Theming_Guide.md) for complete theming documentation.
 
 **Using the `sx` prop for styling:**
 

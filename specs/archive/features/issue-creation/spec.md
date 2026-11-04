@@ -99,4 +99,4 @@ Enable members to report infrastructure issues via mobile app with photos and GP
 - [Mobile Phase](./mobile-phase.md)
 - [Backend Phase](./backend-phase.md)
 - [Web Phase](./web-phase.md)
-- [API Contract](../../contracts/api.md)
+- [API Contract](../../../contracts/api.md)

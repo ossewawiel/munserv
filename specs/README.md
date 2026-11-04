@@ -14,10 +14,11 @@ Living documents only. History lives in [`archive/`](archive/README.md) and is n
 | [architecture/decisions/](architecture/decisions/) | ADRs |
 | [architecture/standards-registry.md](architecture/standards-registry.md) | Coding standards and how each is enforced |
 | [features/](features/) | One folder per feature: spec, implementation plan, platform handoffs, completed/ |
-| [operations/devops.md](operations/devops.md), [operations/environments.md](operations/environments.md) | CI, git workflow, ports, environment variables |
+| [operations/devops.md](operations/devops.md), [operations/environments.md](operations/environments.md) | Git workflow, CI jobs, the one (development) environment, ports, environment variables |
 | [Web_Theming_Guide.md](Web_Theming_Guide.md), [Mobile_Theming_Guide.md](Mobile_Theming_Guide.md) | Theme systems; move into the design-system tokens and skills when that PR lands |
 
 ## Adding content
 - New term: add a file under `domain/` and an entry in `domain/language.yaml` first.
-- New story: `/add-story` (also creates the GitHub issue). New endpoint: `/add-endpoint`. New type: `/add-type`. New decision: `/add-adr`.
-- Feature work: `/create-feature` → `/plan-feature` → `/work-story`.
+- New feature or story: describe it to `/factory` (the `feature-planner` writes the stories, issues, spec and handoffs). Bugs go through the `investigator`. See the factory section of the root `CLAUDE.md`.
+- New decision: add an ADR under `architecture/decisions/`.
+- New endpoint or type: edit `contracts/api.md` or `contracts/types.md` in the same PR as the code.
