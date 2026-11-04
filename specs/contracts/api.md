@@ -102,7 +102,7 @@ Update issue state (admin only).
 
 **Request:** `{ state: IssueState, note?: string }`
 **Response:** `Issue`
-**Errors:** 403 Forbidden | 404 Not found
+**Errors:** 401 Unauthorized | 403 Forbidden | 404 Not found
 
 ### POST /issues/{id}/request-verification
 Request Ground Admin verification (admin only).
@@ -117,6 +117,13 @@ Request Ground Admin verification (admin only).
 ```
 **Response:** `IssueVerification`
 **Errors:** 400 Invalid state | 401 Unauthorized | 403 Forbidden | 404 Not found
+
+### POST /issues/{id}/override-state
+Set an issue to any state without verification (admin only). Skips the legal transition check and expires pending verifications.
+
+**Request:** `{ state: IssueState }`
+**Response:** `{ status: "updated" }`
+**Errors:** 400 | 401 Unauthorized | 403 Forbidden | 404 Not found
 
 ### POST /issues/{id}/verify
 Submit verification result (Ground Admin only).

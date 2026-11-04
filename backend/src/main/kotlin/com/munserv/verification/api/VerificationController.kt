@@ -1,10 +1,12 @@
 package com.munserv.verification.api
 
+import com.munserv.admin.domain.AdminRole
 import com.munserv.issues.domain.IssueId
 import com.munserv.issues.domain.IssueState
 import com.munserv.shared.api.ErrorBody
 import com.munserv.shared.api.ErrorCodes
 import com.munserv.shared.api.ErrorResponse
+import com.munserv.shared.security.RequireRole
 import com.munserv.shared.types.MemberId
 import com.munserv.verification.service.VerificationResult
 import com.munserv.verification.service.VerificationService
@@ -56,10 +58,12 @@ class VerificationController(
         value = [
             ApiResponse(responseCode = "200", description = "Verification requested"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
+            ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Issue not found"),
             ApiResponse(responseCode = "409", description = "Pending verification already exists"),
         ],
     )
+    @RequireRole(AdminRole.SECTOR_ADMIN)
     @PostMapping("/issues/{issueId}/request-verification")
     fun requestVerification(
         @Parameter(description = "Issue UUID")
@@ -87,9 +91,11 @@ class VerificationController(
         value = [
             ApiResponse(responseCode = "200", description = "State updated"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
+            ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Issue not found"),
         ],
     )
+    @RequireRole(AdminRole.SECTOR_ADMIN)
     @PostMapping("/issues/{issueId}/override-state")
     fun overrideState(
         @Parameter(description = "Issue UUID")
