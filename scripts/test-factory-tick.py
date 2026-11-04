@@ -299,8 +299,8 @@ def case_retro_skips_other_days(sb: Sandbox) -> list[str]:
 
 def case_retro_skips_after_a_manual_run(sb: Sandbox) -> list[str]:
     sb.set_env(f"RETRO_WEEKDAY={WEEKDAY}")
-    (sb.repo / ".claude" / "metrics").mkdir(parents=True)
-    (sb.repo / ".claude" / "metrics" / "last-retro").write_text(TODAY + "\n")
+    (sb.repo / "specs" / "metrics").mkdir(parents=True)
+    (sb.repo / "specs" / "metrics" / "last-retro").write_text(TODAY + "\n")
     sb.run(STUB_PICKS="[]")
     return ["retro ran although last-retro is today"] if any("/factory-retro" in c["argv"] for c in sb.calls("claude")) else []
 
