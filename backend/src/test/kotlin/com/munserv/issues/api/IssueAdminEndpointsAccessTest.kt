@@ -11,7 +11,6 @@ import com.munserv.support.domain.SupportGrantId
 import com.munserv.support.repository.SupportGrantRepository
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -62,8 +61,7 @@ class IssueAdminEndpointsAccessTest {
     private val createdIssues = mutableListOf<String>()
     private var createdGrantId: SupportGrantId? = null
 
-    @BeforeEach
-    fun makeGroundAdmin() {
+    private fun makeGroundAdmin() {
         jdbc.update(
             "UPDATE members SET is_ground_admin = true, ground_admin_status = 'active'::ground_admin_status WHERE id = ?",
             groundAdminId,
@@ -165,17 +163,15 @@ class IssueAdminEndpointsAccessTest {
     private fun stateOf(issueId: String): String? =
         jdbc.queryForObject("SELECT state::text FROM issues WHERE id = ?", String::class.java, UUID.fromString(issueId))
 
-    private fun historyCount(issueId: String): Int? =
-        jdbc.queryForObject(
-            "SELECT count(*) FROM issue_state_history WHERE issue_id = ?",
-            Int::class.java,
+    private fun historyRows(issueId: String): List<Map<String, Any?>> =
+        jdbc.queryForList(
+            "SELECT id, state::text AS state, changed_by FROM issue_state_history WHERE issue_id = ? ORDER BY id",
             UUID.fromString(issueId),
         )
 
-    private fun verificationCount(issueId: String): Int? =
-        jdbc.queryForObject(
-            "SELECT count(*) FROM issue_verifications WHERE issue_id = ?",
-            Int::class.java,
+    private fun verificationRows(issueId: String): List<Map<String, Any?>> =
+        jdbc.queryForList(
+            "SELECT id, status::text AS status FROM issue_verifications WHERE issue_id = ? ORDER BY id",
             UUID.fromString(issueId),
         )
 
@@ -186,52 +182,53 @@ class IssueAdminEndpointsAccessTest {
             UUID.fromString(issueId),
         )
 
-    private fun assertForbidden(result: ResultActionsDsl) {
-        result.andExpect {
+    /**
+     * Puts a pending verification on a fresh issue, calls the endpoint with the given token and checks the answer is 403
+     * and that the issue state, the history rows and the verification rows are exactly as before the call.
+     */
+    private fun assertRefusedAndNothingChanged(
+        token: String,
+        call: (issueId: String, token: String?) -> ResultActionsDsl,
+    ) {
+        val issueId = createFreshIssue()
+        requestVerification(issueId, adminToken(podChiefId.value.toString())).andExpect { status { isOk() } }
+        val state = stateOf(issueId)
+        val history = historyRows(issueId)
+        val verifications = verificationRows(issueId)
+        verifications.single()["status"] shouldBe "pending"
+
+        call(issueId, token).andExpect {
             status { isForbidden() }
             jsonPath("$.error.code") { value("FORBIDDEN") }
         }
+
+        stateOf(issueId) shouldBe state
+        historyRows(issueId) shouldBe history
+        verificationRows(issueId) shouldBe verifications
     }
 
     @Test
     fun `should answer 403 and change nothing when a member calls PATCH state`() {
-        val issueId = createFreshIssue()
-        val history = historyCount(issueId)
-
-        assertForbidden(patchState(issueId, memberToken))
-
-        stateOf(issueId) shouldBe "reported"
-        historyCount(issueId) shouldBe history
+        assertRefusedAndNothingChanged(memberToken, ::patchState)
     }
 
     @Test
     fun `should answer 403 and change nothing when a member calls request-verification`() {
-        val issueId = createFreshIssue()
-
-        assertForbidden(requestVerification(issueId, memberToken))
-
-        stateOf(issueId) shouldBe "reported"
-        verificationCount(issueId) shouldBe 0
+        assertRefusedAndNothingChanged(memberToken, ::requestVerification)
     }
 
     @Test
     fun `should answer 403 and change nothing when a member calls override-state`() {
-        val issueId = createFreshIssue()
-        val history = historyCount(issueId)
-
-        assertForbidden(overrideState(issueId, memberToken))
-
-        stateOf(issueId) shouldBe "reported"
-        historyCount(issueId) shouldBe history
+        assertRefusedAndNothingChanged(memberToken, ::overrideState)
     }
 
     @Test
-    fun `should answer 403 when an active ground admin calls request-verification`() {
-        val issueId = createFreshIssue()
+    fun `should answer 403 and change nothing on all three when an active ground admin calls`() {
+        makeGroundAdmin()
 
-        assertForbidden(requestVerification(issueId, memberToken))
-
-        verificationCount(issueId) shouldBe 0
+        assertRefusedAndNothingChanged(memberToken, ::patchState)
+        assertRefusedAndNothingChanged(memberToken, ::requestVerification)
+        assertRefusedAndNothingChanged(memberToken, ::overrideState)
     }
 
     @ParameterizedTest

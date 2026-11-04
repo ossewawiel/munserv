@@ -37,7 +37,7 @@
 |-------|------|-------|
 | state | IssueState | State after transition |
 | changedAt | DateTime | ISO 8601 timestamp |
-| changedBy | string? | Admin name (null for system) |
+| changedBy | string? | Admin name (null for system and for a support grant) |
 | note | string? | Optional note explaining change |
 
 ## Sector
