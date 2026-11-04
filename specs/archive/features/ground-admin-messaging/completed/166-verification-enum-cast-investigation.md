@@ -3,7 +3,7 @@
 Issue: #166 · Investigated 2026-10-29 · Platform: backend · Fix handoff: `166-verification-enum-cast-backend.md`
 
 ## Problem
-`POST /api/v1/issues/{issueId}/request-verification` answers `500 INTERNAL_ERROR` on every call. No admin can request a [verification](../../../domain/verification.md). Ground admins never receive one, and `scripts/dev-seed.py` stops at its last step. The same class of defect also breaks `GET` and `PATCH /api/v1/sectors/{sectorId}/settings`, which the web Sector Settings page (`/settings/sector`) calls.
+`POST /api/v1/issues/{issueId}/request-verification` answers `500 INTERNAL_ERROR` on every call. No admin can request a [verification](../../../../../domain/verification.md). Ground admins never receive one, and `scripts/dev-seed.py` stops at its last step. The same class of defect also breaks `GET` and `PATCH /api/v1/sectors/{sectorId}/settings`, which the web Sector Settings page (`/settings/sector`) calls.
 
 ## Reproduction
 The reproduction ran on the live dev stack: the backend runs from `~/Work/munserv-console` at `f6c23ed` with the `local` profile, and the dev database is on port 5435. No data changed: both failing calls roll back, and the row counts read before and after match.

@@ -37,7 +37,7 @@ The Sector Chief role is partially defined in the system but not fully implement
 
 ### 4. Existing Architecture
 
-From `specs/features/ground-admin-messaging/spec.md`:
+From `specs/archive/features/ground-admin-messaging/spec.md`:
 ```
 Pod Chief
 └── Pod Admin

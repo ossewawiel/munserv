@@ -1,48 +1,39 @@
 # DevOps
 
-## Git Workflow
+What exists today. Nothing is deployed: there is no staging or production environment (`infrastructure/CLAUDE.md`, "Deployment").
 
-**Branching:**
-- `main` - Production-ready
-- `develop` - Integration branch
-- `feature/*` - New features
-- `fix/*` - Bug fixes
+## Git workflow
 
-**Commits:** Conventional commits
-```
-feat(auth): add PIN reset flow
-fix(issues): correct heat calculation
-docs(api): update endpoint documentation
-```
+- `master` is the only long-lived branch. Branch from the latest `origin/master`.
+- Pushing a branch opens a PR and arms auto-merge (`.github/workflows/auto-pr.yml`). GitHub squash-merges when `CI status` is green.
+- Commit and PR titles are Conventional Commits: `<type>(<scope>): <description>`. Types and scopes are in [`CONTRIBUTING.md`](../../CONTRIBUTING.md).
+- `.claude/hooks/guard-git.sh` blocks force pushes, pushes to `master` and history rewrites.
 
-## CI/CD
+## CI
 
-**On Push:**
-1. Lint
-2. Type check
-3. Unit tests
-4. Build
+`.github/workflows/ci.yml` runs on every push and PR. Jobs are path-filtered, and the `CI status` aggregate is the check `master` requires.
 
-**On PR:**
-1. All of above
-2. Integration tests
+| Job | Checks |
+|---|---|
+| `domain` | Domain language against the code, handoff and card lint, requirement rows against GitHub, hook and script tests |
+| `design` | Generated theme files match the tokens |
+| `backend` | `ktlintCheck`, `test` (Testcontainers), `build`; uploads test and JaCoCo coverage reports |
+| `web` | `pnpm lint`, `typecheck`, `test:run`, `build`; no demo account in the bundle |
+| `visual-web` | Storybook screenshot regression; a changed baseline needs the `design-approved` label |
+| `mobile` | `dart format`, `flutter analyze --fatal-infos`, `flutter test`, golden baseline guard, debug APK; no demo account in the APK |
+| `smoke` | On `master`: starts the database and backend with the `local` profile and runs the probe checks |
 
-**On Merge to main:**
-1. All of above
-2. Deploy to staging
-3. E2E tests
-4. Deploy to production (manual approval)
+Other workflows: `standards-check.yml` (advisory, source PRs), `validate-specs.yml` (weekly drift check), `generate-changelog.yml` (on version tags), `pages.yml` (design catalogues and dashboard).
 
 ## Commands
 
 | Platform | Lint | Test | Build |
-|----------|------|------|-------|
+|---|---|---|---|
 | Backend | `./gradlew ktlintCheck` | `./gradlew test` | `./gradlew build` |
-| Web | `pnpm lint` | `pnpm test` | `pnpm build` |
-| Mobile | `flutter analyze` | `flutter test` | `flutter build` |
+| Web | `pnpm lint`, `pnpm typecheck` | `pnpm test:run` | `pnpm build` |
+| Mobile | `dart format --set-exit-if-changed lib test`, `flutter analyze --fatal-infos` | `flutter test` | `flutter build apk --debug` |
 
-## Quality Gates
+## Quality gates
 
-- Test coverage: ≥70%
-- All tests passing
-- No lint errors
+- Every CI job above is green.
+- The backend publishes a JaCoCo report. No coverage threshold is enforced.

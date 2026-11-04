@@ -1,82 +1,101 @@
 # MunServ
 
-Community-powered municipal issue tracking. Report potholes, water leaks, broken streetlights, and more — right from your phone.
+Community infrastructure issue tracker. Members report potholes, leaks and broken lights from a mobile app with photos and GPS. Administrators manage the issues in a web portal. A backend serves both.
 
-## What is this?
+## What it is
 
-MunServ helps communities track and report infrastructure problems to local authorities. Community members snap photos of issues, and administrators manage them through a web dashboard.
+Each deployment is a **pod**: one independent instance with its own database. A pod serves one or more communities, split into sectors (and optionally wards).
 
-**How it works:**
-1. Member sees a pothole → takes photo → reports via mobile app
-2. Issue appears on map with GPS location
-3. Admin reviews, confirms, and tracks progress
-4. Community can see status updates
+1. A member photographs a problem and reports it from the Flutter app. The app attaches the GPS position.
+2. The issue appears on the map for its sector.
+3. A ground admin verifies it on site. Administrators move it through its states in the web portal.
+4. The member sees each state change.
 
-## Quick Start
+Issue types: pothole, water leak, sewage leak, broken traffic light, broken street light, illegal dumping, other. [`domain/`](domain/README.md) defines every term, its states and its code names on each platform. Read it before you read any code.
 
-### Prerequisites
-
-- **Backend:** JDK 21+, Gradle
-- **Web:** Node.js 20+, pnpm
-- **Mobile:** Flutter 3.x
-
-### 1. Start the Backend
-
-```bash
-cd backend
-./gradlew bootRun
-# Runs on http://localhost:8080
+```
+┌─────────────────────────────────────────┐
+│                  Pod                    │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  │
+│  │ Sector  │  │ Sector  │  │ Sector  │  │
+│  │ Ward 42 │  │ Ward 43 │  │ Ward 44 │  │
+│  └─────────┘  └─────────┘  └─────────┘  │
+└─────────────────────────────────────────┘
 ```
 
-### 2. Start the Web Admin
+## Stack
+
+Versions come from the build files.
+
+| Layer | Technology | Version | Source |
+|---|---|---|---|
+| Backend | Kotlin, Spring Boot, Hibernate Spatial, Flyway | Kotlin 2.3.21, Spring Boot 4.1.1, JDK 21, Gradle 9.7.1 | `backend/build.gradle.kts` |
+| Web | React, TypeScript, MUI, React Query, Vite, Vitest | React 19.2, TypeScript 6.0, MUI 9.4, React Query 5, Vite 8, Vitest 5 | `web/package.json` |
+| Mobile | Flutter, Riverpod, Freezed | Flutter 3.47.2 (CI), Dart SDK ^3.10.4, Riverpod 3.4, Freezed 4 | `mobile/pubspec.yaml`, `.github/workflows/ci.yml` |
+| Database | PostgreSQL with PostGIS | PostgreSQL 18, PostGIS 3.6 (`postgis/postgis:18-3.6`) | `infrastructure/docker/docker-compose.yml` |
+| Tooling | Node, pnpm | Node 24, pnpm 10 | `mise.local.toml`, CI |
+
+Flyway migrations live in `backend/src/main/resources/db/migration/`. Photos go to local disk; Cloudflare R2 is wired but off (`storage.type`). Nothing is deployed anywhere yet: see `infrastructure/CLAUDE.md`.
+
+## Run it
+
+Prerequisites: JDK 21, Node 24 with pnpm 10, Flutter, Docker. `mise.local.toml` pins them for [mise](https://mise.jdx.dev).
 
 ```bash
-cd web
-pnpm install
-pnpm dev
-# Runs on http://localhost:3000
-# Login: admin@ward42.example.com / admin123
+# Dev database (PostGIS 18) on localhost:5435
+cd infrastructure/docker && docker compose up -d
+# Backend on http://localhost:8080 (Swagger at /swagger-ui.html)
+cd backend && ./gradlew bootRun
+# Web portal on http://localhost:3000, login admin@ward42.example.com / admin123
+cd web && pnpm install && pnpm dev
+# Mobile app; the Android emulator reaches the backend on 10.0.2.2:8080 (API_HOST, API_PORT)
+cd mobile && flutter pub get && flutter run
 ```
 
-### 3. Start the Mobile App
+Extra accounts (a second member, a ground admin, a pending verification): `python3 scripts/dev-seed.py`. Mail goes to Mailpit with `SPRING_PROFILES_ACTIVE=local,mailpit`. To work on mobile without the backend, run the mock API (`cd infrastructure/mock-api && npm start`, port 3001) and `flutter run --dart-define=API_PORT=3001`.
 
-```bash
-cd mobile
-flutter pub get
-flutter run
-# Connects to backend on port 8080
-```
+The full table of run commands is in [`CLAUDE.md`](CLAUDE.md). The factory console (`./dashboard.sh`) and the operator TUI (`./tui.sh`) show services, PRs and eyeball checks.
 
-**For mock API testing (mobile only):**
-```bash
-cd infrastructure/mock-api && npm start  # Port 3001
-flutter run --dart-define=API_PORT=3001
-```
-
-## Project Structure
+## Repository layout
 
 ```
 munserv/
-├── backend/         # Kotlin + Spring Boot API
-├── web/             # React + TypeScript admin portal
-├── mobile/          # Flutter app (iOS & Android)
-├── database/        # PostgreSQL migrations
-├── infrastructure/  # Docker, mock API, deployment
-├── domain/          # Ubiquitous language (source of truth for terms)
-├── specs/           # Technical specifications
-│   ├── requirements/    # User stories by platform
-│   ├── contracts/       # API contract, shared types
-│   ├── architecture/    # Overview, patterns, ADRs
-│   ├── features/        # Feature specifications
-│   └── operations/      # DevOps, environments
-└── .claude/         # Claude Code skills
+├── backend/         # Kotlin + Spring Boot API, Flyway migrations
+├── web/             # React admin portal
+├── mobile/          # Flutter app
+├── database/        # Database card (naming and migration rules)
+├── infrastructure/  # Docker compose, mock API, systemd units, telemetry
+├── domain/          # Ubiquitous language: the source of truth for terms
+├── design/          # Tokens, component registries, design canvases
+├── specs/           # Requirements, contracts, architecture, features, archive
+├── scripts/         # Factory console, TUI, tick, validators, CI helpers
+├── site/            # GitHub Pages landing page and dashboard
+└── .claude/         # Agents, skills, hooks
 ```
 
-## Development with Claude Code
+## How the factory works
 
-This project is built by an agent factory. Agents in `.claude/agents/` plan (Opus), implement (Sonnet, one story per isolated worktree, tests first), review (Opus) and sync bookkeeping (Sonnet); `/factory` orchestrates them and a human approves stories and merges PRs. `domain/` is the shared vocabulary and CI validates it against the code. See `CLAUDE.md` for the roster.
+Agents in `.claude/agents/` deliver the work. `/factory` orchestrates them.
 
-Slash commands are retired; the factory section of `CLAUDE.md` describes how work is delivered.
+| Agent | Model | Does |
+|---|---|---|
+| `feature-planner` | Opus | Turns a paragraph into stories, issues, a spec and one handoff per story per platform |
+| `investigator` | Opus | Takes a bug to its root cause, writes the investigation and the fix handoffs |
+| `designer`, `design-reviewer` | Opus | Draw the canvas for a UI story; compare the build against it |
+| `backend-implementer`, `web-implementer`, `mobile-implementer` | Sonnet | Build one handoff in an isolated worktree, tests first |
+| `reviewer` | Opus | Gives a verdict per acceptance criterion |
+| `clerk`, `syncer` | Haiku | Status tables, labels and boards; spec and issue bookkeeping after a merge |
+
+The path of one story:
+
+1. A person approves the stories (and the canvas, for a UI story).
+2. An implementer builds the handoff on a branch and cannot finish while its platform gate is red.
+3. Pushing the branch opens a PR (`auto-pr.yml`) and arms auto-merge.
+4. CI runs. The reviewer checks the PR against the handoff.
+5. UI and user-facing stories wait for an eyeball pass: a person runs the handoff's Eyeball block against the PR (`scripts/eyeball-up.sh <pr>` prints the links).
+6. GitHub squash-merges when `CI status` is green. The syncer updates specs and labels.
+
+Progress is public on the [dashboard](https://ossewawiel.github.io/munserv/dashboard/) and the [project board](https://github.com/users/ossewawiel/projects/5). The design catalogues are on [Pages](https://ossewawiel.github.io/munserv/): [Storybook](https://ossewawiel.github.io/munserv/storybook/) for web, [Widgetbook](https://ossewawiel.github.io/munserv/widgetbook/) for mobile.
 
 ### Factory tick (unattended runs)
 
@@ -118,119 +137,17 @@ jq -nR --arg d "$(date +%F)" '[inputs | fromjson? | select(.date == $d) | .total
 
 **Budget.** The defaults are $10 a day and $5 per story run (decision D6). The clerk's call costs about $0.01 and counts toward the day. To change the caps, edit `DAILY_BUDGET_USD` and `RUN_BUDGET_USD` in `tick.env`; the next tick reads the new values. To change the hours, edit `TICK_FIRST_HOUR`, `TICK_LAST_HOUR` and `TICK_EVERY_HOURS`, then rerun the installer, which rewrites the timer. A run that hits its cap ends with subtype `error_max_budget_usd` in the ledger. Its PR or branch stays as it was.
 
-### MCP Integrations
-
-| Server | Purpose |
-|--------|---------|
-| **postgres** | Query database schema |
-| **memory** | Persist architectural decisions |
-| **github** | Manage branches and PRs |
-
-### Recommended Workflow
-
-```
-1. /add-story     → Define user requirement
-2. /add-endpoint  → Define API contract (if needed)
-3. /plan-feature  → Generate implementation plan
-4. cd backend && /dev-cycle  → Implement backend
-5. cd web && /dev-cycle      → Implement web
-6. cd mobile && /dev-cycle   → Implement mobile
-```
-
-## Tech Stack
-
-| Layer | Technology | Status |
-|-------|------------|--------|
-| Backend | Kotlin + Spring Boot 4.x | Ready |
-| Web | React 18 + TypeScript + MUI v7 | Ready |
-| Mobile | Flutter 3.x + Riverpod + Freezed | Ready |
-| Database | PostgreSQL + PostGIS | Ready |
-| Storage | Local uploads (MVP) | Ready |
-
-## MVP Features
-
-### Mobile App (Members)
-- Phone + OTP registration
-- PIN/biometric quick login
-- Report issues with photos and GPS
-- View issues on map
-- Track reported issues with status timeline
-
-### Web Dashboard (Admins)
-- Email/password login
-- Dashboard with statistics
-- Manage issue states
-- View heat report (priority ranking)
-- Member management
-
-## Issue Types
-
-- Potholes / road damage
-- Water pipe leaks
-- Sewage leaks
-- Broken traffic lights
-- Broken street lights
-- Illegal dumping
-
-## Architecture
-
-Each deployment is a **pod** — an independent instance with its own database and infrastructure. A pod serves one or more communities (wards, towns, regions).
-
-```
-┌─────────────────────────────────────────┐
-│                  Pod                     │
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐  │
-│  │ Sector  │  │ Sector  │  │ Sector  │  │
-│  │ Ward 42 │  │ Ward 43 │  │ Ward 44 │  │
-│  └─────────┘  └─────────┘  └─────────┘  │
-└─────────────────────────────────────────┘
-```
-
 ## Documentation
 
-### Quick Reference
-| Document | Description |
-|----------|-------------|
-| [Requirements](specs/requirements/) | User stories by platform |
-| [API Contract](specs/contracts/api.md) | API endpoints (source of truth) |
-| [Shared Types](specs/contracts/types.md) | Data type definitions |
-| [Architecture](specs/architecture/overview.md) | System architecture |
-| [Patterns](specs/architecture/patterns.md) | Code patterns |
-
-### Design system
 | Where | What |
 |---|---|
-| https://ossewawiel.github.io/munserv/ | Landing page for the published design catalogues (rebuilt on every merge to `master`) |
-| https://ossewawiel.github.io/munserv/storybook/ | Web components (Storybook), light and dark, with the token swatches |
-| https://ossewawiel.github.io/munserv/widgetbook/ | Mobile widgets (Widgetbook) on device frames |
-| [`design/`](design/README.md) | Tokens (the single source of colour and size), the component registries agents read, and the per-feature design canvases |
-
-### Domain language
-[`domain/`](domain/README.md) defines every term MunServ uses, with its states and its code names on each platform. `scripts/validate-domain-language.py` checks it against the code in CI.
-
-### Archived guides
-The discovery and MVP-era guides live in [`specs/archive/`](specs/archive/README.md). They explain history and are not maintained.
-
-### Platform Guides
-| Platform | CLAUDE.md | README |
-|----------|-----------|--------|
-| Backend | [backend/CLAUDE.md](backend/CLAUDE.md) | [backend/README.md](backend/README.md) |
-| Web | [web/CLAUDE.md](web/CLAUDE.md) | [web/README.md](web/README.md) |
-| Mobile | [mobile/CLAUDE.md](mobile/CLAUDE.md) | [mobile/README.md](mobile/README.md) |
+| [`domain/`](domain/README.md) | The vocabulary; `scripts/validate-domain-language.py` checks it against the code in CI |
+| [`specs/`](specs/README.md) | Requirements, API contract, shared types, architecture decisions, feature specs and handoffs |
+| [`design/`](design/README.md) | Tokens, component registries, design canvases |
+| [`backend/CLAUDE.md`](backend/CLAUDE.md), [`web/CLAUDE.md`](web/CLAUDE.md), [`mobile/CLAUDE.md`](mobile/CLAUDE.md), [`database/CLAUDE.md`](database/CLAUDE.md), [`infrastructure/CLAUDE.md`](infrastructure/CLAUDE.md) | The rules for each platform |
+| [`backend/README.md`](backend/README.md), [`web/README.md`](web/README.md), [`mobile/README.md`](mobile/README.md) | Platform setup |
+| [`specs/archive/`](specs/archive/README.md) | History from discovery and the MVP build; not maintained |
 
 ## Contributing
 
-This is an open source project. Communities should only pay for hosting costs — no licensing fees.
-
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/awesome`)
-3. Commit your changes
-4. Push and open a PR
-
-## License
-
-MIT
-
----
-
-*Built for communities, by communities.*
+See [`CONTRIBUTING.md`](CONTRIBUTING.md).

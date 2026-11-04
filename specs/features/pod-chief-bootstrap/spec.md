@@ -21,11 +21,11 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 | W23 | Super user creates Pod Chief | [#38](https://github.com/ossewawiel/munserv/issues/38) | |
 | W24 | Super user blocked after Pod Chief onboarded | [#39](https://github.com/ossewawiel/munserv/issues/39) | |
 | W25 | Pod Chief welcome email with temp password | [#40](https://github.com/ossewawiel/munserv/issues/40) | |
-| W26 | Pod Chief must change password on first login | [#41](https://github.com/ossewawiel/munserv/issues/41) | [Handoff](041-change-password-handoff.md) |
+| W26 | Pod Chief must change password on first login | [#41](https://github.com/ossewawiel/munserv/issues/41) | [Handoff](completed/041-change-password-handoff.md) |
 | W27 | Pod Chief completes optional profile info | [#42](https://github.com/ossewawiel/munserv/issues/42) | |
-| W28 | Pod Chief grants super user temporary access | [#43](https://github.com/ossewawiel/munserv/issues/43) | [Handoff](043-W28-grant-support-access-web.md) |
+| W28 | Pod Chief grants super user temporary access | [#43](https://github.com/ossewawiel/munserv/issues/43) | [Handoff](completed/043-W28-grant-support-access-web.md) |
 | W29 | Super user uses temporary access for debugging | [#44](https://github.com/ossewawiel/munserv/issues/44) | |
-| W30 | Pod Chief views/revokes super user sessions | [#45](https://github.com/ossewawiel/munserv/issues/45) | [Handoff](045-W30-support-sessions-web.md) |
+| W30 | Pod Chief views/revokes super user sessions | [#45](https://github.com/ossewawiel/munserv/issues/45) | [Handoff](completed/045-W30-support-sessions-web.md) |
 
 ### Backend (5 stories)
 
@@ -35,7 +35,7 @@ Additionally, Pod Chief can grant the super user temporary access for debugging/
 | B6 | Bootstrap eligibility check | [#47](https://github.com/ossewawiel/munserv/issues/47) | |
 | B7 | Bootstrap audit logging | [#48](https://github.com/ossewawiel/munserv/issues/48) | |
 | B8 | Temporary super user grant tracking | [#49](https://github.com/ossewawiel/munserv/issues/49) | [Handoff](completed/049-B8-support-grants-backend.md) |
-| B9 | Super user login with a support grant | [#68](https://github.com/ossewawiel/munserv/issues/68) | [Handoff](068-B9-support-grant-login-backend.md) |
+| B9 | Super user login with a support grant | [#68](https://github.com/ossewawiel/munserv/issues/68) | [Handoff](completed/068-B9-support-grant-login-backend.md) |
 
 ## Dependencies
 

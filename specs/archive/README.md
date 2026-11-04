@@ -30,3 +30,6 @@ Current sources of truth:
 | `Specification_Roadmap.md` | Document status tracker from the MVP phase |
 | `phases/` | Web registration phase handoffs |
 | Images and the `.docx` | Early theme references and a map-view note |
+| `features/` | Feature folders from before the handoff template: `ground-admin-messaging`, `issue-creation`, `issue-details-screen`, `issue-map-view`, `issue-state-history`, `mobile-theme-refinement`, `component-reusability`, `coding-standards-check`. Paths inside these files still name their old home under `specs/features/` |
+| `backend/docs/`, `backend/documents/` | Backend issue write-ups and the web-registration backend phase, moved from `backend/` |
+| `mobile/docs/`, `mobile/documents/` | Mobile issue write-ups and the web-registration mobile phase, moved from `mobile/` |
