@@ -481,7 +481,7 @@ class GroundAdminServiceTest {
             val result = service.revoke(adminId, memberId, "Performance issues")
 
             result.shouldBeInstanceOf<GroundAdminResult.Success>()
-            verify { memberRepository.save(match { !it.isGroundAdmin }) }
+            verify { memberRepository.save(match { it.groundAdminStatus == GroundAdminStatus.INACTIVE && !it.isCurrentGroundAdmin }) }
             verify { messageService.createMessage(any()) }
         }
 
@@ -526,16 +526,11 @@ class GroundAdminServiceTest {
         }
 
         @Test
-        fun `should demote when status set to INACTIVE`() {
-            val member = createTestMember(isGroundAdmin = true, groundAdminStatus = GroundAdminStatus.ACTIVE)
-
-            every { memberRepository.findById(memberId) } returns member
-            every { memberRepository.save(any()) } answers { firstArg() }
-
+        fun `should return ValidationError and not save when status set to INACTIVE`() {
             val result = service.updateStatus(adminId, memberId, GroundAdminStatus.INACTIVE)
 
-            result.shouldBeInstanceOf<GroundAdminResult.Success>()
-            verify { memberRepository.save(match { !it.isGroundAdmin }) }
+            result.shouldBeInstanceOf<GroundAdminResult.ValidationError>()
+            verify(exactly = 0) { memberRepository.save(any()) }
         }
 
         @Test

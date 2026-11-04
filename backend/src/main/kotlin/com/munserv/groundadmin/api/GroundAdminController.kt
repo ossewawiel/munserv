@@ -1,5 +1,6 @@
 package com.munserv.groundadmin.api
 
+import com.munserv.admin.domain.AdminRole
 import com.munserv.groundadmin.domain.GroundAdminApplicationId
 import com.munserv.groundadmin.service.GroundAdminResult
 import com.munserv.groundadmin.service.GroundAdminService
@@ -7,6 +8,8 @@ import com.munserv.shared.api.ErrorBody
 import com.munserv.shared.api.ErrorCodes
 import com.munserv.shared.api.ErrorResponse
 import com.munserv.shared.enums.GroundAdminStatus
+import com.munserv.shared.security.JwtAuthenticationFilter
+import com.munserv.shared.security.RequireRole
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
 import io.swagger.v3.oas.annotations.Operation
@@ -17,6 +20,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -203,19 +207,21 @@ class GroundAdminController(
         value = [
             ApiResponse(responseCode = "200", description = "Invitation sent"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
-            ApiResponse(responseCode = "403", description = "Member not in your sector"),
+            ApiResponse(responseCode = "403", description = "Requires an admin role, or member not in your sector"),
             ApiResponse(responseCode = "404", description = "Member not found"),
             ApiResponse(responseCode = "409", description = "Member already a Ground Admin or has pending application"),
         ],
     )
+    @RequireRole(AdminRole.SECTOR_ADMIN)
     @PostMapping("/members/{memberId}/ground-admin/invite")
     fun invite(
         @Parameter(description = "Member UUID to invite")
         @PathVariable memberId: UUID,
         @RequestBody request: InviteGroundAdminRequest,
-        @AuthenticationPrincipal adminId: String?,
+        @Parameter(hidden = true)
+        authentication: Authentication?,
     ): ResponseEntity<*> {
-        val adminIdValue = parseMemberId(adminId) ?: return unauthorizedResponse()
+        val adminIdValue = authentication.toAdminActor()
         val memberIdValue = MemberId(memberId)
 
         return when (val result = groundAdminService.invite(adminIdValue, memberIdValue, request.message)) {
@@ -235,19 +241,22 @@ class GroundAdminController(
         value = [
             ApiResponse(responseCode = "200", description = "Invitation revoked"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
+            ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Invitation not found"),
             ApiResponse(responseCode = "409", description = "Invitation already processed"),
         ],
     )
+    @RequireRole(AdminRole.SECTOR_ADMIN)
     @DeleteMapping("/members/{memberId}/ground-admin/invite/{applicationId}")
     fun revokeInvitation(
         @Parameter(description = "Member UUID whose invitation to revoke")
         @PathVariable memberId: UUID,
         @Parameter(description = "Application/Invitation UUID")
         @PathVariable applicationId: UUID,
-        @AuthenticationPrincipal adminId: String?,
+        @Parameter(hidden = true)
+        authentication: Authentication?,
     ): ResponseEntity<*> {
-        val adminIdValue = parseMemberId(adminId) ?: return unauthorizedResponse()
+        val adminIdValue = authentication.toAdminActor()
         val memberIdValue = MemberId(memberId)
         val applicationIdValue = GroundAdminApplicationId(applicationId)
 
@@ -275,18 +284,21 @@ class GroundAdminController(
         value = [
             ApiResponse(responseCode = "200", description = "Application approved"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
+            ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Application not found"),
             ApiResponse(responseCode = "409", description = "Cannot approve this application"),
         ],
     )
+    @RequireRole(AdminRole.SECTOR_ADMIN)
     @PostMapping("/members/{memberId}/ground-admin/approve")
     fun approve(
         @Parameter(description = "Member UUID whose application to approve")
         @PathVariable memberId: UUID,
         @RequestBody request: ApproveApplicationRequest,
-        @AuthenticationPrincipal adminId: String?,
+        @Parameter(hidden = true)
+        authentication: Authentication?,
     ): ResponseEntity<*> {
-        val adminIdValue = parseMemberId(adminId) ?: return unauthorizedResponse()
+        val adminIdValue = authentication.toAdminActor()
         val memberIdValue = MemberId(memberId)
         val applicationId = GroundAdminApplicationId.fromString(request.applicationId)
 
@@ -307,18 +319,21 @@ class GroundAdminController(
         value = [
             ApiResponse(responseCode = "200", description = "Application declined"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
+            ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Application not found"),
             ApiResponse(responseCode = "409", description = "Cannot decline this application"),
         ],
     )
+    @RequireRole(AdminRole.SECTOR_ADMIN)
     @PostMapping("/members/{memberId}/ground-admin/decline")
     fun decline(
         @Parameter(description = "Member UUID whose application to decline")
         @PathVariable memberId: UUID,
         @RequestBody request: DeclineApplicationRequest,
-        @AuthenticationPrincipal adminId: String?,
+        @Parameter(hidden = true)
+        authentication: Authentication?,
     ): ResponseEntity<*> {
-        val adminIdValue = parseMemberId(adminId) ?: return unauthorizedResponse()
+        val adminIdValue = authentication.toAdminActor()
         val memberIdValue = MemberId(memberId)
         val applicationId = GroundAdminApplicationId.fromString(request.applicationId)
 
@@ -347,18 +362,21 @@ class GroundAdminController(
         value = [
             ApiResponse(responseCode = "200", description = "Ground Admin status revoked"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
+            ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Member not found"),
             ApiResponse(responseCode = "409", description = "Member is not a Ground Admin"),
         ],
     )
+    @RequireRole(AdminRole.SECTOR_ADMIN)
     @PostMapping("/members/{memberId}/ground-admin/revoke")
     fun revoke(
         @Parameter(description = "Member UUID to revoke Ground Admin status from")
         @PathVariable memberId: UUID,
         @RequestBody request: RevokeGroundAdminRequest,
-        @AuthenticationPrincipal adminId: String?,
+        @Parameter(hidden = true)
+        authentication: Authentication?,
     ): ResponseEntity<*> {
-        val adminIdValue = parseMemberId(adminId) ?: return unauthorizedResponse()
+        val adminIdValue = authentication.toAdminActor()
         val memberIdValue = MemberId(memberId)
 
         return when (val result = groundAdminService.revoke(adminIdValue, memberIdValue, request.reason)) {
@@ -378,18 +396,21 @@ class GroundAdminController(
         value = [
             ApiResponse(responseCode = "200", description = "Status updated"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
+            ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Member not found"),
             ApiResponse(responseCode = "409", description = "Member is not a Ground Admin"),
         ],
     )
+    @RequireRole(AdminRole.SECTOR_ADMIN)
     @PatchMapping("/members/{memberId}/ground-admin/status")
     fun updateStatus(
         @Parameter(description = "Member UUID to update status for")
         @PathVariable memberId: UUID,
         @RequestBody request: UpdateGroundAdminStatusRequest,
-        @AuthenticationPrincipal adminId: String?,
+        @Parameter(hidden = true)
+        authentication: Authentication?,
     ): ResponseEntity<*> {
-        val adminIdValue = parseMemberId(adminId) ?: return unauthorizedResponse()
+        val adminIdValue = authentication.toAdminActor()
         val memberIdValue = MemberId(memberId)
 
         return when (val result = groundAdminService.updateStatus(adminIdValue, memberIdValue, request.status)) {
@@ -409,20 +430,17 @@ class GroundAdminController(
         value = [
             ApiResponse(responseCode = "200", description = "Ground Admins list retrieved"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
+            ApiResponse(responseCode = "403", description = "Requires an admin role"),
         ],
     )
+    @RequireRole(AdminRole.SECTOR_ADMIN)
     @GetMapping("/sectors/{sectorId}/ground-admins")
     fun listGroundAdmins(
         @Parameter(description = "Sector UUID")
         @PathVariable sectorId: UUID,
         @Parameter(description = "Filter by status (optional)")
         @RequestParam(required = false) status: GroundAdminStatus?,
-        @AuthenticationPrincipal adminId: String?,
     ): ResponseEntity<*> {
-        if (parseMemberId(adminId) == null) {
-            return unauthorizedResponse()
-        }
-
         val sectorIdValue = SectorId(sectorId)
         val response = groundAdminService.listGroundAdmins(sectorIdValue, status)
         return ResponseEntity.ok(response)
@@ -461,4 +479,15 @@ class GroundAdminController(
         ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(ErrorResponse(ErrorBody(ErrorCodes.VALIDATION_ERROR, errors.joinToString(", "))))
+}
+
+/**
+ * The admin behind the call, for the processed_by and invited_by columns.
+ * Null when unauthenticated, for a support grant (its subject is a grant id, not an admin id), or a non-UUID subject.
+ */
+private fun Authentication?.toAdminActor(): MemberId? {
+    val auth = this ?: return null
+    if (auth.authorities.any { it.authority == JwtAuthenticationFilter.SUPPORT_GRANT_AUTHORITY }) return null
+    val subject = auth.principal as? String ?: return null
+    return runCatching { MemberId(UUID.fromString(subject)) }.getOrNull()
 }

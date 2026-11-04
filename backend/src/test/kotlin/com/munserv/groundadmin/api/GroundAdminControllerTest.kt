@@ -47,6 +47,8 @@ class GroundAdminControllerTest {
 
     private val testMemberIdStr = "550e8400-e29b-41d4-a716-446655440000"
     private lateinit var memberToken: String
+    private val adminIdStr = "550e8400-e29b-41d4-a716-446655440020"
+    private lateinit var adminToken: String
 
     private val sectorId = UUID.randomUUID()
     private val applicationId = UUID.randomUUID()
@@ -55,6 +57,7 @@ class GroundAdminControllerTest {
     fun setup() {
         val memberId = MemberId.fromString(testMemberIdStr)
         memberToken = jwtService.generateAccessToken(memberId, "member")
+        adminToken = jwtService.generateAccessToken(MemberId.fromString(adminIdStr), "admin")
     }
 
     @Nested
@@ -212,7 +215,7 @@ class GroundAdminControllerTest {
     inner class Invite {
         @Test
         fun `POST invite returns 200 on success`() {
-            val adminId = MemberId.fromString(testMemberIdStr)
+            val adminId = MemberId.fromString(adminIdStr)
             val targetMemberId = MemberId.generate()
 
             every {
@@ -229,7 +232,7 @@ class GroundAdminControllerTest {
 
             mockMvc
                 .post("/api/v1/members/${targetMemberId.value}/ground-admin/invite") {
-                    header("Authorization", "Bearer $memberToken")
+                    header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                 }.andExpect {
@@ -239,7 +242,7 @@ class GroundAdminControllerTest {
 
         @Test
         fun `POST invite returns 403 when member not in sector`() {
-            val adminId = MemberId.fromString(testMemberIdStr)
+            val adminId = MemberId.fromString(adminIdStr)
             val targetMemberId = MemberId.generate()
 
             every {
@@ -250,7 +253,7 @@ class GroundAdminControllerTest {
 
             mockMvc
                 .post("/api/v1/members/${targetMemberId.value}/ground-admin/invite") {
-                    header("Authorization", "Bearer $memberToken")
+                    header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                 }.andExpect {
@@ -263,7 +266,7 @@ class GroundAdminControllerTest {
     inner class Approve {
         @Test
         fun `POST approve returns 200 on success`() {
-            val adminId = MemberId.fromString(testMemberIdStr)
+            val adminId = MemberId.fromString(adminIdStr)
             val targetMemberId = MemberId.generate()
             val appId = GroundAdminApplicationId.generate()
 
@@ -281,7 +284,7 @@ class GroundAdminControllerTest {
 
             mockMvc
                 .post("/api/v1/members/${targetMemberId.value}/ground-admin/approve") {
-                    header("Authorization", "Bearer $memberToken")
+                    header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                 }.andExpect {
@@ -294,7 +297,7 @@ class GroundAdminControllerTest {
     inner class Revoke {
         @Test
         fun `POST revoke returns 200 on success`() {
-            val adminId = MemberId.fromString(testMemberIdStr)
+            val adminId = MemberId.fromString(adminIdStr)
             val targetMemberId = MemberId.generate()
 
             every {
@@ -305,7 +308,7 @@ class GroundAdminControllerTest {
 
             mockMvc
                 .post("/api/v1/members/${targetMemberId.value}/ground-admin/revoke") {
-                    header("Authorization", "Bearer $memberToken")
+                    header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                 }.andExpect {
@@ -315,7 +318,7 @@ class GroundAdminControllerTest {
 
         @Test
         fun `POST revoke returns 409 when member not a Ground Admin`() {
-            val adminId = MemberId.fromString(testMemberIdStr)
+            val adminId = MemberId.fromString(adminIdStr)
             val targetMemberId = MemberId.generate()
 
             every {
@@ -326,7 +329,7 @@ class GroundAdminControllerTest {
 
             mockMvc
                 .post("/api/v1/members/${targetMemberId.value}/ground-admin/revoke") {
-                    header("Authorization", "Bearer $memberToken")
+                    header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                 }.andExpect {
@@ -339,7 +342,7 @@ class GroundAdminControllerTest {
     inner class UpdateStatus {
         @Test
         fun `PATCH status returns 200 on success`() {
-            val adminId = MemberId.fromString(testMemberIdStr)
+            val adminId = MemberId.fromString(adminIdStr)
             val targetMemberId = MemberId.generate()
 
             every {
@@ -350,7 +353,7 @@ class GroundAdminControllerTest {
 
             mockMvc
                 .patch("/api/v1/members/${targetMemberId.value}/ground-admin/status") {
-                    header("Authorization", "Bearer $memberToken")
+                    header("Authorization", "Bearer $adminToken")
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsString(request)
                 }.andExpect {
@@ -372,7 +375,6 @@ class GroundAdminControllerTest {
                                 id = UUID.randomUUID().toString(),
                                 memberId = UUID.randomUUID().toString(),
                                 name = "John Doe",
-                                phone = "+27123456789",
                                 status = GroundAdminStatus.ACTIVE,
                                 since = Instant.now(),
                                 responseRate = 98.5,
@@ -386,7 +388,7 @@ class GroundAdminControllerTest {
 
             mockMvc
                 .get("/api/v1/sectors/$sectorId/ground-admins") {
-                    header("Authorization", "Bearer $memberToken")
+                    header("Authorization", "Bearer $adminToken")
                 }.andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
@@ -404,7 +406,7 @@ class GroundAdminControllerTest {
 
             mockMvc
                 .get("/api/v1/sectors/$sectorId/ground-admins") {
-                    header("Authorization", "Bearer $memberToken")
+                    header("Authorization", "Bearer $adminToken")
                     param("status", "ACTIVE")
                 }.andExpect {
                     status { isOk() }

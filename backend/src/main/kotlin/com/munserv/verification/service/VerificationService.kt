@@ -228,7 +228,7 @@ class VerificationService(
             memberRepository.findById(memberId)
                 ?: return VerificationResult.NotFound("Member not found")
 
-        if (!member.isGroundAdmin) {
+        if (!member.isCurrentGroundAdmin) {
             return VerificationResult.Success(PendingVerificationsResponse(items = emptyList()))
         }
 

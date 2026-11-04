@@ -47,7 +47,7 @@ data class GroundAdminApplication(
      * Admin approves a member's application.
      * Transitions status from PENDING to APPROVED.
      */
-    fun approve(processedBy: MemberId): GroundAdminApplication =
+    fun approve(processedBy: MemberId?): GroundAdminApplication =
         copy(
             status = ApplicationStatus.APPROVED,
             processedBy = processedBy,
@@ -60,7 +60,7 @@ data class GroundAdminApplication(
      * Transitions status from PENDING to DECLINED.
      */
     fun decline(
-        processedBy: MemberId,
+        processedBy: MemberId?,
         reason: String?,
     ): GroundAdminApplication =
         copy(
@@ -108,7 +108,7 @@ data class GroundAdminApplication(
      * Admin revokes/cancels a pending invitation.
      * Transitions status from PENDING to WITHDRAWN.
      */
-    fun revokeByAdmin(revokedBy: MemberId): GroundAdminApplication =
+    fun revokeByAdmin(revokedBy: MemberId?): GroundAdminApplication =
         copy(
             status = ApplicationStatus.WITHDRAWN,
             processedBy = revokedBy,
@@ -137,7 +137,7 @@ data class GroundAdminApplication(
         fun createInvitation(
             memberId: MemberId,
             sectorId: SectorId,
-            invitedBy: MemberId,
+            invitedBy: MemberId?,
         ): GroundAdminApplication =
             GroundAdminApplication(
                 id = GroundAdminApplicationId.generate(),

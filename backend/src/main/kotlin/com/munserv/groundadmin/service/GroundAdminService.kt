@@ -41,6 +41,9 @@ class GroundAdminService(
     companion object {
         private const val ERROR_APPLICATION_NOT_FOUND = "Application not found"
         private const val ERROR_MEMBER_NOT_FOUND = "Member not found"
+        private const val SUPPORT_SENDER_NAME = "MunServ support"
+        private const val SENDER_TYPE_ADMIN = "admin"
+        private const val SENDER_TYPE_SYSTEM = "system"
     }
 
     // ==================== Member Actions ====================
@@ -54,7 +57,7 @@ class GroundAdminService(
             memberRepository.findById(memberId)
                 ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
-        if (member.isGroundAdmin) {
+        if (member.isCurrentGroundAdmin) {
             return GroundAdminResult.Conflict("Already a Ground Admin")
         }
 
@@ -182,7 +185,7 @@ class GroundAdminService(
             memberRepository.findById(memberId)
                 ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
-        if (!member.isGroundAdmin) {
+        if (!member.isCurrentGroundAdmin) {
             return GroundAdminResult.Conflict("Not a Ground Admin")
         }
 
@@ -216,7 +219,7 @@ class GroundAdminService(
             memberRepository.findById(memberId)
                 ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
-        if (!member.isGroundAdmin) {
+        if (!member.isCurrentGroundAdmin) {
             return GroundAdminResult.Success(null)
         }
 
@@ -240,24 +243,26 @@ class GroundAdminService(
      */
     @Transactional
     fun invite(
-        adminId: MemberId,
+        adminId: MemberId?,
         memberId: MemberId,
         message: String?,
     ): GroundAdminResult {
-        // Look up admin from admins table (not members table)
+        // Look up admin from admins table (not members table); a support grant has no admin row
         val admin =
-            adminRepository.findById(AdminId(adminId.value))
-                ?: return GroundAdminResult.NotFound("Admin not found")
+            adminId?.let {
+                adminRepository.findById(AdminId(it.value))
+                    ?: return GroundAdminResult.NotFound("Admin not found")
+            }
 
         val member =
             memberRepository.findById(memberId)
                 ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
-        if (member.sectorId != admin.sectorId) {
+        if (admin != null && member.sectorId != admin.sectorId) {
             return GroundAdminResult.Forbidden("Member not in your sector")
         }
 
-        if (member.isGroundAdmin) {
+        if (member.isCurrentGroundAdmin) {
             return GroundAdminResult.Conflict("Member is already a Ground Admin")
         }
 
@@ -269,6 +274,8 @@ class GroundAdminService(
         val invitation = GroundAdminApplication.createInvitation(memberId, member.sectorId, adminId)
         val saved = applicationRepository.save(invitation)
 
+        val inviterName = admin?.fullName ?: SUPPORT_SENDER_NAME
+
         // Get sector name
         val sector = sectorRepository.findById(member.sectorId)!!
 
@@ -277,11 +284,11 @@ class GroundAdminService(
             MessageEntity(
                 type = MessageType.GROUND_ADMIN_INVITATION,
                 title = "Ground Admin Invitation",
-                body = "${admin.fullName} has invited you to become a Ground Admin for ${sector.name}${message?.let { ": $it" } ?: "."}",
+                body = "$inviterName has invited you to become a Ground Admin for ${sector.name}${message?.let { ": $it" } ?: "."}",
                 recipientId = memberId.value,
                 recipientType = "member",
-                senderId = adminId.value,
-                senderType = "admin",
+                senderId = adminId?.value,
+                senderType = senderTypeOf(adminId),
                 relatedEntityId = saved.id.value,
                 relatedEntityType = "ground_admin_application",
                 actionType = "accept_decline",
@@ -296,7 +303,7 @@ class GroundAdminService(
      */
     @Transactional
     fun revokeInvitation(
-        adminId: MemberId,
+        adminId: MemberId?,
         memberId: MemberId,
         applicationId: GroundAdminApplicationId,
     ): GroundAdminResult {
@@ -328,7 +335,7 @@ class GroundAdminService(
      */
     @Transactional
     fun approveApplication(
-        adminId: MemberId,
+        adminId: MemberId?,
         memberId: MemberId,
         applicationId: GroundAdminApplicationId,
     ): GroundAdminResult {
@@ -361,8 +368,8 @@ class GroundAdminService(
                 body = "Congratulations! Your application to become a Ground Admin has been approved.",
                 recipientId = memberId.value,
                 recipientType = "member",
-                senderId = adminId.value,
-                senderType = "member",
+                senderId = adminId?.value,
+                senderType = senderTypeOf(adminId),
                 actionType = "acknowledge",
             )
         messageService.createMessage(message)
@@ -375,7 +382,7 @@ class GroundAdminService(
      */
     @Transactional
     fun declineApplication(
-        adminId: MemberId,
+        adminId: MemberId?,
         memberId: MemberId,
         applicationId: GroundAdminApplicationId,
         reason: String,
@@ -403,8 +410,8 @@ class GroundAdminService(
                 body = "Your application to become a Ground Admin has been declined: $reason",
                 recipientId = memberId.value,
                 recipientType = "member",
-                senderId = adminId.value,
-                senderType = "member",
+                senderId = adminId?.value,
+                senderType = senderTypeOf(adminId),
                 actionType = "acknowledge",
             )
         messageService.createMessage(message)
@@ -417,7 +424,7 @@ class GroundAdminService(
      */
     @Transactional
     fun revoke(
-        adminId: MemberId,
+        adminId: MemberId?,
         memberId: MemberId,
         reason: String,
     ): GroundAdminResult {
@@ -425,7 +432,7 @@ class GroundAdminService(
             memberRepository.findById(memberId)
                 ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
-        if (!member.isGroundAdmin) {
+        if (!member.isCurrentGroundAdmin) {
             return GroundAdminResult.Conflict("Member is not a Ground Admin")
         }
 
@@ -441,8 +448,8 @@ class GroundAdminService(
                 body = "Your Ground Admin status has been revoked: $reason",
                 recipientId = memberId.value,
                 recipientType = "member",
-                senderId = adminId.value,
-                senderType = "member",
+                senderId = adminId?.value,
+                senderType = senderTypeOf(adminId),
                 actionType = "acknowledge",
             )
         messageService.createMessage(message)
@@ -455,24 +462,23 @@ class GroundAdminService(
      */
     @Transactional
     fun updateStatus(
-        adminId: MemberId,
+        adminId: MemberId?,
         memberId: MemberId,
         status: GroundAdminStatus,
     ): GroundAdminResult {
+        if (status == GroundAdminStatus.INACTIVE) {
+            return GroundAdminResult.ValidationError(listOf("Use revoke to end the Ground Admin role"))
+        }
+
         val member =
             memberRepository.findById(memberId)
                 ?: return GroundAdminResult.NotFound(ERROR_MEMBER_NOT_FOUND)
 
-        if (!member.isGroundAdmin) {
+        if (!member.isCurrentGroundAdmin) {
             return GroundAdminResult.Conflict("Member is not a Ground Admin")
         }
 
-        val updated =
-            when (status) {
-                GroundAdminStatus.ACTIVE -> member.reactivateGroundAdmin()
-                GroundAdminStatus.ON_HOLD -> member.setGroundAdminOnHold()
-                GroundAdminStatus.INACTIVE -> member.demoteFromGroundAdmin()
-            }
+        val updated = if (status == GroundAdminStatus.ACTIVE) member.reactivateGroundAdmin() else member.setGroundAdminOnHold()
         memberRepository.save(updated)
 
         return GroundAdminResult.Success(mapOf("status" to status.toApiString()))
@@ -499,7 +505,6 @@ class GroundAdminService(
                     id = member.id.toString(),
                     memberId = member.id.toString(),
                     name = member.fullName,
-                    phone = member.phone,
                     status = member.groundAdminStatus!!,
                     since = member.groundAdminSince!!,
                     responseRate = member.groundAdminResponseRate?.toDouble() ?: 100.0,
@@ -514,6 +519,8 @@ class GroundAdminService(
     }
 
     // ==================== Helpers ====================
+
+    private fun senderTypeOf(adminId: MemberId?): String = if (adminId == null) SENDER_TYPE_SYSTEM else SENDER_TYPE_ADMIN
 
     private fun notifySectorAdminsOfApplication(
         sectorId: SectorId,

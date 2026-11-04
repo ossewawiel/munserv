@@ -48,6 +48,10 @@ data class Member(
     val isActive: Boolean
         get() = status == MemberStatus.Active
 
+    /** True while the member holds the Ground Admin role: the flag is set and the status is not inactive. */
+    val isCurrentGroundAdmin: Boolean
+        get() = isGroundAdmin && groundAdminStatus != GroundAdminStatus.INACTIVE
+
     val canLogin: Boolean
         get() = status == MemberStatus.Active && passwordHash != null
 
@@ -80,12 +84,11 @@ data class Member(
         )
 
     /**
-     * Removes Ground Admin status from this member.
-     * Sets status to INACTIVE but preserves historical data.
+     * Ends the Ground Admin role of this member.
+     * Sets status to INACTIVE and keeps is_ground_admin = true, so the history and the database check stay valid.
      */
     fun demoteFromGroundAdmin(): Member =
         copy(
-            isGroundAdmin = false,
             groundAdminStatus = GroundAdminStatus.INACTIVE,
             updatedAt = Instant.now(),
         )

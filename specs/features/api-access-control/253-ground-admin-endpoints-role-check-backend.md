@@ -3,7 +3,7 @@ issue: 253
 story: FIX253
 title: "Only admins and support grants may manage ground admins, and revoke works"
 platform: backend
-status: pending
+status: completed
 depends_on: []
 touches: [api-access-control]
 ui: false
@@ -14,8 +14,21 @@ design_artboards: []
 design_approved: false
 created_by: investigator
 created_at: "2026-11-04"
-files_changed: []
-tests_added: []
+files_changed:
+  - backend/src/main/kotlin/com/munserv/auth/domain/Member.kt
+  - backend/src/main/kotlin/com/munserv/groundadmin/domain/GroundAdminApplication.kt
+  - backend/src/main/kotlin/com/munserv/groundadmin/service/GroundAdminService.kt
+  - backend/src/main/kotlin/com/munserv/groundadmin/api/GroundAdminController.kt
+  - backend/src/main/kotlin/com/munserv/groundadmin/api/GroundAdminDto.kt
+  - backend/src/main/kotlin/com/munserv/verification/service/VerificationService.kt
+  - backend/src/main/kotlin/com/munserv/admin/api/AdminController.kt
+  - backend/src/test/kotlin/com/munserv/groundadmin/api/GroundAdminControllerTest.kt
+  - backend/src/test/kotlin/com/munserv/groundadmin/service/GroundAdminServiceTest.kt
+  - backend/src/test/kotlin/com/munserv/auth/domain/MemberGroundAdminTest.kt
+  - domain/ground-admin.md
+  - specs/contracts/api.md
+tests_added:
+  - backend/src/test/kotlin/com/munserv/groundadmin/api/GroundAdminEndpointsAccessTest.kt
 ---
 
 # #253 · Ground admin management checks the role, and revoke works (Backend)
