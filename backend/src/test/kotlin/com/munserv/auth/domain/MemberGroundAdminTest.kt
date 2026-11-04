@@ -124,7 +124,7 @@ class MemberGroundAdminTest {
     @Nested
     inner class DemoteFromGroundAdmin {
         @Test
-        fun `demoteFromGroundAdmin should set isGroundAdmin to false`() {
+        fun `demoteFromGroundAdmin should keep the flag and end the current role`() {
             val member =
                 createMember(
                     isGroundAdmin = true,
@@ -135,8 +135,9 @@ class MemberGroundAdminTest {
 
             val demoted = member.demoteFromGroundAdmin()
 
-            demoted.isGroundAdmin shouldBe false
+            demoted.isGroundAdmin shouldBe true
             demoted.groundAdminStatus shouldBe GroundAdminStatus.INACTIVE
+            demoted.isCurrentGroundAdmin shouldBe false
             demoted.updatedAt shouldNotBe member.updatedAt
         }
 

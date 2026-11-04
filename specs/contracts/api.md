@@ -239,6 +239,12 @@ Invite member to become Ground Admin (admin only).
 **Response:** `{ applicationId: string, status: 'pending' }`
 **Errors:** 401 Unauthorized | 403 Forbidden | 404 Member not found | 409 Already Ground Admin | 409 Already invited
 
+### DELETE /members/{id}/ground-admin/invite/{applicationId}
+Revoke a pending Ground Admin invitation (admin only).
+
+**Response:** `{ applicationId: string, status: 'revoked' }`
+**Errors:** 400 Not an invitation | 401 Unauthorized | 403 Forbidden | 404 Not found | 409 Already processed
+
 ### POST /members/{id}/ground-admin/approve
 Approve Ground Admin application (admin only).
 
@@ -263,9 +269,9 @@ Revoke Ground Admin status (admin only).
 ### PATCH /members/{id}/ground-admin/status
 Update Ground Admin status (admin only).
 
-**Request:** `{ status: 'active' | 'on_hold' }`
+**Request:** `{ status: 'active' | 'on_hold' }` (`inactive` is refused: use revoke)
 **Response:** `Member`
-**Errors:** 401 Unauthorized | 403 Forbidden | 404 Member not found | 409 Not a Ground Admin
+**Errors:** 400 `inactive` | 401 Unauthorized | 403 Forbidden | 404 Member not found | 409 Not a Ground Admin
 
 ---
 
@@ -317,7 +323,7 @@ Get sector details.
 **Errors:** 404 Not found
 
 ### GET /sectors/{id}/ground-admins
-List Ground Admins in sector.
+List Ground Admins in sector (admin only).
 
 **Query:** `?status={status}` (optional filter: active, on_hold, inactive)
 **Response:**

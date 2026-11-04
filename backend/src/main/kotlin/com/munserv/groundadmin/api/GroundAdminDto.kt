@@ -59,7 +59,6 @@ data class GroundAdminResponse(
     val id: String,
     val memberId: String,
     val name: String,
-    val phone: String,
     val status: GroundAdminStatus,
     val since: Instant,
     val responseRate: Double,

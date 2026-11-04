@@ -9,7 +9,7 @@ Sector administrators need eyes on the street. Ground admins are members with ex
 ## Code names
 | Platform | Identifier |
 |---|---|
-| Kotlin | `com.munserv.groundadmin.domain.GroundAdminApplication`, `ApplicationStatus`, `ApplicationType`, `GroundAdminStatus`, flags on `Member` (`isGroundAdmin`, `groundAdminStatus`, `groundAdminSince`, `groundAdminResponseRate`) |
+| Kotlin | `com.munserv.groundadmin.domain.GroundAdminApplication`, `ApplicationStatus`, `ApplicationType`, `GroundAdminStatus`, flags on `Member` (`isGroundAdmin`, `isCurrentGroundAdmin`, `groundAdminStatus`, `groundAdminSince`, `groundAdminResponseRate`) |
 | Database | `ground_admin_applications`, enum `ground_admin_status`, columns on `members` |
 | TypeScript | `GroundAdmin`, `GroundAdminStatus`, `GroundAdminApplication` |
 | Dart | `GroundAdminStatus`, ground admin pages |
@@ -28,6 +28,7 @@ Application status: `pending` → `approved` | `declined` (application path) or 
 - A ground admin is always also a [member](member.md) of the same sector.
 - A sector's minimum number of ground admins is a sector setting; the portal warns below it.
 - Revocation and step-down produce [messages](message.md).
+- An ended role keeps `is_ground_admin = true` with status `inactive`; the member returns only through a new application or invitation. `isCurrentGroundAdmin` is true only while the flag is set and the status is not `inactive`.
 
 ## Relationships
 - Is a [member](member.md); belongs to a [sector](sector.md); handles [verifications](verification.md).

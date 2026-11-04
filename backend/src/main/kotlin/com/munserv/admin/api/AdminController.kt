@@ -199,7 +199,7 @@ class AdminController(
         val allMembers: List<Member> =
             when {
                 isGroundAdmin == true -> {
-                    memberRepository.findBySectorIdAndIsGroundAdmin(id, true)
+                    memberRepository.findBySectorIdAndIsGroundAdmin(id, true).filter { it.isCurrentGroundAdmin }
                 }
 
                 hasPendingApplication == true || hasInvitationPending == true -> {
@@ -297,8 +297,8 @@ class AdminController(
         status = status,
         issueCount = issueCount,
         joinedAt = createdAt,
-        isGroundAdmin = isGroundAdmin,
-        groundAdminStatus = groundAdminStatus,
+        isGroundAdmin = isCurrentGroundAdmin,
+        groundAdminStatus = groundAdminStatus.takeIf { isCurrentGroundAdmin },
         hasPendingApplication = hasPendingApplication,
         hasInvitationPending = hasInvitationPending,
         pendingApplicationId = pendingApplicationId,
