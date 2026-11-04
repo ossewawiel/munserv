@@ -8,7 +8,7 @@ Read-only. Run it from the checkout the tick uses: the tick ledger and the cost 
 outside git, so a fresh worktree has neither.
 
 Usage: python3 scripts/retro-gather.py [--since YYYY-MM-DD]
-       --since defaults to the date in .claude/metrics/last-retro.
+       --since defaults to the date in specs/metrics/last-retro.
 Env:   MUNSERV_FACTORY_STATE (default ~/.local/state/munserv-factory)
 Exit:  0, or 2 when no start date is given or found.
 """
@@ -31,7 +31,7 @@ from scripts.console import cost  # noqa: E402
 from scripts.console.config import CONFIG  # noqa: E402
 from scripts.console.pipeline import _verdict  # noqa: E402
 
-LAST_RETRO = ROOT / ".claude" / "metrics" / "last-retro"
+LAST_RETRO = ROOT / "specs" / "metrics" / "last-retro"
 GATE_LABELS = ("source:eyeball", "source:review", "source:smoke")
 MAX_PRS = 200
 MAX_RED_RUNS = 30

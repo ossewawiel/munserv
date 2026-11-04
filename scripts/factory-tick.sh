@@ -168,7 +168,7 @@ fi
 # Weekly retro, once per RETRO_WEEKDAY: any retro line in today's ledger (run, failed or capped) means
 # it was tried, and a last-retro of today means someone ran it by hand. A failed retro never stops the tick.
 retro_tried_today() {
-  [[ "$(cat "$REPO_DIR/.claude/metrics/last-retro" 2>/dev/null)" == "$(date +%F)" ]] && return 0
+  [[ "$(cat "$REPO_DIR/specs/metrics/last-retro" 2>/dev/null)" == "$(date +%F)" ]] && return 0
   [[ -f "$LEDGER" ]] && jq -enR --arg d "$(date +%F)" \
     'first(inputs | fromjson? | select(.date == $d and .kind == "retro")) // false' "$LEDGER" >/dev/null
 }
