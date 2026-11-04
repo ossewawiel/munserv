@@ -4,7 +4,8 @@
 # On every exit after the lock (skip, stop or run) the pinned "Waiting on you" issue is refreshed from
 # `python3 -m scripts.console inbox --publish`; it comments, mentioning the owner, only when items arrived.
 #
-# Order: pause file -> lock -> hours window -> fast-forward master -> daily budget -> on RETRO_WEEKDAY,
+# Order: pause file -> lock -> hours window -> fast-forward master -> requirement rows synced from
+# GitHub -> daily budget -> on RETRO_WEEKDAY,
 # the day's first tick runs `/factory-retro` once (Opus, capped at RETRO_BUDGET_USD) -> clerk picks up
 # to STORIES_PER_TICK dispatchable stories (Haiku, structured output) -> one `/factory story <n>` run
 # per story (Sonnet), each capped at the smaller of RUN_BUDGET_USD and what is left of today's budget.
@@ -157,6 +158,27 @@ for ((attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++)); do
 done
 ((fetched)) || stop "git fetch failed after $FETCH_ATTEMPTS attempts"
 git merge -q --ff-only origin/master || stop "master cannot fast-forward to origin/master"
+
+# Bring specs/requirements back in step with GitHub from a throwaway worktree: closing an issue drifts
+# a row, and CI checks only the rows a PR changes. auto-pr.yml opens and merges the branch. Costs no Claude.
+sync_requirements() {
+  [[ -f scripts/render-requirements.py ]] || return 0
+  python3 scripts/render-requirements.py --check >/dev/null 2>&1 && return 0
+  local open branch="chore/sync-requirements-$TICK_ID" dir=".claude/worktrees/requirements-$TICK_ID" rc=0
+  open="$(gh pr list --state open --json headRefName \
+    --jq '[.[] | select(.headRefName | startswith("chore/sync-requirements-"))] | length' 2>/dev/null || true)"
+  [[ "${open:-0}" == 0 ]] || return 0
+  git worktree add -q "$dir" -b "$branch" origin/master || return 1
+  (cd "$dir" && python3 scripts/render-requirements.py >/dev/null && git add specs/requirements \
+    && git commit -q -m "chore(specs): sync requirement status from GitHub" && git push -q origin "$branch") || rc=$?
+  git worktree remove --force "$dir" || rc=1
+  git branch -qD "$branch" || rc=1
+  ((rc == 0)) && record requirements_sync --arg branch "$branch"
+  return "$rc"
+}
+if ((!DRY_RUN)); then
+  sync_requirements || echo "factory-tick: requirements sync failed; the next tick retries" >&2
+fi
 
 left="$(left_today)"
 if jq -en "$left <= 0" >/dev/null; then

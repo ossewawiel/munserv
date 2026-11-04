@@ -27,16 +27,16 @@ Copy `specs/features/_template/story-handoff.md` to `specs/features/<name>/<issu
 - Steps: one file per step with its test. Name real paths that follow the platform card's layout; check with Grep that referenced classes exist.
 - `touches`: the feature folders edited, so the orchestrator can serialise overlapping stories.
 - `user_facing: true` for any story whose change a member, administrator or integrator sees or feels without reading code (a screen, an API response, a mail, data they read); `false` for internal work (refactors, CI, infra, docs, specs). Write an `Eyeball` block only when `ui: true` or `user_facing: true`; otherwise omit the section.
-- `Eyeball` (only for `ui: true` or `user_facing: true` stories): 2 to 6 checks, in the schema the template shows, that together cover every acceptance
+- `Eyeball` (only for `ui: true` or `user_facing: true` stories): 2 to 6 checks, in the schema the template shows and by the rules in `specs/features/_template/eyeball-reference.md` (read it; do not copy it), that together cover every acceptance
   criterion. Pick a real account key from `scripts/console/accounts.yaml` (or `none`), the real
   services the check needs, and the URL the story should end up serving at (the implementer
-  corrects it if the actual route differs). Steps follow the template's plain-English rule: one action per step,
+  corrects it if the actual route differs). Steps follow the reference's plain-English rule: one action per step,
   at most 20 words, no jargon; a terminal command is the command alone in backticks, so the TUI can run it. Expect is one sentence
   a tester can judge without guessing.
 - `ui: true` for any story that adds or changes a screen, dialog or visible component; the orchestrator then requires an approved canvas before dispatch. In Steps, name the artboard each screen must match (`design/canvases/<feature>/<Artboard>.dc.html`) once the designer has produced it; if planning before the canvas exists, write "match artboard: to be produced by designer" and the designer fills the names in.
 - Do not: list the tempting mistakes for this story.
 - Done when: the platform's exact gate commands.
-A handoff longer than about 120 lines means the story is too big: split it and say so.
+CI refuses a new handoff over 120 lines: the story is too big, so split it and say so. Check with `python3 scripts/lint-handoffs.py <handoff>`.
 
 ## Output
 Mode A: the approved table, created issue numbers, milestone URL, paths of the spec and handoffs. Mode B: the handoff path and a three-line summary. Never claim an issue was created unless the `gh` command returned its URL.

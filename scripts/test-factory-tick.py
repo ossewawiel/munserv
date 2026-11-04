@@ -41,6 +41,8 @@ if sys.argv[1:3] == ["issue", "list"]:
     print("")
 elif sys.argv[1:3] == ["issue", "create"]:
     print("https://github.com/o/r/issues/999")
+elif sys.argv[1:3] == ["pr", "list"]:
+    print(os.environ.get("STUB_OPEN_SYNC_PRS", "0"))
 """
 
 
@@ -314,6 +316,74 @@ def case_retro_not_in_dry_run(sb: Sandbox) -> list[str]:
     ] if isinstance(e, str)]
 
 
+RENDER_STUB = r"""#!/usr/bin/env python3
+import os, pathlib, sys
+if "--check" in sys.argv:
+    sys.exit(int(os.environ.get("STUB_DRIFT", "0")))
+row = pathlib.Path("specs/requirements/web.md")
+row.parent.mkdir(parents=True, exist_ok=True)
+row.write_text("rendered\\n")
+"""
+GIT_IDENTITY = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
+
+
+def install_render_stub(sb: Sandbox) -> None:
+    """Commit a stub render-requirements.py to origin/master; the sync's worktree runs that copy."""
+    (sb.repo / "scripts").mkdir(exist_ok=True)
+    write_exe(sb.repo / "scripts" / "render-requirements.py", RENDER_STUB)
+    git("add", ".", cwd=sb.repo)
+    git("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "-m", "render stub", cwd=sb.repo)
+    git("push", "-q", "origin", "master", cwd=sb.repo)
+
+
+def sync_branches(sb: Sandbox) -> list[str]:
+    out = subprocess.run(["git", "ls-remote", "--heads", "origin", "chore/sync-requirements-*"], cwd=sb.repo,
+                         capture_output=True, text=True, check=True).stdout
+    return out.split()[1::2]
+
+
+def case_sync_pushes_a_branch_on_drift(sb: Sandbox) -> list[str]:
+    install_render_stub(sb)
+    r = sb.run(STUB_PICKS="[]", STUB_DRIFT="1", **GIT_IDENTITY)
+    local = subprocess.run(["git", "branch", "--list", "chore/sync-requirements-*"], cwd=sb.repo, capture_output=True, text=True).stdout
+    return [e for e in [
+        r.returncode != 0 and f"exit {r.returncode}: {r.stderr}",
+        len(sync_branches(sb)) != 1 and f"branches on origin {sync_branches(sb)}, want 1",
+        bool(local.strip()) and f"local branch left behind: {local}",
+        any("requirements-" in p.name for p in (sb.repo / ".claude" / "worktrees").glob("*")) and "worktree left behind",
+        [x["kind"] for x in sb.ledger()] != ["requirements_sync", "select"] and f"ledger {[x['kind'] for x in sb.ledger()]}",
+    ] if isinstance(e, str)]
+
+
+def case_sync_quiet_without_drift(sb: Sandbox) -> list[str]:
+    install_render_stub(sb)
+    sb.run(STUB_PICKS="[]", STUB_DRIFT="0", **GIT_IDENTITY)
+    return [f"pushed {sync_branches(sb)} with no drift"] if sync_branches(sb) else []
+
+
+def case_sync_waits_for_an_open_pr(sb: Sandbox) -> list[str]:
+    install_render_stub(sb)
+    sb.run(STUB_PICKS="[]", STUB_DRIFT="1", STUB_OPEN_SYNC_PRS="1", **GIT_IDENTITY)
+    return [f"pushed {sync_branches(sb)} while a sync PR is open"] if sync_branches(sb) else []
+
+
+def case_sync_failure_keeps_the_tick_going(sb: Sandbox) -> list[str]:
+    install_render_stub(sb)
+    git("remote", "set-url", "--push", "origin", str(sb.tmp / "missing.git"), cwd=sb.repo)
+    r = sb.run(STUB_PICKS="[]", STUB_DRIFT="1", **GIT_IDENTITY)
+    return [e for e in [
+        r.returncode != 0 and f"exit {r.returncode}: {r.stderr}",
+        "requirements sync failed" not in r.stderr and "failure not reported",
+        [x["kind"] for x in sb.ledger()] != ["select"] and f"ledger {[x['kind'] for x in sb.ledger()]}",
+    ] if isinstance(e, str)]
+
+
+def case_sync_skipped_in_dry_run(sb: Sandbox) -> list[str]:
+    install_render_stub(sb)
+    sb.run("--dry-run", STUB_PICKS="[]", STUB_DRIFT="1", **GIT_IDENTITY)
+    return [f"dry run pushed {sync_branches(sb)}"] if sync_branches(sb) else []
+
+
 def spent(amount: float) -> list[dict]:
     return [{"date": TODAY, "kind": "story", "total_cost_usd": amount}, {"date": "2000-01-01", "total_cost_usd": 99}]
 
@@ -334,6 +404,11 @@ CASES = [
     ("the retro waits on other weekdays", case_retro_skips_other_days, {}),
     ("a retro run by hand today is not repeated", case_retro_skips_after_a_manual_run, {}),
     ("a dry run reports the retro but does not run it", case_retro_not_in_dry_run, {}),
+    ("requirement drift pushes one sync branch and cleans up", case_sync_pushes_a_branch_on_drift, {}),
+    ("no drift pushes nothing", case_sync_quiet_without_drift, {}),
+    ("an open sync PR holds the next sync", case_sync_waits_for_an_open_pr, {}),
+    ("a failed sync does not stop the tick", case_sync_failure_keeps_the_tick_going, {}),
+    ("a dry run does not sync", case_sync_skipped_in_dry_run, {}),
 ]
 
 
