@@ -89,7 +89,12 @@ class GroundAdminEndpointsAccessTest {
     @AfterEach
     fun cleanUp() {
         jdbc.update("DELETE FROM messages WHERE created_at >= ?", java.sql.Timestamp.from(startedAt))
-        createdIssues.forEach { jdbc.update("DELETE FROM issue_verifications WHERE issue_id = ?", it) }
+        createdIssues.forEach {
+            jdbc.update("DELETE FROM issue_verifications WHERE issue_id = ?", it)
+            jdbc.update("DELETE FROM issue_state_history WHERE issue_id = ?", it)
+            jdbc.update("DELETE FROM issue_photos WHERE issue_id = ?", it)
+            jdbc.update("DELETE FROM issues WHERE id = ?", it)
+        }
         createdIssues.clear()
         targets.forEach { id ->
             jdbc.update("DELETE FROM messages WHERE recipient_id = ?", id)
@@ -315,6 +320,7 @@ class GroundAdminEndpointsAccessTest {
 
     @Test
     fun `should answer 403 and change nothing when a plain member calls`() {
+        memberRow(plainMemberId)["is_ground_admin"] shouldBe false
         Call.entries.forEach { call -> assertRefused(call) { memberToken(plainMemberId) } }
     }
 
@@ -364,11 +370,11 @@ class GroundAdminEndpointsAccessTest {
 
         val revokeInv = prepare(Call.REVOKE_INVITATION)
         invoke(Call.REVOKE_INVITATION, revokeInv, token).andExpect { status { isOk() } }
-        applicationRow(revokeInv.applicationId!!)["processed_by"] shouldBe admin
+        applicationRow(requireNotNull(revokeInv.applicationId))["processed_by"] shouldBe admin
 
         val approve = prepare(Call.APPROVE)
         invoke(Call.APPROVE, approve, token).andExpect { status { isOk() } }
-        applicationRow(approve.applicationId!!)["processed_by"] shouldBe admin
+        applicationRow(requireNotNull(approve.applicationId))["processed_by"] shouldBe admin
         latestMessage(approve.memberId).let {
             it["sender_id"] shouldBe admin
             it["sender_type"] shouldBe "admin"
@@ -376,7 +382,7 @@ class GroundAdminEndpointsAccessTest {
 
         val decline = prepare(Call.DECLINE)
         invoke(Call.DECLINE, decline, token).andExpect { status { isOk() } }
-        applicationRow(decline.applicationId!!)["processed_by"] shouldBe admin
+        applicationRow(requireNotNull(decline.applicationId))["processed_by"] shouldBe admin
         latestMessage(decline.memberId).let {
             it["sender_id"] shouldBe admin
             it["sender_type"] shouldBe "admin"
@@ -410,6 +416,10 @@ class GroundAdminEndpointsAccessTest {
             UUID::class.java,
             p.memberId,
         ) shouldBe UUID.fromString(adminId)
+        latestMessage(p.memberId).let {
+            it["sender_id"] shouldBe UUID.fromString(adminId)
+            it["sender_type"] shouldBe "admin"
+        }
     }
 
     @ParameterizedTest
@@ -448,7 +458,7 @@ class GroundAdminEndpointsAccessTest {
 
         val revokeInv = prepare(Call.REVOKE_INVITATION)
         invoke(Call.REVOKE_INVITATION, revokeInv, token).andExpect { status { isOk() } }
-        applicationRow(revokeInv.applicationId!!)["processed_by"] shouldBe null
+        applicationRow(requireNotNull(revokeInv.applicationId))["processed_by"] shouldBe null
 
         listOf(Call.APPROVE, Call.DECLINE, Call.REVOKE).forEach { call ->
             val p = prepare(call)
@@ -630,9 +640,11 @@ class GroundAdminEndpointsAccessTest {
         val fake = UUID.randomUUID()
         memberCall("POST", "/api/v1/members/me/ground-admin/accept", id, """{"applicationId":"$fake"}""")
             .andExpect { status { isNotFound() } }
-        memberCall("POST", "/api/v1/members/me/ground-admin/decline", id, """{"applicationId":"$fake"}""")
-            .andExpect { status { isNotFound() } }
+        val invitationId = inviteFor(id)
+        memberCall("POST", "/api/v1/members/me/ground-admin/decline", id, """{"applicationId":"$invitationId"}""")
+            .andExpect { status { isOk() } }
+        makeActiveGroundAdmin(id)
         memberCall("POST", "/api/v1/members/me/ground-admin/stepdown", id, """{"reason":"x"}""")
-            .andExpect { status { isConflict() } }
+            .andExpect { status { isOk() } }
     }
 }
