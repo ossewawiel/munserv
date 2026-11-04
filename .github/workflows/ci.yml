@@ -69,8 +69,10 @@ jobs:
         run: python3 scripts/lint-handoffs.py --changed-since origin/master
       - name: Lint the CLAUDE.md cards
         run: python3 scripts/lint-handoffs.py --cards
-      - name: Requirements status matches GitHub issues
-        run: python3 scripts/render-requirements.py --check
+      - name: Test the requirements status check
+        run: python3 scripts/test-render-requirements.py
+      - name: Requirement rows this branch changed match GitHub issues
+        run: python3 scripts/render-requirements.py --check --changed-since origin/master
         env:
           GH_TOKEN: ${{ github.token }}
       - name: One error body type in the backend

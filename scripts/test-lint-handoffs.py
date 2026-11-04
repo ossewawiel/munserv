@@ -129,8 +129,11 @@ class LintHandoffsTest(unittest.TestCase):
         accounts = lint.load_keys(lint.ACCOUNTS)
         services = lint.load_keys(lint.SERVICES)
         self.path.write_text(text)
-        found = [p for p in lint.lint_handoff(self.path, accounts, services) if "lines; keep" not in p]
-        self.assertEqual(found, [])
+        self.assertEqual(lint.lint_handoff(self.path, accounts, services), [])
+
+    def test_should_leave_room_in_the_template_to_fill_it_in(self):
+        lines = len((ROOT / "specs/features/_template/story-handoff.md").read_text().splitlines())
+        self.assertLessEqual(lines, lint.MAX_HANDOFF_LINES - 30)
 
     def test_should_refuse_front_matter_that_is_not_yaml(self):
         found = self.problems("---\nstory: [W1\n---\n\n# W1\n")

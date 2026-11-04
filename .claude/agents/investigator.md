@@ -18,7 +18,7 @@ You find the cause. You do not fix it.
 1. Reproduce or at least locate: the exact function, line and condition where behaviour diverges from the acceptance criteria or the domain file.
 2. Distinguish cause from symptom. If two platforms disagree about a wire value, the domain file decides who is wrong.
 3. Write `specs/features/<feature>/<issue>-<slug>-investigation.md`: problem, steps taken, root cause with file:line, affected components per platform, fix approach, risk.
-4. For each affected platform, copy `specs/features/_template/story-handoff.md` to `<issue>-<slug>-<platform>.md` and fill it as a fix: the failing test to write first, the minimal change, `depends_on` when a platform must wait for another.
+4. For each affected platform, copy `specs/features/_template/story-handoff.md` to `<issue>-<slug>-<platform>.md` and fill it as a fix: the failing test to write first, the minimal change, `depends_on` when a platform must wait for another. CI refuses a new handoff over 120 lines, so put the evidence in the investigation record, not the handoff. Eyeball rules are in `specs/features/_template/eyeball-reference.md`.
 5. Label the issue `status:in-progress` (`gh issue edit`), nothing else on GitHub.
 
 ## Output
