@@ -67,14 +67,7 @@ A second, independent run of `origin/master` for demos, beside the dev stack. It
 `.github/workflows/ci.yml`: `domain` (language validation), `backend`, `web`, `mobile`, each path-filtered, plus the `CI status` aggregate that branch protection requires. Other workflows: `standards-check` (advisory), `validate-specs` (weekly), `generate-changelog` (on tags).
 
 ## MCP servers
-Servers live in `.mcp.json`; plugins in `enabledPlugins` of `.claude/settings.json`. Web fetch is the built-in `WebFetch` and GitHub goes through `gh`, so neither has a server. `context7` is set to `false` in `enabledPlugins` (it fails OAuth `invalid_target`). Export `MUNSERV_DB_URL` (for the dev database: `postgresql://munserv:munserv_dev@localhost:5435/munserv_dev`) before you start Claude Code.
-
-| Name | Kind | Runs | Used by | Notes |
-|---|---|---|---|---|
-| `postgres` | MCP server | `docker run` of `crystaldba/postgres-mcp:0.3.0`, `--access-mode=restricted`, `--init`, `--network host`, URL from `MUNSERV_DB_URL` | `investigator` (`execute_sql`, `list_objects`, `get_object_details`) | Read-only; the restricted parser rejects writes and some functions such as `postgis_full_version()`. Check PostGIS with `pg_extension`. The container takes about 19 s to answer, so `MCP_TIMEOUT=60000` in `.claude/settings.json` lifts the 30 s default; without it the server shows "timed out". `--init` lets SIGTERM stop the container, so none outlive the session. The PyPI package does not install (`pglast==7.2.0` is missing), so use the image. |
-| `playwright` | MCP server | `npx -y @playwright/mcp` | web UI checks in a session | Not granted to any agent. |
-| `typescript-lsp` | plugin (`claude-plugins-official`) | `typescript-language-server` on PATH | `web-implementer` (`LSP` tool) | Install once: `npm install -g typescript-language-server typescript`. |
-| `dart-flutter` | plugin (marketplace `flutter/agent-plugins`) | `dart mcp-server` from the Dart SDK on PATH, plus 25 Dart and Flutter skills | `mobile-implementer` (all `dart-mcp-server` tools) | Official Dart and Flutter team plugin, v1.0.7. Adds about 2.5k tokens to every session. |
+Servers live in `.mcp.json`; plugins in `enabledPlugins` of `.claude/settings.json`. Export `MUNSERV_DB_URL` before you start Claude Code. Per-server notes (postgres, playwright, typescript-lsp, dart-flutter): `infrastructure/docs/mcp-servers.md`.
 
 ## Mock API
 `infrastructure/mock-api` (Express) on port 3001 for mobile UI work without the backend: `npm start`, then `flutter run --dart-define=API_PORT=3001`.
@@ -83,15 +76,4 @@ Servers live in `.mcp.json`; plugins in `enabledPlugins` of `.claude/settings.js
 Not set up yet. The target from the archived DevOps and tech-stack documents is DigitalOcean App Platform plus managed PostgreSQL and Cloudflare R2; nothing is provisioned.
 
 ## Cost meter (telemetry profile)
-```bash
-cd infrastructure/docker
-docker compose --profile telemetry up -d otel-collector    # start; `docker compose stop otel-collector` stops it
-```
-The collector appends Claude Code's OTLP metrics and logs to `infrastructure/telemetry/data/*.jsonl`. The console's Cost section (`scripts/console/cost.py`) reads `metrics.jsonl`: cost and tokens per day, per `agent.name`, per model and per story. A run joins a story with `OTEL_RESOURCE_ATTRIBUTES=story.id=<id>`; a run without it counts under `none`.
-
-Facts verified against real runs (Claude Code 2.1.312):
-- **Project settings do not start telemetry.** `.claude/settings.json` carries the `env` block, but Claude Code ignored it at project scope: nothing reached the collector until the same variables were exported in the shell, passed with `--settings <file>`, or set in `~/.claude/settings.json`. Until the block is copied to user settings, export it before the run.
-- The protocol must be `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`: the default is gRPC, and 4318 speaks HTTP.
-- `agent.name` reads `custom` for every project-defined agent unless `OTEL_LOG_TOOL_DETAILS=1`. With it, the real names (`clerk`, `Explore`) appear. The flag also writes Bash commands, file paths and tool input to `logs.jsonl`, which is why that file is gitignored and the port is localhost only.
-- Metrics export every 60 s by default; set `OTEL_METRIC_EXPORT_INTERVAL=3000` for a short run, or the process may exit first.
-- The files hold the account email. Do not commit or share them. Do not truncate them while the collector runs; stop it first.
+Start it with `docker compose --profile telemetry up -d otel-collector` in `infrastructure/docker`. The console's Cost section reads its output. Setup, env variables and verified facts: `infrastructure/docs/cost-meter.md`.

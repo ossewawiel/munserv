@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Lint the Eyeball block of story handoffs.
+"""Lint story handoffs and the CLAUDE.md cards.
+
+A story handoff needs valid front matter (a status from STATUSES, the template's value types),
+every section of `_template/story-handoff.md`, and at most MAX_HANDOFF_LINES lines. Every
+CLAUDE.md card has at most MAX_CARD_LINES lines.
 
 A handoff with `ui: true` or `user_facing: true` needs an Eyeball block the console can run:
 a fenced yaml list of 2 to 6 checks, each with the template's keys, a real account and real
@@ -8,6 +12,7 @@ cover every criterion, except the ones listed in the front matter's `eyeball_exe
 
 Usage:
   python3 scripts/lint-handoffs.py PATH...              lint these handoffs
+  python3 scripts/lint-handoffs.py --cards              lint the CLAUDE.md cards
   python3 scripts/lint-handoffs.py --changed-since REF  lint handoffs added since REF (handoffs
                                                         written before `covers` existed are not linted)
 
@@ -29,6 +34,13 @@ SERVICES = ROOT / "scripts/console/services.yaml"
 FEATURES = "specs/features/"
 SKIPPED_DIRS = ("/_template/", "/completed/", "/archive/")
 REQUIRED_KEYS = ("id", "title", "as", "services", "url", "steps", "expect", "covers")
+TEMPLATE = ROOT / "specs/features/_template/story-handoff.md"
+STATUSES = ("pending", "in_progress", "completed", "blocked")
+PLATFORMS = ("backend", "web", "mobile", "infra")
+MAX_HANDOFF_LINES = 120
+MAX_CARD_LINES = 80
+LIST_KEYS = ("depends_on", "touches", "eyeball_exempt", "design_artboards", "files_changed", "tests_added")
+BOOL_KEYS = ("ui", "user_facing", "design_approved")
 MIN_CHECKS = 2
 MAX_CHECKS = 6
 
@@ -37,6 +49,7 @@ EYEBALL = re.compile(r"^## Eyeball\b(.*?)(?=^## |\Z)", re.S | re.M)
 YAML_FENCE = re.compile(r"```yaml\n(.*?)\n```", re.S)
 AC_SECTION = re.compile(r"^## Acceptance criteria\b(.*?)(?=^## |\Z)", re.S | re.M)
 AC_ITEM = re.compile(r"^(?:- \[[ xX]\] |- |\d+\. )\S", re.M)
+HEADING = re.compile(r"^## (.+?)\s*$", re.M)
 AC_REF = re.compile(r"\A(?:AC)?(\d+)\Z", re.I)
 
 
@@ -97,8 +110,40 @@ def lint_checks(checks: object, ac_count: int, exempt: set[int], platform: str,
     return problems
 
 
+def template_sections() -> list[str]:
+    """Headings every handoff needs: the template's, minus Eyeball and the ui-only Visual."""
+    names = HEADING.findall(FRONT_MATTER.match(TEMPLATE.read_text()).group(2))
+    return [n for n in names if not n.startswith(("Eyeball", "Visual"))]
+
+
+def lint_structure(meta: dict, body: str, line_count: int, sections: list[str]) -> list[str]:
+    problems = []
+    if not isinstance(meta.get("issue"), int) or isinstance(meta.get("issue"), bool):
+        problems.append("front matter: issue is not a number")
+    if not isinstance(meta.get("story"), str) or not meta["story"]:
+        problems.append("front matter: story is not a story id")
+    if meta.get("platform") not in PLATFORMS:
+        problems.append(f"front matter: platform '{meta.get('platform')}' is not one of {', '.join(PLATFORMS)}")
+    if meta.get("status") not in STATUSES:
+        problems.append(f"front matter: status '{meta.get('status')}' is not one of {', '.join(STATUSES)}")
+    for key in LIST_KEYS:
+        if key in meta and not isinstance(meta[key], list):
+            problems.append(f"front matter: {key} is not a list")
+    for key in BOOL_KEYS:
+        if key in meta and not isinstance(meta[key], bool):
+            problems.append(f"front matter: {key} is not true or false")
+    have = {h.split(" (")[0] for h in HEADING.findall(body)}
+    for name in sections + (["Visual"] if meta.get("ui") is True else []):
+        if name.split(" (")[0] not in have:
+            problems.append(f"missing section ## {name.split(' (')[0]}")
+    if line_count > MAX_HANDOFF_LINES:
+        problems.append(f"{line_count} lines; keep a handoff to {MAX_HANDOFF_LINES} (split the story)")
+    return problems
+
+
 def lint_handoff(path: Path, accounts: set[str], services: set[str]) -> list[str]:
-    m = FRONT_MATTER.match(path.read_text())
+    text = path.read_text()
+    m = FRONT_MATTER.match(text)
     if not m:
         return []
     try:
@@ -107,9 +152,14 @@ def lint_handoff(path: Path, accounts: set[str], services: set[str]) -> list[str
         return [f"front matter is not valid yaml: {e}"]
     if not isinstance(meta, dict) or "story" not in meta:
         return []
+    body = m.group(2)
+    problems = lint_structure(meta, body, len(text.splitlines()), template_sections())
+    return problems + lint_eyeball(meta, body, accounts, services)
+
+
+def lint_eyeball(meta: dict, body: str, accounts: set[str], services: set[str]) -> list[str]:
     if meta.get("ui") is not True and meta.get("user_facing") is not True:
         return []
-    body = m.group(2)
     section = EYEBALL.search(body)
     if not section:
         return ["ui or user_facing is true but there is no ## Eyeball section"]
@@ -129,6 +179,16 @@ def lint_handoff(path: Path, accounts: set[str], services: set[str]) -> list[str
     return lint_checks(checks, ac_count, exempt, str(meta.get("platform", "")), accounts, services)
 
 
+def lint_cards() -> list[str]:
+    cards = [p for p in ROOT.glob("*/CLAUDE.md")] + [ROOT / "CLAUDE.md"]
+    problems = []
+    for card in sorted(cards):
+        n = len(card.read_text().splitlines())
+        if n > MAX_CARD_LINES:
+            problems.append(f"{card.relative_to(ROOT)}: {n} lines; keep a card to {MAX_CARD_LINES}")
+    return problems
+
+
 def is_handoff_path(rel: str) -> bool:
     return rel.startswith(FEATURES) and rel.endswith(".md") and not any(d in "/" + rel for d in SKIPPED_DIRS)
 
@@ -145,12 +205,18 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("paths", nargs="*", type=Path)
     parser.add_argument("--changed-since", metavar="REF")
+    parser.add_argument("--cards", action="store_true", help="lint the CLAUDE.md cards")
     args = parser.parse_args(argv)
     paths = list(args.paths)
     if args.changed_since:
         paths += changed_since(args.changed_since)
     accounts, services = load_keys(ACCOUNTS), load_keys(SERVICES)
     failed = 0
+    if args.cards:
+        card_problems = lint_cards()
+        for p in card_problems:
+            print(f"FAIL {p}")
+        failed += len(card_problems)
     for path in paths:
         problems = lint_handoff(path, accounts, services)
         shown = path.resolve().relative_to(ROOT) if path.resolve().is_relative_to(ROOT) else path

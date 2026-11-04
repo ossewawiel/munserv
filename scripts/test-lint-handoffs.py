@@ -48,12 +48,18 @@ GOOD_CHECKS = """\
 """
 
 
-def handoff(checks: str = GOOD_CHECKS, front: str = "ui: true", acs: int = 3, eyeball: str | None = None) -> str:
+SECTIONS = ("Outcome", "Contract", "Do not", "Done when")
+
+
+def handoff(checks: str = GOOD_CHECKS, front: str = "ui: true", acs: int = 3, eyeball: str | None = None,
+            status: str = "pending", skip: tuple[str, ...] = (), pad: int = 0) -> str:
     criteria = "\n".join(f"- [ ] Criterion {n}" for n in range(1, acs + 1))
     block = eyeball if eyeball is not None else f"## Eyeball\nIntro.\n\n```yaml\n{checks}```\n"
+    extra = "".join(f"## {name}\nText.\n\n" for name in SECTIONS if name not in skip)
+    visual = "## Visual\nNone.\n\n" if "ui: true" in front and "Visual" not in skip else ""
     return (
-        f"---\nissue: 1\nstory: W99\nplatform: web\n{front}\n---\n\n# W99\n\n"
-        f"## Acceptance criteria\n{criteria}\n\n## Steps\n1. Do it.\n\n{block}"
+        f"---\nissue: 1\nstory: W99\nplatform: web\nstatus: {status}\n{front}\n---\n\n# W99\n\n"
+        f"{extra}{visual}## Acceptance criteria\n{criteria}\n\n## Steps\n1. Do it.\n\n{block}" + "\n" * pad
     )
 
 
@@ -119,10 +125,58 @@ class LintHandoffsTest(unittest.TestCase):
 
     def test_should_lint_the_template_examples_as_a_ui_story(self):
         text = (ROOT / "specs/features/_template/story-handoff.md").read_text().replace("ui: false ", "ui: true ", 1)
+        text = text.replace("platform: backend | web | mobile | infra", "platform: web", 1)
         accounts = lint.load_keys(lint.ACCOUNTS)
         services = lint.load_keys(lint.SERVICES)
         self.path.write_text(text)
-        self.assertEqual(lint.lint_handoff(self.path, accounts, services), [])
+        found = [p for p in lint.lint_handoff(self.path, accounts, services) if "lines; keep" not in p]
+        self.assertEqual(found, [])
+
+    def test_should_refuse_front_matter_that_is_not_yaml(self):
+        found = self.problems("---\nstory: [W1\n---\n\n# W1\n")
+        self.assertIn("front matter is not valid yaml", found[0])
+
+    def test_should_refuse_invalid_front_matter_values(self):
+        text = handoff().replace("issue: 1", "issue: one").replace("platform: web", "platform: desktop")
+        found = self.problems(text.replace("ui: true", "ui: yes please"))
+        self.assertTrue(any("issue is not a number" in p for p in found), found)
+        self.assertTrue(any("platform 'desktop'" in p for p in found), found)
+        self.assertTrue(any("ui is not true or false" in p for p in found), found)
+
+    def test_should_refuse_a_status_outside_the_four(self):
+        found = self.problems(handoff(status="done"))
+        self.assertTrue(any("status 'done' is not one of" in p for p in found), found)
+
+    def test_should_accept_each_of_the_four_statuses(self):
+        for status in lint.STATUSES:
+            self.assertEqual(self.problems(handoff(status=status)), [], status)
+
+    def test_should_name_a_missing_section(self):
+        found = self.problems(handoff(skip=("Do not",)))
+        self.assertIn("missing section ## Do not", found)
+
+    def test_should_require_visual_only_for_ui_stories(self):
+        self.assertIn("missing section ## Visual", self.problems(handoff(skip=("Visual",))))
+        plain = handoff(front="ui: false\nuser_facing: false", eyeball="")
+        self.assertEqual(self.problems(plain), [])
+
+    def test_should_refuse_a_handoff_over_the_line_limit(self):
+        found = self.problems(handoff(pad=lint.MAX_HANDOFF_LINES))
+        self.assertTrue(any("lines; keep a handoff to" in p for p in found), found)
+
+    def test_should_refuse_a_card_over_the_line_limit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "web").mkdir()
+            (root / "CLAUDE.md").write_text("x\n" * lint.MAX_CARD_LINES)
+            (root / "web/CLAUDE.md").write_text("x\n" * (lint.MAX_CARD_LINES + 1))
+            old, lint.ROOT = lint.ROOT, root
+            try:
+                found = lint.lint_cards()
+            finally:
+                lint.ROOT = old
+        self.assertEqual(len(found), 1)
+        self.assertIn("web/CLAUDE.md: 81 lines", found[0])
 
     def test_should_only_take_open_handoffs_from_a_diff(self):
         self.assertTrue(lint.is_handoff_path("specs/features/quick-login/208-W31-quick-login-web.md"))

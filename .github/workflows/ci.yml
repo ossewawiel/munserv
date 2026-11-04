@@ -50,6 +50,9 @@ jobs:
   domain:
     name: Domain language and guardrails
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -64,6 +67,12 @@ jobs:
         run: python3 scripts/test-lint-handoffs.py
       - name: Lint the Eyeball block of every new handoff
         run: python3 scripts/lint-handoffs.py --changed-since origin/master
+      - name: Lint the CLAUDE.md cards
+        run: python3 scripts/lint-handoffs.py --cards
+      - name: Requirements status matches GitHub issues
+        run: python3 scripts/render-requirements.py --check
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: One error body type in the backend
         # The wire has one error body, com.munserv.shared.api.ErrorResponse. The two allowlisted
         # duplicates are #246; remove each line here when #246 deletes the class.
