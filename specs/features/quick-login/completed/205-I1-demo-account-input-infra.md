@@ -3,7 +3,7 @@ issue: 205
 story: I1
 title: "Generate quick-login build input from accounts.yaml"
 platform: infra
-status: pending
+status: completed
 depends_on: []
 touches:
   - domain

@@ -3,7 +3,7 @@ issue: 206
 story: I3
 title: "CI fails when a production build contains a demo account"
 platform: infra
-status: pending
+status: completed
 depends_on: []
 touches:
   - scripts

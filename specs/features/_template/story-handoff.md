@@ -2,7 +2,7 @@
 issue: 0
 story: W00
 title: ""
-platform: backend | web | mobile
+platform: backend | web | mobile | infra
 status: pending
 depends_on: []          # other story ids or issue numbers that must be merged first
 touches: []             # feature folders this story edits; the orchestrator serialises overlaps
