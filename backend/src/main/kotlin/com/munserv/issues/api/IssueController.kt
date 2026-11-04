@@ -1,5 +1,6 @@
 package com.munserv.issues.api
 
+import com.munserv.admin.domain.AdminRole
 import com.munserv.issues.domain.IssueId
 import com.munserv.issues.domain.IssueState
 import com.munserv.issues.domain.IssueType
@@ -12,6 +13,8 @@ import com.munserv.shared.api.ErrorCodes
 import com.munserv.shared.api.ErrorResponse
 import com.munserv.shared.api.paginate
 import com.munserv.shared.api.toPaginationInfo
+import com.munserv.shared.security.JwtAuthenticationFilter
+import com.munserv.shared.security.RequireRole
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
@@ -29,6 +32,7 @@ import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -346,6 +350,7 @@ class IssueController(
             ApiResponse(responseCode = "422", description = "Invalid state transition"),
         ],
     )
+    @RequireRole(AdminRole.SECTOR_ADMIN)
     @PatchMapping("/{id}/state")
     fun updateIssueState(
         @Parameter(description = "Issue UUID", required = true)
@@ -358,11 +363,11 @@ class IssueController(
         @Valid
         @RequestBody request: UpdateIssueStateRequest,
         @Parameter(hidden = true)
-        @AuthenticationPrincipal adminIdStr: String?,
+        authentication: Authentication?,
     ): ResponseEntity<*> {
         val issueId = IssueId(UUID.fromString(id))
         val newState = IssueState.fromString(request.state)
-        val adminId = adminIdStr?.let { runCatching { AdminId(UUID.fromString(it)) }.getOrNull() }
+        val adminId = authentication.toHistoryActor()
 
         return when (val result = issueService.updateState(issueId, newState, adminId, request.note)) {
             is IssueResult.Success -> {
@@ -398,4 +403,15 @@ class IssueController(
             }
         }
     }
+}
+
+/**
+ * Map the request's authentication to the admin recorded in the state history.
+ * Null when unauthenticated, for a support grant (its subject is a grant id, not an admin id), or a non-UUID subject.
+ */
+private fun Authentication?.toHistoryActor(): AdminId? {
+    val auth = this ?: return null
+    if (auth.authorities.any { it.authority == JwtAuthenticationFilter.SUPPORT_GRANT_AUTHORITY }) return null
+    val subject = auth.principal as? String ?: return null
+    return runCatching { AdminId(UUID.fromString(subject)) }.getOrNull()
 }

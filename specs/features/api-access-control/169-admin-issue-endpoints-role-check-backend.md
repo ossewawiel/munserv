@@ -3,7 +3,7 @@ issue: 169
 story: FIX169
 title: "Only admins and support grants may change issue state or request a verification"
 platform: backend
-status: pending
+status: completed
 depends_on: []
 touches: [api-access-control]
 ui: false
@@ -14,8 +14,13 @@ design_artboards: []
 design_approved: false
 created_by: investigator
 created_at: "2026-11-04"
-files_changed: []
-tests_added: []
+files_changed:
+  - backend/src/main/kotlin/com/munserv/issues/api/IssueController.kt
+  - backend/src/main/kotlin/com/munserv/verification/api/VerificationController.kt
+  - backend/src/test/kotlin/com/munserv/issues/api/IssueAdminEndpointsAccessTest.kt
+  - specs/contracts/api.md
+tests_added:
+  - backend/src/test/kotlin/com/munserv/issues/api/IssueAdminEndpointsAccessTest.kt
 ---
 
 # #169 · Admin issue endpoints check the role (Backend)
