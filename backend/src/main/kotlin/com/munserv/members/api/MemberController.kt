@@ -7,6 +7,8 @@ import com.munserv.shared.api.ErrorCodes
 import com.munserv.shared.api.ErrorResponse
 import com.munserv.shared.types.MemberId
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -35,12 +37,17 @@ class MemberController(
      * Requires valid JWT token.
      */
     @Operation(
+        operationId = "getCurrentMember",
         summary = "Get current member profile",
         description = "Retrieve the profile of the currently authenticated member",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Profile retrieved successfully"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Profile retrieved successfully",
+                content = [Content(schema = Schema(implementation = MemberProfileResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "404", description = "Member not found"),
         ],

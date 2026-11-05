@@ -35,6 +35,7 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              - 'specs/contracts/openapi.json'
               - '.github/workflows/ci.yml'
             web:
               - 'web/**'

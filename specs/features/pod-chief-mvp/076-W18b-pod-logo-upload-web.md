@@ -52,7 +52,7 @@ under `features/pod-settings/components/`, not a registry component, so it needs
 `design/registry/web.md` row.
 
 ## Contract
-`specs/contracts/api.md` § Pod. Both endpoints require role `pod_chief`.
+`specs/contracts/openapi.json`, operations `uploadPodLogo` and `updatePodSettings`. Both endpoints require role `pod_chief`.
 
 `POST /pod/logo` — `multipart/form-data`, one part named `file` (JPEG, PNG or WebP, max 5MB) → `200`
 ```json

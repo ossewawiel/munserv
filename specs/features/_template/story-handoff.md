@@ -36,7 +36,7 @@ formatting): describe *what* here, never restate *how it looks*. Each artboard i
 story or use-case so the visual gate renders it.
 
 ## Contract
-API or type changes this story depends on, quoted from `specs/contracts/api.md` / `types.md`. "None" if none.
+API or type changes this story depends on, quoted from `specs/contracts/openapi.json` (generated from the controllers) / `types.md`; a shape not built yet is written here and the backend story makes it true. "None" if none.
 
 ## Steps
 Numbered, imperative, one file per step where possible. Each step names the file path, what to add or change, and the test that proves it.

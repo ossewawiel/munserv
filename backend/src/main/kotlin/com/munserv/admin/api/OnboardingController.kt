@@ -1,5 +1,6 @@
 package com.munserv.admin.api
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.munserv.admin.service.OnboardingResult
 import com.munserv.admin.service.OnboardingService
 import com.munserv.shared.types.AdminId
@@ -35,6 +36,7 @@ class OnboardingController(
     private val onboardingService: OnboardingService,
 ) {
     @Operation(
+        operationId = "getOnboardingStatus",
         summary = "Get onboarding status",
         description = "Returns the current onboarding status and requirements for the authenticated admin.",
     )
@@ -78,6 +80,7 @@ class OnboardingController(
     }
 
     @Operation(
+        operationId = "changeOnboardingPassword",
         summary = "Change password",
         description = "Change password during onboarding. Required when status is PENDING.",
     )
@@ -135,6 +138,7 @@ class OnboardingController(
     }
 
     @Operation(
+        operationId = "completeOnboardingProfile",
         summary = "Complete profile",
         description = "Complete profile during onboarding. Required when status is PASSWORD_CHANGED.",
     )
@@ -226,6 +230,7 @@ data class OnboardingStatusResponse(
     val requiresPasswordChange: Boolean,
     @field:Schema(description = "Whether profile completion is required", example = "false")
     val requiresProfileCompletion: Boolean,
+    @get:JsonProperty("isOnboarded")
     @field:Schema(description = "Whether onboarding is complete", example = "false")
     val isOnboarded: Boolean,
     @field:Schema(description = "Current display name", example = "John Smith")
@@ -246,7 +251,7 @@ data class OnboardingStatusResponse(
 /**
  * Request DTO for password change.
  */
-@Schema(description = "Password change request")
+@Schema(name = "OnboardingChangePasswordRequest", description = "Password change request")
 data class ChangePasswordRequest(
     @field:NotBlank(message = "New password is required")
     @field:Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")

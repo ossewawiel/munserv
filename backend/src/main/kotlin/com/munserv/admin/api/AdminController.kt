@@ -63,6 +63,7 @@ class AdminController(
      * Returns dashboard statistics for the given sector.
      */
     @Operation(
+        operationId = "getAdminDashboard",
         summary = "Get dashboard statistics",
         description = "Retrieve dashboard statistics for a sector including issue counts by state and type",
     )
@@ -96,6 +97,7 @@ class AdminController(
      * Returns issues ranked by heat score descending.
      */
     @Operation(
+        operationId = "getHeatReport",
         summary = "Get heat report",
         description = "Retrieve a list of issues ranked by heat score in descending order",
     )
@@ -133,6 +135,7 @@ class AdminController(
      * Optionally filter by member status, Ground Admin status, or pending applications.
      */
     @Operation(
+        operationId = "listMembers",
         summary = "List sector members",
         description =
             "Retrieve a paginated list of members in a sector with their issue counts. " +
@@ -309,6 +312,7 @@ class AdminController(
      * Returns count of members with pending_approval status for the sector.
      */
     @Operation(
+        operationId = "getPendingMemberCount",
         summary = "Get pending member count",
         description = "Returns the number of members awaiting approval in a sector",
     )
@@ -339,6 +343,7 @@ class AdminController(
      * Generates temporary password and sends welcome email.
      */
     @Operation(
+        operationId = "approveMember",
         summary = "Approve pending member registration",
         description = "Approve a pending member registration. Generates temporary password and sends welcome email.",
     )
@@ -406,6 +411,7 @@ class AdminController(
      * Deletes the member record.
      */
     @Operation(
+        operationId = "rejectMember",
         summary = "Reject pending member registration",
         description = "Reject a pending member registration. Deletes the member record.",
     )

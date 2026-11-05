@@ -38,6 +38,7 @@ class SectorSettingsController(
     private val settingsService: SectorSettingsService,
 ) {
     @Operation(
+        operationId = "getSectorSettings",
         summary = "Get sector settings",
         description = "Retrieve the settings for a specific sector. Creates default settings if none exist.",
     )
@@ -73,8 +74,11 @@ class SectorSettingsController(
         }
 
     @Operation(
+        operationId = "updateSectorSettings",
         summary = "Update sector settings",
-        description = "Partially update the settings for a sector. Only provided fields will be updated.",
+        description =
+            "Partially update the settings for a sector. Only provided fields will be updated. " +
+                "daysFixedBeforeClosed 1-365, minimumGroundAdmins 0-100.",
     )
     @ApiResponses(
         value = [

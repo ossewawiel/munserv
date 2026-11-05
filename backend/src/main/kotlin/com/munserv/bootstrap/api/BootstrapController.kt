@@ -39,6 +39,7 @@ class BootstrapController(
      */
     @PostMapping("/pod-chief")
     @Operation(
+        operationId = "createPodChief",
         summary = "Create Pod Chief",
         description = "Creates the first Pod Chief for a fresh pod. Requires SUPER_USER role.",
     )

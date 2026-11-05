@@ -14,6 +14,8 @@ import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -59,12 +61,17 @@ class GroundAdminController(
     // ==================== Member Endpoints ====================
 
     @Operation(
+        operationId = "applyForGroundAdmin",
         summary = "Apply to become Ground Admin",
         description = "Member applies to become a Ground Admin in their sector",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Application submitted successfully"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Application submitted successfully",
+                content = [Content(schema = Schema(implementation = GroundAdminApplicationResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "404", description = "Member not found"),
             ApiResponse(responseCode = "409", description = "Already a Ground Admin or has pending application"),
@@ -86,12 +93,17 @@ class GroundAdminController(
     }
 
     @Operation(
+        operationId = "acceptGroundAdminInvitation",
         summary = "Accept Ground Admin invitation",
         description = "Member accepts an invitation to become a Ground Admin",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Invitation accepted"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Invitation accepted",
+                content = [Content(schema = Schema(implementation = GroundAdminApplicationResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "404", description = "Application not found"),
             ApiResponse(responseCode = "409", description = "Invitation already processed"),
@@ -115,12 +127,17 @@ class GroundAdminController(
     }
 
     @Operation(
+        operationId = "declineGroundAdminInvitation",
         summary = "Decline Ground Admin invitation",
         description = "Member declines an invitation to become a Ground Admin",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Invitation declined"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Invitation declined",
+                content = [Content(schema = Schema(implementation = GroundAdminApplicationResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "404", description = "Application not found"),
             ApiResponse(responseCode = "409", description = "Cannot decline this invitation"),
@@ -144,12 +161,17 @@ class GroundAdminController(
     }
 
     @Operation(
+        operationId = "stepDownAsGroundAdmin",
         summary = "Request to step down as Ground Admin",
         description = "Ground Admin requests to step down from their role",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Step-down request submitted"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Step-down request submitted",
+                content = [Content(schema = Schema(implementation = GroundAdminStatusChangeResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "404", description = "Member not found"),
             ApiResponse(responseCode = "409", description = "Not a Ground Admin"),
@@ -172,12 +194,17 @@ class GroundAdminController(
     }
 
     @Operation(
+        operationId = "getMyGroundAdminInfo",
         summary = "Get my Ground Admin info",
         description = "Get current member's Ground Admin status and statistics",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Ground Admin info retrieved (null if not a GA)"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Ground Admin info retrieved (null if not a GA)",
+                content = [Content(schema = Schema(implementation = GroundAdminInfoResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "404", description = "Member not found"),
         ],
@@ -200,12 +227,17 @@ class GroundAdminController(
     // ==================== Admin Endpoints ====================
 
     @Operation(
+        operationId = "inviteGroundAdmin",
         summary = "Invite member to become Ground Admin",
         description = "Admin invites a member to become a Ground Admin in their sector",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Invitation sent"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Invitation sent",
+                content = [Content(schema = Schema(implementation = GroundAdminApplicationResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Requires an admin role, or member not in your sector"),
             ApiResponse(responseCode = "404", description = "Member not found"),
@@ -234,12 +266,18 @@ class GroundAdminController(
     }
 
     @Operation(
+        operationId = "revokeGroundAdminInvitation",
         summary = "Revoke Ground Admin invitation",
         description = "Admin revokes/cancels a pending Ground Admin invitation",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Invitation revoked"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Invitation revoked",
+                content = [Content(schema = Schema(implementation = GroundAdminApplicationResponse::class))],
+            ),
+            ApiResponse(responseCode = "400", description = "Not an invitation"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Invitation not found"),
@@ -277,12 +315,17 @@ class GroundAdminController(
     }
 
     @Operation(
+        operationId = "approveGroundAdminApplication",
         summary = "Approve Ground Admin application",
         description = "Admin approves a member's application to become a Ground Admin",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Application approved"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Application approved",
+                content = [Content(schema = Schema(implementation = GroundAdminApplicationResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Application not found"),
@@ -312,12 +355,17 @@ class GroundAdminController(
     }
 
     @Operation(
+        operationId = "declineGroundAdminApplication",
         summary = "Decline Ground Admin application",
         description = "Admin declines a member's application to become a Ground Admin",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Application declined"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Application declined",
+                content = [Content(schema = Schema(implementation = GroundAdminApplicationResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Application not found"),
@@ -355,12 +403,17 @@ class GroundAdminController(
     }
 
     @Operation(
+        operationId = "revokeGroundAdmin",
         summary = "Revoke Ground Admin status",
         description = "Admin revokes a member's Ground Admin status",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Ground Admin status revoked"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Ground Admin status revoked",
+                content = [Content(schema = Schema(implementation = GroundAdminStatusChangeResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Member not found"),
@@ -389,12 +442,18 @@ class GroundAdminController(
     }
 
     @Operation(
+        operationId = "updateGroundAdminStatus",
         summary = "Update Ground Admin status",
         description = "Admin updates a Ground Admin's status (active/on_hold)",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Status updated"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Status updated",
+                content = [Content(schema = Schema(implementation = GroundAdminStatusChangeResponse::class))],
+            ),
+            ApiResponse(responseCode = "400", description = "inactive is refused: use revoke"),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Member not found"),
@@ -423,12 +482,17 @@ class GroundAdminController(
     }
 
     @Operation(
+        operationId = "listGroundAdmins",
         summary = "List Ground Admins in sector",
         description = "Get a list of all Ground Admins in a sector, optionally filtered by status",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Ground Admins list retrieved"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Ground Admins list retrieved",
+                content = [Content(schema = Schema(implementation = GroundAdminListResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Requires an admin role"),
         ],

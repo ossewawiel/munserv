@@ -1,5 +1,6 @@
 package com.munserv.pod.api
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.munserv.pod.domain.PodSettings
 import com.munserv.pod.domain.PodSetupStatus
 import com.munserv.pod.service.UpdatePodSettingsCommand
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.Size
  */
 @Schema(description = "Pod setup status")
 data class PodSetupStatusResponse(
+    @get:JsonProperty("isComplete")
     @Schema(description = "Whether setup is complete", example = "false")
     val isComplete: Boolean,
     @Schema(description = "List of missing setup steps", example = "[\"pod_boundaries\", \"first_admin\"]")

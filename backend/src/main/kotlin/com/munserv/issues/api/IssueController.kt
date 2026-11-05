@@ -65,6 +65,7 @@ class IssueController(
      * GET /api/v1/issues - List issues with optional filtering.
      */
     @Operation(
+        operationId = "listIssues",
         summary = "List issues",
         description = "Retrieve a paginated list of issues with optional filtering by sector, state, and type",
     )
@@ -135,6 +136,7 @@ class IssueController(
      * GET /api/v1/issues/mine - List issues reported by the authenticated member.
      */
     @Operation(
+        operationId = "listMyIssues",
         summary = "List my issues",
         description = "Retrieve issues reported by the authenticated member",
     )
@@ -198,6 +200,7 @@ class IssueController(
      * GET /api/v1/issues/{id} - Get issue by ID.
      */
     @Operation(
+        operationId = "getIssue",
         summary = "Get issue details",
         description = "Retrieve detailed information about a specific issue including photos and state history",
     )
@@ -246,6 +249,7 @@ class IssueController(
      * POST /api/v1/issues - Create a new issue.
      */
     @Operation(
+        operationId = "createIssue",
         summary = "Report a new issue",
         description = "Create a new municipal issue report with location and type",
     )
@@ -334,6 +338,7 @@ class IssueController(
      * PATCH /api/v1/issues/{id}/state - Update issue state.
      */
     @Operation(
+        operationId = "updateIssueState",
         summary = "Update issue state",
         description = "Transition an issue to a new state. Requires admin role.",
     )

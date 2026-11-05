@@ -81,6 +81,12 @@ allOpen {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // The contract test reads this file. Without the input a hand edit leaves :test UP-TO-DATE or FROM-CACHE.
+    inputs
+        .files("../specs/contracts/openapi.json")
+        .withPropertyName("openApiContract")
+        .withPathSensitivity(PathSensitivity.NONE)
+    testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     finalizedBy(tasks.jacocoTestReport)
 }
 

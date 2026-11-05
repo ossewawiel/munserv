@@ -12,6 +12,8 @@ import com.munserv.verification.service.VerificationResult
 import com.munserv.verification.service.VerificationService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -51,12 +53,17 @@ class VerificationController(
     // ==================== Admin Endpoints ====================
 
     @Operation(
+        operationId = "requestVerification",
         summary = "Request verification for an issue",
         description = "Admin requests Ground Admins to verify an issue exists or fix is complete",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Verification requested"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Verification requested",
+                content = [Content(schema = Schema(implementation = IssueVerificationResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Issue not found"),
@@ -84,12 +91,19 @@ class VerificationController(
     }
 
     @Operation(
+        operationId = "overrideIssueState",
         summary = "Override issue state",
-        description = "Admin directly changes issue state, bypassing verification",
+        description =
+            "Admin directly changes issue state, bypassing verification. Skips the legal transition check " +
+                "and expires pending verifications.",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "State updated"),
+            ApiResponse(
+                responseCode = "200",
+                description = "State updated",
+                content = [Content(schema = Schema(implementation = OverrideStateResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Requires an admin role"),
             ApiResponse(responseCode = "404", description = "Issue not found"),
@@ -119,12 +133,17 @@ class VerificationController(
     // ==================== Ground Admin Endpoints ====================
 
     @Operation(
+        operationId = "submitVerification",
         summary = "Submit verification result",
         description = "Ground Admin submits verification result for an issue",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Verification submitted"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Verification submitted",
+                content = [Content(schema = Schema(implementation = IssueVerificationResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "403", description = "Not an active Ground Admin"),
             ApiResponse(responseCode = "404", description = "Verification not found"),
@@ -151,12 +170,17 @@ class VerificationController(
     }
 
     @Operation(
+        operationId = "listMyPendingVerifications",
         summary = "Get pending verifications",
         description = "Get list of pending verifications for the current Ground Admin",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Pending verifications retrieved"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Pending verifications retrieved",
+                content = [Content(schema = Schema(implementation = PendingVerificationsResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
             ApiResponse(responseCode = "404", description = "Member not found"),
         ],
@@ -179,12 +203,17 @@ class VerificationController(
     // ==================== General Endpoints ====================
 
     @Operation(
+        operationId = "listIssueVerifications",
         summary = "Get verification history",
         description = "Get verification history for an issue",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Verification history retrieved"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Verification history retrieved",
+                content = [Content(schema = Schema(implementation = VerificationHistoryResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Not authenticated"),
         ],
     )

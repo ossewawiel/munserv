@@ -69,7 +69,7 @@ Pushing a version tag (`v1.2.0`) runs `.github/workflows/generate-changelog.yml`
 | Question | Read |
 |---|---|
 | What does this word mean? | [`domain/`](domain/README.md) |
-| What does the API accept? | [`specs/contracts/api.md`](specs/contracts/api.md), [`specs/contracts/types.md`](specs/contracts/types.md) |
+| What does the API accept? | [`specs/contracts/openapi.json`](specs/contracts/openapi.json) (generated; guide in [`api.md`](specs/contracts/api.md)), [`specs/contracts/types.md`](specs/contracts/types.md) |
 | Why is it built this way? | [`specs/architecture/decisions/`](specs/architecture/decisions/) |
 | How is a standard enforced? | [`specs/architecture/standards-registry.md`](specs/architecture/standards-registry.md) |
 | What is the status of a story? | [`specs/requirements/`](specs/requirements/) and the GitHub issue |

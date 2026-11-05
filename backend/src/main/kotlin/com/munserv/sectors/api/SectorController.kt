@@ -27,7 +27,7 @@ class SectorController(
      * Get all sectors.
      * Matches mock API: GET /api/v1/sectors -> { items: [...] }
      */
-    @Operation(summary = "List all sectors", description = "Retrieve all available sectors")
+    @Operation(operationId = "listSectors", summary = "List all sectors", description = "Retrieve all available sectors")
     @ApiResponses(
         value = [
             ApiResponse(responseCode = "200", description = "Sectors retrieved successfully"),
@@ -42,7 +42,7 @@ class SectorController(
     /**
      * Get a sector by ID.
      */
-    @Operation(summary = "Get sector by ID", description = "Retrieve a specific sector by its UUID")
+    @Operation(operationId = "getSector", summary = "Get sector by ID", description = "Retrieve a specific sector by its UUID")
     @ApiResponses(
         value = [
             ApiResponse(responseCode = "200", description = "Sector retrieved successfully"),
