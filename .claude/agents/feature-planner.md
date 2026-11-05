@@ -25,6 +25,7 @@ Copy `specs/features/_template/story-handoff.md` to `specs/features/<name>/<issu
 - Acceptance criteria verbatim from the issue.
 - Contract: quote the exact request/response shapes from `specs/contracts/openapi.json`; write a shape not built yet in the handoff, and the backend story makes it true. Never edit the JSON by hand.
 - Steps: one file per step with its test. Name real paths that follow the platform card's layout; check with Grep that referenced classes exist.
+- Commands in Steps and Done when run unattended: no inline `python3` (name a file under `scripts/`), no `/tmp`, no `git rm` or `git mv` (`rm`, then `git add`); the handoff lint refuses them. An implementer can edit any file in its worktree except under `.claude/`; give a `.claude/` edit to the main session.
 - `touches`: the feature folders edited, so the orchestrator can serialise overlapping stories.
 - `user_facing: true` for any story whose change a member, administrator or integrator sees or feels without reading code (a screen, an API response, a mail, data they read); `false` for internal work (refactors, CI, infra, docs, specs). Write an `Eyeball` block only when `ui: true` or `user_facing: true`; otherwise omit the section.
 - `Eyeball` (only for `ui: true` or `user_facing: true` stories): 2 to 6 checks, in the schema the template shows and by the rules in `specs/features/_template/eyeball-reference.md` (read it; do not copy it), that together cover every acceptance

@@ -38,7 +38,8 @@ The task names a handoff file under `specs/features/<feature>/`. Read, in this o
 - A new enum value or term needs `domain/` updated in the same commit, or the story is blocked.
 - UI stories (`ui: true`): the artboards named in the handoff's Visual section, under `design/canvases/<feature>/`, and their sticky-note annotations are the authority for layout, copy, states, tokens and formatting. Where the handoff text differs, the canvas wins. Every artboard in scope gets a Widgetbook use-case and a golden so the visual gate covers it.
 - Never touch `backend/`, `web/` or `master`.
-- If a step is impossible as written: set `status: blocked` in the handoff and end with `BLOCKED: <one sentence>`.
+- Search and count with one plain `grep` per call from the worktree root, and read with Read; the Grep and Glob tools may be missing. Unattended runs deny shell loops, inline `python3`, `/tmp`, `git rm`, `git mv` and read commands chained after `cd`; delete with `rm`, then `git add`. A denied command does not block the story: use these and carry on.
+- If a step is impossible as written: set `status: blocked` in the handoff and end with `BLOCKED: <one sentence>`. A step is impossible only when the handoff requires it and no allowed tool can do it.
 
 ## Output
 End with: branch name, commit sha, files changed, tests added, and the exact commands that passed.

@@ -278,8 +278,8 @@ for id in $(jq -r '.[]' <<<"$picks"); do
   run_budget="$(jq -n --argjson a "$RUN_BUDGET_USD" --argjson b "$left" '[$a, $b] | min')"
   echo "factory-tick: /factory story $id (budget \$$run_budget)"
   rc=0
-  # acceptEdits lets implementers write in their worktrees; anything outside the allow list is denied
-  # and shows up in permission_denials, never prompted for and never bypassed.
+  # acceptEdits lets implementers edit their worktrees, except under .claude/. Shell commands outside the
+  # allow list are denied, never prompted for and never bypassed. permission_denials misses subagent denials.
   out="$(OTEL_RESOURCE_ATTRIBUTES="story.id=$id" claude -p "/factory story $id" --model "$STORY_MODEL" \
     --max-turns "$STORY_MAX_TURNS" --output-format json --max-budget-usd "$run_budget" \
     --permission-mode acceptEdits </dev/null)" || rc=$?

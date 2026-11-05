@@ -35,7 +35,8 @@ The task names a handoff file under `specs/features/<feature>/`. Read, in this o
 ## Rules
 - A new enum value or term needs `domain/` and `specs/contracts/types.md` updated in the same commit, or the story is blocked.
 - Never touch `web/`, `mobile/`, migrations already merged, or `master`.
-- If a step is impossible as written, do not improvise around it: set `status: blocked` in the handoff and end with `BLOCKED: <one sentence>`.
+- Search and count with one plain `grep` per call from the worktree root, and read with Read; the Grep and Glob tools may be missing. Unattended runs deny shell loops, inline `python3`, `/tmp`, `git rm`, `git mv` and read commands chained after `cd`; delete with `rm`, then `git add`. A denied command does not block the story: use these and carry on.
+- If a step is impossible as written, do not improvise around it: set `status: blocked` in the handoff and end with `BLOCKED: <one sentence>`. A step is impossible only when the handoff requires it and no allowed tool can do it.
 
 ## Output
 End with: branch name, commit sha, files changed, tests added, and the exact commands that passed.
