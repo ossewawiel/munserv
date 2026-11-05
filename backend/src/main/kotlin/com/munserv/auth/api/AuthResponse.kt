@@ -103,6 +103,7 @@ data class GeoPointResponse(
  * Response for phone registration check.
  */
 data class CheckPhoneResponse(
+    val contractProbe: String? = null,
     @get:JsonProperty("isRegistered")
     val isRegistered: Boolean,
 )
