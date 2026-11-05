@@ -33,3 +33,29 @@ EOF
 2	git -c user.name=x -C /tmp/wt push -f origin feat/x
 0	git -C /tmp/wt push -u origin feat/x
 0	git -C /tmp/wt status
+2	gh pr edit 12 --add-label ci-edit-approved
+2	gh pr edit 12 --add-label "ci-edit-approved"
+2	gh pr edit 12 --add-label design-approved,ci-edit-approved
+2	gh issue edit 12 --add-label ci-edit-approved
+2	cd /tmp/wt && gh pr edit 12 --add-label ci-edit-approved
+2	gh api -X POST repos/o/r/issues/12/labels -f 'labels[]=ci-edit-approved'
+2	gh api repos/o/r/issues/12/labels -f labels[]=anything
+2	gh api -X PUT repos/o/r/branches/master/protection --input p.json
+2	gh api --method PATCH "repos/o/r/branches/master/protection/required_status_checks" -f strict=true
+2	gh api -X PUT repos/o/r/pulls/12/merge
+2	gh api -X POST repos/o/r/rulesets --input r.json
+2	gh api graphql -f query='mutation { addLabelsToLabelable(input:{}) { clientMutationId } }'
+2	gh api graphql -f query='mutation { mergePullRequest(input:{}) { clientMutationId } }'
+2	gh api graphql -f query='mutation { deleteBranchProtectionRule(input:{}) { clientMutationId } }'
+0	gh pr edit 12 --add-label design-approved
+0	gh pr edit 12 --add-label status:review
+0	gh pr edit 12 --remove-label ci-edit-approved
+0	gh api repos/o/r/branches/master/protection
+0	gh api repos/o/r/issues/12/labels
+0	gh api -X GET repos/o/r/issues/12/labels -f per_page=100
+0	gh api repos/o/r/pulls/12 --jq .state
+0	gh api graphql -f query='query { repository(name:"x") { id } }'
+0	gh api -X POST repos/o/r/issues/12/comments -f body=hello
+0	gh pr create --body "release with gh pr edit 12 --add-label ci-edit-approved"
+0	git commit -m "gh pr edit 12 --add-label ci-edit-approved; gh api -X PUT x/pulls/1/merge"
+0	grep ci-edit-approved .github/workflows/ci-edit-guard.yml

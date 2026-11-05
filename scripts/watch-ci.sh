@@ -15,7 +15,7 @@
 #        with GITHUB_TOKEN (the Auto PR workflow), and the push run covers the same commit.
 # Exit:  0 when CI passed and the PR merged, 1 when a run failed or was cancelled, 2 on usage or
 #        timeout, 3 when CI passed but the PR did not merge (conflict, behind, no auto-merge, closed,
-#        or still open after MERGE_TIMEOUT).
+#        held by the CI edit guard, or still open after MERGE_TIMEOUT).
 set -euo pipefail
 
 if [[ $# -ne 1 || ! "$1" =~ ^[0-9]+$ ]]; then
@@ -85,8 +85,8 @@ echo "CI: green (${SHA:0:7})"
 # right now often still reads OPEN. Poll until MERGED, or until a state auto-merge cannot clear.
 merge_waited=0
 while true; do
-  read -r state merge_state armed < <(gh pr view "$PR" --json state,mergeStateStatus,autoMergeRequest \
-    --jq '"\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null)"')
+  read -r state merge_state armed guard < <(gh pr view "$PR" --json state,mergeStateStatus,autoMergeRequest,statusCheckRollup \
+    --jq '"\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null) \([.statusCheckRollup[] | select(.name == "CI edit guard") | .conclusion] | last // "NONE")"')
   case "$state" in
     MERGED)
       echo "CI: green, merged"
@@ -103,6 +103,11 @@ while true; do
       echo "CI: green, not merging - branch is behind master; rebase onto origin/master and push"
       exit 3 ;;
   esac
+  # A failed guard is a hold for a person, not a red build: no agent can clear it (#294).
+  if [[ "$guard" == "FAILURE" ]]; then
+    echo "CI: green, not merging - held by CI edit guard; the owner reads the diff, then runs gh pr edit $PR --add-label ci-edit-approved"
+    exit 3
+  fi
   if [[ "$armed" != "true" && $merge_waited -ge 15 ]]; then
     echo "CI: green, not merging - auto-merge is not armed (mergeStateStatus $merge_state); arm it with gh pr merge $PR --auto --squash"
     exit 3

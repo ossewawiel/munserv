@@ -49,6 +49,31 @@ check_gh() {
   if printf '%s' "$1" | grep -Eq '^gh pr merge' && ! printf '%s' "$1" | grep -Eq -- '(^|[[:space:]])--auto([[:space:]]|$)'; then
     deny "merging is automatic; use gh pr merge <n> --auto --squash only"
   fi
+  # Agents use the owner's gh login, so GitHub cannot tell who applied a label or changed a setting
+  # (#294). These lines are what keep the CI edit guard's release with a person. They look at the raw
+  # command, because the name or path may be quoted.
+  if printf '%s' "$1" | grep -Eq '^gh (pr|issue) edit' && printf '%s' "$1" | grep -q -- '--add-label' \
+    && printf '%s' "$cmd" | grep -q 'ci-edit-approved'; then
+    deny "only the owner releases a held CI edit; report the release command to the user and stop"
+  fi
+  if printf '%s' "$1" | grep -Eq '^gh api graphql'; then
+    if printf '%s' "$cmd" | grep -Eq 'addLabelsToLabelable|mergePullRequest|(create|update|delete)(BranchProtectionRule|RepositoryRuleset)'; then
+      deny "this mutation can release or bypass the CI edit guard; ask the user"
+    fi
+  elif printf '%s' "$1" | grep -Eq '^gh api( |$)' && gh_api_writes "$1"; then
+    if printf '%s' "$cmd" | grep -Eq 'branches/[^ ]*/protection|/rulesets|/pulls/[^ /]+/merge|/issues/[^ /]+/labels'; then
+      deny "this API write can release or bypass the CI edit guard; ask the user"
+    fi
+  fi
+}
+
+# gh api sends a GET unless -X says otherwise or a field or input is given. -X GET with fields stays a read.
+gh_api_writes() {
+  if printf '%s' "$1" | grep -Eq -- '(^|[[:space:]])(-X|--method)([[:space:]]+|=)'; then
+    ! printf '%s' "$1" | grep -Eiq -- '(^|[[:space:]])(-X|--method)([[:space:]]+|=)get([[:space:]]|$)'
+  else
+    printf '%s' "$1" | grep -Eq -- '(^|[[:space:]])(-f|-F|--field|--raw-field|--input)([[:space:]=]|$)'
+  fi
 }
 
 while IFS= read -r seg; do
