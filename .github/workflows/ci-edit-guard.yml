@@ -1,0 +1,74 @@
+name: CI edit guard
+
+# Holds a PR that changes CI until the owner releases it (#294). `pull_request` runs use the
+# workflow files from the PR, so a PR can weaken the gate that then approves it. This workflow runs
+# from master's copy, so a PR cannot edit or remove it. It is a required check on master.
+#
+# Security: `pull_request_target` runs with a write token on PRs from forks too. Never check out
+# or run PR code here, and never put PR text (title, branch, file names) in a ${{ }} expression.
+#
+# Rules:
+# - No path filter and no job-level `if`: a required check that does not run blocks the merge,
+#   and a skipped job counts as passed.
+# - A release covers one commit. A push after the label removes it, and the owner looks again.
+on:
+  pull_request_target:
+    branches: [master]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: ci-edit-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+
+jobs:
+  guard:
+    name: CI edit guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      EVENT_ACTION: ${{ github.event.action }}
+      LABEL: ci-edit-approved
+    steps:
+      - name: Hold a PR that changes CI
+        run: |
+          set -euo pipefail
+          api="repos/$GITHUB_REPOSITORY"
+
+          # A rename counts under both names: moving a workflow out of the folder also changes CI.
+          files=$(gh api --paginate "$api/pulls/$PR/files" --jq '.[] | "\(.filename)\t\(.previous_filename // "")"')
+          listed=$(printf '%s\n' "$files" | grep -c . || true)
+          total=$(gh api "$api/pulls/$PR" --jq .changed_files)
+          # The files API stops at 3000 files, so a larger PR could hide a CI edit.
+          if [ "$listed" -lt "$total" ]; then
+            echo "::error::The API listed $listed of $total changed files, so this guard cannot clear the PR."
+            exit 1
+          fi
+
+          ci_edits=$(printf '%s\n' "$files" | tr '\t' '\n' | grep -E '^\.github/(workflows|actions)/' | sort -u || true)
+          if [ -z "$ci_edits" ]; then
+            echo "This PR changes no CI files."
+            exit 0
+          fi
+
+          echo "This PR changes CI files:"
+          # The prefix stops a crafted file name from being read as a workflow command.
+          printf '%s\n' "$ci_edits" | sed 's/^/- /'
+
+          has_label=$(gh api --paginate "$api/issues/$PR/labels" --jq '.[].name' | grep -cxF "$LABEL" || true)
+          if [ "$has_label" -gt 0 ] && [ "$EVENT_ACTION" = "synchronize" ]; then
+            gh api -X DELETE "$api/issues/$PR/labels/$LABEL" >/dev/null
+            echo "::error::New commits arrived after the release, so $LABEL was removed. The owner must read them and release again."
+            exit 1
+          fi
+          if [ "$has_label" -gt 0 ]; then
+            echo "Released by $LABEL."
+            exit 0
+          fi
+
+          echo "::error::Held: this PR changes CI. The owner reads the diff, then runs: gh pr edit $PR --add-label $LABEL"
+          exit 1
