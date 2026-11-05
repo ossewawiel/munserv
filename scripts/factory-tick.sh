@@ -266,6 +266,20 @@ fi
 # The run's final report goes into the Factory log comment, because commands it hands to a person
 # reach nobody otherwise; the raw result is kept under runs/ for `claude --resume <session_id>` triage.
 mkdir -p "$STATE_DIR/runs"
+
+# subagent_denials <session_id> -- prints a JSON array of the denials in the run's subagent transcripts.
+# A background subagent's denials never reach the result's permission_denials; a foreground one's reach
+# both, so the caller removes duplicates by tool_use_id. A transcript marks a denial with toolDenialKind.
+subagent_denials() {
+  local files=("${CLAUDE_CONFIG_DIR:-$HOME/.claude}"/projects/*/"$1"/subagents/*.jsonl)
+  [[ -e "${files[0]}" ]] || { echo '[]'; return 0; }
+  jq -cnR '[inputs | fromjson? | select(.message?.content? | type == "array")] as $rows
+    | ($rows | map(.message.content[] | select(.type == "tool_use")) | INDEX(.id)) as $uses
+    | [$rows[] | select(.toolDenialKind) | .message.content[] | select(.type == "tool_result")
+       | $uses[.tool_use_id] // empty | {tool_use_id: .id, tool_name: .name, tool_input: .input}]' "${files[@]}" \
+    || echo '[]'
+}
+
 lines=()
 reports=""
 for id in $(jq -r '.[]' <<<"$picks"); do
@@ -279,7 +293,7 @@ for id in $(jq -r '.[]' <<<"$picks"); do
   echo "factory-tick: /factory story $id (budget \$$run_budget)"
   rc=0
   # acceptEdits lets implementers edit their worktrees, except under .claude/. Shell commands outside the
-  # allow list are denied, never prompted for and never bypassed. permission_denials misses subagent denials.
+  # allow list are denied, never prompted for and never bypassed.
   out="$(OTEL_RESOURCE_ATTRIBUTES="story.id=$id" claude -p "/factory story $id" --model "$STORY_MODEL" \
     --max-turns "$STORY_MAX_TURNS" --output-format json --max-budget-usd "$run_budget" \
     --permission-mode acceptEdits </dev/null)" || rc=$?
@@ -291,7 +305,8 @@ for id in $(jq -r '.[]' <<<"$picks"); do
     summary="$(jq -r '.result // "" | split("\n") | map(select(length > 0 and (startswith("```") | not))) as $l
       | ([$l[] | select(test("^(CI|Plan):"))] | join(" / ")) as $status
       | if $status != "" then $status else ($l | last // "") end' <<<"$out" | head -c 300)"
-    denied="$(jq -c '[.permission_denials // [] | .[] | "\(.tool_name): \(.tool_input.command // .tool_input | tostring | .[0:120])"]' <<<"$out")"
+    denied="$({ printf '%s\n' "$out"; subagent_denials "$(jq -r '.session_id // ""' <<<"$out")"; } \
+      | jq -cs '[(.[0].permission_denials // []) + .[1] | unique_by(.tool_use_id)[] | "\(.tool_name): \(.tool_input.command // .tool_input | tostring | .[0:120])"]')"
     record story --argjson story "$id" --argjson exit "$rc" --argjson total_cost_usd "$cost" \
       --arg subtype "$subtype" --argjson is_error "$(jq '.is_error // false' <<<"$out")" \
       --argjson num_turns "$(jq '.num_turns // 0' <<<"$out")" \
