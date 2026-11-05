@@ -56,7 +56,7 @@ A line added to a skill or card replaces or tightens an existing line where it c
    - spend: ledger total, per story, runs that hit a cap, cost meter by agent and model
    - sizes: the table from the gather output, with a delta column against the previous `retro-*.md` (or `baseline-2026-11.md` the first time). Flag every card or skill that grew, and by how much.
 4. Write today's date to `specs/metrics/last-retro`.
-5. Commit with the title `chore(infra): factory retro <date>`. Push. `auto-pr.yml` opens the PR within a minute. Find it with `gh pr list --head chore/factory-retro-<date>` and set its title and body with `gh pr edit`. Use `gh pr create` only when no PR appears. The body lists the clusters, each with its fix, and ends with `Plan step: none`. Run `scripts/watch-ci.sh <n>` in the foreground with a 10-minute timeout. Never run it in the background or tail its output. Report its last line, and fix a red job on the same branch.
+5. Commit with the title `chore(infra): factory retro <date>`. Push. `auto-pr.yml` opens the PR within a minute. Find it with `gh pr list --head chore/factory-retro-<date>` and set its title and body with `gh pr edit`. Use `gh pr create` only when no PR appears. The body lists the clusters, each with its fix, and ends with `Plan step: none`. Run `scripts/watch-ci.sh <n>` in the foreground with a 10-minute timeout. Never run it in the background or tail its output. Report its last line, and fix a red job on the same branch. When that line says the PR is held by CI edit guard, the PR changes CI files and waits for the owner: report the release command it prints and carry on with the next step.
 6. Remove the worktree by its path: `git worktree remove .claude/worktrees/retro-<date>`.
 
 ## Report
