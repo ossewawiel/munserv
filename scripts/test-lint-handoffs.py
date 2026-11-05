@@ -181,6 +181,25 @@ class LintHandoffsTest(unittest.TestCase):
         self.assertEqual(len(found), 1)
         self.assertIn("web/CLAUDE.md: 81 lines", found[0])
 
+    def test_should_refuse_a_command_an_unattended_implementer_cannot_run(self):
+        for command in ('python3 -c "print(1)"', 'python3 -I -c "print(1)"', "mkdir /tmp/scan", "git rm a.md", "git mv a.md b.md"):
+            found = self.problems(handoff().replace("1. Do it.", f"1. Run `{command}`."))
+            self.assertTrue(any(p.startswith("## Steps: ") and "denied in unattended runs" in p for p in found), command)
+
+    def test_should_refuse_a_denied_command_under_done_when(self):
+        text = handoff().replace("## Done when\nText.", '## Done when\n```bash\npython3 -c "print(1)"\n```')
+        found = self.problems(text)
+        self.assertTrue(any(p.startswith("## Done when: ") for p in found), found)
+
+    def test_should_allow_a_denied_command_where_a_person_or_prose_reads_it(self):
+        checks = GOOD_CHECKS.replace("Log in as the pod chief.", 'Run `python3 -c "print(1)"`.')
+        text = handoff(checks=checks).replace("## Do not\nText.", "## Do not\nDo not write to /tmp/ or run `git rm`.")
+        self.assertEqual(self.problems(text), [])
+
+    def test_should_allow_a_path_that_only_contains_tmp(self):
+        text = handoff().replace("1. Do it.", "1. Edit `web/tmp/a.ts`. Run `python3 scripts/lint-handoffs.py`.")
+        self.assertEqual(self.problems(text), [])
+
     def test_should_only_take_open_handoffs_from_a_diff(self):
         self.assertTrue(lint.is_handoff_path("specs/features/quick-login/208-W31-quick-login-web.md"))
         self.assertFalse(lint.is_handoff_path("specs/features/_template/story-handoff.md"))

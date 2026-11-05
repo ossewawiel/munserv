@@ -10,6 +10,9 @@ a fenced yaml list of 2 to 6 checks, each with the template's keys, a real accou
 services, and a `covers` list naming the acceptance criteria it proves. Together the checks
 cover every criterion, except the ones listed in the front matter's `eyeball_exempt`.
 
+Steps and Done when name no command that unattended runs deny: inline `python3`, `/tmp/`,
+`git rm` or `git mv`.
+
 Usage:
   python3 scripts/lint-handoffs.py PATH...              lint these handoffs
   python3 scripts/lint-handoffs.py --cards              lint the CLAUDE.md cards
@@ -51,6 +54,8 @@ AC_SECTION = re.compile(r"^## Acceptance criteria\b(.*?)(?=^## |\Z)", re.S | re.
 AC_ITEM = re.compile(r"^(?:- \[[ xX]\] |- |\d+\. )\S", re.M)
 HEADING = re.compile(r"^## (.+?)\s*$", re.M)
 AC_REF = re.compile(r"\A(?:AC)?(\d+)\Z", re.I)
+IMPLEMENTER_SECTION = re.compile(r"^## (Steps|Done when)\b(.*?)(?=^## |\Z)", re.S | re.M)
+DENIED_COMMAND = re.compile(r"python3 -[cI]\b|(?<![\w.-])/tmp/|\bgit (?:rm|mv)\b")
 
 
 def load_keys(path: Path) -> set[str]:
@@ -141,6 +146,15 @@ def lint_structure(meta: dict, body: str, line_count: int, sections: list[str]) 
     return problems
 
 
+def lint_commands(body: str) -> list[str]:
+    """Steps and Done when run unattended; Eyeball commands run by a person are not checked."""
+    return [
+        f"## {name}: `{found}` is denied in unattended runs; use a file under scripts/, or rm then git add"
+        for name, text in IMPLEMENTER_SECTION.findall(body)
+        for found in dict.fromkeys(DENIED_COMMAND.findall(text))
+    ]
+
+
 def lint_handoff(path: Path, accounts: set[str], services: set[str]) -> list[str]:
     text = path.read_text()
     m = FRONT_MATTER.match(text)
@@ -154,7 +168,7 @@ def lint_handoff(path: Path, accounts: set[str], services: set[str]) -> list[str
         return []
     body = m.group(2)
     problems = lint_structure(meta, body, len(text.splitlines()), template_sections())
-    return problems + lint_eyeball(meta, body, accounts, services)
+    return problems + lint_commands(body) + lint_eyeball(meta, body, accounts, services)
 
 
 def lint_eyeball(meta: dict, body: str, accounts: set[str], services: set[str]) -> list[str]:
