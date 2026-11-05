@@ -11,37 +11,37 @@ import java.time.Instant
  */
 @Schema(description = "Sector settings configuration")
 data class SectorSettingsResponse(
-    @Schema(description = "Settings unique identifier", example = "550e8400-e29b-41d4-a716-446655440010")
+    @field:Schema(description = "Settings unique identifier", example = "550e8400-e29b-41d4-a716-446655440010")
     val id: String,
-    @Schema(description = "Sector unique identifier", example = "550e8400-e29b-41d4-a716-446655440001")
+    @field:Schema(description = "Sector unique identifier", example = "550e8400-e29b-41d4-a716-446655440001")
     val sectorId: String,
-    @Schema(
+    @field:Schema(
         description = "How Ground Admins are notified about new issue verification",
         example = "ALL_NOTIFIED",
     )
     val newIssueVerificationMode: VerificationMode,
-    @Schema(
+    @field:Schema(
         description = "How Ground Admins are notified about fix verification",
         example = "ALL_NOTIFIED",
     )
     val fixVerificationMode: VerificationMode,
-    @Schema(
+    @field:Schema(
         description = "Days an issue stays in Fixed state before auto-closing",
         example = "7",
         minimum = "1",
         maximum = "365",
     )
     val daysFixedBeforeClosed: Int,
-    @Schema(
+    @field:Schema(
         description = "Minimum number of Ground Admins required for the sector",
         example = "2",
         minimum = "0",
         maximum = "100",
     )
     val minimumGroundAdmins: Int,
-    @Schema(description = "When the settings were created")
+    @field:Schema(description = "When the settings were created")
     val createdAt: Instant,
-    @Schema(description = "When the settings were last updated")
+    @field:Schema(description = "When the settings were last updated")
     val updatedAt: Instant,
 ) {
     companion object {
@@ -65,19 +65,19 @@ data class SectorSettingsResponse(
  */
 @Schema(description = "Partial update request for sector settings")
 data class UpdateSectorSettingsRequest(
-    @Schema(
+    @field:Schema(
         description = "How Ground Admins are notified about new issue verification",
         example = "ADMIN_ASSIGNS",
         nullable = true,
     )
     val newIssueVerificationMode: VerificationMode? = null,
-    @Schema(
+    @field:Schema(
         description = "How Ground Admins are notified about fix verification",
         example = "NEAREST_AUTO",
         nullable = true,
     )
     val fixVerificationMode: VerificationMode? = null,
-    @Schema(
+    @field:Schema(
         description = "Days an issue stays in Fixed state before auto-closing (1-365)",
         example = "14",
         minimum = "1",
@@ -85,7 +85,7 @@ data class UpdateSectorSettingsRequest(
         nullable = true,
     )
     val daysFixedBeforeClosed: Int? = null,
-    @Schema(
+    @field:Schema(
         description = "Minimum number of Ground Admins required (0-100)",
         example = "3",
         minimum = "0",

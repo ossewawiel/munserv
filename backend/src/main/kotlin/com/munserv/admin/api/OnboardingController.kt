@@ -231,7 +231,7 @@ data class OnboardingStatusResponse(
     @field:Schema(description = "Whether profile completion is required", example = "false")
     val requiresProfileCompletion: Boolean,
     @get:JsonProperty("isOnboarded")
-    @field:Schema(description = "Whether onboarding is complete", example = "false")
+    @get:Schema(description = "Whether onboarding is complete", example = "false")
     val isOnboarded: Boolean,
     @field:Schema(description = "Current display name", example = "John Smith")
     val displayName: String,

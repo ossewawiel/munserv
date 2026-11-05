@@ -8,13 +8,13 @@ import kotlin.math.ceil
  */
 @Schema(description = "Pagination information")
 data class Pagination(
-    @Schema(description = "Current page number (1-based)", example = "1")
+    @field:Schema(description = "Current page number (1-based)", example = "1")
     val page: Int,
-    @Schema(description = "Items per page", example = "20")
+    @field:Schema(description = "Items per page", example = "20")
     val limit: Int,
-    @Schema(description = "Total number of items", example = "100")
+    @field:Schema(description = "Total number of items", example = "100")
     val totalItems: Int,
-    @Schema(description = "Total number of pages", example = "5")
+    @field:Schema(description = "Total number of pages", example = "5")
     val totalPages: Int,
 )
 

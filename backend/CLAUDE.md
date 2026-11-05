@@ -29,7 +29,7 @@ JUnit 6 (Jupiter 6.0.3, managed by the Boot BOM; `build.gradle.kts` does not pin
 ./gradlew build -x test                           # jar
 ./gradlew bootRun                                 # port 8080; dev DB on 5435
 ```
-Swagger: http://localhost:8080/swagger-ui.html. OpenAPI annotations (`@Tag`, `@Operation`, `@ApiResponses`, `@Schema`) on every public endpoint and DTO. Every `@Operation` needs an `operationId`. A route or DTO change regenerates `specs/contracts/openapi.json`: run `./gradlew test --tests '*OpenApiContractTest*'`, review and commit the file, then run it again.
+Swagger: http://localhost:8080/swagger-ui.html. OpenAPI annotations (`@Tag`, `@Operation`, `@ApiResponses`, `@Schema`) on every public endpoint and DTO. On a DTO constructor property write `@field:Schema`, or `@get:Schema` beside `@get:JsonProperty` on an `is`-prefixed one; plain `@Schema` never reaches the JSON. Every `@Operation` needs an `operationId`. A route or DTO change regenerates `specs/contracts/openapi.json`: run `./gradlew test --tests '*OpenApiContractTest*'`, review and commit the file, then run it again.
 
 ## Forbidden
 `!!` without a preceding check; `var` for state; exceptions for business flow; JPA annotations on domain classes; mutable collections in public APIs; field `@Autowired`; business logic in controllers; direct repository access across modules; a new enum value without the matching migration, web and mobile change and `domain/` update.
