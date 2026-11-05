@@ -62,5 +62,16 @@ echo 4 >backend/a.txt; STUB_GATE_EXIT=1 run backend true; expect "stop_hook_acti
 echo 5 >backend/a.txt; run backend true; expect "fixed tree goes green" 0
 [ ! -e "$repo/.git/verify-backend.red" ] && echo "ok   green clears the red marker" || { echo "FAIL red marker left"; fails=$((fails + 1)); }
 
+# git compares stat times in whole seconds, so a hash built from a copy of the index misses a same-size
+# edit made in the second the entry was written, once the clock has moved on (#284).
+reset; while [ "$(date +%-N)" -ge 100000000 ]; do :; done
+echo 6 >backend/a.txt; git add -A; run backend false; echo 7 >backend/a.txt; sleep 1.1; run backend false
+expect "same-size edit in the index entry's second passes on green" 0
+[ "$(gate_runs)" = 2 ] && echo "ok   same-size edit in the index entry's second reruns the gate" || { echo "FAIL gate ran $(gate_runs) times, want 2: the edit was missed"; fails=$((fails + 1)); }
+
+reset; echo ignored.txt >>.gitignore; echo 1 >ignored.txt; git add -f .gitignore ignored.txt; git commit -qm ignored
+run backend false; echo 2 >ignored.txt; run backend false
+[ "$(gate_runs)" = 2 ] && echo "ok   a change to a tracked ignored file reruns the gate" || { echo "FAIL gate ran $(gate_runs) times, want 2: tracked ignored file missed"; fails=$((fails + 1)); }
+
 echo "$fails failures"
 [ "$fails" = 0 ]
