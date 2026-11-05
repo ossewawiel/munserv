@@ -3,7 +3,7 @@ issue: 275
 story: B13
 title: "Export the API contract from the code"
 platform: backend
-status: pending
+status: completed
 depends_on: []
 touches: [backend/src/main/kotlin/com/munserv/admin, backend/src/main/kotlin/com/munserv/auth, backend/src/main/kotlin/com/munserv/bootstrap, backend/src/main/kotlin/com/munserv/groundadmin, backend/src/main/kotlin/com/munserv/issues, backend/src/main/kotlin/com/munserv/members, backend/src/main/kotlin/com/munserv/messages, backend/src/main/kotlin/com/munserv/photos, backend/src/main/kotlin/com/munserv/pod, backend/src/main/kotlin/com/munserv/sectors, backend/src/main/kotlin/com/munserv/shared, backend/src/main/kotlin/com/munserv/support, backend/src/main/kotlin/com/munserv/verification, specs/contracts, specs/features/_template]
 ui: false
@@ -14,8 +14,8 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-11-05"
-files_changed: []
-tests_added: []
+files_changed: [.github/workflows/ci.yml, CLAUDE.md, CONTRIBUTING.md, backend/CLAUDE.md, backend/README.md, backend/build.gradle.kts, backend/src/main/kotlin/com/munserv/admin/api/AdminController.kt, backend/src/main/kotlin/com/munserv/admin/api/AdminManagementController.kt, backend/src/main/kotlin/com/munserv/admin/api/AdminResponse.kt, backend/src/main/kotlin/com/munserv/admin/api/OnboardingController.kt, backend/src/main/kotlin/com/munserv/auth/api/AuthController.kt, backend/src/main/kotlin/com/munserv/auth/api/AuthResponse.kt, backend/src/main/kotlin/com/munserv/bootstrap/api/BootstrapController.kt, backend/src/main/kotlin/com/munserv/groundadmin/api/GroundAdminController.kt, backend/src/main/kotlin/com/munserv/groundadmin/api/GroundAdminDto.kt, backend/src/main/kotlin/com/munserv/issues/api/IssueController.kt, backend/src/main/kotlin/com/munserv/members/api/MemberController.kt, backend/src/main/kotlin/com/munserv/messages/api/MessageController.kt, backend/src/main/kotlin/com/munserv/photos/api/PhotoController.kt, backend/src/main/kotlin/com/munserv/pod/api/PodAdministratorController.kt, backend/src/main/kotlin/com/munserv/pod/api/PodController.kt, backend/src/main/kotlin/com/munserv/pod/api/PodDashboardController.kt, backend/src/main/kotlin/com/munserv/pod/api/PodDto.kt, backend/src/main/kotlin/com/munserv/sectors/api/SectorController.kt, backend/src/main/kotlin/com/munserv/sectors/api/SectorSettingsController.kt, backend/src/main/kotlin/com/munserv/shared/config/OpenApiConfig.kt, backend/src/main/kotlin/com/munserv/support/api/SupportAccessController.kt, backend/src/main/kotlin/com/munserv/support/api/SupportGrantSelfController.kt, backend/src/main/kotlin/com/munserv/verification/api/VerificationController.kt, backend/src/main/kotlin/com/munserv/verification/api/VerificationDto.kt, backend/src/test/kotlin/com/munserv/shared/config/OpenApiCanonical.kt, backend/src/test/kotlin/com/munserv/shared/config/OpenApiCanonicalTest.kt, backend/src/test/kotlin/com/munserv/shared/config/OpenApiContractTest.kt, specs/README.md, specs/contracts/api.md, specs/contracts/openapi.json, specs/features/_template/story-handoff.md, specs/features/pod-chief-mvp/076-W18b-pod-logo-upload-web.md]
+tests_added: [OpenApiContractTest (5 tests), OpenApiCanonicalTest (6 tests)]
 ---
 
 # B13 · Export the API contract from the code (Backend)
