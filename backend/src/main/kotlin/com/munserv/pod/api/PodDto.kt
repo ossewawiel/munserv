@@ -13,9 +13,9 @@ import jakarta.validation.constraints.Size
 @Schema(description = "Pod setup status")
 data class PodSetupStatusResponse(
     @get:JsonProperty("isComplete")
-    @Schema(description = "Whether setup is complete", example = "false")
+    @get:Schema(description = "Whether setup is complete", example = "false")
     val isComplete: Boolean,
-    @Schema(description = "List of missing setup steps", example = "[\"pod_boundaries\", \"first_admin\"]")
+    @field:Schema(description = "List of missing setup steps", example = "[\"pod_boundaries\", \"first_admin\"]")
     val missingSteps: List<String>,
 ) {
     companion object {
@@ -32,11 +32,11 @@ data class PodSetupStatusResponse(
  */
 @Schema(description = "Pod settings")
 data class PodSettingsResponse(
-    @Schema(description = "Pod name", example = "Ward42")
+    @field:Schema(description = "Pod name", example = "Ward42")
     val name: String,
-    @Schema(description = "Display name shown in UI", example = "Munserv Pod Ward42")
+    @field:Schema(description = "Display name shown in UI", example = "Munserv Pod Ward42")
     val displayName: String,
-    @Schema(description = "URL to pod logo image", example = "https://example.com/logo.png")
+    @field:Schema(description = "URL to pod logo image", example = "https://example.com/logo.png")
     val logoUrl: String?,
 ) {
     companion object {
@@ -55,10 +55,10 @@ data class PodSettingsResponse(
 @Schema(description = "Update pod settings request")
 data class UpdatePodSettingsRequest(
     @field:Size(min = 2, max = 100, message = "Pod name must be between 2 and 100 characters")
-    @Schema(description = "New pod name", example = "Ward42", minLength = 2, maxLength = 100)
+    @field:Schema(description = "New pod name", example = "Ward42", minLength = 2, maxLength = 100)
     val name: String?,
     @field:Size(max = 500, message = "Logo URL must be at most 500 characters")
-    @Schema(description = "URL to pod logo image", example = "https://example.com/logo.png", maxLength = 500)
+    @field:Schema(description = "URL to pod logo image", example = "https://example.com/logo.png", maxLength = 500)
     val logoUrl: String?,
 ) {
     /**
@@ -76,7 +76,7 @@ data class UpdatePodSettingsRequest(
  */
 @Schema(description = "Pod logo upload response")
 data class PodLogoResponse(
-    @Schema(
+    @field:Schema(
         description = "Public URL of the stored logo image",
         example = "http://localhost:8080/uploads/8f14e45f-ea1e-4d0e-9c6b-2a1c6f1b7d10.png",
     )

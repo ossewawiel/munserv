@@ -40,15 +40,15 @@ import java.util.UUID
  */
 @Schema(description = "Photo metadata")
 data class PhotoResponse(
-    @Schema(description = "Photo UUID", example = "550e8400-e29b-41d4-a716-446655440001")
+    @field:Schema(description = "Photo UUID", example = "550e8400-e29b-41d4-a716-446655440001")
     val id: String,
-    @Schema(description = "Full-size photo URL", example = "https://storage.example.com/photos/abc123.jpg")
+    @field:Schema(description = "Full-size photo URL", example = "https://storage.example.com/photos/abc123.jpg")
     val url: String,
-    @Schema(description = "Thumbnail URL", example = "https://storage.example.com/photos/abc123_thumb.jpg")
+    @field:Schema(description = "Thumbnail URL", example = "https://storage.example.com/photos/abc123_thumb.jpg")
     val thumbnailUrl: String,
-    @Schema(description = "Display order", example = "1")
+    @field:Schema(description = "Display order", example = "1")
     val sortOrder: Int,
-    @Schema(description = "Upload timestamp", example = "2025-01-15T10:30:00Z")
+    @field:Schema(description = "Upload timestamp", example = "2025-01-15T10:30:00Z")
     val createdAt: String,
 )
 

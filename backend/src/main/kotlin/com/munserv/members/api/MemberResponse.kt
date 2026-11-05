@@ -8,9 +8,9 @@ import io.swagger.v3.oas.annotations.media.Schema
  */
 @Schema(description = "Geographic coordinates")
 data class GeoPointResponse(
-    @Schema(description = "Latitude coordinate", example = "-26.1350")
+    @field:Schema(description = "Latitude coordinate", example = "-26.1350")
     val latitude: Double,
-    @Schema(description = "Longitude coordinate", example = "27.9800")
+    @field:Schema(description = "Longitude coordinate", example = "27.9800")
     val longitude: Double,
 )
 
@@ -20,23 +20,23 @@ data class GeoPointResponse(
  */
 @Schema(description = "Member profile information")
 data class MemberProfileResponse(
-    @Schema(description = "Member UUID", example = "550e8400-e29b-41d4-a716-446655440001")
+    @field:Schema(description = "Member UUID", example = "550e8400-e29b-41d4-a716-446655440001")
     val id: String,
-    @Schema(description = "First name", example = "John")
+    @field:Schema(description = "First name", example = "John")
     val firstName: String,
-    @Schema(description = "Last name", example = "Doe")
+    @field:Schema(description = "Last name", example = "Doe")
     val surname: String,
-    @Schema(description = "Masked phone number", example = "***-***-4567")
+    @field:Schema(description = "Masked phone number", example = "***-***-4567")
     val phoneNumber: String,
-    @Schema(description = "Home address", example = "42 Doreen Road, Northcliff")
+    @field:Schema(description = "Home address", example = "42 Doreen Road, Northcliff")
     val address: String,
-    @Schema(description = "Registration location coordinates")
+    @field:Schema(description = "Registration location coordinates")
     val registrationLocation: GeoPointResponse,
-    @Schema(description = "Assigned sector UUID", example = "550e8400-e29b-41d4-a716-446655440001")
+    @field:Schema(description = "Assigned sector UUID", example = "550e8400-e29b-41d4-a716-446655440001")
     val sectorId: String,
-    @Schema(description = "Account status", example = "active")
+    @field:Schema(description = "Account status", example = "active")
     val status: String,
-    @Schema(description = "Registration timestamp", example = "2025-01-15T10:00:00Z")
+    @field:Schema(description = "Registration timestamp", example = "2025-01-15T10:00:00Z")
     val createdAt: String,
 )
 

@@ -470,28 +470,38 @@
       "CreateIssueRequest" : {
         "properties" : {
           "description" : {
+            "description" : "Optional description of the issue",
             "maxLength" : 1000,
             "minLength" : 0,
             "type" : [ "null", "string" ]
           },
           "latitude" : {
+            "description" : "GPS latitude",
+            "example" : -26.135,
             "format" : "double",
             "maximum" : 90.0,
             "minimum" : -90.0,
             "type" : "number"
           },
           "longitude" : {
+            "description" : "GPS longitude",
+            "example" : 27.98,
             "format" : "double",
             "maximum" : 180.0,
             "minimum" : -180.0,
             "type" : "number"
           },
           "sectorId" : {
+            "description" : "Sector UUID where the issue is located",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
             "minLength" : 1,
             "pattern" : "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             "type" : "string"
           },
           "type" : {
+            "description" : "Type of issue",
+            "enum" : [ "pothole", "water_leak", "street_light", "traffic_light", "sewage_leak", "illegal_dumping", "road_damage", "other" ],
+            "example" : "pothole",
             "minLength" : 1,
             "pattern" : "^(pothole|water_leak|street_light|traffic_light|sewage_leak|illegal_dumping|road_damage|other)$",
             "type" : "string"
@@ -587,10 +597,14 @@
         "description" : "Geographic coordinates",
         "properties" : {
           "latitude" : {
+            "description" : "Latitude coordinate",
+            "example" : -26.135,
             "format" : "double",
             "type" : "number"
           },
           "longitude" : {
+            "description" : "Longitude coordinate",
+            "example" : 27.98,
             "format" : "double",
             "type" : "number"
           }
@@ -991,30 +1005,47 @@
         "description" : "Member profile information",
         "properties" : {
           "address" : {
+            "description" : "Home address",
+            "example" : "42 Doreen Road, Northcliff",
             "type" : "string"
           },
           "createdAt" : {
+            "description" : "Registration timestamp",
+            "example" : "2025-01-15T10:00:00Z",
             "type" : "string"
           },
           "firstName" : {
+            "description" : "First name",
+            "example" : "John",
             "type" : "string"
           },
           "id" : {
+            "description" : "Member UUID",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
             "type" : "string"
           },
           "phoneNumber" : {
+            "description" : "Masked phone number",
+            "example" : "***-***-4567",
             "type" : "string"
           },
           "registrationLocation" : {
-            "$ref" : "#/components/schemas/GeoPointResponse"
+            "$ref" : "#/components/schemas/GeoPointResponse",
+            "description" : "Registration location coordinates"
           },
           "sectorId" : {
+            "description" : "Assigned sector UUID",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
             "type" : "string"
           },
           "status" : {
+            "description" : "Account status",
+            "example" : "active",
             "type" : "string"
           },
           "surname" : {
+            "description" : "Last name",
+            "example" : "Doe",
             "type" : "string"
           }
         },
@@ -1083,9 +1114,13 @@
         "description" : "Message action request",
         "properties" : {
           "action" : {
+            "description" : "Action to perform",
+            "enum" : [ "accept", "decline", "approve", "reject", "confirm", "cannot_verify", "dismiss", "acknowledge" ],
+            "example" : "accept",
             "type" : "string"
           },
           "note" : {
+            "description" : "Optional note for the action",
             "type" : [ "null", "string" ]
           }
         },
@@ -1095,20 +1130,24 @@
         "description" : "Paginated message list response",
         "properties" : {
           "items" : {
+            "description" : "List of messages",
             "items" : {
               "$ref" : "#/components/schemas/MessageResponse"
             },
             "type" : "array"
           },
           "page" : {
+            "description" : "Current page number (1-based)",
             "format" : "int32",
             "type" : "integer"
           },
           "total" : {
+            "description" : "Total number of messages",
             "format" : "int64",
             "type" : "integer"
           },
           "unreadCount" : {
+            "description" : "Count of unread messages for this recipient",
             "format" : "int64",
             "type" : "integer"
           }
@@ -1119,63 +1158,87 @@
         "description" : "Message details",
         "properties" : {
           "actionResult" : {
+            "description" : "Result of action taken",
             "type" : [ "null", "string" ]
           },
           "actionType" : {
+            "description" : "Type of action available for this message",
+            "example" : "accept_decline",
             "type" : [ "null", "string" ]
           },
           "actionedAt" : {
+            "description" : "Timestamp when action was taken",
             "format" : "date-time",
             "type" : [ "null", "string" ]
           },
           "body" : {
+            "description" : "Message body content",
             "type" : "string"
           },
           "createdAt" : {
+            "description" : "Message creation timestamp",
             "format" : "date-time",
             "type" : "string"
           },
           "expiresAt" : {
+            "description" : "Message expiration timestamp",
             "format" : "date-time",
             "type" : [ "null", "string" ]
           },
           "id" : {
+            "description" : "Unique message ID",
+            "example" : "550e8400-e29b-41d4-a716-446655440000",
             "type" : "string"
           },
           "metadata" : {
             "additionalProperties" : { },
+            "description" : "Additional metadata as JSON object",
             "type" : [ "null", "object" ]
           },
           "readAt" : {
+            "description" : "Timestamp when message was read",
             "format" : "date-time",
             "type" : [ "null", "string" ]
           },
           "recipientId" : {
+            "description" : "Recipient ID",
             "type" : "string"
           },
           "recipientType" : {
+            "description" : "Recipient type",
+            "example" : "member",
             "type" : "string"
           },
           "relatedEntityId" : {
+            "description" : "Related entity ID",
             "type" : [ "null", "string" ]
           },
           "relatedEntityType" : {
+            "description" : "Related entity type",
+            "example" : "issue",
             "type" : [ "null", "string" ]
           },
           "senderId" : {
+            "description" : "Sender ID (if applicable)",
             "type" : [ "null", "string" ]
           },
           "senderType" : {
+            "description" : "Sender type",
+            "example" : "admin",
             "type" : [ "null", "string" ]
           },
           "status" : {
+            "description" : "Message status",
             "enum" : [ "unread", "read", "actioned", "dismissed" ],
             "type" : "string"
           },
           "title" : {
+            "description" : "Message title",
+            "example" : "Ground Admin Invitation",
             "type" : "string"
           },
           "type" : {
+            "description" : "Message type",
             "enum" : [ "ground_admin_invitation", "ground_admin_application", "ground_admin_approved", "ground_admin_declined", "ground_admin_invitation_declined", "ground_admin_invitation_accepted", "ground_admin_revocation", "ground_admin_stepdown_request", "verify_new_issue", "verify_fix", "member_registration", "monthly_report", "admin_welcome" ],
             "type" : "string"
           }
@@ -1205,6 +1268,8 @@
             "type" : "string"
           },
           "isOnboarded" : {
+            "description" : "Whether onboarding is complete",
+            "example" : false,
             "type" : "boolean"
           },
           "requiresPasswordChange" : {
@@ -1365,19 +1430,29 @@
         "description" : "Photo metadata",
         "properties" : {
           "createdAt" : {
+            "description" : "Upload timestamp",
+            "example" : "2025-01-15T10:30:00Z",
             "type" : "string"
           },
           "id" : {
+            "description" : "Photo UUID",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
             "type" : "string"
           },
           "sortOrder" : {
+            "description" : "Display order",
+            "example" : 1,
             "format" : "int32",
             "type" : "integer"
           },
           "thumbnailUrl" : {
+            "description" : "Thumbnail URL",
+            "example" : "https://storage.example.com/photos/abc123_thumb.jpg",
             "type" : "string"
           },
           "url" : {
+            "description" : "Full-size photo URL",
+            "example" : "https://storage.example.com/photos/abc123.jpg",
             "type" : "string"
           }
         },
@@ -1387,38 +1462,56 @@
         "description" : "Pod dashboard statistics",
         "properties" : {
           "activeAdministrators" : {
+            "description" : "Number of active administrators in the pod",
+            "example" : 5,
             "format" : "int32",
             "type" : "integer"
           },
           "activeGroundAdmins" : {
+            "description" : "Number of active ground admins",
+            "example" : 8,
             "format" : "int32",
             "type" : "integer"
           },
           "openIssues" : {
+            "description" : "Number of open issues (reported, confirmed, in_progress, reopened)",
+            "example" : 45,
             "format" : "int32",
             "type" : "integer"
           },
           "pendingIssues" : {
+            "description" : "Number of pending issues awaiting confirmation",
+            "example" : 12,
             "format" : "int32",
             "type" : "integer"
           },
           "resolvedThisMonth" : {
+            "description" : "Number of issues resolved this month",
+            "example" : 23,
             "format" : "int32",
             "type" : "integer"
           },
           "sectorCount" : {
+            "description" : "Number of sectors in the pod",
+            "example" : 16,
             "format" : "int32",
             "type" : "integer"
           },
           "totalIssues" : {
+            "description" : "Total number of issues in the pod",
+            "example" : 150,
             "format" : "int32",
             "type" : "integer"
           },
           "totalMembers" : {
+            "description" : "Total number of members in the pod",
+            "example" : 1250,
             "format" : "int32",
             "type" : "integer"
           },
           "wardCount" : {
+            "description" : "Number of wards in the pod",
+            "example" : 4,
             "format" : "int32",
             "type" : "integer"
           }
@@ -1429,6 +1522,8 @@
         "description" : "Pod logo upload response",
         "properties" : {
           "logoUrl" : {
+            "description" : "Public URL of the stored logo image",
+            "example" : "http://localhost:8080/uploads/8f14e45f-ea1e-4d0e-9c6b-2a1c6f1b7d10.png",
             "type" : "string"
           }
         },
@@ -1438,12 +1533,18 @@
         "description" : "Pod settings",
         "properties" : {
           "displayName" : {
+            "description" : "Display name shown in UI",
+            "example" : "Munserv Pod Ward42",
             "type" : "string"
           },
           "logoUrl" : {
+            "description" : "URL to pod logo image",
+            "example" : "https://example.com/logo.png",
             "type" : [ "null", "string" ]
           },
           "name" : {
+            "description" : "Pod name",
+            "example" : "Ward42",
             "type" : "string"
           }
         },
@@ -1453,9 +1554,13 @@
         "description" : "Pod setup status",
         "properties" : {
           "isComplete" : {
+            "description" : "Whether setup is complete",
+            "example" : false,
             "type" : "boolean"
           },
           "missingSteps" : {
+            "description" : "List of missing setup steps",
+            "example" : [ "pod_boundaries", "first_admin" ],
             "items" : {
               "type" : "string"
             },
@@ -1531,28 +1636,42 @@
         "description" : "Sector dashboard statistics",
         "properties" : {
           "activeGroundAdmins" : {
+            "description" : "Number of active ground admins in the sector",
+            "example" : 2,
             "format" : "int32",
             "type" : "integer"
           },
           "openIssues" : {
+            "description" : "Number of open issues",
+            "example" : 8,
             "format" : "int32",
             "type" : "integer"
           },
           "resolvedThisMonth" : {
+            "description" : "Number of issues resolved this month",
+            "example" : 5,
             "format" : "int32",
             "type" : "integer"
           },
           "sectorId" : {
+            "description" : "Sector ID",
+            "example" : "550e8400-e29b-41d4-a716-446655440002",
             "type" : "string"
           },
           "sectorName" : {
+            "description" : "Sector name",
+            "example" : "Sector A",
             "type" : "string"
           },
           "totalIssues" : {
+            "description" : "Total number of issues in the sector",
+            "example" : 25,
             "format" : "int32",
             "type" : "integer"
           },
           "totalMembers" : {
+            "description" : "Total number of members in the sector",
+            "example" : 320,
             "format" : "int32",
             "type" : "integer"
           }
@@ -1577,32 +1696,50 @@
         "description" : "Sector settings configuration",
         "properties" : {
           "createdAt" : {
+            "description" : "When the settings were created",
             "format" : "date-time",
             "type" : "string"
           },
           "daysFixedBeforeClosed" : {
+            "description" : "Days an issue stays in Fixed state before auto-closing",
+            "example" : 7,
             "format" : "int32",
+            "maximum" : 365,
+            "minimum" : 1,
             "type" : "integer"
           },
           "fixVerificationMode" : {
+            "description" : "How Ground Admins are notified about fix verification",
             "enum" : [ "all_notified", "admin_assigns", "nearest_auto", "first_come" ],
+            "example" : "ALL_NOTIFIED",
             "type" : "string"
           },
           "id" : {
+            "description" : "Settings unique identifier",
+            "example" : "550e8400-e29b-41d4-a716-446655440010",
             "type" : "string"
           },
           "minimumGroundAdmins" : {
+            "description" : "Minimum number of Ground Admins required for the sector",
+            "example" : 2,
             "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0,
             "type" : "integer"
           },
           "newIssueVerificationMode" : {
+            "description" : "How Ground Admins are notified about new issue verification",
             "enum" : [ "all_notified", "admin_assigns", "nearest_auto", "first_come" ],
+            "example" : "ALL_NOTIFIED",
             "type" : "string"
           },
           "sectorId" : {
+            "description" : "Sector unique identifier",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
             "type" : "string"
           },
           "updatedAt" : {
+            "description" : "When the settings were last updated",
             "format" : "date-time",
             "type" : "string"
           }
@@ -1819,11 +1956,15 @@
       "UpdateIssueStateRequest" : {
         "properties" : {
           "note" : {
+            "description" : "Optional note explaining the state change",
             "maxLength" : 500,
             "minLength" : 0,
             "type" : [ "null", "string" ]
           },
           "state" : {
+            "description" : "New issue state",
+            "enum" : [ "reported", "confirmed", "in_progress", "fixed", "rejected", "reopened" ],
+            "example" : "confirmed",
             "minLength" : 1,
             "pattern" : "^(reported|confirmed|in_progress|fixed|rejected|reopened)$",
             "type" : "string"
@@ -1836,11 +1977,15 @@
         "description" : "Update pod settings request",
         "properties" : {
           "logoUrl" : {
+            "description" : "URL to pod logo image",
+            "example" : "https://example.com/logo.png",
             "maxLength" : 500,
             "minLength" : 0,
             "type" : [ "null", "string" ]
           },
           "name" : {
+            "description" : "New pod name",
+            "example" : "Ward42",
             "maxLength" : 100,
             "minLength" : 2,
             "type" : [ "null", "string" ]
@@ -1852,19 +1997,31 @@
         "description" : "Partial update request for sector settings",
         "properties" : {
           "daysFixedBeforeClosed" : {
+            "description" : "Days an issue stays in Fixed state before auto-closing (1-365)",
+            "example" : 14,
             "format" : "int32",
+            "maximum" : 365,
+            "minimum" : 1,
             "type" : [ "integer", "null" ]
           },
           "fixVerificationMode" : {
+            "description" : "How Ground Admins are notified about fix verification",
             "enum" : [ "all_notified", "admin_assigns", "nearest_auto", "first_come" ],
+            "example" : "NEAREST_AUTO",
             "type" : [ "null", "string" ]
           },
           "minimumGroundAdmins" : {
+            "description" : "Minimum number of Ground Admins required (0-100)",
+            "example" : 3,
             "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0,
             "type" : [ "integer", "null" ]
           },
           "newIssueVerificationMode" : {
+            "description" : "How Ground Admins are notified about new issue verification",
             "enum" : [ "all_notified", "admin_assigns", "nearest_auto", "first_come" ],
+            "example" : "ADMIN_ASSIGNS",
             "type" : [ "null", "string" ]
           }
         },
@@ -1901,29 +2058,43 @@
         "description" : "Ward dashboard statistics",
         "properties" : {
           "activeGroundAdmins" : {
+            "description" : "Number of active ground admins in the ward",
+            "example" : 3,
             "format" : "int32",
             "type" : "integer"
           },
           "openIssues" : {
+            "description" : "Number of open issues",
+            "example" : 15,
             "format" : "int32",
             "type" : "integer"
           },
           "resolvedThisMonth" : {
+            "description" : "Number of issues resolved this month",
+            "example" : 8,
             "format" : "int32",
             "type" : "integer"
           },
           "sectorCount" : {
+            "description" : "Number of sectors in the ward",
+            "example" : 4,
             "format" : "int32",
             "type" : "integer"
           },
           "totalIssues" : {
+            "description" : "Total number of issues in the ward",
+            "example" : 45,
             "format" : "int32",
             "type" : "integer"
           },
           "wardId" : {
+            "description" : "Ward ID",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
             "type" : "string"
           },
           "wardName" : {
+            "description" : "Ward name",
+            "example" : "Ward 42",
             "type" : "string"
           }
         },

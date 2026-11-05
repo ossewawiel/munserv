@@ -153,6 +153,19 @@ class OpenApiContractTest {
         listOf("complete", "onboarded", "groundAdmin", "registered").filter { it in propertyNames }.shouldBeEmpty()
     }
 
+    @Test
+    fun `should carry field level schema annotations from a DTO`() {
+        val isComplete =
+            fetchContract()
+                .path("components")
+                .path("schemas")
+                .path("PodSetupStatusResponse")
+                .path("properties")
+                .path("isComplete")
+
+        isComplete.path("description").asString("") shouldBe "Whether setup is complete"
+    }
+
     private companion object {
         const val APP_PACKAGE = "com.munserv"
         const val NO_CONTENT = "204"
