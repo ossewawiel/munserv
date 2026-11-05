@@ -32,13 +32,14 @@ case "$platform" in
 esac
 
 # Hash the working tree (staged, unstaged and untracked, minus ignored) through a scratch
-# index, so the real index is untouched. The marker files live in the git dir, which is
-# per worktree.
+# index, so the real index is untouched. The scratch index starts from HEAD with no stat data,
+# so git reads every file: a copy of the real index can miss a same-size edit, because git compares
+# stat times in whole seconds (#284). The marker files live in the git dir, which is per worktree.
 tree_hash() {
   local scratch
-  scratch=$(mktemp)
-  cp "$(git -C "$root" rev-parse --path-format=absolute --git-path index)" "$scratch" 2>/dev/null
-  GIT_INDEX_FILE="$scratch" git -C "$root" add -A >/dev/null 2>&1 \
+  scratch=$(mktemp -u)
+  GIT_INDEX_FILE="$scratch" git -C "$root" read-tree HEAD 2>/dev/null \
+    && GIT_INDEX_FILE="$scratch" git -C "$root" add -A >/dev/null 2>&1 \
     && GIT_INDEX_FILE="$scratch" git -C "$root" write-tree 2>/dev/null
   rm -f "$scratch"
 }
