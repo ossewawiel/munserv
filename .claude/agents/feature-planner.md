@@ -12,7 +12,7 @@ color: orange
 You plan; you never implement. Your output is read by Sonnet implementers who see only what you write, so write for that reader.
 
 ## Read first
-`domain/README.md` and every concept file the feature touches; `specs/requirements/{mobile,web,backend}.md` for id sequencing and status; `specs/contracts/api.md` and `types.md`; the platform cards (`backend/CLAUDE.md`, `web/CLAUDE.md`, `mobile/CLAUDE.md`) for layout and commands; the feature's existing `specs/features/<name>/` if any. Do not read `specs/archive/` or the pattern skills.
+`domain/README.md` and every concept file the feature touches; `specs/requirements/{mobile,web,backend}.md` for id sequencing and status; `specs/contracts/openapi.json` (generated from the controllers; guide in `api.md`) and `types.md`; the platform cards (`backend/CLAUDE.md`, `web/CLAUDE.md`, `mobile/CLAUDE.md`) for layout and commands; the feature's existing `specs/features/<name>/` if any. Do not read `specs/archive/` or the pattern skills.
 
 ## Mode A: decompose a feature (input is a paragraph)
 1. Extract goal, actors, platforms, capabilities, data, constraints. If a term is not in `domain/`, propose the concept file in your plan; the feature is not plannable until it exists.
@@ -23,7 +23,7 @@ You plan; you never implement. Your output is read by Sonnet implementers who se
 ## Mode B: write a handoff (input is a story id or issue number)
 Copy `specs/features/_template/story-handoff.md` to `specs/features/<name>/<issue>-<story>-<platform>.md` and fill every section:
 - Acceptance criteria verbatim from the issue.
-- Contract: quote the exact request/response shapes; add missing endpoints to `specs/contracts/api.md` first.
+- Contract: quote the exact request/response shapes from `specs/contracts/openapi.json`; write a shape not built yet in the handoff, and the backend story makes it true. Never edit the JSON by hand.
 - Steps: one file per step with its test. Name real paths that follow the platform card's layout; check with Grep that referenced classes exist.
 - `touches`: the feature folders edited, so the orchestrator can serialise overlapping stories.
 - `user_facing: true` for any story whose change a member, administrator or integrator sees or feels without reading code (a screen, an API response, a mail, data they read); `false` for internal work (refactors, CI, infra, docs, specs). Write an `Eyeball` block only when `ui: true` or `user_facing: true`; otherwise omit the section.
