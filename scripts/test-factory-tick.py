@@ -85,7 +85,8 @@ class Sandbox:
         if ledger:
             (self.state / "ticks.jsonl").write_text("".join((r if isinstance(r, str) else json.dumps(r)) + "\n" for r in ledger))
         self.env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}", "STUB_LOG": str(self.log),
-                    "MUNSERV_FACTORY_CONFIG": str(self.config), "MUNSERV_FACTORY_STATE": str(self.state)}
+                    "MUNSERV_FACTORY_CONFIG": str(self.config), "MUNSERV_FACTORY_STATE": str(self.state),
+                    "CLAUDE_CONFIG_DIR": str(tmp / "claude")}
 
     def set_env(self, line: str) -> None:
         """Append a tick.env line; it wins over the base lines and over the process environment."""
@@ -384,6 +385,45 @@ def case_sync_skipped_in_dry_run(sb: Sandbox) -> list[str]:
     return [f"dry run pushed {sync_branches(sb)}"] if sync_branches(sb) else []
 
 
+def denied_row(tool_use_id: str) -> dict:
+    return {"toolDenialKind": "permission-rule", "message": {"content": [
+        {"type": "tool_result", "tool_use_id": tool_use_id, "is_error": True, "content": "Permission to use it has been denied."}]}}
+
+
+def write_transcript(sb: Sandbox, name: str, rows: list[dict | str]) -> None:
+    folder = sb.tmp / "claude" / "projects" / "-any-project" / "s1" / "subagents"
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / name).write_text("".join((r if isinstance(r, str) else json.dumps(r)) + "\n" for r in rows))
+
+
+def case_subagent_denials(sb: Sandbox) -> list[str]:
+    uses = [("t1", "Bash", {"command": "gh label list"}), ("t2", "Bash", {"command": "python3 -c 1"}),
+            ("t3", "Bash", {"command": "false"})]
+    write_transcript(sb, "agent-a.jsonl", [
+        "not json",
+        {"message": {"content": "a plain prompt"}},
+        {"message": {"content": [{"type": "tool_use", "id": i, "name": n, "input": v} for i, n, v in uses]}},
+        denied_row("t1"),  # a foreground denial is in the top-level list as well
+        denied_row("t2"),
+        {"message": {"content": [{"type": "tool_result", "tool_use_id": "t3", "is_error": True, "content": "Exit code 1"}]}},
+        {"hash": "x", "message": {"content": [{"type": "tool_result", "tool_use_id": "t3", "is_error": True, "content": "replay"}]}},
+    ])
+    write_transcript(sb, "agent-b.jsonl", [
+        {"message": {"content": [{"type": "tool_use", "id": "t4", "name": "Bash", "input": {"command": "git rm a"}}]}},
+        denied_row("t4"),
+    ])
+    r = sb.run(STUB_PICKS="[12]")
+    errors = [f"exit {r.returncode}: {r.stderr}"] if r.returncode else []
+    row = next((x for x in sb.ledger() if x["kind"] == "story"), {})
+    want = ["Bash: gh label list", "Bash: python3 -c 1", "Bash: git rm a"]
+    if sorted(row.get("permission_denials") or []) != sorted(want):
+        errors.append(f"permission_denials {row.get('permission_denials')}, want {want}")
+    comments = [c["argv"] for c in sb.calls("gh") if c["argv"][:2] == ["issue", "comment"]]
+    if not comments or "git rm a" not in arg_after(comments[0], "--body"):
+        errors.append("Factory log comment lacks the subagent's denial")
+    return errors
+
+
 def spent(amount: float) -> list[dict]:
     return [{"date": TODAY, "kind": "story", "total_cost_usd": amount}, {"date": "2000-01-01", "total_cost_usd": 99}]
 
@@ -392,6 +432,7 @@ CASES = [
     ("pause file exits before anything", case_pause, {}),
     ("budget reached skips the clerk", case_budget_reached, {"ledger": spent(10)}),
     ("dispatch caps the run at what is left today", case_dispatch, {"ledger": [*spent(6.75), "not json"]}),
+    ("a subagent's denials reach the ledger and the log once each", case_subagent_denials, {}),
     ("nothing ready runs only the clerk", case_nothing_ready, {}),
     ("dry run dispatches nothing", case_dry_run, {}),
     ("a checkout off master stops the tick", case_not_on_master, {"branch": "feat/x"}),
