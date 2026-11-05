@@ -53,8 +53,14 @@ class PodAdministratorController(
     private val podIdResolver: PodIdResolver,
 ) {
     @Operation(
+        operationId = "listAdministrators",
         summary = "List all administrators in the pod",
-        description = "Returns all administrators (at any level) within the current pod, sorted, searched and filtered.",
+        description =
+            "Returns all administrators (at any level) within the current pod, sorted, searched and " +
+                "filtered. A pod's administrators are admins with its podId plus ward- and sector-level " +
+                "admins of its wards and sectors. Unpaginated; total equals items.length. Filters combine " +
+                "with AND. Default createdAt:asc. role sorts by hierarchy, email and displayName ignore case." +
+                " 400 codes invalid_sort, invalid_role, invalid_ward_id.",
     )
     @ApiResponses(
         value = [
@@ -143,8 +149,9 @@ class PodAdministratorController(
     }
 
     @Operation(
+        operationId = "getAdministrator",
         summary = "Get administrator by ID",
-        description = "Retrieve a single administrator's details.",
+        description = "Retrieve a single administrator's details. 403 codes: cross_pod, out_of_scope.",
     )
     @ApiResponses(
         value = [
@@ -203,8 +210,11 @@ class PodAdministratorController(
     }
 
     @Operation(
+        operationId = "createAdministrator",
         summary = "Create a new administrator",
-        description = "Create a new administrator within the pod. A temporary password will be generated.",
+        description =
+            "Create a new administrator within the pod. A temporary password will be generated. Sends an " +
+                "admin_welcome message; temporaryPassword is shown once. 409 code email_exists.",
     )
     @ApiResponses(
         value = [
@@ -298,6 +308,7 @@ class PodAdministratorController(
     }
 
     @Operation(
+        operationId = "updateAdministrator",
         summary = "Update an administrator",
         description = "Update an existing administrator's details.",
     )
@@ -375,8 +386,11 @@ class PodAdministratorController(
     }
 
     @Operation(
+        operationId = "deleteAdministrator",
         summary = "Delete an administrator",
-        description = "Soft delete an administrator (set deletedAt timestamp).",
+        description =
+            "Soft delete an administrator (set deletedAt timestamp). 403 codes: cannot_delete_self, " +
+                "insufficient_permissions, cross_pod.",
     )
     @ApiResponses(
         value = [

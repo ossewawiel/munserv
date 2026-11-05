@@ -5,7 +5,7 @@ Community infrastructure issue tracker. Members report potholes, leaks and broke
 ## Read in this order
 1. `domain/README.md` - the vocabulary. Every term used in code, issues and UI is defined there. A term that is not there does not exist yet.
 2. The platform card for the code you are touching: `backend/CLAUDE.md`, `web/CLAUDE.md`, `mobile/CLAUDE.md`, `database/CLAUDE.md`, `infrastructure/CLAUDE.md`.
-3. Only what the task needs from `specs/`: `requirements/` (stories, status), `contracts/api.md` and `contracts/types.md` (wire contract), `architecture/decisions/` (ADRs), `features/<name>/` (spec, plan, handoffs).
+3. Only what the task needs from `specs/`: `requirements/` (stories, status), `contracts/openapi.json` (generated wire contract; guide in `contracts/api.md`) and `contracts/types.md`, `architecture/decisions/` (ADRs), `features/<name>/` (spec, plan, handoffs).
 
 Skills under `.claude/skills/` hold the worked-example catalogues (`backend-patterns`, `web-patterns`, `web-data-table`, `mobile-patterns`, `mobile-design-system`). Load one when the card is not enough. `specs/archive/` is history; do not read it unless asked why something is the way it is.
 

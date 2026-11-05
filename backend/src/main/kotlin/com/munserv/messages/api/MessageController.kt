@@ -66,6 +66,7 @@ class MessageController(
      * GET /api/v1/messages - List messages for the authenticated user.
      */
     @Operation(
+        operationId = "listMessages",
         summary = "List messages",
         description = "Retrieve a paginated list of messages for the authenticated user with optional filtering",
     )
@@ -131,8 +132,10 @@ class MessageController(
      * GET /api/v1/messages/{id} - Get a single message by ID.
      */
     @Operation(
+        operationId = "getMessage",
         summary = "Get message",
-        description = "Retrieve a single message by its ID",
+        description =
+            "Retrieve a single message by its ID. admin_welcome carries metadata.tasks, a list of strings.",
     )
     @ApiResponses(
         value = [
@@ -192,6 +195,7 @@ class MessageController(
      * PATCH /api/v1/messages/{id}/read - Mark a message as read.
      */
     @Operation(
+        operationId = "markMessageRead",
         summary = "Mark message as read",
         description = "Mark a message as read, updating its status and setting the read timestamp",
     )
@@ -253,6 +257,7 @@ class MessageController(
      * POST /api/v1/messages/{id}/action - Perform an action on a message.
      */
     @Operation(
+        operationId = "performMessageAction",
         summary = "Perform message action",
         description = "Perform an action on a message (e.g., accept, decline, approve, reject)",
     )

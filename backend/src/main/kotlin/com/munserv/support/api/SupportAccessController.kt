@@ -35,13 +35,17 @@ import java.util.UUID
  */
 @RestController
 @RequestMapping("/api/v1/support-access")
-@Tag(name = "Support Access", description = "Endpoints for pod chiefs to grant, list and revoke support access.")
+@Tag(
+    name = "Support Access",
+    description = "Pod chiefs grant, list and revoke support access; a support grant holder reads their own grant.",
+)
 @SecurityRequirement(name = "bearerAuth")
 @RequireRole(AdminRole.POD_CHIEF)
 class SupportAccessController(
     private val supportAccessService: SupportAccessService,
 ) {
     @Operation(
+        operationId = "listSupportGrants",
         summary = "List support grants",
         description = "List support grants for the caller's pod, newest first.",
     )
@@ -89,8 +93,11 @@ class SupportAccessController(
     }
 
     @Operation(
+        operationId = "createSupportGrant",
         summary = "Grant support access",
-        description = "Grant the super user temporary access to the caller's pod.",
+        description =
+            "Grant the super user temporary access to the caller's pod. 400 body { messages: string[] }; " +
+                "409 code active_grant_exists.",
     )
     @ApiResponses(
         value = [
@@ -146,8 +153,9 @@ class SupportAccessController(
     }
 
     @Operation(
+        operationId = "revokeSupportGrant",
         summary = "Revoke support access",
-        description = "Revoke an active support grant immediately.",
+        description = "Revoke an active support grant immediately. 409 code grant_not_active.",
     )
     @ApiResponses(
         value = [

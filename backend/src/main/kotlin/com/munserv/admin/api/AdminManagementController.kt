@@ -43,6 +43,7 @@ class AdminManagementController(
     private val adminManagementService: AdminManagementService,
 ) {
     @Operation(
+        operationId = "createAdmin",
         summary = "Create a new admin",
         description = "Create a new sector admin. A temporary password will be generated.",
     )
@@ -138,6 +139,7 @@ class AdminManagementController(
     }
 
     @Operation(
+        operationId = "listAdmins",
         summary = "List admins in a sector",
         description = "Retrieve a list of all admins in the specified sector.",
     )
@@ -210,6 +212,7 @@ class AdminManagementController(
     }
 
     @Operation(
+        operationId = "getAdmin",
         summary = "Get admin by ID",
         description = "Retrieve a single admin by their ID.",
     )
@@ -282,6 +285,7 @@ class AdminManagementController(
     }
 
     @Operation(
+        operationId = "updateAdmin",
         summary = "Update an admin",
         description = "Update an existing admin's details. Only provided fields will be updated.",
     )
@@ -378,6 +382,7 @@ class AdminManagementController(
     }
 
     @Operation(
+        operationId = "deleteAdmin",
         summary = "Delete an admin",
         description = "Soft delete an admin (set deletedAt timestamp).",
     )

@@ -28,14 +28,20 @@ import java.util.UUID
  */
 @RestController
 @RequestMapping("/api/v1/support-access")
-@Tag(name = "Support Access", description = "Self-service endpoint for a support grant holder.")
+@Tag(
+    name = "Support Access",
+    description = "Pod chiefs grant, list and revoke support access; a support grant holder reads their own grant.",
+)
 @SecurityRequirement(name = "bearerAuth")
 class SupportGrantSelfController(
     private val supportAccessService: SupportAccessService,
 ) {
     @Operation(
+        operationId = "getCurrentSupportGrant",
         summary = "Get the caller's own support grant",
-        description = "Return the grant carried by the caller's own grant-scoped token, so the client can refresh a slid expiry.",
+        description =
+            "Return the grant carried by the caller's own grant-scoped token, so the client can refresh a" +
+                " slid expiry. 403 code not_support_grant.",
     )
     @ApiResponses(
         value = [

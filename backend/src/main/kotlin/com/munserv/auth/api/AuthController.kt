@@ -11,6 +11,8 @@ import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.MemberId
 import com.munserv.shared.types.SectorId
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -44,10 +46,14 @@ class AuthController(
         private const val ERROR_UNEXPECTED = "Unexpected error"
     }
 
-    @Operation(summary = "Request OTP", description = "Request a one-time password for phone number verification")
+    @Operation(operationId = "register", summary = "Request OTP", description = "Request a one-time password for phone number verification")
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "OTP sent successfully"),
+            ApiResponse(
+                responseCode = "200",
+                description = "OTP sent successfully",
+                content = [Content(schema = Schema(implementation = OtpResponse::class))],
+            ),
             ApiResponse(responseCode = "400", description = "Invalid phone number format"),
             ApiResponse(responseCode = "409", description = "Phone number already registered"),
         ],
@@ -99,10 +105,14 @@ class AuthController(
             }
         }
 
-    @Operation(summary = "Verify OTP", description = "Verify the one-time password sent to phone")
+    @Operation(operationId = "verifyOtp", summary = "Verify OTP", description = "Verify the one-time password sent to phone")
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "OTP verified successfully"),
+            ApiResponse(
+                responseCode = "200",
+                description = "OTP verified successfully",
+                content = [Content(schema = Schema(implementation = OtpResponse::class))],
+            ),
             ApiResponse(responseCode = "400", description = "Invalid phone number format"),
             ApiResponse(responseCode = "401", description = "Invalid or expired OTP"),
         ],
@@ -154,10 +164,18 @@ class AuthController(
             }
         }
 
-    @Operation(summary = "Complete registration", description = "Complete member registration with profile details and PIN")
+    @Operation(
+        operationId = "completeRegistration",
+        summary = "Complete registration",
+        description = "Complete member registration with profile details and PIN",
+    )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "201", description = "Registration completed successfully"),
+            ApiResponse(
+                responseCode = "201",
+                description = "Registration completed successfully",
+                content = [Content(schema = Schema(implementation = RegistrationResponse::class))],
+            ),
             ApiResponse(responseCode = "400", description = "Invalid phone number or PIN format"),
         ],
     )
@@ -235,10 +253,14 @@ class AuthController(
             }
         }
 
-    @Operation(summary = "Member login", description = "Authenticate member with phone number and PIN")
+    @Operation(operationId = "login", summary = "Member login", description = "Authenticate member with phone number and PIN")
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Login successful"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Login successful",
+                content = [Content(schema = Schema(implementation = LoginResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Invalid credentials"),
             ApiResponse(responseCode = "403", description = "Account suspended"),
         ],
@@ -297,10 +319,22 @@ class AuthController(
             }
         }
 
-    @Operation(summary = "Admin login", description = "Authenticate administrator with email and password")
+    @Operation(
+        operationId = "adminLogin",
+        summary = "Admin login",
+        description =
+            "Authenticate administrator with email and password. Under an active grant profile.admin.role " +
+                "is the granted role, never super_user, and profile.supportGrant carries the grant (null " +
+                "otherwise). tokens.expiresAt is the token's expiry, supportGrant.expiresAt the grant's " +
+                "sliding expiry. 401 also when the pod is not bootstrap-eligible and has no active grant.",
+    )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Admin login successful"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Admin login successful",
+                content = [Content(schema = Schema(implementation = AdminLoginResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Invalid credentials"),
         ],
     )
@@ -471,10 +505,18 @@ class AuthController(
             }
         }
 
-    @Operation(summary = "Refresh token", description = "Exchange a valid refresh token for new access and refresh tokens")
+    @Operation(
+        operationId = "refreshToken",
+        summary = "Refresh token",
+        description = "Exchange a valid refresh token for new access and refresh tokens",
+    )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Tokens refreshed successfully"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Tokens refreshed successfully",
+                content = [Content(schema = Schema(implementation = TokenResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Invalid or expired refresh token"),
         ],
     )
@@ -520,10 +562,18 @@ class AuthController(
             }
         }
 
-    @Operation(summary = "Check phone registration", description = "Check if a phone number is already registered")
+    @Operation(
+        operationId = "checkPhone",
+        summary = "Check phone registration",
+        description = "Check if a phone number is already registered",
+    )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Phone check successful"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Phone check successful",
+                content = [Content(schema = Schema(implementation = CheckPhoneResponse::class))],
+            ),
             ApiResponse(responseCode = "400", description = "Invalid phone number format"),
         ],
     )
@@ -573,10 +623,14 @@ class AuthController(
      * Public registration for web form submissions.
      * Creates member with PendingApproval status.
      */
-    @Operation(summary = "Register member via web form")
+    @Operation(operationId = "registerWeb", summary = "Register member via web form")
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "201", description = "Registration submitted"),
+            ApiResponse(
+                responseCode = "201",
+                description = "Registration submitted",
+                content = [Content(schema = Schema(implementation = WebRegisterResponse::class))],
+            ),
             ApiResponse(responseCode = "400", description = "Validation error"),
             ApiResponse(responseCode = "409", description = "Email already registered"),
         ],
@@ -642,10 +696,14 @@ class AuthController(
      * Member login with email and password.
      * Used by mobile app after admin approval.
      */
-    @Operation(summary = "Member login with email and password")
+    @Operation(operationId = "memberLogin", summary = "Member login with email and password")
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Login successful"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Login successful",
+                content = [Content(schema = Schema(implementation = MemberLoginResponse::class))],
+            ),
             ApiResponse(responseCode = "401", description = "Invalid credentials"),
             ApiResponse(responseCode = "403", description = "Account pending or suspended"),
         ],
@@ -713,11 +771,15 @@ class AuthController(
     /**
      * Change password for authenticated member.
      */
-    @Operation(summary = "Change member password")
+    @Operation(operationId = "changePassword", summary = "Change member password")
     @SecurityRequirement(name = "bearerAuth")
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Password changed"),
+            ApiResponse(
+                responseCode = "200",
+                description = "Password changed",
+                content = [Content(schema = Schema(implementation = MessageResponse::class))],
+            ),
             ApiResponse(responseCode = "400", description = "Validation error"),
             ApiResponse(responseCode = "401", description = "Invalid current password"),
         ],
@@ -795,7 +857,13 @@ class AuthController(
      * Log out the current caller. Revokes the underlying support grant for a grant-scoped
      * token; a no-op for any other authenticated token. Always returns 204.
      */
-    @Operation(summary = "Logout", description = "Log out the current caller, revoking a support grant if scoped to one")
+    @Operation(
+        operationId = "logout",
+        summary = "Logout",
+        description =
+            "Log out the current caller, revoking a support grant if scoped to one. Always 204; a no-op " +
+                "for a token without a grant.",
+    )
     @SecurityRequirement(name = "bearerAuth")
     @ApiResponses(
         value = [

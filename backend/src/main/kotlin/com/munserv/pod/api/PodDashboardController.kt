@@ -42,6 +42,7 @@ class PodDashboardController(
     private val podIdResolver: PodIdResolver,
 ) {
     @Operation(
+        operationId = "getPodDashboard",
         summary = "Get pod dashboard statistics",
         description = "Returns aggregated statistics for the entire pod including issues, members, and administrative units.",
     )
@@ -85,6 +86,7 @@ class PodDashboardController(
     }
 
     @Operation(
+        operationId = "getWardDashboard",
         summary = "Get ward dashboard statistics",
         description = "Returns aggregated statistics for a specific ward.",
     )
@@ -127,6 +129,7 @@ class PodDashboardController(
     }
 
     @Operation(
+        operationId = "getSectorDashboard",
         summary = "Get sector dashboard statistics",
         description = "Returns aggregated statistics for a specific sector.",
     )

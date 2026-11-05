@@ -236,11 +236,11 @@ class IssuesApiContractTest {
 | `POST` | `/api/v1/auth/login` | Admin login |
 | `GET` | `/api/v1/admin/dashboard` | Dashboard stats |
 
-See [API Contract](../specs/contracts/api.md) for full documentation.
+See the generated [API contract](../specs/contracts/openapi.json) for every route, and its [guide](../specs/contracts/api.md).
 
 ## Documentation
 
 - [CLAUDE.md](CLAUDE.md) — Architecture patterns, coding conventions
-- [API Contract](../specs/contracts/api.md) — Endpoint specifications
+- [API Contract](../specs/contracts/openapi.json) — Endpoint specifications, generated from the controllers; [guide](../specs/contracts/api.md)
 - [Domain Modeling](../specs/archive/Domain_and_Data_Modeling.md) — Entity definitions
 - [Testing Strategy](../specs/archive/Testing_Strategy.md) — Test patterns

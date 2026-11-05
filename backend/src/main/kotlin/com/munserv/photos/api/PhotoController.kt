@@ -78,6 +78,7 @@ class PhotoController(
      * POST /api/v1/issues/{issueId}/photos - Upload a photo for an issue.
      */
     @Operation(
+        operationId = "uploadPhoto",
         summary = "Upload photo for issue",
         description = "Upload a photo to attach to an issue. Supports JPEG, PNG, and WebP formats up to 5MB.",
     )
@@ -154,6 +155,7 @@ class PhotoController(
      * GET /api/v1/issues/{issueId}/photos - Get all photos for an issue.
      */
     @Operation(
+        operationId = "listIssuePhotos",
         summary = "Get photos for issue",
         description = "Retrieve all photos attached to an issue",
     )
@@ -181,6 +183,7 @@ class PhotoController(
      * DELETE /api/v1/photos/{photoId} - Delete a photo.
      */
     @Operation(
+        operationId = "deletePhoto",
         summary = "Delete photo",
         description = "Delete a photo by its ID",
     )

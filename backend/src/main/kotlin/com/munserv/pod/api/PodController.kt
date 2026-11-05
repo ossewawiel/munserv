@@ -48,8 +48,12 @@ class PodController(
     private val podLogoService: PodLogoService,
 ) {
     @Operation(
+        operationId = "getPodSetupStatus",
         summary = "Get pod setup status",
-        description = "Returns the setup completion status for the current pod, including any missing steps.",
+        description =
+            "Returns the setup completion status for the current pod, including any missing steps. " +
+                "missingSteps holds pod_name, pod_boundaries, wards_sectors, first_admin; empty when " +
+                "complete. The response has no wards or sectors (#59).",
     )
     @ApiResponses(
         value = [
@@ -91,8 +95,11 @@ class PodController(
     }
 
     @Operation(
+        operationId = "getPodSettings",
         summary = "Get pod settings",
-        description = "Returns the settings (name, logo) for the current pod.",
+        description =
+            "Returns the settings (name, logo) for the current pod. displayName is \"Munserv Pod {name}\", " +
+                "server-derived; clients render it, never build it. logoUrl is null with no logo.",
     )
     @ApiResponses(
         value = [
@@ -134,6 +141,7 @@ class PodController(
     }
 
     @Operation(
+        operationId = "updatePodSettings",
         summary = "Update pod settings",
         description = "Partially update the pod settings. Only provided fields will be updated.",
     )
@@ -180,10 +188,12 @@ class PodController(
     }
 
     @Operation(
+        operationId = "uploadPodLogo",
         summary = "Upload pod logo",
         description =
-            "Upload a pod logo image and return its public URL. Storing the file does not change " +
-                "the pod; persist the returned URL with PATCH /pod/settings.",
+            "Upload a pod logo image and return its public URL. Storing the file does not change the pod;" +
+                " persist the returned URL with PATCH /pod/settings. One multipart part file: JPEG, PNG or " +
+                "WebP, max 5MB.",
     )
     @ApiResponses(
         value = [

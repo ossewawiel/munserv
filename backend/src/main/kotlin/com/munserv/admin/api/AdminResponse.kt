@@ -1,5 +1,6 @@
 package com.munserv.admin.api
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.munserv.admin.domain.DashboardStats
 import com.munserv.admin.domain.HeatReportItem
 import com.munserv.admin.domain.MemberWithStats
@@ -101,6 +102,7 @@ data class MemberResponse(
     val issueCount: Int,
     val joinedAt: String,
     // Ground Admin fields
+    @get:JsonProperty("isGroundAdmin")
     val isGroundAdmin: Boolean,
     val groundAdminStatus: String?,
     val hasPendingApplication: Boolean,

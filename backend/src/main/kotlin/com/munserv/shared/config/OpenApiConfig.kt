@@ -55,7 +55,7 @@ class OpenApiConfig {
 
                 ## Error Responses
 
-                All errors follow this structure:
+                The target error structure is below; older endpoints differ until #246 closes:
                 ```json
                 {
                   "error": {

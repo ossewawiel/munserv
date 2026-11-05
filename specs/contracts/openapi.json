@@ -1,0 +1,6833 @@
+{
+  "components" : {
+    "schemas" : {
+      "AcceptInvitationRequest" : {
+        "properties" : {
+          "applicationId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AdminCreatedResponse" : {
+        "description" : "Response after creating a new admin",
+        "properties" : {
+          "createdAt" : {
+            "description" : "Creation timestamp",
+            "example" : "2026-01-22T10:00:00Z",
+            "type" : "string"
+          },
+          "displayName" : {
+            "description" : "Admin display name",
+            "example" : "John Smith",
+            "type" : "string"
+          },
+          "email" : {
+            "description" : "Admin email address",
+            "example" : "admin@sector.example",
+            "type" : "string"
+          },
+          "id" : {
+            "description" : "Admin UUID",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
+            "type" : "string"
+          },
+          "level" : {
+            "description" : "Organizational level",
+            "example" : "sector",
+            "type" : "string"
+          },
+          "podId" : {
+            "description" : "Pod UUID (for pod-level admins)",
+            "example" : "550e8400-e29b-41d4-a716-446655440000",
+            "type" : [ "null", "string" ]
+          },
+          "role" : {
+            "description" : "Admin role",
+            "example" : "sector_admin",
+            "type" : "string"
+          },
+          "sectorId" : {
+            "description" : "Sector UUID (for sector-level admins)",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
+            "type" : [ "null", "string" ]
+          },
+          "temporaryPassword" : {
+            "description" : "Temporary password (show once)",
+            "example" : "TempPass123!",
+            "type" : "string"
+          },
+          "wardId" : {
+            "description" : "Ward UUID (for ward-level admins)",
+            "example" : "550e8400-e29b-41d4-a716-446655440030",
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "AdminListResponse" : {
+        "description" : "Paginated list of admin users",
+        "properties" : {
+          "items" : {
+            "description" : "List of admins",
+            "items" : {
+              "$ref" : "#/components/schemas/AdminResponse"
+            },
+            "type" : "array"
+          },
+          "total" : {
+            "description" : "Total count of admins",
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "AdminLoginRequest" : {
+        "properties" : {
+          "email" : {
+            "format" : "email",
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "password" : {
+            "maxLength" : 2147483647,
+            "minLength" : 6,
+            "type" : "string"
+          }
+        },
+        "required" : [ "email", "password" ],
+        "type" : "object"
+      },
+      "AdminLoginResponse" : {
+        "properties" : {
+          "profile" : {
+            "$ref" : "#/components/schemas/AdminProfile"
+          },
+          "tokens" : {
+            "$ref" : "#/components/schemas/AdminTokens"
+          }
+        },
+        "type" : "object"
+      },
+      "AdminProfile" : {
+        "properties" : {
+          "admin" : {
+            "$ref" : "#/components/schemas/AdminUser"
+          },
+          "bootstrapStatus" : {
+            "type" : [ "null", "string" ]
+          },
+          "sector" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/AdminSector"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "supportGrant" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/SupportGrantInfo"
+            }, {
+              "type" : "null"
+            } ]
+          }
+        },
+        "type" : "object"
+      },
+      "AdminResponse" : {
+        "description" : "Admin user details",
+        "properties" : {
+          "createdAt" : {
+            "description" : "Creation timestamp",
+            "example" : "2026-01-22T10:00:00Z",
+            "type" : "string"
+          },
+          "deletedAt" : {
+            "description" : "Deletion timestamp (null if not deleted)",
+            "example" : "null",
+            "type" : [ "null", "string" ]
+          },
+          "displayName" : {
+            "description" : "Admin display name",
+            "example" : "John Smith",
+            "type" : "string"
+          },
+          "email" : {
+            "description" : "Admin email address",
+            "example" : "admin@sector.example",
+            "type" : "string"
+          },
+          "id" : {
+            "description" : "Admin UUID",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
+            "type" : "string"
+          },
+          "level" : {
+            "description" : "Organizational level",
+            "example" : "sector",
+            "type" : "string"
+          },
+          "podId" : {
+            "description" : "Pod UUID (for pod-level admins)",
+            "example" : "550e8400-e29b-41d4-a716-446655440000",
+            "type" : [ "null", "string" ]
+          },
+          "role" : {
+            "description" : "Admin role",
+            "example" : "sector_admin",
+            "type" : "string"
+          },
+          "sectorId" : {
+            "description" : "Sector UUID (for sector-level admins)",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
+            "type" : [ "null", "string" ]
+          },
+          "wardId" : {
+            "description" : "Ward UUID (for ward-level admins)",
+            "example" : "550e8400-e29b-41d4-a716-446655440030",
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "AdminSector" : {
+        "properties" : {
+          "center" : {
+            "$ref" : "#/components/schemas/AuthGeoPointResponse"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AdminTokens" : {
+        "properties" : {
+          "accessToken" : {
+            "type" : "string"
+          },
+          "expiresAt" : {
+            "type" : "string"
+          },
+          "refreshToken" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AdminUser" : {
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "level" : {
+            "type" : "string"
+          },
+          "onboardingStatus" : {
+            "type" : [ "null", "string" ]
+          },
+          "podId" : {
+            "type" : [ "null", "string" ]
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "sectorId" : {
+            "type" : [ "null", "string" ]
+          },
+          "wardId" : {
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "ApproveApplicationRequest" : {
+        "properties" : {
+          "applicationId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AuthGeoPointResponse" : {
+        "properties" : {
+          "lat" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "lng" : {
+            "format" : "double",
+            "type" : "number"
+          }
+        },
+        "type" : "object"
+      },
+      "AuthMessageResponse" : {
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "BootstrapErrorResponse" : {
+        "description" : "Error response",
+        "properties" : {
+          "error" : {
+            "description" : "Error code",
+            "type" : "string"
+          },
+          "message" : {
+            "description" : "Human-readable error message",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "BootstrapValidationErrorResponse" : {
+        "description" : "Validation error response",
+        "properties" : {
+          "error" : {
+            "description" : "Error code",
+            "type" : "string"
+          },
+          "messages" : {
+            "description" : "List of validation error messages",
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "CenterResponse" : {
+        "properties" : {
+          "latitude" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "longitude" : {
+            "format" : "double",
+            "type" : "number"
+          }
+        },
+        "type" : "object"
+      },
+      "ChangePasswordRequest" : {
+        "properties" : {
+          "currentPassword" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "newPassword" : {
+            "maxLength" : 2147483647,
+            "minLength" : 8,
+            "type" : "string"
+          }
+        },
+        "required" : [ "currentPassword", "newPassword" ],
+        "type" : "object"
+      },
+      "CheckPhoneResponse" : {
+        "properties" : {
+          "isRegistered" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "CompleteProfileRequest" : {
+        "description" : "Profile completion request",
+        "properties" : {
+          "address" : {
+            "description" : "Physical address",
+            "example" : "123 Main St, City",
+            "maxLength" : 255,
+            "minLength" : 0,
+            "type" : [ "null", "string" ]
+          },
+          "contactPhone" : {
+            "description" : "Contact phone number",
+            "example" : "+27123456789",
+            "maxLength" : 20,
+            "minLength" : 0,
+            "type" : [ "null", "string" ]
+          },
+          "displayName" : {
+            "description" : "Display name (optional update)",
+            "example" : "John D. Smith",
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : [ "null", "string" ]
+          },
+          "knownAs" : {
+            "description" : "Nickname or preferred name",
+            "example" : "Johnny",
+            "maxLength" : 50,
+            "minLength" : 0,
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "CompleteRegistrationRequest" : {
+        "properties" : {
+          "address" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "firstName" : {
+            "maxLength" : 50,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "latitude" : {
+            "format" : "double",
+            "maximum" : 90.0,
+            "minimum" : -90.0,
+            "type" : "number"
+          },
+          "longitude" : {
+            "format" : "double",
+            "maximum" : 180.0,
+            "minimum" : -180.0,
+            "type" : "number"
+          },
+          "phone" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "pin" : {
+            "maxLength" : 4,
+            "minLength" : 4,
+            "pattern" : "^[0-9]{4}$",
+            "type" : "string"
+          },
+          "sectorId" : {
+            "minLength" : 1,
+            "pattern" : "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "type" : "string"
+          },
+          "surname" : {
+            "maxLength" : 50,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [ "address", "firstName", "phone", "pin", "sectorId", "surname" ],
+        "type" : "object"
+      },
+      "CreateAdminRequest" : {
+        "description" : "Request to create a new admin user",
+        "properties" : {
+          "displayName" : {
+            "description" : "Display name for the admin",
+            "example" : "John Smith",
+            "type" : "string"
+          },
+          "email" : {
+            "description" : "Email address for the new admin",
+            "example" : "newadmin@sector.example",
+            "type" : "string"
+          },
+          "podId" : {
+            "description" : "Pod UUID (required for pod_admin/pod_chief roles)",
+            "example" : "550e8400-e29b-41d4-a716-446655440000",
+            "type" : [ "null", "string" ]
+          },
+          "role" : {
+            "description" : "Admin role to assign",
+            "enum" : [ "sector_admin", "sector_chief", "ward_admin", "ward_chief", "pod_admin", "pod_chief" ],
+            "example" : "sector_admin",
+            "type" : "string"
+          },
+          "sectorId" : {
+            "description" : "Sector UUID (required for sector_admin/sector_chief roles)",
+            "example" : "550e8400-e29b-41d4-a716-446655440001",
+            "type" : [ "null", "string" ]
+          },
+          "wardId" : {
+            "description" : "Ward UUID (required for ward_admin/ward_chief roles)",
+            "example" : "550e8400-e29b-41d4-a716-446655440030",
+            "type" : [ "null", "string" ]
+          }
+        },
+        "required" : [ "displayName", "email", "role" ],
+        "type" : "object"
+      },
+      "CreateIssueRequest" : {
+        "properties" : {
+          "description" : {
+            "maxLength" : 1000,
+            "minLength" : 0,
+            "type" : [ "null", "string" ]
+          },
+          "latitude" : {
+            "format" : "double",
+            "maximum" : 90.0,
+            "minimum" : -90.0,
+            "type" : "number"
+          },
+          "longitude" : {
+            "format" : "double",
+            "maximum" : 180.0,
+            "minimum" : -180.0,
+            "type" : "number"
+          },
+          "sectorId" : {
+            "minLength" : 1,
+            "pattern" : "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "type" : "string"
+          },
+          "type" : {
+            "minLength" : 1,
+            "pattern" : "^(pothole|water_leak|street_light|traffic_light|sewage_leak|illegal_dumping|road_damage|other)$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "sectorId", "type" ],
+        "type" : "object"
+      },
+      "CreatePodChiefRequest" : {
+        "description" : "Request to create a Pod Chief",
+        "properties" : {
+          "displayName" : {
+            "description" : "Display name for the Pod Chief",
+            "example" : "John Doe",
+            "type" : "string"
+          },
+          "email" : {
+            "description" : "Email address for the Pod Chief",
+            "example" : "podchief@example.com",
+            "type" : "string"
+          }
+        },
+        "required" : [ "displayName", "email" ],
+        "type" : "object"
+      },
+      "CreatePodChiefResponse" : {
+        "description" : "Pod Chief creation response",
+        "properties" : {
+          "createdAt" : {
+            "description" : "Timestamp when the Pod Chief was created",
+            "type" : "string"
+          },
+          "displayName" : {
+            "description" : "Display name of the Pod Chief",
+            "type" : "string"
+          },
+          "email" : {
+            "description" : "Email address of the Pod Chief",
+            "type" : "string"
+          },
+          "id" : {
+            "description" : "Unique identifier of the created Pod Chief",
+            "type" : "string"
+          },
+          "role" : {
+            "description" : "Role assigned to the Pod Chief",
+            "type" : "string"
+          },
+          "temporaryPassword" : {
+            "description" : "Temporary password (one-time view)",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "DashboardResponse" : {
+        "properties" : {
+          "sectorId" : {
+            "type" : "string"
+          },
+          "sectorName" : {
+            "type" : "string"
+          },
+          "stats" : {
+            "$ref" : "#/components/schemas/StatsResponse"
+          }
+        },
+        "type" : "object"
+      },
+      "DeclineApplicationRequest" : {
+        "properties" : {
+          "applicationId" : {
+            "type" : "string"
+          },
+          "reason" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "DeclineInvitationRequest" : {
+        "properties" : {
+          "applicationId" : {
+            "type" : "string"
+          },
+          "reason" : {
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "GeoPointResponse" : {
+        "description" : "Geographic coordinates",
+        "properties" : {
+          "latitude" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "longitude" : {
+            "format" : "double",
+            "type" : "number"
+          }
+        },
+        "type" : "object"
+      },
+      "GrantSupportAccessRequest" : {
+        "description" : "Request to grant temporary support access",
+        "properties" : {
+          "grantedRole" : {
+            "description" : "Role to grant the super user, strictly below pod_chief",
+            "example" : "pod_admin",
+            "type" : "string"
+          },
+          "purpose" : {
+            "description" : "Stated purpose for the access, 10-500 characters",
+            "example" : "Investigate duplicate issue reports in sector 3",
+            "type" : "string"
+          }
+        },
+        "required" : [ "grantedRole", "purpose" ],
+        "type" : "object"
+      },
+      "GroundAdminApplicationResponse" : {
+        "properties" : {
+          "applicationId" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "GroundAdminInfoResponse" : {
+        "properties" : {
+          "pendingVerifications" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "responseRate" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "since" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "status" : {
+            "enum" : [ "active", "on_hold", "inactive" ],
+            "type" : "string"
+          },
+          "totalVerifications" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "GroundAdminListResponse" : {
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/GroundAdminResponse"
+            },
+            "type" : "array"
+          },
+          "total" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "GroundAdminResponse" : {
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "memberId" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "pendingVerifications" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "responseRate" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "since" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "status" : {
+            "enum" : [ "active", "on_hold", "inactive" ],
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "GroundAdminStatusChangeResponse" : {
+        "properties" : {
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "HeatReportItemResponse" : {
+        "properties" : {
+          "daysOpen" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "heat" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "location" : {
+            "$ref" : "#/components/schemas/LocationResponse"
+          },
+          "reportCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "state" : {
+            "type" : "string"
+          },
+          "thumbnailUrl" : {
+            "type" : [ "null", "string" ]
+          },
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "HeatReportResponse" : {
+        "properties" : {
+          "generatedAt" : {
+            "type" : "string"
+          },
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/HeatReportItemResponse"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "InviteGroundAdminRequest" : {
+        "properties" : {
+          "message" : {
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "IssueDetailResponse" : {
+        "properties" : {
+          "address" : {
+            "type" : [ "null", "string" ]
+          },
+          "createdAt" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : [ "null", "string" ]
+          },
+          "heat" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "location" : {
+            "$ref" : "#/components/schemas/LocationResponse"
+          },
+          "photoUrls" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "reportCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "reporterId" : {
+            "type" : "string"
+          },
+          "sectorId" : {
+            "type" : "string"
+          },
+          "state" : {
+            "type" : "string"
+          },
+          "stateHistory" : {
+            "items" : {
+              "$ref" : "#/components/schemas/StateHistoryEntryResponse"
+            },
+            "type" : "array"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "IssueSummaryResponse" : {
+        "properties" : {
+          "createdAt" : {
+            "type" : "string"
+          },
+          "heat" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "location" : {
+            "$ref" : "#/components/schemas/LocationResponse"
+          },
+          "state" : {
+            "type" : "string"
+          },
+          "thumbnailUrl" : {
+            "type" : [ "null", "string" ]
+          },
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "IssueVerificationResponse" : {
+        "properties" : {
+          "assignedTo" : {
+            "type" : [ "null", "string" ]
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "issueId" : {
+            "type" : "string"
+          },
+          "note" : {
+            "type" : [ "null", "string" ]
+          },
+          "photoId" : {
+            "type" : [ "null", "string" ]
+          },
+          "reason" : {
+            "type" : [ "null", "string" ]
+          },
+          "requestedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "respondedAt" : {
+            "format" : "date-time",
+            "type" : [ "null", "string" ]
+          },
+          "result" : {
+            "type" : [ "null", "string" ]
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "verificationType" : {
+            "type" : "string"
+          },
+          "verifiedBy" : {
+            "type" : [ "null", "string" ]
+          },
+          "verifiedByName" : {
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "LocationResponse" : {
+        "properties" : {
+          "latitude" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "longitude" : {
+            "format" : "double",
+            "type" : "number"
+          }
+        },
+        "type" : "object"
+      },
+      "LoginRequest" : {
+        "properties" : {
+          "phone" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "pin" : {
+            "maxLength" : 4,
+            "minLength" : 4,
+            "type" : "string"
+          }
+        },
+        "required" : [ "phone", "pin" ],
+        "type" : "object"
+      },
+      "LoginResponse" : {
+        "properties" : {
+          "accessToken" : {
+            "type" : "string"
+          },
+          "expiresIn" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "memberId" : {
+            "type" : "string"
+          },
+          "refreshToken" : {
+            "type" : "string"
+          },
+          "tokenType" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MemberApprovedResponse" : {
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          },
+          "memberId" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MemberLoginRequest" : {
+        "properties" : {
+          "email" : {
+            "format" : "email",
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "password" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "email", "password" ],
+        "type" : "object"
+      },
+      "MemberLoginResponse" : {
+        "properties" : {
+          "accessToken" : {
+            "type" : "string"
+          },
+          "expiresIn" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "memberId" : {
+            "type" : "string"
+          },
+          "mustChangePassword" : {
+            "type" : "boolean"
+          },
+          "refreshToken" : {
+            "type" : "string"
+          },
+          "tokenType" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MemberProfileResponse" : {
+        "description" : "Member profile information",
+        "properties" : {
+          "address" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string"
+          },
+          "firstName" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "phoneNumber" : {
+            "type" : "string"
+          },
+          "registrationLocation" : {
+            "$ref" : "#/components/schemas/GeoPointResponse"
+          },
+          "sectorId" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "surname" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MemberResponse" : {
+        "properties" : {
+          "address" : {
+            "type" : "string"
+          },
+          "firstName" : {
+            "type" : "string"
+          },
+          "groundAdminStatus" : {
+            "type" : [ "null", "string" ]
+          },
+          "hasInvitationPending" : {
+            "type" : "boolean"
+          },
+          "hasPendingApplication" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "isGroundAdmin" : {
+            "type" : "boolean"
+          },
+          "issueCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "joinedAt" : {
+            "type" : "string"
+          },
+          "pendingApplicationId" : {
+            "type" : [ "null", "string" ]
+          },
+          "phoneNumber" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "surname" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MembersListResponse" : {
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/MemberResponse"
+            },
+            "type" : "array"
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/PaginationResponse"
+          }
+        },
+        "type" : "object"
+      },
+      "MessageActionRequest" : {
+        "description" : "Message action request",
+        "properties" : {
+          "action" : {
+            "type" : "string"
+          },
+          "note" : {
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "MessageListResponse" : {
+        "description" : "Paginated message list response",
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/MessageResponse"
+            },
+            "type" : "array"
+          },
+          "page" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "total" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "unreadCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "MessageResponse" : {
+        "description" : "Message details",
+        "properties" : {
+          "actionResult" : {
+            "type" : [ "null", "string" ]
+          },
+          "actionType" : {
+            "type" : [ "null", "string" ]
+          },
+          "actionedAt" : {
+            "format" : "date-time",
+            "type" : [ "null", "string" ]
+          },
+          "body" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "expiresAt" : {
+            "format" : "date-time",
+            "type" : [ "null", "string" ]
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "metadata" : {
+            "additionalProperties" : { },
+            "type" : [ "null", "object" ]
+          },
+          "readAt" : {
+            "format" : "date-time",
+            "type" : [ "null", "string" ]
+          },
+          "recipientId" : {
+            "type" : "string"
+          },
+          "recipientType" : {
+            "type" : "string"
+          },
+          "relatedEntityId" : {
+            "type" : [ "null", "string" ]
+          },
+          "relatedEntityType" : {
+            "type" : [ "null", "string" ]
+          },
+          "senderId" : {
+            "type" : [ "null", "string" ]
+          },
+          "senderType" : {
+            "type" : [ "null", "string" ]
+          },
+          "status" : {
+            "enum" : [ "unread", "read", "actioned", "dismissed" ],
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "enum" : [ "ground_admin_invitation", "ground_admin_application", "ground_admin_approved", "ground_admin_declined", "ground_admin_invitation_declined", "ground_admin_invitation_accepted", "ground_admin_revocation", "ground_admin_stepdown_request", "verify_new_issue", "verify_fix", "member_registration", "monthly_report", "admin_welcome" ],
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "OnboardingChangePasswordRequest" : {
+        "description" : "Password change request",
+        "properties" : {
+          "newPassword" : {
+            "description" : "New password",
+            "example" : "NewSecurePass123",
+            "maxLength" : 100,
+            "minLength" : 8,
+            "type" : "string"
+          }
+        },
+        "required" : [ "newPassword" ],
+        "type" : "object"
+      },
+      "OnboardingStatusResponse" : {
+        "description" : "Onboarding status response",
+        "properties" : {
+          "displayName" : {
+            "description" : "Current display name",
+            "example" : "John Smith",
+            "type" : "string"
+          },
+          "isOnboarded" : {
+            "type" : "boolean"
+          },
+          "requiresPasswordChange" : {
+            "description" : "Whether password change is required",
+            "example" : true,
+            "type" : "boolean"
+          },
+          "requiresProfileCompletion" : {
+            "description" : "Whether profile completion is required",
+            "example" : false,
+            "type" : "boolean"
+          },
+          "status" : {
+            "description" : "Current onboarding status",
+            "example" : "pending",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "OtpResponse" : {
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "OverrideStateRequest" : {
+        "properties" : {
+          "state" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "OverrideStateResponse" : {
+        "properties" : {
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PaginatedIssuesResponse" : {
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/IssueSummaryResponse"
+            },
+            "type" : "array"
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/PaginationInfo"
+          }
+        },
+        "type" : "object"
+      },
+      "PaginationInfo" : {
+        "properties" : {
+          "limit" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "page" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalItems" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "PaginationResponse" : {
+        "properties" : {
+          "limit" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "page" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalItems" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "PendingCountResponse" : {
+        "properties" : {
+          "count" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "PendingVerificationResponse" : {
+        "properties" : {
+          "distance" : {
+            "format" : "double",
+            "type" : [ "null", "number" ]
+          },
+          "issueDescription" : {
+            "type" : [ "null", "string" ]
+          },
+          "issueId" : {
+            "type" : "string"
+          },
+          "issueType" : {
+            "type" : "string"
+          },
+          "latitude" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "longitude" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "requestedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "verificationId" : {
+            "type" : "string"
+          },
+          "verificationType" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PendingVerificationsResponse" : {
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PendingVerificationResponse"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "PhotoResponse" : {
+        "description" : "Photo metadata",
+        "properties" : {
+          "createdAt" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "sortOrder" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "thumbnailUrl" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PodDashboardStatsResponse" : {
+        "description" : "Pod dashboard statistics",
+        "properties" : {
+          "activeAdministrators" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "activeGroundAdmins" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "openIssues" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "pendingIssues" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "resolvedThisMonth" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sectorCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalIssues" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalMembers" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "wardCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "PodLogoResponse" : {
+        "description" : "Pod logo upload response",
+        "properties" : {
+          "logoUrl" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PodSettingsResponse" : {
+        "description" : "Pod settings",
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "logoUrl" : {
+            "type" : [ "null", "string" ]
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PodSetupStatusResponse" : {
+        "description" : "Pod setup status",
+        "properties" : {
+          "isComplete" : {
+            "type" : "boolean"
+          },
+          "missingSteps" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "RefreshTokenRequest" : {
+        "properties" : {
+          "refreshToken" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "refreshToken" ],
+        "type" : "object"
+      },
+      "RegisterRequest" : {
+        "properties" : {
+          "phone" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "phone" ],
+        "type" : "object"
+      },
+      "RegistrationResponse" : {
+        "properties" : {
+          "accessToken" : {
+            "type" : "string"
+          },
+          "expiresIn" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "memberId" : {
+            "type" : "string"
+          },
+          "refreshToken" : {
+            "type" : "string"
+          },
+          "tokenType" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "RequestVerificationRequest" : {
+        "properties" : {
+          "assignTo" : {
+            "type" : [ "null", "string" ]
+          },
+          "message" : {
+            "type" : [ "null", "string" ]
+          },
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "RevokeGroundAdminRequest" : {
+        "properties" : {
+          "reason" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SectorDashboardStatsResponse" : {
+        "description" : "Sector dashboard statistics",
+        "properties" : {
+          "activeGroundAdmins" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "openIssues" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "resolvedThisMonth" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sectorId" : {
+            "type" : "string"
+          },
+          "sectorName" : {
+            "type" : "string"
+          },
+          "totalIssues" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalMembers" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "SectorResponse" : {
+        "properties" : {
+          "center" : {
+            "$ref" : "#/components/schemas/CenterResponse"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SectorSettingsResponse" : {
+        "description" : "Sector settings configuration",
+        "properties" : {
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "daysFixedBeforeClosed" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "fixVerificationMode" : {
+            "enum" : [ "all_notified", "admin_assigns", "nearest_auto", "first_come" ],
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "minimumGroundAdmins" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "newIssueVerificationMode" : {
+            "enum" : [ "all_notified", "admin_assigns", "nearest_auto", "first_come" ],
+            "type" : "string"
+          },
+          "sectorId" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SectorsListResponse" : {
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SectorResponse"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "StateHistoryEntryResponse" : {
+        "properties" : {
+          "changedAt" : {
+            "type" : "string"
+          },
+          "changedBy" : {
+            "type" : [ "null", "string" ]
+          },
+          "note" : {
+            "type" : [ "null", "string" ]
+          },
+          "state" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "StatsResponse" : {
+        "properties" : {
+          "avgResolutionDays" : {
+            "format" : "double",
+            "type" : [ "null", "number" ]
+          },
+          "byState" : {
+            "additionalProperties" : {
+              "format" : "int32",
+              "type" : "integer"
+            },
+            "type" : "object"
+          },
+          "byType" : {
+            "additionalProperties" : {
+              "format" : "int32",
+              "type" : "integer"
+            },
+            "type" : "object"
+          },
+          "reportedThisWeek" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalOpen" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "StepDownRequest" : {
+        "properties" : {
+          "reason" : {
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "SubmitVerificationRequest" : {
+        "properties" : {
+          "note" : {
+            "type" : [ "null", "string" ]
+          },
+          "photoId" : {
+            "type" : [ "null", "string" ]
+          },
+          "reason" : {
+            "type" : [ "null", "string" ]
+          },
+          "result" : {
+            "type" : "string"
+          },
+          "verificationId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SupportGrantInfo" : {
+        "properties" : {
+          "expiresAt" : {
+            "type" : "string"
+          },
+          "grantId" : {
+            "type" : "string"
+          },
+          "grantedRole" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SupportGrantListResponse" : {
+        "description" : "List of support grants",
+        "properties" : {
+          "items" : {
+            "description" : "Support grants for the caller's pod",
+            "items" : {
+              "$ref" : "#/components/schemas/SupportGrantResponse"
+            },
+            "type" : "array"
+          },
+          "total" : {
+            "description" : "Total number of grants returned",
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "SupportGrantResponse" : {
+        "description" : "A temporary super user support grant",
+        "properties" : {
+          "expiredAt" : {
+            "description" : "When the grant expired, if it did",
+            "type" : [ "null", "string" ]
+          },
+          "expiresAt" : {
+            "description" : "When the grant expires absent further activity",
+            "type" : "string"
+          },
+          "grantedAt" : {
+            "description" : "When the grant was issued",
+            "type" : "string"
+          },
+          "grantedBy" : {
+            "description" : "Admin ID of the pod chief who issued the grant",
+            "type" : "string"
+          },
+          "grantedByName" : {
+            "description" : "Display name of the pod chief who issued the grant",
+            "type" : "string"
+          },
+          "grantedRole" : {
+            "description" : "Role granted to the super user",
+            "type" : "string"
+          },
+          "id" : {
+            "description" : "Support grant identifier",
+            "type" : "string"
+          },
+          "lastActivity" : {
+            "description" : "When the super user last acted under this grant",
+            "type" : [ "null", "string" ]
+          },
+          "purpose" : {
+            "description" : "Stated purpose for the access",
+            "type" : "string"
+          },
+          "revokedAt" : {
+            "description" : "When the grant was revoked, if it was",
+            "type" : [ "null", "string" ]
+          },
+          "status" : {
+            "description" : "Status of the grant",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "TokenResponse" : {
+        "properties" : {
+          "accessToken" : {
+            "type" : "string"
+          },
+          "expiresIn" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "refreshToken" : {
+            "type" : "string"
+          },
+          "tokenType" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "UpdateAdminRequest" : {
+        "description" : "Request to update an existing admin user",
+        "properties" : {
+          "displayName" : {
+            "description" : "New display name for the admin (optional)",
+            "example" : "John D. Smith",
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "UpdateGroundAdminStatusRequest" : {
+        "properties" : {
+          "status" : {
+            "enum" : [ "active", "on_hold", "inactive" ],
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "UpdateIssueStateRequest" : {
+        "properties" : {
+          "note" : {
+            "maxLength" : 500,
+            "minLength" : 0,
+            "type" : [ "null", "string" ]
+          },
+          "state" : {
+            "minLength" : 1,
+            "pattern" : "^(reported|confirmed|in_progress|fixed|rejected|reopened)$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "state" ],
+        "type" : "object"
+      },
+      "UpdatePodSettingsRequest" : {
+        "description" : "Update pod settings request",
+        "properties" : {
+          "logoUrl" : {
+            "maxLength" : 500,
+            "minLength" : 0,
+            "type" : [ "null", "string" ]
+          },
+          "name" : {
+            "maxLength" : 100,
+            "minLength" : 2,
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "UpdateSectorSettingsRequest" : {
+        "description" : "Partial update request for sector settings",
+        "properties" : {
+          "daysFixedBeforeClosed" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "fixVerificationMode" : {
+            "enum" : [ "all_notified", "admin_assigns", "nearest_auto", "first_come" ],
+            "type" : [ "null", "string" ]
+          },
+          "minimumGroundAdmins" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "newIssueVerificationMode" : {
+            "enum" : [ "all_notified", "admin_assigns", "nearest_auto", "first_come" ],
+            "type" : [ "null", "string" ]
+          }
+        },
+        "type" : "object"
+      },
+      "VerificationHistoryResponse" : {
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/IssueVerificationResponse"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "VerifyOtpRequest" : {
+        "properties" : {
+          "code" : {
+            "maxLength" : 6,
+            "minLength" : 6,
+            "pattern" : "^[0-9]{6}$",
+            "type" : "string"
+          },
+          "phone" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "code", "phone" ],
+        "type" : "object"
+      },
+      "WardDashboardStatsResponse" : {
+        "description" : "Ward dashboard statistics",
+        "properties" : {
+          "activeGroundAdmins" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "openIssues" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "resolvedThisMonth" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sectorCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalIssues" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "wardId" : {
+            "type" : "string"
+          },
+          "wardName" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "WebRegisterRequest" : {
+        "properties" : {
+          "address" : {
+            "maxLength" : 500,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "email" : {
+            "format" : "email",
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "firstName" : {
+            "maxLength" : 50,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "latitude" : {
+            "format" : "double",
+            "maximum" : 90.0,
+            "minimum" : -90.0,
+            "type" : "number"
+          },
+          "longitude" : {
+            "format" : "double",
+            "maximum" : 180.0,
+            "minimum" : -180.0,
+            "type" : "number"
+          },
+          "phone" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "sectorId" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "surname" : {
+            "maxLength" : 50,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [ "address", "email", "firstName", "phone", "sectorId", "surname" ],
+        "type" : "object"
+      },
+      "WebRegisterResponse" : {
+        "properties" : {
+          "memberId" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "bearerFormat" : "JWT",
+        "description" : "JWT authentication token obtained from login endpoints",
+        "scheme" : "bearer",
+        "type" : "http"
+      }
+    }
+  },
+  "info" : {
+    "contact" : {
+      "email" : "dev@munserv.example.com",
+      "name" : "MunServ Development Team"
+    },
+    "description" : "MunServ - Municipal Service Issue Tracker API.\n\nCommunity-based infrastructure issue reporting system. Members report issues\n(potholes, leaks, broken lights) via mobile app with photos and GPS.\nAdministrators manage via web portal.\n\n## Authentication\n\nMost endpoints require JWT authentication. Obtain tokens via:\n- `/api/v1/auth/login` - Member login with phone + PIN\n- `/api/v1/auth/admin/login` - Admin login with email + password\n\nInclude token in Authorization header: `Bearer <token>`\n\n## Error Responses\n\nThe target error structure is below; older endpoints differ until #246 closes:\n```json\n{\n  \"error\": {\n    \"code\": \"ERROR_CODE\",\n    \"message\": \"Human-readable message\"\n  }\n}\n```",
+    "license" : {
+      "name" : "Proprietary",
+      "url" : "https://munserv.example.com/license"
+    },
+    "title" : "MunServ API",
+    "version" : "1.0.0"
+  },
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/api/v1/admin/dashboard" : {
+      "get" : {
+        "description" : "Retrieve dashboard statistics for a sector including issue counts by state and type",
+        "operationId" : "getAdminDashboard",
+        "parameters" : [ {
+          "description" : "Sector UUID",
+          "example" : "550e8400-e29b-41d4-a716-446655440001",
+          "in" : "query",
+          "name" : "sectorId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DashboardResponse"
+                }
+              }
+            },
+            "description" : "Dashboard statistics retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DashboardResponse"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DashboardResponse"
+                }
+              }
+            },
+            "description" : "Forbidden - requires admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DashboardResponse"
+                }
+              }
+            },
+            "description" : "Sector not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get dashboard statistics",
+        "tags" : [ "Admin" ]
+      }
+    },
+    "/api/v1/admin/members" : {
+      "get" : {
+        "description" : "Retrieve a paginated list of members in a sector with their issue counts. Supports filtering by member status, Ground Admin status, pending applications, and pending invitations.",
+        "operationId" : "listMembers",
+        "parameters" : [ {
+          "description" : "Sector UUID",
+          "example" : "550e8400-e29b-41d4-a716-446655440001",
+          "in" : "query",
+          "name" : "sectorId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "Filter by member status",
+          "example" : "active",
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "pending_approval", "active", "suspended", "deleted" ],
+            "type" : "string"
+          }
+        }, {
+          "description" : "Filter by Ground Admin status (true = only Ground Admins)",
+          "in" : "query",
+          "name" : "isGroundAdmin",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "description" : "Filter by pending GA application (true = only members with pending applications)",
+          "in" : "query",
+          "name" : "hasPendingApplication",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "description" : "Filter by pending GA invitation (true = only members with pending invitations)",
+          "in" : "query",
+          "name" : "hasInvitationPending",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "description" : "Page number (1-based)",
+          "example" : 1,
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "default" : 1,
+            "format" : "int32",
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        }, {
+          "description" : "Items per page",
+          "example" : 20,
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "default" : 20,
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MembersListResponse"
+                }
+              }
+            },
+            "description" : "Members list retrieved successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid status value"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Forbidden - requires admin role"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "List sector members",
+        "tags" : [ "Admin" ]
+      }
+    },
+    "/api/v1/admin/members/pending-count" : {
+      "get" : {
+        "description" : "Returns the number of members awaiting approval in a sector",
+        "operationId" : "getPendingMemberCount",
+        "parameters" : [ {
+          "description" : "Sector UUID",
+          "in" : "query",
+          "name" : "sectorId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PendingCountResponse"
+                }
+              }
+            },
+            "description" : "Pending count retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PendingCountResponse"
+                }
+              }
+            },
+            "description" : "Unauthorized"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PendingCountResponse"
+                }
+              }
+            },
+            "description" : "Forbidden - requires admin role"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get pending member count",
+        "tags" : [ "Admin" ]
+      }
+    },
+    "/api/v1/admin/members/{id}" : {
+      "delete" : {
+        "description" : "Reject a pending member registration. Deletes the member record.",
+        "operationId" : "rejectMember",
+        "parameters" : [ {
+          "description" : "Member UUID to reject",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member rejected"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid status"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Forbidden - requires admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Reject pending member registration",
+        "tags" : [ "Admin" ]
+      }
+    },
+    "/api/v1/admin/members/{id}/approve" : {
+      "post" : {
+        "description" : "Approve a pending member registration. Generates temporary password and sends welcome email.",
+        "operationId" : "approveMember",
+        "parameters" : [ {
+          "description" : "Member UUID to approve",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MemberApprovedResponse"
+                }
+              }
+            },
+            "description" : "Member approved"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid status"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Forbidden - requires admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Approve pending member registration",
+        "tags" : [ "Admin" ]
+      }
+    },
+    "/api/v1/admin/onboarding/change-password" : {
+      "post" : {
+        "description" : "Change password during onboarding. Required when status is PENDING.",
+        "operationId" : "changeOnboardingPassword",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OnboardingChangePasswordRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardingStatusResponse"
+                }
+              }
+            },
+            "description" : "Password changed successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error or invalid step"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Change password",
+        "tags" : [ "Admin Onboarding" ]
+      }
+    },
+    "/api/v1/admin/onboarding/complete-profile" : {
+      "post" : {
+        "description" : "Complete profile during onboarding. Required when status is PASSWORD_CHANGED.",
+        "operationId" : "completeOnboardingProfile",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CompleteProfileRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardingStatusResponse"
+                }
+              }
+            },
+            "description" : "Profile completed successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error or invalid step"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Complete profile",
+        "tags" : [ "Admin Onboarding" ]
+      }
+    },
+    "/api/v1/admin/onboarding/status" : {
+      "get" : {
+        "description" : "Returns the current onboarding status and requirements for the authenticated admin.",
+        "operationId" : "getOnboardingStatus",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardingStatusResponse"
+                }
+              }
+            },
+            "description" : "Status retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get onboarding status",
+        "tags" : [ "Admin Onboarding" ]
+      }
+    },
+    "/api/v1/admin/reports/heat" : {
+      "get" : {
+        "description" : "Retrieve a list of issues ranked by heat score in descending order",
+        "operationId" : "getHeatReport",
+        "parameters" : [ {
+          "description" : "Sector UUID",
+          "example" : "550e8400-e29b-41d4-a716-446655440001",
+          "in" : "query",
+          "name" : "sectorId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "Maximum number of issues to return",
+          "example" : 20,
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "default" : 20,
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HeatReportResponse"
+                }
+              }
+            },
+            "description" : "Heat report generated successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HeatReportResponse"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HeatReportResponse"
+                }
+              }
+            },
+            "description" : "Forbidden - requires admin role"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get heat report",
+        "tags" : [ "Admin" ]
+      }
+    },
+    "/api/v1/admins" : {
+      "get" : {
+        "description" : "Retrieve a list of all admins in the specified sector.",
+        "operationId" : "listAdmins",
+        "parameters" : [ {
+          "description" : "Sector UUID to list admins for",
+          "in" : "query",
+          "name" : "sectorId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminListResponse"
+                }
+              }
+            },
+            "description" : "List retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Cannot view admins in a different sector"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "List admins in a sector",
+        "tags" : [ "Admin Management" ]
+      },
+      "post" : {
+        "description" : "Create a new sector admin. A temporary password will be generated.",
+        "operationId" : "createAdmin",
+        "parameters" : [ {
+          "description" : "Sector UUID for the new admin",
+          "in" : "query",
+          "name" : "sectorId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateAdminRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminCreatedResponse"
+                }
+              }
+            },
+            "description" : "Admin created successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Email already exists"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Create a new admin",
+        "tags" : [ "Admin Management" ]
+      }
+    },
+    "/api/v1/admins/{id}" : {
+      "delete" : {
+        "description" : "Soft delete an admin (set deletedAt timestamp).",
+        "operationId" : "deleteAdmin",
+        "parameters" : [ {
+          "description" : "Admin UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Admin deleted successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Admin not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Delete an admin",
+        "tags" : [ "Admin Management" ]
+      },
+      "get" : {
+        "description" : "Retrieve a single admin by their ID.",
+        "operationId" : "getAdmin",
+        "parameters" : [ {
+          "description" : "Admin UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminResponse"
+                }
+              }
+            },
+            "description" : "Admin retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Cannot view admin in a different sector"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Admin not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get admin by ID",
+        "tags" : [ "Admin Management" ]
+      },
+      "patch" : {
+        "description" : "Update an existing admin's details. Only provided fields will be updated.",
+        "operationId" : "updateAdmin",
+        "parameters" : [ {
+          "description" : "Admin UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateAdminRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminResponse"
+                }
+              }
+            },
+            "description" : "Admin updated successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Admin not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Update an admin",
+        "tags" : [ "Admin Management" ]
+      }
+    },
+    "/api/v1/auth/admin/login" : {
+      "post" : {
+        "description" : "Authenticate administrator with email and password. Under an active grant profile.admin.role is the granted role, never super_user, and profile.supportGrant carries the grant (null otherwise). tokens.expiresAt is the token's expiry, supportGrant.expiresAt the grant's sliding expiry. 401 also when the pod is not bootstrap-eligible and has no active grant.",
+        "operationId" : "adminLogin",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AdminLoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminLoginResponse"
+                }
+              }
+            },
+            "description" : "Admin login successful"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid credentials"
+          }
+        },
+        "summary" : "Admin login",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/change-password" : {
+      "post" : {
+        "operationId" : "changePassword",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuthMessageResponse"
+                }
+              }
+            },
+            "description" : "Password changed"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid current password"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Change member password",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/check-phone" : {
+      "get" : {
+        "description" : "Check if a phone number is already registered",
+        "operationId" : "checkPhone",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "phone",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CheckPhoneResponse"
+                }
+              }
+            },
+            "description" : "Phone check successful"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid phone number format"
+          }
+        },
+        "summary" : "Check phone registration",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/complete-registration" : {
+      "post" : {
+        "description" : "Complete member registration with profile details and PIN",
+        "operationId" : "completeRegistration",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CompleteRegistrationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RegistrationResponse"
+                }
+              }
+            },
+            "description" : "Registration completed successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid phone number or PIN format"
+          }
+        },
+        "summary" : "Complete registration",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/login" : {
+      "post" : {
+        "description" : "Authenticate member with phone number and PIN",
+        "operationId" : "login",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description" : "Login successful"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid credentials"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Account suspended"
+          }
+        },
+        "summary" : "Member login",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/logout" : {
+      "post" : {
+        "description" : "Log out the current caller, revoking a support grant if scoped to one. Always 204; a no-op for a token without a grant.",
+        "operationId" : "logout",
+        "responses" : {
+          "204" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Logged out"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Logout",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/member/login" : {
+      "post" : {
+        "operationId" : "memberLogin",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MemberLoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MemberLoginResponse"
+                }
+              }
+            },
+            "description" : "Login successful"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid credentials"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Account pending or suspended"
+          }
+        },
+        "summary" : "Member login with email and password",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/refresh" : {
+      "post" : {
+        "description" : "Exchange a valid refresh token for new access and refresh tokens",
+        "operationId" : "refreshToken",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenResponse"
+                }
+              }
+            },
+            "description" : "Tokens refreshed successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid or expired refresh token"
+          }
+        },
+        "summary" : "Refresh token",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/register" : {
+      "post" : {
+        "description" : "Request a one-time password for phone number verification",
+        "operationId" : "register",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OtpResponse"
+                }
+              }
+            },
+            "description" : "OTP sent successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid phone number format"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Phone number already registered"
+          }
+        },
+        "summary" : "Request OTP",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/register/web" : {
+      "post" : {
+        "operationId" : "registerWeb",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WebRegisterRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebRegisterResponse"
+                }
+              }
+            },
+            "description" : "Registration submitted"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Email already registered"
+          }
+        },
+        "summary" : "Register member via web form",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/verify-otp" : {
+      "post" : {
+        "description" : "Verify the one-time password sent to phone",
+        "operationId" : "verifyOtp",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VerifyOtpRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OtpResponse"
+                }
+              }
+            },
+            "description" : "OTP verified successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid phone number format"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid or expired OTP"
+          }
+        },
+        "summary" : "Verify OTP",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/bootstrap/pod-chief" : {
+      "post" : {
+        "description" : "Creates the first Pod Chief for a fresh pod. Requires SUPER_USER role.",
+        "operationId" : "createPodChief",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreatePodChiefRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreatePodChiefResponse"
+                }
+              }
+            },
+            "description" : "Pod Chief created successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BootstrapValidationErrorResponse"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - requires super user authentication"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BootstrapErrorResponse"
+                }
+              }
+            },
+            "description" : "Conflict - Pod Chief already exists or email in use"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Create Pod Chief",
+        "tags" : [ "Bootstrap" ]
+      }
+    },
+    "/api/v1/issues" : {
+      "get" : {
+        "description" : "Retrieve a paginated list of issues with optional filtering by sector, state, and type",
+        "operationId" : "listIssues",
+        "parameters" : [ {
+          "description" : "Filter by sector UUID",
+          "in" : "query",
+          "name" : "sectorId",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "Filter by issue state",
+          "in" : "query",
+          "name" : "state",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "Filter by issue type",
+          "in" : "query",
+          "name" : "type",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "Page number (1-based)",
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "default" : 1,
+            "format" : "int32",
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        }, {
+          "description" : "Items per page (max 100)",
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "default" : 20,
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        }, {
+          "description" : "Sort field",
+          "in" : "query",
+          "name" : "sortBy",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "heat", "createdAt" ],
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaginatedIssuesResponse"
+                }
+              }
+            },
+            "description" : "Successfully retrieved issues"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaginatedIssuesResponse"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "List issues",
+        "tags" : [ "Issues" ]
+      },
+      "post" : {
+        "description" : "Create a new municipal issue report with location and type",
+        "operationId" : "createIssue",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateIssueRequest"
+              }
+            }
+          },
+          "description" : "Issue creation request",
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IssueDetailResponse"
+                }
+              }
+            },
+            "description" : "Issue created successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Report a new issue",
+        "tags" : [ "Issues" ]
+      }
+    },
+    "/api/v1/issues/mine" : {
+      "get" : {
+        "description" : "Retrieve issues reported by the authenticated member",
+        "operationId" : "listMyIssues",
+        "parameters" : [ {
+          "description" : "Page number (1-based)",
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "default" : 1,
+            "format" : "int32",
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        }, {
+          "description" : "Items per page",
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "default" : 20,
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaginatedIssuesResponse"
+                }
+              }
+            },
+            "description" : "Successfully retrieved member's issues"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "List my issues",
+        "tags" : [ "Issues" ]
+      }
+    },
+    "/api/v1/issues/{id}" : {
+      "get" : {
+        "description" : "Retrieve detailed information about a specific issue including photos and state history",
+        "operationId" : "getIssue",
+        "parameters" : [ {
+          "description" : "Issue UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IssueDetailResponse"
+                }
+              }
+            },
+            "description" : "Successfully retrieved issue"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Issue not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get issue details",
+        "tags" : [ "Issues" ]
+      }
+    },
+    "/api/v1/issues/{id}/state" : {
+      "patch" : {
+        "description" : "Transition an issue to a new state. Requires admin role.",
+        "operationId" : "updateIssueState",
+        "parameters" : [ {
+          "description" : "Issue UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateIssueStateRequest"
+              }
+            }
+          },
+          "description" : "State change request",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IssueDetailResponse"
+                }
+              }
+            },
+            "description" : "State updated successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Forbidden - requires admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Issue not found"
+          },
+          "422" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid state transition"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Update issue state",
+        "tags" : [ "Issues" ]
+      }
+    },
+    "/api/v1/issues/{issueId}/override-state" : {
+      "post" : {
+        "description" : "Admin directly changes issue state, bypassing verification. Skips the legal transition check and expires pending verifications.",
+        "operationId" : "overrideIssueState",
+        "parameters" : [ {
+          "description" : "Issue UUID",
+          "in" : "path",
+          "name" : "issueId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OverrideStateRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OverrideStateResponse"
+                }
+              }
+            },
+            "description" : "State updated"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Requires an admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Issue not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Override issue state",
+        "tags" : [ "Verifications" ]
+      }
+    },
+    "/api/v1/issues/{issueId}/photos" : {
+      "get" : {
+        "description" : "Retrieve all photos attached to an issue",
+        "operationId" : "listIssuePhotos",
+        "parameters" : [ {
+          "description" : "Issue UUID",
+          "example" : "550e8400-e29b-41d4-a716-446655440001",
+          "in" : "path",
+          "name" : "issueId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PhotoResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Photos retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PhotoResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get photos for issue",
+        "tags" : [ "Photos" ]
+      },
+      "post" : {
+        "description" : "Upload a photo to attach to an issue. Supports JPEG, PNG, and WebP formats up to 5MB.",
+        "operationId" : "uploadPhoto",
+        "parameters" : [ {
+          "description" : "Issue UUID",
+          "example" : "550e8400-e29b-41d4-a716-446655440001",
+          "in" : "path",
+          "name" : "issueId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "properties" : {
+                  "file" : {
+                    "description" : "Photo file (JPEG, PNG, or WebP, max 5MB)",
+                    "format" : "binary",
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "file" ],
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PhotoResponse"
+                }
+              }
+            },
+            "description" : "Photo uploaded successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid file format or size"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not the reporter, an admin or the verifying ground admin"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Issue not found"
+          },
+          "500" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Storage error"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Upload photo for issue",
+        "tags" : [ "Photos" ]
+      }
+    },
+    "/api/v1/issues/{issueId}/request-verification" : {
+      "post" : {
+        "description" : "Admin requests Ground Admins to verify an issue exists or fix is complete",
+        "operationId" : "requestVerification",
+        "parameters" : [ {
+          "description" : "Issue UUID",
+          "in" : "path",
+          "name" : "issueId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RequestVerificationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IssueVerificationResponse"
+                }
+              }
+            },
+            "description" : "Verification requested"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Requires an admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Issue not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Pending verification already exists"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Request verification for an issue",
+        "tags" : [ "Verifications" ]
+      }
+    },
+    "/api/v1/issues/{issueId}/verifications" : {
+      "get" : {
+        "description" : "Get verification history for an issue",
+        "operationId" : "listIssueVerifications",
+        "parameters" : [ {
+          "description" : "Issue UUID",
+          "in" : "path",
+          "name" : "issueId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VerificationHistoryResponse"
+                }
+              }
+            },
+            "description" : "Verification history retrieved"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get verification history",
+        "tags" : [ "Verifications" ]
+      }
+    },
+    "/api/v1/issues/{issueId}/verify" : {
+      "post" : {
+        "description" : "Ground Admin submits verification result for an issue",
+        "operationId" : "submitVerification",
+        "parameters" : [ {
+          "description" : "Issue UUID",
+          "in" : "path",
+          "name" : "issueId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SubmitVerificationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IssueVerificationResponse"
+                }
+              }
+            },
+            "description" : "Verification submitted"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not an active Ground Admin"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Verification not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Verification already completed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Submit verification result",
+        "tags" : [ "Verifications" ]
+      }
+    },
+    "/api/v1/members/me" : {
+      "get" : {
+        "description" : "Retrieve the profile of the currently authenticated member",
+        "operationId" : "getCurrentMember",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MemberProfileResponse"
+                }
+              }
+            },
+            "description" : "Profile retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get current member profile",
+        "tags" : [ "Members" ]
+      }
+    },
+    "/api/v1/members/me/ground-admin" : {
+      "get" : {
+        "description" : "Get current member's Ground Admin status and statistics",
+        "operationId" : "getMyGroundAdminInfo",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminInfoResponse"
+                }
+              }
+            },
+            "description" : "Ground Admin info retrieved (null if not a GA)"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get my Ground Admin info",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/members/me/ground-admin/accept" : {
+      "post" : {
+        "description" : "Member accepts an invitation to become a Ground Admin",
+        "operationId" : "acceptGroundAdminInvitation",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AcceptInvitationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminApplicationResponse"
+                }
+              }
+            },
+            "description" : "Invitation accepted"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Application not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invitation already processed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Accept Ground Admin invitation",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/members/me/ground-admin/apply" : {
+      "post" : {
+        "description" : "Member applies to become a Ground Admin in their sector",
+        "operationId" : "applyForGroundAdmin",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminApplicationResponse"
+                }
+              }
+            },
+            "description" : "Application submitted successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Already a Ground Admin or has pending application"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Apply to become Ground Admin",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/members/me/ground-admin/decline" : {
+      "post" : {
+        "description" : "Member declines an invitation to become a Ground Admin",
+        "operationId" : "declineGroundAdminInvitation",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeclineInvitationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminApplicationResponse"
+                }
+              }
+            },
+            "description" : "Invitation declined"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Application not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Cannot decline this invitation"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Decline Ground Admin invitation",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/members/me/ground-admin/stepdown" : {
+      "post" : {
+        "description" : "Ground Admin requests to step down from their role",
+        "operationId" : "stepDownAsGroundAdmin",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StepDownRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminStatusChangeResponse"
+                }
+              }
+            },
+            "description" : "Step-down request submitted"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not a Ground Admin"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Request to step down as Ground Admin",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/members/me/pending-verifications" : {
+      "get" : {
+        "description" : "Get list of pending verifications for the current Ground Admin",
+        "operationId" : "listMyPendingVerifications",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PendingVerificationsResponse"
+                }
+              }
+            },
+            "description" : "Pending verifications retrieved"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get pending verifications",
+        "tags" : [ "Verifications" ]
+      }
+    },
+    "/api/v1/members/{memberId}/ground-admin/approve" : {
+      "post" : {
+        "description" : "Admin approves a member's application to become a Ground Admin",
+        "operationId" : "approveGroundAdminApplication",
+        "parameters" : [ {
+          "description" : "Member UUID whose application to approve",
+          "in" : "path",
+          "name" : "memberId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ApproveApplicationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminApplicationResponse"
+                }
+              }
+            },
+            "description" : "Application approved"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Requires an admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Application not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Cannot approve this application"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Approve Ground Admin application",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/members/{memberId}/ground-admin/decline" : {
+      "post" : {
+        "description" : "Admin declines a member's application to become a Ground Admin",
+        "operationId" : "declineGroundAdminApplication",
+        "parameters" : [ {
+          "description" : "Member UUID whose application to decline",
+          "in" : "path",
+          "name" : "memberId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeclineApplicationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminApplicationResponse"
+                }
+              }
+            },
+            "description" : "Application declined"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Requires an admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Application not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Cannot decline this application"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Decline Ground Admin application",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/members/{memberId}/ground-admin/invite" : {
+      "post" : {
+        "description" : "Admin invites a member to become a Ground Admin in their sector",
+        "operationId" : "inviteGroundAdmin",
+        "parameters" : [ {
+          "description" : "Member UUID to invite",
+          "in" : "path",
+          "name" : "memberId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InviteGroundAdminRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminApplicationResponse"
+                }
+              }
+            },
+            "description" : "Invitation sent"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Requires an admin role, or member not in your sector"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member already a Ground Admin or has pending application"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Invite member to become Ground Admin",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/members/{memberId}/ground-admin/invite/{applicationId}" : {
+      "delete" : {
+        "description" : "Admin revokes/cancels a pending Ground Admin invitation",
+        "operationId" : "revokeGroundAdminInvitation",
+        "parameters" : [ {
+          "description" : "Member UUID whose invitation to revoke",
+          "in" : "path",
+          "name" : "memberId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "Application/Invitation UUID",
+          "in" : "path",
+          "name" : "applicationId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminApplicationResponse"
+                }
+              }
+            },
+            "description" : "Invitation revoked"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not an invitation"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Requires an admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invitation not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invitation already processed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Revoke Ground Admin invitation",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/members/{memberId}/ground-admin/revoke" : {
+      "post" : {
+        "description" : "Admin revokes a member's Ground Admin status",
+        "operationId" : "revokeGroundAdmin",
+        "parameters" : [ {
+          "description" : "Member UUID to revoke Ground Admin status from",
+          "in" : "path",
+          "name" : "memberId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RevokeGroundAdminRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminStatusChangeResponse"
+                }
+              }
+            },
+            "description" : "Ground Admin status revoked"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Requires an admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member is not a Ground Admin"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Revoke Ground Admin status",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/members/{memberId}/ground-admin/status" : {
+      "patch" : {
+        "description" : "Admin updates a Ground Admin's status (active/on_hold)",
+        "operationId" : "updateGroundAdminStatus",
+        "parameters" : [ {
+          "description" : "Member UUID to update status for",
+          "in" : "path",
+          "name" : "memberId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateGroundAdminStatusRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminStatusChangeResponse"
+                }
+              }
+            },
+            "description" : "Status updated"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "inactive is refused: use revoke"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Requires an admin role"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Member is not a Ground Admin"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Update Ground Admin status",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/messages" : {
+      "get" : {
+        "description" : "Retrieve a paginated list of messages for the authenticated user with optional filtering",
+        "operationId" : "listMessages",
+        "parameters" : [ {
+          "description" : "Filter by message status",
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "unread", "read", "actioned", "dismissed" ],
+            "type" : "string"
+          }
+        }, {
+          "description" : "Filter by message type",
+          "in" : "query",
+          "name" : "type",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "ground_admin_invitation", "ground_admin_application", "ground_admin_approved", "ground_admin_declined", "ground_admin_invitation_declined", "ground_admin_invitation_accepted", "ground_admin_revocation", "ground_admin_stepdown_request", "verify_new_issue", "verify_fix", "member_registration", "monthly_report", "admin_welcome" ],
+            "type" : "string"
+          }
+        }, {
+          "description" : "Page number (1-based)",
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "default" : 1,
+            "format" : "int32",
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        }, {
+          "description" : "Items per page (max 100)",
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "default" : 20,
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessageListResponse"
+                }
+              }
+            },
+            "description" : "Successfully retrieved messages"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "List messages",
+        "tags" : [ "Messages" ]
+      }
+    },
+    "/api/v1/messages/{id}" : {
+      "get" : {
+        "description" : "Retrieve a single message by its ID. admin_welcome carries metadata.tasks, a list of strings.",
+        "operationId" : "getMessage",
+        "parameters" : [ {
+          "description" : "Message UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description" : "Successfully retrieved message"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Message not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get message",
+        "tags" : [ "Messages" ]
+      }
+    },
+    "/api/v1/messages/{id}/action" : {
+      "post" : {
+        "description" : "Perform an action on a message (e.g., accept, decline, approve, reject)",
+        "operationId" : "performMessageAction",
+        "parameters" : [ {
+          "description" : "Message UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MessageActionRequest"
+              }
+            }
+          },
+          "description" : "Action request",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description" : "Action performed successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid action for message type"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Message not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Message already actioned"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Perform message action",
+        "tags" : [ "Messages" ]
+      }
+    },
+    "/api/v1/messages/{id}/read" : {
+      "patch" : {
+        "description" : "Mark a message as read, updating its status and setting the read timestamp",
+        "operationId" : "markMessageRead",
+        "parameters" : [ {
+          "description" : "Message UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description" : "Message marked as read"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Message not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Mark message as read",
+        "tags" : [ "Messages" ]
+      }
+    },
+    "/api/v1/photos/{photoId}" : {
+      "delete" : {
+        "description" : "Delete a photo by its ID",
+        "operationId" : "deletePhoto",
+        "parameters" : [ {
+          "description" : "Photo UUID",
+          "example" : "550e8400-e29b-41d4-a716-446655440001",
+          "in" : "path",
+          "name" : "photoId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Photo deleted successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Unauthorized - invalid or missing token"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not the reporter or an admin"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Photo not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Delete photo",
+        "tags" : [ "Photos" ]
+      }
+    },
+    "/api/v1/pod/administrators" : {
+      "get" : {
+        "description" : "Returns all administrators (at any level) within the current pod, sorted, searched and filtered. A pod's administrators are admins with its podId plus ward- and sector-level admins of its wards and sectors. Unpaginated; total equals items.length. Filters combine with AND. Default createdAt:asc. role sorts by hierarchy, email and displayName ignore case. 400 codes invalid_sort, invalid_role, invalid_ward_id.",
+        "operationId" : "listAdministrators",
+        "parameters" : [ {
+          "description" : "Sort as <column>:<direction>",
+          "example" : "createdAt:asc",
+          "in" : "query",
+          "name" : "sort",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "email:asc", "email:desc", "displayName:asc", "displayName:desc", "role:asc", "role:desc", "createdAt:asc", "createdAt:desc" ],
+            "type" : "string"
+          }
+        }, {
+          "description" : "Case-insensitive substring matched against email or display name",
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "Repeatable admin_role wire value filter",
+          "in" : "query",
+          "name" : "role",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "sector_admin", "sector_chief", "ward_admin", "ward_chief", "pod_admin", "pod_chief" ],
+            "items" : {
+              "enum" : [ "sector_admin", "sector_chief", "ward_admin", "ward_chief", "pod_admin", "pod_chief" ],
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        }, {
+          "description" : "Ward UUID filter",
+          "in" : "query",
+          "name" : "wardId",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminListResponse"
+                }
+              }
+            },
+            "description" : "Administrators retrieved successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Invalid sort, role or ward id"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "List all administrators in the pod",
+        "tags" : [ "Pod Administrators" ]
+      },
+      "post" : {
+        "description" : "Create a new administrator within the pod. A temporary password will be generated. Sends an admin_welcome message; temporaryPassword is shown once. 409 code email_exists.",
+        "operationId" : "createAdministrator",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateAdminRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminCreatedResponse"
+                }
+              }
+            },
+            "description" : "Administrator created successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Email already exists"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Create a new administrator",
+        "tags" : [ "Pod Administrators" ]
+      }
+    },
+    "/api/v1/pod/administrators/{id}" : {
+      "delete" : {
+        "description" : "Soft delete an administrator (set deletedAt timestamp). 403 codes: cannot_delete_self, insufficient_permissions, cross_pod.",
+        "operationId" : "deleteAdministrator",
+        "parameters" : [ {
+          "description" : "Administrator UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Administrator deleted successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Administrator not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Delete an administrator",
+        "tags" : [ "Pod Administrators" ]
+      },
+      "get" : {
+        "description" : "Retrieve a single administrator's details. 403 codes: cross_pod, out_of_scope.",
+        "operationId" : "getAdministrator",
+        "parameters" : [ {
+          "description" : "Administrator UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminResponse"
+                }
+              }
+            },
+            "description" : "Administrator retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions or out of scope"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Administrator not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get administrator by ID",
+        "tags" : [ "Pod Administrators" ]
+      },
+      "patch" : {
+        "description" : "Update an existing administrator's details.",
+        "operationId" : "updateAdministrator",
+        "parameters" : [ {
+          "description" : "Administrator UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateAdminRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminResponse"
+                }
+              }
+            },
+            "description" : "Administrator updated successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Administrator not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Update an administrator",
+        "tags" : [ "Pod Administrators" ]
+      }
+    },
+    "/api/v1/pod/dashboard" : {
+      "get" : {
+        "description" : "Returns aggregated statistics for the entire pod including issues, members, and administrative units.",
+        "operationId" : "getPodDashboard",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PodDashboardStatsResponse"
+                }
+              }
+            },
+            "description" : "Dashboard statistics retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Pod not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get pod dashboard statistics",
+        "tags" : [ "Pod Dashboard" ]
+      }
+    },
+    "/api/v1/pod/dashboard/sectors/{sectorId}" : {
+      "get" : {
+        "description" : "Returns aggregated statistics for a specific sector.",
+        "operationId" : "getSectorDashboard",
+        "parameters" : [ {
+          "description" : "Sector UUID",
+          "in" : "path",
+          "name" : "sectorId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SectorDashboardStatsResponse"
+                }
+              }
+            },
+            "description" : "Sector statistics retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Sector not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get sector dashboard statistics",
+        "tags" : [ "Pod Dashboard" ]
+      }
+    },
+    "/api/v1/pod/dashboard/wards/{wardId}" : {
+      "get" : {
+        "description" : "Returns aggregated statistics for a specific ward.",
+        "operationId" : "getWardDashboard",
+        "parameters" : [ {
+          "description" : "Ward UUID",
+          "in" : "path",
+          "name" : "wardId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WardDashboardStatsResponse"
+                }
+              }
+            },
+            "description" : "Ward statistics retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Ward not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get ward dashboard statistics",
+        "tags" : [ "Pod Dashboard" ]
+      }
+    },
+    "/api/v1/pod/logo" : {
+      "post" : {
+        "description" : "Upload a pod logo image and return its public URL. Storing the file does not change the pod; persist the returned URL with PATCH /pod/settings. One multipart part file: JPEG, PNG or WebP, max 5MB.",
+        "operationId" : "uploadPodLogo",
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "properties" : {
+                  "file" : {
+                    "description" : "Logo file (JPEG, PNG, or WebP, max 5MB)",
+                    "format" : "binary",
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "file" ],
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PodLogoResponse"
+                }
+              }
+            },
+            "description" : "Logo uploaded successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "500" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Storage error"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Upload pod logo",
+        "tags" : [ "Pod Settings" ]
+      }
+    },
+    "/api/v1/pod/settings" : {
+      "get" : {
+        "description" : "Returns the settings (name, logo) for the current pod. displayName is \"Munserv Pod {name}\", server-derived; clients render it, never build it. logoUrl is null with no logo.",
+        "operationId" : "getPodSettings",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PodSettingsResponse"
+                }
+              }
+            },
+            "description" : "Settings retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Pod not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get pod settings",
+        "tags" : [ "Pod Settings" ]
+      },
+      "patch" : {
+        "description" : "Partially update the pod settings. Only provided fields will be updated.",
+        "operationId" : "updatePodSettings",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdatePodSettingsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PodSettingsResponse"
+                }
+              }
+            },
+            "description" : "Settings updated successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Pod not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Update pod settings",
+        "tags" : [ "Pod Settings" ]
+      }
+    },
+    "/api/v1/pod/status" : {
+      "get" : {
+        "description" : "Returns the setup completion status for the current pod, including any missing steps. missingSteps holds pod_name, pod_boundaries, wards_sectors, first_admin; empty when complete. The response has no wards or sectors (#59).",
+        "operationId" : "getPodSetupStatus",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PodSetupStatusResponse"
+                }
+              }
+            },
+            "description" : "Setup status retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Insufficient permissions"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Pod not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get pod setup status",
+        "tags" : [ "Pod Settings" ]
+      }
+    },
+    "/api/v1/sectors" : {
+      "get" : {
+        "description" : "Retrieve all available sectors",
+        "operationId" : "listSectors",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SectorsListResponse"
+                }
+              }
+            },
+            "description" : "Sectors retrieved successfully"
+          }
+        },
+        "summary" : "List all sectors",
+        "tags" : [ "Sectors" ]
+      }
+    },
+    "/api/v1/sectors/{id}" : {
+      "get" : {
+        "description" : "Retrieve a specific sector by its UUID",
+        "operationId" : "getSector",
+        "parameters" : [ {
+          "description" : "Sector UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SectorResponse"
+                }
+              }
+            },
+            "description" : "Sector retrieved successfully"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SectorResponse"
+                }
+              }
+            },
+            "description" : "Sector not found"
+          }
+        },
+        "summary" : "Get sector by ID",
+        "tags" : [ "Sectors" ]
+      }
+    },
+    "/api/v1/sectors/{sectorId}/ground-admins" : {
+      "get" : {
+        "description" : "Get a list of all Ground Admins in a sector, optionally filtered by status",
+        "operationId" : "listGroundAdmins",
+        "parameters" : [ {
+          "description" : "Sector UUID",
+          "in" : "path",
+          "name" : "sectorId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "Filter by status (optional)",
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "active", "on_hold", "inactive" ],
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroundAdminListResponse"
+                }
+              }
+            },
+            "description" : "Ground Admins list retrieved"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Requires an admin role"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "List Ground Admins in sector",
+        "tags" : [ "Ground Admins" ]
+      }
+    },
+    "/api/v1/sectors/{sectorId}/settings" : {
+      "get" : {
+        "description" : "Retrieve the settings for a specific sector. Creates default settings if none exist.",
+        "operationId" : "getSectorSettings",
+        "parameters" : [ {
+          "description" : "Sector UUID",
+          "in" : "path",
+          "name" : "sectorId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SectorSettingsResponse"
+                }
+              }
+            },
+            "description" : "Settings retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Access denied to this sector"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Sector not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get sector settings",
+        "tags" : [ "Sector Settings" ]
+      },
+      "patch" : {
+        "description" : "Partially update the settings for a sector. Only provided fields will be updated. daysFixedBeforeClosed 1-365, minimumGroundAdmins 0-100.",
+        "operationId" : "updateSectorSettings",
+        "parameters" : [ {
+          "description" : "Sector UUID",
+          "in" : "path",
+          "name" : "sectorId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateSectorSettingsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SectorSettingsResponse"
+                }
+              }
+            },
+            "description" : "Settings updated successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Access denied to this sector"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Sector not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Update sector settings",
+        "tags" : [ "Sector Settings" ]
+      }
+    },
+    "/api/v1/support-access/grants" : {
+      "get" : {
+        "description" : "List support grants for the caller's pod, newest first.",
+        "operationId" : "listSupportGrants",
+        "parameters" : [ {
+          "description" : "Filter by status",
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SupportGrantListResponse"
+                }
+              }
+            },
+            "description" : "List retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not pod chief"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "List support grants",
+        "tags" : [ "Support Access" ]
+      },
+      "post" : {
+        "description" : "Grant the super user temporary access to the caller's pod. 400 body { messages: string[] }; 409 code active_grant_exists.",
+        "operationId" : "createSupportGrant",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GrantSupportAccessRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SupportGrantResponse"
+                }
+              }
+            },
+            "description" : "Grant created successfully"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Validation error"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not pod chief"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Active grant already exists"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Grant support access",
+        "tags" : [ "Support Access" ]
+      }
+    },
+    "/api/v1/support-access/grants/current" : {
+      "get" : {
+        "description" : "Return the grant carried by the caller's own grant-scoped token, so the client can refresh a slid expiry. 403 code not_support_grant.",
+        "operationId" : "getCurrentSupportGrant",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SupportGrantResponse"
+                }
+              }
+            },
+            "description" : "Grant retrieved successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated, or the grant is revoked or expired (the activity filter clears the token's authentication before this controller runs)"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not a support grant token"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Get the caller's own support grant",
+        "tags" : [ "Support Access" ]
+      }
+    },
+    "/api/v1/support-access/grants/{id}" : {
+      "delete" : {
+        "description" : "Revoke an active support grant immediately. 409 code grant_not_active.",
+        "operationId" : "revokeSupportGrant",
+        "parameters" : [ {
+          "description" : "Support grant UUID",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Grant revoked successfully"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Not pod chief or grant belongs to another pod"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Grant not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "Grant is not active"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Revoke support access",
+        "tags" : [ "Support Access" ]
+      }
+    }
+  },
+  "security" : [ {
+    "bearerAuth" : [ ]
+  } ],
+  "tags" : [ {
+    "description" : "Admin dashboard and reporting endpoints. Requires admin role.",
+    "name" : "Admin"
+  }, {
+    "description" : "Endpoints for managing admin users. Requires sector_chief role.",
+    "name" : "Admin Management"
+  }, {
+    "description" : "Onboarding endpoints for new administrators",
+    "name" : "Admin Onboarding"
+  }, {
+    "description" : "User registration, login, and token management",
+    "name" : "Authentication"
+  }, {
+    "description" : "Pod bootstrap endpoints for super user",
+    "name" : "Bootstrap"
+  }, {
+    "description" : "Ground Admin lifecycle management",
+    "name" : "Ground Admins"
+  }, {
+    "description" : "Issue management endpoints for reporting and tracking municipal issues",
+    "name" : "Issues"
+  }, {
+    "description" : "Member profile operations",
+    "name" : "Members"
+  }, {
+    "description" : "Message management endpoints for viewing and acting on platform messages",
+    "name" : "Messages"
+  }, {
+    "description" : "Photo upload and management for issues",
+    "name" : "Photos"
+  }, {
+    "description" : "Manage pod administrators. Requires pod_chief role.",
+    "name" : "Pod Administrators"
+  }, {
+    "description" : "Dashboard statistics endpoints. Requires pod_chief role.",
+    "name" : "Pod Dashboard"
+  }, {
+    "description" : "Pod configuration and setup status endpoints. Requires pod_chief role.",
+    "name" : "Pod Settings"
+  }, {
+    "description" : "Endpoints for managing sector configuration",
+    "name" : "Sector Settings"
+  }, {
+    "description" : "Sector management operations",
+    "name" : "Sectors"
+  }, {
+    "description" : "Pod chiefs grant, list and revoke support access; a support grant holder reads their own grant.",
+    "name" : "Support Access"
+  }, {
+    "description" : "Issue verification workflow",
+    "name" : "Verifications"
+  } ]
+}

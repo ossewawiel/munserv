@@ -119,6 +119,13 @@ data class PendingVerificationResponse(
 )
 
 /**
+ * Response for an administrator override of an issue state.
+ */
+data class OverrideStateResponse(
+    val status: String,
+)
+
+/**
  * Response for verification history.
  */
 data class VerificationHistoryResponse(

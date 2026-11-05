@@ -55,6 +55,10 @@ data class GroundAdminApplicationResponse(
     val status: String,
 )
 
+data class GroundAdminStatusChangeResponse(
+    val status: String,
+)
+
 data class GroundAdminResponse(
     val id: String,
     val memberId: String,

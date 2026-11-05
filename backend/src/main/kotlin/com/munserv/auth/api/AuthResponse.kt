@@ -1,6 +1,8 @@
 package com.munserv.auth.api
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.munserv.auth.service.TokenPair
+import io.swagger.v3.oas.annotations.media.Schema
 
 /**
  * Response for OTP sent/verified operations.
@@ -91,6 +93,7 @@ data class AdminSector(
     val center: GeoPointResponse,
 )
 
+@Schema(name = "AuthGeoPointResponse")
 data class GeoPointResponse(
     val lat: Double,
     val lng: Double,
@@ -100,6 +103,7 @@ data class GeoPointResponse(
  * Response for phone registration check.
  */
 data class CheckPhoneResponse(
+    @get:JsonProperty("isRegistered")
     val isRegistered: Boolean,
 )
 
@@ -153,6 +157,7 @@ data class MemberApprovedResponse(
 /**
  * Simple message response.
  */
+@Schema(name = "AuthMessageResponse")
 data class MessageResponse(
     val message: String,
 )
