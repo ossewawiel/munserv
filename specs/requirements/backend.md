@@ -22,6 +22,12 @@
 | B8 | As a developer, the system tracks temporary super user grants | Store grants with: role, purpose, granted_by, granted_at, expires_at, last_activity ǀ Auto-expire logic ǀ Activity tracking updates last_activity | 🟢 Done | [#49](https://github.com/ossewawiel/munserv/issues/49) |
 | B9 | As a super user, I can log in to a bootstrapped pod under an active support grant so that I can help with a live problem under the role the pod chief allowed | Login succeeds when an active grant exists and the pod is not bootstrap-eligible ǀ JWT subject is the grant id and its role is the granted role only ǀ Login response carries grantId, grantedRole, expiresAt ǀ `GET /support-access/grants/current` returns the caller's own grant ǀ `POST /auth/logout` revokes a grant-scoped login ǀ `SUPPORT_ACCESS_LOGIN` audit entry written | 🟢 Done | [#68](https://github.com/ossewawiel/munserv/issues/68) |
 
+## API Contract Stories
+
+| ID | Story | Acceptance Criteria | Status | Issue |
+|----|-------|---------------------|--------|-------|
+| B13 | As a developer, I can read the API contract from a file the backend writes, so that the contract cannot drift from the code and web and mobile can generate from it | `OpenApiContractTest` writes `specs/contracts/openapi.json` with sorted keys and no `servers` block, stable across runs and builds ǀ The JSON lists every controller route, checked against the handler mapping (76 on the PR) ǀ Every route has an explicit, unique operationId and a tag ǀ Every success response with a body names a schema, and schema names match the wire ǀ A DTO change without regenerating fails CI, and so does a hand edit of the file ǀ `api.md` is a short guide; its true route facts move to the annotations ǀ The handoff template and living docs no longer name `api.md` as the place new endpoints are added ǀ ktlint and tests pass | 🔴 Pending | [#275](https://github.com/ossewawiel/munserv/issues/275) |
+
 ## Status Legend
 - 🟢 Done
 - 🟡 In Progress
