@@ -33,6 +33,9 @@ state = json.loads(state_path.read_text())
 args = sys.argv[1:]
 
 def out(value):
+    # Like real gh, answer only the fields asked for. A field the script forgot to ask for reads as null.
+    if isinstance(value, dict) and "--json" in args:
+        value = {k: value.get(k) for k in args[args.index("--json") + 1].split(",")}
     if "--jq" in args:
         expr = args[args.index("--jq") + 1]
         result = subprocess.run(["jq", "-r", expr], input=json.dumps(value), capture_output=True, text=True)
@@ -386,6 +389,12 @@ class StuckRun(unittest.TestCase):
                                 "102": [stuck(jobs, event="pull_request")], "101": [view(ALL_PASSED)]})
         self.assertEqual(code, 1, out)
 
+    def test_a_failed_job_next_to_a_cancelled_gate_job_stays_red(self):
+        jobs = [job("Web (React)", "failure"), job("CI status", "cancelled")]
+        code, out = watch(runs={"103": [view(ALL_PASSED, event="pull_request")],
+                                "102": [stuck(jobs, event="pull_request")], "101": [view(ALL_PASSED)]})
+        self.assertEqual(code, 1, out)
+
     def test_a_failed_gate_job_alone_stays_red(self):
         jobs = [job("Web (React)"), job("CI status", "failure")]
         code, out = watch(runs={"103": [view(ALL_PASSED, event="pull_request")],
@@ -594,6 +603,18 @@ class MergePhase(unittest.TestCase):
         code, out = watch([view(ALL_PASSED)], pr=moved)
         self.assertEqual(code, 2, out)
         self.assertNotIn("held by", out)
+
+    def test_a_push_is_read_before_conflicts_or_behind_on_the_old_commit(self):
+        for merge_state in ("DIRTY", "BEHIND"):
+            with self.subTest(merge_state):
+                code, out = watch([view(ALL_PASSED)], pr=open_pr(merge_state, headRefOid=NEW_HEAD["headRefOid"]))
+                self.assertEqual(code, 2, out)
+                self.assertEqual(last_line(out), "CI: not finished - head moved to def7654; watch again")
+
+    def test_a_closed_pr_is_closed_whatever_its_head(self):
+        code, out = watch([view(ALL_PASSED)], pr=open_pr("CLEAN", state="CLOSED", headRefOid=NEW_HEAD["headRefOid"]))
+        self.assertEqual(code, 3, out)
+        self.assertEqual(last_line(out), "CI: green, not merging - the PR is closed")
 
     def test_a_merged_pr_is_merged_whatever_its_head(self):
         code, out = watch([view(ALL_PASSED)], pr={**MERGED_PR, "headRefOid": NEW_HEAD["headRefOid"]})
