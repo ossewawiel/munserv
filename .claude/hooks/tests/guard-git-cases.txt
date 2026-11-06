@@ -59,3 +59,14 @@ EOF
 0	gh pr create --body "release with gh pr edit 12 --add-label ci-edit-approved"
 0	git commit -m "gh pr edit 12 --add-label ci-edit-approved; gh api -X PUT x/pulls/1/merge"
 0	grep ci-edit-approved .github/workflows/ci-edit-guard.yml
+2	gh pr edit 12 --add-label "design-approved, ci-edit-approved"
+2	gh pr edit 12 --add-label='ci-edit-approved'
+2	gh pr edit 12 \
+  --add-label ci-edit-approved
+2	gh api repos/o/r/pulls/12/merge \
+  -X PUT
+2	gh api -X PUT 'repos/o/r/pulls/12/merge'
+2	git push "origin" "master"
+0	gh issue comment 294 --body "run gh pr edit 297 --add-label ci-edit-approved"; gh issue edit 294 --add-label status:done
+0	gh issue comment 294 --body "see /pulls/12/merge" && gh api -X POST repos/o/r/issues/12/comments -f body=hello
+0	gh pr edit 12 --add-label status:review --body "mentions ci-edit-approved in text"

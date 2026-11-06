@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # PreToolUse guard for Bash: refuse the git operations no agent may run.
-# Only real git invocations are inspected: heredoc bodies and quoted strings (commit
-# messages, PR bodies, test strings) are removed first, then the command is split on
-# ; & | and newlines and only segments that start with `git` are checked.
+# Only real git and gh invocations are inspected: line continuations are joined, then heredoc
+# bodies and multi-word quoted strings (commit messages, PR bodies, test strings) are removed. A
+# quoted single word and the value of --add-label stay readable, since they are arguments. The
+# command is then split on ; & | and newlines, and only segments that start with `git` or `gh` are checked.
 # Exit 2 blocks the call and returns the message to the model.
 input=$(cat)
 cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""')
+cmd=${cmd//$'\\\n'/ }
 
 deny() { echo "guard-git: $1" >&2; exit 2; }
 
@@ -15,7 +17,7 @@ stripped=$(printf '%s\n' "$cmd" \
            if (match($0, /<<-?[\047"]?[A-Za-z_][A-Za-z0-9_]*/)) {
              tag=substr($0, RSTART, RLENGTH); sub(/^<<-?[\047"]?/, "", tag); print; skip=1; next }
            print }' \
-  | sed -E "s/'[^']*'/_/g; s/\"[^\"]*\"/_/g")
+  | sed -E "s/(--add-label)[ =]+[\"']([^\"']*)[\"']/\1 \2/g; s/'([^' ]*)'/\1/g; s/\"([^\" ]*)\"/\1/g; s/'[^']*'/_/g; s/\"[^\"]*\"/_/g")
 # GUARD_GIT_BRANCH lets the test runner pin the branch context (CI checks out master).
 branch="${GUARD_GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null)}"
 
@@ -50,18 +52,18 @@ check_gh() {
     deny "merging is automatic; use gh pr merge <n> --auto --squash only"
   fi
   # Agents use the owner's gh login, so GitHub cannot tell who applied a label or changed a setting
-  # (#294). These lines are what keep the CI edit guard's release with a person. They look at the raw
-  # command, because the name or path may be quoted.
+  # (#294). These lines are what keep the CI edit guard's release with a person.
   if printf '%s' "$1" | grep -Eq '^gh (pr|issue) edit' && printf '%s' "$1" | grep -q -- '--add-label' \
-    && printf '%s' "$cmd" | grep -q 'ci-edit-approved'; then
+    && printf '%s' "$1" | grep -q 'ci-edit-approved'; then
     deny "only the owner releases a held CI edit; report the release command to the user and stop"
   fi
   if printf '%s' "$1" | grep -Eq '^gh api graphql'; then
+    # The query is a multi-word string, which the segment no longer holds.
     if printf '%s' "$cmd" | grep -Eq 'addLabelsToLabelable|mergePullRequest|(create|update|delete)(BranchProtectionRule|RepositoryRuleset)'; then
       deny "this mutation can release or bypass the CI edit guard; ask the user"
     fi
   elif printf '%s' "$1" | grep -Eq '^gh api( |$)' && gh_api_writes "$1"; then
-    if printf '%s' "$cmd" | grep -Eq 'branches/[^ ]*/protection|/rulesets|/pulls/[^ /]+/merge|/issues/[^ /]+/labels'; then
+    if printf '%s' "$1" | grep -Eq 'branches/[^ ]*/protection|/rulesets|/pulls/[^ /]+/merge|/issues/[^ /]+/labels'; then
       deny "this API write can release or bypass the CI edit guard; ask the user"
     fi
   fi
