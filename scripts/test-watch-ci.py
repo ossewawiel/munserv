@@ -275,6 +275,11 @@ class HeadMoved(unittest.TestCase):
         code, out = watch([view(ALL_PASSED)], heads=[HEAD, "gh-failure", HEAD])
         self.assertEqual(code, 0, out)
 
+    def test_head_reads_failing_for_good_leave_the_verdict_standing(self):
+        code, out = watch([view(ALL_PASSED)], heads=[HEAD, "gh-failure"])
+        self.assertEqual(code, 0, out)
+        self.assertEqual(last_line(out), "CI: green, merged")
+
 
 class BlockedGh(unittest.TestCase):
     """A call that never returns must not stop the watcher. These wait in real time, for GH_TIMEOUT."""
