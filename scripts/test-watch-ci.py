@@ -370,6 +370,49 @@ class MergePhase(unittest.TestCase):
         self.assertEqual(code, 3, out)
         self.assertIn("held by CI edit guard", out)
 
+    def test_an_infra_hold_names_the_reviewer_and_not_the_owner(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [{"name": "Infra review guard", "conclusion": "FAILURE"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertIn("held by infra review guard; dispatch the reviewer agent", last_line(out))
+        self.assertNotIn("ci-edit-approved", out)
+
+    def test_the_reviewer_goes_before_the_owner_when_both_guards_hold(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [{"name": "CI edit guard", "conclusion": "FAILURE"},
+                                    {"name": "Infra review guard", "conclusion": "FAILURE"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertIn("held by infra review guard", last_line(out))
+
+    def test_a_guard_still_running_does_not_shift_the_other_guard(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [{"name": "CI edit guard", "conclusion": ""},
+                                    {"name": "Infra review guard", "conclusion": "FAILURE"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertIn("held by infra review guard", last_line(out))
+
+    def test_a_guard_release_listed_before_the_old_hold_is_a_release(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [
+                  {"name": "Infra review guard", "conclusion": "SUCCESS", "startedAt": "2026-11-06T10:05:00Z"},
+                  {"name": "Infra review guard", "conclusion": "FAILURE", "startedAt": "2026-11-06T10:00:00Z"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertNotIn("held by", out)
+
+    def test_a_queued_guard_run_is_not_read_as_the_old_hold(self):
+        # gh prints the zero time for a time GitHub has not set yet.
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [
+                  {"name": "Infra review guard", "conclusion": "FAILURE", "startedAt": "2026-11-06T10:00:00Z"},
+                  {"name": "Infra review guard", "conclusion": "", "startedAt": "0001-01-01T00:00:00Z"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertNotIn("held by", out)
+
     def test_a_release_after_a_hold_reads_the_newest_guard_run(self):
         pr = {"state": "MERGED", "mergeStateStatus": "CLEAN", "autoMergeRequest": None,
               "statusCheckRollup": [{"name": "CI edit guard", "conclusion": "FAILURE"},

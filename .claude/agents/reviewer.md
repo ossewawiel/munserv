@@ -29,3 +29,7 @@ The handoff the task names (acceptance criteria, steps, do-not list); `domain/RE
 
 ## Decision
 `APPROVE` when every criterion is met and there is no finding in 2 to 5 above. Otherwise `REQUEST CHANGES` with findings ranked by severity, each with file:line, what is wrong, and the smallest fix. Post the verdict as a PR review comment with `gh pr review <n> --comment --body` (never `--approve`; merging is the user's decision) and end your message with the same text.
+
+With no handoff, the PR body is the acceptance criteria, and items 5 and 6 above do not apply.
+
+On a PR, the last line of the review body is the verdict line, alone on its line: `Reviewer verdict: APPROVE <sha>` or `Reviewer verdict: REQUEST CHANGES <sha>`. `<sha>` is the full `headRefOid` from `gh pr view <n> --json headRefOid`, read before you read the diff. Write `APPROVE` only for the commit you reviewed. When the PR changes `scripts/watch-ci.sh`, `scripts/factory-tick.sh`, `.claude/hooks/` or `.github/workflows/`, `Infra review guard` holds it until that line says `APPROVE`. After an `APPROVE` on such a PR, run `gh pr edit <n> --add-label infra-reviewed`, because a review alone does not start the check. If the label is already there, remove it first, because only adding it starts the check. After a `REQUEST CHANGES` on such a PR, remove the label when it is there: `gh pr edit <n> --remove-label infra-reviewed`. A review alone does not start the check, so a green check would otherwise stay green.

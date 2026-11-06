@@ -23,7 +23,7 @@ The root [`CLAUDE.md`](CLAUDE.md) describes the agents. The path of one change:
 5. **PR.** Pushing a branch opens the PR and arms auto-merge (`.github/workflows/auto-pr.yml`). Do not run `gh pr merge` yourself. Watch CI with `scripts/watch-ci.sh <pr>`. Do not use `gh pr checks --watch`: it exits green while new runs are still pending.
 6. **Review.** The `reviewer` gives a verdict per acceptance criterion against the handoff and the domain language. A UI story also goes through the `design-reviewer`.
 7. **Eyeball.** A UI or user-facing story (`ui: true` or `user_facing: true`) waits for a person to run the Eyeball block of its handoff. `scripts/eyeball-up.sh <pr>` prints the links. The result labels the PR `eyeball:pass` or `eyeball:fail`, and each failed check files a `source:eyeball` bug.
-8. **Merge.** GitHub squash-merges when `CI status` is green.
+8. **Merge.** GitHub squash-merges when the required checks are green: `CI status`, `CI edit guard` and `Infra review guard`. A PR that changes `scripts/watch-ci.sh`, `scripts/factory-tick.sh`, `.claude/hooks/` or `.github/workflows/` holds until the `reviewer` agent approves its head commit. See `CLAUDE.md`, "The factory".
 9. **After the merge.** Sync your checkout: `git fetch origin && git switch master && git pull --ff-only`, then `git branch -d <branch>`. The `syncer` updates specs and issue labels.
 
 `.claude/hooks/guard-git.sh` blocks force pushes, pushes to `master` and history rewrites.

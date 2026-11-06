@@ -1,0 +1,90 @@
+name: Infra review guard
+
+# Holds a PR that changes the factory's own machinery until a reviewer verdict exists for its head
+# commit (plan step S49). Green CI does not prove this code right: the post-merge review of #300
+# found nine blocking defects in a script that had passed every check. This workflow runs from
+# master's copy, so a PR cannot edit or remove it. It is a required check on master.
+#
+# Security: `pull_request_target` runs with a write token on PRs from forks too. Never check out
+# or run PR code here, and never put PR text (title, branch, file names) in a ${{ }} expression.
+#
+# Rules:
+# - No path filter and no job-level `if`: a required check that does not run blocks the merge,
+#   and a skipped job counts as passed.
+# - The verdict is a PR review with this line, alone on its line, for the full head commit:
+#     Reviewer verdict: APPROVE <sha>
+#   A push changes the head, so a verdict covers one commit. The newest verdict line for a commit
+#   wins, so a later REQUEST CHANGES withdraws an APPROVE at the next run. The reviewer removes the
+#   label after a REQUEST CHANGES, and that starts the run.
+# - Only a review by the repo owner's login counts. The repo is public, so any GitHub account can
+#   post a comment review.
+# - A review starts no run of this workflow: `pull_request_review` runs would use the PR's copy of
+#   the file. The reviewer adds the label after its review, and the label starts the run. The label
+#   alone releases nothing.
+# - Agents use the owner's login, so this check cannot tell the reviewer agent from another session
+#   on that login. CLAUDE.md gives the line to the reviewer agent only.
+on:
+  pull_request_target:
+    branches: [master]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: infra-review-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+
+jobs:
+  guard:
+    name: Infra review guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      EVENT_ACTION: ${{ github.event.action }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      LABEL: infra-reviewed
+    steps:
+      - name: Hold an infrastructure PR until it has a reviewer verdict
+        run: |
+          set -euo pipefail
+          api="repos/$GITHUB_REPOSITORY"
+
+          # A rename counts under both names: moving a file out of the list also changes it.
+          files=$(gh api --paginate "$api/pulls/$PR/files" --jq '.[] | "\(.filename)\t\(.previous_filename // "")"')
+          listed=$(printf '%s\n' "$files" | grep -c . || true)
+          total=$(gh api "$api/pulls/$PR" --jq .changed_files)
+          # The files API stops at 3000 files, so a larger PR could hide an infrastructure edit.
+          if [ "$listed" -lt "$total" ]; then
+            echo "::error::The API listed $listed of $total changed files, so this guard cannot clear the PR."
+            exit 1
+          fi
+
+          infra_edits=$(printf '%s\n' "$files" | tr '\t' '\n' \
+            | grep -E '^(scripts/watch-ci\.sh|scripts/factory-tick\.sh|\.claude/hooks/.*|\.github/workflows/.*)$' | sort -u || true)
+          if [ -z "$infra_edits" ]; then
+            echo "This PR changes no infrastructure files."
+            exit 0
+          fi
+
+          echo "This PR changes infrastructure files:"
+          # The prefix stops a crafted file name from being read as a workflow command.
+          printf '%s\n' "$infra_edits" | sed 's/^/- /'
+
+          # The next review must be able to add the label again, or no run would start.
+          has_label=$(gh api --paginate "$api/issues/$PR/labels" --jq '.[].name' | grep -cxF "$LABEL" || true)
+          if [ "$has_label" -gt 0 ] && [ "$EVENT_ACTION" = "synchronize" ]; then
+            gh api -X DELETE "$api/issues/$PR/labels/$LABEL" >/dev/null
+          fi
+
+          verdict=$(gh api --paginate "$api/pulls/$PR/reviews" --jq '.[] | select(.author_association == "OWNER") | .body' \
+            | tr -d '\r' | grep -xE "Reviewer verdict: (APPROVE|REQUEST CHANGES) $HEAD_SHA" | tail -n 1 || true)
+          if [ "$verdict" = "Reviewer verdict: APPROVE $HEAD_SHA" ]; then
+            echo "Released by a reviewer APPROVE on $HEAD_SHA."
+            exit 0
+          fi
+
+          echo "::error::Held: this PR changes infrastructure and has no reviewer APPROVE on $HEAD_SHA. Dispatch the reviewer agent on PR $PR. Its APPROVE releases this check."
+          exit 1

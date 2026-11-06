@@ -93,7 +93,7 @@ The path of one story:
 3. Pushing the branch opens a PR (`auto-pr.yml`) and arms auto-merge.
 4. CI runs. The reviewer checks the PR against the handoff.
 5. UI and user-facing stories wait for an eyeball pass: a person runs the handoff's Eyeball block against the PR (`scripts/eyeball-up.sh <pr>` prints the links).
-6. GitHub squash-merges when `CI status` and `CI edit guard` are green. A PR that changes CI files holds until the owner reads the diff and runs `gh pr edit <n> --add-label ci-edit-approved`. The syncer updates specs and labels.
+6. GitHub squash-merges when `CI status`, `CI edit guard` and `Infra review guard` are green. A PR that changes CI files holds until the owner reads the diff and runs `gh pr edit <n> --add-label ci-edit-approved`. A PR that changes `scripts/watch-ci.sh`, `scripts/factory-tick.sh`, `.claude/hooks/` or `.github/workflows/` holds until the `reviewer` agent approves its head commit. The syncer updates specs and labels.
 
 Progress is public on the [dashboard](https://ossewawiel.github.io/munserv/dashboard/) and the [project board](https://github.com/users/ossewawiel/projects/5). The design catalogues are on [Pages](https://ossewawiel.github.io/munserv/): [Storybook](https://ossewawiel.github.io/munserv/storybook/) for web, [Widgetbook](https://ossewawiel.github.io/munserv/widgetbook/) for mobile.
 
