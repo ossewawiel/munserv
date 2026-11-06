@@ -273,7 +273,7 @@ while true; do
     exit 3
   fi
   if [[ "$baseline_guard" == "FAILURE" ]]; then
-    echo "CI: green, not merging - held by baseline guard; a design-reviewer APPROVE, or the owner when the story has no canvas, releases it with gh pr edit $PR --add-label design-approved"
+    echo "CI: green, not merging - held by baseline guard; a design-reviewer APPROVE on a ui: true story, or the owner on any other, releases it with gh pr edit $PR --add-label design-approved"
     exit 3
   fi
   # No agent can clear this one (#294).
