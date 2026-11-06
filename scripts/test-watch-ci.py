@@ -4,9 +4,10 @@
 The stub `gh` answers from a JSON fixture and applies --jq with the real jq. Each entry in a run's
 `views` list answers one `gh run view --json` call that asks for status, and the last entry repeats.
 `heads`, `prs` and `listings` work the same way for `gh pr view` and `gh run list`. An entry can
-also be "gh-failure" (the call exits 1) or "gh-hang" (the call blocks until it is killed).
+also be "gh-failure" (the call exits 1), "gh-hang" (the call blocks until it is killed), or
+slow(entry) (the call takes real time, then answers with that entry).
 The stub `sleep` returns at once, so the time limits count polls and the tests take no real time.
-Only the gh-hang tests wait in real time, for GH_TIMEOUT.
+Only the gh-hang and slow() tests wait in real time.
 
 Usage: python3 scripts/test-watch-ci.py
 """
@@ -45,6 +46,9 @@ def next_entry(holder, key):
     holder[key + "_calls"] = index + 1
     state_path.write_text(json.dumps(state))
     entry = holder[key][min(index, len(holder[key]) - 1)]
+    if isinstance(entry, dict) and "gh-delay" in entry:
+        time.sleep(entry["gh-delay"])
+        entry = entry["then"]
     if entry == "gh-failure":
         sys.stderr.write("HTTP 502\n")
         sys.exit(1)
@@ -53,8 +57,10 @@ def next_entry(holder, key):
     return entry
 
 if args[:2] == ["pr", "view"]:
-    fields = args[args.index("--json") + 1]
-    out(next_entry(state, "heads" if "headRefOid" in fields else "prs"))
+    fields = args[args.index("--json") + 1].split(",")
+    if "state" in fields:
+        out({"headRefOid": "abc1234567", **next_entry(state, "prs")})
+    out(next_entry(state, "heads"))
 if args[:2] == ["run", "list"]:
     out([{"databaseId": int(i)} for i in next_entry(state, "listings")])
 if args[:2] == ["run", "view"]:
@@ -92,9 +98,19 @@ def view(jobs: list[dict], status: str = "completed", conclusion: str = "success
     return {"event": event, "status": status, "conclusion": conclusion, "jobs": jobs}
 
 
-def stuck(jobs: list[dict]) -> dict:
+def stuck(jobs: list[dict], event: str = "push") -> dict:
     """What the API returned for run 42065926402 on #297: all jobs done, the run itself not."""
-    return view(jobs, status="in_progress", conclusion="")
+    return view(jobs, status="in_progress", conclusion="", event=event)
+
+
+def slow(entry: object) -> dict:
+    """A gh call that takes more than a second of real time, then answers with this entry."""
+    return {"gh-delay": 1.1, "then": entry}
+
+
+def open_pr(merge_state: str = "BLOCKED", armed: bool = True, **fields: object) -> dict:
+    return {"state": "OPEN", "mergeStateStatus": merge_state, "autoMergeRequest": {"m": 1} if armed else None,
+            "statusCheckRollup": [], **fields}
 
 
 RUNNING = view([job("Web (React)", "", "in_progress")], status="in_progress", conclusion="")
@@ -179,6 +195,23 @@ class SeveralRuns(unittest.TestCase):
         code, out = watch(runs={"102": [self.GREEN_PUSH], "101": [self.CANCELLED_PR]})
         self.assertEqual(code, 1, out)
 
+    def test_a_push_run_cancelled_by_a_newer_dispatch_run_is_not_red(self):
+        # Both events run in one concurrency group, so either can cancel the other.
+        dispatch = view(ALL_PASSED, event="workflow_dispatch")
+        code, out = watch(runs={"102": [dispatch], "101": [view(ALL_PASSED, conclusion="cancelled")]})
+        self.assertEqual(code, 0, out)
+        self.assertIn("run 101: cancelled; newer run 102", out)
+
+    def test_a_dispatch_run_cancelled_by_a_newer_push_run_is_not_red(self):
+        dispatch = view(ALL_PASSED, conclusion="cancelled", event="workflow_dispatch")
+        code, out = watch(runs={"102": [self.GREEN_PUSH], "101": [dispatch]})
+        self.assertEqual(code, 0, out)
+
+    def test_the_newest_of_a_push_and_a_dispatch_cancelled_is_red(self):
+        dispatch = view(ALL_PASSED, conclusion="cancelled", event="workflow_dispatch")
+        code, out = watch(runs={"102": [dispatch], "101": [self.GREEN_PUSH]})
+        self.assertEqual(code, 1, out)
+
     def test_a_failed_run_stays_red_when_a_newer_run_passes(self):
         failed = view(ONE_FAILED, conclusion="failure", event="pull_request")
         code, out = watch(runs={"102": [self.GREEN_PR], "101": [failed]})
@@ -235,7 +268,12 @@ class ListingFailures(unittest.TestCase):
     def test_listing_failing_from_the_start_is_not_finished_on_stdout(self):
         code, out = watch(runs={}, listings=["gh-failure"])
         self.assertEqual(code, 2, out)
-        self.assertTrue(last_line(out).startswith("CI: not finished"), out)
+        self.assertTrue(last_line(out).startswith("CI: not finished - cannot list CI runs"), out)
+
+    def test_one_good_listing_with_no_runs_says_no_run(self):
+        code, out = watch(runs={}, listings=["gh-failure", [], "gh-failure"])
+        self.assertEqual(code, 2, out)
+        self.assertTrue(last_line(out).startswith("CI: not finished - no CI run"), out)
 
 
 class PrFailures(unittest.TestCase):
@@ -326,6 +364,34 @@ class StuckRun(unittest.TestCase):
                 code, out = watch([stuck([job("Web (React)", bad), job("CI status")])])
                 self.assertEqual(code, 1, out)
 
+    CANCELLED_JOBS = [job("Web (React)"), job("Mobile (Flutter)", "cancelled", job_id=57),
+                      job("CI status", "failure", job_id=58)]
+
+    def test_a_stuck_cancelled_run_with_a_newer_green_run_is_not_red(self):
+        # `CI status` fails when a job is cancelled, so the run is cancelled and not failed.
+        code, out = watch(runs={"103": [view(ALL_PASSED, event="pull_request")],
+                                "102": [stuck(self.CANCELLED_JOBS, event="pull_request")],
+                                "101": [view(ALL_PASSED)]})
+        self.assertEqual(code, 0, out)
+        self.assertIn("run 102: cancelled; newer run 103", out)
+
+    def test_a_stuck_cancelled_run_that_is_the_newest_is_red_with_its_job_logs(self):
+        code, out = watch(runs={"102": [stuck(self.CANCELLED_JOBS, event="pull_request")], "101": [view(ALL_PASSED)]})
+        self.assertEqual(code, 1, out)
+        self.assertIn("log of job 57", out)
+
+    def test_a_failed_job_next_to_a_cancelled_one_stays_red(self):
+        jobs = [job("Web (React)", "failure"), job("Mobile (Flutter)", "cancelled"), job("CI status", "failure")]
+        code, out = watch(runs={"103": [view(ALL_PASSED, event="pull_request")],
+                                "102": [stuck(jobs, event="pull_request")], "101": [view(ALL_PASSED)]})
+        self.assertEqual(code, 1, out)
+
+    def test_a_failed_gate_job_alone_stays_red(self):
+        jobs = [job("Web (React)"), job("CI status", "failure")]
+        code, out = watch(runs={"103": [view(ALL_PASSED, event="pull_request")],
+                                "102": [stuck(jobs, event="pull_request")], "101": [view(ALL_PASSED)]})
+        self.assertEqual(code, 1, out)
+
     def test_late_real_conclusion_wins_over_the_jobs(self):
         code, out = watch([stuck(ALL_PASSED), view(ALL_PASSED, conclusion="failure")])
         self.assertEqual(code, 1, out)
@@ -346,9 +412,65 @@ class StuckRun(unittest.TestCase):
 
     def test_a_job_that_starts_later_resets_the_settle_wait(self):
         running = view([job("CI status"), job("Web (React)", "", "in_progress")], status="in_progress", conclusion="")
-        code, out = watch([stuck(ALL_PASSED), running, stuck(ALL_PASSED), view(ALL_PASSED)])
+        code, out = watch([stuck(ALL_PASSED)] * 4 + [running] + [stuck(ALL_PASSED)] * 4 + [view(ALL_PASSED)])
         self.assertEqual(code, 0, out)
         self.assertNotIn("judging it from the jobs", out)
+
+    def test_a_running_job_blocks_the_verdict(self):
+        running = view([job("CI status"), job("Web (React)", "", "in_progress")], status="in_progress", conclusion="")
+        code, out = watch([running] * 10 + [view(ALL_PASSED)])
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("judging it from the jobs", out)
+
+    def test_four_stuck_polls_are_not_yet_a_verdict(self):
+        # Four polls 30 seconds apart do not pass the 120-second settle wait.
+        code, out = watch([stuck(ALL_PASSED)] * 4 + [view(ALL_PASSED, conclusion="failure")])
+        self.assertEqual(code, 1, out)
+        self.assertNotIn("judging it from the jobs", out)
+
+    def test_the_fifth_stuck_poll_is_the_verdict(self):
+        code, out = watch([stuck(ALL_PASSED)] * 5 + [view(ALL_PASSED, conclusion="failure")])
+        self.assertEqual(code, 0, out)
+        self.assertIn("judging it from the jobs", out)
+
+
+class TimeAccounting(unittest.TestCase):
+    """A slow gh call uses up the limit. In each test the watcher sees the good answer only if it does
+    not add the time the calls took. These wait in real time, about two seconds each."""
+
+    def test_the_head_read_wait_counts_the_call(self):
+        code, out = watch([view(ALL_PASSED)], heads=[slow("gh-failure"), slow("gh-failure"), HEAD],
+                          env={"CI_APPEAR_TIMEOUT": "21"})
+        self.assertEqual(code, 2, out)
+        self.assertTrue(last_line(out).startswith("CI: not finished - cannot read PR"), out)
+
+    def test_the_appear_wait_counts_the_call(self):
+        code, out = watch([view(ALL_PASSED)], listings=[slow([]), slow([]), ["101"]], env={"CI_APPEAR_TIMEOUT": "11"})
+        self.assertEqual(code, 2, out)
+        self.assertTrue(last_line(out).startswith("CI: not finished - no CI run"), out)
+
+    def test_the_listing_wait_counts_the_call(self):
+        code, out = watch([view(ALL_PASSED)], listings=[["101"], slow("gh-failure"), slow("gh-failure"), ["101"]],
+                          env={"CI_APPEAR_TIMEOUT": "21"})
+        self.assertEqual(code, 2, out)
+        self.assertTrue(last_line(out).startswith("CI: not finished - cannot list"), out)
+
+    def test_the_run_wait_counts_the_call(self):
+        code, out = watch([slow(RUNNING), slow(RUNNING), view(ALL_PASSED)], env={"RUN_TIMEOUT": "61"})
+        self.assertEqual(code, 2, out)
+        self.assertTrue(last_line(out).startswith("CI: not finished - run 101"), out)
+
+    def test_the_merge_wait_counts_a_read_of_an_open_pr(self):
+        code, out = watch([view(ALL_PASSED)], prs=[slow(open_pr()), slow(open_pr()), open_pr(), MERGED_PR],
+                          env={"MERGE_TIMEOUT": "11"})
+        self.assertEqual(code, 3, out)
+        self.assertIn("still OPEN", last_line(out))
+
+    def test_the_merge_wait_counts_a_failed_read(self):
+        code, out = watch([view(ALL_PASSED)], prs=[slow("gh-failure"), slow("gh-failure"), "gh-failure", MERGED_PR],
+                          env={"MERGE_TIMEOUT": "11"})
+        self.assertEqual(code, 3, out)
+        self.assertIn("cannot read the PR", last_line(out))
 
 
 class GhFailures(unittest.TestCase):
@@ -428,12 +550,55 @@ class MergePhase(unittest.TestCase):
         self.assertEqual(code, 3, out)
         self.assertNotIn("held by", out)
 
-    def test_a_release_after_a_hold_reads_the_newest_guard_run(self):
-        pr = {"state": "MERGED", "mergeStateStatus": "CLEAN", "autoMergeRequest": None,
-              "statusCheckRollup": [{"name": "CI edit guard", "conclusion": "FAILURE"},
-                                    {"name": "CI edit guard", "conclusion": "SUCCESS"}]}
-        code, out = watch([view(ALL_PASSED)], pr=pr)
+    def test_conflicts_name_the_rebase(self):
+        code, out = watch([view(ALL_PASSED)], pr=open_pr("DIRTY"))
+        self.assertEqual(code, 3, out)
+        self.assertEqual(last_line(out), "CI: green, not merging - conflicts with master; rebase onto origin/master and push")
+
+    def test_behind_names_the_rebase(self):
+        code, out = watch([view(ALL_PASSED)], pr=open_pr("BEHIND"))
+        self.assertEqual(code, 3, out)
+        self.assertEqual(last_line(out), "CI: green, not merging - branch is behind master; rebase onto origin/master and push")
+
+    def test_a_closed_pr_uses_the_not_merging_form(self):
+        code, out = watch([view(ALL_PASSED)], pr=open_pr("CLEAN", state="CLOSED"))
+        self.assertEqual(code, 3, out)
+        self.assertEqual(last_line(out), "CI: green, not merging - the PR is closed")
+
+    def test_auto_merge_not_armed_names_the_command(self):
+        code, out = watch([view(ALL_PASSED)], pr=open_pr("CLEAN", armed=False))
+        self.assertEqual(code, 3, out)
+        self.assertEqual(last_line(out),
+                         "CI: green, not merging - auto-merge is not armed (mergeStateStatus CLEAN); arm it with gh pr merge 7 --auto --squash")
+
+    def test_auto_merge_armed_late_is_not_a_hold(self):
+        # auto-pr.yml can arm auto-merge after the watcher starts its merge phase.
+        code, out = watch([view(ALL_PASSED)], prs=[open_pr("CLEAN", armed=False), MERGED_PR])
         self.assertEqual(code, 0, out)
+
+    def test_still_open_at_the_limit_uses_the_not_merging_form(self):
+        code, out = watch([view(ALL_PASSED)], pr=open_pr())
+        self.assertEqual(code, 3, out)
+        self.assertEqual(last_line(out),
+                         "CI: green, not merging - still OPEN after 90s (mergeStateStatus BLOCKED, auto-merge armed: true)")
+
+    def test_a_push_in_the_merge_phase_gives_no_verdict(self):
+        moved = open_pr(headRefOid=NEW_HEAD["headRefOid"])
+        code, out = watch([view(ALL_PASSED)], prs=[open_pr(), moved])
+        self.assertEqual(code, 2, out)
+        self.assertEqual(last_line(out), "CI: not finished - head moved to def7654; watch again")
+
+    def test_a_push_is_read_before_a_guard_on_the_old_commit(self):
+        moved = open_pr(headRefOid=NEW_HEAD["headRefOid"],
+                        statusCheckRollup=[{"name": "CI edit guard", "conclusion": "FAILURE"}])
+        code, out = watch([view(ALL_PASSED)], pr=moved)
+        self.assertEqual(code, 2, out)
+        self.assertNotIn("held by", out)
+
+    def test_a_merged_pr_is_merged_whatever_its_head(self):
+        code, out = watch([view(ALL_PASSED)], pr={**MERGED_PR, "headRefOid": NEW_HEAD["headRefOid"]})
+        self.assertEqual(code, 0, out)
+        self.assertEqual(last_line(out), "CI: green, merged")
 
 
 if __name__ == "__main__":
