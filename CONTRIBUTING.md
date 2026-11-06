@@ -23,7 +23,7 @@ The root [`CLAUDE.md`](CLAUDE.md) describes the agents. The path of one change:
 5. **PR.** Pushing a branch opens the PR and arms auto-merge (`.github/workflows/auto-pr.yml`). Do not run `gh pr merge` yourself. Watch CI with `scripts/watch-ci.sh <pr>`. Do not use `gh pr checks --watch`: it exits green while new runs are still pending.
 6. **Review.** The `reviewer` gives a verdict per acceptance criterion against the handoff and the domain language. A UI story also goes through the `design-reviewer`.
 7. **Eyeball.** A UI or user-facing story (`ui: true` or `user_facing: true`) waits for a person to run the Eyeball block of its handoff. `scripts/eyeball-up.sh <pr>` prints the links. The result labels the PR `eyeball:pass` or `eyeball:fail`, and each failed check files a `source:eyeball` bug.
-8. **Merge.** GitHub squash-merges when the required checks are green: `CI status`, `CI edit guard` and `Infra review guard`. A PR that changes `scripts/watch-ci.sh`, `scripts/factory-tick.sh`, `.claude/hooks/` or `.github/workflows/` holds until the `reviewer` agent approves its head commit. See `CLAUDE.md`, "The factory".
+8. **Merge.** GitHub squash-merges when the required checks are green: `CI status`, `CI edit guard`, `Infra review guard` and `Baseline guard`. A PR that changes `scripts/watch-ci.sh`, `scripts/factory-tick.sh`, `.claude/hooks/` or `.github/workflows/` holds until the `reviewer` agent approves its head commit. See `CLAUDE.md`, "The factory".
 9. **After the merge.** Sync your checkout: `git fetch origin && git switch master && git pull --ff-only`, then `git branch -d <branch>`. The `syncer` updates specs and issue labels.
 
 `.claude/hooks/guard-git.sh` blocks force pushes, pushes to `master` and history rewrites.
@@ -38,7 +38,7 @@ CI (`.github/workflows/ci.yml`) is required on `master`. Run the same commands b
 | Backend | `cd backend && ./gradlew ktlintCheck test build` (tests use Testcontainers, so Docker must run) |
 | Web | `cd web && pnpm lint && pnpm typecheck && pnpm test:run && pnpm build` |
 | Design tokens | `pnpm --dir design check` |
-| Web visual regression | `pnpm --dir web test:visual`; a changed baseline under `web/e2e/visual/__screenshots__/` needs the `design-approved` label |
+| Web visual regression | `pnpm --dir web test:visual`; a changed baseline needs the `design-approved` label (`Baseline guard`) |
 | Mobile | `cd mobile && dart format --set-exit-if-changed lib test && flutter analyze --fatal-infos && flutter test` |
 
 CI also runs the `standards-check` workflow (advisory) on PRs that touch source files. It flags wildcard imports, `any`/`dynamic`, hardcoded URLs and debug prints. For a manual check of enums across platforms, run `scripts/validate-enum-sync.sh`.

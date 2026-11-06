@@ -378,6 +378,21 @@ class MergePhase(unittest.TestCase):
         self.assertIn("held by infra review guard; dispatch the reviewer agent", last_line(out))
         self.assertNotIn("ci-edit-approved", out)
 
+    def test_a_baseline_hold_names_the_design_reviewer(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [{"name": "Baseline guard", "conclusion": "FAILURE"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertIn("held by baseline guard; dispatch the design-reviewer agent", last_line(out))
+
+    def test_the_owner_goes_last_when_a_baseline_also_holds(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [{"name": "CI edit guard", "conclusion": "FAILURE"},
+                                    {"name": "Baseline guard", "conclusion": "FAILURE"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertIn("held by baseline guard", last_line(out))
+
     def test_the_reviewer_goes_before_the_owner_when_both_guards_hold(self):
         pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
               "statusCheckRollup": [{"name": "CI edit guard", "conclusion": "FAILURE"},
