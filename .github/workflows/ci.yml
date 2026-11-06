@@ -101,6 +101,8 @@ jobs:
         run: .claude/hooks/tests/verify-platform-cases.sh
       - name: Test the CI edit guard
         run: python3 scripts/test-ci-edit-guard.py
+      - name: Test the CI watcher
+        run: python3 scripts/test-watch-ci.py
       - name: Test the operator TUI
         run: pip install --quiet textual==8.2.8 && python3 scripts/test-tui.py
       - name: Test the quick-login input generator

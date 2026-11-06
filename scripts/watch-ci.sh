@@ -10,11 +10,14 @@
 #
 # Usage: scripts/watch-ci.sh <pr-number>
 # Env:   CI_WORKFLOW (default CI), CI_APPEAR_TIMEOUT (seconds to wait for runs to appear, default 120)
+#        RUN_TIMEOUT (seconds to wait for one run to finish, default 2400)
 #        MERGE_TIMEOUT (seconds to wait for the merge after green CI, default 90)
 #        A pull_request run with no jobs is skipped: GitHub fails it at once when the PR was opened
 #        with GITHUB_TOKEN (the Auto PR workflow), and the push run covers the same commit.
+#        GitHub can leave a run `in_progress` long after its last job ended (#299). Once the gate job
+#        has finished and RUN_SETTLE_SECONDS have passed, the script judges that run from its jobs.
 # Exit:  0 when CI passed and the PR merged, 1 when a run failed or was cancelled, 2 on usage or
-#        timeout, 3 when CI passed but the PR did not merge (conflict, behind, no auto-merge, closed,
+#        timeout (a run that has not finished is not a red run), 3 when CI passed but the PR did not merge (conflict, behind, no auto-merge, closed,
 #        held by the CI edit guard, or still open after MERGE_TIMEOUT).
 set -euo pipefail
 
@@ -28,11 +31,48 @@ APPEAR_TIMEOUT="${CI_APPEAR_TIMEOUT:-120}"
 POLL_SECONDS=10
 MERGE_TIMEOUT="${MERGE_TIMEOUT:-90}"
 MERGE_POLL_SECONDS=5
+RUN_TIMEOUT="${RUN_TIMEOUT:-2400}"
+RUN_POLL_SECONDS=30
+RUN_SETTLE_SECONDS=120
+# Needs every other job and runs always, so it is the last job of a run. A listed job set without it
+# is not complete: GitHub lists a job only once its `needs` are met.
+GATE_JOB="CI status"
 
 read -r SHA BRANCH < <(gh pr view "$PR" --json headRefOid,headRefName --jq '"\(.headRefOid) \(.headRefName)"')
 
 run_ids() {
-  gh run list --branch "$BRANCH" --workflow "$WORKFLOW" --commit "$SHA" --json databaseId --jq '.[].databaseId'
+  gh run list --branch "$BRANCH" --workflow "$WORKFLOW" --commit "$SHA" --json databaseId --jq '.[].databaseId' || true
+}
+
+# Waits for one run and sets event, job_count and conclusion. Returns 1 at RUN_TIMEOUT. This polls
+# instead of `gh run watch`, which has no time limit and can return before the run has a conclusion.
+# A failed gh call counts as "not finished yet", so a network blip cannot end the watch.
+wait_for_run() {
+  local id="$1" run_waited=0 settled=0 view status open gate bad
+  while (( run_waited < RUN_TIMEOUT )); do
+    if view=$(gh run view "$id" --json event,status,conclusion,jobs --jq '[.event, .status, (.conclusion // "" | if . == "" then "none" else . end), (.jobs | length),
+      ([.jobs[] | select(.status != "completed")] | length),
+      ([.jobs[] | select(.name == "'"$GATE_JOB"'")] | length),
+      ([.jobs[] | select(.conclusion != "success" and .conclusion != "skipped")] | length)] | map(tostring) | join(" ")' 2>/dev/null); then
+      read -r event status conclusion job_count open gate bad <<<"$view"
+      if [[ "$status" == "completed" && "$conclusion" != "none" ]]; then
+        return 0
+      fi
+      if (( open == 0 && gate > 0 )); then
+        settled=$(( settled + RUN_POLL_SECONDS ))
+        if (( settled > RUN_SETTLE_SECONDS )); then
+          echo "--- run $id: GitHub still says $status, but its jobs finished $RUN_SETTLE_SECONDS seconds ago; judging it from the jobs ---"
+          if (( bad > 0 )); then conclusion="failure"; else conclusion="success"; fi
+          return 0
+        fi
+      else
+        settled=0
+      fi
+    fi
+    sleep "$RUN_POLL_SECONDS"
+    run_waited=$(( run_waited + RUN_POLL_SECONDS ))
+  done
+  return 1
 }
 
 waited=0
@@ -60,13 +100,15 @@ while true; do
   [[ -n "$new_ids" ]] || break
   for id in $new_ids; do
     seen+="$id "
-    gh run watch "$id" --interval 30 >/dev/null 2>&1 || true
-    read -r event job_count conclusion < <(gh run view "$id" --json event,jobs,conclusion --jq '"\(.event) \(.jobs | length) \(.conclusion)"')
+    if ! wait_for_run "$id"; then
+      echo "CI: not finished - run $id is not done after ${RUN_TIMEOUT}s; check it with gh run view $id"
+      exit 2
+    fi
     if [[ "$event" == "pull_request" && "$job_count" -eq 0 && "$conclusion" != "success" ]]; then
       echo "--- run $id: pull_request run with no jobs ($conclusion), skipped; the push run covers this commit ---"
       continue
     fi
-    gh run view "$id" --json event,jobs --jq '.event as $e | .jobs[] | "\($e)\t\(.name)\t\(.conclusion)"'
+    gh run view "$id" --json event,jobs --jq '.event as $e | .jobs[] | "\($e)\t\(.name)\t\(.conclusion)"' || true
     if [[ "$conclusion" != "success" ]]; then
       failed=1
       echo "--- run $id: $conclusion; failed log tail ---"
