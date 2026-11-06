@@ -383,7 +383,7 @@ class MergePhase(unittest.TestCase):
               "statusCheckRollup": [{"name": "Baseline guard", "conclusion": "FAILURE"}]}
         code, out = watch([view(ALL_PASSED)], pr=pr)
         self.assertEqual(code, 3, out)
-        self.assertIn("held by baseline guard; dispatch the design-reviewer agent", last_line(out))
+        self.assertIn("held by baseline guard; a design-reviewer APPROVE, or the owner", last_line(out))
 
     def test_the_owner_goes_last_when_a_baseline_also_holds(self):
         pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},

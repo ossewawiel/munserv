@@ -20,8 +20,8 @@
 #        GitHub can leave a run `in_progress` long after its last job ended (#299). Once the gate
 #        job has finished and RUN_SETTLE_SECONDS have passed, the script judges that run from its
 #        jobs.
-#        A label on an open PR starts a new run and cancels the running one of that event. A
-#        cancelled run with a newer run of the same event on this commit is not a failure.
+#        A new run can cancel the running one of its event: a reopen does, and until #301 a label
+#        did. A cancelled run with a newer run of the same event on this commit is not a failure.
 # Exit:  0 when CI passed and the PR merged.
 #        1 when a run failed, or the newest run of an event was cancelled.
 #        2 on usage or when the watch cannot give a verdict: no run appeared, a run did not finish,
@@ -273,7 +273,7 @@ while true; do
     exit 3
   fi
   if [[ "$baseline_guard" == "FAILURE" ]]; then
-    echo "CI: green, not merging - held by baseline guard; dispatch the design-reviewer agent on PR $PR, then after its APPROVE run gh pr edit $PR --add-label design-approved"
+    echo "CI: green, not merging - held by baseline guard; a design-reviewer APPROVE, or the owner when the story has no canvas, releases it with gh pr edit $PR --add-label design-approved"
     exit 3
   fi
   # No agent can clear this one (#294).

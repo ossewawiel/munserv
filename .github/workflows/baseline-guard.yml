@@ -68,5 +68,5 @@ jobs:
             exit 0
           fi
 
-          echo "::error::Held: this PR changes visual baselines without the $LABEL label. Dispatch the design-reviewer agent on PR $PR. After its APPROVE, run: gh pr edit $PR --add-label $LABEL"
+          echo "::error::Held: this PR changes visual baselines without the $LABEL label. A design-reviewer APPROVE, or the owner when the story has no canvas, releases it with: gh pr edit $PR --add-label $LABEL"
           exit 1
