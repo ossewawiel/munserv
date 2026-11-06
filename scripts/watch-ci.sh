@@ -27,7 +27,8 @@
 #        2 on usage or when the watch cannot give a verdict: no run appeared, a run did not finish,
 #        gh kept failing, or the head moved. None of these is a red run.
 #        3 when CI passed but the PR did not merge (conflict, behind, no auto-merge, closed, held
-#        by the CI edit guard, unreadable, or still open after MERGE_TIMEOUT).
+#        by the infra review guard or the CI edit guard, unreadable, or still open after
+#        MERGE_TIMEOUT).
 # Every CI line goes to stdout, and the last line of stdout is the result.
 set -euo pipefail
 
@@ -237,7 +238,8 @@ merge_waited=0
 while true; do
   started=$SECONDS
   if ! pr_fields=$(gh pr view "$PR" --json state,mergeStateStatus,autoMergeRequest,statusCheckRollup \
-    --jq '"\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null) \([.statusCheckRollup[] | select(.name == "CI edit guard") | .conclusion] | last // "NONE")"') || [[ -z "$pr_fields" ]]; then
+    --jq 'def newest($name): [.statusCheckRollup[] | select(.name == $name)] | sort_by(.startedAt) | (last.conclusion // "") | if . == "" then "NONE" else . end;
+      "\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null) \(newest("CI edit guard")) \(newest("Infra review guard"))"') || [[ -z "$pr_fields" ]]; then
     if (( merge_waited >= MERGE_TIMEOUT )); then
       echo "CI: green, not merging - cannot read the PR after ${MERGE_TIMEOUT}s; watch again"
       exit 3
@@ -246,7 +248,7 @@ while true; do
     sleep "$MERGE_POLL_SECONDS"
     continue
   fi
-  read -r state merge_state armed guard <<<"$pr_fields"
+  read -r state merge_state armed guard infra_guard <<<"$pr_fields"
   case "$state" in
     MERGED)
       echo "CI: green, merged"
@@ -263,7 +265,13 @@ while true; do
       echo "CI: green, not merging - branch is behind master; rebase onto origin/master and push"
       exit 3 ;;
   esac
-  # A failed guard is a hold for a person, not a red build: no agent can clear it (#294).
+  # A failed guard is a hold, not a red build. The reviewer goes first, so the owner reads a PR that
+  # has already had its review.
+  if [[ "$infra_guard" == "FAILURE" ]]; then
+    echo "CI: green, not merging - held by infra review guard; dispatch the reviewer agent on PR $PR, and its APPROVE on this commit releases it"
+    exit 3
+  fi
+  # No agent can clear this one (#294).
   if [[ "$guard" == "FAILURE" ]]; then
     echo "CI: green, not merging - held by CI edit guard; the owner reads the diff, then runs gh pr edit $PR --add-label ci-edit-approved"
     exit 3

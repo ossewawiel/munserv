@@ -101,6 +101,8 @@ jobs:
         run: .claude/hooks/tests/verify-platform-cases.sh
       - name: Test the CI edit guard
         run: python3 scripts/test-ci-edit-guard.py
+      - name: Test the infra review guard
+        run: python3 scripts/test-infra-review-guard.py
       - name: Test the CI watcher
         run: python3 scripts/test-watch-ci.py
       - name: Test the operator TUI
