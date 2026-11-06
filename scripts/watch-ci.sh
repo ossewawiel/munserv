@@ -19,9 +19,12 @@
 #        with GITHUB_TOKEN (the Auto PR workflow), and the push run covers the same commit.
 #        GitHub can leave a run `in_progress` long after its last job ended (#299). Once the gate
 #        job has finished and RUN_SETTLE_SECONDS have passed, the script judges that run from its
-#        jobs.
+#        jobs. It judges the run cancelled when every bad job other than the gate job is cancelled,
+#        because the gate job fails when a job it needs is cancelled.
 #        A new run can cancel the running one of its event: a reopen does, and until #301 a label
-#        did. A cancelled run with a newer run of the same event on this commit is not a failure.
+#        did. A push run and a dispatch run on one branch share a concurrency group, so they count
+#        as one event here. A cancelled run with a newer run of the same event on this commit is not
+#        a failure.
 # Exit:  0 when CI passed and the PR merged.
 #        1 when a run failed, or the newest run of an event was cancelled.
 #        2 on usage or when the watch cannot give a verdict: no run appeared, a run did not finish,
@@ -46,8 +49,8 @@ RUN_TIMEOUT="${RUN_TIMEOUT:-2400}"
 RUN_POLL_SECONDS=30
 RUN_SETTLE_SECONDS=120
 GH_TIMEOUT="${GH_TIMEOUT:-60}"
-# Needs every other job and runs always, so it is the last job of a run. A listed job set without it
-# is not complete: GitHub lists a job only once its `needs` are met.
+# Needs every other job except smoke and runs always, so only smoke can finish after it. A listed
+# job set without it is not complete: GitHub lists a job only once its `needs` are met.
 GATE_JOB="CI status"
 
 GH_BIN="$(type -P gh)" || { echo "CI: not finished - gh is not installed"; exit 2; }
@@ -88,15 +91,17 @@ run_ids() {
 # polls instead of `gh run watch`, which has no time limit and can return before the run has a
 # conclusion. A failed gh call counts as "not finished yet", so a network blip cannot end the watch.
 wait_for_run() {
-  local id="$1" run_waited=0 settled=0 started view status open gate bad
+  local id="$1" run_waited=0 settled=0 started view status open gate bad other_bad other_cancelled
   judged=0
   while (( run_waited < RUN_TIMEOUT )); do
     started=$SECONDS
     if view=$(gh run view "$id" --json event,status,conclusion,jobs --jq '[.event, .status, (.conclusion // "" | if . == "" then "none" else . end), (.jobs | length),
       ([.jobs[] | select(.status != "completed")] | length),
       ([.jobs[] | select(.name == "'"$GATE_JOB"'")] | length),
-      ([.jobs[] | select(.conclusion != "success" and .conclusion != "skipped")] | length)] | map(tostring) | join(" ")' 2>/dev/null); then
-      read -r event status conclusion job_count open gate bad <<<"$view"
+      ([.jobs[] | select(.conclusion != "success" and .conclusion != "skipped")] | length),
+      ([.jobs[] | select(.name != "'"$GATE_JOB"'" and .conclusion != "success" and .conclusion != "skipped")] | length),
+      ([.jobs[] | select(.name != "'"$GATE_JOB"'" and .conclusion == "cancelled")] | length)] | map(tostring) | join(" ")' 2>/dev/null); then
+      read -r event status conclusion job_count open gate bad other_bad other_cancelled <<<"$view"
       if [[ "$status" == "completed" && "$conclusion" != "none" ]]; then
         return 0
       fi
@@ -104,7 +109,13 @@ wait_for_run() {
         settled=$(( settled + RUN_POLL_SECONDS ))
         if (( settled > RUN_SETTLE_SECONDS )); then
           echo "--- run $id: GitHub still says $status, but its jobs finished $RUN_SETTLE_SECONDS seconds ago; judging it from the jobs ---"
-          if (( bad > 0 )); then conclusion="failure"; else conclusion="success"; fi
+          if (( bad == 0 )); then
+            conclusion="success"
+          elif (( other_bad > 0 && other_bad == other_cancelled )); then
+            conclusion="cancelled"
+          else
+            conclusion="failure"
+          fi
           judged=1
           return 0
         fi
@@ -132,14 +143,18 @@ print_failed_log() {
   fi
 }
 
+end_head_moved() {
+  echo "CI: not finished - head moved to ${1:0:7}; watch again"
+  exit 2
+}
+
 # A push during the watch cancels this commit's runs, and nobody is merging this commit any more, so
 # its verdict means nothing. A failed read leaves the verdict standing: the merge phase reads the PR
 # again anyway.
 end_if_head_moved() {
   local head_now
   if head_now="$(read_head)" && [[ "${head_now%% *}" != "$SHA" ]]; then
-    echo "CI: not finished - head moved to ${head_now:0:7}; watch again"
-    exit 2
+    end_head_moved "$head_now"
   fi
 }
 
@@ -149,19 +164,26 @@ end_red() {
   exit 1
 }
 
+# "No run" needs one listing that worked. If every listing failed, nobody knows.
 waited=0
-started=$SECONDS
-ids="$(run_ids)" || ids=""
-while [[ -z "$ids" ]]; do
+listed_once=0
+while true; do
+  started=$SECONDS
+  if ids="$(run_ids)"; then
+    listed_once=1
+    [[ -z "$ids" ]] || break
+  fi
   waited=$(( waited + SECONDS - started ))
   if (( waited >= APPEAR_TIMEOUT )); then
-    echo "CI: not finished - no $WORKFLOW run for ${SHA:0:7} after ${APPEAR_TIMEOUT}s"
+    if (( listed_once )); then
+      echo "CI: not finished - no $WORKFLOW run for ${SHA:0:7} after ${APPEAR_TIMEOUT}s"
+    else
+      echo "CI: not finished - cannot list $WORKFLOW runs for ${SHA:0:7} after ${APPEAR_TIMEOUT}s"
+    fi
     exit 2
   fi
   sleep "$POLL_SECONDS"
   waited=$(( waited + POLL_SECONDS ))
-  started=$SECONDS
-  ids="$(run_ids)" || ids=""
 done
 
 # The push run and the pull_request run do not appear together, so list again after each pass and
@@ -203,10 +225,12 @@ while true; do
       echo "--- run $id: pull_request run with no jobs ($conclusion), skipped; the push run covers this commit ---"
       continue
     fi
-    if (( id > ${newest[$event]:-0} )); then newest[$event]="$id"; fi
+    key="$event"
+    if [[ "$key" == "workflow_dispatch" ]]; then key="push"; fi
+    if (( id > ${newest[$key]:-0} )); then newest[$key]="$id"; fi
     gh run view "$id" --json event,jobs --jq '.event as $e | .jobs[] | "\($e)\t\(.name)\t\(.conclusion)"' || true
     if [[ "$conclusion" == "cancelled" ]]; then
-      cancelled+="$id:$event "
+      cancelled+="$id:$key:$judged "
     elif [[ "$conclusion" != "success" ]]; then
       failed=1
       echo "--- run $id: $conclusion; failed log tail ---"
@@ -217,14 +241,13 @@ done
 
 # Judged only now, because `gh run list` gives the newest run first and the runs arrive in any order.
 for entry in $cancelled; do
-  id="${entry%%:*}"
-  event="${entry#*:}"
-  if (( id < ${newest[$event]} )); then
-    echo "--- run $id: cancelled; newer $event run ${newest[$event]} covers this commit ---"
+  IFS=: read -r id key from_jobs <<<"$entry"
+  if (( id < ${newest[$key]} )); then
+    echo "--- run $id: cancelled; newer run ${newest[$key]} covers this commit ---"
   else
     failed=1
     echo "--- run $id: cancelled; failed log tail ---"
-    print_failed_log "$id" 0
+    print_failed_log "$id" "$from_jobs"
   fi
 done
 
@@ -238,9 +261,9 @@ echo "CI: green (${SHA:0:7})"
 merge_waited=0
 while true; do
   started=$SECONDS
-  if ! pr_fields=$(gh pr view "$PR" --json state,mergeStateStatus,autoMergeRequest,statusCheckRollup \
+  if ! pr_fields=$(gh pr view "$PR" --json state,mergeStateStatus,autoMergeRequest,statusCheckRollup,headRefOid \
     --jq 'def newest($name): [.statusCheckRollup[] | select(.name == $name)] | sort_by(.startedAt // "" | if startswith("0001-") then "9999" else . end) | (last.conclusion // "") | if . == "" then "NONE" else . end;
-      "\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null) \(newest("CI edit guard")) \(newest("Infra review guard")) \(newest("Baseline guard"))"') || [[ -z "$pr_fields" ]]; then
+      "\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null) \(newest("CI edit guard")) \(newest("Infra review guard")) \(newest("Baseline guard")) \(.headRefOid)"') || [[ -z "$pr_fields" ]]; then
     if (( merge_waited >= MERGE_TIMEOUT )); then
       echo "CI: green, not merging - cannot read the PR after ${MERGE_TIMEOUT}s; watch again"
       exit 3
@@ -249,15 +272,19 @@ while true; do
     sleep "$MERGE_POLL_SECONDS"
     continue
   fi
-  read -r state merge_state armed guard infra_guard baseline_guard <<<"$pr_fields"
+  read -r state merge_state armed guard infra_guard baseline_guard head_now <<<"$pr_fields"
   case "$state" in
     MERGED)
       echo "CI: green, merged"
       exit 0 ;;
     CLOSED)
-      echo "CI: green, but the PR is closed without merging"
+      echo "CI: green, not merging - the PR is closed"
       exit 3 ;;
   esac
+  # The verdict above is for the old commit, and the new one has none yet.
+  if [[ "$head_now" != "$SHA" ]]; then
+    end_head_moved "$head_now"
+  fi
   case "$merge_state" in
     DIRTY)
       echo "CI: green, not merging - conflicts with master; rebase onto origin/master and push"
@@ -286,7 +313,7 @@ while true; do
     exit 3
   fi
   if (( merge_waited >= MERGE_TIMEOUT )); then
-    echo "CI: green, still OPEN after ${MERGE_TIMEOUT}s (mergeStateStatus $merge_state, auto-merge armed: $armed)"
+    echo "CI: green, not merging - still OPEN after ${MERGE_TIMEOUT}s (mergeStateStatus $merge_state, auto-merge armed: $armed)"
     exit 3
   fi
   merge_waited=$(( merge_waited + MERGE_POLL_SECONDS + SECONDS - started ))
