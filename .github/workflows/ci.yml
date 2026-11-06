@@ -1,5 +1,7 @@
 name: CI
 
+# A PR that changes this file waits for the owner: see ci-edit-guard.yml (#294).
+
 on:
   push:
     branches: ['**']
