@@ -107,6 +107,8 @@ jobs:
         run: python3 scripts/test-infra-review-guard.py
       - name: Test the baseline guard
         run: python3 scripts/test-baseline-guard.py
+      - name: Test the CI status job
+        run: python3 scripts/test-ci-status.py
       - name: Test the CI watcher
         run: python3 scripts/test-watch-ci.py
       - name: Test the operator TUI
@@ -341,8 +343,10 @@ jobs:
           path: backend-smoke.log
           if-no-files-found: ignore
 
-  # Single required status check for branch protection. Passes when every
-  # triggered platform job passed and none failed.
+  # Single required status check for branch protection. Passes when `changes` succeeded and every
+  # triggered job passed. `changes` must be `success` and not `skipped`: when it fails, GitHub skips
+  # the platform jobs that need it, and a skipped job counts as passed in the loop below (#306).
+  # scripts/test-ci-status.py runs this step for each job in `needs`.
   ci-status:
     name: CI status
     needs: [changes, domain, design, backend, web, visual-web, mobile]
@@ -351,7 +355,11 @@ jobs:
     steps:
       - name: Evaluate
         run: |
-          echo "domain=${{ needs.domain.result }} design=${{ needs.design.result }} backend=${{ needs.backend.result }} web=${{ needs.web.result }} visual-web=${{ needs.visual-web.result }} mobile=${{ needs.mobile.result }}"
+          echo "changes=${{ needs.changes.result }} domain=${{ needs.domain.result }} design=${{ needs.design.result }} backend=${{ needs.backend.result }} web=${{ needs.web.result }} visual-web=${{ needs.visual-web.result }} mobile=${{ needs.mobile.result }}"
+          if [ "${{ needs.changes.result }}" != "success" ]; then
+            echo "Detect changes did not pass, so no platform job ran: ${{ needs.changes.result }}"
+            exit 1
+          fi
           for r in "${{ needs.domain.result }}" "${{ needs.design.result }}" "${{ needs.backend.result }}" "${{ needs.web.result }}" "${{ needs.visual-web.result }}" "${{ needs.mobile.result }}"; do
             case "$r" in
               success|skipped) ;;
