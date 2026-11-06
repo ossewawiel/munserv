@@ -33,7 +33,7 @@ printf '%s\\n' "$*" >> "$STUB_DIR/calls"
 case "$*" in
   *"-X DELETE"*) exit 0 ;;
   *"/pulls/7/files"*) [ -f "$STUB_DIR/files_fail" ] && exit 1; cat "$STUB_DIR/files" ;;
-  *"/pulls/7/reviews"*) cat "$STUB_DIR/reviews" ;;
+  *"/pulls/7/reviews"*) jq -r "${@: -1}" "$STUB_DIR/reviews" ;;
   *"/pulls/7 "*) cat "$STUB_DIR/total" ;;
   *"/issues/7/labels"*) cat "$STUB_DIR/labels" ;;
   *) echo "unexpected gh call: $*" >&2; exit 9 ;;
@@ -49,14 +49,23 @@ def changes(sha: str = SHA) -> str:
     return f"Reviewer verdict: REQUEST CHANGES {sha}\n"
 
 
-def run_guard(files: list[tuple[str, str]], reviews: tuple[str, ...] = (), labels: tuple[str, ...] = (),
+def stranger(body: str) -> dict:
+    """On a public repo, any GitHub account can post a comment review."""
+    return {"body": body, "author_association": "NONE"}
+
+
+def review_json(review: str | dict) -> dict:
+    return review if isinstance(review, dict) else {"body": review, "author_association": "OWNER"}
+
+
+def run_guard(files: list[tuple[str, str]], reviews: tuple[str | dict, ...] = (), labels: tuple[str, ...] = (),
               action: str = "opened", total: int | None = None, files_fail: bool = False) -> tuple[int, str, str]:
     with tempfile.TemporaryDirectory() as tmp:
         d = Path(tmp)
         (d / "files").write_text("".join(f"{a}\t{b}\n" for a, b in files))
         (d / "total").write_text(f"{len(files) if total is None else total}\n")
         (d / "labels").write_text("".join(f"{x}\n" for x in labels))
-        (d / "reviews").write_text("".join(reviews))
+        (d / "reviews").write_text(json.dumps([review_json(r) for r in reviews]))
         (d / "calls").write_text("")
         if files_fail:
             (d / "files_fail").write_text("")
@@ -148,6 +157,21 @@ class Verdicts(unittest.TestCase):
     def test_a_sha_with_more_text_does_not_release(self):
         code, out, _ = run_guard([WATCHER], reviews=(f"Reviewer verdict: APPROVE {SHA}0\n",))
         self.assertEqual(code, 1, out)
+
+    def test_a_stranger_cannot_release_a_pr(self):
+        for association in ("NONE", "CONTRIBUTOR", "FIRST_TIME_CONTRIBUTOR", "MEMBER", "COLLABORATOR"):
+            with self.subTest(association):
+                review = {"body": approve(), "author_association": association}
+                code, out, _ = run_guard([WATCHER], reviews=(review,), action="reopened")
+                self.assertEqual(code, 1, out)
+
+    def test_a_stranger_cannot_withdraw_an_approve(self):
+        code, out, _ = run_guard([WATCHER], reviews=(approve(), stranger(changes())))
+        self.assertEqual(code, 0, out)
+
+    def test_a_review_with_no_body_changes_nothing(self):
+        code, out, _ = run_guard([WATCHER], reviews=(approve(), {"body": None, "author_association": "OWNER"}))
+        self.assertEqual(code, 0, out)
 
     def test_windows_line_ends_still_match(self):
         # GitHub can store a review body with CRLF line ends.

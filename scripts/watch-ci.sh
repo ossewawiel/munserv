@@ -234,11 +234,12 @@ echo "CI: green (${SHA:0:7})"
 
 # Merge phase. Auto-merge lands the squash a few seconds after green CI, so one look at the PR
 # right now often still reads OPEN. Poll until MERGED, or until a state auto-merge cannot clear.
+# A guard run that has not started shows the zero time, so the sort puts it last: it is the newest.
 merge_waited=0
 while true; do
   started=$SECONDS
   if ! pr_fields=$(gh pr view "$PR" --json state,mergeStateStatus,autoMergeRequest,statusCheckRollup \
-    --jq 'def newest($name): [.statusCheckRollup[] | select(.name == $name)] | sort_by(.startedAt) | (last.conclusion // "") | if . == "" then "NONE" else . end;
+    --jq 'def newest($name): [.statusCheckRollup[] | select(.name == $name)] | sort_by(.startedAt // "" | if startswith("0001-") then "9999" else . end) | (last.conclusion // "") | if . == "" then "NONE" else . end;
       "\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null) \(newest("CI edit guard")) \(newest("Infra review guard"))"') || [[ -z "$pr_fields" ]]; then
     if (( merge_waited >= MERGE_TIMEOUT )); then
       echo "CI: green, not merging - cannot read the PR after ${MERGE_TIMEOUT}s; watch again"

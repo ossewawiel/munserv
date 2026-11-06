@@ -14,11 +14,15 @@ name: Infra review guard
 # - The verdict is a PR review with this line, alone on its line, for the full head commit:
 #     Reviewer verdict: APPROVE <sha>
 #   A push changes the head, so a verdict covers one commit. The newest verdict line for a commit
-#   wins, so a later REQUEST CHANGES withdraws an APPROVE.
+#   wins, so a later REQUEST CHANGES withdraws an APPROVE at the next run. The reviewer removes the
+#   label after a REQUEST CHANGES, and that starts the run.
+# - Only a review by the repo owner's login counts. The repo is public, so any GitHub account can
+#   post a comment review.
 # - A review starts no run of this workflow: `pull_request_review` runs would use the PR's copy of
 #   the file. The reviewer adds the label after its review, and the label starts the run. The label
 #   alone releases nothing.
-# - This check shows that someone wrote a verdict for this commit. It cannot show who wrote it.
+# - Agents use the owner's login, so this check cannot tell the reviewer agent from another session
+#   on that login. CLAUDE.md gives the line to the reviewer agent only.
 on:
   pull_request_target:
     branches: [master]
@@ -75,7 +79,7 @@ jobs:
             gh api -X DELETE "$api/issues/$PR/labels/$LABEL" >/dev/null
           fi
 
-          verdict=$(gh api --paginate "$api/pulls/$PR/reviews" --jq '.[].body' \
+          verdict=$(gh api --paginate "$api/pulls/$PR/reviews" --jq '.[] | select(.author_association == "OWNER") | .body' \
             | tr -d '\r' | grep -xE "Reviewer verdict: (APPROVE|REQUEST CHANGES) $HEAD_SHA" | tail -n 1 || true)
           if [ "$verdict" = "Reviewer verdict: APPROVE $HEAD_SHA" ]; then
             echo "Released by a reviewer APPROVE on $HEAD_SHA."

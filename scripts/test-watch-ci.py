@@ -403,6 +403,16 @@ class MergePhase(unittest.TestCase):
         self.assertEqual(code, 3, out)
         self.assertNotIn("held by", out)
 
+    def test_a_queued_guard_run_is_not_read_as_the_old_hold(self):
+        # gh prints the zero time for a time GitHub has not set yet.
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [
+                  {"name": "Infra review guard", "conclusion": "FAILURE", "startedAt": "2026-11-06T10:00:00Z"},
+                  {"name": "Infra review guard", "conclusion": "", "startedAt": "0001-01-01T00:00:00Z"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertNotIn("held by", out)
+
     def test_a_release_after_a_hold_reads_the_newest_guard_run(self):
         pr = {"state": "MERGED", "mergeStateStatus": "CLEAN", "autoMergeRequest": None,
               "statusCheckRollup": [{"name": "CI edit guard", "conclusion": "FAILURE"},
