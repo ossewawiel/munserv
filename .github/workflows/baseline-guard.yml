@@ -1,0 +1,72 @@
+name: Baseline guard
+
+# Holds a PR that changes a visual baseline until it has the design-approved label (#301). This is
+# its own required check because `CI status` cannot hold it: push and pull_request runs both report
+# `CI status`, a push run has no PR to read a label from, and a green push run alone is enough for
+# auto-merge. #225 merged 20 seconds after its push run passed, with its pull_request run still going.
+# This workflow runs from master's copy, so a PR cannot edit or remove it. It is a required check on
+# master.
+#
+# Security: `pull_request_target` runs with a write token on PRs from forks too. Never check out
+# or run PR code here, and never put PR text (title, branch, file names) in a ${{ }} expression.
+#
+# Rules:
+# - No path filter and no job-level `if`: a required check that does not run blocks the merge,
+#   and a skipped job counts as passed.
+# - Every label event runs this check again, so a label does not need a CI run.
+on:
+  pull_request_target:
+    branches: [master]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: baseline-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: read
+
+jobs:
+  guard:
+    name: Baseline guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      LABEL: design-approved
+    steps:
+      - name: Hold a PR that changes a baseline until it is approved
+        run: |
+          set -euo pipefail
+          api="repos/$GITHUB_REPOSITORY"
+
+          # A rename counts under both names: moving a baseline away also changes it.
+          files=$(gh api --paginate "$api/pulls/$PR/files" --jq '.[] | "\(.filename)\t\(.previous_filename // "")"')
+          listed=$(printf '%s\n' "$files" | grep -c . || true)
+          total=$(gh api "$api/pulls/$PR" --jq .changed_files)
+          # The files API stops at 3000 files, so a larger PR could hide a baseline.
+          if [ "$listed" -lt "$total" ]; then
+            echo "::error::The API listed $listed of $total changed files, so this guard cannot clear the PR."
+            exit 1
+          fi
+
+          baselines=$(printf '%s\n' "$files" | tr '\t' '\n' \
+            | grep -E '^(web/e2e/visual/__screenshots__/.*|mobile/test/goldens/.*\.png)$' | sort -u || true)
+          if [ -z "$baselines" ]; then
+            echo "This PR changes no visual baselines."
+            exit 0
+          fi
+
+          echo "This PR changes visual baselines:"
+          # The prefix stops a crafted file name from being read as a workflow command.
+          printf '%s\n' "$baselines" | sed 's/^/- /'
+
+          has_label=$(gh api --paginate "$api/issues/$PR/labels" --jq '.[].name' | grep -cxF "$LABEL" || true)
+          if [ "$has_label" -gt 0 ]; then
+            echo "Approved by $LABEL."
+            exit 0
+          fi
+
+          echo "::error::Held: this PR changes visual baselines without the $LABEL label. A design-reviewer APPROVE on a ui: true story, or the owner on any other, releases it with: gh pr edit $PR --add-label $LABEL"
+          exit 1

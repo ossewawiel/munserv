@@ -19,8 +19,8 @@ What exists today. Nothing is deployed: there is no staging or production enviro
 | `design` | Generated theme files match the tokens |
 | `backend` | `ktlintCheck`, `test` (Testcontainers), `build`; uploads test and JaCoCo coverage reports |
 | `web` | `pnpm lint`, `typecheck`, `test:run`, `build`; no demo account in the bundle |
-| `visual-web` | Storybook screenshot regression; a changed baseline needs the `design-approved` label |
-| `mobile` | `dart format`, `flutter analyze --fatal-infos`, `flutter test`, golden baseline guard, debug APK; no demo account in the APK |
+| `visual-web` | Storybook screenshot regression; `Baseline guard` holds a changed baseline until it has the `design-approved` label |
+| `mobile` | `dart format`, `flutter analyze --fatal-infos`, `flutter test`, debug APK; no demo account in the APK |
 | `smoke` | On `master`: starts the database and backend with the `local` profile and runs the probe checks |
 
 Other workflows: `standards-check.yml` (advisory, source PRs), `validate-specs.yml` (weekly drift check), `generate-changelog.yml` (on version tags), `pages.yml` (design catalogues and dashboard).
