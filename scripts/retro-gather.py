@@ -39,6 +39,9 @@ LOG_TAIL_LINES = 30
 BODY_LIMIT = 4000
 TIMESTAMP_RE = re.compile(r"\d{4}-\d{2}-\d{2}T[\d:.]+Z ?")
 BLOCKED_RE = re.compile(r"^.*\bBLOCKED:.*$", re.MULTILINE)
+# The error line a guard prints when it holds a PR on purpose (ci-edit-guard.yml, infra-review-guard.yml,
+# baseline-guard.yml). Matches the runtime output only: the script listing shows `::error::`, not `##[error]`.
+HOLD_RE = re.compile(r"##\[error\](Held: |New commits arrived after the release)")
 SIZE_GLOBS = ("CLAUDE.md", "*/CLAUDE.md", ".claude/agents/*.md", ".claude/skills/*/SKILL.md")
 
 
@@ -65,6 +68,11 @@ def clip(text: str, limit: int = BODY_LIMIT) -> str:
 def log_key(lines: list[str]) -> str:
     """A failed-log tail with job, step and timestamp columns dropped, so reruns of one failure match."""
     return "\n".join(TIMESTAMP_RE.sub("", line.split("\t")[-1]) for line in lines)
+
+
+def is_hold(lines: list[str]) -> bool:
+    """True when a failed-log tail is a guard holding a PR as designed, not a defect."""
+    return any(HOLD_RE.search(line) for line in lines)
 
 
 def verdicts(pr: dict) -> list[dict]:
@@ -111,10 +119,11 @@ def sizes(root: Path) -> list[tuple[str, int, int]]:
     rows = []
     for pattern in SIZE_GLOBS:
         for path in sorted(root.glob(pattern)):
-            if ".claude/worktrees" in str(path) or "node_modules" in path.parts:
+            name = str(path.relative_to(root))
+            if ".claude/worktrees" in name or "node_modules" in path.parts:
                 continue
             text = path.read_text(errors="replace")
-            rows.append((str(path.relative_to(root)), text.count("\n"), len(text.encode())))
+            rows.append((name, text.count("\n"), len(text.encode())))
     return rows
 
 
@@ -152,9 +161,13 @@ def section_red_ci(since: str) -> list[str]:
                    "--json", "databaseId,workflowName,headBranch,event,createdAt,displayTitle")
     out = [f"## Red CI runs ({len(runs)}, newest first, at most {MAX_RED_RUNS}; identical log tails shown once)", ""]
     seen: dict[str, list[str]] = {}
+    holds: dict[str, list[str]] = defaultdict(list)
     for run in runs:
         tail = gh_text("run", "view", str(run["databaseId"]), "--log-failed").splitlines()[-LOG_TAIL_LINES:]
         title = f"{run['workflowName']} on {run['headBranch']} ({run['event']}, {run['createdAt'][:10]}, run {run['databaseId']})"
+        if is_hold(tail):
+            holds[run["workflowName"]].append(f"{run['headBranch']} run {run['databaseId']}")
+            continue
         key = log_key(tail)
         if key in seen:
             seen[key].append(title)
@@ -162,7 +175,9 @@ def section_red_ci(since: str) -> list[str]:
         seen[key] = []
         out += [f"### {title}: {run['displayTitle']}", "", "```", *tail, "```", ""]
     repeats = [f"- {t}" for titles in seen.values() for t in titles]
-    return out + (["Same log tail as a run above:", *repeats, ""] if repeats else [])
+    out += ["Same log tail as a run above:", *repeats, ""] if repeats else []
+    held = [f"- {name} ({len(items)}): {', '.join(items)}" for name, items in sorted(holds.items())]
+    return out + (["Guard holds, as designed (not findings):", *held, ""] if held else [])
 
 
 def section_blocked(since: str, state_dir: Path) -> list[str]:

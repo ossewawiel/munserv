@@ -62,6 +62,19 @@ def case_log_key() -> list[str]:
     ] if isinstance(e, str)]
 
 
+def case_is_hold() -> list[str]:
+    infra = ["Infra review guard\tUNKNOWN STEP\t2026-11-06T14:28:34.0580321Z ##[error]Held: this PR changes infrastructure"]
+    release = ["CI edit guard\tHold\t2026-11-06T13:09:44Z ##[error]New commits arrived after the release, so the label was removed."]
+    listing = ["CI edit guard\tHold\t2026-11-06T13:09:43Z \x1b[36;1mecho \"::error::Held: this PR changes CI.\"\x1b[0m"]
+    api = ["Baseline guard\tHold\t2026-11-06T13:09:43Z ##[error]The API listed 3 of 5 changed files, so this guard cannot clear the PR."]
+    return [e for e in [
+        not rg.is_hold(infra) and "an infra review hold is not a hold",
+        not rg.is_hold(release) and "a voided release is not a hold",
+        rg.is_hold(listing) and "the script listing alone reads as a hold",
+        rg.is_hold(api) and "an API failure reads as a hold",
+    ] if isinstance(e, str)]
+
+
 def case_clip_quotes() -> list[str]:
     got = rg.clip("## Heading\n\nbody", 1000)
     long = rg.clip("x" * 50, 10)
@@ -85,6 +98,7 @@ CASES = [
     ("BLOCKED lines are picked out of a report", case_blocked_lines),
     ("ledger spend counts only the window and flags capped runs", case_ledger_spend),
     ("a CI failure rerun on another day matches its first run", case_log_key),
+    ("a guard hold is set apart from a guard failure", case_is_hold),
     ("bodies are quoted and clipped", case_clip_quotes),
     ("sizes cover cards and skills, not worktrees", case_sizes),
 ]
