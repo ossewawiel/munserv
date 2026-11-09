@@ -22,6 +22,8 @@ Read `domain/README.md` first. Load the `backend-patterns` skill for worked exam
 ## Tests
 JUnit 6 (Jupiter 6.0.3, managed by the Boot BOM; `build.gradle.kts` does not pin it), MockK + SpringMockK, Kotest assertions, Testcontainers 2. Every Spring context test does `@Import(TestContainersConfig::class)`; the container is PostGIS 18 via `@ServiceConnection`, so there is no datasource in `application-test.yml`. Domain and service tests are written first (TDD); controller and repository tests after. Names: `` `should X when Y` ``; Arrange / Act / Assert.
 
+A role-check test proves both sides. Each caller starts plain: set a role flag only inside the test that needs it, never in `@BeforeEach`. A refused call asserts the 403, then every row the criterion names (state, history, child rows) against a snapshot taken before the call. An allowed call expects its 2xx with real fixtures; a 404 or 409 is no proof of access. Example: `IssueAdminEndpointsAccessTest.assertRefusedAndNothingChanged`.
+
 ## Commands
 ```bash
 ./gradlew ktlintFormat && ./gradlew ktlintCheck   # style (ktlint 1.8)
@@ -32,4 +34,4 @@ JUnit 6 (Jupiter 6.0.3, managed by the Boot BOM; `build.gradle.kts` does not pin
 Swagger: http://localhost:8080/swagger-ui.html. OpenAPI annotations (`@Tag`, `@Operation`, `@ApiResponses`, `@Schema`) on every public endpoint and DTO. On a DTO constructor property write `@field:Schema`, or `@get:Schema` beside `@get:JsonProperty` on an `is`-prefixed one; plain `@Schema` never reaches the JSON. Every `@Operation` needs an `operationId`. A route or DTO change regenerates `specs/contracts/openapi.json`: run `./gradlew test --tests '*OpenApiContractTest*'`, review and commit the file, then run it again.
 
 ## Forbidden
-`!!` without a preceding check; `var` for state; exceptions for business flow; JPA annotations on domain classes; mutable collections in public APIs; field `@Autowired`; business logic in controllers; direct repository access across modules; a new enum value without the matching migration, web and mobile change and `domain/` update.
+`!!` without a preceding check, in tests too (use `requireNotNull`); `var` for state; exceptions for business flow; JPA annotations on domain classes; mutable collections in public APIs; field `@Autowired`; business logic in controllers; direct repository access across modules; a new enum value without the matching migration, web and mobile change and `domain/` update.
