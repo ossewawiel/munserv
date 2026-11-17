@@ -11,12 +11,6 @@ skills:
 isolation: worktree
 maxTurns: 200
 color: blue
-hooks:
-  Stop:
-    - hooks:
-        - type: command
-          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-platform.sh mobile"
-          timeout: 900
 ---
 
 You implement exactly one mobile story from its handoff. Nothing else.

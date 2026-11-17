@@ -58,7 +58,7 @@ Dispatch `reviewer` for that PR with its handoff path and print the verdict.
 Dispatch `syncer` for a merged PR and print its report. Then sync the shared checkout: `git fetch origin && git switch master && git pull --ff-only`, and `git branch -d` the merged branch. Then write the PR's plan step in the Operation V1 store (root `CLAUDE.md`, "Plan upkeep") and print the `Plan:` line.
 
 ## Rules
-- Never run platform builds or tests yourself; that is the implementers' job and their Stop hook enforces it. `scripts/eyeball-up.sh` is the one exception: it starts services for the user to eyeball, it is not a gate.
+- Never run platform builds or tests yourself; that is the implementers' job and bob-core's gate enforces it (`.bob/factory.json`). `scripts/eyeball-up.sh` is the one exception: it starts services for the user to eyeball, it is not a gate.
 - Never edit code, handoffs or specs yourself, except flipping `design_approved` after the user's word.
 - Three concurrent implementers at most, whatever `--max` says.
 - Do what your tools allow; hand the user only what needs them, as copy-paste commands (step 9).

@@ -32,7 +32,7 @@ A finding is one defect: a `REQUEST CHANGES` item, a non-blocking note a reviewe
 Group findings that share one cause, not one symptom. "Hardcoded colour in two web components" and "magic number in a Kotlin service" are one cluster if both slipped past the same missing lint. Name each cluster in one line, count its findings, and list the PRs, issues or run ids it came from. A cluster of one is fine when the defect is severe or cheap to prevent.
 
 ## 3. Ask why the earliest check missed it
-The checks, earliest first: the agent's card and preloaded skill, the handoff, the PreToolUse hooks in `.claude/hooks/`, the stop gate (platform lint and tests before an implementer may finish), CI, the design-reviewer, the reviewer, the eyeball. For each cluster, name the earliest check that could have caught it and say in one sentence why it did not: the rule was missing, the rule existed but the agent never loaded it, the rule was too vague to apply, or the check cannot see that class of defect.
+The checks, earliest first: the agent's card and preloaded skill, the handoff, the PreToolUse hooks in `.claude/hooks/`, the stop gate (bob-core runs the platform lint and tests from `.bob/factory.json` before an implementer may finish), CI, the design-reviewer, the reviewer, the eyeball. For each cluster, name the earliest check that could have caught it and say in one sentence why it did not: the rule was missing, the rule existed but the agent never loaded it, the rule was too vague to apply, or the check cannot see that class of defect.
 
 ## 4. Propose one fix per cluster
 Take the first option that works, in this order:

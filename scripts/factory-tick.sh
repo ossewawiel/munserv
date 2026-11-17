@@ -4,7 +4,8 @@
 # On every exit after the lock (skip, stop or run) the pinned "Waiting on you" issue is refreshed from
 # `python3 -m scripts.console inbox --publish`; it comments, mentioning the owner, only when items arrived.
 #
-# Order: pause file -> lock -> hours window -> fast-forward master -> requirement rows synced from
+# Order: pause file -> lock -> hours window -> fast-forward master -> bob-core refreshed (the implementers'
+# gate; its version recorded, the tick stops without it) -> requirement rows synced from
 # GitHub -> daily budget -> on RETRO_WEEKDAY,
 # the day's first tick runs `/factory-retro` once (Opus, capped at RETRO_BUDGET_USD) -> clerk picks up
 # to STORIES_PER_TICK dispatchable stories (Haiku, structured output) -> one `/factory story <n>` run
@@ -60,6 +61,7 @@ REPO_DIR="${REPO_DIR:-$SCRIPT_REPO}"
 FETCH_ATTEMPTS="${FETCH_ATTEMPTS:-6}"
 FETCH_WAIT_SECONDS="${FETCH_WAIT_SECONDS:-20}"
 INBOX_UPDATE="${INBOX_UPDATE:-1}"
+BOB_UPDATE="${BOB_UPDATE:-1}"
 # Weekly retro: `date +%u` day (1 = Monday); empty turns it off.
 RETRO_WEEKDAY="${RETRO_WEEKDAY-1}"
 RETRO_BUDGET_USD="${RETRO_BUDGET_USD:-5}"
@@ -159,6 +161,23 @@ done
 ((fetched)) || stop "git fetch failed after $FETCH_ATTEMPTS attempts"
 git merge -q --ff-only origin/master || stop "master cannot fast-forward to origin/master"
 
+# bob-core's gate holds the implementers (.bob/factory.json, prject-bob ADR-0029). Claude Code does not
+# document plugin auto-update for headless runs, so the tick refreshes and updates bob-core itself
+# (BOB_UPDATE=0 pins the installed copy), records the version it runs with, and stops when bob-core is
+# missing or disabled: the implementers have no Stop hook of their own any more.
+BOB_PLUGIN="${BOB_PLUGIN:-bob-core@prject-bob}"
+export BOB_GATE_LOG="${BOB_GATE_LOG:-$STATE_DIR/bob-gate.jsonl}"
+if ((BOB_UPDATE)); then
+  claude plugin marketplace update prject-bob >/dev/null 2>&1 \
+    || echo "factory-tick: refreshing the prject-bob marketplace failed; the installed bob-core runs" >&2
+  claude plugin update "$BOB_PLUGIN" --scope user >/dev/null 2>&1 \
+    || echo "factory-tick: updating $BOB_PLUGIN failed; the installed copy runs" >&2
+fi
+bob_version="$({ claude plugin list --json 2>/dev/null || echo '[]'; } \
+  | jq -r --arg id "$BOB_PLUGIN" '[.[] | select(.id == $id and .enabled)][0].version // empty' 2>/dev/null || true)"
+[[ -n "$bob_version" ]] || stop "$BOB_PLUGIN is not installed and enabled; the implementers would run ungated"
+record bob --arg plugin "$BOB_PLUGIN" --arg version "$bob_version"
+echo "factory-tick: $BOB_PLUGIN $bob_version"
 # Bring specs/requirements back in step with GitHub from a throwaway worktree: closing an issue drifts
 # a row, and CI checks only the rows a PR changes. auto-pr.yml opens and merges the branch. Costs no Claude.
 sync_requirements() {

@@ -11,12 +11,6 @@ skills:
 isolation: worktree
 maxTurns: 200
 color: green
-hooks:
-  Stop:
-    - hooks:
-        - type: command
-          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-platform.sh web"
-          timeout: 600
 ---
 
 You implement exactly one web story from its handoff. Nothing else.
