@@ -37,3 +37,31 @@ git push --force origin master is what the guard refuses
 0	gh pr comment 3 --body "git push -f is refused"
 2	pwsh -EncodedCommand ZwBpAHQAIABwAHUAcwBoAA==
 2	powershell -enc ZwBpAHQA
+2	pwsh -NoProfile -ExecutionPolicy Bypass -Command "git push -f origin feat/x"
+2	powershell -ExecutionPolicy Bypass -Command "gh pr edit 3 --add-label ci-edit-approved"
+2	$sep = '@'
+git push -f origin feat/x
+2	Write-Host "mail admin@"
+gh pr edit 3 --add-label ci-edit-approved
+2	$parts = $email -split '@'
+gh pr merge 3 --squash
+2	Write-Host "x<<EOF"
+git push -f origin feat/x
+2	pwsh --enc ZwBpAHQA
+2	pwsh /enc ZwBpAHQA
+2	pwsh --command "git push -f origin feat/x"
+2	pwsh -cwa "gh pr merge 3"
+2	iex @"
+git push -f origin feat/x
+"@
+0	gh pr create --title "x" --body @"
+## Summary
+git push -f origin master is refused
+"@
+0	git log --format="%H %s" -5
+0	Get-ChildItem | ForEach-Object { $_.Name }
+0	gh pr comment 3 --body "line1`nline2"
+0	$env:Path += ";C:\x"; gh pr view 1
+0	cmd /c "dir" ; git status
+0	Start-Process pwsh -ArgumentList '-NoExit'
+0	start https://github.com/ossewawiel/munserv/pull/319

@@ -16,6 +16,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -148,6 +149,15 @@ def main() -> int:
             ok = r.returncode == want
             failures += not ok
             print(("ok  " if ok else "FAIL"), f"want={want} got={r.returncode}", name)
+        # A hook past its 10 s timeout lets the call run, so many quoted strings after an interpreter
+        # must still be scanned in time and reach a forbidden command at the very end (PR 319 review B5).
+        many = 'eval "x"; ' + " ; ".join(f"echo 'a {i}' \"b {i}\"" for i in range(150)) + " ; bash -c 'git push -f origin feat/x'"
+        started = time.monotonic()
+        r = run(json.dumps({"tool_input": {"command": many}}), "feat/hook-test", full)
+        took = time.monotonic() - started
+        ok = r.returncode == 2 and took < 8
+        failures += not ok
+        print(("ok  " if ok else "FAIL"), f"150 quoted strings after eval: want=2 got={r.returncode} in {took:.1f}s (limit 8s)")
         r = run(json.dumps({"tool_input": {"command": "ls"}}), "feat/hook-test", neither)
         ok = "install node or jq" in r.stderr
         failures += not ok

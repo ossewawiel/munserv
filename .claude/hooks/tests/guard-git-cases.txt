@@ -123,3 +123,51 @@ EOF
 0	echo "mail me@" && git status
 2	bash -ec 'git push -f origin feat/x'
 0	bash -x scripts/x.sh "git push -f origin feat/x"
+2	git push origin ${BRANCH} --force
+2	git push origin $(git branch --show-current) -f
+2	git push origin $(git rev-parse --abbrev-ref HEAD):master
+2	git push origin `git branch --show-current` --force
+2	bash -o pipefail -c 'git push -f origin feat/x'
+2	bash -euo pipefail -c 'git push -f origin feat/x'
+2	sh -o errexit -c 'gh pr merge 3'
+2	bash -ce 'git push -f origin feat/x'
+2	bash --login -c 'git push -f origin feat/x'
+2	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "gh pr merge 3"
+2	gh pr edit $(cat n.txt) --add-label ci-edit-approved
+2	gh pr edit ${N} --add-label ci-edit-approved
+2	grep -q foo <<<"some text"
+git push -f origin feat/x
+2	bash -c "$(cat <<'EOF'
+git push -f origin feat/x
+EOF
+)"
+2	echo "it's a" ; git push -f origin feat/x ; echo 'b c'
+2	git push -uf origin feat/x
+2	git push origin +feat/x
+2	git push origin :feat/x
+2	g\it push -f origin feat/x
+0	gh pr merge "${PR}" --auto --squash
+0	gh pr merge $(gh pr view --json number -q .number) --auto --squash
+0	gh pr create --title "feat(web): x" --body "$(cat <<'EOF'
+## Summary
+- refuses (gh pr edit 3 --add-label ci-edit-approved) and `git push -f`
+- bash -o pipefail -c 'git push -f'
+EOF
+)"
+0	git commit -m "$(cat <<'EOF'
+fix(infra): check wrapped commands (#319)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+0	scripts/watch-ci.sh 319
+0	for f in scripts/*.sh; do bash -n "$f" || echo "bad $f"; done
+0	echo "$(date)" && gh pr view 319 --json headRefOid -q .headRefOid
+0	git log --format='%H {%s}' -3
+0	gh pr create --title "x" --body 'Summary
+- the guard now refuses `git push -f origin feat/x` in wrappers
+'
+0	git commit -m "fix(x): y
+
+Refuses \`git push -f origin feat/x\` now."
+0	git commit -m "x" ; bash -c 'echo "one" "two" ; bash -c \"echo three four\"'

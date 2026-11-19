@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # PreToolUse guard for Bash and PowerShell: refuse the git operations no agent may run.
 # Usage: guard-git.sh [bash|powershell] (the PowerShell tool's entry passes `powershell`).
-# Only real git and gh invocations are inspected: line continuations are joined, then heredoc
-# bodies (and PowerShell here-string bodies) and multi-word quoted strings (commit messages, PR bodies,
-# test strings) are removed. A quoted single word and the value of --add-label stay readable, since
-# they are arguments. The command is then split on ; & | ( ) { } ` and newlines, so a subshell,
-# a group or a command substitution is its own segment.
+# Only real git and gh invocations are inspected: line continuations are joined, heredoc bodies (and
+# PowerShell here-string bodies) are removed, then a quote-aware tokenizer (TOK_AWK) cuts the command
+# into segments. A multi-word quoted string (commit message, PR body) becomes one placeholder word; a
+# quoted single word and the value of --add-label stay readable. $(...) and backticks become a
+# placeholder in their segment and segments of their own, so `git push origin $(...) -f` keeps its -f.
 # Each segment loses its wrappers before it is read: `!`, `&`, VAR=value, env, command, builtin, exec,
 # eval, time, nohup, nice, timeout, xargs, sudo, a path or a `\` before the program, `.exe`, and the
 # letter case of git and gh (Windows finds GIT.EXE). Segments that then start with git or gh are checked.
@@ -65,17 +65,107 @@ else
 fi
 cmd=${cmd//$'\r'/ }
 
-# Heredoc bodies (and, in PowerShell mode only, here-string bodies) out, or only those bodies with
-# `bodies`. In bash a line can end in @" without opening anything, so that rule must stay in PowerShell.
+psflag=""
+[ "$mode" = powershell ] && psflag=1
+
+# Heredoc bodies out (`keep`), or only those bodies (`bodies`). Bash mode reads `<<TAG` heredocs, not
+# `<<<` here-strings. PowerShell mode reads only here-strings: an @' or @" that ends a line after a line
+# start, blank, = ( , or ;, closed by the same quote and @ at column 0. In bash a line can end in @"
+# without opening anything, so that rule stays in PowerShell. An unclosed body is code: it is printed.
 heredocs() {
-  awk -v want="$1" -v ps="$([ "$mode" = powershell ] && echo 1)" 'BEGIN{skip=0}
-       { if (skip) { if ((tag != "" && $0 ~ ("^[ \t]*" tag "[ \t]*$")) || (tag == "" && $0 ~ /^[ \t]*[\047"]@/)) { skip=0; next }
-                     if (want == "bodies") print; next }
-         if (match($0, /<<-?[\047"]?[A-Za-z_][A-Za-z0-9_]*/)) {
-           tag=substr($0, RSTART, RLENGTH); sub(/^<<-?[\047"]?/, "", tag); if (want != "bodies") print; skip=1; next }
-         if (ps == "1" && $0 ~ /@[\047"][ \t]*$/) { tag=""; if (want != "bodies") print; skip=1; next }
-         if (want != "bodies") print }'
+  awk -v want="$1" -v ps="$psflag" 'BEGIN{skip=0; nb=0}
+       { if (skip) {
+           if ((tag != "" && $0 ~ ("^[ \t]*" tag "[ \t]*$")) || (tag == "" && substr($0, 1, 2) == closer)) {
+             skip=0; if (want == "bodies") for (b = 1; b <= nb; b++) print body[b]; nb=0; next }
+           body[++nb]=$0; next }
+         if (ps != "1" && match($0, /(^|[^<])<<-?[\047"]?[A-Za-z_][A-Za-z0-9_]*/)) {
+           tag=substr($0, RSTART, RLENGTH); sub(/^[^<]?<<-?[\047"]?/, "", tag)
+           if (want != "bodies") print; skip=1; nb=0; next }
+         if (ps == "1" && match($0, /(^|[ \t=(,;])@[\047"][ \t]*$/)) {
+           t=$0; sub(/[ \t]*$/, "", t); closer=substr(t, length(t), 1) "@"; tag=""
+           if (want != "bodies") print; skip=1; nb=0; next }
+         if (want != "bodies") print }
+       END { if (skip) for (b = 1; b <= nb; b++) print body[b] }'
 }
+
+# The tokenizer: one segment per output line. It tracks quotes across lines. A quoted string becomes
+# its text when it is one word, `git`/`gh` when it is a path to them, its raw text after --add-label,
+# and `_` otherwise. Each $(...), <(...), >(...) and backtick span becomes the word `_` in its segment
+# and its text becomes segments of its own; ${...} becomes `_`. ; & | ( ) split segments, and so do
+# { and } when they stand alone. A backslash escapes the next character in bash (g\it is git); in
+# PowerShell it is a path character. With want=payloads it prints each quoted string's text instead,
+# unescaped as the shell would pass it, for the interpreter rescan.
+TOK_AWK='
+function quoted(c, out,   lc) {
+  if (out ~ /--add-label[ \t]*=?[ \t]*$/) return c
+  lc = tolower(c)
+  if (lc ~ /[\\\/]gh(\.exe)?$/) return "gh"
+  if (lc ~ /[\\\/]git(\.exe)?$/) return "git"
+  if (c == "" || c ~ /[ \t\n]/) return "_"
+  return c
+}
+function closing(s, p, n,   d, k, ch) {
+  d = 0
+  for (k = p; k <= n; k++) { ch = substr(s, k, 1); if (ch == "(") d++; else if (ch == ")") { d--; if (d == 0) return k } }
+  return n
+}
+function tok(s,   out, i, n, c, nx, j, k, buf, raw, prev) {
+  out = ""; n = length(s); i = 1
+  while (i <= n) {
+    c = substr(s, i, 1); nx = substr(s, i + 1, 1)
+    if (c == "\\" && ps != "1") { out = out nx; i += 2; continue }
+    if (c == "\047") {
+      j = index(substr(s, i + 1), "\047")
+      if (j == 0) { buf = substr(s, i + 1); i = n + 1 } else { buf = substr(s, i + 1, j - 1); i = i + j + 1 }
+      pay[++np] = buf; out = out quoted(buf, out); continue
+    }
+    if (c == "\"") {
+      buf = ""; raw = ""; i++
+      while (i <= n) {
+        c = substr(s, i, 1); nx = substr(s, i + 1, 1)
+        if (c == "\\" && ps != "1") {
+          if (nx == "\"" || nx == "\\" || nx == "$" || nx == "`") raw = raw nx; else raw = raw c nx
+          buf = buf nx; i += 2; continue }
+        if (c == "\"") { i++; break }
+        if (c == "$" && nx == "(") {
+          k = closing(s, i + 1, n); if (substr(s, i + 2, 1) != "(") subq[++nq] = substr(s, i + 2, k - i - 2)
+          raw = raw substr(s, i, k - i + 1); buf = buf "_"; i = k + 1; continue }
+        if (c == "`" && ps != "1") {
+          j = index(substr(s, i + 1), "`"); k = (j == 0) ? n : i + j; subq[++nq] = substr(s, i + 1, k - i - 1)
+          raw = raw substr(s, i, k - i + 1); buf = buf "_"; i = k + 1; continue }
+        if (c == "$" && nx == "{") {
+          j = index(substr(s, i + 1), "}"); k = (j == 0) ? n : i + j
+          raw = raw substr(s, i, k - i + 1); buf = buf "_"; i = k + 1; continue }
+        raw = raw c; buf = buf c; i++
+      }
+      pay[++np] = raw; out = out quoted(buf, out); continue
+    }
+    if ((c == "$" || c == "<" || c == ">") && nx == "(") {
+      k = closing(s, i + 1, n)
+      if (!(c == "$" && substr(s, i + 2, 1) == "(")) subq[++nq] = substr(s, i + 2, k - i - 2)
+      out = out "_"; i = k + 1; continue
+    }
+    if (c == "`" && ps != "1") {
+      j = index(substr(s, i + 1), "`"); k = (j == 0) ? n : i + j; subq[++nq] = substr(s, i + 1, k - i - 1)
+      out = out "_"; i = k + 1; continue
+    }
+    if (c == "$" && nx == "{") { j = index(substr(s, i + 1), "}"); k = (j == 0) ? n : i + j; out = out "_"; i = k + 1; continue }
+    if (c == ";" || c == "&" || c == "|" || c == "(" || c == ")") { out = out "\n"; i++; continue }
+    if (c == "{" || c == "}") {
+      prev = (i == 1) ? "\n" : substr(s, i - 1, 1)
+      if (prev ~ /[ \t\n;&|]/ && (nx == "" || nx ~ /[ \t\n;&|)]/)) { out = out "\n"; i++; continue }
+    }
+    out = out c; i++
+  }
+  return out
+}
+{ text = text (NR > 1 ? "\n" : "") $0 }
+END {
+  res = tok(text)
+  for (q = 1; q <= nq && q <= 200; q++) res = res "\n" tok(subq[q])
+  if (want == "payloads") { for (p = 1; p <= np; p++) print pay[p]; exit }
+  print res
+}'
 
 # Strip one segment's wrappers until it stops changing; sets interp when a wrapper runs an interpreter.
 # Pure bash, no subprocess per segment: process starts are slow on Windows and the hook has 10 s.
@@ -85,20 +175,34 @@ re_start='^(start-process|saps|start)$'
 re_gitword='(^|[[:space:]\\/])(git|gh)(\.exe)?([[:space:]]|$)'
 re_wrap='^((!|&)[[:space:]]*|[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+|(command|builtin|exec|eval|time|nohup|nice|timeout|stdbuf|xargs|sudo|doas|env|source|bash|sh|zsh|dash|ksh|fish|pwsh|powershell|cmd|invoke-expression|iex)(\.exe)?(([[:space:]]+[-/][^[:space:]]*)|([[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)|([[:space:]]+[0-9][0-9.]*[smhd]?))*([[:space:]]+|$))'
 # Does this interpreter run code from the command line or stdin, rather than a script file?
-# eval and Invoke-Expression always do. A shell does with -c / -Command / /c, or with no script
-# argument (`| bash`, `bash <<EOF`). `sh scripts/run.sh "git push -f ..."` only passes text.
+# eval, Invoke-Expression, cmd, pwsh and powershell always count: Windows PowerShell reads a bare
+# argument as a command, and pwsh options take values that look like script names. An sh-family shell
+# counts with a short option holding c (-c, -ec, -euxc) or with no script argument (`| bash`,
+# `bash <<EOF`); the value after a cluster ending in o or O (-o, -euo, +O) or after
+# --rcfile/--init-file is skipped. `sh scripts/run.sh "git push -f"`
+# only passes text.
 runs_code() {
-  local name="$1" t
+  local name="$1" t value=""
   local -a toks
-  case "$name" in eval|iex|invoke-expression) interp=1; return ;; esac
   read -ra toks <<< "$2"
+  case "$name" in
+    eval|iex|invoke-expression|cmd) interp=1; return ;;
+    pwsh|powershell)
+      for t in "${toks[@]:1}"; do
+        t="${t,,}"; t="${t#--}"; t="${t#-}"; t="${t#/}"
+        if [[ $t =~ ^(e|ec|en|enc|enco.*)$ ]]; then
+          deny "an encoded PowerShell command hides what it runs from this guard; pass the command as text"
+        fi
+      done
+      interp=1; return ;;
+  esac
   for t in "${toks[@]:1}"; do
-    if [[ $name == pwsh || $name == powershell ]] && [[ ${t,,} =~ ^-(e|ec|en|enc|enco.*)$ ]]; then
-      deny "an encoded PowerShell command hides what it runs from this guard; pass the command as text"
-    fi
-    case "${t,,}" in
-      -c|-[a-z]*c|-command|-com*|/c|/k) interp=1; return ;;
-      -*|/*|\<*) ;;
+    if [ -n "$value" ]; then value=""; continue; fi
+    case "$t" in
+      --*) [[ $t == --rcfile || $t == --init-file ]] && value=1 ;;
+      -*c*) interp=1; return ;;
+      -*o|+*o|-*O|+*O) value=1 ;;
+      -*|+*|\<*) ;;
       *) return ;;
     esac
   done
@@ -130,28 +234,22 @@ norm() {
   normed="$s"
 }
 
-re_quoted='"(([^"\\]|\\.)*)"|'"'"'([^'"'"']*)'"'"
-# Check every git and gh segment of $1; then, when it ran an interpreter, its quoted strings and
-# heredoc bodies as commands of their own, up to depth 3.
+# Check every git and gh segment of $1; then, when it ran an interpreter, all its quoted strings and
+# heredoc bodies together as one more command text, up to depth 3. One scan per depth: a scan per
+# string costs a process start each, and a hook past its timeout lets the call run.
 scan() {
-  local text="$1" depth="$2" stripped seg rest payload
+  local text="$1" depth="$2" kept segs seg payload
   interp=""
-  stripped=$(printf '%s\n' "$text" | heredocs keep \
-    | sed -E "s#['\"][^'\"]*[\\/](git|gh)(\.exe)?['\"]#\1#Ig; s/(--add-label)[ =]+[\"']([^\"']*)[\"']/\1 \2/g; s/'([^' ]*)'/\1/g; s/\"([^\" ]*)\"/\1/g; s/'[^']*'/_/g; s/\"[^\"]*\"/_/g")
+  kept=$(printf '%s\n' "$text" | heredocs keep)
+  segs=$(printf '%s\n' "$kept" | awk -v ps="$psflag" -v want=segments "$TOK_AWK")
   while IFS= read -r seg; do
     norm "$seg"
     case "$normed" in git\ *) check "$normed" ;; gh\ *) check_gh "$normed" ;; esac
-  done < <(printf '%s\n' "$stripped" | tr ';&|(){}`' '\n\n\n\n\n\n\n\n')
+  done <<< "$segs"
   [ -n "$interp" ] && [ "$depth" -lt 3 ] || return 0
-  rest="$text"
-  while [[ $rest =~ $re_quoted ]]; do
-    payload="${BASH_REMATCH[1]}${BASH_REMATCH[3]}"
-    rest="${rest#*"${BASH_REMATCH[0]}"}"
-    payload=${payload//\\\"/\"}
-    scan "$payload" $((depth + 1))
-  done
-  payload=$(printf '%s\n' "$text" | heredocs bodies)
-  [ -z "$payload" ] || scan "$payload" $((depth + 1))
+  payload=$(printf '%s\n' "$kept" | awk -v ps="$psflag" -v want=payloads "$TOK_AWK")
+  payload+=$'\n'$(printf '%s\n' "$text" | heredocs bodies)
+  scan "$payload" $((depth + 1))
 }
 # GUARD_GIT_BRANCH lets the test runner pin the branch context (CI checks out master).
 branch="${GUARD_GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null)}"
@@ -162,8 +260,16 @@ check() {
   g=$(printf '%s' "$g" | sed -E 's/^(sudo )?git( +(-C|-c) +[^ ]+)+/\1git/')
   case "$g" in
     *"git push"*)
-      if printf '%s' "$g" | grep -Eq -- '(^|[[:space:]])(--force|-f)([[:space:]]|$)' && ! printf '%s' "$g" | grep -q -- '--force-with-lease'; then
+      if printf '%s' "$g" | grep -Eq -- '(^|[[:space:]])--force([[:space:]]|$)' && ! printf '%s' "$g" | grep -q -- '--force-with-lease'; then
         deny "force push is not allowed; use --force-with-lease on a feature branch only"
+      fi
+      # -f alone or among short flags (-uf), and a +refspec, force too.
+      if printf '%s' "$g" | grep -Eq -- '(^|[[:space:]])-[a-zA-Z]*f[a-zA-Z]*([[:space:]]|$)|(^|[[:space:]])\+[^[:space:]]'; then
+        deny "force push is not allowed; use --force-with-lease on a feature branch only"
+      fi
+      # -d among short flags, and a :branch refspec, delete the remote branch.
+      if printf '%s' "$g" | grep -Eq -- '(^|[[:space:]])-[a-zA-Z]*d[a-zA-Z]*([[:space:]]|$)|(^|[[:space:]]):[^[:space:]]'; then
+        deny "deleting remote branches is the user's job"
       fi
       if printf '%s' "$g" | grep -Eq '(^|[[:space:]]|:)master([[:space:]]|$)'; then deny "pushing to master is not allowed; open a pull request"; fi
       # On master, a bare push would target master; a push naming another branch (worktrees do this) is fine.
