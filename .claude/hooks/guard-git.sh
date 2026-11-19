@@ -5,11 +5,28 @@
 # quoted single word and the value of --add-label stay readable, since they are arguments. The
 # command is then split on ; & | and newlines, and only segments that start with `git` or `gh` are checked.
 # Exit 2 blocks the call and returns the message to the model.
-input=$(cat)
-cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""')
-cmd=${cmd//$'\\\n'/ }
-
+#
+# Fail closed: the command is read with jq, or with node when jq is missing (the Windows laptop has no
+# jq). With neither, or when the input does not parse, every call is refused. Before this, a missing jq
+# read as an empty command and let everything through, force pushes included.
 deny() { echo "guard-git: $1" >&2; exit 2; }
+
+input=$(cat)
+if command -v jq >/dev/null 2>&1; then
+  cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""') \
+    || deny "the tool input did not parse, so this guard cannot read the command; refusing"
+elif command -v node >/dev/null 2>&1; then
+  cmd=$(printf '%s' "$input" | node -e '
+let s = "";
+process.stdin.on("data", (d) => { s += d; }).on("end", () => {
+  const c = ((JSON.parse(s) || {}).tool_input || {}).command;
+  process.stdout.write(typeof c === "string" ? c : "");
+});' 2>/dev/null) \
+    || deny "the tool input did not parse, so this guard cannot read the command; refusing"
+else
+  deny "neither jq nor node is on PATH, so this guard cannot read the command and refuses every Bash call. Ask the user to install jq (winget install jqlang.jq, or apt install jq), then start a new session"
+fi
+cmd=${cmd//$'\\\n'/ }
 
 stripped=$(printf '%s\n' "$cmd" \
   | awk 'BEGIN{skip=0}
