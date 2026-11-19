@@ -74,6 +74,20 @@ def main() -> int:
         full = os.environ["PATH"]
         no_jq = path_without(full, ("jq",), Path(tmp) / "no-jq")
         neither = path_without(full, ("jq", "node"), Path(tmp) / "neither")
+        # A jq that writes CRLF, as a native jq.exe does under Git Bash (PR 317 review B1).
+        crlf_dir = Path(tmp) / "crlf-jq"
+        crlf_dir.mkdir()
+        (crlf_dir / "jq").write_text(f"#!/usr/bin/env bash\n\"{shutil.which('jq')}\" \"$@\" | sed 's/$/\\r/'\n")
+        (crlf_dir / "jq").chmod(0o755)
+        crlf = f"{crlf_dir}{os.pathsep}{full}"
+        # The shims must hide what they claim, or the [node] and no-parser runs prove nothing.
+        shims = [("no-jq hides jq", shutil.which("jq", path=no_jq) is None),
+                 ("no-jq keeps node", shutil.which("node", path=no_jq) is not None),
+                 ("neither hides jq and node", shutil.which("jq", path=neither) is None and shutil.which("node", path=neither) is None),
+                 ("crlf puts the CRLF jq first", shutil.which("jq", path=crlf) == str(crlf_dir / "jq"))]
+        for name, ok in shims:
+            failures += not ok
+            print(("ok  " if ok else "FAIL"), name)
         # Every case, read by jq and then by the node fallback the Windows laptop uses.
         for label, path in (("jq", full), ("node", no_jq)):
             for want, branch, cmd in cases:
@@ -82,20 +96,32 @@ def main() -> int:
                 failures += not ok
                 print(("ok  " if ok else "FAIL"), f"[{label}] want={want} got={r.returncode}", cmd.splitlines()[0][:70])
         # Fail closed: an unreadable command is refused, never read as empty and allowed.
+        def cmd_input(c: object) -> str:
+            return json.dumps({"tool_input": {"command": c}})
+
         closed = [
-            ("no jq and no node refuses a harmless command", json.dumps({"tool_input": {"command": "ls"}}), neither),
-            ("no jq and no node refuses a force push", json.dumps({"tool_input": {"command": "git push --force"}}), neither),
-            ("jq refuses input that does not parse", "not json", full),
-            ("node refuses input that does not parse", "not json", no_jq),
-            ("node refuses empty input", "", no_jq),
+            ("no jq and no node refuses a harmless command", cmd_input("ls"), neither, 2),
+            ("no jq and no node refuses a force push", cmd_input("git push --force"), neither, 2),
+            ("a CRLF jq still joins a continued force push", cmd_input("git push \\\n  -f origin feat/x"), crlf, 2),
+            ("a CRLF jq still joins a continued label release", cmd_input("gh pr edit 3 \\\n--add-label ci-edit-approved"), crlf, 2),
+            ("a CRLF jq lets a harmless command through", cmd_input("git status"), crlf, 0),
+            ("a CRLF inside the command still joins a continuation", cmd_input("git push \\\r\n  -f origin feat/x"), full, 2),
         ]
-        for name, stdin, path in closed:
+        for label, path in (("jq", full), ("node", no_jq)):
+            closed += [
+                (f"{label} refuses input that does not parse", "not json", path, 2),
+                (f"{label} refuses empty input", "", path, 2),
+                (f"{label} refuses a payload with no command", json.dumps({"tool_input": {}}), path, 2),
+                (f"{label} refuses a command that is not a string", cmd_input(123), path, 2),
+                (f"{label} lets an empty command string through", cmd_input(""), path, 0),
+            ]
+        for name, stdin, path, want in closed:
             r = run(stdin, "feat/hook-test", path)
-            ok = r.returncode == 2
+            ok = r.returncode == want
             failures += not ok
-            print(("ok  " if ok else "FAIL"), f"want=2 got={r.returncode}", name)
+            print(("ok  " if ok else "FAIL"), f"want={want} got={r.returncode}", name)
         r = run(json.dumps({"tool_input": {"command": "ls"}}), "feat/hook-test", neither)
-        ok = "install jq" in r.stderr
+        ok = "install node or jq" in r.stderr
         failures += not ok
         print(("ok  " if ok else "FAIL"), "the no-parser refusal names the fix")
     print(f"{failures} failures")
