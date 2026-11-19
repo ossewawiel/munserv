@@ -21,6 +21,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 HOOK = ROOT / ".claude" / "hooks" / "guard-git.sh"
 CASES = ROOT / ".claude" / "hooks" / "tests" / "guard-git-cases.txt"
+PS_CASES = ROOT / ".claude" / "hooks" / "tests" / "guard-git-powershell-cases.txt"
+SETTINGS = ROOT / ".claude" / "settings.json"
 
 
 def parse(text: str) -> list[tuple[int, str, str]]:
@@ -56,13 +58,13 @@ def path_without(path: str, tools: tuple[str, ...], shim: Path) -> str:
     return os.pathsep.join(dirs)
 
 
-def run(stdin: str, branch: str, path: str, windows_bash: bool = False) -> subprocess.CompletedProcess:
+def run(stdin: str, branch: str, path: str, windows_bash: bool = False, mode: str = "bash") -> subprocess.CompletedProcess:
     # Pin the branch context, whatever CI checked out; optionally stand in for Git Bash.
     env = {**os.environ, "GUARD_GIT_BRANCH": branch, "PATH": path}
     env.pop("GUARD_GIT_WINDOWS_BASH", None)
     if windows_bash:
         env["GUARD_GIT_WINDOWS_BASH"] = "1"
-    return subprocess.run(["bash", str(HOOK)], input=stdin, capture_output=True, text=True, cwd=ROOT, env=env)
+    return subprocess.run(["bash", str(HOOK), mode], input=stdin, capture_output=True, text=True, cwd=ROOT, env=env)
 
 
 def main() -> int:
@@ -73,6 +75,7 @@ def main() -> int:
             return 1
     failures = 0
     cases = parse(CASES.read_text())
+    ps_cases = parse(PS_CASES.read_text())
     with tempfile.TemporaryDirectory() as tmp:
         full = os.environ["PATH"]
         no_jq = path_without(full, ("jq",), Path(tmp) / "no-jq")
@@ -94,12 +97,22 @@ def main() -> int:
             failures += not ok
             print(("ok  " if ok else "FAIL"), name)
         # Every case, read by jq and then by the node fallback the Windows laptop uses.
+        # Both shell tools must reach the guard: Bash plain, PowerShell with its mode.
+        entries = json.loads(SETTINGS.read_text())["hooks"]["PreToolUse"]
+        wired = {e["matcher"]: [h["command"] for h in e["hooks"]] for e in entries}
+        for matcher, suffix in (("Bash", "guard-git.sh"), ("PowerShell", "guard-git.sh powershell")):
+            ok = any(c.endswith(suffix) for c in wired.get(matcher, []))
+            failures += not ok
+            print(("ok  " if ok else "FAIL"), f"settings.json runs {suffix} on {matcher}")
+        # The PowerShell tool's entry runs the same hook with `powershell` (backtick continuations,
+        # here-strings, Start-Process, the call operator).
         for label, path in (("jq", full), ("node", no_jq)):
-            for want, branch, cmd in cases:
-                r = run(json.dumps({"tool_input": {"command": cmd}}), branch, path)
-                ok = r.returncode == want
-                failures += not ok
-                print(("ok  " if ok else "FAIL"), f"[{label}] want={want} got={r.returncode}", cmd.splitlines()[0][:70])
+            for mode, mode_cases in (("bash", cases), ("powershell", ps_cases)):
+                for want, branch, cmd in mode_cases:
+                    r = run(json.dumps({"tool_input": {"command": cmd}}), branch, path, mode=mode)
+                    ok = r.returncode == want
+                    failures += not ok
+                    print(("ok  " if ok else "FAIL"), f"[{label} {mode}] want={want} got={r.returncode}", cmd.splitlines()[0][:70])
         # Fail closed: an unreadable command is refused, never read as empty and allowed.
         def cmd_input(c: object) -> str:
             return json.dumps({"tool_input": {"command": c}})

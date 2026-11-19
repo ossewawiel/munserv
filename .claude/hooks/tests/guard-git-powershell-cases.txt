@@ -1,0 +1,39 @@
+2	git push --force origin feat/x
+2	git push origin master
+2	gh pr edit 3 --add-label ci-edit-approved
+2	gh pr merge 3 --squash
+2	& git push -f origin feat/x
+2	& 'C:\Program Files\Git\cmd\git.exe' push -f origin feat/x
+2	& "C:\Program Files\GitHub CLI\gh.exe" pr merge 3
+2	git.exe push -f origin feat/x
+2	GIT push -f origin feat/x
+2	Gh pr merge 3
+2	g`it push -f origin feat/x
+2	git push `
+  -f origin feat/x
+2	gh pr edit 3 `
+  --add-label ci-edit-approved
+2	git --% push -f origin feat/x
+2	Invoke-Expression "git push -f origin feat/x"
+2	iex 'gh pr edit 3 --add-label ci-edit-approved'
+2	Start-Process git -ArgumentList 'push','-f','origin','feat/x'
+2	Start-Process -FilePath gh.exe -ArgumentList 'pr merge 3'
+2	saps git 'push -f'
+2	powershell -Command "gh pr merge 3"
+2	pwsh -NoProfile -c "git push -f origin feat/x"
+2	cmd /c "git push -f origin feat/x"
+2	bash -c 'git push -f origin feat/x'
+2	git status; git push -f origin feat/x
+2	if ($true) { git push -f origin feat/x }
+0	git status; git log --oneline -3
+0	gh pr view 3 --json state
+0	git push -u origin feat/x
+0	gh pr merge 3 --auto --squash
+0	Get-Command git
+0	Start-Process notepad
+0	$body = @'
+git push --force origin master is what the guard refuses
+'@
+0	gh pr comment 3 --body "git push -f is refused"
+2	pwsh -EncodedCommand ZwBpAHQAIABwAHUAcwBoAA==
+2	powershell -enc ZwBpAHQA

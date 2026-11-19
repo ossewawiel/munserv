@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
-# PreToolUse guard for Bash: refuse the git operations no agent may run.
+# PreToolUse guard for Bash and PowerShell: refuse the git operations no agent may run.
+# Usage: guard-git.sh [bash|powershell] (the PowerShell tool's entry passes `powershell`).
 # Only real git and gh invocations are inspected: line continuations are joined, then heredoc
-# bodies and multi-word quoted strings (commit messages, PR bodies, test strings) are removed. A
-# quoted single word and the value of --add-label stay readable, since they are arguments. The
-# command is then split on ; & | and newlines, and only segments that start with `git` or `gh` are checked.
+# bodies (and PowerShell here-string bodies) and multi-word quoted strings (commit messages, PR bodies,
+# test strings) are removed. A quoted single word and the value of --add-label stay readable, since
+# they are arguments. The command is then split on ; & | ( ) { } ` and newlines, so a subshell,
+# a group or a command substitution is its own segment.
+# Each segment loses its wrappers before it is read: `!`, `&`, VAR=value, env, command, builtin, exec,
+# eval, time, nohup, nice, timeout, xargs, sudo, a path or a `\` before the program, `.exe`, and the
+# letter case of git and gh (Windows finds GIT.EXE). Segments that then start with git or gh are checked.
+# When any segment runs an interpreter (bash -c, sh, eval, source, pwsh, powershell, cmd,
+# Invoke-Expression), each quoted string and heredoc body is scanned again as a command, three levels
+# deep. Start-Process with git or gh is refused outright.
 # Exit 2 blocks the call and returns the message to the model.
 #
 # Fail closed: the command is read with jq or node, whichever is found first (node first under Git Bash
@@ -44,17 +52,107 @@ cmd=$("read_with_$reader") || deny "the tool input did not parse or has no comma
 # Linux bash does not: there `\` escapes the CR and the LF ends the command, so folding would hide the
 # next line from the checks. Every other CR becomes a space, which can only split a word: it adds
 # checks and never hides one.
-if [ -n "$windows_bash" ]; then cmd=${cmd//$'\r\n'/$'\n'}; fi
+mode="${1:-bash}"
+if [ "$mode" = "powershell" ]; then
+  # PowerShell ends a line at CRLF or LF and continues one with a trailing backtick; elsewhere the
+  # backtick is an escape (g`it runs git), so it is dropped.
+  cmd=${cmd//$'\r\n'/$'\n'}
+  cmd=${cmd//$'`\n'/ }
+  cmd=${cmd//\`/}
+else
+  if [ -n "$windows_bash" ]; then cmd=${cmd//$'\r\n'/$'\n'}; fi
+  cmd=${cmd//$'\\\n'/ }
+fi
 cmd=${cmd//$'\r'/ }
-cmd=${cmd//$'\\\n'/ }
 
-stripped=$(printf '%s\n' "$cmd" \
-  | awk 'BEGIN{skip=0}
-         { if (skip) { if ($0 ~ ("^[ \t]*" tag "[ \t]*$")) skip=0; next }
-           if (match($0, /<<-?[\047"]?[A-Za-z_][A-Za-z0-9_]*/)) {
-             tag=substr($0, RSTART, RLENGTH); sub(/^<<-?[\047"]?/, "", tag); print; skip=1; next }
-           print }' \
-  | sed -E "s/(--add-label)[ =]+[\"']([^\"']*)[\"']/\1 \2/g; s/'([^' ]*)'/\1/g; s/\"([^\" ]*)\"/\1/g; s/'[^']*'/_/g; s/\"[^\"]*\"/_/g")
+# Heredoc bodies (and, in PowerShell mode only, here-string bodies) out, or only those bodies with
+# `bodies`. In bash a line can end in @" without opening anything, so that rule must stay in PowerShell.
+heredocs() {
+  awk -v want="$1" -v ps="$([ "$mode" = powershell ] && echo 1)" 'BEGIN{skip=0}
+       { if (skip) { if ((tag != "" && $0 ~ ("^[ \t]*" tag "[ \t]*$")) || (tag == "" && $0 ~ /^[ \t]*[\047"]@/)) { skip=0; next }
+                     if (want == "bodies") print; next }
+         if (match($0, /<<-?[\047"]?[A-Za-z_][A-Za-z0-9_]*/)) {
+           tag=substr($0, RSTART, RLENGTH); sub(/^<<-?[\047"]?/, "", tag); if (want != "bodies") print; skip=1; next }
+         if (ps == "1" && $0 ~ /@[\047"][ \t]*$/) { tag=""; if (want != "bodies") print; skip=1; next }
+         if (want != "bodies") print }'
+}
+
+# Strip one segment's wrappers until it stops changing; sets interp when a wrapper runs an interpreter.
+# Pure bash, no subprocess per segment: process starts are slow on Windows and the hook has 10 s.
+interp=""
+re_interp='^(bash|sh|zsh|dash|ksh|fish|eval|source|pwsh|powershell|cmd|invoke-expression|iex)$'
+re_start='^(start-process|saps|start)$'
+re_gitword='(^|[[:space:]\\/])(git|gh)(\.exe)?([[:space:]]|$)'
+re_wrap='^((!|&)[[:space:]]*|[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+|(command|builtin|exec|eval|time|nohup|nice|timeout|stdbuf|xargs|sudo|doas|env|source|bash|sh|zsh|dash|ksh|fish|pwsh|powershell|cmd|invoke-expression|iex)(\.exe)?(([[:space:]]+[-/][^[:space:]]*)|([[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)|([[:space:]]+[0-9][0-9.]*[smhd]?))*([[:space:]]+|$))'
+# Does this interpreter run code from the command line or stdin, rather than a script file?
+# eval and Invoke-Expression always do. A shell does with -c / -Command / /c, or with no script
+# argument (`| bash`, `bash <<EOF`). `sh scripts/run.sh "git push -f ..."` only passes text.
+runs_code() {
+  local name="$1" t
+  local -a toks
+  case "$name" in eval|iex|invoke-expression) interp=1; return ;; esac
+  read -ra toks <<< "$2"
+  for t in "${toks[@]:1}"; do
+    if [[ $name == pwsh || $name == powershell ]] && [[ ${t,,} =~ ^-(e|ec|en|enc|enco.*)$ ]]; then
+      deny "an encoded PowerShell command hides what it runs from this guard; pass the command as text"
+    fi
+    case "${t,,}" in
+      -c|-[a-z]*c|-command|-com*|/c|/k) interp=1; return ;;
+      -*|/*|\<*) ;;
+      *) return ;;
+    esac
+  done
+  interp=1
+}
+
+norm() {
+  local s="$1" prev w lw i
+  for i in 1 2 3 4 5 6 7 8; do
+    prev="$s"
+    s="${s#"${s%%[![:space:]]*}"}"
+    # A path before the program (/usr/bin/git, C:\...\git.exe, \git) and .exe or capitals on git and gh.
+    w="${s%%[[:space:]]*}"
+    if [[ $w == *[\\/]* ]]; then s="${w##*[\\/]}${s:${#w}}"; w="${w##*[\\/]}"; fi
+    lw="${w,,}"
+    lw="${lw%.exe}"
+    if [[ $lw == git || $lw == gh ]]; then s="$lw${s:${#w}}"; fi
+    s="${s/#git --% /git }"
+    if [[ $lw =~ $re_interp ]]; then runs_code "$lw" "$s"; fi
+    if [[ $lw =~ $re_start ]] && [[ ${s,,} =~ $re_gitword ]]; then
+      deny "Start-Process hides the git or gh command from this guard; run git or gh directly"
+    fi
+    shopt -s nocasematch
+    if [[ $s =~ $re_wrap ]]; then s="${s:${#BASH_REMATCH[0]}}"; fi
+    shopt -u nocasematch
+    [ "$s" = "$prev" ] && break
+  done
+  # A global, not output: in $(...) the deny above and interp would be lost in the subshell.
+  normed="$s"
+}
+
+re_quoted='"(([^"\\]|\\.)*)"|'"'"'([^'"'"']*)'"'"
+# Check every git and gh segment of $1; then, when it ran an interpreter, its quoted strings and
+# heredoc bodies as commands of their own, up to depth 3.
+scan() {
+  local text="$1" depth="$2" stripped seg rest payload
+  interp=""
+  stripped=$(printf '%s\n' "$text" | heredocs keep \
+    | sed -E "s#['\"][^'\"]*[\\/](git|gh)(\.exe)?['\"]#\1#Ig; s/(--add-label)[ =]+[\"']([^\"']*)[\"']/\1 \2/g; s/'([^' ]*)'/\1/g; s/\"([^\" ]*)\"/\1/g; s/'[^']*'/_/g; s/\"[^\"]*\"/_/g")
+  while IFS= read -r seg; do
+    norm "$seg"
+    case "$normed" in git\ *) check "$normed" ;; gh\ *) check_gh "$normed" ;; esac
+  done < <(printf '%s\n' "$stripped" | tr ';&|(){}`' '\n\n\n\n\n\n\n\n')
+  [ -n "$interp" ] && [ "$depth" -lt 3 ] || return 0
+  rest="$text"
+  while [[ $rest =~ $re_quoted ]]; do
+    payload="${BASH_REMATCH[1]}${BASH_REMATCH[3]}"
+    rest="${rest#*"${BASH_REMATCH[0]}"}"
+    payload=${payload//\\\"/\"}
+    scan "$payload" $((depth + 1))
+  done
+  payload=$(printf '%s\n' "$text" | heredocs bodies)
+  [ -z "$payload" ] || scan "$payload" $((depth + 1))
+}
 # GUARD_GIT_BRANCH lets the test runner pin the branch context (CI checks out master).
 branch="${GUARD_GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null)}"
 
@@ -115,8 +213,5 @@ gh_api_writes() {
   fi
 }
 
-while IFS= read -r seg; do
-  seg="${seg#"${seg%%[![:space:]]*}"}"
-  case "$seg" in git\ *|sudo\ git\ *) check "$seg" ;; gh\ *) check_gh "$seg" ;; esac
-done < <(printf '%s\n' "$stripped" | tr ';&|' '\n\n\n')
+scan "$cmd" 0
 exit 0

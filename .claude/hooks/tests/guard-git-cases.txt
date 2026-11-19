@@ -70,3 +70,56 @@ EOF
 0	gh issue comment 294 --body "run gh pr edit 297 --add-label ci-edit-approved"; gh issue edit 294 --add-label status:done
 0	gh issue comment 294 --body "see /pulls/12/merge" && gh api -X POST repos/o/r/issues/12/comments -f body=hello
 0	gh pr edit 12 --add-label status:review --body "mentions ci-edit-approved in text"
+2	(gh pr edit 3 --add-label ci-edit-approved)
+2	{ git push -f origin feat/x; }
+2	command gh pr edit 3 --add-label ci-edit-approved
+2	command git push --force origin feat/x
+2	builtin command git push -f origin feat/x
+2	env git push -f origin feat/x
+2	env -i PATH=/usr/bin git push --force origin feat/x
+2	GIT_TRACE=1 git push -f origin feat/x
+2	exec git push -f origin feat/x
+2	time git push -f origin feat/x
+2	nohup git push -f origin feat/x
+2	timeout 30 git push -f origin feat/x
+2	xargs -n1 gh pr merge
+2	sudo -E git push -f origin feat/x
+2	/usr/bin/git push -f origin feat/x
+2	\git push -f origin feat/x
+2	! git push -f origin feat/x
+2	GIT push -f origin feat/x
+2	git.exe push -f origin feat/x
+2	"/c/Program Files/Git/cmd/git.exe" push -f origin feat/x
+2	echo $(git push -f origin feat/x)
+2	echo `git push -f origin feat/x`
+2	bash -c 'git push -f origin feat/x'
+2	sh -c "gh pr edit 3 --add-label ci-edit-approved"
+2	bash -c "gh pr edit 3 --add-label 'ci-edit-approved'"
+2	bash -c "bash -c 'git push -f origin feat/x'"
+2	eval "git push -f origin feat/x"
+2	eval git push -f origin feat/x
+2	echo "git push -f origin feat/x" | bash
+2	printf 'gh pr merge 3\n' | sh
+2	bash <<'EOF'
+git push -f origin feat/x
+EOF
+2	pwsh -c "git push -f origin feat/x"
+2	cmd /c "gh pr merge 3"
+2	start git push -f origin feat/x
+0	bash -c 'git status'
+0	bash -c "echo hi" && git log --oneline -1
+0	echo "$(git rev-parse HEAD)"
+0	env | grep PATH
+0	(cd backend && ./gradlew test)
+0	time ./gradlew test
+0	git commit -m "fix(web): x"
+0	shellcheck scripts/x.sh
+0	bash scripts/x.sh && git commit -m "never git push -f here"
+0	sh scripts/run.sh "git push -f is what this script refuses"
+0	gh pr create --body "$(cat <<'EOF'
+bash -c 'git push -f origin feat/x' is what the guard refuses
+EOF
+)"
+0	echo "mail me@" && git status
+2	bash -ec 'git push -f origin feat/x'
+0	bash -x scripts/x.sh "git push -f origin feat/x"
