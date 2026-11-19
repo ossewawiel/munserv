@@ -56,9 +56,12 @@ def path_without(path: str, tools: tuple[str, ...], shim: Path) -> str:
     return os.pathsep.join(dirs)
 
 
-def run(stdin: str, branch: str, path: str) -> subprocess.CompletedProcess:
-    # Pin the branch context, whatever CI checked out.
+def run(stdin: str, branch: str, path: str, windows_bash: bool = False) -> subprocess.CompletedProcess:
+    # Pin the branch context, whatever CI checked out; optionally stand in for Git Bash.
     env = {**os.environ, "GUARD_GIT_BRANCH": branch, "PATH": path}
+    env.pop("GUARD_GIT_WINDOWS_BASH", None)
+    if windows_bash:
+        env["GUARD_GIT_WINDOWS_BASH"] = "1"
     return subprocess.run(["bash", str(HOOK)], input=stdin, capture_output=True, text=True, cwd=ROOT, env=env)
 
 
@@ -79,12 +82,14 @@ def main() -> int:
         crlf_dir.mkdir()
         (crlf_dir / "jq").write_text(f"#!/usr/bin/env bash\n\"{shutil.which('jq')}\" \"$@\" | sed 's/$/\\r/'\n")
         (crlf_dir / "jq").chmod(0o755)
-        crlf = f"{crlf_dir}{os.pathsep}{full}"
-        # The shims must hide what they claim, or the [node] and no-parser runs prove nothing.
+        # Under Git Bash node is tried first, so the CRLF jq is only reached with node gone.
+        crlf = f"{crlf_dir}{os.pathsep}{path_without(full, ('node',), Path(tmp) / 'no-node')}"
+        # The shims must hide what they claim, or the [node], CRLF and no-parser runs prove nothing.
         shims = [("no-jq hides jq", shutil.which("jq", path=no_jq) is None),
                  ("no-jq keeps node", shutil.which("node", path=no_jq) is not None),
                  ("neither hides jq and node", shutil.which("jq", path=neither) is None and shutil.which("node", path=neither) is None),
-                 ("crlf puts the CRLF jq first", shutil.which("jq", path=crlf) == str(crlf_dir / "jq"))]
+                 ("crlf puts the CRLF jq first and hides node",
+                  shutil.which("jq", path=crlf) == str(crlf_dir / "jq") and shutil.which("node", path=crlf) is None)]
         for name, ok in shims:
             failures += not ok
             print(("ok  " if ok else "FAIL"), name)
@@ -99,24 +104,34 @@ def main() -> int:
         def cmd_input(c: object) -> str:
             return json.dumps({"tool_input": {"command": c}})
 
+        win = True
         closed = [
-            ("no jq and no node refuses a harmless command", cmd_input("ls"), neither, 2),
-            ("no jq and no node refuses a force push", cmd_input("git push --force"), neither, 2),
-            ("a CRLF jq still joins a continued force push", cmd_input("git push \\\n  -f origin feat/x"), crlf, 2),
-            ("a CRLF jq still joins a continued label release", cmd_input("gh pr edit 3 \\\n--add-label ci-edit-approved"), crlf, 2),
-            ("a CRLF jq lets a harmless command through", cmd_input("git status"), crlf, 0),
-            ("a CRLF inside the command still joins a continuation", cmd_input("git push \\\r\n  -f origin feat/x"), full, 2),
+            ("no jq and no node refuses a harmless command", cmd_input("ls"), neither, 2, False),
+            ("no jq and no node refuses a force push", cmd_input("git push --force"), neither, 2, False),
+            # PR 317 review B1: a native jq.exe under Git Bash writes CRLF.
+            ("Git Bash: a CRLF jq still joins a continued force push", cmd_input("git push \\\n  -f origin feat/x"), crlf, 2, win),
+            ("Git Bash: a CRLF jq still joins a continued label release",
+             cmd_input("gh pr edit 3 \\\n--add-label ci-edit-approved"), crlf, 2, win),
+            ("Git Bash: a CRLF jq lets a harmless command through", cmd_input("git status"), crlf, 0, win),
+            ("Git Bash: backslash-CR-LF in the command joins, as Git Bash does",
+             cmd_input("git push \\\r\n  -f origin feat/x"), no_jq, 2, win),
+            # PR 317 second review S1: Linux bash does not join backslash-CR-LF; the next line runs alone.
+            ("Linux: backslash-CR-LF does not hide the next line",
+             cmd_input("echo \\\r\ngh pr edit 3 --add-label ci-edit-approved"), full, 2, False),
+            ("Linux: backslash-CR-LF does not hide a force push on the next line",
+             cmd_input("echo \\\r\ngit push -f origin feat/x"), full, 2, False),
         ]
         for label, path in (("jq", full), ("node", no_jq)):
             closed += [
-                (f"{label} refuses input that does not parse", "not json", path, 2),
-                (f"{label} refuses empty input", "", path, 2),
-                (f"{label} refuses a payload with no command", json.dumps({"tool_input": {}}), path, 2),
-                (f"{label} refuses a command that is not a string", cmd_input(123), path, 2),
-                (f"{label} lets an empty command string through", cmd_input(""), path, 0),
+                (f"{label} refuses input that does not parse", "not json", path, 2, False),
+                (f"{label} refuses empty input", "", path, 2, False),
+                (f"{label} refuses whitespace-only input", "   \n", path, 2, False),
+                (f"{label} refuses a payload with no command", json.dumps({"tool_input": {}}), path, 2, False),
+                (f"{label} refuses a command that is not a string", cmd_input(123), path, 2, False),
+                (f"{label} lets an empty command string through", cmd_input(""), path, 0, False),
             ]
-        for name, stdin, path, want in closed:
-            r = run(stdin, "feat/hook-test", path)
+        for name, stdin, path, want, windows_bash in closed:
+            r = run(stdin, "feat/hook-test", path, windows_bash)
             ok = r.returncode == want
             failures += not ok
             print(("ok  " if ok else "FAIL"), f"want={want} got={r.returncode}", name)

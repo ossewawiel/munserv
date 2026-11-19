@@ -13,7 +13,8 @@
 deny() { echo "guard-git: $1" >&2; exit 2; }
 
 read_with_jq() {
-  printf '%s' "$input" | jq -r '.tool_input.command | if type == "string" then . else error("no command") end'
+  # -e: whitespace-only input yields no value, which exits 4 instead of reading as an empty command.
+  printf '%s' "$input" | jq -er '.tool_input.command | if type == "string" then . else error("no command") end'
 }
 read_with_node() {
   printf '%s' "$input" | node -e '
@@ -28,17 +29,22 @@ process.stdin.on("data", (d) => { s += d; }).on("end", () => {
 
 input=$(cat)
 [ -n "$input" ] || deny "the tool input is empty, so this guard cannot read the command; refusing"
-readers="jq node"
-case "${OSTYPE:-}" in msys*|cygwin*) readers="node jq" ;; esac
+# GUARD_GIT_WINDOWS_BASH lets the test runner stand in for Git Bash on Linux, where bash sets OSTYPE.
+windows_bash="${GUARD_GIT_WINDOWS_BASH:-}"
+case "${OSTYPE:-}" in msys*|cygwin*) windows_bash=1 ;; esac
+if [ -n "$windows_bash" ]; then readers="node jq"; else readers="jq node"; fi
 reader=""
 for r in $readers; do
   if command -v "$r" >/dev/null 2>&1; then reader="$r"; break; fi
 done
 [ -n "$reader" ] || deny "neither jq nor node is on PATH, so this guard cannot read the command and refuses every Bash call. Ask the user to install node or jq (apt install jq), then start a new session"
 cmd=$("read_with_$reader") || deny "the tool input did not parse or has no command, so this guard cannot read it; refusing"
-# A native jq.exe writes CRLF, which would hide a `\`-newline continuation from the join below. A CR
-# anywhere else becomes a space: that can only split a word, so it adds checks and never hides one.
-cmd=${cmd//$'\r\n'/$'\n'}
+# Read the line ends the way the bash that runs the command does. Git Bash and Cygwin join `\`+CR+LF
+# as a continuation, and a native jq.exe writes CRLF there, so CRLF becomes LF before the join below.
+# Linux bash does not: there `\` escapes the CR and the LF ends the command, so folding would hide the
+# next line from the checks. Every other CR becomes a space, which can only split a word: it adds
+# checks and never hides one.
+if [ -n "$windows_bash" ]; then cmd=${cmd//$'\r\n'/$'\n'}; fi
 cmd=${cmd//$'\r'/ }
 cmd=${cmd//$'\\\n'/ }
 
