@@ -35,4 +35,9 @@ claude plugin install bob-core@prject-bob             # user scope: loads in hea
 The tick then refreshes and updates `bob-core` before each run, records the version in the ledger, and
 stops if `bob-core` is missing, disabled or older than `BOB_MIN_VERSION` (0.3.0), or if `node` is not on
 PATH, because the implementers have no gate of their own any more. In a plain session, `/factory run` and
-`/factory story` make the same check before they dispatch an implementer.
+`/factory story` make the same check before they dispatch an implementer, and
+`.claude/hooks/guard-dispatch.sh` enforces it on every `*implementer` dispatch, in every session and in
+the tick's runs. The hook counts a user-scope install, or a project or local install whose `projectPath`
+is this checkout; `claude plugin list --json` reports other projects' installs as enabled too. It fails
+closed: when it cannot read the plugin list, it refuses. Each check costs one `claude plugin list --json`,
+about 2 s.
