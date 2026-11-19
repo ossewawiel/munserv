@@ -10,7 +10,11 @@
 #
 # Gated: any subagent_type ending in "implementer" (backend-implementer, bob-kotlin:implementer).
 # scripts/test-guard-dispatch.py pins that every agent in .bob/factory.json matches.
-# Fail closed: when the plugin list cannot be read, the dispatch is refused.
+# Fail closed: when the plugin list cannot be read, or takes longer than GUARD_LIST_TIMEOUT (20 s,
+# under the 30 s hook timeout), the dispatch is refused.
+# The hook reads what is installed, not what this session loaded. A plugin installed after the session
+# started is not loaded in it, so every refusal tells the model to dispatch no implementer in this
+# session; reading the session start from the transcript would refuse resumed sessions by mistake.
 # Bash with no jq (the Windows laptop has none); node parses the plugin list once it is known to run.
 # Exit 2 blocks the call and returns the message to the model.
 set -u
@@ -24,12 +28,15 @@ case "$agent" in
   *implementer) ;;
   *) exit 0 ;;
 esac
+# From here on, any exit but 0 (pass) or 2 (refuse) is a refusal: Claude Code runs the tool on
+# other codes.
+trap 'rc=$?; if [ "$rc" -ne 0 ] && [ "$rc" -ne 2 ]; then echo "guard-dispatch: not dispatching $agent: the check stopped with exit $rc. Dispatch no implementer; report this to the user." >&2; exit 2; fi' EXIT
 
 plugin="${BOB_PLUGIN:-bob-core@prject-bob}"
 min="${BOB_MIN_VERSION:-0.3.0}"
 fix="claude plugin marketplace add ossewawiel/prject-bob; claude plugin install $plugin (or claude plugin update $plugin); then start a new session"
 deny() {
-  echo "guard-dispatch: not dispatching $agent: $1. Its stop gate is bob-core (.bob/factory.json), and it would finish ungated. Dispatch no implementer; report this to the user with the fix: $2" >&2
+  echo "guard-dispatch: not dispatching $agent: $1. Its stop gate is bob-core (.bob/factory.json), and it would finish ungated. Dispatch no implementer in this session, even after the fix: a running session does not load a plugin installed after it started. Report this to the user with the fix: $2" >&2
   exit 2
 }
 
@@ -41,9 +48,12 @@ for c in "$(command -v claude 2>/dev/null)" "$HOME/.local/bin/claude" "$HOME/.lo
 done
 [ -n "$claude_bin" ] || deny "the claude CLI is not on PATH, so the plugin list cannot be read" "put claude on PATH for hooks, then start a new session"
 
-plugins=$("$claude_bin" plugin list --json 2>/dev/null) || deny "claude plugin list --json failed" "run claude plugin list --json and fix what it reports"
-
 project="${CLAUDE_PROJECT_DIR:-$(pwd)}"
+# Claude Code lets the tool run when the hook outlives its 30 s timeout, so the list gets less: a hang
+# must end in a refusal here. The list runs from the checkout, because its "enabled" is the effective
+# value for the cwd's project. A missing `timeout` exits 127, which also refuses.
+plugins=$(cd "$project" && timeout "${GUARD_LIST_TIMEOUT:-20}" "$claude_bin" plugin list --json 2>/dev/null) \
+  || deny "claude plugin list --json failed or ran past ${GUARD_LIST_TIMEOUT:-20}s" "run claude plugin list --json and fix what it reports"
 # Prints one word: ok, missing, disabled, old <version>, or unreadable.
 verdict=$(printf '%s' "$plugins" | PLUGIN="$plugin" MIN="$min" PROJECT="$project" node -e '
 const path = require("path");
@@ -59,12 +69,15 @@ if (!Array.isArray(list)) { console.log("unreadable"); process.exit(0); }
 const here = list.filter((p) => p && p.id === process.env.PLUGIN
   && (p.scope === "user" || (p.projectPath && norm(p.projectPath) === norm(process.env.PROJECT))));
 if (here.length === 0) { console.log("missing"); process.exit(0); }
-const on = here.filter((p) => p.enabled === true);
-if (on.length === 0) { console.log("disabled"); process.exit(0); }
+// The most specific install is the one to judge (local, then project, then user), not the newest:
+// a newer user copy must not vouch for an older project copy.
+const rank = { local: 0, project: 1, user: 2 };
+const pick = here.slice().sort((a, b) => (rank[a.scope] ?? 3) - (rank[b.scope] ?? 3))[0];
+if (pick.enabled !== true) { console.log("disabled"); process.exit(0); }
 const min = parse(process.env.MIN);
-const best = on.map((p) => [p.version, parse(p.version)]).filter((x) => x[1]).sort((a, b) => cmp(b[1], a[1]))[0];
-if (!min || !best) { console.log("old " + on.map((p) => p.version).join(",")); process.exit(0); }
-console.log(cmp(best[1], min) >= 0 ? "ok" : "old " + best[0]);
+const have = parse(pick.version);
+if (!min || !have) { console.log("badversion " + pick.version); process.exit(0); }
+console.log(cmp(have, min) >= 0 ? "ok" : "old " + pick.version);
 ' 2>/dev/null) || verdict="unreadable"
 
 case "$verdict" in
@@ -72,5 +85,6 @@ case "$verdict" in
   missing) deny "$plugin is not installed for this checkout" "$fix" ;;
   disabled) deny "$plugin is installed but disabled" "claude plugin enable $plugin, then start a new session" ;;
   old\ *) deny "$plugin ${verdict#old } is older than $min" "claude plugin update $plugin, then start a new session" ;;
+  badversion\ *) deny "$plugin reports version '${verdict#badversion }', which is not x.y.z, or BOB_MIN_VERSION '$min' is not" "claude plugin update $plugin, then start a new session" ;;
   *) deny "the plugin list could not be read" "run claude plugin list --json and fix what it reports" ;;
 esac

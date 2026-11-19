@@ -39,5 +39,7 @@ PATH, because the implementers have no gate of their own any more. In a plain se
 `.claude/hooks/guard-dispatch.sh` enforces it on every `*implementer` dispatch, in every session and in
 the tick's runs. The hook counts a user-scope install, or a project or local install whose `projectPath`
 is this checkout; `claude plugin list --json` reports other projects' installs as enabled too. It fails
-closed: when it cannot read the plugin list, it refuses. Each check costs one `claude plugin list --json`,
-about 2 s.
+closed: when it cannot read the plugin list, or the list takes longer than `GUARD_LIST_TIMEOUT` (20 s,
+under the hook's 30 s timeout), it refuses. Each check costs one `claude plugin list --json`, run from the
+checkout, about 2 s. It reads what is installed, not what the session loaded, and a session does not load
+a plugin installed after it started: after a refusal, install the fix and start a new session.
