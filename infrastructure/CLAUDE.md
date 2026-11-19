@@ -64,7 +64,7 @@ A second, independent run of `origin/master` for demos, beside the dev stack. It
 | `ADMIN_PORTAL_URL`, `APP_DOWNLOAD_URL`, `APP_NAME` | Links in emails | localhost:3000 |
 
 ## CI
-`.github/workflows/ci.yml`: `domain` (language validation), `backend`, `web`, `mobile`, each path-filtered, plus the `CI status` aggregate that branch protection requires. Other workflows: `standards-check` (advisory), `validate-specs` (weekly), `generate-changelog` (on tags).
+`.github/workflows/ci.yml`: `domain` (language validation), `backend`, `web`, `mobile`, each path-filtered, plus the `CI status` aggregate that branch protection requires. Other workflows: `standards-check` (advisory), `validate-specs` (weekly), `generate-changelog` (on tags). The `domain` job's script tests need Linux (`flock`, `jq`, `python3`). On the Windows checkout, run each one you touched with `scripts/test-in-container.sh <test script>`, for example `scripts/test-in-container.sh scripts/test-factory-tick.py`, before you push. It needs Docker and takes one to two minutes per script. It ships the working tree, uncommitted edits included, into a `python:3.12-slim` container and exits with the test's code. `scripts/test-tui.py` needs `TEST_PIP="textual==8.2.8"`.
 
 ## MCP servers
 Servers live in `.mcp.json`; plugins in `enabledPlugins` of `.claude/settings.json`. Export `MUNSERV_DB_URL` before you start Claude Code. Per-server notes (postgres, playwright, typescript-lsp, dart-flutter): `infrastructure/docs/mcp-servers.md`.
