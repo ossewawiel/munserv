@@ -76,6 +76,9 @@ class Sandbox:
         write_exe(bin_dir / "claude", CLAUDE_STUB)
         write_exe(bin_dir / "gh", GH_STUB)
         write_exe(bin_dir / "notify-send", "#!/bin/sh\nexit 0\n")
+        # The tick only checks that node exists (bob-core's hook runs on it); the stub keeps the cases off
+        # the runner's own node. path_without() takes it away again.
+        write_exe(bin_dir / "node", "#!/bin/sh\nexit 0\n")
         origin = tmp / "origin.git"
         git("init", "-q", "--bare", "-b", "master", str(origin), cwd=tmp)
         git("clone", "-q", str(origin), str(self.repo), cwd=tmp)
@@ -469,6 +472,57 @@ def case_bob_core_missing_stops_the_tick(sb: Sandbox) -> list[str]:
     ] if isinstance(e, str)]
 
 
+def case_bob_core_too_old_stops_the_tick(sb: Sandbox) -> list[str]:
+    r = sb.run(STUB_PICKS="[12]", STUB_PLUGINS='[{"id": "bob-core@prject-bob", "version": "0.2.0", "enabled": true}]')
+    last = sb.ledger()[-1] if sb.ledger() else {}
+    return [e for e in [
+        r.returncode != 1 and f"exit {r.returncode}, want 1",
+        sb.calls("claude") and "a run started on a bob-core that gates hand-backs as red",
+        "0.2.0 is older than 0.3.0" not in last.get("reason", "") and f"last ledger line {last}",
+    ] if isinstance(e, str)]
+
+
+def case_bob_core_version_compared_as_versions(sb: Sandbox) -> list[str]:
+    r = sb.run(STUB_PICKS="[]", STUB_PLUGINS='[{"id": "bob-core@prject-bob", "version": "0.10.0", "enabled": true}]')
+    bob = next((x for x in sb.ledger() if x["kind"] == "bob"), {})
+    return [e for e in [
+        r.returncode != 0 and f"exit {r.returncode}: {r.stderr}",
+        bob.get("version") != "0.10.0" and f"bob ledger line {bob}, want 0.10.0 accepted",
+    ] if isinstance(e, str)]
+
+
+def path_without(sb: Sandbox, tool: str) -> str:
+    """sb's PATH with `tool` gone: every PATH folder that holds it is swapped for a shim folder that links
+    everything else in it, so bash, jq and git still resolve."""
+    shim = sb.tmp / "shim"
+    shim.mkdir(exist_ok=True)
+    dirs: list[str] = []
+    for d in sb.env["PATH"].split(":"):
+        folder = Path(d)
+        if not (folder / tool).exists():
+            dirs.append(d)
+            continue
+        for f in folder.iterdir():
+            if f.name != tool and not (shim / f.name).exists():
+                try:
+                    (shim / f.name).symlink_to(f)
+                except OSError:
+                    pass
+        if str(shim) not in dirs:
+            dirs.append(str(shim))
+    return ":".join(dirs)
+
+
+def case_no_node_stops_the_tick(sb: Sandbox) -> list[str]:
+    r = sb.run(STUB_PICKS="[12]", PATH=path_without(sb, "node"))
+    last = sb.ledger()[-1] if sb.ledger() else {}
+    return [e for e in [
+        r.returncode != 1 and f"exit {r.returncode}, want 1: {r.stderr}",
+        sb.calls("claude") and "a run started with no node for bob-core's hook",
+        "node is not on PATH" not in last.get("reason", "") and f"last ledger line {last}",
+    ] if isinstance(e, str)]
+
+
 def case_bob_update_off_pins_bob_core(sb: Sandbox) -> list[str]:
     sb.set_env("BOB_UPDATE=0")
     r = sb.run(STUB_PICKS="[]")
@@ -509,6 +563,9 @@ CASES = [
     ("bob-core is updated and its version recorded before the clerk", case_bob_core_updated_and_recorded, {}),
     ("a disabled bob-core stops the tick before any run", case_bob_core_disabled_stops_the_tick, {}),
     ("a missing bob-core stops the tick before any run", case_bob_core_missing_stops_the_tick, {}),
+    ("a bob-core below BOB_MIN_VERSION stops the tick before any run", case_bob_core_too_old_stops_the_tick, {}),
+    ("bob-core versions compare as versions (0.10.0 passes 0.3.0)", case_bob_core_version_compared_as_versions, {}),
+    ("no node on PATH stops the tick before any run", case_no_node_stops_the_tick, {}),
     ("BOB_UPDATE=0 pins bob-core", case_bob_update_off_pins_bob_core, {}),
 ]
 

@@ -6,8 +6,17 @@
   },
   "handback": "BLOCKED:",
   "gates": {
-    "bob-kotlin": "docker info >/dev/null 2>&1 || { echo 'environment: docker info; end your message with BLOCKED: environment'; exit 1; }; cd backend && ./gradlew ktlintCheck test -q",
-    "bob-react": "mise --version >/dev/null 2>&1 || { echo 'environment: mise; end your message with BLOCKED: environment'; exit 1; }; cd web && { [ -d node_modules ] || pnpm install --frozen-lockfile; } && pnpm lint && pnpm typecheck && pnpm test:run",
-    "bob-flutter": "flutter --version >/dev/null 2>&1 || { echo 'environment: flutter --version; end your message with BLOCKED: environment'; exit 1; }; cd mobile && dart format --output=none --set-exit-if-changed lib test && flutter analyze --fatal-infos && flutter test"
+    "bob-kotlin": {
+      "command": "docker info >/dev/null 2>&1 || { echo 'environment: docker info; end your message with BLOCKED: environment'; exit 1; }; cd backend && ./gradlew ktlintCheck test -q",
+      "commandWindows": "docker info >NUL 2>&1 || (echo environment: docker info; end your message with BLOCKED: environment& exit 1) & cd backend && call gradlew.bat ktlintCheck test -q"
+    },
+    "bob-react": {
+      "command": "mise --version >/dev/null 2>&1 || { echo 'environment: mise; end your message with BLOCKED: environment'; exit 1; }; cd web && { [ -d node_modules ] || pnpm install --frozen-lockfile; } && pnpm lint && pnpm typecheck && pnpm test:run",
+      "commandWindows": "pnpm --version >NUL 2>&1 || (echo environment: pnpm; end your message with BLOCKED: environment& exit 1) & cd web && (if not exist node_modules call pnpm install --frozen-lockfile) && call pnpm lint && call pnpm typecheck && call pnpm test:run"
+    },
+    "bob-flutter": {
+      "command": "flutter --version >/dev/null 2>&1 || { echo 'environment: flutter --version; end your message with BLOCKED: environment'; exit 1; }; cd mobile && dart format --output=none --set-exit-if-changed lib test && flutter analyze --fatal-infos && flutter test",
+      "commandWindows": "flutter --version >NUL 2>&1 || (echo environment: flutter --version; end your message with BLOCKED: environment& exit 1) & cd mobile && call dart format --output=none --set-exit-if-changed lib test && call flutter analyze --fatal-infos && call flutter test"
+    }
   }
 }
