@@ -29,7 +29,7 @@
 #        1 when a run failed, or the newest run of an event was cancelled.
 #        2 on usage or when the watch cannot give a verdict: no run appeared, a run did not finish,
 #        gh kept failing, or the head moved. None of these is a red run.
-#        3 when CI passed but the PR did not merge (conflict, behind, no auto-merge, closed, held
+#        3 when CI passed but the PR did not merge (conflict, behind, a draft, no auto-merge, closed, held
 #        by the infra review guard, the baseline guard, the hold label or the CI edit guard,
 #        unreadable, or still open after MERGE_TIMEOUT).
 # Every CI line goes to stdout, and the last line of stdout is the result.
@@ -261,9 +261,9 @@ echo "CI: green (${SHA:0:7})"
 merge_waited=0
 while true; do
   started=$SECONDS
-  if ! pr_fields=$(gh pr view "$PR" --json state,mergeStateStatus,autoMergeRequest,statusCheckRollup,headRefOid \
+  if ! pr_fields=$(gh pr view "$PR" --json state,mergeStateStatus,autoMergeRequest,statusCheckRollup,isDraft,headRefOid \
     --jq 'def newest($name): [.statusCheckRollup[] | select(.name == $name)] | sort_by(.startedAt // "" | if startswith("0001-") then "9999" else . end) | (last.conclusion // "") | if . == "" then "NONE" else . end;
-      "\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null) \(newest("CI edit guard")) \(newest("Infra review guard")) \(newest("Baseline guard")) \(newest("Hold guard")) \(.headRefOid)"') || [[ -z "$pr_fields" ]]; then
+      "\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null) \(newest("CI edit guard")) \(newest("Infra review guard")) \(newest("Baseline guard")) \(newest("Hold guard")) \(.isDraft == true) \(.headRefOid)"') || [[ -z "$pr_fields" ]]; then
     if (( merge_waited >= MERGE_TIMEOUT )); then
       echo "CI: green, not merging - cannot read the PR after ${MERGE_TIMEOUT}s; watch again"
       exit 3
@@ -272,7 +272,7 @@ while true; do
     sleep "$MERGE_POLL_SECONDS"
     continue
   fi
-  read -r state merge_state armed guard infra_guard baseline_guard hold_guard head_now <<<"$pr_fields"
+  read -r state merge_state armed guard infra_guard baseline_guard hold_guard draft head_now <<<"$pr_fields"
   case "$state" in
     MERGED)
       echo "CI: green, merged"
@@ -311,6 +311,11 @@ while true; do
   # No agent can clear this one (#294).
   if [[ "$guard" == "FAILURE" ]]; then
     echo "CI: green, not merging - held by CI edit guard; the owner reads the diff, then runs gh pr edit $PR --add-label ci-edit-approved"
+    exit 3
+  fi
+  # GitHub refuses to arm a draft, and Auto PR arms it when it is marked ready.
+  if [[ "$draft" == "true" ]]; then
+    echo "CI: green, not merging - the PR is a draft; mark it ready with gh pr ready $PR, and Auto PR arms it"
     exit 3
   fi
   if [[ "$armed" != "true" && $merge_waited -ge 15 ]]; then

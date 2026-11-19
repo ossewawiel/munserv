@@ -21,7 +21,8 @@ permissions:
 jobs:
   open-pr:
     name: Open pull request for pushed branch
-    # A fork's PR is never armed: its run has no AUTO_PR_TOKEN and must not merge itself.
+    # A fork's PR is never armed: its run has no AUTO_PR_TOKEN and must not merge itself. The PR list
+    # in the step filters forks out as well, because a push here can list one by branch name.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
@@ -35,7 +36,10 @@ jobs:
           BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
-          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          # --head matches the branch name alone, so a fork PR from a branch of the same name is listed
+          # too; arming it would merge a stranger's code. Only this repo's own PR counts.
+          existing=$(gh pr list --head "$BRANCH" --state open --json number,isCrossRepository \
+            --jq '[.[] | select(.isCrossRepository | not)][0].number // empty')
           if [ -n "$existing" ]; then
             echo "PR #$existing already open for $BRANCH"
           else

@@ -9,6 +9,7 @@ Usage: python3 scripts/test-auto-pr.py
 """
 from __future__ import annotations
 
+import json
 import os
 import stat
 import subprocess
@@ -28,7 +29,9 @@ SCRIPT = STEP["run"]
 STUB_GH = """#!/usr/bin/env bash
 echo "$*" >> "$STUB_DIR/calls"
 case "$1 $2" in
-  "pr list") cat "$STUB_DIR/existing" ;;
+  # The real jq applies the workflow's own --jq filter to the fixture list.
+  "pr list") jq_expr=""; while [ $# -gt 0 ]; do [ "$1" = "--jq" ] && jq_expr="$2"; shift; done
+             jq -r "$jq_expr" "$STUB_DIR/prs" ;;
   "pr create") echo "https://github.com/o/r/pull/12" ;;
   "pr view") [ -f "$STUB_DIR/view_fail" ] && exit 1; cat "$STUB_DIR/draft" ;;
   "pr merge") [ -f "$STUB_DIR/merge_fail" ] && { echo "Pull request is a draft" >&2; exit 1; }; exit 0 ;;
@@ -44,11 +47,19 @@ esac
 """
 
 
-def run_step(existing: str = "", draft: bool = False, view_fail: bool = False,
+def own(n: int) -> dict:
+    return {"number": n, "isCrossRepository": False}
+
+
+def fork(n: int) -> dict:
+    return {"number": n, "isCrossRepository": True}
+
+
+def run_step(prs: list[dict] | None = None, draft: bool = False, view_fail: bool = False,
              merge_fail: bool = False) -> tuple[int, str, list[str]]:
     with tempfile.TemporaryDirectory() as tmp:
         d = Path(tmp)
-        (d / "existing").write_text(f"{existing}\n" if existing else "")
+        (d / "prs").write_text(json.dumps(prs or []))
         (d / "draft").write_text("true\n" if draft else "false\n")
         (d / "calls").write_text("")
         if view_fail:
@@ -78,13 +89,13 @@ class Step(unittest.TestCase):
         self.assertEqual(merges(calls), ["pr merge 12 --auto --squash --delete-branch"])
 
     def test_an_open_pr_is_armed_again(self):
-        code, out, calls = run_step(existing="5")
+        code, out, calls = run_step([own(5)])
         self.assertEqual(code, 0, out)
         self.assertFalse(any(c.startswith("pr create") for c in calls), calls)
         self.assertEqual(merges(calls), ["pr merge 5 --auto --squash --delete-branch"])
 
     def test_a_draft_stays_unarmed_and_the_run_passes(self):
-        code, out, calls = run_step(existing="5", draft=True)
+        code, out, calls = run_step([own(5)], draft=True)
         self.assertEqual(code, 0, out)
         self.assertEqual(merges(calls), [], calls)
         self.assertIn("draft", out)
@@ -92,17 +103,29 @@ class Step(unittest.TestCase):
 
     def test_the_draft_check_comes_before_any_merge_call(self):
         # The #312 failure: gh refused to arm the draft and the run went red.
-        code, out, calls = run_step(existing="5", draft=True, merge_fail=True)
+        code, out, calls = run_step([own(5)], draft=True, merge_fail=True)
         self.assertEqual(code, 0, out)
 
     def test_an_unreadable_draft_flag_fails_the_run(self):
-        code, out, calls = run_step(existing="5", view_fail=True)
+        code, out, calls = run_step([own(5)], view_fail=True)
         self.assertNotEqual(code, 0, out)
         self.assertEqual(merges(calls), [], calls)
 
     def test_a_failed_arm_still_fails_the_run(self):
-        code, out, calls = run_step(existing="5", merge_fail=True)
+        code, out, calls = run_step([own(5)], merge_fail=True)
         self.assertNotEqual(code, 0, out)
+
+    def test_a_fork_pr_with_the_same_branch_name_is_never_armed(self):
+        # PR #315 review B1: --head matches the branch name alone, newest first.
+        code, out, calls = run_step([fork(9), own(5)])
+        self.assertEqual(code, 0, out)
+        self.assertEqual(merges(calls), ["pr merge 5 --auto --squash --delete-branch"])
+
+    def test_only_a_fork_pr_open_means_this_branch_gets_its_own(self):
+        code, out, calls = run_step([fork(9)])
+        self.assertEqual(code, 0, out)
+        self.assertTrue(any(c.startswith("pr create") for c in calls), calls)
+        self.assertEqual(merges(calls), ["pr merge 12 --auto --squash --delete-branch"])
 
 
 class WorkflowShape(unittest.TestCase):

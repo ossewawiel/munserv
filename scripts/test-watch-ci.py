@@ -616,6 +616,18 @@ class MergePhase(unittest.TestCase):
         self.assertEqual(last_line(out),
                          "CI: green, not merging - auto-merge is not armed (mergeStateStatus CLEAN); arm it with gh pr merge 7 --auto --squash")
 
+    def test_a_draft_names_gh_pr_ready_and_not_the_merge(self):
+        # GitHub refuses gh pr merge --auto on a draft; Auto PR arms it on ready_for_review.
+        code, out = watch([view(ALL_PASSED)], pr=open_pr("DRAFT", armed=False, isDraft=True))
+        self.assertEqual(code, 3, out)
+        self.assertEqual(last_line(out), "CI: green, not merging - the PR is a draft; mark it ready with gh pr ready 7, and Auto PR arms it")
+        self.assertNotIn("gh pr merge", out)
+
+    def test_a_ready_pr_is_not_read_as_a_draft(self):
+        code, out = watch([view(ALL_PASSED)], pr=open_pr("CLEAN", armed=False, isDraft=False))
+        self.assertEqual(code, 3, out)
+        self.assertIn("auto-merge is not armed", last_line(out))
+
     def test_auto_merge_armed_late_is_not_a_hold(self):
         # auto-pr.yml can arm auto-merge after the watcher starts its merge phase.
         code, out = watch([view(ALL_PASSED)], prs=[open_pr("CLEAN", armed=False), MERGED_PR])

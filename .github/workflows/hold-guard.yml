@@ -44,7 +44,10 @@ jobs:
         run: |
           set -euo pipefail
           labels=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/labels" --jq '.[].name')
-          if printf '%s\n' "$labels" | grep -qxF "$LABEL"; then
+          # grep -c, not grep -q: -q exits at the first match, and under pipefail printf's SIGPIPE
+          # would then fail the test and let a held PR pass.
+          held=$(printf '%s\n' "$labels" | grep -cxF "$LABEL" || true)
+          if [ "$held" -gt 0 ]; then
             echo "::error::Held: this PR has the $LABEL label. The PR comments say why. Whoever added it, or the owner, releases it with: gh pr edit $PR --remove-label $LABEL"
             exit 1
           fi
