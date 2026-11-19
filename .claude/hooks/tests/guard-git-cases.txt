@@ -171,3 +171,50 @@ EOF
 
 Refuses \`git push -f origin feat/x\` now."
 0	git commit -m "x" ; bash -c 'echo "one" "two" ; bash -c \"echo three four\"'
+2	# don't force push here
+git push -f origin feat/x
+2	echo hi # it's fine
+git push -f origin feat/x
+2	cat << EOF > notes.txt
+don't
+EOF
+git push -f origin feat/x
+2	cat <<\EOF > notes.txt
+don't
+EOF
+git push -f origin feat/x
+2	echo $'it\'s' ; git push -f origin feat/x
+2	echo $'it's' ; git push -f origin feat/x
+2	echo "$(echo ")")" ; git push -f origin feat/x
+2	echo $(echo ')') ; git push -f origin feat/x
+2	echo "$(echo '(')" ; git push -f origin feat/x
+2	x=$(printf '%s)' a) ; git push -f origin feat/x
+2	git commit -m "don't stop" ; bash -c 'git push -f origin feat/x'
+2	echo "it's" && bash -c 'git push -f origin feat/x'
+2	echo "it's" && bash <<'EOF'
+git push -f origin feat/x
+EOF
+2	echo ${x:-$(git push -f origin feat/x)}
+2	echo $(( $(git push -f origin feat/x) ))
+2	({ git push -f origin feat/x; })
+2	echo 'unclosed ; git push -f origin feat/x
+2	cat <<EOF
+git push -f origin feat/x
+2	bash +o posix -c 'git push -f origin feat/x'
+2	case $x in a) git push -f origin feat/x ;; esac
+2	bash -c "bash -c 'bash -c \"git push -f origin feat/x\"'"
+0	git push -u origin feat/x
+0	git push origin HEAD:feat/x
+0	git push --dry-run origin feat/x
+0	git push --force-with-lease -u origin feat/add-dark-mode
+0	git push origin feat/x --no-verify
+0	git push -o ci.skip origin feat/x
+0	git push --tags origin
+0	git push --follow-tags origin feat/x
+0	git push -v origin feat/x
+0	find . -name '*.tmp' -exec rm {} \;
+0	awk '{print $1}' x.txt && git status
+0	bash -O extglob scripts/x.sh "git push -f origin feat/x"
+0	if true; then git status; fi
+0	# a comment with an apostrophe: it's fine
+git status

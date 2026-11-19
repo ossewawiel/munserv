@@ -158,6 +158,21 @@ def main() -> int:
         ok = r.returncode == 2 and took < 8
         failures += not ok
         print(("ok  " if ok else "FAIL"), f"150 quoted strings after eval: want=2 got={r.returncode} in {took:.1f}s (limit 8s)")
+        # More than 200 substitutions refuses instead of leaving the rest unread (PR 319 second review S2).
+        subs = "echo " + " ".join(["$(:)"] * 201) + " ; echo done"
+        r = run(json.dumps({"tool_input": {"command": subs}}), "feat/hook-test", full)
+        ok = r.returncode == 2
+        failures += not ok
+        print(("ok  " if ok else "FAIL"), f"201 substitutions: want=2 got={r.returncode}")
+        # Without its tokenizer beside it, the hook refuses everything.
+        lone = Path(tmp) / "lone"
+        lone.mkdir()
+        shutil.copy(HOOK, lone / "guard-git.sh")
+        r = subprocess.run(["bash", str(lone / "guard-git.sh")], input=json.dumps({"tool_input": {"command": "git status"}}),
+                           capture_output=True, text=True, cwd=ROOT, env={**os.environ, "GUARD_GIT_BRANCH": "feat/hook-test"})
+        ok = r.returncode == 2
+        failures += not ok
+        print(("ok  " if ok else "FAIL"), f"no guard-git-tok.awk beside the hook: want=2 got={r.returncode}")
         r = run(json.dumps({"tool_input": {"command": "ls"}}), "feat/hook-test", neither)
         ok = "install node or jq" in r.stderr
         failures += not ok

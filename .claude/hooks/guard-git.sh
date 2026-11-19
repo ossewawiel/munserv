@@ -2,7 +2,7 @@
 # PreToolUse guard for Bash and PowerShell: refuse the git operations no agent may run.
 # Usage: guard-git.sh [bash|powershell] (the PowerShell tool's entry passes `powershell`).
 # Only real git and gh invocations are inspected: line continuations are joined, heredoc bodies (and
-# PowerShell here-string bodies) are removed, then a quote-aware tokenizer (TOK_AWK) cuts the command
+# PowerShell here-string bodies) are removed, then a quote-aware tokenizer (guard-git-tok.awk) cuts the command
 # into segments. A multi-word quoted string (commit message, PR body) becomes one placeholder word; a
 # quoted single word and the value of --add-label stay readable. $(...) and backticks become a
 # placeholder in their segment and segments of their own, so `git push origin $(...) -f` keeps its -f.
@@ -55,10 +55,9 @@ cmd=$("read_with_$reader") || deny "the tool input did not parse or has no comma
 mode="${1:-bash}"
 if [ "$mode" = "powershell" ]; then
   # PowerShell ends a line at CRLF or LF and continues one with a trailing backtick; elsewhere the
-  # backtick is an escape (g`it runs git), so it is dropped.
+  # backtick is an escape (g`it runs git, `" is a quote character), which the tokenizer reads.
   cmd=${cmd//$'\r\n'/$'\n'}
   cmd=${cmd//$'`\n'/ }
-  cmd=${cmd//\`/}
 else
   if [ -n "$windows_bash" ]; then cmd=${cmd//$'\r\n'/$'\n'}; fi
   cmd=${cmd//$'\\\n'/ }
@@ -68,104 +67,32 @@ cmd=${cmd//$'\r'/ }
 psflag=""
 [ "$mode" = powershell ] && psflag=1
 
-# Heredoc bodies out (`keep`), or only those bodies (`bodies`). Bash mode reads `<<TAG` heredocs, not
-# `<<<` here-strings. PowerShell mode reads only here-strings: an @' or @" that ends a line after a line
-# start, blank, = ( , or ;, closed by the same quote and @ at column 0. In bash a line can end in @"
+# Heredoc bodies out (`keep`), or only those bodies (`bodies`, each body followed by \036 so the
+# tokenizer reads it on its own). Bash mode reads `<<TAG`, `<< TAG`, `<<-TAG`, `<<\TAG` and quoted tags,
+# not `<<<` here-strings. PowerShell mode reads only here-strings: an @' or @" that ends a line after a
+# line start, blank, = ( , or ;, closed by the same quote and @ at column 0; the opener is printed with
+# that @' replaced by _, so the tokenizer never sees an open quote. In bash a line can end in @"
 # without opening anything, so that rule stays in PowerShell. An unclosed body is code: it is printed.
 heredocs() {
   awk -v want="$1" -v ps="$psflag" 'BEGIN{skip=0; nb=0}
+       function flush(   b) { for (b = 1; b <= nb; b++) print body[b]; if (want == "bodies") printf "\036"; nb=0 }
        { if (skip) {
            if ((tag != "" && $0 ~ ("^[ \t]*" tag "[ \t]*$")) || (tag == "" && substr($0, 1, 2) == closer)) {
-             skip=0; if (want == "bodies") for (b = 1; b <= nb; b++) print body[b]; nb=0; next }
+             skip=0; if (want == "bodies") flush(); nb=0; next }
            body[++nb]=$0; next }
-         if (ps != "1" && match($0, /(^|[^<])<<-?[\047"]?[A-Za-z_][A-Za-z0-9_]*/)) {
-           tag=substr($0, RSTART, RLENGTH); sub(/^[^<]?<<-?[\047"]?/, "", tag)
+         if (ps != "1" && match($0, /(^|[^<])<<-?[ \t]*\\?[\047"]?[A-Za-z_][A-Za-z0-9_]*/)) {
+           tag=substr($0, RSTART, RLENGTH); sub(/^[^<]?<<-?[ \t]*\\?[\047"]?/, "", tag)
            if (want != "bodies") print; skip=1; nb=0; next }
          if (ps == "1" && match($0, /(^|[ \t=(,;])@[\047"][ \t]*$/)) {
            t=$0; sub(/[ \t]*$/, "", t); closer=substr(t, length(t), 1) "@"; tag=""
-           if (want != "bodies") print; skip=1; nb=0; next }
+           if (want != "bodies") { sub(/@[\047"]$/, "_", t); print t }
+           skip=1; nb=0; next }
          if (want != "bodies") print }
-       END { if (skip) for (b = 1; b <= nb; b++) print body[b] }'
+       END { if (skip) flush() }'
 }
 
-# The tokenizer: one segment per output line. It tracks quotes across lines. A quoted string becomes
-# its text when it is one word, `git`/`gh` when it is a path to them, its raw text after --add-label,
-# and `_` otherwise. Each $(...), <(...), >(...) and backtick span becomes the word `_` in its segment
-# and its text becomes segments of its own; ${...} becomes `_`. ; & | ( ) split segments, and so do
-# { and } when they stand alone. A backslash escapes the next character in bash (g\it is git); in
-# PowerShell it is a path character. With want=payloads it prints each quoted string's text instead,
-# unescaped as the shell would pass it, for the interpreter rescan.
-TOK_AWK='
-function quoted(c, out,   lc) {
-  if (out ~ /--add-label[ \t]*=?[ \t]*$/) return c
-  lc = tolower(c)
-  if (lc ~ /[\\\/]gh(\.exe)?$/) return "gh"
-  if (lc ~ /[\\\/]git(\.exe)?$/) return "git"
-  if (c == "" || c ~ /[ \t\n]/) return "_"
-  return c
-}
-function closing(s, p, n,   d, k, ch) {
-  d = 0
-  for (k = p; k <= n; k++) { ch = substr(s, k, 1); if (ch == "(") d++; else if (ch == ")") { d--; if (d == 0) return k } }
-  return n
-}
-function tok(s,   out, i, n, c, nx, j, k, buf, raw, prev) {
-  out = ""; n = length(s); i = 1
-  while (i <= n) {
-    c = substr(s, i, 1); nx = substr(s, i + 1, 1)
-    if (c == "\\" && ps != "1") { out = out nx; i += 2; continue }
-    if (c == "\047") {
-      j = index(substr(s, i + 1), "\047")
-      if (j == 0) { buf = substr(s, i + 1); i = n + 1 } else { buf = substr(s, i + 1, j - 1); i = i + j + 1 }
-      pay[++np] = buf; out = out quoted(buf, out); continue
-    }
-    if (c == "\"") {
-      buf = ""; raw = ""; i++
-      while (i <= n) {
-        c = substr(s, i, 1); nx = substr(s, i + 1, 1)
-        if (c == "\\" && ps != "1") {
-          if (nx == "\"" || nx == "\\" || nx == "$" || nx == "`") raw = raw nx; else raw = raw c nx
-          buf = buf nx; i += 2; continue }
-        if (c == "\"") { i++; break }
-        if (c == "$" && nx == "(") {
-          k = closing(s, i + 1, n); if (substr(s, i + 2, 1) != "(") subq[++nq] = substr(s, i + 2, k - i - 2)
-          raw = raw substr(s, i, k - i + 1); buf = buf "_"; i = k + 1; continue }
-        if (c == "`" && ps != "1") {
-          j = index(substr(s, i + 1), "`"); k = (j == 0) ? n : i + j; subq[++nq] = substr(s, i + 1, k - i - 1)
-          raw = raw substr(s, i, k - i + 1); buf = buf "_"; i = k + 1; continue }
-        if (c == "$" && nx == "{") {
-          j = index(substr(s, i + 1), "}"); k = (j == 0) ? n : i + j
-          raw = raw substr(s, i, k - i + 1); buf = buf "_"; i = k + 1; continue }
-        raw = raw c; buf = buf c; i++
-      }
-      pay[++np] = raw; out = out quoted(buf, out); continue
-    }
-    if ((c == "$" || c == "<" || c == ">") && nx == "(") {
-      k = closing(s, i + 1, n)
-      if (!(c == "$" && substr(s, i + 2, 1) == "(")) subq[++nq] = substr(s, i + 2, k - i - 2)
-      out = out "_"; i = k + 1; continue
-    }
-    if (c == "`" && ps != "1") {
-      j = index(substr(s, i + 1), "`"); k = (j == 0) ? n : i + j; subq[++nq] = substr(s, i + 1, k - i - 1)
-      out = out "_"; i = k + 1; continue
-    }
-    if (c == "$" && nx == "{") { j = index(substr(s, i + 1), "}"); k = (j == 0) ? n : i + j; out = out "_"; i = k + 1; continue }
-    if (c == ";" || c == "&" || c == "|" || c == "(" || c == ")") { out = out "\n"; i++; continue }
-    if (c == "{" || c == "}") {
-      prev = (i == 1) ? "\n" : substr(s, i - 1, 1)
-      if (prev ~ /[ \t\n;&|]/ && (nx == "" || nx ~ /[ \t\n;&|)]/)) { out = out "\n"; i++; continue }
-    }
-    out = out c; i++
-  }
-  return out
-}
-{ text = text (NR > 1 ? "\n" : "") $0 }
-END {
-  res = tok(text)
-  for (q = 1; q <= nq && q <= 200; q++) res = res "\n" tok(subq[q])
-  if (want == "payloads") { for (p = 1; p <= np; p++) print pay[p]; exit }
-  print res
-}'
+# The tokenizer lives beside this hook; when it is missing awk fails, and the scan refuses.
+case "${BASH_SOURCE[0]}" in */*) tok_awk="${BASH_SOURCE[0]%/*}/guard-git-tok.awk" ;; *) tok_awk=./guard-git-tok.awk ;; esac
 
 # Strip one segment's wrappers until it stops changing; sets interp when a wrapper runs an interpreter.
 # Pure bash, no subprocess per segment: process starts are slow on Windows and the hook has 10 s.
@@ -234,21 +161,27 @@ norm() {
   normed="$s"
 }
 
-# Check every git and gh segment of $1; then, when it ran an interpreter, all its quoted strings and
-# heredoc bodies together as one more command text, up to depth 3. One scan per depth: a scan per
-# string costs a process start each, and a hook past its timeout lets the call run.
+# Check every git and gh segment of $1; then, when it ran an interpreter, its quoted strings and
+# heredoc bodies as more command text, up to depth 3. One scan per depth, with the payloads as \036-
+# separated records that the tokenizer reads one by one: a scan per string costs a process start
+# each, and a hook past its timeout lets the call run.
+# At depth 0 a command that ends inside a quote or substitution is refused: no shell runs it, and
+# reading past the open quote would hide every later line. Deeper, a payload may be plain text.
 scan() {
-  local text="$1" depth="$2" kept segs seg payload
+  local text="$1" depth="$2" kept segs seg payload strict=""
+  [ "$depth" -eq 0 ] && strict=1
   interp=""
   kept=$(printf '%s\n' "$text" | heredocs keep)
-  segs=$(printf '%s\n' "$kept" | awk -v ps="$psflag" -v want=segments "$TOK_AWK")
+  segs=$(printf '%s\n' "$kept" | awk -v ps="$psflag" -v want=segments -v strict="$strict" -f "$tok_awk") \
+    || deny "the command has an unclosed quote or substitution, or more than 200 substitutions, or this guard's tokenizer did not run, so it cannot be read; refusing"
   while IFS= read -r seg; do
     norm "$seg"
     case "$normed" in git\ *) check "$normed" ;; gh\ *) check_gh "$normed" ;; esac
   done <<< "$segs"
   [ -n "$interp" ] && [ "$depth" -lt 3 ] || return 0
-  payload=$(printf '%s\n' "$kept" | awk -v ps="$psflag" -v want=payloads "$TOK_AWK")
-  payload+=$'\n'$(printf '%s\n' "$text" | heredocs bodies)
+  payload=$(printf '%s\n' "$kept" | awk -v ps="$psflag" -v want=payloads -f "$tok_awk") \
+    || deny "this guard's tokenizer did not run; refusing"
+  payload+=$'\036'$(printf '%s\n' "$text" | heredocs bodies)
   scan "$payload" $((depth + 1))
 }
 # GUARD_GIT_BRANCH lets the test runner pin the branch context (CI checks out master).
