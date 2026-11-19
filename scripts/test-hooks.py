@@ -3,14 +3,19 @@
 
 Case file format: `<expected exit>\t<command>`; a case may continue over following
 lines (heredocs) until the next line that starts with a digit and a tab.
+Each case runs twice: with jq, and with jq hidden so the guard falls back to node, as on the
+Windows laptop. Then the fail-closed cases: no parser, or input that does not parse, refuses.
+Needs jq and node on PATH (CI has both; in the container: TEST_APT=nodejs).
 Exit 1 if any case returns a different exit code.
 """
 from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -31,14 +36,94 @@ def parse(text: str) -> list[tuple[int, str, str]]:
     return [(e[0], e[1], e[2].rstrip("\n")) for e in entries]
 
 
+def path_without(path: str, tools: tuple[str, ...], shim: Path) -> str:
+    """PATH with `tools` gone: each folder holding one is swapped for a shim folder linking the rest."""
+    shim.mkdir(exist_ok=True)
+    dirs: list[str] = []
+    for d in path.split(os.pathsep):
+        folder = Path(d)
+        if not any((folder / t).exists() for t in tools):
+            dirs.append(d)
+            continue
+        for f in folder.iterdir():
+            if f.name not in tools and not (shim / f.name).exists():
+                try:
+                    (shim / f.name).symlink_to(f)
+                except OSError:
+                    pass
+        if str(shim) not in dirs:
+            dirs.append(str(shim))
+    return os.pathsep.join(dirs)
+
+
+def run(stdin: str, branch: str, path: str) -> subprocess.CompletedProcess:
+    # Pin the branch context, whatever CI checked out.
+    env = {**os.environ, "GUARD_GIT_BRANCH": branch, "PATH": path}
+    return subprocess.run(["bash", str(HOOK)], input=stdin, capture_output=True, text=True, cwd=ROOT, env=env)
+
+
 def main() -> int:
+    for tool in ("jq", "node"):
+        if not shutil.which(tool):
+            print(f"FAIL {tool} is not on PATH; these tests run the guard with jq and with its node fallback"
+                  " (container: TEST_APT=nodejs)")
+            return 1
     failures = 0
-    for want, branch, cmd in parse(CASES.read_text()):
-        env = {**os.environ, "GUARD_GIT_BRANCH": branch}  # pin the branch context, whatever CI checked out
-        r = subprocess.run([str(HOOK)], input=json.dumps({"tool_input": {"command": cmd}}), capture_output=True, text=True, cwd=ROOT, env=env)
-        ok = r.returncode == want
+    cases = parse(CASES.read_text())
+    with tempfile.TemporaryDirectory() as tmp:
+        full = os.environ["PATH"]
+        no_jq = path_without(full, ("jq",), Path(tmp) / "no-jq")
+        neither = path_without(full, ("jq", "node"), Path(tmp) / "neither")
+        # A jq that writes CRLF, as a native jq.exe does under Git Bash (PR 317 review B1).
+        crlf_dir = Path(tmp) / "crlf-jq"
+        crlf_dir.mkdir()
+        (crlf_dir / "jq").write_text(f"#!/usr/bin/env bash\n\"{shutil.which('jq')}\" \"$@\" | sed 's/$/\\r/'\n")
+        (crlf_dir / "jq").chmod(0o755)
+        crlf = f"{crlf_dir}{os.pathsep}{full}"
+        # The shims must hide what they claim, or the [node] and no-parser runs prove nothing.
+        shims = [("no-jq hides jq", shutil.which("jq", path=no_jq) is None),
+                 ("no-jq keeps node", shutil.which("node", path=no_jq) is not None),
+                 ("neither hides jq and node", shutil.which("jq", path=neither) is None and shutil.which("node", path=neither) is None),
+                 ("crlf puts the CRLF jq first", shutil.which("jq", path=crlf) == str(crlf_dir / "jq"))]
+        for name, ok in shims:
+            failures += not ok
+            print(("ok  " if ok else "FAIL"), name)
+        # Every case, read by jq and then by the node fallback the Windows laptop uses.
+        for label, path in (("jq", full), ("node", no_jq)):
+            for want, branch, cmd in cases:
+                r = run(json.dumps({"tool_input": {"command": cmd}}), branch, path)
+                ok = r.returncode == want
+                failures += not ok
+                print(("ok  " if ok else "FAIL"), f"[{label}] want={want} got={r.returncode}", cmd.splitlines()[0][:70])
+        # Fail closed: an unreadable command is refused, never read as empty and allowed.
+        def cmd_input(c: object) -> str:
+            return json.dumps({"tool_input": {"command": c}})
+
+        closed = [
+            ("no jq and no node refuses a harmless command", cmd_input("ls"), neither, 2),
+            ("no jq and no node refuses a force push", cmd_input("git push --force"), neither, 2),
+            ("a CRLF jq still joins a continued force push", cmd_input("git push \\\n  -f origin feat/x"), crlf, 2),
+            ("a CRLF jq still joins a continued label release", cmd_input("gh pr edit 3 \\\n--add-label ci-edit-approved"), crlf, 2),
+            ("a CRLF jq lets a harmless command through", cmd_input("git status"), crlf, 0),
+            ("a CRLF inside the command still joins a continuation", cmd_input("git push \\\r\n  -f origin feat/x"), full, 2),
+        ]
+        for label, path in (("jq", full), ("node", no_jq)):
+            closed += [
+                (f"{label} refuses input that does not parse", "not json", path, 2),
+                (f"{label} refuses empty input", "", path, 2),
+                (f"{label} refuses a payload with no command", json.dumps({"tool_input": {}}), path, 2),
+                (f"{label} refuses a command that is not a string", cmd_input(123), path, 2),
+                (f"{label} lets an empty command string through", cmd_input(""), path, 0),
+            ]
+        for name, stdin, path, want in closed:
+            r = run(stdin, "feat/hook-test", path)
+            ok = r.returncode == want
+            failures += not ok
+            print(("ok  " if ok else "FAIL"), f"want={want} got={r.returncode}", name)
+        r = run(json.dumps({"tool_input": {"command": "ls"}}), "feat/hook-test", neither)
+        ok = "install node or jq" in r.stderr
         failures += not ok
-        print(("ok  " if ok else "FAIL"), f"want={want} got={r.returncode}", cmd.splitlines()[0][:70])
+        print(("ok  " if ok else "FAIL"), "the no-parser refusal names the fix")
     print(f"{failures} failures")
     return 1 if failures else 0
 

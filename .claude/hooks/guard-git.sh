@@ -5,11 +5,42 @@
 # quoted single word and the value of --add-label stay readable, since they are arguments. The
 # command is then split on ; & | and newlines, and only segments that start with `git` or `gh` are checked.
 # Exit 2 blocks the call and returns the message to the model.
-input=$(cat)
-cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""')
-cmd=${cmd//$'\\\n'/ }
-
+#
+# Fail closed: the command is read with jq or node, whichever is found first (node first under Git Bash
+# and Cygwin, where a native jq.exe writes CRLF). With neither, with empty input, input that does not
+# parse, or no string at tool_input.command, every call is refused. Before this, a missing jq read as
+# an empty command and let everything through, force pushes included.
 deny() { echo "guard-git: $1" >&2; exit 2; }
+
+read_with_jq() {
+  printf '%s' "$input" | jq -r '.tool_input.command | if type == "string" then . else error("no command") end'
+}
+read_with_node() {
+  printf '%s' "$input" | node -e '
+let s = "";
+process.stdin.setEncoding("utf8");
+process.stdin.on("data", (d) => { s += d; }).on("end", () => {
+  const c = ((JSON.parse(s) || {}).tool_input || {}).command;
+  if (typeof c !== "string") throw new Error("no command");
+  process.stdout.write(c);
+});' 2>/dev/null
+}
+
+input=$(cat)
+[ -n "$input" ] || deny "the tool input is empty, so this guard cannot read the command; refusing"
+readers="jq node"
+case "${OSTYPE:-}" in msys*|cygwin*) readers="node jq" ;; esac
+reader=""
+for r in $readers; do
+  if command -v "$r" >/dev/null 2>&1; then reader="$r"; break; fi
+done
+[ -n "$reader" ] || deny "neither jq nor node is on PATH, so this guard cannot read the command and refuses every Bash call. Ask the user to install node or jq (apt install jq), then start a new session"
+cmd=$("read_with_$reader") || deny "the tool input did not parse or has no command, so this guard cannot read it; refusing"
+# A native jq.exe writes CRLF, which would hide a `\`-newline continuation from the join below. A CR
+# anywhere else becomes a space: that can only split a word, so it adds checks and never hides one.
+cmd=${cmd//$'\r\n'/$'\n'}
+cmd=${cmd//$'\r'/ }
+cmd=${cmd//$'\\\n'/ }
 
 stripped=$(printf '%s\n' "$cmd" \
   | awk 'BEGIN{skip=0}
