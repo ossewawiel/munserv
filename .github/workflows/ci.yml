@@ -107,6 +107,10 @@ jobs:
         run: python3 scripts/test-infra-review-guard.py
       - name: Test the baseline guard
         run: python3 scripts/test-baseline-guard.py
+      - name: Test the hold guard
+        run: python3 scripts/test-hold-guard.py
+      - name: Test Auto PR
+        run: python3 scripts/test-auto-pr.py
       - name: Test the CI status job
         run: python3 scripts/test-ci-status.py
       - name: Test the CI watcher

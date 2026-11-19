@@ -30,8 +30,8 @@
 #        2 on usage or when the watch cannot give a verdict: no run appeared, a run did not finish,
 #        gh kept failing, or the head moved. None of these is a red run.
 #        3 when CI passed but the PR did not merge (conflict, behind, no auto-merge, closed, held
-#        by the infra review guard, the baseline guard or the CI edit guard, unreadable, or still
-#        open after MERGE_TIMEOUT).
+#        by the infra review guard, the baseline guard, the hold label or the CI edit guard,
+#        unreadable, or still open after MERGE_TIMEOUT).
 # Every CI line goes to stdout, and the last line of stdout is the result.
 set -euo pipefail
 
@@ -263,7 +263,7 @@ while true; do
   started=$SECONDS
   if ! pr_fields=$(gh pr view "$PR" --json state,mergeStateStatus,autoMergeRequest,statusCheckRollup,headRefOid \
     --jq 'def newest($name): [.statusCheckRollup[] | select(.name == $name)] | sort_by(.startedAt // "" | if startswith("0001-") then "9999" else . end) | (last.conclusion // "") | if . == "" then "NONE" else . end;
-      "\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null) \(newest("CI edit guard")) \(newest("Infra review guard")) \(newest("Baseline guard")) \(.headRefOid)"') || [[ -z "$pr_fields" ]]; then
+      "\(.state) \(.mergeStateStatus) \(.autoMergeRequest != null) \(newest("CI edit guard")) \(newest("Infra review guard")) \(newest("Baseline guard")) \(newest("Hold guard")) \(.headRefOid)"') || [[ -z "$pr_fields" ]]; then
     if (( merge_waited >= MERGE_TIMEOUT )); then
       echo "CI: green, not merging - cannot read the PR after ${MERGE_TIMEOUT}s; watch again"
       exit 3
@@ -272,7 +272,7 @@ while true; do
     sleep "$MERGE_POLL_SECONDS"
     continue
   fi
-  read -r state merge_state armed guard infra_guard baseline_guard head_now <<<"$pr_fields"
+  read -r state merge_state armed guard infra_guard baseline_guard hold_guard head_now <<<"$pr_fields"
   case "$state" in
     MERGED)
       echo "CI: green, merged"
@@ -301,6 +301,11 @@ while true; do
   fi
   if [[ "$baseline_guard" == "FAILURE" ]]; then
     echo "CI: green, not merging - held by baseline guard; a design-reviewer APPROVE on a ui: true story, or the owner on any other, releases it with gh pr edit $PR --add-label design-approved"
+    exit 3
+  fi
+  # Someone holds this PR on purpose; the PR comments say why. Never remove a hold you did not add.
+  if [[ "$hold_guard" == "FAILURE" ]]; then
+    echo "CI: green, not merging - held by the hold label; the PR comments say why, and whoever added it, or the owner, releases it with gh pr edit $PR --remove-label hold"
     exit 3
   fi
   # No agent can clear this one (#294).

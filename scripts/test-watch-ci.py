@@ -532,6 +532,42 @@ class MergePhase(unittest.TestCase):
         self.assertEqual(code, 3, out)
         self.assertIn("held by infra review guard", last_line(out))
 
+    def test_a_hold_label_is_not_red_and_names_the_release(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [{"name": "Hold guard", "conclusion": "FAILURE"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertIn("held by the hold label", last_line(out))
+        self.assertIn("gh pr edit 7 --remove-label hold", last_line(out))
+
+    def test_a_released_hold_is_not_a_hold(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [
+                  {"name": "Hold guard", "conclusion": "SUCCESS", "startedAt": "2026-11-19T10:05:00Z"},
+                  {"name": "Hold guard", "conclusion": "FAILURE", "startedAt": "2026-11-19T10:00:00Z"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertNotIn("held by", out)
+
+    def test_the_reviewer_and_the_design_go_before_the_hold(self):
+        for guard, expected in (("Infra review guard", "held by infra review guard"),
+                                ("Baseline guard", "held by baseline guard")):
+            with self.subTest(guard):
+                pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+                      "statusCheckRollup": [{"name": "Hold guard", "conclusion": "FAILURE"},
+                                            {"name": guard, "conclusion": "FAILURE"}]}
+                code, out = watch([view(ALL_PASSED)], pr=pr)
+                self.assertEqual(code, 3, out)
+                self.assertIn(expected, last_line(out))
+
+    def test_the_hold_goes_before_the_owners_ci_edit_release(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [{"name": "CI edit guard", "conclusion": "FAILURE"},
+                                    {"name": "Hold guard", "conclusion": "FAILURE"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertIn("held by the hold label", last_line(out))
+
     def test_a_guard_still_running_does_not_shift_the_other_guard(self):
         pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
               "statusCheckRollup": [{"name": "CI edit guard", "conclusion": ""},
