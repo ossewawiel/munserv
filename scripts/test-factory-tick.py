@@ -21,8 +21,16 @@ TICK = ROOT / "scripts" / "factory-tick.sh"
 CLAUDE_STUB = r"""#!/usr/bin/env python3
 import json, os, sys
 log = os.environ["STUB_LOG"]
+# `claude plugin ...` is the tick's bob-core step, not a run: it is logged apart so run counts hold.
+if sys.argv[1:2] == ["plugin"]:
+    with open(log, "a") as f:
+        f.write(json.dumps({"tool": "claude-plugin", "argv": sys.argv[1:]}) + "\n")
+    if sys.argv[2:4] == ["list", "--json"]:
+        print(os.environ.get("STUB_PLUGINS", '[{"id": "bob-core@prject-bob", "version": "0.3.0", "scope": "user", "enabled": true}]'))
+    sys.exit(0)
 with open(log, "a") as f:
-    f.write(json.dumps({"tool": "claude", "argv": sys.argv[1:], "otel": os.environ.get("OTEL_RESOURCE_ATTRIBUTES", "")}) + "\n")
+    f.write(json.dumps({"tool": "claude", "argv": sys.argv[1:], "otel": os.environ.get("OTEL_RESOURCE_ATTRIBUTES", ""),
+                        "bob_gate_log": os.environ.get("BOB_GATE_LOG", "")}) + "\n")
 if "--json-schema" in sys.argv:
     print(json.dumps({"type": "result", "subtype": "success", "is_error": False, "total_cost_usd": 0.04,
                       "structured_output": {"stories": json.loads(os.environ.get("STUB_PICKS", "[]")), "reason": "stub pick"}}))
@@ -68,6 +76,9 @@ class Sandbox:
         write_exe(bin_dir / "claude", CLAUDE_STUB)
         write_exe(bin_dir / "gh", GH_STUB)
         write_exe(bin_dir / "notify-send", "#!/bin/sh\nexit 0\n")
+        # The tick only checks that node exists (bob-core's hook runs on it); the stub keeps the cases off
+        # the runner's own node. path_without() takes it away again.
+        write_exe(bin_dir / "node", "#!/bin/sh\nexit 0\n")
         origin = tmp / "origin.git"
         git("init", "-q", "--bare", "-b", "master", str(origin), cwd=tmp)
         git("clone", "-q", str(origin), str(self.repo), cwd=tmp)
@@ -163,7 +174,7 @@ def case_dispatch(sb: Sandbox) -> list[str]:
         any("bypassPermissions" in a or "dangerously" in a for c in calls for a in c["argv"]) and "bypass flag used",
     ] if isinstance(e, str)]
     kinds = [(x["kind"], x.get("story")) for x in sb.ledger()]
-    if kinds != [("select", None), ("story", 12), ("skip", 14)]:
+    if kinds != [("bob", None), ("select", None), ("story", 12), ("skip", 14)]:
         errors.append(f"ledger {kinds}: the second story should be skipped once 6.75 + 0.04 + 3.21 reaches 10")
     story_row = next((x for x in sb.ledger() if x["kind"] == "story"), {})
     if story_row.get("summary") != "CI: green, merged / Plan: no step":
@@ -185,7 +196,7 @@ def case_nothing_ready(sb: Sandbox) -> list[str]:
     return [e for e in [
         r.returncode != 0 and f"exit {r.returncode}",
         len(sb.calls("claude")) != 1 and "story run without a pick",
-        [x["kind"] for x in sb.ledger()] != ["select"] and f"ledger {sb.ledger()}",
+        [x["kind"] for x in sb.ledger()] != ["bob", "select"] and f"ledger {sb.ledger()}",
     ] if isinstance(e, str)]
 
 
@@ -286,8 +297,8 @@ def case_retro_runs_once_on_its_day(sb: Sandbox) -> list[str]:
         sb.calls("claude")[0]["otel"] != "story.id=retro" and "retro not tagged for the cost meter",
     ] if isinstance(e, str)]
     kinds = [x["kind"] for x in sb.ledger()]
-    if kinds != ["retro", "select", "select"]:
-        errors.append(f"ledger kinds {kinds}, want retro then one select per tick")
+    if kinds != ["bob", "retro", "select", "bob", "select"]:
+        errors.append(f"ledger kinds {kinds}, want bob and retro, then bob and one select per tick")
     retro_row = next((x for x in sb.ledger() if x["kind"] == "retro"), {})
     if retro_row.get("total_cost_usd") != 1.25 or retro_row.get("summary") != "CI: green, merged":
         errors.append(f"retro ledger row {retro_row}")
@@ -352,7 +363,7 @@ def case_sync_pushes_a_branch_on_drift(sb: Sandbox) -> list[str]:
         len(sync_branches(sb)) != 1 and f"branches on origin {sync_branches(sb)}, want 1",
         bool(local.strip()) and f"local branch left behind: {local}",
         any("requirements-" in p.name for p in (sb.repo / ".claude" / "worktrees").glob("*")) and "worktree left behind",
-        [x["kind"] for x in sb.ledger()] != ["requirements_sync", "select"] and f"ledger {[x['kind'] for x in sb.ledger()]}",
+        [x["kind"] for x in sb.ledger()] != ["bob", "requirements_sync", "select"] and f"ledger {[x['kind'] for x in sb.ledger()]}",
     ] if isinstance(e, str)]
 
 
@@ -375,7 +386,7 @@ def case_sync_failure_keeps_the_tick_going(sb: Sandbox) -> list[str]:
     return [e for e in [
         r.returncode != 0 and f"exit {r.returncode}: {r.stderr}",
         "requirements sync failed" not in r.stderr and "failure not reported",
-        [x["kind"] for x in sb.ledger()] != ["select"] and f"ledger {[x['kind'] for x in sb.ledger()]}",
+        [x["kind"] for x in sb.ledger()] != ["bob", "select"] and f"ledger {[x['kind'] for x in sb.ledger()]}",
     ] if isinstance(e, str)]
 
 
@@ -424,6 +435,105 @@ def case_subagent_denials(sb: Sandbox) -> list[str]:
     return errors
 
 
+BOB_UPDATE_CALLS = [["plugin", "marketplace", "update", "prject-bob"], ["plugin", "update", "bob-core@prject-bob", "--scope", "user"]]
+
+
+def case_bob_core_updated_and_recorded(sb: Sandbox) -> list[str]:
+    r = sb.run(STUB_PICKS="[12]")
+    plugin = [c["argv"] for c in sb.calls("claude-plugin")]
+    kinds = [x["kind"] for x in sb.ledger()]
+    bob = next((x for x in sb.ledger() if x["kind"] == "bob"), {})
+    story = next((c for c in sb.calls("claude") if c["argv"][:2] == ["-p", "/factory story 12"]), None)
+    return [e for e in [
+        r.returncode != 0 and f"exit {r.returncode}: {r.stderr}",
+        plugin != [*BOB_UPDATE_CALLS, ["plugin", "list", "--json"]] and f"plugin calls {plugin}",
+        (bob.get("plugin"), bob.get("version")) != ("bob-core@prject-bob", "0.3.0") and f"bob ledger line {bob}",
+        "bob" in kinds and "select" in kinds and kinds.index("bob") > kinds.index("select") and f"bob recorded after the clerk: {kinds}",
+        story is None and "no story run",
+        story is not None and story["bob_gate_log"] != str(sb.state / "bob-gate.jsonl") and f"BOB_GATE_LOG {story and story['bob_gate_log']!r}",
+    ] if isinstance(e, str)]
+
+
+def case_bob_core_disabled_stops_the_tick(sb: Sandbox) -> list[str]:
+    r = sb.run(STUB_PICKS="[12]", STUB_PLUGINS='[{"id": "bob-core@prject-bob", "version": "0.3.0", "enabled": false}]')
+    last = sb.ledger()[-1] if sb.ledger() else {}
+    return [e for e in [
+        r.returncode != 1 and f"exit {r.returncode}, want 1",
+        sb.calls("claude") and "a run started without bob-core's gate",
+        "bob-core@prject-bob is not installed and enabled" not in last.get("reason", "") and f"last ledger line {last}",
+    ] if isinstance(e, str)]
+
+
+def case_bob_core_missing_stops_the_tick(sb: Sandbox) -> list[str]:
+    r = sb.run(STUB_PICKS="[12]", STUB_PLUGINS="[]")
+    return [e for e in [
+        r.returncode != 1 and f"exit {r.returncode}, want 1",
+        sb.calls("claude") and "a run started without bob-core installed",
+    ] if isinstance(e, str)]
+
+
+def case_bob_core_too_old_stops_the_tick(sb: Sandbox) -> list[str]:
+    r = sb.run(STUB_PICKS="[12]", STUB_PLUGINS='[{"id": "bob-core@prject-bob", "version": "0.2.0", "enabled": true}]')
+    last = sb.ledger()[-1] if sb.ledger() else {}
+    return [e for e in [
+        r.returncode != 1 and f"exit {r.returncode}, want 1",
+        sb.calls("claude") and "a run started on a bob-core that gates hand-backs as red",
+        "0.2.0 is older than 0.3.0" not in last.get("reason", "") and f"last ledger line {last}",
+    ] if isinstance(e, str)]
+
+
+def case_bob_core_version_compared_as_versions(sb: Sandbox) -> list[str]:
+    r = sb.run(STUB_PICKS="[]", STUB_PLUGINS='[{"id": "bob-core@prject-bob", "version": "0.10.0", "enabled": true}]')
+    bob = next((x for x in sb.ledger() if x["kind"] == "bob"), {})
+    return [e for e in [
+        r.returncode != 0 and f"exit {r.returncode}: {r.stderr}",
+        bob.get("version") != "0.10.0" and f"bob ledger line {bob}, want 0.10.0 accepted",
+    ] if isinstance(e, str)]
+
+
+def path_without(sb: Sandbox, tool: str) -> str:
+    """sb's PATH with `tool` gone: every PATH folder that holds it is swapped for a shim folder that links
+    everything else in it, so bash, jq and git still resolve."""
+    shim = sb.tmp / "shim"
+    shim.mkdir(exist_ok=True)
+    dirs: list[str] = []
+    for d in sb.env["PATH"].split(":"):
+        folder = Path(d)
+        if not (folder / tool).exists():
+            dirs.append(d)
+            continue
+        for f in folder.iterdir():
+            if f.name != tool and not (shim / f.name).exists():
+                try:
+                    (shim / f.name).symlink_to(f)
+                except OSError:
+                    pass
+        if str(shim) not in dirs:
+            dirs.append(str(shim))
+    return ":".join(dirs)
+
+
+def case_no_node_stops_the_tick(sb: Sandbox) -> list[str]:
+    r = sb.run(STUB_PICKS="[12]", PATH=path_without(sb, "node"))
+    last = sb.ledger()[-1] if sb.ledger() else {}
+    return [e for e in [
+        r.returncode != 1 and f"exit {r.returncode}, want 1: {r.stderr}",
+        sb.calls("claude") and "a run started with no node for bob-core's hook",
+        "node is not on PATH" not in last.get("reason", "") and f"last ledger line {last}",
+    ] if isinstance(e, str)]
+
+
+def case_bob_update_off_pins_bob_core(sb: Sandbox) -> list[str]:
+    sb.set_env("BOB_UPDATE=0")
+    r = sb.run(STUB_PICKS="[]")
+    plugin = [c["argv"] for c in sb.calls("claude-plugin")]
+    return [e for e in [
+        r.returncode != 0 and f"exit {r.returncode}: {r.stderr}",
+        plugin != [["plugin", "list", "--json"]] and f"plugin calls {plugin}, want only the list",
+        not any(x["kind"] == "bob" for x in sb.ledger()) and "bob version not recorded",
+    ] if isinstance(e, str)]
+
+
 def spent(amount: float) -> list[dict]:
     return [{"date": TODAY, "kind": "story", "total_cost_usd": amount}, {"date": "2000-01-01", "total_cost_usd": 99}]
 
@@ -450,6 +560,13 @@ CASES = [
     ("an open sync PR holds the next sync", case_sync_waits_for_an_open_pr, {}),
     ("a failed sync does not stop the tick", case_sync_failure_keeps_the_tick_going, {}),
     ("a dry run does not sync", case_sync_skipped_in_dry_run, {}),
+    ("bob-core is updated and its version recorded before the clerk", case_bob_core_updated_and_recorded, {}),
+    ("a disabled bob-core stops the tick before any run", case_bob_core_disabled_stops_the_tick, {}),
+    ("a missing bob-core stops the tick before any run", case_bob_core_missing_stops_the_tick, {}),
+    ("a bob-core below BOB_MIN_VERSION stops the tick before any run", case_bob_core_too_old_stops_the_tick, {}),
+    ("bob-core versions compare as versions (0.10.0 passes 0.3.0)", case_bob_core_version_compared_as_versions, {}),
+    ("no node on PATH stops the tick before any run", case_no_node_stops_the_tick, {}),
+    ("BOB_UPDATE=0 pins bob-core", case_bob_update_off_pins_bob_core, {}),
 ]
 
 

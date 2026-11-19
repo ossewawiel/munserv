@@ -61,7 +61,9 @@
       "Bash(python3 scripts/retro-gather.py*)",
       "Bash(python3 scripts/lint-handoffs.py*)",
       "Bash(python3 scripts/test-*.py)",
-      "Bash(cd .claude/worktrees/retro-*)"
+      "Bash(cd .claude/worktrees/retro-*)",
+      "Bash(claude plugin list --json)",
+      "Bash(node --version)"
     ],
     "deny": [
       "Read(./.env)",
@@ -78,7 +80,9 @@
       "Bash(gh api -X DELETE*)",
       "Bash(gh api --method DELETE*)",
       "Bash(docker compose down --volumes*)",
-      "Read(./web/.env*)"
+      "Read(./web/.env*)",
+      "Edit(**/.bob/**/*.json)",
+      "Write(**/.bob/**/*.json)"
     ]
   },
   "hooks": {

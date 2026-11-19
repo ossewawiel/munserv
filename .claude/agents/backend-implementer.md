@@ -10,12 +10,6 @@ skills:
 isolation: worktree
 maxTurns: 200
 color: purple
-hooks:
-  Stop:
-    - hooks:
-        - type: command
-          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/verify-platform.sh backend"
-          timeout: 900
 ---
 
 You implement exactly one backend story from its handoff. Nothing else.

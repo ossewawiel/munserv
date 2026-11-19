@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Stop hook for implementer agents: refuse to finish while the platform's own gate is red.
+# Not wired any more: bob-core's gate replaces it (.bob/factory.json, prject-bob ADR-0029). Kept, with its
+# CI cases, so the cutover can be reverted until the canary verdict; removed after it.
 # Usage: verify-platform.sh <backend|web|mobile>
 # The agent may end with a message containing "BLOCKED:" to hand the story back with a reason.
 # Order: BLOCKED escape, environment probe, green cache, loop breaker, gate.
