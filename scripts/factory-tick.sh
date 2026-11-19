@@ -178,6 +178,7 @@ bob_version="$({ claude plugin list --json 2>/dev/null || echo '[]'; } \
 [[ -n "$bob_version" ]] || stop "$BOB_PLUGIN is not installed and enabled; the implementers would run ungated"
 record bob --arg plugin "$BOB_PLUGIN" --arg version "$bob_version"
 echo "factory-tick: $BOB_PLUGIN $bob_version"
+
 # Bring specs/requirements back in step with GitHub from a throwaway worktree: closing an issue drifts
 # a row, and CI checks only the rows a PR changes. auto-pr.yml opens and merges the branch. Costs no Claude.
 sync_requirements() {
