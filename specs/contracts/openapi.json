@@ -1777,6 +1777,7 @@
       "StatsResponse" : {
         "properties" : {
           "avgResolutionDays" : {
+            "description" : "Mean days from reported to fixed over issues fixed in the last 90 days, one decimal; absent when none was fixed",
             "format" : "double",
             "type" : [ "null", "number" ]
           },
