@@ -547,6 +547,10 @@ class ConfigDefaultsTests(unittest.TestCase):
             self.assertEqual(cfg.sections, {})
             self.assertTrue(cfg.section_enabled("overview"))
 
+    def test_eyeball_merged_days_defaults_to_14(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(Config(console_dir=Path(d), root=Path(d)).eyeball_merged_days, 14)
+
     def test_section_can_be_disabled(self):
         with tempfile.TemporaryDirectory() as d:
             console_dir = Path(d)
@@ -1234,6 +1238,155 @@ class HandoffLookupCaseTests(unittest.TestCase):
         self.assertEqual(eyeball.match_handoff(files, "fix123"), files[1])
         self.assertEqual(eyeball.match_handoff(files, "W29"), files[2])
         self.assertIsNone(eyeball.match_handoff(files, "W2"))
+
+
+def _handoff(story: str, ui: bool = False, user_facing: bool = False) -> str:
+    return (f"---\nstory: {story}\nplatform: backend\nui: {str(ui).lower()}\n"
+            f"user_facing: {str(user_facing).lower()}\n---\n\n## Eyeball\n```yaml\n"
+            f"- id: E1\n  title: t\n  as: none\n```\n")
+
+
+class IssueHandoffLookupTests(unittest.TestCase):
+    """FIX329: a PR's handoff is found from its closing issue, not only from a `story:` label."""
+
+    NAMES = [
+        "specs/features/a/055-B14-avg-resolution-days-backend.md",
+        "specs/features/a/329-eyeball-merged-prs-investigation.md",
+        "specs/features/a/329-FIX329-eyeball-merged-prs-infra.md",
+        "specs/features/a/5550-W99-other-web.md",
+    ]
+
+    def test_issue_lookup_ignores_investigation_records(self):
+        self.assertEqual(eyeball.issue_handoff_names(self.NAMES, 329),
+                         ["specs/features/a/329-FIX329-eyeball-merged-prs-infra.md"])
+
+    def test_issue_lookup_accepts_zero_padding(self):
+        self.assertEqual(eyeball.issue_handoff_names(self.NAMES, 55),
+                         ["specs/features/a/055-B14-avg-resolution-days-backend.md"])
+        self.assertEqual(eyeball.issue_handoff_names(self.NAMES, 5), [])
+
+    def _find(self, files: dict[str, str], issues: list[int], story: str | None):
+        def fake_gh_run(args):
+            if args[1] == "ls-tree":
+                return "\n".join(files) + "\n"
+            path = args[2].split(":", 1)[1]
+            return files[path]
+        with patch.object(eyeball, "gh_run", fake_gh_run):
+            return eyeball.find_handoff("abc123", issues, story)
+
+    def test_issue_lookup_skips_a_handoff_with_neither_flag(self):
+        files = {"specs/features/a/060-B20-x-backend.md": _handoff("B20"),
+                 "specs/features/a/060-W20-x-web.md": _handoff("W20", ui=True)}
+        self.assertEqual(self._find(files, [60], None), ("specs/features/a/060-W20-x-web.md", files["specs/features/a/060-W20-x-web.md"]))
+        files = {"specs/features/a/060-B20-x-backend.md": _handoff("B20")}
+        self.assertIsNone(self._find(files, [60], None))
+
+    def test_lookup_falls_back_to_story_label(self):
+        files = {"specs/features/a/070-W31-quick-login-web.md": _handoff("W31")}
+        self.assertEqual(self._find(files, [], "W31"),
+                         ("specs/features/a/070-W31-quick-login-web.md", files["specs/features/a/070-W31-quick-login-web.md"]))
+
+
+class BuildCandidatesTests(unittest.TestCase):
+    """FIX329: open PRs are found by closing issue as well as label, and merged ui/user_facing PRs
+    with no eyeball:* label stay listed with stage `merged`."""
+
+    FILES = {
+        "specs/features/a/055-B14-avg-backend.md": _handoff("B14", user_facing=True),
+        "specs/features/a/056-B15-plain-backend.md": _handoff("B15"),
+        "specs/features/a/057-W31-login-web.md": _handoff("W31", ui=True),
+    }
+
+    def _build(self, open_prs: list[dict], merged_prs: list[dict]) -> list[dict]:
+        def fake_gh_json(*args):
+            if "--state" in args:
+                return open_prs if args[args.index("--state") + 1] == "open" else merged_prs
+            raise AssertionError(args)
+
+        def fake_gh_run(args):
+            if args[1] == "fetch":
+                return ""
+            if args[1] == "ls-tree":
+                return "\n".join(self.FILES) + "\n"
+            return self.FILES[args[2].split(":", 1)[1]]
+
+        eyeball._cache["candidates"] = None
+        with patch.object(eyeball, "gh_json", fake_gh_json), patch.object(eyeball, "gh_run", fake_gh_run), \
+                patch.object(eyeball, "pr_verdict_sources", lambda n, r: []), \
+                patch.object(eyeball, "repo", lambda: "o/r"):
+            try:
+                return [c for c in eyeball.build_candidates(force=True) if c["kind"] == "pr"]
+            finally:
+                eyeball._cache["candidates"] = None
+
+    @staticmethod
+    def _open(number: int, issue: int | None, labels: tuple[str, ...] = ()) -> dict:
+        return {"number": number, "title": f"pr {number}", "headRefName": f"b{number}", "url": f"u{number}",
+                "reviewDecision": "", "labels": [{"name": n} for n in labels],
+                "closingIssuesReferences": [{"number": issue}] if issue else []}
+
+    @staticmethod
+    def _merged(number: int, issue: int, labels: tuple[str, ...] = ()) -> dict:
+        return {"number": number, "title": f"pr {number}", "baseRefName": "master", "url": f"u{number}",
+                "labels": [{"name": n} for n in labels], "mergeCommit": {"oid": f"sha{number}"},
+                "closingIssuesReferences": [{"number": issue}]}
+
+    def test_open_pr_without_story_label_is_found_by_closing_issue(self):
+        [c] = self._build([self._open(100, 55)], [])
+        self.assertEqual((c["id"], c["story"], c["branch"], c["merged"]), ("pr-100", "B14", "b100", False))
+        self.assertEqual([k["id"] for k in c["checks"]], ["E1"])
+
+    def test_story_labelled_open_pr_is_still_listed(self):
+        [c] = self._build([self._open(101, None, ("story:W31",))], [])
+        self.assertEqual((c["story"], c["handoff_path"]), ("W31", "specs/features/a/057-W31-login-web.md"))
+
+    def test_open_pr_without_label_or_flagged_handoff_is_not_listed(self):
+        self.assertEqual(self._build([self._open(102, 56)], []), [])
+
+    def test_merged_user_facing_pr_is_a_candidate(self):
+        [c] = self._build([], [self._merged(200, 55)])
+        self.assertEqual((c["id"], c["stage"], c["branch"], c["merged"], c["story"]),
+                         ("pr-200", "merged", "master", True, "B14"))
+        self.assertEqual([k["id"] for k in c["checks"]], ["E1"])
+
+    def test_merged_pr_with_eyeball_label_is_not_listed(self):
+        self.assertEqual(self._build([], [self._merged(201, 55, ("eyeball:pass",))]), [])
+
+    def test_merged_pr_without_flag_is_not_listed(self):
+        self.assertEqual(self._build([], [self._merged(202, 56)]), [])
+
+
+class SubmitGhFailureTests(unittest.TestCase):
+    """FIX329: a failed `gh pr comment` / `gh pr edit` is a 502, never a reported label."""
+
+    CANDIDATE = {"id": "pr-9", "kind": "pr", "number": 9, "story": "B14", "platform": "backend", "url": "u",
+                 "checks": [{"id": "E1", "title": "t", "as": "none", "steps": [], "expect": "e"}]}
+
+    def _submit(self, failing: str):
+        class Result:
+            def __init__(self, code: int, out: str, err: str) -> None:
+                self.returncode, self.stdout, self.stderr = code, out, err
+
+        def fake_run_captured(args, cwd=None, check=True):
+            if args[:3] == ["gh", "pr", failing]:
+                return Result(1, "", "HTTP 403: denied")
+            return Result(0, "https://github.com/o/r/pull/9#c1\n", "")
+
+        data = {"candidate": "pr-9", "checks": {"E1": {"result": "pass", "note": ""}}, "observations": []}
+        with tempfile.TemporaryDirectory() as d, patch.object(eyeball, "ensure_labels", lambda: None), \
+                patch.object(eyeball, "run_captured", fake_run_captured), patch.object(eyeball, "repo", lambda: "o/r"):
+            with self.assertRaises(gitops.ApiError) as ctx:
+                eyeball.submit(self.CANDIDATE, data, Path(d))
+            saved = eyeball.load_results(Path(d), "pr-9")
+        self.assertEqual(ctx.exception.status, 502)
+        self.assertIn("HTTP 403: denied", str(ctx.exception))
+        self.assertNotIn("last_submission", saved)
+
+    def test_submit_raises_502_when_label_edit_fails(self):
+        self._submit("edit")
+
+    def test_submit_raises_502_when_comment_fails(self):
+        self._submit("comment")
 
 
 # --- remote eyeball -----------------------------------------------------------

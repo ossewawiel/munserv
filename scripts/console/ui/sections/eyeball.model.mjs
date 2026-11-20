@@ -62,6 +62,7 @@ const STAGE_LABELS = {
   in_review: 'In review',
   awaiting_eyeball: 'Awaiting eyeball',
   ready_to_merge: 'Ready to merge',
+  merged: 'Merged, awaiting eyeball',
 };
 
 const STAGE_CLASSES = {
@@ -69,6 +70,7 @@ const STAGE_CLASSES = {
   in_review: 'warn',
   awaiting_eyeball: 'accent',
   ready_to_merge: 'good',
+  merged: 'accent',
 };
 
 export function stageLabel(stage) {
