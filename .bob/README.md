@@ -27,8 +27,10 @@ implementer that could edit it could switch its own gate off. `.claude/settings.
 
 **CI checks that the two lists agree** (`scripts/check-bob-factory.py`, in the domain job). It fails when a
 key in `agents` has no `.claude/agents/<key>.md` (a renamed agent leaves its gate guarding a name nobody
-dispatches), when an agent file named `*implementer` has no key (bob-core would never gate it), and when a
-key's pack has no gate or a gate has no `command`. Rename an implementer in both places in one PR.
+dispatches), when an agent file named `*implementer` has no key (bob-core would never gate it), when a
+pack name is not `bob-<name>` (bob-core rejects it and lets the agent go ungated), and when a key's pack
+has no gate, a gate has no `command`, or `handback` is missing. Rename an implementer in both places in
+one PR.
 
 ## Setup on every machine that runs implementers (once, as that user)
 

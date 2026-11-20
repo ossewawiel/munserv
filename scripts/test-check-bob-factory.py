@@ -115,7 +115,7 @@ class CheckBobFactoryTest(unittest.TestCase):
         self.assertOneProblem("agent `web-implementer` must name a pack")
 
     def test_empty_agents_is_a_problem(self):
-        self.write({"agents": {}, "gates": {}}, {"reviewer": None})
+        self.write({"agents": {}, "handback": "BLOCKED:", "gates": {}}, {"reviewer": None})
         self.assertOneProblem("`agents` must be a non-empty object")
 
     def test_a_blank_handback_is_a_problem(self):
@@ -130,6 +130,65 @@ class CheckBobFactoryTest(unittest.TestCase):
 
     def test_a_missing_file_is_a_problem(self):
         self.assertOneProblem("is missing")
+
+    def test_a_pack_name_bob_core_rejects_is_a_problem(self):
+        # PR 320 review B1: bob-core takes only bob-<name>; otherwise it blocks once and lets the agent go.
+        for pack in ("kotlin", "bob-", "Bob-kotlin", "bob_kotlin", "bob-kotlin:implementer"):
+            with self.subTest(pack):
+                config = json.loads(json.dumps(GOOD))
+                config["agents"]["backend-implementer"] = pack
+                config["gates"][pack] = {"command": "x"}
+                self.write(config)
+                self.assertOneProblem("which bob-core rejects")
+
+    def test_pack_names_bob_core_accepts_pass(self):
+        config = json.loads(json.dumps(GOOD))
+        config["agents"]["backend-implementer"] = "bob-kotlin-2"
+        config["gates"]["bob-kotlin-2"] = {"command": "x"}
+        self.write(config)
+        self.assertEqual(self.problems(), [])
+
+    def raw(self, name: str, text: bytes) -> None:
+        (self.root / ".claude" / "agents" / f"{name}.md").write_bytes(text)
+
+    def test_a_quoted_name_on_an_implementer_with_no_key_is_a_problem(self):
+        # PR 320 review B2: the quotes must not hide the implementer suffix.
+        self.write(GOOD)
+        self.raw("mobile-implementer", b'---\nname: "mobile-implementer"\ndescription: x\n---\n')
+        self.assertOneProblem("`mobile-implementer` is an implementer with no entry")
+
+    def test_an_implementer_file_name_with_another_frontmatter_name_is_a_problem(self):
+        self.write(GOOD)
+        self.raw("mobile-implementer", b"---\nname: mobile-builder\ndescription: x\n---\n")
+        self.assertOneProblem("is an implementer with no entry")
+
+    def test_quotes_a_comment_and_a_bom_on_a_keyed_agent_pass(self):
+        self.write(GOOD, {"reviewer": None})
+        self.raw("backend-implementer", b"\xef\xbb\xbf---\nname: 'backend-implementer'  # the Kotlin one\n---\n")
+        self.raw("web-implementer", b'---\nname: "web-implementer"\n---\n')
+        self.assertEqual(self.problems(), [])
+
+    def test_an_agent_file_that_is_not_utf8_is_a_problem_not_a_crash(self):
+        self.write(GOOD)
+        self.raw("designer", b"---\nname: designer\ndescription: caf\xe9\n---\n")
+        self.assertOneProblem("designer.md is not UTF-8")
+
+    def test_frontmatter_that_is_not_yaml_is_a_problem(self):
+        self.write(GOOD)
+        self.raw("designer", b"---\nname: [designer\n---\n")
+        self.assertOneProblem("frontmatter is not valid YAML")
+
+    def test_a_missing_handback_is_a_problem(self):
+        config = json.loads(json.dumps(GOOD))
+        del config["handback"]
+        self.write(config)
+        self.assertOneProblem("`handback` must be a non-empty string")
+
+    def test_a_string_gate_is_refused_as_munserv_rule(self):
+        config = json.loads(json.dumps(GOOD))
+        config["gates"]["bob-react"] = "cd web && pnpm test:run"
+        self.write(config)
+        self.assertOneProblem("munserv's rule")
 
     def test_the_repo_itself_passes(self):
         self.assertEqual(check.problems(ROOT), [])
