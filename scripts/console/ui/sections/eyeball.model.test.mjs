@@ -95,6 +95,8 @@ test('stageLabel and stageChipClass cover every known stage', () => {
   assert.equal(stageLabel('ready_to_merge'), 'Ready to merge');
   assert.equal(stageChipClass('ready_to_merge'), 'good');
   assert.equal(stageLabel('awaiting_eyeball'), 'Awaiting eyeball');
+  assert.equal(stageLabel('merged'), 'Merged, awaiting eyeball');
+  assert.equal(stageChipClass('merged'), 'accent');
   assert.equal(stageLabel(null), null);
 });
 

@@ -7,6 +7,7 @@ accent: "#233D36" # design/tokens/color.tokens.json: brand.primary
 checkout_dir: munserv-console
 handoff_glob: specs/features
 story_label_prefix: "story:"
+eyeball_merged_days: 14 # merged ui/user_facing PRs with no eyeball:* label stay listed this long
 
 domain_language: domain/language.yaml
 requirements_dir: specs/requirements

@@ -362,6 +362,15 @@ class EyeballScreenTest(StubbedTuiCase):
             self.assertIn("PR #12", str(screen.query_one("#candidates").render()))
         self.run_eyeball(scenario)
 
+    def test_a_merged_candidate_says_merged_in_the_list(self) -> None:
+        self.stub.candidates[1]["stage"] = "merged"
+
+        async def scenario(screen, pilot) -> None:
+            listing = str(screen.query_one("#candidates").render())
+            self.assertIn("PR #13", listing)
+            self.assertIn("merged", listing)
+        self.run_eyeball(scenario)
+
     def test_only_a_command_step_gets_a_run_key_and_its_output_shows_under_it(self) -> None:
         async def scenario(screen, pilot) -> None:
             self.assertEqual(self.cards(screen).count("press"), 1)

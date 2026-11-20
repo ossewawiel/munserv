@@ -24,7 +24,7 @@ from .runner import command_of, run_command
 
 RESULT_MARK = {"pass": ("PASS", "#5DBE8A"), "fail": ("FAIL", "#FF6B62"), None: ("not checked", "#9AA3B2")}
 STAGE_WORDS = {"in_progress": "in progress", "in_review": "in review", "awaiting_eyeball": "awaiting eyeball",
-               "ready_to_merge": "ready to merge"}
+               "ready_to_merge": "ready to merge", "merged": "merged"}
 MAX_STEP_KEYS = 9
 EMPTY_ENTRY = {"result": None, "note": "", "issue_url": None, "issue_reused": False}
 
