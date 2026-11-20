@@ -51,13 +51,7 @@
       "Edit(./mobile/**)",
       "Edit(./specs/**)",
       "Edit(./domain/**)",
-      "Write(./backend/**)",
-      "Write(./web/**)",
-      "Write(./mobile/**)",
-      "Write(./specs/**)",
-      "Write(./domain/**)",
       "Edit(./design/**)",
-      "Write(./design/**)",
       "Bash(python3 scripts/retro-gather.py*)",
       "Bash(python3 scripts/lint-handoffs.py*)",
       "Bash(python3 scripts/test-*.py)",
@@ -81,8 +75,7 @@
       "Bash(gh api --method DELETE*)",
       "Bash(docker compose down --volumes*)",
       "Read(./web/.env*)",
-      "Edit(**/.bob/**/*.json)",
-      "Write(**/.bob/**/*.json)"
+      "Edit(**/.bob/**/*.json)"
     ]
   },
   "hooks": {
