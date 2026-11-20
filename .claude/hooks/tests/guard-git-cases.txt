@@ -303,3 +303,15 @@ B
 cat <<'EOF'
 git push --force is what the guard refuses
 EOF
+2	echo \<<EOF
+git push -f origin feat/x
+EOF
+2	echo $'it\'s <<EOF'
+git push -f origin feat/x
+EOF
+2	$'\x67it' push -f origin feat/x
+2	$'\147it' push -f origin feat/x
+2	$'git' push -f origin feat/x
+2	bash -c $'git\x20push\x20-f\x20origin\x20feat/x'
+0	echo $'line\none' && git status
+0	printf $'a\tb\n' && git log --oneline -1

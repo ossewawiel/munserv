@@ -29,6 +29,28 @@ function quoted(c, out,   lc) {
   return c
 }
 
+# One $'...' escape at position k (a backslash): sets `decoded` and returns the index after it.
+# \xHH, \NNN, \uHHHH and \UHHHHHHHH become their character, so $'\x67it' reads as git; a character
+# outside printable ASCII becomes ?.
+function ansi(s, k,   e, m, h, lim, v) {
+  e = substr(s, k + 1, 1)
+  if (e == "x" || e == "u" || e == "U") {
+    lim = (e == "x") ? 2 : (e == "u") ? 4 : 8; m = k + 2; h = ""
+    while (length(h) < lim && substr(s, m, 1) ~ /[0-9A-Fa-f]/) { h = h substr(s, m, 1); m++ }
+    decoded = chr(num(h, 16)); return m
+  }
+  if (e ~ /[0-7]/) {
+    m = k + 1; h = ""
+    while (length(h) < 3 && substr(s, m, 1) ~ /[0-7]/) { h = h substr(s, m, 1); m++ }
+    decoded = chr(num(h, 8)); return m
+  }
+  if (e == "n") { decoded = "\n"; return k + 2 }
+  if (e == "t") { decoded = "\t"; return k + 2 }
+  decoded = e; return k + 2
+}
+function num(h, base,   v, i) { v = 0; for (i = 1; i <= length(h); i++) v = v * base + index("0123456789abcdef", tolower(substr(h, i, 1))) - 1; return v }
+function chr(v) { return (v >= 32 && v < 127) || v == 9 || v == 10 ? sprintf("%c", v) : "?" }
+
 function escapes(ch) { return (ch == "\\" && ps != "1") || (ch == "`" && ps == "1") }
 
 # Index of the quote closing the double quote at p, past escapes and $(...); 0 when there is none.
@@ -102,7 +124,7 @@ function tok(s,   out, i, n, c, nx, j, k, buf, raw, prev, atword, closed) {
       buf = ""; k = i + 2; closed = 0
       while (k <= n) {
         c = substr(s, k, 1)
-        if (c == "\\") { buf = buf substr(s, k + 1, 1); k += 2; continue }
+        if (c == "\\") { k = ansi(s, k); buf = buf decoded; continue }
         if (c == "'") { closed = 1; k++; break }
         buf = buf c; k++
       }

@@ -33,7 +33,7 @@ function closebody(   b, txt) {
 }
 
 # Quote state carried across the lines of a record (bash mode): a stack of contexts, code (c), double
-# quote (d), single quote (s). $( opens code again inside a double quote, so the heredoc in
+# quote (d), single quote (s), $'...' (a). $( opens code again inside a double quote, so the heredoc in
 # --body "$(cat <<'EOF' is real, while a <<EOF on the second line of a multi-line "..." is text.
 # Heredoc bodies do not move the state; a # comment in code ends the line; each \036 resets it.
 function reset() { top = 1; st[1] = "c" }
@@ -45,10 +45,14 @@ function walk(l, p,   k, n, ch, cur, prev) {
   for (k = 1; k <= n; k++) {
     if (k == p) atq = (st[top] != "c")
     ch = substr(l, k, 1); cur = st[top]
-    if (cur != "s" && ch == "\\") { if (k + 1 == p) atq = (st[top] != "c"); k++; continue }
+    # An escaped < before << is a literal character: `echo \<<EOF` redirects from a file, no heredoc.
+    if (cur != "s" && ch == "\\") { if (k + 1 == p) atq = 1; k++; continue }
     if (cur == "s") { if (ch == "'") top--; continue }
-    if (ch == "$" && substr(l, k + 1, 1) == "(") { st[++top] = "c"; if (k + 1 == p) atq = 0; k++; continue }
+    if (cur == "a") { if (ch == "'") top--; continue }
+    if (ch == "$" && substr(l, k + 1, 1) == "(") { st[++top] = "c"; k++; continue }
     if (cur == "d") { if (ch == "\"") top--; continue }
+    # $'...' (code only): a backslash escapes, as the tokenizer reads it, so $'it\'s <<EOF' is text.
+    if (ch == "$" && substr(l, k + 1, 1) == "'") { st[++top] = "a"; k++; continue }
     prev = (k == 1) ? " " : substr(l, k - 1, 1)
     if (ch == "#" && prev ~ /[ \t;&|(]/) break
     if (ch == "'") st[++top] = "s"
