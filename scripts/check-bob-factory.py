@@ -93,7 +93,8 @@ def problems(root: Path) -> list[str]:
         if not isinstance(pack, str) or not pack:
             found.append(f".bob/factory.json: agent `{agent}` must name a pack (a string), not {pack!r}")
             continue
-        if not PACK_NAME.match(pack):
+        # fullmatch: Python's `$` also matches before a trailing newline, and JavaScript's (bob-core) does not.
+        if not PACK_NAME.fullmatch(pack):
             found.append(f".bob/factory.json: agent `{agent}` names pack `{pack}`, which bob-core rejects (it takes only bob-<name>); the gate would never run")
         md = agents_dir / f"{agent}.md"
         if not md.is_file():
@@ -105,7 +106,7 @@ def problems(root: Path) -> list[str]:
 
     for pack, gate in gates.items():
         if not isinstance(gate, dict):
-            found.append(f".bob/factory.json: gate `{pack}` must be an object with `command` and `commandWindows` (munserv's rule; bob-core also takes a plain string)")
+            found.append(f".bob/factory.json: gate `{pack}` must be an object with a `command` and, optionally, a `commandWindows` (munserv's rule; bob-core also takes a plain string)")
             continue
         if not isinstance(gate.get("command"), str) or not gate["command"].strip():
             found.append(f".bob/factory.json: gate `{pack}` has no `command`")

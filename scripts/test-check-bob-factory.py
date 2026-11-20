@@ -102,6 +102,12 @@ class CheckBobFactoryTest(unittest.TestCase):
         self.write(config)
         self.assertOneProblem("gate `bob-react` has no `command`")
 
+    def test_a_string_gate_is_a_problem_and_says_command_windows_is_optional(self):
+        config = json.loads(json.dumps(GOOD))
+        config["gates"]["bob-react"] = "cd web && pnpm test"
+        self.write(config)
+        self.assertOneProblem("gate `bob-react` must be an object with a `command` and, optionally, a `commandWindows`")
+
     def test_a_blank_command_windows_is_a_problem(self):
         config = json.loads(json.dumps(GOOD))
         config["gates"]["bob-kotlin"]["commandWindows"] = " "
@@ -133,7 +139,8 @@ class CheckBobFactoryTest(unittest.TestCase):
 
     def test_a_pack_name_bob_core_rejects_is_a_problem(self):
         # PR 320 review B1: bob-core takes only bob-<name>; otherwise it blocks once and lets the agent go.
-        for pack in ("kotlin", "bob-", "Bob-kotlin", "bob_kotlin", "bob-kotlin:implementer"):
+        # "bob-kotlin\n": Python's `$` matches before a trailing newline; bob-core's JavaScript `$` does not.
+        for pack in ("kotlin", "bob-", "Bob-kotlin", "bob_kotlin", "bob-kotlin:implementer", "bob-kotlin\n"):
             with self.subTest(pack):
                 config = json.loads(json.dumps(GOOD))
                 config["agents"]["backend-implementer"] = pack
