@@ -1,4 +1,5 @@
-"""Eyeball flow: candidates (open story:* PRs plus the smoke checklist), handoff parsing, results
+"""Eyeball flow: candidates (open PRs with a story: label or a ui/user_facing handoff, recently merged
+ui/user_facing PRs with no eyeball:* label, plus the smoke checklist), handoff parsing, results
 storage, and GitHub submit effects (comment, eyeball:* label, source:eyeball issues).
 
 This is the same logic the standalone scripts/eyeball.py used to own, now folded into the console
@@ -98,12 +99,126 @@ def match_handoff(names: list[str], story: str) -> str | None:
     return None
 
 
-def find_handoff_path(branch: str, story: str) -> str | None:
+HANDOFF_PLATFORMS = ("backend", "web", "mobile", "infra")
+
+
+def issue_handoff_names(names: list[str], issue: int) -> list[str]:
+    """Handoff files for `issue`: `<issue>-...-<platform>.md`, the number zero-padded or not.
+    An investigation record (`<issue>-...-investigation.md`) is not a handoff."""
+    pattern = re.compile(rf"^0*{issue}-.+-(?:{'|'.join(HANDOFF_PLATFORMS)})\.md$")
+    return sorted(n for n in names if pattern.match(n.rsplit("/", 1)[-1]))
+
+
+def handoff_flagged(text: str) -> bool:
+    """True when the handoff's frontmatter has `ui` or `user_facing` true; False when it does not
+    parse, since an unreadable handoff cannot say it needs an eyeball."""
     try:
-        names = gh_run(["git", "ls-tree", "-r", "--name-only", f"origin/{branch}", "--", CONFIG.handoff_glob])
+        fm, _ = frontmatter_and_body(text)
+    except EyeballParseError:
+        return False
+    return fm.get("ui") is True or fm.get("user_facing") is True
+
+
+def find_handoff(ref: str, issues: list[int], story: str | None) -> tuple[str, str] | None:
+    """(path, text) of a PR's handoff at `ref`. Tries each closing issue in turn and takes the first
+    handoff with `ui` or `user_facing` true; falls back to the `story:` label match, flagged or not."""
+    try:
+        names = gh_run(["git", "ls-tree", "-r", "--name-only", ref, "--", CONFIG.handoff_glob]).splitlines()
     except CommandError:
         return None
-    return match_handoff(names.splitlines(), story)
+
+    def show(path: str) -> str:
+        try:
+            return gh_run(["git", "show", f"{ref}:{path}"])
+        except CommandError:
+            return ""
+
+    for issue in issues:
+        for path in issue_handoff_names(names, issue):
+            text = show(path)
+            if handoff_flagged(text):
+                return path, text
+    if story:
+        path = match_handoff(names, story)
+        if path:
+            return path, show(path)
+    return None
+
+
+def pr_candidate(pr: dict, labels: list[str], branch: str, story: str | None, stage: str | None,
+                 merged: bool, found: tuple[str, str] | None) -> dict:
+    """One PR row of the Eyeball list. `found` is the handoff (path, text) at the ref the row
+    reads: the head branch of an open PR, or the merge commit of a merged one."""
+    platform = next((l.split(":", 1)[1] for l in labels if l.startswith("platform:")), "")
+    handoff_path, handoff_text = found or (None, "")
+    checks: list = []
+    parse_error = None
+    if handoff_text:
+        try:
+            fm, body = frontmatter_and_body(handoff_text)
+            checks = eyeball_block(body)
+            platform = fm.get("platform", platform)
+            story = story or fm.get("story")
+        except EyeballParseError as e:
+            checks = []
+            parse_error = str(e)
+    return {
+        "id": f"pr-{pr['number']}", "kind": "pr", "number": pr["number"], "title": pr["title"],
+        "branch": branch, "url": pr["url"], "story": story or "", "platform": platform,
+        "review_decision": pr.get("reviewDecision") or "",
+        "eyeball_label": next((l for l in labels if l.startswith("eyeball:")), None),
+        "stage": stage, "merged": merged,
+        "handoff_path": handoff_path, "checks": checks, "parse_error": parse_error,
+    }
+
+
+def closing_issues(pr: dict) -> list[int]:
+    return [ref["number"] for ref in pr.get("closingIssuesReferences") or [] if ref.get("number")]
+
+
+def open_pr_candidates() -> list[dict]:
+    """Open PRs with a `story:` label, or whose closing issue has a ui/user_facing handoff."""
+    try:
+        prs = gh_json("pr", "list", "--repo", repo(), "--state", "open", "--json",
+                      "number,title,headRefName,labels,url,reviewDecision,closingIssuesReferences")
+    except CommandError:
+        return []
+    prefix = CONFIG.story_label_prefix
+    rows = []
+    for pr in prs:
+        labels = [l["name"] for l in pr["labels"]]
+        story = next((l[len(prefix):] for l in labels if l.startswith(prefix)), None)
+        found = find_handoff(f"origin/{pr['headRefName']}", closing_issues(pr), story)
+        if not story and not found:
+            continue
+        stage = classify_pr(set(labels), pr_verdict_sources(pr["number"], repo()))
+        rows.append(pr_candidate(pr, labels, pr["headRefName"], story, stage, False, found))
+    return rows
+
+
+def merged_pr_candidates() -> list[dict]:
+    """PRs merged within `eyeball_merged_days` whose handoff at the merge commit is ui or
+    user_facing and that carry no eyeball:* label: auto-merge landed them before the eyeball."""
+    since = time.strftime("%Y-%m-%d", time.gmtime(time.time() - CONFIG.eyeball_merged_days * 86400))
+    try:
+        prs = gh_json("pr", "list", "--repo", repo(), "--state", "merged", "--search", f"merged:>={since}",
+                      "--limit", "100", "--json",
+                      "number,title,baseRefName,labels,url,mergeCommit,closingIssuesReferences")
+    except CommandError:
+        return []
+    prefix = CONFIG.story_label_prefix
+    rows = []
+    for pr in prs:
+        labels = [l["name"] for l in pr["labels"]]
+        merge_sha = (pr.get("mergeCommit") or {}).get("oid")
+        if any(l.startswith("eyeball:") for l in labels) or not merge_sha:
+            continue
+        story = next((l[len(prefix):] for l in labels if l.startswith(prefix)), None)
+        found = find_handoff(merge_sha, closing_issues(pr), story)
+        if not found or not handoff_flagged(found[1]):
+            continue
+        rows.append(pr_candidate(pr, labels, pr["baseRefName"], story, "merged", True, found))
+    return rows
 
 
 def build_candidates(force: bool) -> list[dict]:
@@ -114,46 +229,7 @@ def build_candidates(force: bool) -> list[dict]:
             gh_run(["git", "fetch", "origin"])
         except CommandError:
             pass
-        try:
-            prs = gh_json("pr", "list", "--repo", repo(), "--state", "open", "--json",
-                          "number,title,headRefName,labels,url,reviewDecision")
-        except CommandError:
-            prs = []
-        candidates = []
-        prefix = CONFIG.story_label_prefix
-        for pr in prs:
-            labels = [l["name"] for l in pr["labels"]]
-            story = next((l[len(prefix):] for l in labels if l.startswith(prefix)), None)
-            if not story:
-                continue
-            platform = next((l.split(":", 1)[1] for l in labels if l.startswith("platform:")), "")
-            branch = pr["headRefName"]
-            handoff_path = find_handoff_path(branch, story)
-            checks: list = []
-            parse_error = None
-            handoff_text = ""
-            if handoff_path:
-                try:
-                    handoff_text = gh_run(["git", "show", f"origin/{branch}:{handoff_path}"])
-                except CommandError:
-                    handoff_text = ""
-            if handoff_text:
-                try:
-                    fm, body = frontmatter_and_body(handoff_text)
-                    checks = eyeball_block(body)
-                    platform = fm.get("platform", platform)
-                except EyeballParseError as e:
-                    checks = []
-                    parse_error = str(e)
-            eyeball_label = next((l for l in labels if l.startswith("eyeball:")), None)
-            stage = classify_pr(set(labels), pr_verdict_sources(pr["number"], repo()))
-            candidates.append({
-                "id": f"pr-{pr['number']}", "kind": "pr", "number": pr["number"], "title": pr["title"],
-                "branch": branch, "url": pr["url"], "story": story, "platform": platform,
-                "review_decision": pr.get("reviewDecision") or "", "eyeball_label": eyeball_label,
-                "stage": stage,
-                "handoff_path": handoff_path, "checks": checks, "parse_error": parse_error,
-            })
+        candidates = open_pr_candidates() + merged_pr_candidates()
         smoke_checks = CONFIG.smoke_config
         candidates.append({
             "id": "smoke", "kind": "smoke", "number": None, "title": "Smoke checklist",
@@ -374,13 +450,20 @@ def submit(candidate: dict, data: dict, checkout: Path) -> dict:
     comment_url = None
     label = None
     if candidate["kind"] == "pr":
+        # A merged PR takes comments and labels like an open one. Either `gh` call failing is a 502
+        # with gh's own words, raised before `last_submission` is written, so the result never
+        # names a label that was not applied (FIX329).
         comment_out = run_captured(["gh", "pr", "comment", str(candidate["number"]), "--repo", repo(),
                                     "--body", body], cwd=ROOT, check=False)
+        if comment_out.returncode != 0:
+            raise ApiError(f"gh pr comment failed: {(comment_out.stderr or comment_out.stdout).strip()}", 502)
         comment_url = comment_out.stdout.strip().splitlines()[-1] if comment_out.stdout.strip() else None
         label = PASS_LABEL[0] if total and passed == total else FAIL_LABEL[0]
         other = FAIL_LABEL[0] if label == PASS_LABEL[0] else PASS_LABEL[0]
-        run_captured(["gh", "pr", "edit", str(candidate["number"]), "--repo", repo(),
-                     "--remove-label", other, "--add-label", label], cwd=ROOT, check=False)
+        edit_out = run_captured(["gh", "pr", "edit", str(candidate["number"]), "--repo", repo(),
+                                 "--remove-label", other, "--add-label", label], cwd=ROOT, check=False)
+        if edit_out.returncode != 0:
+            raise ApiError(f"gh pr edit failed: {(edit_out.stderr or edit_out.stdout).strip()}", 502)
 
     data["submitted_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     # Everything the result dialog needs to show without re-deriving it from the checks/

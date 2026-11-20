@@ -385,6 +385,44 @@ class IssueServiceTest {
     }
 
     @Nested
+    inner class GetStateHistories {
+        @Test
+        fun `should group state history by issue when ids are given`() {
+            val otherIssueId = IssueId.generate()
+            val first =
+                IssueStateHistoryEntry(
+                    com.munserv.issues.domain.IssueStateHistoryId
+                        .generate(),
+                    testIssueId,
+                    IssueState.Reported,
+                    fixedInstant,
+                    null,
+                    null,
+                )
+            val second =
+                first.copy(
+                    id =
+                        com.munserv.issues.domain.IssueStateHistoryId
+                            .generate(),
+                    issueId = otherIssueId,
+                )
+            every { stateHistoryRepository.findByIssueIds(listOf(testIssueId, otherIssueId)) } returns listOf(first, second)
+
+            val result = service.getStateHistories(listOf(testIssueId, otherIssueId))
+
+            result shouldBe mapOf(testIssueId to listOf(first), otherIssueId to listOf(second))
+        }
+
+        @Test
+        fun `should not query when no ids are given`() {
+            val result = service.getStateHistories(emptyList())
+
+            result shouldBe emptyMap()
+            verify(exactly = 0) { stateHistoryRepository.findByIssueIds(any()) }
+        }
+    }
+
+    @Nested
     inner class IncrementReportCount {
         @Test
         fun `should increment report count and recalculate heat`() {

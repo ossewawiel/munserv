@@ -11,6 +11,8 @@ import java.util.UUID
  */
 interface IssueStateHistoryJpaRepository : JpaRepository<IssueStateHistoryEntity, UUID> {
     fun findByIssueIdOrderByChangedAtAsc(issueId: UUID): List<IssueStateHistoryEntity>
+
+    fun findByIssueIdInOrderByChangedAtAsc(issueIds: Collection<UUID>): List<IssueStateHistoryEntity>
 }
 
 /**
@@ -20,6 +22,8 @@ interface IssueStateHistoryRepository {
     fun save(entry: IssueStateHistoryEntry): IssueStateHistoryEntry
 
     fun findByIssueId(issueId: IssueId): List<IssueStateHistoryEntry>
+
+    fun findByIssueIds(issueIds: Collection<IssueId>): List<IssueStateHistoryEntry>
 }
 
 /**
@@ -35,4 +39,7 @@ class JpaIssueStateHistoryRepository(
 
     override fun findByIssueId(issueId: IssueId): List<IssueStateHistoryEntry> =
         jpa.findByIssueIdOrderByChangedAtAsc(issueId.value).map { it.toDomain() }
+
+    override fun findByIssueIds(issueIds: Collection<IssueId>): List<IssueStateHistoryEntry> =
+        jpa.findByIssueIdInOrderByChangedAtAsc(issueIds.map { it.value }).map { it.toDomain() }
 }

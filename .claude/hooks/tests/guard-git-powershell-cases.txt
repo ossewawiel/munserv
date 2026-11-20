@@ -134,8 +134,14 @@ body
 '@ | Set-Content x.txt; git status
 2	master	git push -u origin HEAD
 2	git push origin HEAD:refs/heads/master
-0	master	Set-Location D:\wt; git push -u origin HEAD
+0	master	Set-Location {WT}; git push -u origin HEAD
 0	git push -u origin HEAD
 2	master	Write-Host 'run cd backend'; git push -u origin HEAD
 2	master	Set-Location backend; git push -u origin HEAD
 0	master	git switch -c fix/x; git push -u origin HEAD
+0	master	Push-Location {WT}; git push -u origin HEAD
+2	master	Push-Location {WT}; Pop-Location; git push -u origin HEAD
+2	master	pushd {WT}; popd; git push -u origin HEAD
+2	master	Set-Location {WT}; Set-Location -; git push -u origin HEAD
+2	master	Set-Location -Path {WT}; Set-Location -; git push -u origin HEAD
+2	master	git checkout package-lock.json; git push -u origin HEAD

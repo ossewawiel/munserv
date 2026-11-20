@@ -87,6 +87,10 @@ class Config:
         return self._raw().get("story_label_prefix", "story:")
 
     @property
+    def eyeball_merged_days(self) -> int:
+        return int(self._raw().get("eyeball_merged_days", 14))
+
+    @property
     def domain_language(self) -> Path:
         return self.root / self._raw().get("domain_language", "domain/language.yaml")
 

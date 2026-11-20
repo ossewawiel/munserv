@@ -53,6 +53,7 @@ issue is public, so its links carry no console access token.
 | `checkout_dir` | `<name>-console` | Directory name (a sibling of the repo) for the working copy under test. |
 | `handoff_glob` | `specs/features` | Path `git ls-tree` searches for handoffs. |
 | `story_label_prefix` | `story:` | The PR label prefix naming the story a PR implements. |
+| `eyeball_merged_days` | `14` | How many days a merged PR stays in the Eyeball list when its handoff is `ui` or `user_facing` and it has no `eyeball:*` label. |
 | `domain_language` | `domain/language.yaml` | Path to the domain-language YAML mirror. |
 | `requirements_dir` | `specs/requirements` | Directory of requirements markdown files. |
 | `adr_dir` | `specs/architecture/decisions` | Directory of ADR markdown files. |

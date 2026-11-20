@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.munserv.admin.domain.DashboardStats
 import com.munserv.admin.domain.HeatReportItem
 import com.munserv.admin.domain.MemberWithStats
+import io.swagger.v3.oas.annotations.media.Schema
 import java.time.Instant
 
 /**
@@ -22,6 +23,12 @@ data class StatsResponse(
     val totalOpen: Int,
     val byState: Map<String, Int>,
     val byType: Map<String, Int>,
+    @field:Schema(
+        description =
+            "Mean days from reported to fixed over issues fixed in the last 90 days, " +
+                "one decimal; absent when none was fixed",
+        nullable = true,
+    )
     val avgResolutionDays: Double?,
     val reportedThisWeek: Int,
 )

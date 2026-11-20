@@ -19,7 +19,7 @@ EOF
 2	master	git push
 2	master	git push origin
 0	master	git push -q -u origin feat/x
-0	master	cd /tmp/wt && git push origin feat/x
+0	master	cd {WT} && git push origin feat/x
 0	gh pr merge 12 --auto --squash
 0	gh pr merge 12 --squash --auto --delete-branch
 0	gh pr view 12 --json state
@@ -323,8 +323,8 @@ EOF
 2	git push origin feat/x:refs/heads/master
 2	git push -u origin HEAD:refs/heads/master
 0	git push -u origin HEAD
-0	master	cd /tmp/wt && git push -u origin HEAD
-0	master	git -C /tmp/wt push -u origin HEAD
+0	master	cd {WT} && git push -u origin HEAD
+0	master	git -C {WT} push -u origin HEAD
 0	master	git push origin HEAD:feat/x
 0	master	git push origin HEAD:refs/heads/feat/x
 0	git push origin refs/heads/feat/x
@@ -349,3 +349,66 @@ git push -u origin HEAD
 0	master	git switch -c fix/x && git push
 0	master	cd "$WT" && git push -u origin HEAD
 0	master	cd - && git push -u origin HEAD
+2	master	git checkout package-lock.json && git push -u origin HEAD
+2	master	git checkout . && git push -u origin HEAD
+2	master	cd {MAIN} && git checkout README && git push -u origin HEAD
+0	master	cd {MAIN} && git checkout feat/other && git push -u origin HEAD
+0	master	cd {MAIN} && git checkout feat/remote && git push -u origin HEAD
+0	master	cd {MAIN} && git checkout -b fix/y && git push -u origin HEAD
+2	cd {WT} && git checkout master && git push
+2	master	cd {WT} && cd - && git push -u origin HEAD
+0	master	cd {WT} && cd - && cd - && git push -u origin HEAD
+2	master	pushd {WT} && popd && git push -u origin HEAD
+0	master	pushd {WT} && git push -u origin HEAD
+0	master	pushd {WT} && pushd {MAIN} && popd && git push -u origin HEAD
+2	pushd {WT} && pushd {MAIN} && git push -u origin HEAD
+2	master	popd; git push -u origin HEAD
+2	master	cd "$(git rev-parse --show-toplevel)" && git push -u origin HEAD
+2	master	cd "$(git rev-parse --show-toplevel)/backend" && git push -u origin HEAD
+2	master	cd /no/such/dir; git push -u origin HEAD
+2	master	git -C /no/such/dir push -u origin HEAD
+0	master	git -C "$WT" push -u origin HEAD
+2	master	(cd {WT} && ls) && git push -u origin HEAD
+2	master	(cd /tmp && ls) && git push -u origin HEAD
+2	master	( (cd {WT}) && git push -u origin HEAD )
+0	master	(cd {WT} && git push -u origin HEAD)
+2	(cd {MAIN} && git push -u origin HEAD)
+2	master	x=$(cd {WT} && pwd) && git push -u origin HEAD
+2	master	echo `cd {WT}` && git push -u origin HEAD
+2	(git switch master) && git push -u origin HEAD
+2	master	(cd {WT} && git switch master) && cd {WT} && git push -u origin HEAD
+0	master	(cd "$dir" && git add x && git commit -q -m "chore(specs): sync" && git push -q origin "$branch") || rc=$?
+0	master	cd {WT} && (cd {MAIN} && ls) && git push -u origin HEAD
+2	master	cd {MAIN} && git checkout HEAD README && git push -u origin HEAD
+2	master	cd {MAIN} && git checkout HEAD . && git push -u origin HEAD
+2	master	git checkout HEAD package-lock.json && git push -u origin HEAD
+2	master	(case a in a) cd {WT};; esac) && git push -u origin HEAD
+2	master	(cd {WT}; case a in (a) ls;; esac) && git push -u origin HEAD
+2	master	case a in a) cd {WT};; esac; git push -u origin HEAD
+0	master	case a in a) ls;; esac; cd {WT} && git push -u origin HEAD
+2	master	pushd +0 && git push -u origin HEAD
+2	master	pushd -n /tmp && git push -u origin HEAD
+2	pushd {WT} && pushd {MAIN} && popd -n && git push -u origin HEAD
+0	master	pushd {WT} && pushd -n {MAIN} && git push -u origin HEAD
+2	master	cd -P . && git push -u origin HEAD
+2	master	cd -P {WT} && cd - && git push -u origin HEAD
+2	cd {MAIN} && git switch feat/other && git switch - && git push -u origin HEAD
+0	master	cd {MAIN} && git switch feat/other && git switch - && git switch - && git push -u origin HEAD
+2	cd {MAIN} && git checkout feat/other && git checkout - && git push
+2	master	pushd {WT} && pushd +1 && git push -u origin HEAD
+0	master	pushd {WT} && pushd +1 && pushd +1 && git push -u origin HEAD
+2	pushd {WT} && pushd {MAIN} && pushd +1 && pushd +2 && git push -u origin HEAD
+2	pushd {MAIN} && pushd {WT} && pushd -1 && git push -u origin HEAD
+0	master	pushd {WT} && pushd +5 && git push -u origin HEAD
+2	master	pushd {WT} && popd +0 && git push -u origin HEAD
+2	master	cd {WT} && pushd -n {MAIN} && popd && git push -u origin HEAD
+0	master	cd {MAIN} && pushd -n {WT} && popd && git push -u origin HEAD
+0	master	pushd {WT} && pushd {MAIN} && popd +2 && popd && git push -u origin HEAD
+2	master	pushd {WT} && pushd {MAIN} && popd +1 && popd && git push -u origin HEAD
+2	master	pushd {WT} && pushd {MAIN} && popd -n && popd && git push -u origin HEAD
+2	master	cd -- . && git push -u origin HEAD
+2	master	cd -- {WT} && cd -- - && git push -u origin HEAD
+2	master	pushd -L .; git push -u origin HEAD
+2	master	pushd --; git push -u origin HEAD
+2	master	cd -- -P; git push -u origin HEAD
+2	master	pushd -n -P; git push -u origin HEAD

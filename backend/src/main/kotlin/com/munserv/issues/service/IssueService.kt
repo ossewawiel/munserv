@@ -149,6 +149,17 @@ class IssueService(
     fun getStateHistory(issueId: IssueId): List<IssueStateHistoryEntry> = stateHistoryRepository.findByIssueId(issueId)
 
     /**
+     * Get the state history of many issues in one query, grouped by issue.
+     */
+    @Transactional(readOnly = true)
+    fun getStateHistories(issueIds: Collection<IssueId>): Map<IssueId, List<IssueStateHistoryEntry>> =
+        if (issueIds.isEmpty()) {
+            emptyMap()
+        } else {
+            stateHistoryRepository.findByIssueIds(issueIds).groupBy { it.issueId }
+        }
+
+    /**
      * Increment the report count for an issue (when another member reports the same issue).
      * Also recalculates and updates the heat value.
      */

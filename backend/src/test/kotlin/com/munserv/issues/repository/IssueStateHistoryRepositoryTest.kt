@@ -73,6 +73,21 @@ class IssueStateHistoryRepositoryTest {
     }
 
     @Nested
+    inner class FindByIssueIds {
+        @Test
+        fun `should return entries of every given issue ordered by changedAt`() {
+            val second = IssueId(UUID.fromString("550e8400-e29b-41d4-a716-446655440102"))
+
+            val history = repository.findByIssueIds(listOf(testIssueId, second))
+
+            history.map { it.issueId }.toSet() shouldBe setOf(testIssueId, second)
+            history.zipWithNext().forEach { (earlier, later) ->
+                (earlier.changedAt <= later.changedAt) shouldBe true
+            }
+        }
+    }
+
+    @Nested
     inner class FindByIssueId {
         @Test
         fun `should return history entries ordered by changedAt ascending`() {
