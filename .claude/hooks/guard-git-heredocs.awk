@@ -19,7 +19,7 @@
 # never runs past one: at each separator an open body is closed as code, so one payload cannot hide the
 # next. An unclosed body is code too: it is printed.
 
-BEGIN { skip = 0; nb = 0; ne = 0 }
+BEGIN { skip = 0; nb = 0; ne = 0; reset() }
 
 function code(   b) { for (b = 1; b <= nb; b++) print body[b]; nb = 0; skip = 0 }
 
@@ -32,23 +32,31 @@ function closebody(   b, txt) {
   nb = 0; skip = 0
 }
 
-# Is position p of line l inside a quote opened earlier on the line? A stack of contexts: code (c),
-# double quote (d), single quote (s). $( opens code again inside a double quote, so the heredoc in
-# --body "$(cat <<'EOF' is real.
-function inquote(l, p,   k, ch, cur, top, st) {
-  top = 1; st[1] = "c"
-  for (k = 1; k < p; k++) {
+# Quote state carried across the lines of a record (bash mode): a stack of contexts, code (c), double
+# quote (d), single quote (s). $( opens code again inside a double quote, so the heredoc in
+# --body "$(cat <<'EOF' is real, while a <<EOF on the second line of a multi-line "..." is text.
+# Heredoc bodies do not move the state; a # comment in code ends the line; each \036 resets it.
+function reset() { top = 1; st[1] = "c" }
+
+# Walk line l from the carried state and leave the state after it; atq tells whether position p was
+# inside a quote (p = 0: no question).
+function walk(l, p,   k, n, ch, cur, prev) {
+  atq = 0; n = length(l)
+  for (k = 1; k <= n; k++) {
+    if (k == p) atq = (st[top] != "c")
     ch = substr(l, k, 1); cur = st[top]
-    if (cur != "s" && ((ch == "\\" && ps != "1") || (ch == "`" && ps == "1"))) { k++; continue }
+    if (cur != "s" && ch == "\\") { if (k + 1 == p) atq = (st[top] != "c"); k++; continue }
     if (cur == "s") { if (ch == "'") top--; continue }
-    if (ch == "$" && substr(l, k + 1, 1) == "(") { st[++top] = "c"; k++; continue }
+    if (ch == "$" && substr(l, k + 1, 1) == "(") { st[++top] = "c"; if (k + 1 == p) atq = 0; k++; continue }
     if (cur == "d") { if (ch == "\"") top--; continue }
+    prev = (k == 1) ? " " : substr(l, k - 1, 1)
+    if (ch == "#" && prev ~ /[ \t;&|(]/) break
     if (ch == "'") st[++top] = "s"
     else if (ch == "\"") st[++top] = "d"
     else if (ch == "(") st[++top] = "c"
     else if (ch == ")" && top > 1) top--
   }
-  return st[top] != "c"
+  if (p > n) atq = (st[top] != "c")
 }
 
 function line(l,   t, m, q) {
@@ -60,8 +68,11 @@ function line(l,   t, m, q) {
     }
     body[++nb] = l; return
   }
-  if (ps != "1" && match(l, /(^|[^<])<<-?[ \t]*\\?['"]?[A-Za-z_][A-Za-z0-9_.-]*/) && !inquote(l, RSTART + 1)) {
-    m = substr(l, RSTART, RLENGTH); sub(/^[^<]?<<-?[ \t]*/, "", m)
+  if (ps != "1" && match(l, /(^|[^<])<<-?[ \t]*\\?['"]?[A-Za-z_][A-Za-z0-9_.-]*/)) {
+    m = substr(l, RSTART, RLENGTH)
+    walk(l, (substr(m, 1, 1) == "<") ? RSTART : RSTART + 1)
+    if (atq) { if (want != "bodies") print l; return }
+    sub(/^[^<]?<<-?[ \t]*/, "", m)
     expand = (m !~ /^[\\'"]/)
     tag = m; sub(/^[\\'"]/, "", tag)
     etag = tag; gsub(/\./, "\\.", etag)
@@ -74,6 +85,7 @@ function line(l,   t, m, q) {
     if (want != "bodies") { sub(/@['"]$/, "_", t); print t }
     skip = 1; nb = 0; return
   }
+  if (ps != "1") walk(l, 0)
   if (want != "bodies") print l
 }
 
@@ -83,6 +95,7 @@ function line(l,   t, m, q) {
   for (i = 1; i <= n; i++) {
     if (i > 1) {
       if (skip) { if (want == "bodies") closebody(); else code() }
+      reset()
       if (want != "bodies") printf "\036"
     }
     line(part[i])

@@ -257,3 +257,49 @@ it's ok"
 0	echo "Total: $(wc -l < f.txt) lines (approx)"
 0	gh pr view 319 --json body --jq '.body' | grep -c '#'
 0	bash -c 'x=1 # it'\''s' ; git status
+2	git commit -m "fix: x
+use cat <<EOF here"
+git push -f origin feat/x
+EOF
+2	echo 'a
+<<EOF'
+git push -f origin feat/x
+EOF
+2	cat <<EOF
+ok
+EOF
+git push -f origin feat/x
+2	cat <<EOF
+${x:-$(git push -f origin feat/x)}
+EOF
+0	gh pr create --title "x" --body "$(cat <<EOF
+## Summary
+- uses `foo` and the `$(...)` form
+- it's done (mostly
+EOF
+)"
+0	gh pr create --title "x" --body "$(cat <<'EOF'
+## Summary
+- uses `$(cmd` and it's ok (
+EOF
+)"
+0	python3 - <<PY
+import re, os
+print(re.sub(r'\$(\d+)', 'x', 'cost $5'))
+print(os.environ['HOME'], "it's")
+PY
+0	cat > notes.md <<EOF
+Cost is \$5 and it's "fine" (really
+EOF
+0	cat <<EOF
+Built on $(date) by $USER
+EOF
+0	cat <<'A' > a.txt; cat <<'B' > b.txt
+first it's
+A
+second
+B
+0	# don't worry, this comment has an apostrophe
+cat <<'EOF'
+git push --force is what the guard refuses
+EOF

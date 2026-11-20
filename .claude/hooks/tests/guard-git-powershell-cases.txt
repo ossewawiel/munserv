@@ -123,3 +123,12 @@ $(git push -f origin feat/x) stays text in a single-quoted here-string
 0	Write-Host "C:\path\"; git status
 0	$env:GIT_TRACE = 1; git status 2>&1 | Out-String
 0	Get-Process | Where-Object {$_.CPU -gt 10} | Sort-Object CPU
+0	$b = @"
+Hello $env:USERNAME, it's $(Get-Date)
+"@
+gh pr comment 3 --body $b
+0	git commit -m "Don’t break “things”"
+0	Write-Host ‘single’; git status
+0	$x = @'
+body
+'@ | Set-Content x.txt; git status

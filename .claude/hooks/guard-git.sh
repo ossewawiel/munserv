@@ -47,6 +47,9 @@ for r in $readers; do
 done
 [ -n "$reader" ] || deny "neither jq nor node is on PATH, so this guard cannot read the command and refuses every Bash call. Ask the user to install node or jq (apt install jq), then start a new session"
 cmd=$("read_with_$reader") || deny "the tool input did not parse or has no command, so this guard cannot read it; refusing"
+# \035 and \036 are this guard's own record markers; a command that holds them could pose as a heredoc
+# body or start a record of its own and hide what follows.
+case "$cmd" in *$'\035'*|*$'\036'*) deny "the command holds the control character \\035 or \\036; refusing" ;; esac
 # Read the line ends the way the bash that runs the command does. Git Bash and Cygwin join `\`+CR+LF
 # as a continuation, and a native jq.exe writes CRLF there, so CRLF becomes LF before the join below.
 # Linux bash does not: there `\` escapes the CR and the LF ends the command, so folding would hide the

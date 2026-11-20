@@ -164,6 +164,13 @@ def main() -> int:
         ok = r.returncode == 2
         failures += not ok
         print(("ok  " if ok else "FAIL"), f"201 substitutions: want=2 got={r.returncode}")
+        # The guard's own record markers in a command refuse it (PR 319 fourth review B1).
+        for mode, c in (("bash", "echo a\x1e\x1d; git push -f origin feat/x"), ("bash", "echo a\x1e\ngit status"),
+                        ("powershell", "Write-Output a\x1e\x1d; git push -f origin feat/x"), ("bash", "echo \x1d")):
+            r = run(json.dumps({"tool_input": {"command": c}}), "feat/hook-test", full, mode=mode)
+            ok = r.returncode == 2
+            failures += not ok
+            print(("ok  " if ok else "FAIL"), f"[{mode}] a \\035 or \\036 in the command: want=2 got={r.returncode} {c[:30]!r}")
         # The cap holds below depth 0 too (PR 319 third review B2).
         deep = "bash -c 'echo " + " ".join(["$(:)"] * 200) + " $(git push -f origin feat/x)'"
         r = run(json.dumps({"tool_input": {"command": deep}}), "feat/hook-test", full)
