@@ -379,3 +379,19 @@ git push -u origin HEAD
 2	master	(cd {WT} && git switch master) && cd {WT} && git push -u origin HEAD
 0	master	(cd "$dir" && git add x && git commit -q -m "chore(specs): sync" && git push -q origin "$branch") || rc=$?
 0	master	cd {WT} && (cd {MAIN} && ls) && git push -u origin HEAD
+2	master	cd {MAIN} && git checkout HEAD README && git push -u origin HEAD
+2	master	cd {MAIN} && git checkout HEAD . && git push -u origin HEAD
+2	master	git checkout HEAD package-lock.json && git push -u origin HEAD
+2	master	(case a in a) cd {WT};; esac) && git push -u origin HEAD
+2	master	(cd {WT}; case a in (a) ls;; esac) && git push -u origin HEAD
+2	master	case a in a) cd {WT};; esac; git push -u origin HEAD
+0	master	case a in a) ls;; esac; cd {WT} && git push -u origin HEAD
+2	master	pushd +0 && git push -u origin HEAD
+2	master	pushd -n /tmp && git push -u origin HEAD
+2	pushd {WT} && pushd {MAIN} && popd -n && git push -u origin HEAD
+0	master	pushd {WT} && pushd -n {MAIN} && git push -u origin HEAD
+2	master	cd -P . && git push -u origin HEAD
+2	master	cd -P {WT} && cd - && git push -u origin HEAD
+2	cd {MAIN} && git switch feat/other && git switch - && git push -u origin HEAD
+0	master	cd {MAIN} && git switch feat/other && git switch - && git switch - && git push -u origin HEAD
+2	cd {MAIN} && git checkout feat/other && git checkout - && git push

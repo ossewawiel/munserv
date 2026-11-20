@@ -64,7 +64,7 @@ def make_repos(tmp: Path) -> dict[str, str]:
     """Two real checkouts for the cases that move between them (#322); `{WT}` and `{MAIN}` in a case name them.
 
     {WT}: a repository on feat/wt, standing in for a worktree. {MAIN}: one on master that also has the
-    branch feat/other, the remote-tracking branch origin/feat/remote and the file README.
+    branch feat/other, the remote-tracking branch origin/feat/remote, origin/HEAD and the file README.
     """
     git = ["git", "-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "init.defaultBranch=master"]
     repos = {"WT": tmp / "wt", "MAIN": tmp / "main"}
@@ -76,6 +76,8 @@ def make_repos(tmp: Path) -> dict[str, str]:
     subprocess.run([*git, "-C", str(repos["WT"]), "switch", "-q", "-c", "feat/wt"], check=True)
     subprocess.run([*git, "-C", str(repos["MAIN"]), "branch", "feat/other"], check=True)
     subprocess.run([*git, "-C", str(repos["MAIN"]), "update-ref", "refs/remotes/origin/feat/remote", "HEAD"], check=True)
+    # A clone has origin/HEAD; it must not make `git checkout HEAD <path>` read as a switch (PR 326 review B1).
+    subprocess.run([*git, "-C", str(repos["MAIN"]), "symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/feat/remote"], check=True)
     return {name: repo.as_posix() for name, repo in repos.items()}
 
 
