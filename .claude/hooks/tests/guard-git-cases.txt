@@ -218,3 +218,42 @@ git push -f origin feat/x
 0	if true; then git status; fi
 0	# a comment with an apostrophe: it's fine
 git status
+2	bash -c $'cat <<EOF\n' ; bash -c $'git push -f origin feat/x\nEOF\n'
+2	bash -c "cat <<\EOF
+" ; bash -c "git push -f origin feat/x
+EOF
+"
+2	echo "<<EOF"
+git push -f origin feat/x
+EOF
+2	cat <<EOF
+$(git push -f origin feat/x)
+EOF
+2	cat <<EOF
+`gh pr merge 3`
+EOF
+0	cat <<'EOF'
+$(git push -f origin feat/x) stays text in a quoted heredoc
+EOF
+0	gh issue list --search "#5" && git log --grep '#123' --oneline
+0	x=abc; echo ${#x} $# && curl -s https://example.com/a#frag
+0	gh issue view 5 # it's the flaky one
+0	[[ $x == *#* ]] && echo yes
+0	cat <<'END-PR' > body.md
+It's done
+END-PR
+0	python3 - <<'PY'
+print("it's")
+PY
+0	for i in {1..3}; do echo $i; done
+0	sed -i "s/it's/it is/" notes.md && git status
+0	jq -r '.[] | "\(.name) (\(.id))"' x.json
+0	echo $(( (1+2) * 3 ))
+0	git commit -m "feat: x
+
+# Notes
+it's ok"
+0	git commit -m 'It'\''s done'
+0	echo "Total: $(wc -l < f.txt) lines (approx)"
+0	gh pr view 319 --json body --jq '.body' | grep -c '#'
+0	bash -c 'x=1 # it'\''s' ; git status

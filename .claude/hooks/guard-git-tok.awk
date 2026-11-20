@@ -5,9 +5,10 @@
 #   ps=1           PowerShell rules: backtick escapes, ( ) groups, { } always split, <# #> comments.
 #   want=payloads  print each quoted string's text (unescaped as the shell would pass it) followed
 #                  by \036, for the interpreter rescan, instead of the segments.
-#   strict=1       exit 3 when a record ends inside a quote or substitution, or holds more than 200
-#                  substitutions. A shell rejects an unclosed quote, so a command that runs never
-#                  ends inside one; reading past it would hide every later line.
+#   strict=1       exit 3 when a record ends inside a quote or substitution. A shell rejects an
+#                  unclosed quote, so a command that runs never ends inside one; reading past it would
+#                  hide every later line. More than 200 substitutions in a record exits 3 always.
+# A record that starts with \035 is an expanding heredoc body (see guard-git-heredocs.awk).
 #
 # A quoted string becomes its text when it is one word, git or gh when it is a path to them, its raw
 # text after --add-label, and _ otherwise. Each $(...), <(...), >(...), ${...}, $((...)), backtick span
@@ -55,7 +56,30 @@ function pairend(s, p, n, op, cl,   d, k, ch, j) {
   return 0
 }
 
-function addsub(t) { if (nq >= 200) { bad = 1; return } subq[++nq] = t }
+# More than 200 substitutions in one record refuses at every depth, not only at depth 0: past the cap
+# the rest would go unread.
+function addsub(t) { if (nq >= 200) { capped = 1; return } subq[++nq] = t }
+
+# An expanding heredoc or @" body (a record that starts with \035): quotes are literal there, but
+# $(...), ${...} and backticks run, so only those are scanned.
+function dqbody(s,   i, n, c, nx, j, k) {
+  n = length(s); i = 1
+  while (i <= n) {
+    c = substr(s, i, 1); nx = substr(s, i + 1, 1)
+    if (escapes(c)) { i += 2; continue }
+    if (c == "$" && nx == "(") {
+      k = pairend(s, i + 1, n, "(", ")"); if (k == 0) { bad = 1; k = n }
+      addsub(substr(s, i + 2, k - i - 2)); i = k + 1; continue }
+    if (c == "$" && nx == "{") {
+      k = pairend(s, i + 1, n, "{", "}"); if (k == 0) { bad = 1; k = n }
+      addsub(substr(s, i + 2, k - i - 2)); i = k + 1; continue }
+    if (c == "`" && ps != "1") {
+      j = index(substr(s, i + 1), "`"); if (j == 0) { bad = 1; k = n } else k = i + j
+      addsub(substr(s, i + 1, k - i - 1)); i = k + 1; continue }
+    i++
+  }
+  return "_"
+}
 
 function tok(s,   out, i, n, c, nx, j, k, buf, raw, prev, atword, closed) {
   out = ""; n = length(s); i = 1
@@ -135,10 +159,10 @@ function tok(s,   out, i, n, c, nx, j, k, buf, raw, prev, atword, closed) {
 
 {
   nq = 0; first = np + 1
-  res = tok($0)
+  res = (substr($0, 1, 1) == "\035") ? dqbody(substr($0, 2)) : tok($0)
   for (q = 1; q <= nq; q++) res = res "\n" tok(subq[q])
   if (want == "payloads") { for (p = first; p <= np; p++) printf "%s\036", pay[p] }
   else print res
 }
 
-END { if (bad && strict == "1") exit 3 }
+END { if (capped || (bad && strict == "1")) exit 3 }

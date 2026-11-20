@@ -164,15 +164,25 @@ def main() -> int:
         ok = r.returncode == 2
         failures += not ok
         print(("ok  " if ok else "FAIL"), f"201 substitutions: want=2 got={r.returncode}")
-        # Without its tokenizer beside it, the hook refuses everything.
-        lone = Path(tmp) / "lone"
-        lone.mkdir()
-        shutil.copy(HOOK, lone / "guard-git.sh")
-        r = subprocess.run(["bash", str(lone / "guard-git.sh")], input=json.dumps({"tool_input": {"command": "git status"}}),
-                           capture_output=True, text=True, cwd=ROOT, env={**os.environ, "GUARD_GIT_BRANCH": "feat/hook-test"})
+        # The cap holds below depth 0 too (PR 319 third review B2).
+        deep = "bash -c 'echo " + " ".join(["$(:)"] * 200) + " $(git push -f origin feat/x)'"
+        r = run(json.dumps({"tool_input": {"command": deep}}), "feat/hook-test", full)
         ok = r.returncode == 2
         failures += not ok
-        print(("ok  " if ok else "FAIL"), f"no guard-git-tok.awk beside the hook: want=2 got={r.returncode}")
+        print(("ok  " if ok else "FAIL"), f"200 substitutions inside bash -c, then a push: want=2 got={r.returncode}")
+        # Without its awk files beside it, the hook refuses everything.
+        for missing in ("guard-git-tok.awk", "guard-git-heredocs.awk"):
+            lone = Path(tmp) / f"lone-{missing}"
+            lone.mkdir()
+            shutil.copy(HOOK, lone / "guard-git.sh")
+            for other in ("guard-git-tok.awk", "guard-git-heredocs.awk"):
+                if other != missing:
+                    shutil.copy(HOOK.parent / other, lone / other)
+            r = subprocess.run(["bash", str(lone / "guard-git.sh")], input=json.dumps({"tool_input": {"command": "git status"}}),
+                               capture_output=True, text=True, cwd=ROOT, env={**os.environ, "GUARD_GIT_BRANCH": "feat/hook-test"})
+            ok = r.returncode == 2
+            failures += not ok
+            print(("ok  " if ok else "FAIL"), f"no {missing} beside the hook: want=2 got={r.returncode}")
         r = run(json.dumps({"tool_input": {"command": "ls"}}), "feat/hook-test", neither)
         ok = "install node or jq" in r.stderr
         failures += not ok

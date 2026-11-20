@@ -100,3 +100,26 @@ It's done: no git push -f origin feat/x
 '@
 0	# it's a comment
 git status
+2	$x = @'
+body
+'@; git push -f origin feat/x
+2	$x = @"
+body
+"@ | Out-Null; gh pr merge 3 --squash
+2	$m = @"
+$(git push -f origin feat/x)
+"@
+2	Write-Host “x" ; git push -f origin feat/x ; Write-Host "y”
+0	$m = @'
+$(git push -f origin feat/x) stays text in a single-quoted here-string
+'@
+0	Write-Host "It's (maybe) fine"; $s.Replace("'", "")
+0	"{0} items" -f 3; [string]::Join(',', @('a','b'))
+0	if (Test-Path 'C:\x\') { Write-Host ok }
+0	Get-Content x.txt | Select-String '#' ; Write-Output 'a' # it's a note
+0	git log --format="%h (%an)" -3
+0	$x = @{ 'a' = "b" }; $x.a
+0	gh pr create --title (Get-Content t.txt) --body-file b.md
+0	Write-Host "C:\path\"; git status
+0	$env:GIT_TRACE = 1; git status 2>&1 | Out-String
+0	Get-Process | Where-Object {$_.CPU -gt 10} | Sort-Object CPU

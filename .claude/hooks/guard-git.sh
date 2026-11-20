@@ -58,6 +58,10 @@ if [ "$mode" = "powershell" ]; then
   # backtick is an escape (g`it runs git, `" is a quote character), which the tokenizer reads.
   cmd=${cmd//$'\r\n'/$'\n'}
   cmd=${cmd//$'`\n'/ }
+  # PowerShell also quotes with curly and low-9 quotes. One literal per character: a bracket set of
+  # multibyte characters matches single bytes in a C locale.
+  for q in "“" "”" "„" "‟"; do cmd=${cmd//"$q"/\"}; done
+  for q in "‘" "’" "‚" "‛"; do cmd=${cmd//"$q"/\'}; done
 else
   if [ -n "$windows_bash" ]; then cmd=${cmd//$'\r\n'/$'\n'}; fi
   cmd=${cmd//$'\\\n'/ }
@@ -67,32 +71,11 @@ cmd=${cmd//$'\r'/ }
 psflag=""
 [ "$mode" = powershell ] && psflag=1
 
-# Heredoc bodies out (`keep`), or only those bodies (`bodies`, each body followed by \036 so the
-# tokenizer reads it on its own). Bash mode reads `<<TAG`, `<< TAG`, `<<-TAG`, `<<\TAG` and quoted tags,
-# not `<<<` here-strings. PowerShell mode reads only here-strings: an @' or @" that ends a line after a
-# line start, blank, = ( , or ;, closed by the same quote and @ at column 0; the opener is printed with
-# that @' replaced by _, so the tokenizer never sees an open quote. In bash a line can end in @"
-# without opening anything, so that rule stays in PowerShell. An unclosed body is code: it is printed.
-heredocs() {
-  awk -v want="$1" -v ps="$psflag" 'BEGIN{skip=0; nb=0}
-       function flush(   b) { for (b = 1; b <= nb; b++) print body[b]; if (want == "bodies") printf "\036"; nb=0 }
-       { if (skip) {
-           if ((tag != "" && $0 ~ ("^[ \t]*" tag "[ \t]*$")) || (tag == "" && substr($0, 1, 2) == closer)) {
-             skip=0; if (want == "bodies") flush(); nb=0; next }
-           body[++nb]=$0; next }
-         if (ps != "1" && match($0, /(^|[^<])<<-?[ \t]*\\?[\047"]?[A-Za-z_][A-Za-z0-9_]*/)) {
-           tag=substr($0, RSTART, RLENGTH); sub(/^[^<]?<<-?[ \t]*\\?[\047"]?/, "", tag)
-           if (want != "bodies") print; skip=1; nb=0; next }
-         if (ps == "1" && match($0, /(^|[ \t=(,;])@[\047"][ \t]*$/)) {
-           t=$0; sub(/[ \t]*$/, "", t); closer=substr(t, length(t), 1) "@"; tag=""
-           if (want != "bodies") { sub(/@[\047"]$/, "_", t); print t }
-           skip=1; nb=0; next }
-         if (want != "bodies") print }
-       END { if (skip) flush() }'
-}
-
-# The tokenizer lives beside this hook; when it is missing awk fails, and the scan refuses.
-case "${BASH_SOURCE[0]}" in */*) tok_awk="${BASH_SOURCE[0]%/*}/guard-git-tok.awk" ;; *) tok_awk=./guard-git-tok.awk ;; esac
+# The heredoc pass and the tokenizer live beside this hook (guard-git-heredocs.awk,
+# guard-git-tok.awk); when either is missing awk fails, and the scan refuses.
+case "${BASH_SOURCE[0]}" in */*) hook_dir="${BASH_SOURCE[0]%/*}" ;; *) hook_dir=. ;; esac
+tok_awk="$hook_dir/guard-git-tok.awk"
+heredocs() { awk -v want="$1" -v ps="$psflag" -f "$hook_dir/guard-git-heredocs.awk"; }
 
 # Strip one segment's wrappers until it stops changing; sets interp when a wrapper runs an interpreter.
 # Pure bash, no subprocess per segment: process starts are slow on Windows and the hook has 10 s.
@@ -171,7 +154,7 @@ scan() {
   local text="$1" depth="$2" kept segs seg payload strict=""
   [ "$depth" -eq 0 ] && strict=1
   interp=""
-  kept=$(printf '%s\n' "$text" | heredocs keep)
+  kept=$(printf '%s\n' "$text" | heredocs keep) || deny "this guard's heredoc pass did not run; refusing"
   segs=$(printf '%s\n' "$kept" | awk -v ps="$psflag" -v want=segments -v strict="$strict" -f "$tok_awk") \
     || deny "the command has an unclosed quote or substitution, or more than 200 substitutions, or this guard's tokenizer did not run, so it cannot be read; refusing"
   while IFS= read -r seg; do
