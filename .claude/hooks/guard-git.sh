@@ -174,7 +174,13 @@ scan() {
 branch="${GUARD_GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null)}"
 
 check() {
-  local g="$1"
+  local g="$1" elsewhere=""
+  # A push run in another directory (git -C <dir>, or after cd / pushd / Set-Location in the same
+  # command) may be on any branch there, so the "you are on master" rules below do not apply to it.
+  if [[ $g =~ ^git([[:space:]]+-c[[:space:]]+[^[:space:]]+)*[[:space:]]+-C[[:space:]] ]] \
+    || [[ ${cmd,,} =~ (^|[^a-z0-9_-])(cd|pushd|set-location|sl|chdir)[[:space:]] ]]; then
+    elsewhere=1
+  fi
   # `git -C <dir> push` and `git -c k=v push` hide the subcommand; drop the global options first.
   g=$(printf '%s' "$g" | sed -E 's/^(sudo )?git( +(-C|-c) +[^ ]+)+/\1git/')
   case "$g" in
@@ -190,10 +196,16 @@ check() {
       if printf '%s' "$g" | grep -Eq -- '(^|[[:space:]])-[a-zA-Z]*d[a-zA-Z]*([[:space:]]|$)|(^|[[:space:]]):[^[:space:]]'; then
         deny "deleting remote branches is the user's job"
       fi
-      if printf '%s' "$g" | grep -Eq '(^|[[:space:]]|:)master([[:space:]]|$)'; then deny "pushing to master is not allowed; open a pull request"; fi
+      # master as a refspec or its destination, short or full (HEAD:refs/heads/master).
+      if printf '%s' "$g" | grep -Eq '(^|[[:space:]]|:)(refs/heads/)?master([[:space:]]|$)'; then deny "pushing to master is not allowed; open a pull request"; fi
       # On master, a bare push would target master; a push naming another branch (worktrees do this) is fine.
       if [ "$branch" = "master" ] && ! printf '%s' "$g" | grep -Eq 'git push([[:space:]]+-[^[:space:]]+)*[[:space:]]+[^-[:space:]]+[[:space:]]+[^-[:space:]]+'; then
         deny "you are on master; create a branch before pushing"
+      fi
+      # On master, HEAD (or @) as a whole refspec is master too: `git push -u origin HEAD`.
+      # HEAD:<branch> names its destination and stays allowed.
+      if [ "$branch" = "master" ] && [ -z "$elsewhere" ] && printf '%s' "$g" | grep -Eq '(^|[[:space:]])(HEAD|@)([[:space:]]|$)'; then
+        deny "you are on master, so HEAD is master; create a branch, or push HEAD:<branch>"
       fi
       if printf '%s' "$g" | grep -Eq -- '--delete|(^|[[:space:]])-d([[:space:]]|$)'; then deny "deleting remote branches is the user's job"; fi
       ;;

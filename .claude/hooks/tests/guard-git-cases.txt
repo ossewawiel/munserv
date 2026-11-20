@@ -315,3 +315,17 @@ EOF
 2	bash -c $'git\x20push\x20-f\x20origin\x20feat/x'
 0	echo $'line\none' && git status
 0	printf $'a\tb\n' && git log --oneline -1
+2	master	git push -u origin HEAD
+2	master	git push origin HEAD
+2	master	git push origin @
+2	git push origin HEAD:refs/heads/master
+2	git push origin refs/heads/master
+2	git push origin feat/x:refs/heads/master
+2	git push -u origin HEAD:refs/heads/master
+0	git push -u origin HEAD
+0	master	cd /tmp/wt && git push -u origin HEAD
+0	master	git -C /tmp/wt push -u origin HEAD
+0	master	git push origin HEAD:feat/x
+0	master	git push origin HEAD:refs/heads/feat/x
+0	git push origin refs/heads/feat/x
+0	git push origin refs/heads/master-notes

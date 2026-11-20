@@ -132,3 +132,7 @@ gh pr comment 3 --body $b
 0	$x = @'
 body
 '@ | Set-Content x.txt; git status
+2	master	git push -u origin HEAD
+2	git push origin HEAD:refs/heads/master
+0	master	Set-Location D:\wt; git push -u origin HEAD
+0	git push -u origin HEAD
