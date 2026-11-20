@@ -4,8 +4,11 @@ import com.munserv.admin.domain.DashboardStats
 import com.munserv.issues.domain.Issue
 import com.munserv.issues.domain.IssueId
 import com.munserv.issues.domain.IssueState
+import com.munserv.issues.domain.IssueStateHistoryEntry
+import com.munserv.issues.domain.IssueStateHistoryId
 import com.munserv.issues.domain.IssueType
 import com.munserv.issues.repository.IssueRepository
+import com.munserv.issues.service.IssueService
 import com.munserv.sectors.domain.Sector
 import com.munserv.sectors.service.SectorService
 import com.munserv.shared.types.GeoPoint
@@ -26,6 +29,7 @@ import java.time.temporal.ChronoUnit
 class DashboardServiceTest {
     private lateinit var issueRepository: IssueRepository
     private lateinit var sectorService: SectorService
+    private lateinit var issueService: IssueService
     private lateinit var clock: Clock
     private lateinit var service: DashboardService
 
@@ -39,8 +43,10 @@ class DashboardServiceTest {
     fun setUp() {
         issueRepository = mockk()
         sectorService = mockk()
+        issueService = mockk()
+        every { issueService.getStateHistories(any()) } returns emptyMap()
         clock = Clock.fixed(fixedInstant, ZoneId.of("UTC"))
-        service = DashboardService(issueRepository, sectorService, clock)
+        service = DashboardService(issueRepository, issueService, sectorService, clock)
     }
 
     private fun createTestSector() =
@@ -168,6 +174,49 @@ class DashboardServiceTest {
             val result = service.getDashboardStats(testSectorId)
 
             result?.reportedThisWeek shouldBe 2
+        }
+
+        @Test
+        fun `should return avgResolutionDays from state history when an issue was fixed in the window`() {
+            val issue = createTestIssue(state = IssueState.Fixed)
+            val reportedAt = fixedInstant.minus(10, ChronoUnit.DAYS)
+            val history =
+                listOf(
+                    IssueStateHistoryEntry(
+                        IssueStateHistoryId.generate(),
+                        issue.id,
+                        IssueState.Reported,
+                        reportedAt,
+                        null,
+                        null,
+                    ),
+                    IssueStateHistoryEntry(
+                        IssueStateHistoryId.generate(),
+                        issue.id,
+                        IssueState.Fixed,
+                        reportedAt.plus(4, ChronoUnit.DAYS),
+                        null,
+                        null,
+                    ),
+                )
+            every { sectorService.findById(testSectorId) } returns createTestSector()
+            every { issueRepository.findBySectorId(testSectorId) } returns listOf(issue)
+            every { issueService.getStateHistories(listOf(issue.id)) } returns mapOf(issue.id to history)
+
+            val result = service.getDashboardStats(testSectorId)
+
+            result?.avgResolutionDays shouldBe 4.0
+        }
+
+        @Test
+        fun `should return null avgResolutionDays when no issue was fixed`() {
+            val issue = createTestIssue(state = IssueState.Reported)
+            every { sectorService.findById(testSectorId) } returns createTestSector()
+            every { issueRepository.findBySectorId(testSectorId) } returns listOf(issue)
+
+            val result = service.getDashboardStats(testSectorId)
+
+            result?.avgResolutionDays shouldBe null
         }
 
         @Test

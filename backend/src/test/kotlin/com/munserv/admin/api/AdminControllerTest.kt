@@ -411,6 +411,19 @@ class AdminControllerTest {
         }
 
         @Test
+        fun `dashboard response should carry avgResolutionDays when the sector has a fixed issue`() {
+            mockMvc
+                .get("/api/v1/admin/dashboard") {
+                    header("Authorization", "Bearer $adminToken")
+                    param("sectorId", "550e8400-e29b-41d4-a716-446655440002")
+                    accept = MediaType.APPLICATION_JSON
+                }.andExpect {
+                    status { isOk() }
+                    jsonPath("$.stats.avgResolutionDays") { isNumber() }
+                }
+        }
+
+        @Test
         fun `heat report response should match mock API contract format`() {
             val result =
                 mockMvc
