@@ -107,6 +107,38 @@ class ResolutionTimeTest {
     }
 
     @Test
+    fun `should round an exact half up when the mean is 0,15 days`() {
+        val id = IssueId.generate()
+        val base = now.minus(30, ChronoUnit.DAYS)
+        val histories =
+            mapOf(
+                id to
+                    listOf(
+                        entry(id, IssueState.Reported, base),
+                        entry(id, IssueState.Fixed, base.plus(216, ChronoUnit.MINUTES)),
+                    ),
+            )
+
+        ResolutionTime.averageDays(histories, windowStart) shouldBe 0.2
+    }
+
+    @Test
+    fun `should round an exact half up when the mean is 0,25 days`() {
+        val id = IssueId.generate()
+        val base = now.minus(30, ChronoUnit.DAYS)
+        val histories =
+            mapOf(
+                id to
+                    listOf(
+                        entry(id, IssueState.Reported, base),
+                        entry(id, IssueState.Fixed, base.plus(6, ChronoUnit.HOURS)),
+                    ),
+            )
+
+        ResolutionTime.averageDays(histories, windowStart) shouldBe 0.3
+    }
+
+    @Test
     fun `should skip an issue that has no reported entry`() {
         val withoutReported = IssueId.generate()
         val complete = IssueId.generate()
