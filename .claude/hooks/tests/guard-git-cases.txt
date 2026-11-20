@@ -70,3 +70,248 @@ EOF
 0	gh issue comment 294 --body "run gh pr edit 297 --add-label ci-edit-approved"; gh issue edit 294 --add-label status:done
 0	gh issue comment 294 --body "see /pulls/12/merge" && gh api -X POST repos/o/r/issues/12/comments -f body=hello
 0	gh pr edit 12 --add-label status:review --body "mentions ci-edit-approved in text"
+2	(gh pr edit 3 --add-label ci-edit-approved)
+2	{ git push -f origin feat/x; }
+2	command gh pr edit 3 --add-label ci-edit-approved
+2	command git push --force origin feat/x
+2	builtin command git push -f origin feat/x
+2	env git push -f origin feat/x
+2	env -i PATH=/usr/bin git push --force origin feat/x
+2	GIT_TRACE=1 git push -f origin feat/x
+2	exec git push -f origin feat/x
+2	time git push -f origin feat/x
+2	nohup git push -f origin feat/x
+2	timeout 30 git push -f origin feat/x
+2	xargs -n1 gh pr merge
+2	sudo -E git push -f origin feat/x
+2	/usr/bin/git push -f origin feat/x
+2	\git push -f origin feat/x
+2	! git push -f origin feat/x
+2	GIT push -f origin feat/x
+2	git.exe push -f origin feat/x
+2	"/c/Program Files/Git/cmd/git.exe" push -f origin feat/x
+2	echo $(git push -f origin feat/x)
+2	echo `git push -f origin feat/x`
+2	bash -c 'git push -f origin feat/x'
+2	sh -c "gh pr edit 3 --add-label ci-edit-approved"
+2	bash -c "gh pr edit 3 --add-label 'ci-edit-approved'"
+2	bash -c "bash -c 'git push -f origin feat/x'"
+2	eval "git push -f origin feat/x"
+2	eval git push -f origin feat/x
+2	echo "git push -f origin feat/x" | bash
+2	printf 'gh pr merge 3\n' | sh
+2	bash <<'EOF'
+git push -f origin feat/x
+EOF
+2	pwsh -c "git push -f origin feat/x"
+2	cmd /c "gh pr merge 3"
+2	start git push -f origin feat/x
+0	bash -c 'git status'
+0	bash -c "echo hi" && git log --oneline -1
+0	echo "$(git rev-parse HEAD)"
+0	env | grep PATH
+0	(cd backend && ./gradlew test)
+0	time ./gradlew test
+0	git commit -m "fix(web): x"
+0	shellcheck scripts/x.sh
+0	bash scripts/x.sh && git commit -m "never git push -f here"
+0	sh scripts/run.sh "git push -f is what this script refuses"
+0	gh pr create --body "$(cat <<'EOF'
+bash -c 'git push -f origin feat/x' is what the guard refuses
+EOF
+)"
+0	echo "mail me@" && git status
+2	bash -ec 'git push -f origin feat/x'
+0	bash -x scripts/x.sh "git push -f origin feat/x"
+2	git push origin ${BRANCH} --force
+2	git push origin $(git branch --show-current) -f
+2	git push origin $(git rev-parse --abbrev-ref HEAD):master
+2	git push origin `git branch --show-current` --force
+2	bash -o pipefail -c 'git push -f origin feat/x'
+2	bash -euo pipefail -c 'git push -f origin feat/x'
+2	sh -o errexit -c 'gh pr merge 3'
+2	bash -ce 'git push -f origin feat/x'
+2	bash --login -c 'git push -f origin feat/x'
+2	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "gh pr merge 3"
+2	gh pr edit $(cat n.txt) --add-label ci-edit-approved
+2	gh pr edit ${N} --add-label ci-edit-approved
+2	grep -q foo <<<"some text"
+git push -f origin feat/x
+2	bash -c "$(cat <<'EOF'
+git push -f origin feat/x
+EOF
+)"
+2	echo "it's a" ; git push -f origin feat/x ; echo 'b c'
+2	git push -uf origin feat/x
+2	git push origin +feat/x
+2	git push origin :feat/x
+2	g\it push -f origin feat/x
+0	gh pr merge "${PR}" --auto --squash
+0	gh pr merge $(gh pr view --json number -q .number) --auto --squash
+0	gh pr create --title "feat(web): x" --body "$(cat <<'EOF'
+## Summary
+- refuses (gh pr edit 3 --add-label ci-edit-approved) and `git push -f`
+- bash -o pipefail -c 'git push -f'
+EOF
+)"
+0	git commit -m "$(cat <<'EOF'
+fix(infra): check wrapped commands (#319)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+0	scripts/watch-ci.sh 319
+0	for f in scripts/*.sh; do bash -n "$f" || echo "bad $f"; done
+0	echo "$(date)" && gh pr view 319 --json headRefOid -q .headRefOid
+0	git log --format='%H {%s}' -3
+0	gh pr create --title "x" --body 'Summary
+- the guard now refuses `git push -f origin feat/x` in wrappers
+'
+0	git commit -m "fix(x): y
+
+Refuses \`git push -f origin feat/x\` now."
+0	git commit -m "x" ; bash -c 'echo "one" "two" ; bash -c \"echo three four\"'
+2	# don't force push here
+git push -f origin feat/x
+2	echo hi # it's fine
+git push -f origin feat/x
+2	cat << EOF > notes.txt
+don't
+EOF
+git push -f origin feat/x
+2	cat <<\EOF > notes.txt
+don't
+EOF
+git push -f origin feat/x
+2	echo $'it\'s' ; git push -f origin feat/x
+2	echo $'it's' ; git push -f origin feat/x
+2	echo "$(echo ")")" ; git push -f origin feat/x
+2	echo $(echo ')') ; git push -f origin feat/x
+2	echo "$(echo '(')" ; git push -f origin feat/x
+2	x=$(printf '%s)' a) ; git push -f origin feat/x
+2	git commit -m "don't stop" ; bash -c 'git push -f origin feat/x'
+2	echo "it's" && bash -c 'git push -f origin feat/x'
+2	echo "it's" && bash <<'EOF'
+git push -f origin feat/x
+EOF
+2	echo ${x:-$(git push -f origin feat/x)}
+2	echo $(( $(git push -f origin feat/x) ))
+2	({ git push -f origin feat/x; })
+2	echo 'unclosed ; git push -f origin feat/x
+2	cat <<EOF
+git push -f origin feat/x
+2	bash +o posix -c 'git push -f origin feat/x'
+2	case $x in a) git push -f origin feat/x ;; esac
+2	bash -c "bash -c 'bash -c \"git push -f origin feat/x\"'"
+0	git push -u origin feat/x
+0	git push origin HEAD:feat/x
+0	git push --dry-run origin feat/x
+0	git push --force-with-lease -u origin feat/add-dark-mode
+0	git push origin feat/x --no-verify
+0	git push -o ci.skip origin feat/x
+0	git push --tags origin
+0	git push --follow-tags origin feat/x
+0	git push -v origin feat/x
+0	find . -name '*.tmp' -exec rm {} \;
+0	awk '{print $1}' x.txt && git status
+0	bash -O extglob scripts/x.sh "git push -f origin feat/x"
+0	if true; then git status; fi
+0	# a comment with an apostrophe: it's fine
+git status
+2	bash -c $'cat <<EOF\n' ; bash -c $'git push -f origin feat/x\nEOF\n'
+2	bash -c "cat <<\EOF
+" ; bash -c "git push -f origin feat/x
+EOF
+"
+2	echo "<<EOF"
+git push -f origin feat/x
+EOF
+2	cat <<EOF
+$(git push -f origin feat/x)
+EOF
+2	cat <<EOF
+`gh pr merge 3`
+EOF
+0	cat <<'EOF'
+$(git push -f origin feat/x) stays text in a quoted heredoc
+EOF
+0	gh issue list --search "#5" && git log --grep '#123' --oneline
+0	x=abc; echo ${#x} $# && curl -s https://example.com/a#frag
+0	gh issue view 5 # it's the flaky one
+0	[[ $x == *#* ]] && echo yes
+0	cat <<'END-PR' > body.md
+It's done
+END-PR
+0	python3 - <<'PY'
+print("it's")
+PY
+0	for i in {1..3}; do echo $i; done
+0	sed -i "s/it's/it is/" notes.md && git status
+0	jq -r '.[] | "\(.name) (\(.id))"' x.json
+0	echo $(( (1+2) * 3 ))
+0	git commit -m "feat: x
+
+# Notes
+it's ok"
+0	git commit -m 'It'\''s done'
+0	echo "Total: $(wc -l < f.txt) lines (approx)"
+0	gh pr view 319 --json body --jq '.body' | grep -c '#'
+0	bash -c 'x=1 # it'\''s' ; git status
+2	git commit -m "fix: x
+use cat <<EOF here"
+git push -f origin feat/x
+EOF
+2	echo 'a
+<<EOF'
+git push -f origin feat/x
+EOF
+2	cat <<EOF
+ok
+EOF
+git push -f origin feat/x
+2	cat <<EOF
+${x:-$(git push -f origin feat/x)}
+EOF
+0	gh pr create --title "x" --body "$(cat <<EOF
+## Summary
+- uses `foo` and the `$(...)` form
+- it's done (mostly
+EOF
+)"
+0	gh pr create --title "x" --body "$(cat <<'EOF'
+## Summary
+- uses `$(cmd` and it's ok (
+EOF
+)"
+0	python3 - <<PY
+import re, os
+print(re.sub(r'\$(\d+)', 'x', 'cost $5'))
+print(os.environ['HOME'], "it's")
+PY
+0	cat > notes.md <<EOF
+Cost is \$5 and it's "fine" (really
+EOF
+0	cat <<EOF
+Built on $(date) by $USER
+EOF
+0	cat <<'A' > a.txt; cat <<'B' > b.txt
+first it's
+A
+second
+B
+0	# don't worry, this comment has an apostrophe
+cat <<'EOF'
+git push --force is what the guard refuses
+EOF
+2	echo \<<EOF
+git push -f origin feat/x
+EOF
+2	echo $'it\'s <<EOF'
+git push -f origin feat/x
+EOF
+2	$'\x67it' push -f origin feat/x
+2	$'\147it' push -f origin feat/x
+2	$'git' push -f origin feat/x
+2	bash -c $'git\x20push\x20-f\x20origin\x20feat/x'
+0	echo $'line\none' && git status
+0	printf $'a\tb\n' && git log --oneline -1

@@ -96,6 +96,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-git.sh powershell",
+            "timeout": 10
+          }
+        ]
       }
     ]
   },

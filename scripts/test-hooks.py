@@ -16,11 +16,14 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 HOOK = ROOT / ".claude" / "hooks" / "guard-git.sh"
 CASES = ROOT / ".claude" / "hooks" / "tests" / "guard-git-cases.txt"
+PS_CASES = ROOT / ".claude" / "hooks" / "tests" / "guard-git-powershell-cases.txt"
+SETTINGS = ROOT / ".claude" / "settings.json"
 
 
 def parse(text: str) -> list[tuple[int, str, str]]:
@@ -56,13 +59,13 @@ def path_without(path: str, tools: tuple[str, ...], shim: Path) -> str:
     return os.pathsep.join(dirs)
 
 
-def run(stdin: str, branch: str, path: str, windows_bash: bool = False) -> subprocess.CompletedProcess:
+def run(stdin: str, branch: str, path: str, windows_bash: bool = False, mode: str = "bash") -> subprocess.CompletedProcess:
     # Pin the branch context, whatever CI checked out; optionally stand in for Git Bash.
     env = {**os.environ, "GUARD_GIT_BRANCH": branch, "PATH": path}
     env.pop("GUARD_GIT_WINDOWS_BASH", None)
     if windows_bash:
         env["GUARD_GIT_WINDOWS_BASH"] = "1"
-    return subprocess.run(["bash", str(HOOK)], input=stdin, capture_output=True, text=True, cwd=ROOT, env=env)
+    return subprocess.run(["bash", str(HOOK), mode], input=stdin, capture_output=True, text=True, cwd=ROOT, env=env)
 
 
 def main() -> int:
@@ -73,6 +76,7 @@ def main() -> int:
             return 1
     failures = 0
     cases = parse(CASES.read_text())
+    ps_cases = parse(PS_CASES.read_text())
     with tempfile.TemporaryDirectory() as tmp:
         full = os.environ["PATH"]
         no_jq = path_without(full, ("jq",), Path(tmp) / "no-jq")
@@ -94,12 +98,22 @@ def main() -> int:
             failures += not ok
             print(("ok  " if ok else "FAIL"), name)
         # Every case, read by jq and then by the node fallback the Windows laptop uses.
+        # Both shell tools must reach the guard: Bash plain, PowerShell with its mode.
+        entries = json.loads(SETTINGS.read_text())["hooks"]["PreToolUse"]
+        wired = {e["matcher"]: [h["command"] for h in e["hooks"]] for e in entries}
+        for matcher, suffix in (("Bash", "guard-git.sh"), ("PowerShell", "guard-git.sh powershell")):
+            ok = any(c.endswith(suffix) for c in wired.get(matcher, []))
+            failures += not ok
+            print(("ok  " if ok else "FAIL"), f"settings.json runs {suffix} on {matcher}")
+        # The PowerShell tool's entry runs the same hook with `powershell` (backtick continuations,
+        # here-strings, Start-Process, the call operator).
         for label, path in (("jq", full), ("node", no_jq)):
-            for want, branch, cmd in cases:
-                r = run(json.dumps({"tool_input": {"command": cmd}}), branch, path)
-                ok = r.returncode == want
-                failures += not ok
-                print(("ok  " if ok else "FAIL"), f"[{label}] want={want} got={r.returncode}", cmd.splitlines()[0][:70])
+            for mode, mode_cases in (("bash", cases), ("powershell", ps_cases)):
+                for want, branch, cmd in mode_cases:
+                    r = run(json.dumps({"tool_input": {"command": cmd}}), branch, path, mode=mode)
+                    ok = r.returncode == want
+                    failures += not ok
+                    print(("ok  " if ok else "FAIL"), f"[{label} {mode}] want={want} got={r.returncode}", cmd.splitlines()[0][:70])
         # Fail closed: an unreadable command is refused, never read as empty and allowed.
         def cmd_input(c: object) -> str:
             return json.dumps({"tool_input": {"command": c}})
@@ -135,6 +149,47 @@ def main() -> int:
             ok = r.returncode == want
             failures += not ok
             print(("ok  " if ok else "FAIL"), f"want={want} got={r.returncode}", name)
+        # A hook past its 10 s timeout lets the call run, so many quoted strings after an interpreter
+        # must still be scanned in time and reach a forbidden command at the very end (PR 319 review B5).
+        many = 'eval "x"; ' + " ; ".join(f"echo 'a {i}' \"b {i}\"" for i in range(150)) + " ; bash -c 'git push -f origin feat/x'"
+        started = time.monotonic()
+        r = run(json.dumps({"tool_input": {"command": many}}), "feat/hook-test", full)
+        took = time.monotonic() - started
+        ok = r.returncode == 2 and took < 8
+        failures += not ok
+        print(("ok  " if ok else "FAIL"), f"150 quoted strings after eval: want=2 got={r.returncode} in {took:.1f}s (limit 8s)")
+        # More than 200 substitutions refuses instead of leaving the rest unread (PR 319 second review S2).
+        subs = "echo " + " ".join(["$(:)"] * 201) + " ; echo done"
+        r = run(json.dumps({"tool_input": {"command": subs}}), "feat/hook-test", full)
+        ok = r.returncode == 2
+        failures += not ok
+        print(("ok  " if ok else "FAIL"), f"201 substitutions: want=2 got={r.returncode}")
+        # The guard's own record markers in a command refuse it (PR 319 fourth review B1).
+        for mode, c in (("bash", "echo a\x1e\x1d; git push -f origin feat/x"), ("bash", "echo a\x1e\ngit status"),
+                        ("powershell", "Write-Output a\x1e\x1d; git push -f origin feat/x"), ("bash", "echo \x1d")):
+            r = run(json.dumps({"tool_input": {"command": c}}), "feat/hook-test", full, mode=mode)
+            ok = r.returncode == 2
+            failures += not ok
+            print(("ok  " if ok else "FAIL"), f"[{mode}] a \\035 or \\036 in the command: want=2 got={r.returncode} {c[:30]!r}")
+        # The cap holds below depth 0 too (PR 319 third review B2).
+        deep = "bash -c 'echo " + " ".join(["$(:)"] * 200) + " $(git push -f origin feat/x)'"
+        r = run(json.dumps({"tool_input": {"command": deep}}), "feat/hook-test", full)
+        ok = r.returncode == 2
+        failures += not ok
+        print(("ok  " if ok else "FAIL"), f"200 substitutions inside bash -c, then a push: want=2 got={r.returncode}")
+        # Without its awk files beside it, the hook refuses everything.
+        for missing in ("guard-git-tok.awk", "guard-git-heredocs.awk"):
+            lone = Path(tmp) / f"lone-{missing}"
+            lone.mkdir()
+            shutil.copy(HOOK, lone / "guard-git.sh")
+            for other in ("guard-git-tok.awk", "guard-git-heredocs.awk"):
+                if other != missing:
+                    shutil.copy(HOOK.parent / other, lone / other)
+            r = subprocess.run(["bash", str(lone / "guard-git.sh")], input=json.dumps({"tool_input": {"command": "git status"}}),
+                               capture_output=True, text=True, cwd=ROOT, env={**os.environ, "GUARD_GIT_BRANCH": "feat/hook-test"})
+            ok = r.returncode == 2
+            failures += not ok
+            print(("ok  " if ok else "FAIL"), f"no {missing} beside the hook: want=2 got={r.returncode}")
         r = run(json.dumps({"tool_input": {"command": "ls"}}), "feat/hook-test", neither)
         ok = "install node or jq" in r.stderr
         failures += not ok

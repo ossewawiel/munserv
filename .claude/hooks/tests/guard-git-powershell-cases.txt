@@ -1,0 +1,134 @@
+2	git push --force origin feat/x
+2	git push origin master
+2	gh pr edit 3 --add-label ci-edit-approved
+2	gh pr merge 3 --squash
+2	& git push -f origin feat/x
+2	& 'C:\Program Files\Git\cmd\git.exe' push -f origin feat/x
+2	& "C:\Program Files\GitHub CLI\gh.exe" pr merge 3
+2	git.exe push -f origin feat/x
+2	GIT push -f origin feat/x
+2	Gh pr merge 3
+2	g`it push -f origin feat/x
+2	git push `
+  -f origin feat/x
+2	gh pr edit 3 `
+  --add-label ci-edit-approved
+2	git --% push -f origin feat/x
+2	Invoke-Expression "git push -f origin feat/x"
+2	iex 'gh pr edit 3 --add-label ci-edit-approved'
+2	Start-Process git -ArgumentList 'push','-f','origin','feat/x'
+2	Start-Process -FilePath gh.exe -ArgumentList 'pr merge 3'
+2	saps git 'push -f'
+2	powershell -Command "gh pr merge 3"
+2	pwsh -NoProfile -c "git push -f origin feat/x"
+2	cmd /c "git push -f origin feat/x"
+2	bash -c 'git push -f origin feat/x'
+2	git status; git push -f origin feat/x
+2	if ($true) { git push -f origin feat/x }
+0	git status; git log --oneline -3
+0	gh pr view 3 --json state
+0	git push -u origin feat/x
+0	gh pr merge 3 --auto --squash
+0	Get-Command git
+0	Start-Process notepad
+0	$body = @'
+git push --force origin master is what the guard refuses
+'@
+0	gh pr comment 3 --body "git push -f is refused"
+2	pwsh -EncodedCommand ZwBpAHQAIABwAHUAcwBoAA==
+2	powershell -enc ZwBpAHQA
+2	pwsh -NoProfile -ExecutionPolicy Bypass -Command "git push -f origin feat/x"
+2	powershell -ExecutionPolicy Bypass -Command "gh pr edit 3 --add-label ci-edit-approved"
+2	$sep = '@'
+git push -f origin feat/x
+2	Write-Host "mail admin@"
+gh pr edit 3 --add-label ci-edit-approved
+2	$parts = $email -split '@'
+gh pr merge 3 --squash
+2	Write-Host "x<<EOF"
+git push -f origin feat/x
+2	pwsh --enc ZwBpAHQA
+2	pwsh /enc ZwBpAHQA
+2	pwsh --command "git push -f origin feat/x"
+2	pwsh -cwa "gh pr merge 3"
+2	iex @"
+git push -f origin feat/x
+"@
+0	gh pr create --title "x" --body @"
+## Summary
+git push -f origin master is refused
+"@
+0	git log --format="%H %s" -5
+0	Get-ChildItem | ForEach-Object { $_.Name }
+0	gh pr comment 3 --body "line1`nline2"
+0	$env:Path += ";C:\x"; gh pr view 1
+0	cmd /c "dir" ; git status
+0	Start-Process pwsh -ArgumentList '-NoExit'
+0	start https://github.com/ossewawiel/munserv/pull/319
+2	$b = @'
+body
+'@
+git push -f origin feat/x
+2	$b = @"
+body
+"@
+gh pr edit 3 --add-label ci-edit-approved
+2	$msg = @'
+fix: x
+'@
+git commit -m $msg
+git push -f origin feat/x
+2	Write-Host "5`" screen"; git push -f origin feat/x
+2	Write-Host `"; git push -f origin feat/x; Write-Host `"
+2	if ($true) {git push -f origin feat/x}
+2	1..2 | ForEach-Object {gh pr merge 3 --squash}
+2	git push origin (git branch --show-current) --force
+2	gh pr edit (Get-Content n.txt) --add-label ci-edit-approved
+2	# don't do this
+git push -f origin feat/x
+2	<# it's a block comment #>
+git push -f origin feat/x
+2	Write-Host 'unclosed; git push -f origin feat/x
+0	$msg = @'
+fix: x
+'@
+git commit -m $msg
+0	$h = @{ a = 1 }; git status
+0	Get-ChildItem | Where-Object { $_.Length -gt 0 } | ForEach-Object { git -C $_.FullName status }
+0	gh pr create --title 'x' --body @'
+It's done: no git push -f origin feat/x
+'@
+0	# it's a comment
+git status
+2	$x = @'
+body
+'@; git push -f origin feat/x
+2	$x = @"
+body
+"@ | Out-Null; gh pr merge 3 --squash
+2	$m = @"
+$(git push -f origin feat/x)
+"@
+2	Write-Host “x" ; git push -f origin feat/x ; Write-Host "y”
+0	$m = @'
+$(git push -f origin feat/x) stays text in a single-quoted here-string
+'@
+0	Write-Host "It's (maybe) fine"; $s.Replace("'", "")
+0	"{0} items" -f 3; [string]::Join(',', @('a','b'))
+0	if (Test-Path 'C:\x\') { Write-Host ok }
+0	Get-Content x.txt | Select-String '#' ; Write-Output 'a' # it's a note
+0	git log --format="%h (%an)" -3
+0	$x = @{ 'a' = "b" }; $x.a
+0	gh pr create --title (Get-Content t.txt) --body-file b.md
+0	Write-Host "C:\path\"; git status
+0	$env:GIT_TRACE = 1; git status 2>&1 | Out-String
+0	Get-Process | Where-Object {$_.CPU -gt 10} | Sort-Object CPU
+0	$b = @"
+Hello $env:USERNAME, it's $(Get-Date)
+"@
+gh pr comment 3 --body $b
+0	git commit -m "Don’t break “things”"
+0	Write-Host ‘single’; git status
+0	$x = @'
+body
+'@ | Set-Content x.txt; git status
