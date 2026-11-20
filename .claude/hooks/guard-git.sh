@@ -241,6 +241,62 @@ pop_dir() { # popd: the top of the stack; on an empty stack popd fails and the d
   remember_prev
   set_cur "$d" "$t" "$b"
 }
+# Bash's directory stack as an array: entry 0 is the current directory, then dstack top first.
+stack_load() {
+  local e rest="$dstack"
+  stk=("$cur_dir"$'\035'"$cur_top"$'\035'"$cur_branch")
+  while [ -n "$rest" ]; do e="${rest%%$'\036'*}"; rest="${rest#*$'\036'}"; stk+=("$e"); done
+}
+stack_store() { # entry 0 becomes the current directory when $1 is set (bash changes directory)
+  local i d t b
+  dstack=""
+  for ((i = 1; i < ${#stk[@]}; i++)); do dstack+="${stk[i]}"$'\036'; done
+  [ -n "$1" ] || return 0
+  IFS=$'\035' read -r d t b <<< "${stk[0]}"
+  remember_prev
+  set_cur "$d" "$t" "$b"
+}
+stack_index() { # $1 +N or -N: sets idx (bash counts -N from the bottom), or fails when out of range
+  local n="${1:1}" len=${#stk[@]}
+  [[ $n =~ ^[0-9]+$ ]] || return 1
+  if [ "${1:0:1}" = + ]; then idx=$n; else idx=$((len - 1 - n)); fi
+  [ "$idx" -ge 0 ] && [ "$idx" -lt "$len" ]
+}
+pushd_args() { # pushd -n <dir> | pushd +N / -N
+  local -a stk; local idx e
+  stack_load
+  case "$1" in
+    -n) # adds <dir> as entry 1 and stays; an entry that does not resolve keeps the branch
+      resolve_dir "$2"
+      if [ -n "$res_dir" ]; then e="$res_dir"$'\035'"$res_top"$'\035'"$res_branch"
+      elif [[ $2 == *'$'* ]]; then e=$'\035\035'
+      else e=$'\035\035'"$cur_branch"
+      fi
+      stk=("${stk[0]}" "$e" "${stk[@]:1}"); stack_store "" ;;
+    *) # rotates entry N to the top and goes there; out of range, pushd fails and nothing moves
+      stack_index "$1" || return 0
+      stk=("${stk[@]:idx}" "${stk[@]:0:idx}"); stack_store 1 ;;
+  esac
+}
+popd_args() { # popd -n [±N] | popd ±N
+  local -a stk; local idx=0 nocd="" a
+  stack_load
+  for a in "$@"; do
+    case "$a" in
+      -n) nocd=1 ;;
+      [+-][0-9]*) stack_index "$a" || return 0 ;;
+    esac
+  done
+  [ ${#stk[@]} -gt 1 ] || return 0
+  # Removing entry 0 changes directory to the next one, unless -n, which removes entry 1 instead.
+  if [ "$idx" -eq 0 ]; then
+    if [ -n "$nocd" ]; then stk=("${stk[0]}" "${stk[@]:2}"); stack_store ""
+    else stk=("${stk[@]:1}"); stack_store 1
+    fi
+  else
+    stk=("${stk[@]:0:idx}" "${stk[@]:idx+1}"); stack_store ""
+  fi
+}
 subshell_enter() {
   sdepth=$((sdepth + 1))
   s_dir[$sdepth]="$cur_dir"; s_top[$sdepth]="$cur_top"; s_branch[$sdepth]="$cur_branch"
@@ -309,6 +365,8 @@ track_one() {
       case "${a,,}" in -path|-literalpath) a="${rest%%[[:space:]]*}" ;; esac
       # cd -P, -L, -e and -@ change how the target is read, not which one it is.
       while [[ $lw == cd && $a =~ ^-[LPe@]+$ ]]; do read -r a rest <<< "$rest"; done
+      # cd -- <dir>: the end of options; the next word is the directory (bash still reads - as cd -).
+      if [[ $lw == cd && $a == -- ]]; then read -r a rest <<< "$rest"; fi
       if [[ $lw == pushd || $lw == push-location ]]; then
         case "$a" in
           "") # bash pushd alone swaps with the stack's top; Push-Location alone pushes and stays.
@@ -316,10 +374,8 @@ track_one() {
             elif [ -n "$dstack" ]; then t="$cur_dir"$'\035'"$cur_top"$'\035'"$cur_branch"; pop_dir; dstack="$t"$'\036'"$dstack"
             fi
             return ;;
-          # pushd -n <dir> adds <dir> below the top and stays; the entry's branch is not resolved.
-          -n) dstack=$'\035\035'"$cur_branch"$'\036'"$dstack"; return ;;
-          # pushd +N / -N rotates the stack: the directory is unknown, and the branch stays.
-          [+-][0-9]*) remember_prev; cur_dir=""; cur_top=""; return ;;
+          -n) read -r t _ <<< "$rest"; pushd_args -n "$t"; return ;;
+          [+-][0-9]*) pushd_args "$a"; return ;;
         esac
         push_dir
       elif [ "$a" = - ]; then go_back; return
@@ -328,8 +384,7 @@ track_one() {
       move_to "$a" ;;
     popd|pop-location)
       case "$a" in
-        -n) [ -n "$dstack" ] && dstack="${dstack#*$'\036'}" ;; # drops the entry below the top, stays
-        [+-][0-9]*) remember_prev; cur_dir=""; cur_top="" ;;   # removes an entry the guard cannot place
+        -n|[+-][0-9]*) read -ra toks <<< "$a $rest"; popd_args "${toks[@]}" ;;
         *) pop_dir ;;
       esac ;;
     git)

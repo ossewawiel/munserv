@@ -395,3 +395,16 @@ git push -u origin HEAD
 2	cd {MAIN} && git switch feat/other && git switch - && git push -u origin HEAD
 0	master	cd {MAIN} && git switch feat/other && git switch - && git switch - && git push -u origin HEAD
 2	cd {MAIN} && git checkout feat/other && git checkout - && git push
+2	master	pushd {WT} && pushd +1 && git push -u origin HEAD
+0	master	pushd {WT} && pushd +1 && pushd +1 && git push -u origin HEAD
+2	pushd {WT} && pushd {MAIN} && pushd +1 && pushd +2 && git push -u origin HEAD
+2	pushd {MAIN} && pushd {WT} && pushd -1 && git push -u origin HEAD
+0	master	pushd {WT} && pushd +5 && git push -u origin HEAD
+2	master	pushd {WT} && popd +0 && git push -u origin HEAD
+2	master	cd {WT} && pushd -n {MAIN} && popd && git push -u origin HEAD
+0	master	cd {MAIN} && pushd -n {WT} && popd && git push -u origin HEAD
+0	master	pushd {WT} && pushd {MAIN} && popd +2 && popd && git push -u origin HEAD
+2	master	pushd {WT} && pushd {MAIN} && popd +1 && popd && git push -u origin HEAD
+2	master	pushd {WT} && pushd {MAIN} && popd -n && popd && git push -u origin HEAD
+2	master	cd -- . && git push -u origin HEAD
+2	master	cd -- {WT} && cd -- - && git push -u origin HEAD
