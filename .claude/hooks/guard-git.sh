@@ -176,31 +176,218 @@ branch="${GUARD_GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null)}"
 
 # The branch a push runs on. The command can move before it pushes: `cd backend && ... && cd ..`,
 # `git switch -c fix/x && git push -u origin HEAD`, `cd ../wt && git push`. track() follows those
-# segments in order: a directory change is resolved for real, and inside the same checkout the branch
-# stays, while another worktree has its own; git switch / checkout set the branch. A target that
-# cannot be resolved (a variable, a placeholder, a missing directory, popd, cd -) makes the branch
-# unknown, and the "you are on master" rules then stay silent, as they did for worktree pushes.
-cur_branch="$branch"; cur_dir="$PWD"; start_top=""
-resolve_dir() { # $1 dir: sets res_dir and res_branch, or empties both when it cannot be resolved
-  local out top br
-  res_dir=""; res_branch=""
-  [ -n "$cur_dir" ] || return
-  case "$1" in ""|_|-|*'$'*) return ;; esac
-  out=$(cd "$cur_dir" 2>/dev/null && cd "$1" 2>/dev/null && pwd && { git rev-parse --show-toplevel 2>/dev/null || echo; } \
-        && git rev-parse --abbrev-ref HEAD 2>/dev/null) || return
-  { IFS= read -r res_dir; IFS= read -r top; IFS= read -r br; } <<< "$out"
-  [ -n "$start_top" ] || start_top=$(cd "$PWD" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null)
-  if [ -n "$top" ] && [ "$top" = "$start_top" ]; then res_branch="$cur_branch"; else res_branch="$br"; fi
+# segments in order (#321, #322):
+# - A directory change is resolved for real. Each checkout keeps its own branch: the start checkout's
+#   is the session's, another worktree's is what git reports, and a switch inside one sets that one's.
+# - cd - goes back to the previous directory (unknown when the command made none); pushd / popd
+#   (Push-Location / Pop-Location) keep a stack, and popd on an empty one stays where it is.
+# - A subshell's directory changes end with it: the tokenizer marks ( and ) as segments of their own
+#   in bash. A branch switch inside one stays, because it changes the checkout, not the shell.
+#   Inside a case the ( and ) of patterns are not edges, and a directory change keeps the branch.
+# - git checkout <name> switches only when <name> is master or a branch (local, or a remote one that
+#   checkout would create). Otherwise it is a path (or a commit, HEAD included), and the branch stays.
+#   git switch - / checkout - go to the branch this command left, else to git's @{-1}.
+# - A target holding a variable makes the branch unknown, and the "you are on master" rules then stay
+#   silent: scripts name other worktrees that way. Any other target that cannot be resolved (a
+#   substitution, a missing directory) keeps the branch: if cd fails, the push runs where it was.
+# State: cur_dir ("" when unknown), cur_top (the checkout: @start for the session's, else its top
+# level; "" when unknown or not in a repo), cur_branch ("" when unknown).
+cur_branch="$branch"; cur_dir="$PWD"; cur_top="@start"; start_top="" start_resolved=""
+prev_dir="" prev_top="" prev_branch="" dstack="" sdepth=0
+declare -A top_branch=() s_dir=() s_top=() s_branch=() s_pdir=() s_ptop=() s_pbranch=() s_dstack=()
+# $1 dir, $2 checkout, $3 the branch it had: a checkout switched since then has its newer branch.
+set_cur() {
+  cur_dir="$1"; cur_top="$2"; cur_branch="$3"
+  if [ -n "$2" ] && [ -n "${top_branch[$2]+x}" ]; then cur_branch="${top_branch[$2]}"; fi
 }
+remember_prev() { prev_dir="$cur_dir"; prev_top="$cur_top"; prev_branch="$cur_branch"; }
+resolve_dir() { # $1 dir: sets res_dir, res_top and res_branch, or empties them when it cannot be resolved
+  local out top br
+  res_dir=""; res_top=""; res_branch=""
+  case "$1" in ""|_|-|*'$'*) return ;; esac
+  [ -n "$cur_dir" ] || [[ $1 == /* || $1 == [A-Za-z]:[\\/]* ]] || return
+  # cd --: a target that looks like an option (-P, --) must not send cd to $HOME (PR 326 review B3).
+  out=$(cd "${cur_dir:-/}" 2>/dev/null && cd -- "$1" 2>/dev/null && pwd && { git rev-parse --show-toplevel 2>/dev/null || echo; } \
+        && { git rev-parse --abbrev-ref HEAD 2>/dev/null || echo; }) || return
+  { IFS= read -r res_dir; IFS= read -r top; IFS= read -r br; } <<< "$out"
+  if [ -z "$start_resolved" ]; then
+    start_top=$(cd "$PWD" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null); start_resolved=1
+  fi
+  if [ -z "$top" ]; then res_top=""; res_branch=""
+  elif [ "$top" = "$start_top" ]; then res_top="@start"; res_branch="$branch"
+  else res_top="$top"; res_branch="$br"
+  fi
+  [ -n "$res_top" ] && [ -n "${top_branch[$res_top]+x}" ] && res_branch="${top_branch[$res_top]}"
+  return 0
+}
+move_to() { # $1 target directory
+  resolve_dir "$1"
+  remember_prev
+  if [ -n "$res_dir" ]; then set_cur "$res_dir" "$res_top" "$res_branch"
+  elif [[ $1 == *'$'* ]]; then set_cur "" "" ""
+  else cur_dir=""
+  fi
+}
+go_back() { # cd -: to the previous directory, or unknown when there is none
+  local d="$prev_dir" t="$prev_top" b="$prev_branch"
+  remember_prev
+  if [ -n "$d" ]; then set_cur "$d" "$t" "$b"; else set_cur "" "" ""; fi
+}
+push_dir() { dstack="$cur_dir"$'\035'"$cur_top"$'\035'"$cur_branch"$'\036'"$dstack"; }
+pop_dir() { # popd: the top of the stack; on an empty stack popd fails and the directory stays
+  local e d t b
+  [ -n "$dstack" ] || return 0
+  e="${dstack%%$'\036'*}"; dstack="${dstack#*$'\036'}"
+  IFS=$'\035' read -r d t b <<< "$e"
+  remember_prev
+  set_cur "$d" "$t" "$b"
+}
+# Bash's directory stack as an array: entry 0 is the current directory, then dstack top first.
+stack_load() {
+  local e rest="$dstack"
+  stk=("$cur_dir"$'\035'"$cur_top"$'\035'"$cur_branch")
+  while [ -n "$rest" ]; do e="${rest%%$'\036'*}"; rest="${rest#*$'\036'}"; stk+=("$e"); done
+}
+stack_store() { # entry 0 becomes the current directory when $1 is set (bash changes directory)
+  local i d t b
+  dstack=""
+  for ((i = 1; i < ${#stk[@]}; i++)); do dstack+="${stk[i]}"$'\036'; done
+  [ -n "$1" ] || return 0
+  IFS=$'\035' read -r d t b <<< "${stk[0]}"
+  remember_prev
+  set_cur "$d" "$t" "$b"
+}
+stack_index() { # $1 +N or -N: sets idx (bash counts -N from the bottom), or fails when out of range
+  local n="${1:1}" len=${#stk[@]}
+  [[ $n =~ ^[0-9]+$ ]] || return 1
+  if [ "${1:0:1}" = + ]; then idx=$n; else idx=$((len - 1 - n)); fi
+  [ "$idx" -ge 0 ] && [ "$idx" -lt "$len" ]
+}
+pushd_args() { # pushd -n <dir> | pushd +N / -N
+  local -a stk; local idx e
+  stack_load
+  case "$1" in
+    -n) # adds <dir> as entry 1 and stays; an entry that does not resolve keeps the branch
+      resolve_dir "$2"
+      if [ -n "$res_dir" ]; then e="$res_dir"$'\035'"$res_top"$'\035'"$res_branch"
+      elif [[ $2 == *'$'* ]]; then e=$'\035\035'
+      else e=$'\035\035'"$cur_branch"
+      fi
+      stk=("${stk[0]}" "$e" "${stk[@]:1}"); stack_store "" ;;
+    *) # rotates entry N to the top and goes there; out of range, pushd fails and nothing moves
+      stack_index "$1" || return 0
+      stk=("${stk[@]:idx}" "${stk[@]:0:idx}"); stack_store 1 ;;
+  esac
+}
+popd_args() { # popd -n [±N] | popd ±N
+  local -a stk; local idx=0 nocd="" a
+  stack_load
+  for a in "$@"; do
+    case "$a" in
+      -n) nocd=1 ;;
+      [+-][0-9]*) stack_index "$a" || return 0 ;;
+    esac
+  done
+  [ ${#stk[@]} -gt 1 ] || return 0
+  # Removing entry 0 changes directory to the next one, unless -n, which removes entry 1 instead.
+  if [ "$idx" -eq 0 ]; then
+    if [ -n "$nocd" ]; then stk=("${stk[0]}" "${stk[@]:2}"); stack_store ""
+    else stk=("${stk[@]:1}"); stack_store 1
+    fi
+  else
+    stk=("${stk[@]:0:idx}" "${stk[@]:idx+1}"); stack_store ""
+  fi
+}
+subshell_enter() {
+  sdepth=$((sdepth + 1))
+  s_dir[$sdepth]="$cur_dir"; s_top[$sdepth]="$cur_top"; s_branch[$sdepth]="$cur_branch"
+  s_pdir[$sdepth]="$prev_dir"; s_ptop[$sdepth]="$prev_top"; s_pbranch[$sdepth]="$prev_branch"
+  s_dstack[$sdepth]="$dstack"
+}
+subshell_leave() { # a ) with no ( before it (a case pattern) changes nothing
+  [ "$sdepth" -gt 0 ] || return 0
+  prev_dir="${s_pdir[$sdepth]}"; prev_top="${s_ptop[$sdepth]}"; prev_branch="${s_pbranch[$sdepth]}"
+  dstack="${s_dstack[$sdepth]}"
+  set_cur "${s_dir[$sdepth]}" "${s_top[$sdepth]}" "${s_branch[$sdepth]}"
+  sdepth=$((sdepth - 1))
+}
+is_branch() { # $1 name: a local branch, or a remote one that git checkout would create, in cur_dir
+  local ref r
+  # HEAD names the commit, not a branch: `git checkout HEAD <path>` restores a file (origin/HEAD
+  # would otherwise read as a remote branch called HEAD).
+  case "$1" in HEAD|@|*/HEAD) return 1 ;; esac
+  [ -n "$cur_dir" ] || return 1
+  git -C "$cur_dir" show-ref --verify --quiet "refs/heads/$1" 2>/dev/null && return 0
+  while IFS= read -r ref; do
+    r="${ref#refs/remotes/}"
+    [[ $r == */HEAD ]] && continue
+    [ "$r" = "$1" ] || [ "${r#*/}" = "$1" ] && return 0
+  done < <(git -C "$cur_dir" for-each-ref --format='%(refname)' refs/remotes/ 2>/dev/null)
+  return 1
+}
+# The branch before the last switch, per checkout, for `git switch -`.
+declare -A top_prev=()
+set_branch() {
+  [ -n "$cur_top" ] && top_prev[$cur_top]="$cur_branch" && top_branch[$cur_top]="$1"
+  cur_branch="$1"; return 0
+}
+prev_branch_of_cur() { # git switch - / checkout -: the branch this command left, else git's @{-1}
+  if [ -n "$cur_top" ] && [ -n "${top_prev[$cur_top]+x}" ]; then printf '%s' "${top_prev[$cur_top]}"; return; fi
+  [ -n "$cur_dir" ] && git -C "$cur_dir" rev-parse --abbrev-ref '@{-1}' 2>/dev/null
+}
+case_depth=0
 track() {
-  local w a rest t i name=""
+  local before="$cur_branch" w
+  track_one "$1"
+  read -r w _ <<< "$1"
+  if [ "$case_depth" -gt 0 ]; then
+    case "${w,,}" in cd|chdir|set-location|sl|pushd|push-location|popd|pop-location)
+      cur_branch="$before"; cur_dir=""; cur_top="" ;;
+    esac
+  fi
+  return 0
+}
+track_one() {
+  local w a rest t i lw name="" create=""
   local -a toks
   read -r w a rest <<< "$1"
-  case "${w,,}" in
-    cd|pushd|chdir|set-location|sl)
-      case "${a,,}" in -path|-literalpath) a="${rest%%[[:space:]]*}" ;; ""|"~") a="$HOME" ;; esac
-      resolve_dir "$a"; cur_dir="$res_dir"; cur_branch="$res_branch" ;;
-    popd) cur_dir=""; cur_branch="" ;;
+  lw="${w,,}"
+  # A case pattern's ) (and an optional leading () is not a subshell edge. Inside a case the guard
+  # cannot tell which branch runs, so a directory change there keeps the branch (below).
+  case "$lw" in
+    "case") case_depth=$((case_depth + 1)); return ;;
+    "esac") [ "$case_depth" -gt 0 ] && case_depth=$((case_depth - 1)); return ;;
+    "("|")") [ "$case_depth" -gt 0 ] && return ;;
+  esac
+  case "$lw" in
+    "(") subshell_enter ;;
+    ")") subshell_leave ;;
+    cd|chdir|set-location|sl|pushd|push-location)
+      case "${a,,}" in -path|-literalpath) a="${rest%%[[:space:]]*}" ;; esac
+      # cd -P, -L, -e and -@ change how the target is read, not which one it is.
+      while [[ $lw == cd && $a =~ ^-[LPe@]+$ ]]; do read -r a rest <<< "$rest"; done
+      # cd -- <dir>: the end of options; the next word is the directory (bash still reads - as cd -).
+      if [[ $lw == cd && $a == -- ]]; then read -r a rest <<< "$rest"; fi
+      if [[ $lw == pushd || $lw == push-location ]]; then
+        case "$a" in
+          "") # bash pushd alone swaps with the stack's top; Push-Location alone pushes and stays.
+            if [ "$lw" = push-location ]; then push_dir
+            elif [ -n "$dstack" ]; then t="$cur_dir"$'\035'"$cur_top"$'\035'"$cur_branch"; pop_dir; dstack="$t"$'\036'"$dstack"
+            fi
+            return ;;
+          -n) read -r t _ <<< "$rest"; pushd_args -n "$t"; return ;;
+          [+-][0-9]*) pushd_args "$a"; return ;;
+        esac
+        push_dir
+      elif [ "$a" = - ]; then go_back; return
+      fi
+      case "$a" in ""|"~") a="$HOME" ;; "~/"*) a="$HOME/${a#"~/"}" ;; esac
+      move_to "$a" ;;
+    popd|pop-location)
+      case "$a" in
+        -n|[+-][0-9]*) read -ra toks <<< "$a $rest"; popd_args "${toks[@]}" ;;
+        *) pop_dir ;;
+      esac ;;
     git)
       [[ $a == switch || $a == checkout ]] || return
       [[ " $rest " == *" -- "* ]] && return
@@ -208,20 +395,29 @@ track() {
       for ((i = 0; i < ${#toks[@]}; i++)); do
         t="${toks[i]}"
         case "$t" in
-          -c|-C|-b|-B|--create|--force-create|--orphan) name="${toks[i+1]:-}"; break ;;
+          -c|-C|-b|-B|--create|--force-create|--orphan) name="${toks[i+1]:-}"; create=1; break ;;
+          -) name=-; break ;;
           -*) ;;
           *) name="$t"; break ;;
         esac
       done
-      case "$name" in "") ;; _|-|*'$'*) cur_branch="" ;; *) cur_branch="$name" ;; esac ;;
+      case "$name" in
+        "") ;;
+        -) set_branch "$(prev_branch_of_cur)" ;;
+        _|*'$'*) set_branch "" ;;
+        *) if [ -n "$create" ] || [ "$a" = switch ] || [ "$name" = master ] || is_branch "$name"; then set_branch "$name"; fi ;;
+      esac ;;
   esac
+  return 0
 }
 
 check() {
   local g="$1" on="$cur_branch" dir
   # `git -C <dir> push` runs in <dir>: resolve that directory's branch for this segment alone.
   if [[ $g =~ ^git([[:space:]]+-c[[:space:]]+[^[:space:]]+)*[[:space:]]+-C[[:space:]]+([^[:space:]]+) ]]; then
-    dir="${BASH_REMATCH[2]}"; resolve_dir "$dir"; on="$res_branch"
+    dir="${BASH_REMATCH[2]}"; resolve_dir "$dir"
+    # As for cd: a variable is unknown; a directory that does not resolve leaves the push where it was.
+    if [ -n "$res_dir" ]; then on="$res_branch"; elif [[ $dir == *'$'* ]]; then on=""; fi
   fi
   # `git -C <dir> push` and `git -c k=v push` hide the subcommand; drop the global options first.
   g=$(printf '%s' "$g" | sed -E 's/^(sudo )?git( +(-C|-c) +[^ ]+)+/\1git/')
