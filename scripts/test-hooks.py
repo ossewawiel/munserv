@@ -2,7 +2,8 @@
 """Run the guard-git hook against .claude/hooks/tests/guard-git-cases.txt.
 
 Case file format: `<expected exit>\t<command>`; a case may continue over following
-lines (heredocs) until the next line that starts with a digit and a tab.
+lines (heredocs) until the next line that starts with a digit and a tab. `{WT}` and `{MAIN}` in a
+command become the paths of two throwaway repositories (see make_repos).
 Each case runs twice: with jq, and with jq hidden so the guard falls back to node, as on the
 Windows laptop. Then the fail-closed cases: no parser, or input that does not parse, refuses.
 Needs jq and node on PATH (CI has both; in the container: TEST_APT=nodejs).
@@ -59,6 +60,31 @@ def path_without(path: str, tools: tuple[str, ...], shim: Path) -> str:
     return os.pathsep.join(dirs)
 
 
+def make_repos(tmp: Path) -> dict[str, str]:
+    """Two real checkouts for the cases that move between them (#322); `{WT}` and `{MAIN}` in a case name them.
+
+    {WT}: a repository on feat/wt, standing in for a worktree. {MAIN}: one on master that also has the
+    branch feat/other, the remote-tracking branch origin/feat/remote and the file README.
+    """
+    git = ["git", "-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "init.defaultBranch=master"]
+    repos = {"WT": tmp / "wt", "MAIN": tmp / "main"}
+    for name, repo in repos.items():
+        subprocess.run([*git, "init", "-q", str(repo)], check=True)
+        (repo / "README").write_text("x\n")
+        subprocess.run([*git, "-C", str(repo), "add", "README"], check=True)
+        subprocess.run([*git, "-C", str(repo), "commit", "-q", "-m", "x"], check=True)
+    subprocess.run([*git, "-C", str(repos["WT"]), "switch", "-q", "-c", "feat/wt"], check=True)
+    subprocess.run([*git, "-C", str(repos["MAIN"]), "branch", "feat/other"], check=True)
+    subprocess.run([*git, "-C", str(repos["MAIN"]), "update-ref", "refs/remotes/origin/feat/remote", "HEAD"], check=True)
+    return {name: repo.as_posix() for name, repo in repos.items()}
+
+
+def fill(cmd: str, repos: dict[str, str]) -> str:
+    for name, path in repos.items():
+        cmd = cmd.replace("{" + name + "}", path)
+    return cmd
+
+
 def run(stdin: str, branch: str, path: str, windows_bash: bool = False, mode: str = "bash") -> subprocess.CompletedProcess:
     # Pin the branch context, whatever CI checked out; optionally stand in for Git Bash.
     env = {**os.environ, "GUARD_GIT_BRANCH": branch, "PATH": path}
@@ -107,9 +133,11 @@ def main() -> int:
             print(("ok  " if ok else "FAIL"), f"settings.json runs {suffix} on {matcher}")
         # The PowerShell tool's entry runs the same hook with `powershell` (backtick continuations,
         # here-strings, Start-Process, the call operator).
+        repos = make_repos(Path(tmp))
         for label, path in (("jq", full), ("node", no_jq)):
             for mode, mode_cases in (("bash", cases), ("powershell", ps_cases)):
                 for want, branch, cmd in mode_cases:
+                    cmd = fill(cmd, repos)
                     r = run(json.dumps({"tool_input": {"command": cmd}}), branch, path, mode=mode)
                     ok = r.returncode == want
                     failures += not ok

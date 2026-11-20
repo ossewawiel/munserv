@@ -13,7 +13,8 @@
 # A quoted string becomes its text when it is one word, git or gh when it is a path to them, its raw
 # text after --add-label, and _ otherwise. Each $(...), <(...), >(...), ${...}, $((...)), backtick span
 # (and in PowerShell each (...)) becomes the word _ in its segment, and its text becomes segments of its
-# own. ; & | ( ) split segments, and so do { and } when they stand alone (always in PowerShell). An
+# own (in bash between ( and ) segments: a substitution runs in a subshell). ; & | ( ) split segments,
+# and in bash ( and ) are segments themselves; so do { and } split when they stand alone (always in PowerShell). An
 # unquoted # at the start of a word starts a comment. In bash a backslash escapes the next character
 # (g\it is git) and $'...' reads its escapes; in PowerShell a backslash is a path character and the
 # backtick escapes.
@@ -170,6 +171,9 @@ function tok(s,   out, i, n, c, nx, j, k, buf, raw, prev, atword, closed) {
       j = index(substr(s, i + 1), "`"); if (j == 0) { bad = 1; k = n } else k = i + j
       addsub(substr(s, i + 1, k - i - 1)); out = out "_"; i = k + 1; continue
     }
+    # In bash ( and ) open and close a subshell: each becomes a segment of its own, so guard-git.sh can
+    # undo the directory changes made inside (#322). In PowerShell ( ) do not scope the location.
+    if (ps != "1" && (c == "(" || c == ")")) { out = out "\n" c "\n"; i++; continue }
     if (c == ";" || c == "&" || c == "|" || c == "(" || c == ")") { out = out "\n"; i++; continue }
     if (c == "{" || c == "}") {
       if (ps == "1" || (atword && (nx == "" || nx ~ /[ \t\n;&|)]/))) { out = out "\n"; i++; continue }
@@ -182,7 +186,8 @@ function tok(s,   out, i, n, c, nx, j, k, buf, raw, prev, atword, closed) {
 {
   nq = 0; first = np + 1
   res = (substr($0, 1, 1) == "\035") ? dqbody(substr($0, 2)) : tok($0)
-  for (q = 1; q <= nq; q++) res = res "\n" tok(subq[q])
+  # In bash a substitution runs in a subshell too, so its segments sit between ( and ) markers.
+  for (q = 1; q <= nq; q++) res = res (ps == "1" ? "\n" tok(subq[q]) : "\n(\n" tok(subq[q]) "\n)")
   if (want == "payloads") { for (p = first; p <= np; p++) printf "%s\036", pay[p] }
   else print res
 }
