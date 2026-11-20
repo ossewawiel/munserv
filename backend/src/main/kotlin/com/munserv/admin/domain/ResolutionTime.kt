@@ -37,6 +37,6 @@ object ResolutionTime {
                 }
             }
         if (days.isEmpty()) return null
-        return BigDecimal(days.average()).setScale(DECIMAL_PLACES, RoundingMode.HALF_UP).toDouble()
+        return BigDecimal.valueOf(days.average()).setScale(DECIMAL_PLACES, RoundingMode.HALF_UP).toDouble()
     }
 }
