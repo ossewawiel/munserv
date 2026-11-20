@@ -162,6 +162,7 @@ scan() {
     || deny "the command has an unclosed quote or substitution, or more than 200 substitutions, or this guard's tokenizer did not run, so it cannot be read; refusing"
   while IFS= read -r seg; do
     norm "$seg"
+    track "$normed"
     case "$normed" in git\ *) check "$normed" ;; gh\ *) check_gh "$normed" ;; esac
   done <<< "$segs"
   [ -n "$interp" ] && [ "$depth" -lt 3 ] || return 0
@@ -173,13 +174,54 @@ scan() {
 # GUARD_GIT_BRANCH lets the test runner pin the branch context (CI checks out master).
 branch="${GUARD_GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null)}"
 
+# The branch a push runs on. The command can move before it pushes: `cd backend && ... && cd ..`,
+# `git switch -c fix/x && git push -u origin HEAD`, `cd ../wt && git push`. track() follows those
+# segments in order: a directory change is resolved for real, and inside the same checkout the branch
+# stays, while another worktree has its own; git switch / checkout set the branch. A target that
+# cannot be resolved (a variable, a placeholder, a missing directory, popd, cd -) makes the branch
+# unknown, and the "you are on master" rules then stay silent, as they did for worktree pushes.
+cur_branch="$branch"; cur_dir="$PWD"; start_top=""
+resolve_dir() { # $1 dir: sets res_dir and res_branch, or empties both when it cannot be resolved
+  local out top br
+  res_dir=""; res_branch=""
+  [ -n "$cur_dir" ] || return
+  case "$1" in ""|_|-|*'$'*) return ;; esac
+  out=$(cd "$cur_dir" 2>/dev/null && cd "$1" 2>/dev/null && pwd && { git rev-parse --show-toplevel 2>/dev/null || echo; } \
+        && git rev-parse --abbrev-ref HEAD 2>/dev/null) || return
+  { IFS= read -r res_dir; IFS= read -r top; IFS= read -r br; } <<< "$out"
+  [ -n "$start_top" ] || start_top=$(cd "$PWD" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null)
+  if [ -n "$top" ] && [ "$top" = "$start_top" ]; then res_branch="$cur_branch"; else res_branch="$br"; fi
+}
+track() {
+  local w a rest t i name=""
+  local -a toks
+  read -r w a rest <<< "$1"
+  case "${w,,}" in
+    cd|pushd|chdir|set-location|sl)
+      case "${a,,}" in -path|-literalpath) a="${rest%%[[:space:]]*}" ;; ""|"~") a="$HOME" ;; esac
+      resolve_dir "$a"; cur_dir="$res_dir"; cur_branch="$res_branch" ;;
+    popd) cur_dir=""; cur_branch="" ;;
+    git)
+      [[ $a == switch || $a == checkout ]] || return
+      [[ " $rest " == *" -- "* ]] && return
+      read -ra toks <<< "$rest"
+      for ((i = 0; i < ${#toks[@]}; i++)); do
+        t="${toks[i]}"
+        case "$t" in
+          -c|-C|-b|-B|--create|--force-create|--orphan) name="${toks[i+1]:-}"; break ;;
+          -*) ;;
+          *) name="$t"; break ;;
+        esac
+      done
+      case "$name" in "") ;; _|-|*'$'*) cur_branch="" ;; *) cur_branch="$name" ;; esac ;;
+  esac
+}
+
 check() {
-  local g="$1" elsewhere=""
-  # A push run in another directory (git -C <dir>, or after cd / pushd / Set-Location in the same
-  # command) may be on any branch there, so the "you are on master" rules below do not apply to it.
-  if [[ $g =~ ^git([[:space:]]+-c[[:space:]]+[^[:space:]]+)*[[:space:]]+-C[[:space:]] ]] \
-    || [[ ${cmd,,} =~ (^|[^a-z0-9_-])(cd|pushd|set-location|sl|chdir)[[:space:]] ]]; then
-    elsewhere=1
+  local g="$1" on="$cur_branch" dir
+  # `git -C <dir> push` runs in <dir>: resolve that directory's branch for this segment alone.
+  if [[ $g =~ ^git([[:space:]]+-c[[:space:]]+[^[:space:]]+)*[[:space:]]+-C[[:space:]]+([^[:space:]]+) ]]; then
+    dir="${BASH_REMATCH[2]}"; resolve_dir "$dir"; on="$res_branch"
   fi
   # `git -C <dir> push` and `git -c k=v push` hide the subcommand; drop the global options first.
   g=$(printf '%s' "$g" | sed -E 's/^(sudo )?git( +(-C|-c) +[^ ]+)+/\1git/')
@@ -196,15 +238,15 @@ check() {
       if printf '%s' "$g" | grep -Eq -- '(^|[[:space:]])-[a-zA-Z]*d[a-zA-Z]*([[:space:]]|$)|(^|[[:space:]]):[^[:space:]]'; then
         deny "deleting remote branches is the user's job"
       fi
-      # master as a refspec or its destination, short or full (HEAD:refs/heads/master).
-      if printf '%s' "$g" | grep -Eq '(^|[[:space:]]|:)(refs/heads/)?master([[:space:]]|$)'; then deny "pushing to master is not allowed; open a pull request"; fi
+      # master as a refspec or its destination, short or full (HEAD:refs/heads/master, HEAD:heads/master).
+      if printf '%s' "$g" | grep -Eq '(^|[[:space:]]|:)(refs/heads/|heads/)?master([[:space:]]|$)'; then deny "pushing to master is not allowed; open a pull request"; fi
       # On master, a bare push would target master; a push naming another branch (worktrees do this) is fine.
-      if [ "$branch" = "master" ] && ! printf '%s' "$g" | grep -Eq 'git push([[:space:]]+-[^[:space:]]+)*[[:space:]]+[^-[:space:]]+[[:space:]]+[^-[:space:]]+'; then
+      if [ "$on" = "master" ] && ! printf '%s' "$g" | grep -Eq 'git push([[:space:]]+-[^[:space:]]+)*[[:space:]]+[^-[:space:]]+[[:space:]]+[^-[:space:]]+'; then
         deny "you are on master; create a branch before pushing"
       fi
       # On master, HEAD (or @) as a whole refspec is master too: `git push -u origin HEAD`.
       # HEAD:<branch> names its destination and stays allowed.
-      if [ "$branch" = "master" ] && [ -z "$elsewhere" ] && printf '%s' "$g" | grep -Eq '(^|[[:space:]])(HEAD|@)([[:space:]]|$)'; then
+      if [ "$on" = "master" ] && printf '%s' "$g" | grep -Eq '(^|[[:space:]])(HEAD|@)([[:space:]]|$)'; then
         deny "you are on master, so HEAD is master; create a branch, or push HEAD:<branch>"
       fi
       if printf '%s' "$g" | grep -Eq -- '--delete|(^|[[:space:]])-d([[:space:]]|$)'; then deny "deleting remote branches is the user's job"; fi
@@ -213,7 +255,7 @@ check() {
   if printf '%s' "$g" | grep -Eq 'git (reset --hard|clean -[a-zA-Z]*f|branch -D|filter-repo|filter-branch)'; then
     deny "destructive git operation blocked; ask the user"
   fi
-  if printf '%s' "$g" | grep -Eq 'git (merge|rebase)[[:space:]]+(origin/)?master([[:space:]]|$)' && [ "$branch" = "master" ]; then
+  if printf '%s' "$g" | grep -Eq 'git (merge|rebase)[[:space:]]+(origin/)?master([[:space:]]|$)' && [ "$on" = "master" ]; then
     deny "do not merge into master locally; pull requests only"
   fi
 }

@@ -136,3 +136,6 @@ body
 2	git push origin HEAD:refs/heads/master
 0	master	Set-Location D:\wt; git push -u origin HEAD
 0	git push -u origin HEAD
+2	master	Write-Host 'run cd backend'; git push -u origin HEAD
+2	master	Set-Location backend; git push -u origin HEAD
+0	master	git switch -c fix/x; git push -u origin HEAD

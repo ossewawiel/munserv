@@ -329,3 +329,23 @@ EOF
 0	master	git push origin HEAD:refs/heads/feat/x
 0	git push origin refs/heads/feat/x
 0	git push origin refs/heads/master-notes
+2	master	cd backend && ./gradlew test && cd .. && git push -u origin HEAD
+2	master	git push -u origin HEAD && gh pr create --body "$(cat <<'EOF'
+- cd backend && ./gradlew test
+EOF
+)"
+2	master	git commit -m "docs: explain cd usage" && git push -u origin HEAD
+2	master	# cd later
+git push -u origin HEAD
+2	master	echo use sl here; git push -u origin HEAD
+2	master	git -C . push -u origin HEAD
+2	master	cd backend && git push -u origin HEAD
+2	git push origin HEAD:heads/master
+2	git switch master && git push -u origin HEAD
+2	master	git switch -c fix/x && git switch master && git push -u origin HEAD
+2	git checkout master && git push
+0	master	git fetch origin && git switch -c fix/x origin/master && git add -A && git commit -q -m "fix: x" && git push -u origin HEAD
+0	master	git checkout -b fix/x && git push -u origin HEAD
+0	master	git switch -c fix/x && git push
+0	master	cd "$WT" && git push -u origin HEAD
+0	master	cd - && git push -u origin HEAD
