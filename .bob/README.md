@@ -25,6 +25,11 @@ to `$BOB_GATE_LOG`, which the tick sets to `~/.local/state/munserv-factory/bob-g
 implementer that could edit it could switch its own gate off. `.claude/settings.json` denies `Edit` and
 `Write` on `**/.bob/**/*.json` in every session, worktrees included. Change `factory.json` by hand, in a PR.
 
+**CI checks that the two lists agree** (`scripts/check-bob-factory.py`, in the domain job). It fails when a
+key in `agents` has no `.claude/agents/<key>.md` (a renamed agent leaves its gate guarding a name nobody
+dispatches), when an agent file named `*implementer` has no key (bob-core would never gate it), and when a
+key's pack has no gate or a gate has no `command`. Rename an implementer in both places in one PR.
+
 ## Setup on every machine that runs implementers (once, as that user)
 
 ```bash

@@ -125,6 +125,10 @@ jobs:
         run: python3 scripts/test-check-no-demo-accounts.py
       - name: Test the factory tick
         run: python3 scripts/test-factory-tick.py
+      - name: Test the bob-core config check
+        run: python3 scripts/test-check-bob-factory.py
+      - name: Every agent in .bob/factory.json has an agent file and a gate
+        run: python3 scripts/check-bob-factory.py
       - name: Test the retro evidence gatherer
         run: python3 scripts/test-retro-gather.py
 
