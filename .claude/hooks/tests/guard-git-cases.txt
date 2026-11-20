@@ -408,3 +408,7 @@ git push -u origin HEAD
 2	master	pushd {WT} && pushd {MAIN} && popd -n && popd && git push -u origin HEAD
 2	master	cd -- . && git push -u origin HEAD
 2	master	cd -- {WT} && cd -- - && git push -u origin HEAD
+2	master	pushd -L .; git push -u origin HEAD
+2	master	pushd --; git push -u origin HEAD
+2	master	cd -- -P; git push -u origin HEAD
+2	master	pushd -n -P; git push -u origin HEAD

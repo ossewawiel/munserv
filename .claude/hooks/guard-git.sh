@@ -206,7 +206,8 @@ resolve_dir() { # $1 dir: sets res_dir, res_top and res_branch, or empties them 
   res_dir=""; res_top=""; res_branch=""
   case "$1" in ""|_|-|*'$'*) return ;; esac
   [ -n "$cur_dir" ] || [[ $1 == /* || $1 == [A-Za-z]:[\\/]* ]] || return
-  out=$(cd "${cur_dir:-/}" 2>/dev/null && cd "$1" 2>/dev/null && pwd && { git rev-parse --show-toplevel 2>/dev/null || echo; } \
+  # cd --: a target that looks like an option (-P, --) must not send cd to $HOME (PR 326 review B3).
+  out=$(cd "${cur_dir:-/}" 2>/dev/null && cd -- "$1" 2>/dev/null && pwd && { git rev-parse --show-toplevel 2>/dev/null || echo; } \
         && { git rev-parse --abbrev-ref HEAD 2>/dev/null || echo; }) || return
   { IFS= read -r res_dir; IFS= read -r top; IFS= read -r br; } <<< "$out"
   if [ -z "$start_resolved" ]; then
