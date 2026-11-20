@@ -17,19 +17,8 @@ design_artboards: []
 design_approved: false
 created_by: feature-planner
 created_at: "2026-11-20"
-files_changed:
-  - backend/src/main/kotlin/com/munserv/admin/domain/ResolutionTime.kt
-  - backend/src/main/kotlin/com/munserv/admin/service/DashboardService.kt
-  - backend/src/main/kotlin/com/munserv/admin/api/AdminResponse.kt
-  - backend/src/main/kotlin/com/munserv/issues/service/IssueService.kt
-  - backend/src/main/kotlin/com/munserv/issues/repository/IssueStateHistoryRepository.kt
-  - specs/contracts/openapi.json
-tests_added:
-  - backend/src/test/kotlin/com/munserv/admin/domain/ResolutionTimeTest.kt
-  - backend/src/test/kotlin/com/munserv/admin/service/DashboardServiceTest.kt
-  - backend/src/test/kotlin/com/munserv/admin/api/AdminControllerTest.kt
-  - backend/src/test/kotlin/com/munserv/issues/service/IssueServiceTest.kt
-  - backend/src/test/kotlin/com/munserv/issues/repository/IssueStateHistoryRepositoryTest.kt
+files_changed: [backend/src/main/kotlin/com/munserv/admin/domain/ResolutionTime.kt, backend/src/main/kotlin/com/munserv/admin/service/DashboardService.kt, backend/src/main/kotlin/com/munserv/admin/api/AdminResponse.kt, backend/src/main/kotlin/com/munserv/issues/service/IssueService.kt, backend/src/main/kotlin/com/munserv/issues/repository/IssueStateHistoryRepository.kt, specs/contracts/openapi.json]
+tests_added: [backend/src/test/kotlin/com/munserv/admin/domain/ResolutionTimeTest.kt, backend/src/test/kotlin/com/munserv/admin/service/DashboardServiceTest.kt, backend/src/test/kotlin/com/munserv/admin/api/AdminControllerTest.kt, backend/src/test/kotlin/com/munserv/issues/service/IssueServiceTest.kt, backend/src/test/kotlin/com/munserv/issues/repository/IssueStateHistoryRepositoryTest.kt]
 ---
 
 # B14 · Dashboard avgResolutionDays computed from issue state history (Backend)
