@@ -1,11 +1,17 @@
 name: Auto PR
 
+# Opens a PR for every pushed branch and arms auto-merge on it. A draft is opened or kept unarmed,
+# because GitHub refuses to arm a draft (retro 2026-11-09 cluster 3, retro 2026-11-19 cluster 5:
+# the run failed instead). Marking the draft ready arms it. To keep a ready PR from merging, add
+# the hold label (hold-guard.yml).
 on:
   push:
     branches-ignore: [master, "gh-pages"]
+  pull_request:
+    types: [ready_for_review]
 
 concurrency:
-  group: auto-pr-${{ github.ref }}
+  group: auto-pr-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
@@ -15,19 +21,25 @@ permissions:
 jobs:
   open-pr:
     name: Open pull request for pushed branch
+    # A fork's PR is never armed: its run has no AUTO_PR_TOKEN and must not merge itself. The PR list
+    # in the step filters forks out as well, because a push here can list one by branch name.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Open the PR if none exists
+      - name: Open the PR if none exists, and arm it unless it is a draft
         env:
           GH_TOKEN: ${{ secrets.AUTO_PR_TOKEN || github.token }}
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
-          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          # --head matches the branch name alone, so a fork PR from a branch of the same name is listed
+          # too; arming it would merge a stranger's code. Only this repo's own PR counts.
+          existing=$(gh pr list --head "$BRANCH" --state open --json number,isCrossRepository \
+            --jq '[.[] | select(.isCrossRepository | not)][0].number // empty')
           if [ -n "$existing" ]; then
             echo "PR #$existing already open for $BRANCH"
           else
@@ -39,5 +51,12 @@ jobs:
             existing=$(gh pr create --base master --head "$BRANCH" --title "$title" --body-file pr-body.md | grep -o '[0-9]*$')
           fi
 
-          # Squash-merge once required checks pass; GitHub waits on the CI status check.
+          # An assignment, so set -e stops the run when gh fails; inside [ ] a failure reads as "not a draft".
+          draft=$(gh pr view "$existing" --json isDraft --jq .isDraft)
+          if [ "$draft" = "true" ]; then
+            echo "::notice::PR #$existing is a draft, so auto-merge stays off. Marking it ready arms it."
+            exit 0
+          fi
+
+          # Squash-merge once required checks pass; GitHub waits on the required checks.
           gh pr merge "$existing" --auto --squash --delete-branch

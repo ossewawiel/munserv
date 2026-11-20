@@ -532,6 +532,42 @@ class MergePhase(unittest.TestCase):
         self.assertEqual(code, 3, out)
         self.assertIn("held by infra review guard", last_line(out))
 
+    def test_a_hold_label_is_not_red_and_names_the_release(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [{"name": "Hold guard", "conclusion": "FAILURE"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertIn("held by the hold label", last_line(out))
+        self.assertIn("gh pr edit 7 --remove-label hold", last_line(out))
+
+    def test_a_released_hold_is_not_a_hold(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [
+                  {"name": "Hold guard", "conclusion": "SUCCESS", "startedAt": "2026-11-19T10:05:00Z"},
+                  {"name": "Hold guard", "conclusion": "FAILURE", "startedAt": "2026-11-19T10:00:00Z"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertNotIn("held by", out)
+
+    def test_the_reviewer_and_the_design_go_before_the_hold(self):
+        for guard, expected in (("Infra review guard", "held by infra review guard"),
+                                ("Baseline guard", "held by baseline guard")):
+            with self.subTest(guard):
+                pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+                      "statusCheckRollup": [{"name": "Hold guard", "conclusion": "FAILURE"},
+                                            {"name": guard, "conclusion": "FAILURE"}]}
+                code, out = watch([view(ALL_PASSED)], pr=pr)
+                self.assertEqual(code, 3, out)
+                self.assertIn(expected, last_line(out))
+
+    def test_the_hold_goes_before_the_owners_ci_edit_release(self):
+        pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
+              "statusCheckRollup": [{"name": "CI edit guard", "conclusion": "FAILURE"},
+                                    {"name": "Hold guard", "conclusion": "FAILURE"}]}
+        code, out = watch([view(ALL_PASSED)], pr=pr)
+        self.assertEqual(code, 3, out)
+        self.assertIn("held by the hold label", last_line(out))
+
     def test_a_guard_still_running_does_not_shift_the_other_guard(self):
         pr = {"state": "OPEN", "mergeStateStatus": "BLOCKED", "autoMergeRequest": {"m": 1},
               "statusCheckRollup": [{"name": "CI edit guard", "conclusion": ""},
@@ -579,6 +615,18 @@ class MergePhase(unittest.TestCase):
         self.assertEqual(code, 3, out)
         self.assertEqual(last_line(out),
                          "CI: green, not merging - auto-merge is not armed (mergeStateStatus CLEAN); arm it with gh pr merge 7 --auto --squash")
+
+    def test_a_draft_names_gh_pr_ready_and_not_the_merge(self):
+        # GitHub refuses gh pr merge --auto on a draft; Auto PR arms it on ready_for_review.
+        code, out = watch([view(ALL_PASSED)], pr=open_pr("DRAFT", armed=False, isDraft=True))
+        self.assertEqual(code, 3, out)
+        self.assertEqual(last_line(out), "CI: green, not merging - the PR is a draft; mark it ready with gh pr ready 7, and Auto PR arms it")
+        self.assertNotIn("gh pr merge", out)
+
+    def test_a_ready_pr_is_not_read_as_a_draft(self):
+        code, out = watch([view(ALL_PASSED)], pr=open_pr("CLEAN", armed=False, isDraft=False))
+        self.assertEqual(code, 3, out)
+        self.assertIn("auto-merge is not armed", last_line(out))
 
     def test_auto_merge_armed_late_is_not_a_hold(self):
         # auto-pr.yml can arm auto-merge after the watcher starts its merge phase.

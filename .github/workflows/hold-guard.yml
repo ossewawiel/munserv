@@ -1,0 +1,54 @@
+name: Hold guard
+
+# Holds any PR that has the hold label. Auto-merge lands a PR seconds after its last required check
+# passes, and before this guard only the guards could stop it: none of them holds on intent. #312
+# merged 23 seconds after its reviewer APPROVE, before its body edit and before the attended run
+# that ADR-0029 puts ahead of the timer (retro 2026-11-19, cluster 5). A draft is no hold either.
+# Whoever needs the PR to wait adds the label with a comment saying why; removing it releases the
+# PR, and auto-merge finishes it.
+# This workflow runs from master's copy, so a PR cannot edit or remove it. It is a required check on
+# master.
+#
+# Security: `pull_request_target` runs with a write token on PRs from forks too. Never check out
+# or run PR code here, and never put PR text (title, branch, file names) in a ${{ }} expression.
+#
+# Rules:
+# - No path filter and no job-level `if`: a required check that does not run blocks the merge,
+#   and a skipped job counts as passed.
+# - Every label event runs this check again, so adding or removing the label needs no CI run.
+# - The label is read from the API, not from the event: a run started before a label change must
+#   not pass on the old list.
+on:
+  pull_request_target:
+    branches: [master]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: hold-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: read
+
+jobs:
+  guard:
+    name: Hold guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      LABEL: hold
+    steps:
+      - name: Hold a PR that has the hold label
+        run: |
+          set -euo pipefail
+          labels=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/labels" --jq '.[].name')
+          # grep -c, not grep -q: -q exits at the first match, and under pipefail printf's SIGPIPE
+          # would then fail the test and let a held PR pass.
+          held=$(printf '%s\n' "$labels" | grep -cxF "$LABEL" || true)
+          if [ "$held" -gt 0 ]; then
+            echo "::error::Held: this PR has the $LABEL label. The PR comments say why. Whoever added it, or the owner, releases it with: gh pr edit $PR --remove-label $LABEL"
+            exit 1
+          fi
+          echo "This PR has no $LABEL label."
