@@ -6,9 +6,13 @@ import com.munserv.admin.domain.AdminRole
 import com.munserv.admin.domain.CreateAdminCommand
 import com.munserv.admin.domain.UpdateAdminCommand
 import com.munserv.admin.repository.AdminRepository
+import com.munserv.sectors.domain.Sector
+import com.munserv.sectors.service.SectorService
 import com.munserv.shared.types.AdminId
+import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.shared.types.WardId
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldHaveLength
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -27,6 +31,7 @@ import java.time.ZoneId
 class AdminManagementServiceTest {
     private lateinit var adminRepository: AdminRepository
     private lateinit var passwordEncoder: PasswordEncoder
+    private lateinit var sectorService: SectorService
     private lateinit var clock: Clock
     private lateinit var service: AdminManagementService
 
@@ -43,8 +48,9 @@ class AdminManagementServiceTest {
         clearAllMocks()
         adminRepository = mockk()
         passwordEncoder = mockk()
+        sectorService = mockk()
         clock = Clock.fixed(fixedInstant, ZoneId.of("UTC"))
-        service = AdminManagementService(adminRepository, passwordEncoder, clock)
+        service = AdminManagementService(adminRepository, passwordEncoder, sectorService, clock)
     }
 
     private fun createTestAdmin(
@@ -526,6 +532,98 @@ class AdminManagementServiceTest {
             val result = service.deleteAdmin(sectorAdminId, sectorChiefId)
 
             result.shouldBeInstanceOf<AdminResult.NotFound>()
+        }
+    }
+
+    @Nested
+    inner class WardScope {
+        private val wardId = WardId.fromString("550e8400-e29b-41d4-a716-446655440030")
+        private val otherWardId = WardId.fromString("550e8400-e29b-41d4-a716-446655440031")
+        private val wardAdminId = AdminId.fromString("550e8400-e29b-41d4-a716-446655440034")
+
+        private val wardAdmin =
+            Admin(
+                id = wardAdminId,
+                wardId = wardId,
+                email = "ward@example.com",
+                displayName = "Ward Admin",
+                role = AdminRole.WARD_ADMIN,
+                createdAt = fixedInstant,
+                updatedAt = fixedInstant,
+            )
+
+        private fun sectorInWard(ward: WardId?) =
+            Sector(
+                id = testSectorId,
+                podId = PodId.generate(),
+                name = "Sector",
+                center = GeoPoint(latitude = -26.0, longitude = 28.0),
+                wardId = ward,
+            )
+
+        @Test
+        fun `should return success when ward admin gets sector admin in own ward`() {
+            val target = createTestAdmin(id = sectorAdminId)
+            every { adminRepository.findById(wardAdminId) } returns wardAdmin
+            every { adminRepository.findById(sectorAdminId) } returns target
+            every { sectorService.findById(testSectorId) } returns sectorInWard(wardId)
+
+            val result = service.getAdmin(sectorAdminId, wardAdminId)
+
+            result.shouldBeInstanceOf<AdminResult.Success>()
+        }
+
+        @Test
+        fun `should return cross ward when ward admin gets sector admin in another ward`() {
+            val target = createTestAdmin(id = sectorAdminId)
+            every { adminRepository.findById(wardAdminId) } returns wardAdmin
+            every { adminRepository.findById(sectorAdminId) } returns target
+            every { sectorService.findById(testSectorId) } returns sectorInWard(otherWardId)
+
+            val result = service.getAdmin(sectorAdminId, wardAdminId)
+
+            result shouldBe AdminResult.CrossWardOperation(wardId, otherWardId)
+        }
+
+        @Test
+        fun `should return cross ward with null target when sector has no ward`() {
+            val target = createTestAdmin(id = sectorAdminId)
+            every { adminRepository.findById(wardAdminId) } returns wardAdmin
+            every { adminRepository.findById(sectorAdminId) } returns target
+            every { sectorService.findById(testSectorId) } returns sectorInWard(null)
+
+            val result = service.getAdmin(sectorAdminId, wardAdminId)
+
+            result shouldBe AdminResult.CrossWardOperation(wardId, null)
+        }
+
+        @Test
+        fun `should return cross ward when ward admin lists admins of sector in another ward`() {
+            every { adminRepository.findById(wardAdminId) } returns wardAdmin
+            every { sectorService.findById(testSectorId) } returns sectorInWard(otherWardId)
+
+            val result = service.listAdmins(testSectorId, wardAdminId)
+
+            result shouldBe AdminResult.CrossWardOperation(wardId, otherWardId)
+            verify(exactly = 0) { adminRepository.findBySectorId(any()) }
+        }
+
+        @Test
+        fun `should return cross ward when ward admin creates admin in sector of another ward`() {
+            val command =
+                CreateAdminCommand(
+                    email = "new@example.com",
+                    displayName = "New",
+                    role = AdminRole.SECTOR_ADMIN,
+                    sectorId = testSectorId,
+                )
+            every { adminRepository.findById(wardAdminId) } returns wardAdmin
+            every { sectorService.findById(testSectorId) } returns sectorInWard(otherWardId)
+
+            val result = service.createAdmin(command, wardAdminId)
+
+            result shouldBe AdminResult.CrossWardOperation(wardId, otherWardId)
+            verify(exactly = 0) { adminRepository.save(any(), any(), any()) }
         }
     }
 }

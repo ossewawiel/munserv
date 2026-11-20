@@ -3,6 +3,7 @@ package com.munserv.sectors.repository
 import com.munserv.TestContainersConfig
 import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.shared.types.WardId
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Import(TestContainersConfig::class)
@@ -82,5 +84,20 @@ class SectorRepositoryTest {
         sector shouldNotBe null
         sector?.center?.latitude shouldBe -26.1367
         sector?.center?.longitude shouldBe 27.9833
+    }
+
+    @Test
+    @Transactional
+    fun `should return ward id when sector belongs to a ward`() {
+        val wardId = WardId.fromString("550e8400-e29b-41d4-a716-446655440030")
+        val template = requireNotNull(sectorRepository.findById(northcliffSectorId))
+        val saved = sectorRepository.save(template.copy(id = SectorId.generate(), name = "Ward sector", wardId = wardId))
+
+        sectorRepository.findById(saved.id)?.wardId shouldBe wardId
+    }
+
+    @Test
+    fun `should return null ward id when sector has no ward`() {
+        sectorRepository.findById(northcliffSectorId)?.wardId shouldBe null
     }
 }

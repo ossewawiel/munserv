@@ -4,6 +4,7 @@ import com.munserv.sectors.domain.Sector
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.shared.types.WardId
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -37,6 +38,8 @@ class SectorEntity(
     val createdAt: Instant,
     @Column(name = "updated_at", nullable = false)
     val updatedAt: Instant,
+    @Column(name = "ward_id")
+    val wardId: UUID? = null,
 ) {
     /**
      * Convert JPA entity to domain model.
@@ -59,6 +62,7 @@ class SectorEntity(
                 },
             createdAt = createdAt,
             updatedAt = updatedAt,
+            wardId = wardId?.let { WardId(it) },
         )
 
     companion object {
@@ -91,6 +95,7 @@ class SectorEntity(
                 boundary = boundaryPolygon,
                 createdAt = sector.createdAt,
                 updatedAt = sector.updatedAt,
+                wardId = sector.wardId?.value,
             )
         }
     }

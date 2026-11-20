@@ -17,7 +17,7 @@ A metro pod can have dozens of sectors. Wards give pod-level administrators a mi
 ## Invariants
 - A ward belongs to exactly one pod.
 - A sector may belong to at most one ward; sectors without a ward report straight to the pod.
-- Ward administrators may act only on sectors inside their ward (enforcement gap tracked in #56).
+- Ward administrators may act only on sectors inside their ward; a sector with no ward is outside every ward.
 - Whether a pod calls this tier "ward" or shows sectors directly is pod configuration; the portal labels adapt.
 
 ## Relationships

@@ -8,6 +8,7 @@ import com.munserv.admin.domain.OnboardingStatus
 import com.munserv.admin.domain.UpdateAdminCommand
 import com.munserv.admin.domain.applyTo
 import com.munserv.admin.repository.AdminRepository
+import com.munserv.sectors.service.SectorService
 import com.munserv.shared.types.AdminId
 import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
@@ -28,13 +29,14 @@ import java.time.Instant
  * - Admins can only manage admins with strictly lower roles
  * - Scope restrictions:
  *   - Sector admins can only manage within their sector
- *   - Ward admins can manage across sectors within their ward
+ *   - Ward admins can manage across sectors within their ward; a sector with no ward is outside every ward
  *   - Pod admins can manage across wards/sectors within their pod
  */
 @Service
 class AdminManagementService(
     private val adminRepository: AdminRepository,
     private val passwordEncoder: PasswordEncoder,
+    private val sectorService: SectorService,
     private val clock: Clock = Clock.systemUTC(),
 ) {
     /**
@@ -125,6 +127,8 @@ class AdminManagementService(
                 // The role check already handles that; just check ward scope
                 if (command.wardId != null && command.wardId != actor.wardId) {
                     AdminResult.CrossWardOperation(actor.wardId!!, command.wardId)
+                } else if (command.sectorId != null) {
+                    checkSectorInWard(actor, command.sectorId)
                 } else {
                     null
                 }
@@ -251,8 +255,9 @@ class AdminManagementService(
                     AdminResult.CrossWardOperation(actor.wardId!!, wardId)
                 } else if (podId != null) {
                     AdminResult.OutOfScope("Ward-level admin cannot view pod-level admins")
+                } else if (sectorId != null) {
+                    checkSectorInWard(actor, sectorId)
                 } else {
-                    // Allow viewing sector admins in their ward
                     null
                 }
             }
@@ -320,10 +325,9 @@ class AdminManagementService(
                 // Ward admins can access admins in their ward or sectors within their ward
                 when (target.level) {
                     AdminLevel.SECTOR -> {
-                        null
+                        checkSectorInWard(actor, target.sectorId)
                     }
 
-                    // Tracked in #56: verify the sector belongs to the actor's ward
                     AdminLevel.WARD -> {
                         if (target.wardId != actor.wardId) {
                             AdminResult.CrossWardOperation(actor.wardId!!, target.wardId)
@@ -339,18 +343,16 @@ class AdminManagementService(
             }
 
             AdminLevel.POD -> {
-                // Pod admins can access all admins in their pod
+                // A deployment holds one pod (#58), so every ward and sector here is in the actor's pod.
                 when (target.level) {
                     AdminLevel.SECTOR -> {
                         null
                     }
 
-                    // Tracked in #56: verify the sector belongs to the pod
                     AdminLevel.WARD -> {
                         null
                     }
 
-                    // Tracked in #56: verify the ward belongs to pod
                     AdminLevel.POD -> {
                         if (target.podId != actor.podId) {
                             AdminResult.CrossPodOperation(actor.podId!!, target.podId)
@@ -361,6 +363,24 @@ class AdminManagementService(
                 }
             }
         }
+
+    /**
+     * Check that the sector belongs to the actor's ward. A sector with no ward, or one that
+     * does not exist, is outside every ward.
+     */
+    private fun checkSectorInWard(
+        actor: Admin,
+        sectorId: SectorId?,
+    ): AdminResult? {
+        val actorWardId =
+            actor.wardId ?: return AdminResult.OutOfScope("Ward-level admin has no ward")
+        val sectorWardId = sectorId?.let { sectorService.findById(it) }?.wardId
+        return if (sectorWardId != actorWardId) {
+            AdminResult.CrossWardOperation(actorWardId, sectorWardId)
+        } else {
+            null
+        }
+    }
 
     /**
      * Update an existing admin.

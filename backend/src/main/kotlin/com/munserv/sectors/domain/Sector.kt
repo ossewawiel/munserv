@@ -3,6 +3,7 @@ package com.munserv.sectors.domain
 import com.munserv.shared.types.GeoPoint
 import com.munserv.shared.types.PodId
 import com.munserv.shared.types.SectorId
+import com.munserv.shared.types.WardId
 import java.time.Instant
 
 /**
@@ -19,4 +20,5 @@ data class Sector(
     val boundary: List<GeoPoint>? = null,
     val createdAt: Instant = Instant.now(),
     val updatedAt: Instant = Instant.now(),
+    val wardId: WardId? = null,
 )

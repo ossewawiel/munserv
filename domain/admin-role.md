@@ -30,7 +30,7 @@ Responsibility follows geography. Each tier of the pod has a chief who sets it u
 `onboarding_status`: `pending` → `password_changed` → `profile_complete` → `active`. A new admin receives a temporary password by email and cannot reach the dashboard until the password is changed; profile completion is optional and can be skipped.
 
 ## Invariants
-- A role can manage only roles below it, and only inside its own pod, ward or sector (ward and sector scope checks tracked in #56).
+- A role can manage only roles below it, and only inside its own pod, ward or sector; sector scope for issue actions is tracked in #254.
 - An admin has at most one of `podId`, `wardId`, `sectorId` set, matching its level.
 - One person may hold roles in several sectors, but each `Admin` row is one role in one place.
 
